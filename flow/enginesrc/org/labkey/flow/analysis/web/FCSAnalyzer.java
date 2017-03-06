@@ -606,6 +606,11 @@ public class FCSAnalyzer
         return FCS.isFCSFile(file);
     }
 
+    public boolean isSupportedFCSVersion(File file)
+    {
+        return FCS.isSupportedVersion(file);
+    }
+
     public byte[] getFCSBytes(URI uri, int maxEventCount) throws IOException
     {
         FCS fcs = _cache.readFCS(uri);

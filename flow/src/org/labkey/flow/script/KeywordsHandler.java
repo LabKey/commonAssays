@@ -25,7 +25,9 @@ import org.fhcrc.cpas.exp.xml.ProtocolApplicationBaseType;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URIUtil;
+import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FCSKeywordData;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.data.FlowDataObject;
@@ -81,6 +83,10 @@ public class KeywordsHandler extends BaseHandler
         if (_fcsFilePattern != null)
             return _fcsFilePattern.matcher(file.getName()).matches();
         return FCSAnalyzer.get().isFCSFile(file);
+    }
+
+    protected boolean isSupportedFCSVersion(File file){
+        return FCSAnalyzer.get().isSupportedFCSVersion(file);
     }
 
     private boolean isEmpty(String str)
@@ -153,6 +159,12 @@ public class KeywordsHandler extends BaseHandler
             File file = files[i];
             if (!isFCSFile(file))
                 continue;
+
+            if(!isSupportedFCSVersion(file)){
+                String[] versionsList = FCS.supportedVersions.toArray(new String[FCS.supportedVersions.size()]);
+                addStatus("The FSC version " + FCS.getFcsVersion(file) + " is not support for file " + file.getName() +
+                ". Supported versions are " + StringUtilsLabKey.joinNonBlank(",", versionsList) + ".");
+            }
             addStatus("Reading keywords from file " + file.getName());
             lstFileData.add( getAnalyzer().readAllKeywords(file.toURI()));
         }

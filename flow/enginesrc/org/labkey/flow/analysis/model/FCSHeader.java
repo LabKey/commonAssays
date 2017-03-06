@@ -357,10 +357,13 @@ public class FCSHeader
 
             if (buf.length < 58)
                 return false;
-            String header = new String(buf, 0, 58);
 
-            if (!header.startsWith("FCS2.0") && !header.startsWith("FCS3.0"))
+            if(!FCS.isSupportedVersion(buf))
+            {
                 return false;
+            }
+
+            String header = new String(buf, 0, 58);
 
             try
             {

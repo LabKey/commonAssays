@@ -21,7 +21,9 @@ import org.apache.log4j.Logger;
 import org.labkey.api.util.StringUtilsLabKey;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * User: mbellew
@@ -33,6 +35,7 @@ public class FCS extends FCSHeader
     static private final Logger _log = Logger.getLogger(FCS.class);
     boolean bigEndian;
     DataFrame rawData;
+    public static List<String> supportedVersions = new ArrayList<>(Arrays.asList("FCS2.0","FCS3.0","FCS3.1"));
 
     protected FCS() { }
 
@@ -382,13 +385,6 @@ public class FCS extends FCSHeader
                 // Don't read from the File if it is "/dev/stdin"
                 return false;
             }
-            byte[] buffer = new byte[6];
-            byte[] compare2 = new byte[]{'F', 'C', 'S', '2', '.', '0'};
-            byte[] compare3 = new byte[]{'F', 'C', 'S', '3', '.', '0'};
-            if (stream.read(buffer) != 6)
-                return false;
-            if (!Arrays.equals(buffer, compare2) && !Arrays.equals(buffer, compare3))
-                return false;
             return true;
         }
         catch (IOException e)
@@ -408,6 +404,85 @@ public class FCS extends FCSHeader
                 }
             }
         }
+    }
+
+    public static boolean isSupportedVersion(File file)
+    {
+        InputStream stream = null;
+        try
+        {
+            stream = new FileInputStream(file);
+
+            byte[] buffer = new byte[6];
+
+            if (stream.read(buffer) != 6)
+            {
+                return false;
+            }
+
+            return(isSupportedVersion(buffer));
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+        finally
+        {
+            if (stream != null)
+            {
+                try
+                {
+                    stream.close();
+                }
+                catch (IOException e)
+                {
+                }
+            }
+        }
+
+    }
+
+    public static String getFcsVersion(File file)
+    {
+        InputStream stream = null;
+        String errorMessage = "Unable to read version.";
+        try
+        {
+            stream = new FileInputStream(file);
+
+            byte[] buffer = new byte[6];
+
+            if (stream.read(buffer) != 6)
+            {
+                return errorMessage;
+            }
+
+            return new String(buffer, 0, 6);
+        }
+        catch (IOException e)
+        {
+            return errorMessage;
+        }
+        finally
+        {
+            if (stream != null)
+            {
+                try
+                {
+                    stream.close();
+                }
+                catch (IOException e)
+                {
+                }
+            }
+        }
+
+    }
+
+    public static boolean isSupportedVersion(byte[] buffer)
+    {
+        String version = new String(buffer, 0, 6);
+        return supportedVersions.contains(version);
     }
 
 
