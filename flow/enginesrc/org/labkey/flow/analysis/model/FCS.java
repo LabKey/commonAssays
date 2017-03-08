@@ -385,6 +385,12 @@ public class FCS extends FCSHeader
                 // Don't read from the File if it is "/dev/stdin"
                 return false;
             }
+            byte[] buffer = new byte[3];
+            byte[] compare1 = new byte[]{'F', 'C', 'S'};
+            if (stream.read(buffer) != 3)
+                return false;
+            if (!Arrays.equals(buffer, compare1))
+                return false;
             return true;
         }
         catch (IOException e)
