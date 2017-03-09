@@ -42,6 +42,9 @@ public class KeywordUtil
             "\\$CSMODE|\\$CSVBITS|" +
             "\\$CSV\\d+FLAG|" +
             "\\$GATING|\\$LOST|" +
+            "\\$VOL|\\$ORIGINALITY|" +
+            "\\$LAST_MODIFIED|\\$LAST_MODIFIER|" +
+            "\\$UNICODE|" +
             "\\$PK\\d+.*|" +
             "\\$G\\d+.*|\\$R\\d.*|" +
             "\\$LASER\\d+.*|" +
@@ -105,7 +108,7 @@ public class KeywordUtil
     // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     public static boolean hasSpillKeyword(Map<String, String> keywords)
     {
-        return keywords.containsKey("SPILL") || keywords.containsKey("$DFC1TO2");
+        return keywords.containsKey("SPILL") || keywords.containsKey("$SPILLOVER") || keywords.containsKey("$DFC1TO2");
     }
 
     public static boolean isSideScatter(String parameterName)

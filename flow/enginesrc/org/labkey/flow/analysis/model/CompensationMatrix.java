@@ -604,6 +604,10 @@ public class CompensationMatrix implements Serializable
     {
         String spill = StringUtils.trimToNull(keywords.get("SPILL"));
 
+        if(spill == null){
+            spill = StringUtils.trimToNull(keywords.get("$SPILLOVER"));
+        }
+
         if (null != spill)
         {
             String[] strings = StringUtils.split(spill, ",");

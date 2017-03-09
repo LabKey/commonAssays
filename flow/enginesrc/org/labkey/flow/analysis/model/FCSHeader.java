@@ -147,7 +147,7 @@ public class FCSHeader
     // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     public static boolean hasSpillKeyword(Map<String, String> keywords)
     {
-        return keywords.containsKey("SPILL") || keywords.containsKey("$DFC1TO2");
+        return keywords.containsKey("SPILL") || keywords.containsKey("$SPILLOVER") || keywords.containsKey("$DFC1TO2");
     }
 
     public Map<String, String> getKeywords()
