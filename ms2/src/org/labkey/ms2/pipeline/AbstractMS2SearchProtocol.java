@@ -87,7 +87,8 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
                                           PipeRoot root,
                                           List<File> filesInput,
-                                          File fileParameters) throws IOException;
+                                          File fileParameters,
+                                          Map<String, String> variableMap) throws IOException;
 
     @Override
     protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException

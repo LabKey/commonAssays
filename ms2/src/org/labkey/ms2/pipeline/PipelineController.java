@@ -491,8 +491,8 @@ public class PipelineController extends SpringActionController
                     _protocol.saveInstance(fileParameters, getContainer());
                 }
 
-                AbstractMS2SearchPipelineJob job =
-                        _protocol.createPipelineJob(getViewBackgroundInfo(), _root, mzXMLFiles, fileParameters);
+                AbstractMS2SearchPipelineJob job = _protocol.createPipelineJob(getViewBackgroundInfo(), _root,
+                        mzXMLFiles, fileParameters, null);
 
                 // Check for existing job
                 PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
