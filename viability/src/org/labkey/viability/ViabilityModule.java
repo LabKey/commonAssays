@@ -43,7 +43,7 @@ public class ViabilityModule extends DefaultModule
 
     public double getVersion()
     {
-        return 16.30;
+        return 17.10;
     }
 
     public boolean hasScripts()
