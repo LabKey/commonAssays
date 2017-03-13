@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -43,8 +44,9 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
     }
 
     public CometPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                PipeRoot root, List<File> filesInput,
-                                                File fileParameters, Map<String, String> variableMap) throws IOException
+                                              PipeRoot root, List<File> filesInput,
+                                              File fileParameters, @Nullable Map<String, String> variableMap
+    ) throws IOException
     {
         return new CometPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

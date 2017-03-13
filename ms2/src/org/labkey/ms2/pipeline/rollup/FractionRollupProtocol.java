@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.rollup;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -46,7 +47,8 @@ public class FractionRollupProtocol extends AbstractMS2SearchProtocol<FractionRo
 
     public FractionRollupPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                 PipeRoot root, List<File> filesInput,
-                                                File fileParameters, Map<String, String> variableMap) throws IOException
+                                                File fileParameters, @Nullable Map<String, String> variableMap
+    ) throws IOException
     {
         return new FractionRollupPipelineJob(this, info, root, getName(),
                 filesInput, fileParameters);

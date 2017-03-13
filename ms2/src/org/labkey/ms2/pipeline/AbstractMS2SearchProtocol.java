@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineValidationException;
@@ -88,7 +89,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
                                           PipeRoot root,
                                           List<File> filesInput,
                                           File fileParameters,
-                                          Map<String, String> variableMap) throws IOException;
+                                          @Nullable Map<String, String> variableMap) throws IOException;
 
     @Override
     protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException

@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.tandem;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -49,7 +50,8 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
 
     public XTandemPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                 PipeRoot root, List<File> filesInput,
-                                                File fileParameters, Map<String, String> variableMap) throws IOException
+                                                File fileParameters, @Nullable Map<String, String> variableMap
+    ) throws IOException
     {
         return new XTandemPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);

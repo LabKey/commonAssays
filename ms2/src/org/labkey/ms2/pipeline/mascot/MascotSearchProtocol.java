@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -43,7 +44,8 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
 
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                PipeRoot root, List<File> filesInput,
-                                               File fileParameters, Map<String, String> variableMap) throws IOException
+                                               File fileParameters, @Nullable Map<String, String> variableMap
+    ) throws IOException
     {
         return new MascotPipelineJob(this, info, root, getName(), getDirSeqRoot(),
                 filesInput, fileParameters);
