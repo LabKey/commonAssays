@@ -30,6 +30,9 @@ import java.util.regex.Pattern;
  */
 public class KeywordUtil
 {
+    public static final String KEYWORD_SPILL = "SPILL";
+    public static final String KEYWORD_SPILLOVER = "$SPILLOVER";
+    public static final String KEYWORD_DFC1TO2 = "$DFC1TO2";
     private static Pattern hiddenKeyword = Pattern.compile("^(" +
             "\\$BEGINANALYSIS|\\$BEGINDATA|\\$BEGINSTEXT|" +
             "\\$ENDANALYSIS|\\$ENDDATA|\\$ENDSTEXT|" +
@@ -108,7 +111,7 @@ public class KeywordUtil
     // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     public static boolean hasSpillKeyword(Map<String, String> keywords)
     {
-        return keywords.containsKey("SPILL") || keywords.containsKey("$SPILLOVER") || keywords.containsKey("$DFC1TO2");
+        return keywords.containsKey(KEYWORD_SPILL) || keywords.containsKey(KEYWORD_SPILLOVER) || keywords.containsKey(KEYWORD_DFC1TO2);
     }
 
     public static boolean isSideScatter(String parameterName)

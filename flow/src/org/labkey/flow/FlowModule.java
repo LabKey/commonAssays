@@ -39,6 +39,7 @@ import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
@@ -200,7 +201,8 @@ public class FlowModule extends DefaultModule
                 SubsetTests.class,
                 StatisticSpec.TestCase.class,
                 FlowJoWorkspace.LoadTests.class,
-                AnalysisSerializer.TestCase.class));
+                AnalysisSerializer.TestCase.class,
+                CompensationMatrix.TestFCS.class));
     }
 
     @NotNull

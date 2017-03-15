@@ -22,6 +22,7 @@ import org.labkey.api.search.SearchService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.webdav.WebdavResource;
+import org.labkey.flow.util.KeywordUtil;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
@@ -147,7 +148,7 @@ public class FCSHeader
     // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     public static boolean hasSpillKeyword(Map<String, String> keywords)
     {
-        return keywords.containsKey("SPILL") || keywords.containsKey("$SPILLOVER") || keywords.containsKey("$DFC1TO2");
+        return KeywordUtil.hasSpillKeyword(keywords);
     }
 
     public Map<String, String> getKeywords()
