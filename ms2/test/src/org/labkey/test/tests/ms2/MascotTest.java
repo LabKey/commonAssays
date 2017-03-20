@@ -230,7 +230,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test3/", "Import Search Results");
 
         String mascotDatLabel = SAMPLE_BASE_NAME + ".dat";
-        waitForRunningPipelineJobs(MAX_WAIT_SECONDS);
+        waitForRunningPipelineJobs(MAX_WAIT_SECONDS * 1000);
         waitForElement(Locator.linkWithText(mascotDatLabel));
 
         log("Spot check results loaded from .dat file");
@@ -296,7 +296,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test4/", "Import Search Results");
 
         String mascotDatLabel = SAMPLE_BASE_NAME + "_decoy.dat";
-        waitForRunningPipelineJobs(MAX_WAIT_SECONDS);
+        waitForRunningPipelineJobs(MAX_WAIT_SECONDS * 1000);
         waitForElement(Locator.linkWithText(mascotDatLabel));
 
         log("Spot check results loaded from .dat file");
