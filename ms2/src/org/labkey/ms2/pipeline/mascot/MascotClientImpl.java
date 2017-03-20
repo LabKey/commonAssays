@@ -1250,8 +1250,7 @@ public class MascotClientImpl implements SearchClient
                     {
                         uploadFinished = true;
                         getLogger().info("Mascot search task status: query upload completed");
-                        //WCH: we cannot break for Mascot on Windows platform
-                        //break;
+                        break;
                     }
                 }
             }
