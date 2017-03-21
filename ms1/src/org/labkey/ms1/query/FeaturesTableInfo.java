@@ -39,22 +39,16 @@ import java.util.*;
  * Date: Oct 3, 2007
  * Time: 11:00:43 AM
  */
-public class FeaturesTableInfo extends VirtualTable
+public class FeaturesTableInfo extends VirtualTable<MS1Schema>
 {
     public static final String COLUMN_PEPTIDE_INFO = "RelatedPeptide";
     public static final String COLUMN_FIND_SIMILAR_LINK = "FindSimilarLink";
 
     //Data Members
-    private MS1Schema _schema;
     private TableInfo _sourceTable;
     private boolean _includePepFk = true;
     private List<FeaturesFilter> _filters = null;
     private boolean _includeDeleted = false;
-
-    public FeaturesTableInfo(MS1Schema schema)
-    {
-        this(schema, true);
-    }
 
     public FeaturesTableInfo(MS1Schema schema, boolean includePepFk)
     {
@@ -63,10 +57,9 @@ public class FeaturesTableInfo extends VirtualTable
 
     public FeaturesTableInfo(MS1Schema schema, boolean includePepFk, Boolean peaksAvailable)
     {
-        super(schema.getDbSchema(), "Features");
+        super(schema.getDbSchema(), "Features", schema);
         setDescription("Contains all features from all MS1 experiment runs loaded into this folder.");
 
-        _schema = schema;
         _sourceTable = MS1Manager.get().getTable(MS1Service.Tables.Features.name());
         _includePepFk = includePepFk;
 
@@ -78,7 +71,7 @@ public class FeaturesTableInfo extends VirtualTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _schema.getFilesTableInfo();
+                return getUserSchema().getFilesTableInfo();
             }
         });
 
@@ -106,8 +99,8 @@ public class FeaturesTableInfo extends VirtualTable
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return MS2Service.get().createPeptidesTableInfo(_schema.getUser(), _schema.getContainer(),
-                            false, _schema.isRestrictContainer() ? ContainerFilter.CURRENT : ContainerFilter.EVERYTHING, null, null);
+                    return MS2Service.get().createPeptidesTableInfo(getUserSchema().getUser(), getUserSchema().getContainer(),
+                            false, getUserSchema().isRestrictContainer() ? ContainerFilter.CURRENT : ContainerFilter.EVERYTHING, null, null);
                 }
             });
 
@@ -236,14 +229,14 @@ public class FeaturesTableInfo extends VirtualTable
             sql.append("\nINNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction)");
             sql.append("\nINNER JOIN ms2.Runs AS r ON (fr.Run=r.Run");
             sql.append("\nAND r.Container IN (");
-            sql.append(_schema.getContainerInList());
+            sql.append(getUserSchema().getContainerInList());
             sql.append(")\nAND r.Deleted='0')");
             sql.append(") AS pep ON (fi.MzXmlUrl=pep.MzXmlUrl AND fe.MS2Scan=pep.Scan AND fe.MS2Charge=pep.Charge)");
         }
 
         //add a base filter that includes only features in the schema's container list
         sql.append("\nWHERE d.Container IN (");
-        sql.append(_schema.getContainerInList());
+        sql.append(getUserSchema().getContainerInList());
         sql.append(")");
 
         //set a base filter condition to exclude deleted and unimported runs

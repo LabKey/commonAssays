@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.security.User;
@@ -23,10 +24,13 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
+import org.labkey.api.view.WebPartFactory;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MS2FolderType extends MultiPortalFolderType
 {
@@ -41,17 +45,29 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart("Data Pipeline").createWebPart(),
                 Portal.getPortalPart(MS2Module.MS2_RUNS_NAME).createWebPart()
             ),
-            Arrays.asList(
+            buildPreferredWebPartsList(),
+            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
+            module);
+    }
+
+    @NotNull
+    private static List<Portal.WebPart> buildPreferredWebPartsList()
+    {
+        List<Portal.WebPart> webParts = new ArrayList<>(Arrays.asList(
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
                 Portal.getPortalPart(MS2Module.MS2_SAMPLE_PREPARATION_RUNS_NAME).createWebPart(),
                 Portal.getPortalPart("Run Groups").createWebPart(),
                 Portal.getPortalPart("Run Types").createWebPart(),
                 Portal.getPortalPart("Sample Sets").createWebPart(),
-                Portal.getPortalPart("Protocols").createWebPart(),
-                Portal.getPortalPart("Assay List").createWebPart()
-            ),
-            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
-            module);
+                Portal.getPortalPart("Protocols").createWebPart()
+        ));
+        WebPartFactory assayList = Portal.getPortalPart("Assay List");
+        if (assayList != null)
+        {
+            webParts.add(assayList.createWebPart());
+        }
+
+        return webParts;
     }
 
     @Override
