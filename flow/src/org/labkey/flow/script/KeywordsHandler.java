@@ -16,6 +16,7 @@
 
 package org.labkey.flow.script;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveType;
@@ -160,10 +161,10 @@ public class KeywordsHandler extends BaseHandler
             if (!isFCSFile(file))
                 continue;
 
-            if(!isSupportedFCSVersion(file)){
-                String[] versionsList = FCS.supportedVersions.toArray(new String[FCS.supportedVersions.size()]);
-                addStatus("The FSC version " + FCS.getFcsVersion(file) + " is not support for file " + file.getName() +
-                ". Supported versions are " + StringUtilsLabKey.joinNonBlank(",", versionsList) + ".");
+            if (!isSupportedFCSVersion(file))
+            {
+                addStatus("The FCS version " + FCS.getFcsVersion(file) + " is not supported for file " + file.getName() +
+                ". Supported versions are " + StringUtils.join(FCS.supportedVersions,",") + ".");
             }
             addStatus("Reading keywords from file " + file.getName());
             lstFileData.add( getAnalyzer().readAllKeywords(file.toURI()));

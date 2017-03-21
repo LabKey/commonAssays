@@ -371,7 +371,6 @@ public class FCS extends FCSHeader
     
     static public boolean isFCSFile(File file)
     {
-        InputStream stream = null;
         try
         {
             if (!file.isFile())
@@ -379,17 +378,9 @@ public class FCS extends FCSHeader
                 // Don't read from the File if it is "/dev/ttyp0"
                 return false;
             }
-            stream = new FileInputStream(file);
-            if (stream.available() < 6)
-            {
-                // Don't read from the File if it is "/dev/stdin"
-                return false;
-            }
-            byte[] buffer = new byte[3];
             byte[] compare1 = new byte[]{'F', 'C', 'S'};
-            if (stream.read(buffer) != 3)
-                return false;
-            if (!Arrays.equals(buffer, compare1))
+
+            if (!Arrays.equals(readFirstBytes(file, 3), compare1))
                 return false;
             return true;
         }
@@ -397,40 +388,30 @@ public class FCS extends FCSHeader
         {
             return false;
         }
-        finally
-        {
-            if (stream != null)
-            {
-                try
-                {
-                    stream.close();
-                }
-                catch (IOException e)
-                {
-                }
-            }
-        }
     }
 
     public static boolean isSupportedVersion(File file)
+    {
+        try
+        {
+            return isSupportedVersion(readFirstBytes(file, 6));
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
+
+    private static byte[] readFirstBytes(File file , int len) throws IOException
     {
         InputStream stream = null;
         try
         {
             stream = new FileInputStream(file);
 
-            byte[] buffer = new byte[6];
-
-            if (stream.read(buffer) != 6)
-            {
-                return false;
-            }
-
-            return(isSupportedVersion(buffer));
-        }
-        catch (IOException e)
-        {
-            return false;
+            byte[] bytes = new byte[len];
+            stream.read(bytes);
+            return bytes;
         }
         finally
         {
@@ -448,7 +429,7 @@ public class FCS extends FCSHeader
 
     }
 
-    public static String getFcsVersion(File file)
+    public static String getFcsVersion(File file) throws IOException
     {
         InputStream stream = null;
         String errorMessage = "Unable to read version.";
@@ -464,10 +445,6 @@ public class FCS extends FCSHeader
             }
 
             return new String(buffer, 0, 6);
-        }
-        catch (IOException e)
-        {
-            return errorMessage;
         }
         finally
         {

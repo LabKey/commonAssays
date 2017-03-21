@@ -30,9 +30,9 @@ import java.util.regex.Pattern;
  */
 public class KeywordUtil
 {
-    public static final String KEYWORD_SPILL = "SPILL";
-    public static final String KEYWORD_SPILLOVER = "$SPILLOVER";
-    public static final String KEYWORD_DFC1TO2 = "$DFC1TO2";
+    private static final String KEYWORD_SPILL = "SPILL";
+    private static final String KEYWORD_SPILLOVER = "$SPILLOVER";
+    private static final String KEYWORD_DFC1TO2 = "$DFC1TO2";
     private static Pattern hiddenKeyword = Pattern.compile("^(" +
             "\\$BEGINANALYSIS|\\$BEGINDATA|\\$BEGINSTEXT|" +
             "\\$ENDANALYSIS|\\$ENDDATA|\\$ENDSTEXT|" +

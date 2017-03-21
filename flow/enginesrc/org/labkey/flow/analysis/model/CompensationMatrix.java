@@ -608,7 +608,8 @@ public class CompensationMatrix implements Serializable
     {
         String spill = StringUtils.trimToNull(keywords.get("SPILL"));
 
-        if(spill == null){
+        if (spill == null)
+        {
             spill = StringUtils.trimToNull(keywords.get("$SPILLOVER"));
         }
 
