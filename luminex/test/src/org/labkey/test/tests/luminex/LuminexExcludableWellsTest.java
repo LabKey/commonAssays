@@ -47,6 +47,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     private Set<String> excludedWells = null;
     private static final File SINGLEPOINT_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
 
+    private static int jobCount = 0;
 
     @BeforeClass
     public static void updateAssayDefinition()
@@ -74,6 +75,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     public void testWellExclusion()
     {
         ensureMultipleCurveDataPresent(TEST_ASSAY_LUM);
+        jobCount++;
 
         clickAndWait(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
 
@@ -90,23 +92,23 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         excludedWellDescription = "Standard2";
         excludedWellType = "S3";
         excludedWells = new HashSet<>(Arrays.asList("C3", "D3"));
-        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, 1);
+        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, ++jobCount);
 
         // QC control titration well group exclusion
         excludedWellDescription = "Standard1";
         excludedWellType = "C2";
         excludedWells = new HashSet<>(Arrays.asList("E2", "F2"));
-        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, 2);
+        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, ++jobCount);
 
         // unknown titration well group exclusion
         excludedWellDescription = "Sample 2";
         excludedWellType = "X25";
         excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
-        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, 3);
-        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], 5);
+        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, ++jobCount);
+        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], (jobCount += 2));
 
         // analyte exclusion
-        excludeAnalyteForAllWellsTest(analytes[1], 6);
+        excludeAnalyteForAllWellsTest(analytes[1], ++jobCount);
 
         // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
@@ -184,7 +186,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
 
         //Save Exclusion
         clickSaveAndAcceptConfirm("Confirm Exclusions");
-        verifyExclusionPipelineJobComplete(1, "MULTIPLE singlepoint unknown exclusions", runId, "", 3, 1);
+        verifyExclusionPipelineJobComplete(++jobCount, "MULTIPLE singlepoint unknown exclusions", runId, "", 3, 1);
 
         //Check ExclusionReport for changes
         ExclusionReportPage exclusionReportPage = ExclusionReportPage.beginAt(this);
@@ -202,7 +204,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         dialog.selectDilution(toDelete, dilution);
         dialog.uncheckAnalyte(analytes[0]);
         clickSaveAndAcceptConfirm("Confirm Exclusions");
-        verifyExclusionPipelineJobComplete(2, String.format("DELETE singlepoint unknown exclusion (Description: %1$s, Dilution: %2$s)", toDelete, dilutionDecimal), runId, "");
+        verifyExclusionPipelineJobComplete(++jobCount, String.format("DELETE singlepoint unknown exclusion (Description: %1$s, Dilution: %2$s)", toDelete, dilutionDecimal), runId, "");
 
         //Check ExclusionReport for changes
         exclusionReportPage = ExclusionReportPage.beginAt(this);
@@ -222,7 +224,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         dialog.selectDilution(toUpdate, dilution);
         dialog.uncheckAnalyte(analytes[0]);
         clickSaveAndAcceptConfirm("Confirm Exclusions");
-        verifyExclusionPipelineJobComplete(3, String.format("UPDATE singlepoint unknown exclusion (Description: %1s, Dilution: %2s)", toUpdate, dilutionDecimal), runId, "");
+        verifyExclusionPipelineJobComplete(++jobCount, String.format("UPDATE singlepoint unknown exclusion (Description: %1s, Dilution: %2s)", toUpdate, dilutionDecimal), runId, "");
 
         exclusionReportPage = ExclusionReportPage.beginAt(this);
         exclusionReportPage.assertSinglepointUnknownExclusion(runId, toKeep, dilutionDecimal, analytes[0]);
