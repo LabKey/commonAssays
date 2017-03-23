@@ -100,6 +100,11 @@ public class KeywordsHandler extends BaseHandler
         _job.addStatus(status);
     }
 
+    protected void warn(String status)
+    {
+        _job.warn(status);
+    }
+
     protected FlowRun addRun(File directory, List<FCSKeywordData> data) throws Exception
     {
         ExperimentArchiveDocument xarDoc = _job.createExperimentArchive();
@@ -163,7 +168,7 @@ public class KeywordsHandler extends BaseHandler
 
             if (!isSupportedFCSVersion(file))
             {
-                addStatus("The FCS version " + FCS.getFcsVersion(file) + " is not supported for file " + file.getName() +
+                warn("The FCS version " + FCS.getFcsVersion(file) + " is not supported for file " + file.getName() +
                 ". Supported versions are " + StringUtils.join(FCS.supportedVersions,",") + ".");
             }
             addStatus("Reading keywords from file " + file.getName());
