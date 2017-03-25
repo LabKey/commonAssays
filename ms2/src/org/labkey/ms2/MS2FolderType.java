@@ -62,7 +62,7 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart("Protocols").createWebPart()
         ));
         WebPartFactory assayList = Portal.getPortalPart("Assay List");
-        if (assayList != null)
+        if (assayList != null)  // Study module might not be present, #29772
         {
             webParts.add(assayList.createWebPart());
         }

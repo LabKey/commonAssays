@@ -21,7 +21,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
-import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -262,17 +261,13 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         runTypes.add(new MS2SearchExperimentRunType("Sequest Searches", MS2Schema.TableType.SequestSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Fraction Rollups", MS2Schema.TableType.FractionRollupsRuns.toString(), Handler.Priority.HIGH, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX));
 
-        ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
+        ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
-            @NotNull
-            public Set<ExperimentRunType> getExperimentRunTypes(@Nullable Container container)
+            if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
             {
-                if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
-                {
-                    return runTypes;
-                }
-                return Collections.emptySet();
+                return runTypes;
             }
+            return Collections.emptySet();
         });
 
         ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
@@ -290,9 +285,15 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
-        
-        AssayService.get().registerAssayProvider(new MassSpecMetadataAssayProvider());
-        AssayService.get().registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
+
+        AssayService.Interface svc = AssayService.get();
+
+        // Study module might not be present, #29772
+        if (null != svc)
+        {
+            svc.registerAssayProvider(new MassSpecMetadataAssayProvider());
+            svc.registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
+        }
 
         if (null != ServiceRegistry.get(SearchService.class))
         {
