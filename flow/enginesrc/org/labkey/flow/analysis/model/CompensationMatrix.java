@@ -699,7 +699,7 @@ public class CompensationMatrix implements Serializable
         @Test
         public void testFcsLoad() throws IOException
         {
-            AppProps.Interface props = AppProps.getInstance();
+            AppProps props = AppProps.getInstance();
 
             String projectRootPath =  props.getProjectRoot();
             File projectRoot = new File(projectRootPath);

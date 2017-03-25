@@ -473,7 +473,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testExpressPlus() throws Exception
         {
-            AppProps.Interface props = AppProps.getInstance();
+            AppProps props = AppProps.getInstance();
             String projectRootPath =  props.getProjectRoot();
             File projectRoot = new File(projectRootPath);
 

@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.settings.AppProps;
