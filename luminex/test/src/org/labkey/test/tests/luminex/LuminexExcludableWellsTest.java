@@ -47,8 +47,6 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     private Set<String> excludedWells = null;
     private static final File SINGLEPOINT_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
 
-    private static int jobCount = 0;
-
     @BeforeClass
     public static void updateAssayDefinition()
     {
@@ -74,8 +72,9 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     @Test
     public void testWellExclusion()
     {
+        int jobCount = 0;
+
         ensureMultipleCurveDataPresent(TEST_ASSAY_LUM);
-        jobCount++;
 
         clickAndWait(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
 
@@ -127,6 +126,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     @Test
     public void testSinglePointExclusions()
     {
+        int jobCount = 0;
         String runId = "Singlepoint Exclusion run";
         goToTestAssayHome();
 
