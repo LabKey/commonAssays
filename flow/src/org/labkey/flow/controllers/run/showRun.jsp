@@ -119,7 +119,7 @@
     }
 
 
-    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             getViewContext(),
             run.getLSID(),
@@ -128,7 +128,7 @@
             false, true);
     include(discussion, out);
 
-    AttachmentService.Service att = AttachmentService.get();
+    AttachmentService att = AttachmentService.get();
     Collection<Attachment> attachments = att.getAttachments(run);
     MimeMap mm = new MimeMap();
     %><table><tr><%

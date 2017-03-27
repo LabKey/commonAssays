@@ -300,7 +300,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public int updateSampleIds(User user) throws SQLException
     {
-        ExperimentService.Interface svc = ExperimentService.get();
+        ExperimentService svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleSetJoinFields();
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         ExpSampleSet ss = getSampleSet();
@@ -529,7 +529,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public void updateFCSAnalysisName(User user) throws Exception
     {
-        ExperimentService.Interface expService = ExperimentService.get();
+        ExperimentService expService = ExperimentService.get();
         FieldSubstitution fs = getFCSAnalysisNameExpr();
         if (fs == null)
         {

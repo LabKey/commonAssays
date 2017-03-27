@@ -360,7 +360,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     }
 
     @Override
-    protected ExpData createExternalAnalysisData(ExperimentService.Interface svc,
+    protected ExpData createExternalAnalysisData(ExperimentService svc,
                                                  ExpRun externalAnalysisRun,
                                                  User user, Container container,
                                                  String analysisName,

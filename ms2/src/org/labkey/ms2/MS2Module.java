@@ -286,7 +286,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
 
-        AssayService.Interface svc = AssayService.get();
+        AssayService svc = AssayService.get();
 
         // Study module might not be present, #29772
         if (null != svc)

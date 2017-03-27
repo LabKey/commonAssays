@@ -224,7 +224,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         final String fileName = dataFile.getName().toLowerCase();
 
         DataLoader loader = null;
-        DataLoaderService.I svc = DataLoaderService.get();
+        DataLoaderService svc = DataLoaderService.get();
         if (svc != null)
             loader = svc.createLoader(dataFile, null, hasColumnHeaders, null, ExcelLoader.FILE_TYPE);
         else

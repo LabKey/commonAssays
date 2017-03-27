@@ -212,7 +212,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     private PlateTemplate createMultiVirusTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
-        PlateService.Service plateService = PlateService.get();
+        PlateService plateService = PlateService.get();
 
         List<Position> cellControlPositions = new ArrayList<>();
         List<Position> virusControlPositions = new ArrayList<>();
@@ -275,7 +275,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     private PlateTemplate create20Sample4VirusScreeningTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
-        PlateService.Service plateService = PlateService.get();
+        PlateService plateService = PlateService.get();
 
         List<Position> cellControlPositions = new ArrayList<>();
         List<Position> virusControlPositions = new ArrayList<>();
@@ -363,7 +363,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     private PlateTemplate create240Sample1VirusScreeningTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
-        PlateService.Service plateService = PlateService.get();
+        PlateService plateService = PlateService.get();
 
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 plateService.createPosition(c, 2, 1),

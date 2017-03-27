@@ -24,38 +24,32 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.services.ServiceRegistry;
 
 /**
  * User: jeckels
  * Date: Jan 9, 2007
  */
-public class MS2Service
+public interface MS2Service
 {
-    private static Service _serviceImpl = null;
-
-    public interface Service
+    static void register(MS2Service serviceImpl)
     {
-        SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword);
-
-        UserSchema createSchema(User user, Container container);
-
-        TableInfo createPeptidesTableInfo(User user, Container container);
-        TableInfo createSequencesTableInfo(User user, Container container);
-        TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk,
-                                          ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns);
+        ServiceRegistry.get().registerService(MS2Service.class, serviceImpl);
     }
 
-    public static void register(Service serviceImpl)
+    static MS2Service get()
     {
-        if (_serviceImpl != null)
-            throw new IllegalStateException("Service has already been set.");
-        _serviceImpl = serviceImpl;
+        return ServiceRegistry.get().getService(MS2Service.class);
     }
 
-    public static Service get()
-    {
-        if (_serviceImpl == null)
-            throw new IllegalStateException("Service has not been set.");
-        return _serviceImpl;
-    }
+    SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword);
+
+    UserSchema createSchema(User user, Container container);
+
+    TableInfo createPeptidesTableInfo(User user, Container container);
+
+    TableInfo createSequencesTableInfo(User user, Container container);
+
+    TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk,
+                                      ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns);
 }

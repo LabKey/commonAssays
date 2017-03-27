@@ -100,7 +100,7 @@ public class CompensationController extends BaseFlowController
         public boolean handlePost(UploadCompensationForm form, BindException errors) throws Exception
         {
             boolean hasErrors = false;
-            ExperimentService.Interface svc = ExperimentService.get();
+            ExperimentService svc = ExperimentService.get();
             MultipartFile compensationMatrixFile = getFileMap().get("ff_compensationMatrixFile");
 
             if (compensationMatrixFile.isEmpty() || compensationMatrixFile.getSize() == 0)

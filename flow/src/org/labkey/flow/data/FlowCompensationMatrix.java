@@ -66,7 +66,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     static public FlowCompensationMatrix create(User user, Container container, String name, AttributeSet attrs) throws Exception
     {
-        ExperimentService.Interface svc = ExperimentService.get();
+        ExperimentService svc = ExperimentService.get();
 
         FlowCompensationMatrix flowComp;
         try (DbScope.Transaction transaction = svc.ensureTransaction())

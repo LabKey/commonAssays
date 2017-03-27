@@ -281,7 +281,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
     protected abstract FlowRun createExperimentRun() throws Exception;
 
-    protected abstract ExpData createExternalAnalysisData(ExperimentService.Interface svc,
+    protected abstract ExpData createExternalAnalysisData(ExperimentService svc,
                                                  ExpRun externalAnalysisRun,
                                                  User user, Container container,
                                                  String analysisName,
@@ -318,7 +318,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         // Clear cache after preparing all samples and comp. matrices
         AttributeCache.uncacheAllAfterCommit(container);
 
-        ExperimentService.Interface svc = ExperimentService.get();
+        ExperimentService svc = ExperimentService.get();
         boolean success = false;
         try (DbScope.Transaction transaction = svc.ensureTransaction())
         {
@@ -522,7 +522,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    int totSamples,
                                    String sampleLabel) throws SQLException
     {
-        ExperimentService.Interface svc = ExperimentService.get();
+        ExperimentService svc = ExperimentService.get();
         FlowProtocol flowProtocol = getProtocol();
         ExpProtocol protocol = flowProtocol.getProtocol();
 

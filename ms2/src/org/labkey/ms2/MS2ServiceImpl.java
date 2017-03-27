@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  * User: jeckels
  * Date: Jan 9, 2007
  */
-public class MS2ServiceImpl implements MS2Service.Service
+public class MS2ServiceImpl implements MS2Service
 {
     public SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword)
     {

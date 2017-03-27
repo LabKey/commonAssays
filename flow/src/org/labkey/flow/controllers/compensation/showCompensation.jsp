@@ -186,7 +186,7 @@
 <% } %>
 <labkey:link href="<%=flowComp.urlDownload()%>" text="Download" rel="nofollow"/><br>
 <%
-    DiscussionService.Service service = DiscussionService.get();
+    DiscussionService service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             getViewContext(),
             flowComp.getLSID(),
