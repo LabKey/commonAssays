@@ -31,7 +31,7 @@ public class ViabilityServiceImpl implements ViabilityService
 {
     private static final ViabilityServiceImpl INSTANCE = new ViabilityServiceImpl();
 
-    public static final ViabilityService get()
+    public static ViabilityService get()
     {
         return INSTANCE;
     }

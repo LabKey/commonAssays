@@ -29,10 +29,10 @@ import org.labkey.api.security.User;
  */
 public interface MS1Service
 {
-    public static final String DB_SCHEMA_NAME = "ms1";
-    public static final String PUBLIC_SCHEMA_NAME = "ms1";
+    String DB_SCHEMA_NAME = "ms1";
+    String PUBLIC_SCHEMA_NAME = "ms1";
 
-    public enum Tables
+    enum Tables
     {
         Features,
         Files,

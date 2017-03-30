@@ -30,7 +30,6 @@ import org.labkey.ms1.query.MS1Schema;
  */
 public class MS1ServiceImpl implements MS1Service
 {
-
     public TableInfo createFeaturesTableInfo(User user, Container container)
     {
         return createFeaturesTableInfo(user, container, true);

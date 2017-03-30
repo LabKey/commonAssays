@@ -68,5 +68,4 @@ public class MS2ServiceImpl implements MS2Service
             table.setDefaultVisibleColumns(defaultColumns);
         return table;
     }
-
 }
