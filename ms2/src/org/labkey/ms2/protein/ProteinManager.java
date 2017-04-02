@@ -1713,7 +1713,7 @@ public class ProteinManager
                         new Path(docid),
                         docid,
                         c.getId(), "text/plain",
-                        sb.toString().getBytes(),
+                        sb.toString(),
                         url.clone().addParameter("seqId",id),
                         m);
                 task.addResource(r, SearchService.PRIORITY.item);
@@ -1772,7 +1772,7 @@ public class ProteinManager
                                     new Path(docid),
                                     docid,
                                     c.getId(), "text/plain",
-                                    sb.toString().getBytes(),
+                                    sb.toString(),
                                     url.clone().addParameter("seqId",curSeqId),
                                     m);
                             task.addResource(r, SearchService.PRIORITY.item);
