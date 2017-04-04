@@ -26,18 +26,15 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.ResultSetUtil;
-import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
 import org.labkey.ms2.reader.MS2Loader;
-import org.labkey.ms2.reader.MascotDatLoader;
 import org.labkey.ms2.reader.PeptideProphetHandler;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +56,13 @@ public abstract class PeptideImporter extends MS2Importer
     protected List<RelativeQuantAnalysisSummary> _quantSummaries;
     private boolean _scoringAnalysis;
     protected MS2Run _run = null;
+
+    /**
+     * ProteomeDiscoverer does not write out pepXML file with full fraction information, even for fraction searches
+     * Thus, we end up importing data as if it was all from a single fraction, which can cause errors when multiple fractions
+     * have IDs on the same scan numbers. Thus, as a hack, assign a "queryNumber" (ala Mascot) to make each ID unique.
+     */
+    private int _proteomeDiscovererOffset = 0;
 
     public PeptideImporter(User user, Container c, String description, String fullFileName, Logger log, XarContext context)
     {
@@ -236,6 +240,9 @@ public abstract class PeptideImporter extends MS2Importer
             stmt.setNull(n++, Types.REAL);
         }
 
+        // ProteomeDiscoverer exports lack a previous and next AA value
+        boolean likelyProteomeDiscovererImport = peptide.getPrevAA() == null && peptide.getNextAA() == null;
+
         stmt.setString(n++, peptide.getPeptide());
         stmt.setString(n++, peptide.getPrevAA() == null ? "?" : peptide.getPrevAA());
         stmt.setString(n++, peptide.getTrimmedPeptide());
@@ -254,7 +261,16 @@ public abstract class PeptideImporter extends MS2Importer
         if (null != peptide.getQueryNumber())
             stmt.setInt(n++, peptide.getQueryNumber());
         else
-            stmt.setNull(n++, Types.INTEGER);
+        {
+            if (likelyProteomeDiscovererImport)
+            {
+                stmt.setInt(n++, _proteomeDiscovererOffset++);
+            }
+            else
+            {
+                stmt.setNull(n++, Types.INTEGER);
+            }
+        }
 
         stmt.setInt(n++, peptide.getHitRank());
         stmt.setBoolean(n, peptide.getDecoy());
