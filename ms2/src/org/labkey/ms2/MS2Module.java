@@ -295,13 +295,15 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             svc.registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
         }
 
-        if (null != ServiceRegistry.get(SearchService.class))
+        SearchService ss = SearchService.get();
+
+        if (null != ss)
         {
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new MzXMLDocumentParser());
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new MzMLDocumentParser());
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new DatDocumentParser());
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new SequestLogDocumentParser());
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new MGFDocumentParser());
+            ss.addDocumentParser(new MzXMLDocumentParser());
+            ss.addDocumentParser(new MzMLDocumentParser());
+            ss.addDocumentParser(new DatDocumentParser());
+            ss.addDocumentParser(new SequestLogDocumentParser());
+            ss.addDocumentParser(new MGFDocumentParser());
         }
 
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")

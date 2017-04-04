@@ -17,11 +17,8 @@
 package org.labkey.microarray;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.exp.ExperimentRunType;
-import org.labkey.api.exp.ExperimentRunTypeSource;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
@@ -29,7 +26,6 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.search.SearchService;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.FileType;
@@ -107,7 +103,7 @@ public class MicroarrayModule extends SpringModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return new ArrayList<WebPartFactory>(Arrays.asList(
+        return new ArrayList<>(Arrays.asList(
             new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
@@ -183,20 +179,18 @@ public class MicroarrayModule extends SpringModule
         ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
-        ExperimentService.get().registerExperimentRunTypeSource(new ExperimentRunTypeSource()
+        ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
-            @NotNull
-            public Set<ExperimentRunType> getExperimentRunTypes(@Nullable Container container)
+            if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
             {
-                if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
-                {
-                    return Collections.singleton(MicroarrayRunType.INSTANCE);
-                }
-                return Collections.emptySet();
+                return Collections.singleton(MicroarrayRunType.INSTANCE);
             }
+            return Collections.emptySet();
         });
-        if (null != ServiceRegistry.get(SearchService.class))
-            ServiceRegistry.get(SearchService.class).addDocumentParser(new MageMLDocumentParser());
+
+        SearchService ss = SearchService.get();
+        if (null != ss)
+            ss.addDocumentParser(new MageMLDocumentParser());
 
         // TODO: Are these module properties still needed?
         /*

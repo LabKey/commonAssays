@@ -175,8 +175,9 @@ public class FlowModule extends DefaultModule
         AssayService.get().registerAssayProvider(new FlowAssayProvider());
 
         FolderTypeManager.get().registerFolderType(this, new FlowFolderType(this));
-        if (null != ServiceRegistry.get(SearchService.class))
-            ServiceRegistry.get(SearchService.class).addDocumentParser(FCSHeader.documentParser);
+        SearchService ss = SearchService.get();
+        if (null != ss)
+            ss.addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));

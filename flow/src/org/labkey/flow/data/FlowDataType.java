@@ -32,12 +32,12 @@ import org.labkey.flow.persist.ObjectType;
 abstract public class FlowDataType extends AssayDataType
 {
     // The prefix of the LSID namespace prefix :)
-    public static final String FLOW_DATA_PREFIX = "Flow-";
+    private static final String FLOW_DATA_PREFIX = "Flow-";
 
-    String _name;
-    String _label;
-    ObjectType _objType;
-    boolean _requireAttrObject;
+    private final String _name;
+    private final String _label;
+    private final ObjectType _objType;
+    private final boolean _requireAttrObject;
 
     private FlowDataType(String type, String label, ObjectType objType, boolean requireAttrObject)
     {
