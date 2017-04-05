@@ -15,9 +15,8 @@
  */
 package org.labkey.test.pages.ms2;
 
-import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.WebTestHelper;
+import org.labkey.test.Locators;
 import org.labkey.test.components.ComponentElements;
 import org.labkey.test.pages.LabKeyPage;
 import org.labkey.test.selenium.LazyWebElement;
