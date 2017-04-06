@@ -76,7 +76,7 @@ public class MS1Controller extends SpringActionController
 
     public static void registerAdminConsoleLinks()
     {
-        AdminConsole.addLink(SettingsLinkType.Management, "ms1", getShowAdminURL());
+        AdminConsole.addLink(SettingsLinkType.Management, "ms1", getShowAdminURL(), AdminPermission.class);
     }
 
     /**

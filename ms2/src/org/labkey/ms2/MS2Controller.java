@@ -76,6 +76,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -210,9 +211,9 @@ public class MS2Controller extends SpringActionController
 
     public static void registerAdminConsoleLinks()
     {
-        AdminConsole.addLink(SettingsLinkType.Management, "ms2", getShowMS2AdminURL(null));
-        AdminConsole.addLink(SettingsLinkType.Configuration, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()));
-        AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl());
+        AdminConsole.addLink(SettingsLinkType.Management, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Configuration, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
     private NavTree appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
