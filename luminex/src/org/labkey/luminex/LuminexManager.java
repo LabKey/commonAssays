@@ -35,6 +35,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -275,17 +277,17 @@ public class LuminexManager
 
     private Map<Integer, ExpData> getReplacementInputMap(ExpProtocol protocol, ExpRun replacedRun, ExpRun run)
     {
-        //Map old data inputs to new based on filename
+        //Map old data inputs to new based on dataFileHeaderKey
         //NOTE: exclusions in renamed/new files will be dropped
         Map<String, Integer> oldInputs = new HashMap<>();
         Map<Integer, ExpData> inputIdMap = new HashMap<>(); //key: oldId
         replacedRun.getDataOutputs().forEach(o ->  {
-            oldInputs.put(getFileNameKey(protocol, o), o.getRowId());
+            oldInputs.put(getDataFileHeaderKey(protocol, o), o.getRowId());
         });
         run.getDataOutputs().stream()
-                .filter(newFile -> oldInputs.containsKey(getFileNameKey(protocol, newFile)))
+                .filter(newFile -> oldInputs.containsKey(getDataFileHeaderKey(protocol, newFile)))
                 .forEach( newFile -> {
-                    Integer oldId = oldInputs.get(getFileNameKey(protocol, newFile));
+                    Integer oldId = oldInputs.get(getDataFileHeaderKey(protocol, newFile));
                     inputIdMap.put(oldId, newFile);
                 });
 
@@ -314,17 +316,14 @@ public class LuminexManager
         //Get full list of exclusions expanded per analyte
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT a.Name AS AnalyteName\n")
-            .append(", COALESCE(opv.StringValue,'') AS FileName\n")
             .append(", e.* \n")
             .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "e").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "ea").append(",")
             .append(ExperimentService.get().getTinfoData(), "d").append(",")
-            .append(OntologyManager.getTinfoObjectPropertiesView(), "opv").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
             .append(" WHERE e.RowId = ea.WellExclusionId ")
             .append(" AND ea.AnalyteId = a.RowId ")
             .append(" AND d.RowId = e.DataId")
-            .append(" AND opv.name = 'FileName' AND opv.Container = d.Container AND opv.ObjectURI = d.LSID")
             .append(" AND a.DataId ");
 
         OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(sql, dataIds);
@@ -398,13 +397,13 @@ public class LuminexManager
             if (newAnalyte == null)
                 return;
 
-            String dataFileName = getFileNameKey(context.getProtocol(), inputIdMap.get(dataId));
+            String dataFileHeaderKey = getDataFileHeaderKey(context.getProtocol(), inputIdMap.get(dataId));
             String description = (String)exclusion.get("Description");  // == null for Blank control wells
             String type = (String)exclusion.get("Type"); // == null for singlepoint unknown and titration exclusions
             Double dilution = exclusion.get("Dilution") != null ? Double.parseDouble(exclusion.get("Dilution").toString()) : null; // == null for well replicate group and titration exclusions
 
             //Get existing command
-            String key = createExclusionCommandKey(dataFileName, description, type, dilution);
+            String key = createExclusionCommandKey(dataFileHeaderKey, description, type, dilution);
             LuminexSingleExclusionCommand command = replacementCommands.get(key);
 
             if (command == null)
@@ -415,11 +414,11 @@ public class LuminexManager
                 boolean hasWellKeyMatch = false;
 
                 if (isTitrationTypeExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileName, analyteName, description)));
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)));
                 else if (isSinglepointUnknownExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileName, analyteName, description)) && k.endsWith("|" + dilution));
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution));
                 else if (isWellReplicateGroupTypeExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileName, analyteName, description, type)));
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type)));
 
                 if (hasWellKeyMatch)
                     command = generateExclusionCommands(exclusion, file.getRowId());
@@ -456,16 +455,19 @@ public class LuminexManager
     public Collection<WellExclusion> getRetainedWellExclusions(Integer replacedRunId)
     {
         SQLFragment sql = new SQLFragment();
-        sql.append( "SELECT opv.StringValue AS FileName, a.Name AS Analyte, we.Description, we.Type, we.Dilution\n")
+        sql.append( "SELECT opvRSN.StringValue AS ReaderSerialNumber, opvAD.DateTimeValue AS AcquisitionDate, ")
+            .append("a.Name AS Analyte, we.Description, we.Type, we.Dilution\n")
             .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(",")
-            .append(OntologyManager.getTinfoObjectPropertiesView(), "opv").append(",")
+            .append(OntologyManager.getTinfoObjectPropertiesView(), "opvRSN").append(",")
+            .append(OntologyManager.getTinfoObjectPropertiesView(), "opvAD").append(",")
             .append(ExperimentService.get().getTinfoData(), "d")
             .append(" WHERE we.RowId = wea.WellExclusionId")
             .append(" AND wea.AnalyteId = a.RowId")
             .append(" AND we.DataId = d.RowId")
-            .append(" AND opv.name = 'FileName' AND opv.Container = d.Container AND opv.ObjectURI = d.LSID")
+            .append(" AND opvRSN.name = 'ReaderSerialNumber' AND opvRSN.Container = d.Container AND opvRSN.ObjectURI = d.LSID")
+            .append(" AND opvAD.name = 'AcquisitionDate' AND opvAD.Container = d.Container AND opvAD.ObjectURI = d.LSID")
             .append(" AND d.RunId = ?").add(replacedRunId);
 
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getCollection(WellExclusion.class);
@@ -473,7 +475,7 @@ public class LuminexManager
 
     private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set, String closeOutString)
     {
-        //Add filename filter
+        //Add dataFileHeaderKey filter
         if (set != null && set.size() > 0)
         {
             sql.append(" AND ").append(columnExpression);
@@ -637,12 +639,13 @@ public class LuminexManager
         LuminexDataTable table = new LuminexDataTable(schema);
 
         // data file, analyte, description, dilution, and type are needed to match an existing exclusion to data from an Excel file row
-        FieldKey dataFileFK = FieldKey.fromParts("Data", "FileName");
+        FieldKey readerSerialNumberFK = FieldKey.fromParts("Data", "ReaderSerialNumber");
+        FieldKey acquisitionDateFK = FieldKey.fromParts("Data", "AcquisitionDate");
         FieldKey analyteFK = FieldKey.fromParts("Analyte", "Name");
         FieldKey descriptionFK = FieldKey.fromParts("Description");
         FieldKey typeFK = FieldKey.fromParts("Type");
         FieldKey dilutionFK = FieldKey.fromParts("Dilution");
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(dataFileFK, analyteFK, descriptionFK, dilutionFK, typeFK));
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(readerSerialNumberFK, acquisitionDateFK, analyteFK, descriptionFK, dilutionFK, typeFK));
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), runId);
         if(onlyExcludedWells)
@@ -650,51 +653,64 @@ public class LuminexManager
 
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
-            String dataFileName = (String)row.get(cols.get(dataFileFK).getAlias());
+            String readerSerialNumber = (String)row.get(cols.get(readerSerialNumberFK).getAlias());
+            Date acquisitionDate = (Date)row.get(cols.get(acquisitionDateFK).getAlias());
+            String dataFileHeaderKey = getDataFileHeaderKey(readerSerialNumber, acquisitionDate);
+
             String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
             String description = (String)row.get(cols.get(descriptionFK).getAlias());
             String type = (String)row.get(cols.get(typeFK).getAlias());
             Object dilutionObj = row.get(cols.get(dilutionFK).getAlias());
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
 
-            excludedWellKeys.add(createWellKey(dataFileName, analyteName, description, type, dilution));
+            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution));
         });
 
         return excludedWellKeys;
     }
 
     /** Create a simple object to use as a key, combining the three properties */
-    private String createExclusionCommandKey(String dataFileName, String description, String type, Double dilution)
+    private String createExclusionCommandKey(String dataFileHeaderKey, String description, String type, Double dilution)
     {
-        return dataFileName  + "|" + description + "|" + type + "|" + dilution;
+        return dataFileHeaderKey  + "|" + description + "|" + type + "|" + dilution;
     }
 
     /** Refine the key object with the individual analyte */
-    public String createWellKey(String dataFileName, String analyteName, String description, String type, Double dilution)
+    public String createWellKey(String dataFileHeaderKey, String analyteName, String description, String type, Double dilution)
     {
-        return getReplicateGroupKey(dataFileName, analyteName, description, type) + dilution;
+        return getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type) + dilution;
     }
 
-    private String getReplicateGroupKey(String dataFileName, String analyteName, String description, String type)
+    private String getReplicateGroupKey(String dataFileHeaderKey, String analyteName, String description, String type)
     {
-        return getTitrationKey(dataFileName, analyteName, description) + type + "|";
+        return getTitrationKey(dataFileHeaderKey, analyteName, description) + type + "|";
     }
 
-    private String getTitrationKey(String dataFileName, String analyteName, String description)
+    private String getTitrationKey(String dataFileHeaderKey, String analyteName, String description)
     {
-        return dataFileName + "|" + analyteName + "|" + description + "|";
+        return dataFileHeaderKey + "|" + analyteName + "|" + description + "|";
     }
 
-    private String getFileNameKey(ExpProtocol protocol, ExpData o)
+    private String getDataFileHeaderKey(ExpProtocol protocol, ExpData o)
     {
         Domain excelRunDomain =  LuminexAssayProvider.getExcelRunDomain(protocol);
-        return (String) o.getProperty(excelRunDomain.getPropertyByName("Filename"));
+        String readerSerialNumber = (String) o.getProperty(excelRunDomain.getPropertyByName("ReaderSerialNumber"));
+        Date acquisitionDate = (Date) o.getProperty(excelRunDomain.getPropertyByName("AcquisitionDate"));
+        return getDataFileHeaderKey(readerSerialNumber, acquisitionDate);
     }
 
-    public String getFileNameKey(ExpProtocol protocol, File dataFile) throws ExperimentException
+    public String getDataFileHeaderKey(ExpProtocol protocol, File dataFile) throws ExperimentException
     {
         LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
         Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain(protocol);
-        return parser.getExcelRunProps(dataFile).get(excelRunDomain.getPropertyByName("Filename"));
+        Map<DomainProperty, String> excelRunProps = parser.getExcelRunProps(dataFile);
+        String readerSerialNumber = excelRunProps.get(excelRunDomain.getPropertyByName("ReaderSerialNumber"));
+        String acquisitionDate = excelRunProps.get(excelRunDomain.getPropertyByName("AcquisitionDate"));
+        return getDataFileHeaderKey(readerSerialNumber, acquisitionDate != null ? new Date(acquisitionDate) : null);
+    }
+
+    public String getDataFileHeaderKey(String readerSerialNumber, Date acquisitionDate)
+    {
+        return readerSerialNumber + "|" + (acquisitionDate != null ? acquisitionDate.getTime() : null);
     }
 }

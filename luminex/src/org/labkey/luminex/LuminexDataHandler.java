@@ -2053,7 +2053,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
         LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
-        String fileNameProperty = LuminexManager.get().getFileNameKey(protocol, dataFile);
+        String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile);
 
         // create a temporary resolver to use for parsing the description value prior to creating the data file for the transform script
         // i.e. we don't care about about resolving the study or lookup information at this time (that will happen after the transform is run)
@@ -2080,7 +2080,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 // Merge in whether or not the data row is excluded via a "well exclusion".
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
-                String dataRowWellKey = LuminexManager.get().createWellKey(fileNameProperty, entry.getKey().getName(),
+                String dataRowWellKey = LuminexManager.get().createWellKey(dataFileHeaderKey, entry.getKey().getName(),
                         dataRow.getDescription(), dataRow.getType(), dataRow.getDilution());
                 dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(dataRowWellKey));
 

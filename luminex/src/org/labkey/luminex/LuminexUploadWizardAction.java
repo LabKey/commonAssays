@@ -475,18 +475,18 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         Collection<WellExclusion> notRetained = LuminexManager.get().getRetainedWellExclusions(form.getReRun().getRowId()         );
 
-        //Get Filename from the Run filename property
+        //Get dataFileHeaderKey from the Run excel header property
         LuminexExcelParser parser = form.getParser();
-        Map<String, String> fileNames = new HashMap<>();
+        Map<String, String> fileNameToHeaderKeyMap = new HashMap<>();
         for (File file : form.getUploadedData().values())
-            fileNames.put(file.getName(), LuminexManager.get().getFileNameKey(form.getProtocol(), file));
+            fileNameToHeaderKeyMap.put(file.getName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file));
 
         Set retainedExclusions = new HashSet();
 
         parser.getSheets().forEach((analyte, datRowList) ->
             datRowList.forEach(row ->
             {
-                String fileName = fileNames.get(row.getDataFile());
+                String dataFileHeaderKey = fileNameToHeaderKeyMap.get(row.getDataFile());
                 String analyteName = analyte.getName();
                 String description = row.getDescription();
                 String type = row.getType();
@@ -494,10 +494,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                 for (WellExclusion ex : notRetained)
                 {
-                    if (ex.wouldExclude(fileName, analyteName, description, type, dilution))
+                    if (ex.wouldExclude(dataFileHeaderKey, analyteName, description, type, dilution))
                     {
                         //Aggregate retained exclusions by analyte
-                        retainedExclusions.add(new MultiKey(ex.getFileName(), ex.getDescription(), ex.getType(), ex.getDilution()));
+                        retainedExclusions.add(new MultiKey(ex.getDataFileHeaderKey(), ex.getDescription(), ex.getType(), ex.getDilution()));
                         notRetained.remove(ex);
                         return;
                     }

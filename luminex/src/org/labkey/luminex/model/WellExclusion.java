@@ -1,11 +1,16 @@
 package org.labkey.luminex.model;
 
+import org.labkey.luminex.LuminexManager;
+
+import java.util.Date;
+
 /**
  * Created by iansigmon on 1/27/17.
  */
 public class WellExclusion
 {
-    private String _fileName;
+    private String _readerSerialNumber;
+    private Date _acquisitionDate;
     private String _analyte;
     private String _description;
     private String _type;
@@ -48,18 +53,32 @@ public class WellExclusion
         _analyte = analyte;
     }
 
-    public String getFileName()
+    public String getReaderSerialNumber()
     {
-        return _fileName;
+        return _readerSerialNumber;
     }
-    public void setFileName(String fileName)
+    public void setReaderSerialNumber(String readerSerialNumber)
     {
-        _fileName = fileName;
+        _readerSerialNumber = readerSerialNumber;
     }
 
-    public boolean wouldExclude(String fileName, String analyteName, String description, String type, String dilution)
+    public Date getAcquisitionDate()
     {
-        return getFileName().equals(fileName)
+        return _acquisitionDate;
+    }
+    public void setAcquisitionDate(Date acquisitionDate)
+    {
+        _acquisitionDate = acquisitionDate;
+    }
+
+    public String getDataFileHeaderKey()
+    {
+        return LuminexManager.get().getDataFileHeaderKey(getReaderSerialNumber(), getAcquisitionDate());
+    }
+
+    public boolean wouldExclude(String dataFileHeaderKey, String analyteName, String description, String type, String dilution)
+    {
+        return getDataFileHeaderKey().equals(dataFileHeaderKey)
                 && getAnalyte().equals(analyteName)
                 && isNullOrValue(getDescription(), description)
                 && isNullOrValue(getType(), type)
