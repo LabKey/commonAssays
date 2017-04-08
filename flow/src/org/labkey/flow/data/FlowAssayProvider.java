@@ -431,7 +431,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public void deleteProtocol(ExpProtocol protocol, User user) throws ExperimentException
     {
-        // Do nothing.  Flow protcol can't be deleted.
+        // Do nothing. Flow protocol can't be deleted.
     }
 
     @Override
