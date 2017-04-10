@@ -2682,7 +2682,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
+    @RequiresPermission(AdminOperationsPermission.class)
     public class ShowProteinAdminAction extends FormViewAction<BlastForm>
     {
         @Override
@@ -4141,7 +4141,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
+    @RequiresPermission(AdminOperationsPermission.class)
     public class MascotConfigAction extends FormViewAction<MascotSettingsForm>
     {
         @Override
@@ -4966,7 +4966,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
+    @RequiresPermission(AdminOperationsPermission.class)
     public class MascotTestAction extends SimpleViewAction<TestMascotForm>
     {
         public ModelAndView getView(TestMascotForm form, BindException errors) throws Exception

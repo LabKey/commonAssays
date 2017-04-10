@@ -33,8 +33,8 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -482,7 +482,8 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresSiteAdmin
+    @AdminConsoleAction
+    @RequiresPermission(AdminOperationsPermission.class)
     public class FlowAdminAction extends FormViewAction<FlowAdminForm>
     {
         public void validateCommand(FlowAdminForm form, Errors errors)
