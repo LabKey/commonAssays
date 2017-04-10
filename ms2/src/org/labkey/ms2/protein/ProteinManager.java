@@ -25,33 +25,13 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.data.DbScope;
-import org.labkey.api.data.GroupedResultSet;
-import org.labkey.api.data.ResultSetCollapser;
-import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Selector;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TableResultSet;
-import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.Path;
@@ -1647,7 +1627,7 @@ public class ProteinManager
 
         if (null == task)
         {
-            SearchService ss = ServiceRegistry.get().getService(SearchService.class);
+            SearchService ss = SearchService.get();
             task = null == ss ? null : ss.createTask("Index Proteins");
             if (null == task)
                 return;

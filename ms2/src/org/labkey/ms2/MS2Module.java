@@ -232,7 +232,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         final ModuleContext finalModuleContext = moduleContext;
-//        SearchService ss = ServiceRegistry.get().getService(SearchService.class);
+//        SearchService ss = SearchService.get());
 //        if (null != ss)
 //        {
 //            ss.addSearchCategory(ProteinManager.proteinCategory);
