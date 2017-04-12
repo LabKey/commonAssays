@@ -26,6 +26,7 @@
 <%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
+<%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
@@ -60,7 +61,7 @@
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(c);
     boolean _hasPipelineRoot = pipeRoot != null;
-    boolean _canSetPipelineRoot = user.isSiteAdmin();
+    boolean _canSetPipelineRoot = c.hasPermission(user, AdminOperationsPermission.class);
     boolean _canUpdate = c.hasPermission(user, UpdatePermission.class);
     boolean _canCreateFolder = c.getParent() != null && !c.getParent().isRoot() &&
             c.getParent().hasPermission(user, AdminPermission.class);

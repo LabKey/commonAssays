@@ -3641,7 +3641,7 @@ public class MS2Controller extends SpringActionController
             gridView.getRenderContext().setUseContainerFilter(false);
             SimpleFilter runFilter = new SimpleFilter();
 
-            if (!getUser().isSiteAdmin())
+            if (!getUser().hasRootAdminPermission())
             {
                 runFilter.addInClause(FieldKey.fromParts("Container"), ContainerManager.getIds(getUser(), ReadPermission.class));
             }

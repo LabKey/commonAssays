@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -71,7 +72,7 @@ public class FlowOverview extends Overview
         PipelineService pipeService = PipelineService.get();
         PipeRoot pipeRoot = pipeService.findPipelineRoot(getContainer());
         _hasPipelineRoot = pipeRoot != null;
-        _canSetPipelineRoot = isGlobalAdmin();
+        _canSetPipelineRoot = hasPermission(AdminOperationsPermission.class);
         _canInsert = hasPermission(InsertPermission.class);
         _canUpdate = hasPermission(UpdatePermission.class);
         _canCreateFolder = getContainer().getParent() != null && !getContainer().getParent().isRoot() &&

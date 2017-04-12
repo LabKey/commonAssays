@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
+<%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
@@ -31,7 +32,8 @@
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
 
     boolean hasPipelineRoot = pipeRoot != null;
-    boolean canSetPipelineRoot = getUser().isSiteAdmin() && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
+    boolean canSetPipelineRoot = container.hasPermission(getUser(), AdminOperationsPermission.class)
+                                    && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 
 <p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline
