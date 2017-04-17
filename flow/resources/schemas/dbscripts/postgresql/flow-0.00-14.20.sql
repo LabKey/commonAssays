@@ -295,22 +295,7 @@ SELECT core.fn_dropifexists('Attribute', 'flow', 'TABLE', NULL);
 
 /* flow-11.20-11.30.sql */
 
--- delete orpahned exp.data objects created by the flow module
-DELETE FROM exp.data WHERE rowid IN (
-    SELECT
-        d.rowid
-    FROM
-        exp.data d
-    WHERE
-        d.sourceapplicationid IS NULL AND
-        d.runid IS NULL AND
-        (d.lsid like 'urn:lsid:%:Flow-%' OR d.lsid like 'urn:lsid:%:Data.Folder-%') AND
-        d.rowid NOT IN (
-            SELECT dataid FROM exp.datainput
-            UNION
-            SELECT dataid FROM flow.object
-        )
-);
+-- removed obsolete DELETE statement that cleaned up orphaned exp.data objects
 
 /* flow-12.30-13.10.sql */
 
