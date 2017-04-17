@@ -76,6 +76,7 @@ import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractActionPermissionTest;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -94,6 +95,7 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -6768,4 +6770,56 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public static class TestCase extends AbstractActionPermissionTest
+    {
+        @Override
+        public void testActionPermissions()
+        {
+            User user = TestContext.get().getUser();
+            assertTrue(user.isInSiteAdminGroup());
+
+            MS2Controller controller = new MS2Controller();
+
+            // @RequiresPermission(InsertPermission.class)
+            assertForInsertPermission(user,
+                controller.new ImportProteinProphetAction()
+            );
+
+            // @RequiresPermission(UpdatePermission.class)
+            assertForUpdateOrDeletePermission(user,
+                controller.new RenameRunAction(),
+                controller.new ToggleValidQuantitationAction(),
+                controller.new EditElutionGraphAction()
+            );
+
+            // @RequiresPermission(AdminPermission.class)
+            assertForAdminPermission(user,
+                controller.new SetBestNameAction()
+            );
+
+            // @RequiresPermission(AdminOperationsPermission.class)
+            assertForAdminOperationsPermission(user,
+                controller.new ShowProteinAdminAction(),
+                controller.new MascotConfigAction(),
+                controller.new MascotTestAction()
+            );
+
+            // @RequiresSiteAdmin
+            assertForRequiresSiteAdmin(user,
+                controller.new LoadGoAction(),
+                controller.new GoStatusAction(),
+                controller.new ReloadFastaAction(),
+                controller.new DeleteDataBasesAction(),
+                controller.new TestFastaParsingAction(),
+                controller.new PurgeRunsAction(),
+                controller.new ShowMS2AdminAction(),
+                controller.new ReloadSPOMAction(),
+                controller.new InsertAnnotsAction(),
+                controller.new DeleteAnnotInsertEntriesAction(),
+                controller.new ShowAnnotInsertDetailsAction(),
+                controller.new AttachFilesUpgradeAction(),
+                controller.new ImportMSScanCountsUpgradeAction()
+            );
+        }
+    }
 }

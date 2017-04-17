@@ -400,7 +400,8 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return new HashSet<>(Arrays.asList(
             ThermoSequestParamsBuilder.TestCase.class,
             Comet2014ParamsBuilder.FullParseTestCase.class,
-            Comet2015ParamsBuilder.FullParseTestCase.class
+            Comet2015ParamsBuilder.FullParseTestCase.class,
+            MS2Controller.TestCase.class
         ));
     }
 

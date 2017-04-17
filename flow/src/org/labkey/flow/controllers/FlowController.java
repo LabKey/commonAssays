@@ -35,6 +35,8 @@ import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractActionPermissionTest;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -44,6 +46,7 @@ import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.TestContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -575,4 +578,39 @@ public class FlowController extends BaseFlowController
         }
     }
 
+    public static class TestCase extends AbstractActionPermissionTest
+    {
+        @Override
+        public void testActionPermissions()
+        {
+            User user = TestContext.get().getUser();
+            assertTrue(user.isInSiteAdminGroup());
+
+            FlowController controller = new FlowController();
+
+            // @RequiresPermission(ReadPermission.class)
+            assertForReadPermission(user,
+                controller.new BeginAction(),
+                controller.new QueryAction(),
+                controller.new ShowStatusJobAction(),
+                controller.new SavePerferencesAction()
+            );
+
+            // @RequiresPermission(UpdatePermission.class)
+            assertForUpdateOrDeletePermission(user,
+                controller.new CancelJobAction()
+            );
+
+            // @RequiresPermission(AdminPermission.class)
+            assertForAdminPermission(user,
+                controller.new NewFolderAction()
+            );
+
+            // @AdminConsoleAction
+            // @RequiresPermission(AdminOperationsPermission.class)
+            assertForAdminOperationsPermission(ContainerManager.getRoot(), user,
+                controller.new FlowAdminAction()
+            );
+        }
+    }
 }
