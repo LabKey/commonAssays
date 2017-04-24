@@ -71,6 +71,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
@@ -2684,6 +2685,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @AdminConsoleAction
     @RequiresPermission(AdminOperationsPermission.class)
     public class ShowProteinAdminAction extends FormViewAction<BlastForm>
     {
@@ -6799,7 +6801,6 @@ public class MS2Controller extends SpringActionController
 
             // @RequiresPermission(AdminOperationsPermission.class)
             assertForAdminOperationsPermission(user,
-                controller.new ShowProteinAdminAction(),
                 controller.new MascotConfigAction(),
                 controller.new MascotTestAction()
             );
@@ -6819,6 +6820,12 @@ public class MS2Controller extends SpringActionController
                 controller.new ShowAnnotInsertDetailsAction(),
                 controller.new AttachFilesUpgradeAction(),
                 controller.new ImportMSScanCountsUpgradeAction()
+            );
+
+            // @AdminConsoleAction
+            // @RequiresPermission(AdminOperationsPermission.class)
+            assertForAdminOperationsPermission(ContainerManager.getRoot(), user,
+                controller.new ShowProteinAdminAction()
             );
         }
     }
