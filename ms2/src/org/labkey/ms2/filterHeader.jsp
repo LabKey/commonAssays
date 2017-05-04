@@ -21,7 +21,6 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -29,18 +28,11 @@
     User user = getUser();
     String runChargeFilterColumnName = bean.run.getChargeFilterColumnName();
     String grouping = getViewContext().cloneActionURL().getParameter("grouping");
-    boolean isStandardView = false;
-    if(null == grouping)
-    {
+    boolean isStandardView;
+    if (null == grouping)
         isStandardView = true;  // no parameter = standard
-    }
     else
-    {
-        if(grouping.equals("query"))  // standard view
-            isStandardView = true;
-        else  // not standard, so disable checkbox (which would not work anyway)
-            isStandardView = false;
-    }
+        isStandardView = grouping.equals("query");
 %>
 <labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
     <table id="ms2RunViewConfig">
@@ -55,13 +47,13 @@
             if (bean.currentViewType.supportsPeptideColumnPicker())
             { %>
             <td valign=bottom>
-                <%= PageFlowUtil.button("Pick Peptide Columns").href(bean.pickPeptideColumnsURL).attributes("id=\"pickPeptideColumns\"") %><% } %>
+                <%= PageFlowUtil.button("Pick Peptide Columns").href(bean.pickPeptideColumnsURL).id("pickPeptideColumns") %><% } %>
             </td>
             <%
             if (bean.currentViewType.supportsProteinColumnPicker())
             { %>
             <td valign=bottom>
-                <%= PageFlowUtil.button("Pick Protein Columns").href(bean.pickProteinColumnsURL).attributes("id=\"pickProteinColumns\"") %></td><%
+                <%= PageFlowUtil.button("Pick Protein Columns").href(bean.pickProteinColumnsURL).id("pickProteinColumns") %></td><%
             } %>
         </tr>
     </table>
@@ -85,7 +77,7 @@
                             </td>
                             <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=PageFlowUtil.helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
                             <td style="vertical-align: middle;" nowrap>
-                                <%= button("Go").submit(true).attributes("id=\"viewTypeSubmitButton\"") %></td>
+                                <%= button("Go").id("viewTypeSubmitButton").submit(true) %></td>
                         </tr>
                     </table>
                 </fieldset>
@@ -102,7 +94,7 @@
                                     <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=PageFlowUtil.helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
-                                    <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddChargeScoreFilterButton\"") %></td>
+                                    <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddChargeScoreFilterButton").submit(true) %></td>
                                 </tr>
                             </table>
                         </fieldset>
@@ -118,7 +110,7 @@
                                     <input type="radio" name="tryptic"<%=checked(1 == bean.tryptic)%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
                                     <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
-                                <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddTrypticEndsFilterButton\"") %></td>
+                                <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddTrypticEndsFilterButton").submit(true) %></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -131,7 +123,7 @@
                                 <td nowrap style="vertical-align: middle;">
                                     <input type="checkbox" id="highestScore" name="highestScore"<%=checked(bean.highestScore)%> value="1">Only show highest score for <%=h(runChargeFilterColumnName)%><%=PageFlowUtil.helpPopup("Only show highest score for " + runChargeFilterColumnName, "Filter out all but highest " + runChargeFilterColumnName + " score for a peptide")%>
                                 </td>
-                                <td nowrap style="vertical-align: middle;"><%= button("Go").submit(true).attributes("id=\"AddHighestScoreFilterButton\"") %></td>
+                                <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddHighestScoreFilterButton").submit(true) %></td>
                             </tr>
                         </table>
                     </fieldset>
@@ -148,10 +140,10 @@
     </table>
 </labkey:form>
 <script type="text/javascript">
-    var viewTypeInfo = new Object();
+    var viewTypeInfo = {};
     var count = 0;<%
 
-    for(MS2RunViewType viewType : bean.viewTypes)
+    for (MS2RunViewType viewType : bean.viewTypes)
     { %>
         viewTypeInfo[count++] = <%=viewType.supportsExpansion()%>;<%
     } %>
