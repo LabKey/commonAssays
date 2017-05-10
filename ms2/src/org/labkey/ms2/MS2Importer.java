@@ -414,6 +414,28 @@ public abstract class MS2Importer
          */
     }
 
+    // Issue 30322 - Optimize for ProteomeDiscoverer style protein names in pepXML files
+    private static final String _updateSpPrefixSeqIdSql;
+    static
+    {
+        _updateSpPrefixSeqIdSql = "UPDATE " +
+                MS2Manager.getTableInfoPeptidesData() +
+                " SET SeqId = fs.SeqId\nFROM " +
+                ProteinManager.getTableInfoFastaSequences() +
+                " fs WHERE Fraction = ? AND fs.LookupString LIKE " +
+                MS2Manager.getSqlDialect().concatenate("'sp|'", MS2Manager.getTableInfoPeptidesData() + ".Protein", "'|%'") +
+                " AND fs.FastaId = ? AND " +
+                MS2Manager.getTableInfoPeptidesData() + ".SeqId IS NULL";
+
+        /*
+            UPDATE ms2.PeptidesData
+	            SET SeqId = fs.SeqId
+	            FROM prot.FastaSequences fs
+	            WHERE Fraction = ? AND
+		            fs.LookupString LIKE 'sp|' + ms2.PeptidesData.Protein + '|%' AND fs.FastaId = ? AND ms2.peptidesdata.SeqId IS NULL
+         */
+    }
+
 
     private static String _updateSwissProtSeqIdSql;
 
@@ -622,9 +644,17 @@ public abstract class MS2Importer
 
             for (int fastaId : run.getFastaIds())
             {
-                int rowCount = executor.execute(_updateSeqIdInexactMatchSql, fastaId, fastaId, fraction.getFraction());
-                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match for FASTA id " + fastaId);
+                int rowCount = executor.execute(_updateSpPrefixSeqIdSql, fraction.getFraction(), fastaId);
+                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on 'sp|' prefix name match for FASTA id " + fastaId);
             }
+
+            // Disabled because this is a very slow query, and seldom adds enough new matches to be worth the hours it takes
+            // for runs that have significant unresolved proteins at this point in the import. See issue 30322
+//            for (int fastaId : run.getFastaIds())
+//            {
+//                int rowCount = executor.execute(_updateSeqIdInexactMatchSql, fastaId, fastaId, fraction.getFraction());
+//                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on inexact protein name match for FASTA id " + fastaId);
+//            }
         }
 
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateSequencePosition);
