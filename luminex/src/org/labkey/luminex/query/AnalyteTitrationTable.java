@@ -137,7 +137,6 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
-                        String dataRegionName = ctx.getCurrentRegion() == null ? null : ctx.getCurrentRegion().getName();
                         int protocolId = schema.getProtocol().getRowId();
                         int analyte = (int)ctx.get("analyte");
                         int titration = (int)ctx.get("titration");
@@ -152,7 +151,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         ljPlotsNav.addChild("High MFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
 
                         PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                        ljPlotsMenu.renderMenuButton(out, dataRegionName, false);
+                        ljPlotsMenu.renderMenuButton(ctx, out, false, null);
                         ljPlotsMenu.renderMenuScript(out);
                     }
 

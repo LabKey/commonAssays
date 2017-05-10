@@ -244,10 +244,11 @@ public class SamplesConfirmGridView extends GridView
         protected int unmatchedCount = 0;
         protected int matchedCount = 0;
 
-        // XXX: This is the lamest way to add new messages to the DataRegion.
         @Override
-        protected void renderHeaderScript(RenderContext ctx, Writer writer, Map<String, String> messages, boolean showRecordSelectors) throws IOException
+        protected Map<String, String> prepareMessages(RenderContext ctx) throws IOException
         {
+            Map<String, String> messages = super.prepareMessages(ctx);
+
             if (resolving)
             {
                 String matchedMsg;
@@ -257,7 +258,8 @@ public class SamplesConfirmGridView extends GridView
                     matchedMsg = String.format("Matched %d of %d samples.", matchedCount, sampleCount);
                 messages.put("matches", matchedMsg);
             }
-            super.renderHeaderScript(ctx, writer, messages, showRecordSelectors);
+
+            return messages;
         }
 
         @Override
@@ -298,9 +300,9 @@ public class SamplesConfirmGridView extends GridView
         protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
         {
             // Add a hidden input for spring form binding -- if this value is posed, the row was unchecked.
-            out.write("<input type=hidden name='");
+            out.write("<input type=\"hidden\" name=\"");
             out.write(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx));
-            out.write("' value=\"0\">");
+            out.write("\" value=\"0\">");
         }
 
         @Override
@@ -314,20 +316,12 @@ public class SamplesConfirmGridView extends GridView
                     return false;
 
                 // If the row isn't selected and won't be imported, don't render as an error.
-                String checkboxName = getRecordSelectorValue(ctx);
-                boolean checked = isRecordSelectorChecked(ctx, checkboxName);
-                if (!checked)
-                    return false;
-
                 // Unmatched and row is selected for import.
-                return true;
+                return isRecordSelectorChecked(ctx, getRecordSelectorValue(ctx));
             }
-            else
-            {
-                return false;
-            }
-        }
 
+            return false;
+        }
     }
 
     private class MatchedFlagDisplayColumn extends SimpleDisplayColumn
