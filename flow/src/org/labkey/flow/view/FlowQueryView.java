@@ -96,18 +96,6 @@ public class FlowQueryView extends QueryView
         return false;
     }
 
-    public DataView createDataView()
-    {
-        DataView ret = super.createDataView();
-
-//        if (hasGraphs() && showGraphs())
-//        {
-//            ret = new GraphView(ret);
-//        }
-//        ret.getDataRegion().setShowPaginationCount(false);
-        return ret;
-    }
-
     @Override
     protected DataRegion createDataRegion()
     {
@@ -229,11 +217,9 @@ public class FlowQueryView extends QueryView
         {
             FlowExperiment[] experiments = FlowExperiment.getAnalysesAndWorkspace(getContainer());
             URLHelper target = urlChangeView();
-//            if (getSchema().getScript() != null)
-//                getSchema().getScript().addParams(target);
             MenuButton button = new MenuButton("Analysis Folder");
 
-            Map<Integer, String> availableExperiments = new LinkedHashMap();
+            Map<Integer, String> availableExperiments = new LinkedHashMap<>();
             availableExperiments.put(0, "All Analysis Folders");
 
             for (FlowExperiment experiment : experiments)
@@ -270,14 +256,6 @@ public class FlowQueryView extends QueryView
             {
                 ExpProtocol expProtocol = protocol.getProtocol();
                 ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
-                /*
-                for (Pair<String, String> param : publishURL.getParameterNames())
-                {
-                    if (!"rowId".equalsIgnoreCase(param.getKey()))
-                        view.getDataRegion().addHiddenFormField(param.getKey(), param.getValue());
-                }
-                publishURL.deleteParameters();
-                */
 
                 if (getTable().getContainerFilter() != null && getTable().getContainerFilter().getType() != null)
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());

@@ -53,11 +53,9 @@ public class ChooseRunsView extends FlowQueryView
     }
 
 
-
     public DataView createDataView()
     {
         DataView ret = super.createDataView();
-        DataRegion rgn = ret.getDataRegion();
         RenderContext ctx = ret.getRenderContext();
         Filter filter = ctx.getBaseFilter();
         if (!(filter instanceof SimpleFilter))
@@ -73,8 +71,7 @@ public class ChooseRunsView extends FlowQueryView
     protected void populateButtonBar(DataView view, ButtonBar bb)
     {
         view.getDataRegion().setShowRecordSelectors(true);
-        ActionButton btnRunAnalysis = new ActionButton(AnalysisScriptController.AnalyzeSelectedRunsAction.class, "Analyze selected runs");
-        bb.add(btnRunAnalysis);
+        bb.add(new ActionButton(AnalysisScriptController.AnalyzeSelectedRunsAction.class, "Analyze selected runs"));
     }
 
 

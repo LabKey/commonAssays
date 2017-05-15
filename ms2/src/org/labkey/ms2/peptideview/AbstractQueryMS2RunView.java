@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.RenderContext;
@@ -35,7 +34,6 @@ import org.labkey.api.query.QueryNestingOption;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.reports.ReportService;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -203,13 +201,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         {
             super(schema, settings, expanded, allowNesting, queryNestingOptions);
 
-            setViewItemFilter(new ReportService.ItemFilter()
-            {
-                public boolean accept(String type, String label)
-                {
-                    return SingleMS2RunRReport.TYPE.equals(type);
-                }
-            });
+            setViewItemFilter((type, label) -> SingleMS2RunRReport.TYPE.equals(type));
         }
 
         protected void populateButtonBar(DataView view, ButtonBar bar)
