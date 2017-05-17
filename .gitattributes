@@ -147,7 +147,6 @@ elispotassay/src/org/labkey/elispot/view/plateSummary.jsp -text
 elispotassay/webapp/elispot/PlateSummary.css -text
 elispotassay/webapp/elispot/PlateSummary.js -text
 flow/build.gradle -text
-flow/build.xml -text
 flow/enginesrc/org/labkey/flow/Main.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DataFrameXYDataset.java -text
 flow/enginesrc/org/labkey/flow/analysis/chart/DatasetFactory.java -text
