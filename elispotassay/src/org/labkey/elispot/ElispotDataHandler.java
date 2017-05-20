@@ -17,7 +17,6 @@
 package org.labkey.elispot;
 
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
@@ -26,8 +25,6 @@ import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -262,16 +259,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         }
         return plateMap;
     }
-    
-    public Priority getPriority(ExpData data)
-    {
-        Lsid lsid = new Lsid(data.getLSID());
-        if (ELISPOT_DATA_TYPE.matches(lsid))
-        {
-            return Priority.HIGH;
-        }
-        return null;
-    }
 
     /**
      * Adds antigen wellgroup properties to the elispot data table.
@@ -292,12 +279,10 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             String dataLsid = data.get(0).getLSID();
 
             // for each antigen well group, we want to flatten that information to the well level
-            List<ObjectProperty> results = new ArrayList<>();
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
             {
                 for (Position pos : group.getPositions())
                 {
-                    results.clear();
                     Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, pos);
 
                     for (RunDataRow runDataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), container))

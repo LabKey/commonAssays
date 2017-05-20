@@ -26,7 +26,6 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
@@ -72,8 +71,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         DATA_TYPE = new AssayDataType(NAMESPACE, new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
     }
 
-    private boolean _allowEmptyData = false;
-
     @Override
     public DataType getDataType()
     {
@@ -83,7 +80,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     @Override
     protected boolean allowEmptyData()
     {
-        return _allowEmptyData;
+        return false;
     }
 
     @Override

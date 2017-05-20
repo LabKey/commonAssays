@@ -19,9 +19,7 @@ import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
@@ -43,22 +41,11 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
 {
     public static final AssayDataType NAB_HIGH_THROUGHPUT_DATA_TYPE = new AssayDataType("HighThroughputAssayRunNabData", new FileType(".csv"));
 
-    public Priority getPriority(ExpData data)
-    {
-        Lsid lsid = new Lsid(data.getLSID());
-        if (NAB_HIGH_THROUGHPUT_DATA_TYPE.matches(lsid))
-        {
-            return Priority.HIGH;
-        }
-        return null;
-    }
-
     @Override
     public DataType getDataType()
     {
         return NAB_HIGH_THROUGHPUT_DATA_TYPE;
     }
-
 
     @Override
     protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException

@@ -60,16 +60,6 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
 {
     public static final AssayDataType SINGLE_PLATE_DILUTION_DATA_TYPE = new AssayDataType("SinglePlateDilutionAssayRunNabData", new FileType(".csv"));
 
-    public Priority getPriority(ExpData data)
-    {
-        Lsid lsid = new Lsid(data.getLSID());
-        if (SINGLE_PLATE_DILUTION_DATA_TYPE.matches(lsid))
-        {
-            return Priority.HIGH;
-        }
-        return null;
-    }
-
     @Override
     public DataType getDataType()
     {
