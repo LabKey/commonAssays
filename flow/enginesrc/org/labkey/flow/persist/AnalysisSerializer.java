@@ -156,10 +156,10 @@ public class AnalysisSerializer
     // Used for testing
     public interface JobLog
     {
-        public void info(String msg);
-        public void info(String msg, Throwable t);
-        public void error(String msg);
-        public void error(String msg, Throwable t);
+        void info(String msg);
+        void info(String msg, Throwable t);
+        void error(String msg);
+        void error(String msg, Throwable t);
     }
 
     private static class Log4JAdapter implements JobLog
@@ -1230,32 +1230,28 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private final Comparator<Pair<SubsetSpec, String>> SUBSET_POPULATION_COMPARATOR = new Comparator<Pair<SubsetSpec, String>>()
+    private final Comparator<Pair<SubsetSpec, String>> SUBSET_POPULATION_COMPARATOR = (pair1, pair2) ->
     {
-        @Override
-        public int compare(Pair<SubsetSpec, String> pair1, Pair<SubsetSpec, String> pair2)
-        {
-            if (pair1 == pair2)
-                return 0;
-            if (pair1 == null)
-                return -1;
-            if (pair2 == null)
-                return 1;
-
-            int firstCompare = SubsetSpec.COMPARATOR.compare(pair1.first, pair2.first);
-            if (firstCompare != 0)
-                return firstCompare;
-
-            if (pair1.second != null)
-                return pair1.second.compareTo(pair2.second);
-
-            // pair1.second is null; check if pair2.second is null as well
-            if (pair2.second == null)
-                return 0;
-
-            // pai1.second is null, pair2.second is non-null
+        if (pair1 == pair2)
+            return 0;
+        if (pair1 == null)
             return -1;
-        }
+        if (pair2 == null)
+            return 1;
+
+        int firstCompare = SubsetSpec.COMPARATOR.compare(pair1.first, pair2.first);
+        if (firstCompare != 0)
+            return firstCompare;
+
+        if (pair1.second != null)
+            return pair1.second.compareTo(pair2.second);
+
+        // pair1.second is null; check if pair2.second is null as well
+        if (pair2.second == null)
+            return 0;
+
+        // pai1.second is null, pair2.second is non-null
+        return -1;
     };
 
     private void writeStatistics(Map<String, AttributeSet> analysis, EnumSet<Options> saveOptions) throws IOException

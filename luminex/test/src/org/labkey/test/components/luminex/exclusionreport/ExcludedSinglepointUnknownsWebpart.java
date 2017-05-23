@@ -70,10 +70,10 @@ public class ExcludedSinglepointUnknownsWebpart extends BaseExclusionWebpart
         //Breaking out analyte check since order can't be trusted
         String analyteValue = table.getDataAsText(0, ANALYTES_COLUMN);
         List<String> analyteValues = Arrays.asList(analyteValue.split(", "));
-        analyteValues.sort(String::compareToIgnoreCase);
+        analyteValues.sort(String.CASE_INSENSITIVE_ORDER);
 
         List<String> expectedAnalytes = Arrays.asList(analytes);
-        expectedAnalytes.sort(String::compareToIgnoreCase);
+        expectedAnalytes.sort(String.CASE_INSENSITIVE_ORDER);
 
         assertEquals("Exclusion analytes not as expected", expectedAnalytes, analyteValues);
 

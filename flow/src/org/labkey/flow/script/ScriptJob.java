@@ -36,17 +36,15 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataObject;
-import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.FlowManager;
+import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
@@ -57,15 +55,15 @@ import java.util.TreeMap;
 
 abstract public class ScriptJob extends FlowExperimentJob
 {
+    private final List<String> _pendingRunLSIDs = new ArrayList<>();
+    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap<>();
 
-    FlowScript _runAnalysisScript;
-    FlowCompensationMatrix _compensationMatrix;
-    String _compensationExperimentLSID;
-
-    List<String> _pendingRunLSIDs = new ArrayList();
-    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap();
+    final FlowScript _runAnalysisScript;
 
     private transient ScriptHandlerGroup _handlers;
+
+    FlowCompensationMatrix _compensationMatrix;
+    String _compensationExperimentLSID;
 
     class ScriptHandlerGroup
     {
@@ -219,12 +217,7 @@ abstract public class ScriptJob extends FlowExperimentJob
 
     public Map<FlowProtocolStep, String[]> getProcessedRunLSIDs()
     {
-        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<>(new Comparator<FlowProtocolStep>() {
-            public int compare(FlowProtocolStep o1, FlowProtocolStep o2)
-            {
-                return o1.getDefaultActionSequence() - o2.getDefaultActionSequence();
-            }
-        });
+        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<>(Comparator.comparingInt(FlowProtocolStep::getDefaultActionSequence));
         synchronized(_processedRunLSIDs)
         {
             for (Map.Entry<FlowProtocolStep, List<String>> entry : _processedRunLSIDs.entrySet())

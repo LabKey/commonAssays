@@ -247,19 +247,16 @@ public class SubsetSpec implements Serializable
         return new SubsetSpec(_parent.addRoot(root), _subset);
     }
 
-    static public Comparator<SubsetSpec> COMPARATOR = new Comparator<SubsetSpec>()
+    static public Comparator<SubsetSpec> COMPARATOR = (spec1, spec2) ->
     {
-        public int compare(SubsetSpec spec1, SubsetSpec spec2)
-        {
-            if (spec1 == spec2)
-                return 0;
-            if (spec1 == null)
-                return -1;
-            if (spec2 == null)
-                return 1;
+        if (spec1 == spec2)
+            return 0;
+        if (spec1 == null)
+            return -1;
+        if (spec2 == null)
+            return 1;
 
-            return spec1.toString().compareTo(spec2.toString());
-        }
+        return spec1.toString().compareTo(spec2.toString());
     };
 
 

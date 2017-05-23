@@ -105,13 +105,7 @@ public class NabRunDataTable extends NabBaseTable
     {
         List<PropertyDescriptor>pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
 
-        Collections.sort(pds, new Comparator<PropertyDescriptor>()
-        {
-            public int compare(PropertyDescriptor o1, PropertyDescriptor o2)
-            {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        pds.sort(Comparator.comparing(PropertyDescriptor::getName));
         return pds.toArray(new PropertyDescriptor[pds.size()]);        
     }
 

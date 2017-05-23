@@ -379,13 +379,7 @@ public class ProteinManager
             }
         }
 
-        Collections.sort(dedupedSets, new Comparator<CustomAnnotationSet>()
-        {
-            public int compare(CustomAnnotationSet o1, CustomAnnotationSet o2)
-            {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
+        dedupedSets.sort(Comparator.comparing(CustomAnnotationSet::getName));
         Map<String, CustomAnnotationSet> result = new LinkedHashMap<>();
         for (CustomAnnotationSet set : dedupedSets)
         {

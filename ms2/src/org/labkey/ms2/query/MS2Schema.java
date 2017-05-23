@@ -64,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -879,24 +878,21 @@ public class MS2Schema extends UserSchema
     {
         _runs = runs;
         _proteinGroupProteins.setRuns(_runs);
-        Collections.sort(_runs, new Comparator<MS2Run>()
+        _runs.sort((run1, run2) ->
         {
-            public int compare(MS2Run run1, MS2Run run2)
+            if (run1.getDescription() == null && run2.getDescription() == null)
             {
-                if (run1.getDescription() == null && run2.getDescription() == null)
-                {
-                    return 0;
-                }
-                if (run1.getDescription() == null)
-                {
-                    return 1;
-                }
-                if (run2.getDescription() == null)
-                {
-                    return -1;
-                }
-                return run1.getDescription().compareTo(run2.getDescription());
+                return 0;
             }
+            if (run1.getDescription() == null)
+            {
+                return 1;
+            }
+            if (run2.getDescription() == null)
+            {
+                return -1;
+            }
+            return run1.getDescription().compareTo(run2.getDescription());
         });
     }
 

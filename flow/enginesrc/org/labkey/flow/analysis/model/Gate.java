@@ -33,14 +33,7 @@ import java.io.Serializable;
  */
 public abstract class Gate implements Serializable
 {
-    public static Comparator<Gate> NAME_COMPARATOR = new Comparator<Gate>()
-    {
-        @Override
-        public int compare(Gate a, Gate b)
-        {
-            return a.getName().compareTo(b.getName());
-        }
-    };
+    public static Comparator<Gate> NAME_COMPARATOR = Comparator.comparing(Gate::getName);
 
     String _id;
     PopulationName _name;
@@ -73,7 +66,7 @@ public abstract class Gate implements Serializable
 
     static public List<Gate> readGateList(Element element)
     {
-        List<Gate> ret = new ArrayList();
+        List<Gate> ret = new ArrayList<>();
         NodeList nlChildren = element.getChildNodes();
         for (int i = 0; i < nlChildren.getLength(); i ++)
         {

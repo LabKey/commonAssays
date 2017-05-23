@@ -47,7 +47,6 @@ import org.labkey.nab.NabDataHandler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -207,20 +206,16 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
 
             if (hasExplicitOrder)
             {
-                Collections.sort(wellData, new Comparator<WellData>()
+                wellData.sort((Comparator<WellData>) (w1, w2) ->
                 {
-                    @Override
-                    public int compare(WellData w1, WellData w2)
+                    if ((w1 instanceof WellGroupTemplate) && (w2 instanceof WellGroupTemplate))
                     {
-                        if ((w1 instanceof WellGroupTemplate) && (w2 instanceof WellGroupTemplate))
-                        {
-                            String order1 = (String)((WellGroupTemplate)w1).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
-                            String order2 = (String)((WellGroupTemplate)w2).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                        String order1 = (String) ((WellGroupTemplate) w1).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                        String order2 = (String) ((WellGroupTemplate) w2).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
 
-                            return NumberUtils.toInt(order1, 0) - NumberUtils.toInt(order2, 0);
-                        }
-                        return 0;
+                        return NumberUtils.toInt(order1, 0) - NumberUtils.toInt(order2, 0);
                     }
+                    return 0;
                 });
 
             }

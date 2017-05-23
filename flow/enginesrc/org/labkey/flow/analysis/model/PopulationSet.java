@@ -16,29 +16,20 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.flow.analysis.web.SubsetSpec;
-
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
-import java.io.Serializable;
 
 /**
  * Class corresponding to a <groupanalysis> element in a FlowJo workspace.
  */
 public class PopulationSet implements Serializable, Cloneable
 {
-    public static Comparator<PopulationSet> NAME_COMPARATOR = new Comparator<PopulationSet>()
-    {
-        @Override
-        public int compare(PopulationSet a, PopulationSet b)
-        {
-            return a.getName().compareTo(b.getName());
-        }
-    };
+    private final static Comparator<PopulationSet> NAME_COMPARATOR = Comparator.comparing(PopulationSet::getName);
 
-    List<Population> _populations = new ArrayList<>();
+    private final List<Population> _populations = new ArrayList<>();
+
     PopulationName _name;
 
     public PopulationName getName()
@@ -112,10 +103,10 @@ public class PopulationSet implements Serializable, Cloneable
             return false;
 
         ArrayList<Population> thisSortedPopulation = new ArrayList<>(getPopulations());
-        Collections.sort(thisSortedPopulation, NAME_COMPARATOR);
+        thisSortedPopulation.sort(NAME_COMPARATOR);
 
         ArrayList<Population> otherSortedPopulation = new ArrayList<>(other.getPopulations());
-        Collections.sort(otherSortedPopulation, NAME_COMPARATOR);
+        otherSortedPopulation.sort(NAME_COMPARATOR);
 
         for (int i = 0; i < thisSortedPopulation.size(); i++)
         {

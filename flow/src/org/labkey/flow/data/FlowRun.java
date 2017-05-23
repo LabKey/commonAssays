@@ -57,19 +57,9 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
 
-    public static Comparator<FlowRun> NAME_COMPARATOR = new Comparator<FlowRun>() {
-        public int compare(FlowRun o1, FlowRun o2)
-        {
-            return o1.getName().compareTo(o2.getName());
-        }
-    };
+    public static Comparator<FlowRun> NAME_COMPARATOR = Comparator.comparing(FlowObject::getName);
 
-    public static Comparator<FlowRun> CREATED_COMPARATOR = new Comparator<FlowRun>() {
-        public int compare(FlowRun o1, FlowRun o2)
-        {
-            return o1.getExperimentRun().getCreated().compareTo(o2.getExperimentRun().getCreated());
-        }
-    };
+    public static Comparator<FlowRun> CREATED_COMPARATOR = Comparator.comparing(o -> o.getExperimentRun().getCreated());
 
 
     static public String getRunLSIDPrefix()
@@ -412,7 +402,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         }
 
         if (comparator != null)
-            Collections.sort(ret, comparator);
+            ret.sort(comparator);
 
         return ret.toArray(new FlowRun[0]);
     }

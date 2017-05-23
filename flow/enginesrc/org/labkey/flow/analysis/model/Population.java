@@ -81,10 +81,10 @@ public class Population extends PopulationSet
             return false;
 
         ArrayList<Gate> thisSortedGates = new ArrayList<>(getGates());
-        Collections.sort(thisSortedGates, Gate.NAME_COMPARATOR);
+        thisSortedGates.sort(Gate.NAME_COMPARATOR);
 
         ArrayList<Gate> otherSortedGates = new ArrayList<>(other.getGates());
-        Collections.sort(otherSortedGates, Gate.NAME_COMPARATOR);
+        otherSortedGates.sort(Gate.NAME_COMPARATOR);
 
         for (int i = 0; i < thisSortedGates.size(); i++)
         {
