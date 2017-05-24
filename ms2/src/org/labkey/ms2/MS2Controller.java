@@ -30,7 +30,7 @@ import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.HasViewContext;
-import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.LabKey_Error;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.RedirectAction;
@@ -2132,7 +2132,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (RunListException e)
             {
-                errors.addError(new LabkeyError(e));
+                errors.addError(new LabKey_Error(e));
                 SimpleErrorView view = new SimpleErrorView(errors);
                 renderInTemplate(getViewContext(), this, getPageConfig(), view);
                 return;
@@ -2348,7 +2348,7 @@ public class MS2Controller extends SpringActionController
         {
             if (form.getRunList() == null)
             {
-                errors.addError(new LabkeyError("Could not find the list of selected runs for comparison. Please reselect the runs."));
+                errors.addError(new LabKey_Error("Could not find the list of selected runs for comparison. Please reselect the runs."));
                 return new SimpleErrorView(errors);
             }
             try
@@ -2460,7 +2460,7 @@ public class MS2Controller extends SpringActionController
         CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs, getUser());
         if (query == null)
         {
-            errors.addError(new LabkeyError("You must specify a comparison type"));
+            errors.addError(new LabKey_Error("You must specify a comparison type"));
             return new SimpleErrorView(errors);
         }
 
@@ -5773,7 +5773,7 @@ public class MS2Controller extends SpringActionController
             String fname = form.getFileName();
             if (fname == null)
             {
-                errors.addError(new LabkeyError("Please enter a file path."));
+                errors.addError(new LabKey_Error("Please enter a file path."));
                 return false;
             }
             File file = FileUtil.getAbsoluteCaseSensitiveFile(new File(fname));
@@ -5807,7 +5807,7 @@ public class MS2Controller extends SpringActionController
             }
             catch (IOException e)
             {
-                errors.addError(new LabkeyError(e.getMessage()));
+                errors.addError(new LabKey_Error(e.getMessage()));
                 return false;
             }
         }
@@ -6486,7 +6486,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                errors.addError(new LabkeyError("Invalid elution profile range"));
+                errors.addError(new LabKey_Error("Invalid elution profile range"));
                 return false;
             }
         }

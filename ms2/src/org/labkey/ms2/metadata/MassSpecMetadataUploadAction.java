@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.metadata;
 
-import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.LabKey_Error;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.*;
@@ -106,7 +106,7 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
             }
             catch (ExperimentException e)
             {
-                errors.addError(new LabkeyError(e));
+                errors.addError(new LabKey_Error(e));
             }
         }
         return parent;

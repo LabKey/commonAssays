@@ -17,7 +17,7 @@
 package org.labkey.ms2.compare;
 
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.LabKey_Error;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -233,7 +233,7 @@ public abstract class CompareQuery extends SQLFragment
             }
             if (!illegalColumns.isEmpty())
             {
-                errors.addError(new LabkeyError("If you are comparing runs of different types, you cannot filter on search-engine specific scores: " + illegalColumns));
+                errors.addError(new LabKey_Error("If you are comparing runs of different types, you cannot filter on search-engine specific scores: " + illegalColumns));
             }
         }
 
@@ -418,12 +418,12 @@ public abstract class CompareQuery extends SQLFragment
     {
         if (_runs.isEmpty())
         {
-            errors.addError(new LabkeyError("You must select at least one run."));
+            errors.addError(new LabKey_Error("You must select at least one run."));
             return;
         }
         if (getGridColumns().size() == 0)
         {
-            errors.addError(new LabkeyError("You must choose at least one comparison column to display in the grid."));
+            errors.addError(new LabKey_Error("You must choose at least one comparison column to display in the grid."));
             return;
         }
         generateSql(errors);

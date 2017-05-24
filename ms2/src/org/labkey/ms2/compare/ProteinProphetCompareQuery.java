@@ -26,7 +26,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.action.LabkeyError;
+import org.labkey.api.action.LabKey_Error;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSetMetaData;
@@ -221,7 +221,7 @@ public class ProteinProphetCompareQuery extends CompareQuery
         {
             if (run.getProteinProphetFile() == null)
             {
-                errors.addError(new LabkeyError("Run " + run.getDescription() + " does not have ProteinProphet results."));
+                errors.addError(new LabKey_Error("Run " + run.getDescription() + " does not have ProteinProphet results."));
             }
         }
     }
