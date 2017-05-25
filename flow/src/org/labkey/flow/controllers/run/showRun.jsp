@@ -55,8 +55,7 @@
         dependencies.add("vis/ColumnVisualizationAnalytics.js");
         dependencies.add("vis/ColumnVisualizationAnalytics.css");
         dependencies.add("query/ColumnQueryAnalytics.js");
-        dependencies.add("query/ColumnSummaryStatistics.js");
-        dependencies.add("query/ColumnSummaryStatistics.css");
+        dependencies.add("query/ColumnSummaryStatistics");
     }
 %>
 <%
