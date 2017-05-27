@@ -288,15 +288,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         }
 
         @Test
-        public void checkLogging()
+        public void checkLogging() throws Exception
         {
-            try{
-                asyncContext = new LuminexRunAsyncContext(testContext);
-            }
-            catch(Exception e)
-            {
-                fail();
-            }
+            asyncContext = new LuminexRunAsyncContext(testContext);
             StringLogger sl = new StringLogger();
             asyncContext.logProperties(sl);
             String output = sl.toString();

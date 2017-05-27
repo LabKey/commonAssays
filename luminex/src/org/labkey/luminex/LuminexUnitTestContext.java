@@ -28,11 +28,13 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.pipeline.AssayRunAsyncContext;
+import org.labkey.api.view.ActionURL;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -104,6 +106,12 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     }
 
     @Override
+    public ActionURL getActionURL()
+    {
+        return null;
+    }
+
+    @Override
     public Map<DomainProperty, String> getBatchProperties()
     {
         Map<DomainProperty, String> ret = new HashMap<>();
@@ -133,6 +141,22 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         ret.put(domainProperty, "Name of the Batch");
 
         return ret;
+    }
+
+    @NotNull
+    @Override
+    public LuminexAssayProvider getProvider()
+    {
+        Mockery mock = new Mockery();
+        mock.setImposteriser(ClassImposteriser.INSTANCE);
+
+        final LuminexAssayProvider provider = mock.mock(LuminexAssayProvider.class);
+        mock.checking(new Expectations()
+        {{
+                allowing(provider).getDataCollectors(with(any(Map.class)), with(any(AssayRunUploadForm.class)));
+                will(returnValue(Collections.emptyList()));
+        }});
+        return provider;
     }
 
     @Override
