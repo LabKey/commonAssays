@@ -101,8 +101,7 @@ public class SamplesConfirmGridView extends GridView
             columns.add(GROUP_NAMES_FIELD_KEY.getName());
         columns.addAll(keywords);
         int columnCount = columns.size();
-        RowMapFactory factory = new RowMapFactory(columns.toArray(new String[columnCount]));
-
+        RowMapFactory factory = new RowMapFactory(columns);
 
         // Create the data maps, one for each sample in the workspace
         List<Map<String, Object>> unmatchedList = new ArrayList<>(samples.size());

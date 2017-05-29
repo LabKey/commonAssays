@@ -18,18 +18,21 @@ package org.labkey.flow.persist;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.TSVMapWriter;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -41,7 +44,6 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -109,8 +111,8 @@ public class AnalysisSerializer
     public static final String GRAPHS_FILENAME = "graphs.tsv";
     public static final String COMPENSATION_FILENAME = "compensation.tsv";
 
-    JobLog _log;
-    VirtualFile _rootDir;
+    private final JobLog _log;
+    private final VirtualFile _rootDir;
 
     private enum KeywordColumnName
     {
@@ -329,21 +331,11 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             String spec = (population == null ? "" : population + ":") + statistic;
-            StatisticSpec stat = stats.get(spec);
-            if (stat == null)
-            {
-                // XXX: catch SubsetException ?
-                stat = new StatisticSpec(spec);
-                stats.put(spec, stat);
-            }
+            StatisticSpec stat = stats.computeIfAbsent(spec, StatisticSpec::new);
+            // XXX: catch SubsetException ?
             attrs.setStatistic(stat, value);
         }
     }
@@ -362,12 +354,7 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -376,7 +363,7 @@ public class AnalysisSerializer
                 {
                     if (StringUtils.isEmpty(statistic))
                     {
-                        _log.error(String.format("Statistic name must not be empty"));
+                        _log.error("Statistic name must not be empty");
                         continue;
                     }
 
@@ -417,12 +404,7 @@ public class AnalysisSerializer
             String population = (String)row.get(StatColumnName.Population.toString());
             SubsetSpec subset = (population == null ? null : SubsetSpec.fromEscapedString(population));
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -431,7 +413,7 @@ public class AnalysisSerializer
                 {
                     if (StringUtils.isEmpty(statistic))
                     {
-                        _log.error(String.format("Statistic name must not be empty"));
+                        _log.error("Statistic name must not be empty");
                         continue;
                     }
 
@@ -492,12 +474,7 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -506,7 +483,7 @@ public class AnalysisSerializer
                 {
                     if (StringUtils.isEmpty(statistic))
                     {
-                        _log.error(String.format("Statistic name must not be empty"));
+                        _log.error("Statistic name must not be empty");
                         continue;
                     }
 
@@ -553,7 +530,7 @@ public class AnalysisSerializer
 
     private void readStatistics(InputStream statFile, Map<String, AttributeSet> results) throws IOException
     {
-        try (Reader reader = new InputStreamReader(statFile))
+        try (Reader reader = Readers.getReader(statFile))
         {
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
@@ -604,7 +581,6 @@ public class AnalysisSerializer
 
     private void readKeywordsRowPerKeyword(TabLoader loader, Map<String, AttributeSet> results)
     {
-        Map<String, String> keywords = new TreeMap<>();
         int index = 0;
         for (Map<String, Object> row : loader)
         {
@@ -628,12 +604,7 @@ public class AnalysisSerializer
             // Trim keyword values to null -- FCS files encode empty keyword values as a single space character.
             value = StringUtils.trimToNull(value);
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsKeywords, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
 
             attrs.setKeyword(keyword, value);
         }
@@ -653,12 +624,7 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.get(name);
-            if (attrs == null)
-            {
-                attrs = new AttributeSet(ObjectType.fcsKeywords, null);
-                results.put(name, attrs);
-            }
+            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
 
             if (keywords == null)
             {
@@ -667,7 +633,7 @@ public class AnalysisSerializer
                 {
                     if (StringUtils.isEmpty(keyword))
                     {
-                        _log.error(String.format("Keyword name must not be empty"));
+                        _log.error("Keyword name must not be empty");
                         continue;
                     }
 
@@ -689,7 +655,7 @@ public class AnalysisSerializer
 
     private void readKeywords(InputStream statFile, Map<String, AttributeSet> results) throws IOException
     {
-        try (Reader reader = new InputStreamReader(statFile))
+        try (Reader reader = Readers.getReader(statFile))
         {
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
@@ -727,7 +693,7 @@ public class AnalysisSerializer
 
     private void readGraphs(InputStream graphsFile, Map<String, AttributeSet> results) throws IOException
     {
-        try (Reader reader = new InputStreamReader(graphsFile))
+        try (Reader reader = Readers.getReader(graphsFile))
         {
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
@@ -781,24 +747,14 @@ public class AnalysisSerializer
                     continue;
                 }
 
-                AttributeSet attrs = results.get(name);
-                if (attrs == null)
-                {
-                    attrs = new AttributeSet(ObjectType.fcsAnalysis, null);
-                    results.put(name, attrs);
-                }
+                AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
                 if (!graph.startsWith("(") && !graph.endsWith(")"))
                     graph = "(" + graph + ")";
 
                 String spec = (population == null ? "" : population) + graph;
-                GraphSpec graphSpec = graphs.get(spec);
-                if (graphSpec == null)
-                {
-                    // XXX: catch SubsetException ?
-                    graphSpec = new GraphSpec(spec);
-                    graphs.put(spec, graphSpec);
-                }
+                GraphSpec graphSpec = graphs.computeIfAbsent(spec, GraphSpec::new);
+                // XXX: catch SubsetException ?
 
                 String[] pathParts = path.split("/");
                 VirtualFile dir = _rootDir;
@@ -829,7 +785,7 @@ public class AnalysisSerializer
 
     private void readCompMatrices(InputStream compensationFile, Map<String, CompensationMatrix> matrices) throws IOException
     {
-        try (Reader reader = new InputStreamReader(compensationFile))
+        try (Reader reader = Readers.getReader(compensationFile))
         {
             TabLoader loader = new TabLoader(reader, true);
             loader.setUnescapeBackslashes(false);
@@ -980,7 +936,7 @@ public class AnalysisSerializer
         return Tuple3.of(keywords, results, matrices);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         List<String> columns = new ArrayList<>();
         columns.add(StatColumnName.Sample.toString());
@@ -988,7 +944,7 @@ public class AnalysisSerializer
         columns.add(StatColumnName.Statistic.toString());
         columns.add(StatColumnName.Value.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
@@ -1017,7 +973,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics
         Set<StatisticSpec> stats = new TreeSet<>();
@@ -1035,7 +991,7 @@ public class AnalysisSerializer
         for (StatisticSpec stat : stats)
             columns.add(shortStatNames ? stat.toShortString(true) : stat.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
@@ -1061,7 +1017,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population removed
         Set<StatisticSpec> stats = new TreeSet<>();
@@ -1082,7 +1038,7 @@ public class AnalysisSerializer
         for (StatisticSpec stat : stats)
             columns.add(shortStatNames ? stat.toShortString(true) : stat.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
@@ -1100,9 +1056,7 @@ public class AnalysisSerializer
                 StatisticSpec s = new StatisticSpec(null, entry.getKey().getStatistic(), entry.getKey().getParameter());
                 Double value = entry.getValue();
 
-                Map<StatisticSpec, Double> statsByPopulation = populations.get(pop);
-                if (statsByPopulation == null)
-                    populations.put(pop, statsByPopulation = new HashMap<>());
+                Map<StatisticSpec, Double> statsByPopulation = populations.computeIfAbsent(pop, k -> new HashMap<>());
 
                 statsByPopulation.put(s, value);
             }
@@ -1127,7 +1081,7 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population and parameter removed
         Set<StatisticSpec> stats = new TreeSet<>();
@@ -1168,7 +1122,7 @@ public class AnalysisSerializer
         for (StatisticSpec stat : stats)
             columns.add(shortStatNames ? stat.toShortString(true) : stat.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
@@ -1202,9 +1156,7 @@ public class AnalysisSerializer
                 StatisticSpec s = new StatisticSpec(null, stat, remainingParameter);
                 Double value = entry.getValue();
 
-                Map<StatisticSpec, Double> statsByPopulationParameter = map.get(pair);
-                if (statsByPopulationParameter == null)
-                    map.put(pair, statsByPopulationParameter = new HashMap<>());
+                Map<StatisticSpec, Double> statsByPopulationParameter = map.computeIfAbsent(pair, k -> new HashMap<>());
 
                 statsByPopulationParameter.put(s, value);
             }
@@ -1272,25 +1224,25 @@ public class AnalysisSerializer
             results = writeGroupBySamplePopulation(analysis, shortStatNames);
 
         // write the tsv file
-        if (results != null && results.second.size() > 0)
+        if (results.second.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(STATISTICS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
+            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
             {
                 writer.write(pw);
             }
         }
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeRowPerKeyword(Map<String, AttributeSet> keywords)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeRowPerKeyword(Map<String, AttributeSet> keywords)
     {
         List<String> columns = new ArrayList<>();
         columns.add(KeywordColumnName.Sample.toString());
         columns.add(KeywordColumnName.Keyword.toString());
         columns.add(KeywordColumnName.Value.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : keywords.keySet())
@@ -1332,10 +1284,9 @@ public class AnalysisSerializer
 
         List<String> columns = new ArrayList<>();
         columns.add(KeywordColumnName.Sample.toString());
-        for (String keyword : allKeywords)
-            columns.add(keyword);
+        columns.addAll(allKeywords);
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : keywords.keySet())
@@ -1376,11 +1327,11 @@ public class AnalysisSerializer
         Pair<List<String>, List<Map<String, Object>>> results = writeRowPerKeyword(keywords);
 
         // write the tsv file
-        if (results != null && results.second.size() > 0)
+        if (results.second.size() > 0)
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(KEYWORDS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
+            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(results.first, results.second))
             {
                 writer.write(pw);
             }
@@ -1393,7 +1344,7 @@ public class AnalysisSerializer
             return;
 
         List<String> columns = Arrays.asList(CompensationColumnName.Sample.toString(), CompensationColumnName.Path.toString());
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
         List<Map<String, Object>> rows = new ArrayList<>();
 
         Map<CompensationMatrix, String> compPaths = new HashMap<>();
@@ -1423,7 +1374,7 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(COMPENSATION_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
+            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
             {
                 writer.write(pw);
             }
@@ -1470,7 +1421,7 @@ public class AnalysisSerializer
         columns.add(GraphColumnName.Graph.toString());
         columns.add(GraphColumnName.Path.toString());
 
-        RowMapFactory rowMapFactory = new RowMapFactory(columns.toArray(new String[columns.size()]));
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
         for (String sampleName : analysis.keySet())
@@ -1526,7 +1477,7 @@ public class AnalysisSerializer
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(GRAPHS_FILENAME);
 
-            try (PrintWriter pw = new PrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
+            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile); TSVWriter writer = new TSVMapWriter(columns, rows))
             {
                 writer.write(pw);
             }
@@ -1589,6 +1540,5 @@ public class AnalysisSerializer
             assertEquals("Expected 117 statistics for 119043.fcs", 117, attrs.getStatisticNames().size());
             assertEquals("Expected 12 statistics for 119043.fcs", 13, attrs.getGraphNames().size());
         }
-
     }
 }
