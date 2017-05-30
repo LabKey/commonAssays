@@ -107,7 +107,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
                 form.getFileFractionMap().put(mzxmlFile, derivedMaterial);
             }
             ViewBackgroundInfo info = new ViewBackgroundInfo(form.getContainer(), form.getUser(), form.getActionURL());
-            Map<ExpMaterial, String> startingMaterials = form.getInputMaterials();
+            Map<ExpMaterial, String> startingMaterials = form.getStartingMaterials();
             ExpRun run = ExperimentService.get().deriveSamples(startingMaterials, derivedSamples, info, null);
 
             // Change the run's name
@@ -133,6 +133,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
         }
     }
 
+    @Override
     protected void addInputMaterials(AssayRunUploadContext<MassSpecMetadataAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
         MassSpecMetadataAssayForm form = (MassSpecMetadataAssayForm)context;
@@ -147,7 +148,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
         }
         else
         {
-            inputMaterials.putAll(form.getInputMaterials());
+            inputMaterials.putAll(form.getStartingMaterials());
         }
     }
 

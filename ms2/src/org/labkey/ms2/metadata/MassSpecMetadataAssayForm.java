@@ -48,7 +48,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
         return Boolean.parseBoolean(getRequest().getParameter(FractionsDisplayColumn.FRACTIONS_FIELD_NAME));
     }
 
-    public Map<ExpMaterial, String> getInputMaterials() throws ExperimentException
+    public Map<ExpMaterial, String> getStartingMaterials() throws ExperimentException
     {
         Map<ExpMaterial, String> result = new HashMap<>();
         if (isBulkUploadAttempted())
