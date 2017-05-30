@@ -17,8 +17,10 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DetailsColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.UpdateColumn;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.data.FlowCompensationControl;
@@ -64,6 +66,8 @@ public class ChooseRunsRegion extends DataRegion
     @Override
     protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
+        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
+
         out.write("<tr");
         String disabledReason = getDisabledReason(ctx);
         if (disabledReason != null)
@@ -73,12 +77,14 @@ public class ChooseRunsRegion extends DataRegion
         }
         out.write(">");
 
+        DisplayColumn detailsColumn = newUI ? getDetailsUpdateColumn(ctx, renderers, true) : null;
+        DisplayColumn updateColumn = newUI ? getDetailsUpdateColumn(ctx, renderers, false) : null;;
 
         int visibleCount = 0;
-        if (showRecordSelectors)
+        if (showRecordSelectors || (newUI && (detailsColumn != null || updateColumn != null)))
         {
             visibleCount++;
-            renderRecordSelector(ctx, out, rowIndex);
+            renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
         }
 
         int nameColumn = 0;
@@ -87,6 +93,9 @@ public class ChooseRunsRegion extends DataRegion
             DisplayColumn renderer = renderers.get(i);
             if (renderer.isVisible(ctx))
             {
+                if (newUI && (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn))
+                    continue;
+
                 if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
                     nameColumn = i+1;
                 visibleCount++;
