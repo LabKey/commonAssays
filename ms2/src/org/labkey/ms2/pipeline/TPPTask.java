@@ -83,10 +83,10 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot_IPPROB.png"), "iPropProtProb");
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot_PPPROB.png"), "ProtPropProb");
 
-        // Additonal output from ProteinProphet, added as part of TPP 4.0 or so
+        // Additional output from ProteinProphet, added as part of TPP 4.0 or so
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".pep-prot.xml_senserr.txt"), "ProtSensErr");
 
-        // Additonal output from ProteinProphet, added as part of TPP 4.6 or so
+        // Additional output from ProteinProphet, added as part of TPP 4.6 or so
         FT_OPTIONAL_AND_IGNORABLES.put(new FileType(".prot-MODELS.html"), "ProteinProphetModel");
     }
 
