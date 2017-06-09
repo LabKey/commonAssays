@@ -27,6 +27,7 @@ import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PerlHelper;
 import org.labkey.test.util.PortalHelper;
 import org.openqa.selenium.By;
@@ -40,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @Category({DailyA.class, Assays.class})
 public final class LuminexPositivityTest extends LuminexTest
@@ -70,7 +71,7 @@ public final class LuminexPositivityTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
-    @Test @Ignore //TODO: 28604: LuminexPositivityTest.testPositivity times out on TeamCity
+    @Test// @Ignore //TODO: 28604: LuminexPositivityTest.testPositivity times out on TeamCity
     public void testPositivity()
     {
         test3xFoldChange();
@@ -134,6 +135,7 @@ public final class LuminexPositivityTest extends LuminexTest
         }
     }
 
+    @LogMethod
     private void testDefaultAnalyteProperties()
     {
         // for issue 20549 :upload a run that unchecks the "Calucate Positivity" and then verify the default value for re-runs and new imports
@@ -166,6 +168,7 @@ public final class LuminexPositivityTest extends LuminexTest
         clickButton("Cancel");
     }
 
+    @LogMethod
     private void testBaselineVisitDataFromPreviousRun()
     {
         setPositivityThresholdParams(100, 100);
@@ -214,6 +217,7 @@ public final class LuminexPositivityTest extends LuminexTest
         checkPositivityValues("negative", negWells.length, negWells);
     }
 
+    @LogMethod
     private void testWithNegativeControls()
     {
         setPositivityThresholdParams(100, 100);
@@ -223,6 +227,7 @@ public final class LuminexPositivityTest extends LuminexTest
         checkPositivityValues("negative", 0, new String[0]);
     }
 
+    @LogMethod
     private void testWithoutBaselineVisitOrFoldChange()
     {
         setPositivityThresholdParams(101, 101);
@@ -249,6 +254,7 @@ public final class LuminexPositivityTest extends LuminexTest
         checkDescriptionParsing("P562, Wk 48, 7-27-2011", " ", "P562", "48.0", "2011-07-27");
     }
 
+    @LogMethod
     public void test5xFoldChange()
     {
         // file contains the baseline visit data
@@ -262,6 +268,7 @@ public final class LuminexPositivityTest extends LuminexTest
         checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15");
     }
 
+    @LogMethod
     public void test3xFoldChange()
     {
         // file contains the baseline visit data
