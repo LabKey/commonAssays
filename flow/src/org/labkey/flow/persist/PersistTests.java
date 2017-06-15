@@ -18,7 +18,6 @@ package org.labkey.flow.persist;
 import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableResultSet;
@@ -69,8 +68,8 @@ public class PersistTests
         user = TestContext.get().getUser();
 
         // Ensure we don't have any attributes in the test container
-        assertEquals(0, new SqlSelector(DbSchema.get("flow"), "SELECT rowid FROM flow.object WHERE container = ?", c.getId()).getRowCount());
-        assertEquals(0, new SqlSelector(DbSchema.get("flow"), "SELECT rowid FROM flow.keywordattr WHERE container = ?", c.getId()).getRowCount());
+        assertEquals(0, new SqlSelector(FlowManager.get().getSchema(), "SELECT rowid FROM flow.object WHERE container = ?", c.getId()).getRowCount());
+        assertEquals(0, new SqlSelector(FlowManager.get().getSchema(), "SELECT rowid FROM flow.keywordattr WHERE container = ?", c.getId()).getRowCount());
     }
 
     @Test

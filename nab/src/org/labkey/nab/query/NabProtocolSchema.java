@@ -28,7 +28,6 @@ import org.labkey.api.cache.Wrapper;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DatabaseCache;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
@@ -37,7 +36,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
@@ -210,11 +208,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
             }
         }
         return super.createProviderTable(tableType);
-    }
-
-    public static DbSchema getSchema()
-    {
-        return DbSchema.get(NAB_DBSCHEMA_NAME);
     }
 
     private NAbSpecimenTable createNAbSpecimenTable()

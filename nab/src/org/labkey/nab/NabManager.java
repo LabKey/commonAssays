@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.Selector;
@@ -75,7 +76,7 @@ public class NabManager extends AbstractNabManager
 
     public static DbSchema getSchema()
     {
-        return DbSchema.get(NabProtocolSchema.NAB_DBSCHEMA_NAME);
+        return DbSchema.get(NabProtocolSchema.NAB_DBSCHEMA_NAME, DbSchemaType.Module);
     }
 
     public void deleteRunData(List<ExpData> datas) throws SQLException

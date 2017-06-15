@@ -23,6 +23,7 @@ import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.property.AssayDomainKind;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.nab.NabAssayProvider;
+import org.labkey.nab.NabManager;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -67,7 +68,7 @@ public class NabVirusDomainKind extends AssayDomainKind
     @Override
     public DbScope getScope()
     {
-        return NabProtocolSchema.getSchema().getScope();
+        return NabManager.getSchema().getScope();
     }
 
     @Override
