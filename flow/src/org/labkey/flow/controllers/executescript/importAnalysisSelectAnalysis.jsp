@@ -99,34 +99,37 @@
                 ,showToolbar:false
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
                 ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
+                ,autoResize: {
+                    skipHeight: true
+                }
                 ,listeners: {
+                    <% if (!PageFlowUtil.useExperimentalCoreUI()) { %>
                     afterrender: {
                         fn: function(f) {
                             var size = Ext4.getBody().getSize();
                             LABKEY.ext4.Util.resizeToViewport(f, size.width, size.height, 20, null);
                         },
                         single: true
+                    },
+                    <% } %>
+                    doubleclick: function(record) {
+                        if (record && !record.data.collection) {
+                            selectRecord(record.data.id.replace(fileBrowser.getBaseURL(), '/'));
+                            document.forms["importAnalysis"].submit();
+                            return false;
+                        }
+                        return true;
+                    },
+                    selectionchange: function() {
+                        var path = null;
+                        var record = fileBrowser.getGrid().getSelectionModel().getSelection();
+                        if (record && record.length == 1 && !record[0].data.collection) {
+                            path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
+                        }
+                        selectRecord(path);
+                        return true;
                     }
                 }
-            });
-
-            fileBrowser.on("doubleclick", function(record){
-                if (record && !record.data.collection)
-                {
-                    var path = record.data.id.replace(fileBrowser.getBaseURL(), '/');
-                    selectRecord(path);
-                    document.forms["importAnalysis"].submit();
-                    return false;
-                }
-                return true;
-            });
-            fileBrowser.on("selectionchange", function(){
-                var path = null;
-                var record = fileBrowser.getGrid().getSelectionModel().getSelection();
-                if (record && record.length == 1 && !record[0].data.collection)
-                    path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
-                selectRecord(path);
-                return true;
             });
 
             fileBrowser.render('treeDiv');
