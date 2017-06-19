@@ -18,8 +18,9 @@ package org.labkey.flow.analysis.web;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.JunitUtil;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.Workspace;
@@ -29,9 +30,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,14 +47,6 @@ import java.util.Map;
  */
 public class PlotTests extends Assert
 {
-    private File projectRoot()
-    {
-        String projectRootPath = AppProps.getInstance().getProjectRoot();
-        if (projectRootPath == null)
-            projectRootPath = System.getProperty("user.dir") + "/..";
-        return new File(projectRootPath);
-    }
-
     private Workspace loadWorkspace(File file) throws Exception
     {
         return Workspace.readWorkspace(file.getName(), file.getPath(), new FileInputStream(file));
@@ -114,14 +106,7 @@ public class PlotTests extends Assert
 
     private void generateHtml(File outDir, File workspaceFile, File fcsFile, File expectedImageDir, Map<String, GraphSpec> generatedImages) throws IOException
     {
-        String[] expectedImages = expectedImageDir.list(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File file, String s)
-            {
-                return s.endsWith(".png");
-            }
-        });
+        String[] expectedImages = expectedImageDir.list((file, s) -> s.endsWith(".png"));
 
         Map<String, GraphSpec> allImages = new LinkedHashMap<>(generatedImages);
         for (String expectedImage : expectedImages)
@@ -129,7 +114,6 @@ public class PlotTests extends Assert
             if (!allImages.containsKey(expectedImage))
                 allImages.put(expectedImage, null);
         }
-
 
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
@@ -158,6 +142,7 @@ public class PlotTests extends Assert
         sb.append("<tr>");
         sb.append("<td align=center><b>FlowJo</b></td><td align=center><b>LabKey</b></td>");
         sb.append("</tr>");
+
         for (Map.Entry<String, GraphSpec> image : allImages.entrySet())
         {
             String imageName = image.getKey();
@@ -176,6 +161,7 @@ public class PlotTests extends Assert
             sb.append("<td valign=top><img src='").append(new File(outDir, imageName)).append("'></td>");
             sb.append("</tr>");
         }
+
         sb.append("</tr>");
         sb.append("</table>");
         sb.append("</center>");
@@ -183,7 +169,7 @@ public class PlotTests extends Assert
         sb.append("</body>");
         sb.append("</html>");
 
-        try (FileWriter writer = new FileWriter(new File(outDir, "index.html")))
+        try (PrintWriter writer = PrintWriters.getPrintWriter(new File(outDir, "index.html")))
         {
             writer.append(sb.toString());
             writer.flush();
@@ -208,9 +194,9 @@ public class PlotTests extends Assert
     public void advanced() throws Exception
     {
         File outDir         = new File(outDir(), "flow/advanced");
-        File workspaceFile  = new File(projectRoot(), "sampledata/flow/advanced/advanced-v7.6.5.wsp");
-        File fcsFile        = new File(projectRoot(), "sampledata/flow/advanced/931115-B02- Sample 01.fcs");
-        File expectedImages = new File(projectRoot(), "sampledata/flow/advanced/931115-B02_graphs_v7.6.5");
+        File workspaceFile  = JunitUtil.getSampleData(null, "flow/advanced/advanced-v7.6.5.wsp");
+        File fcsFile        = JunitUtil.getSampleData(null, "flow/advanced/931115-B02- Sample 01.fcs");
+        File expectedImages = JunitUtil.getSampleData(null, "flow/advanced/931115-B02_graphs_v7.6.5");
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -322,5 +308,4 @@ public class PlotTests extends Assert
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
-
 }

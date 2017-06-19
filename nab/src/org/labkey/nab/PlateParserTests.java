@@ -20,8 +20,8 @@ import org.jmock.Mockery;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 
 import java.io.File;
@@ -36,16 +36,10 @@ public class PlateParserTests
 {
     private final double DELTA = 1e-8;
     private final Mockery _context;
-    private final File _projectRoot;
 
     public PlateParserTests()
     {
         _context = new Mockery();
-
-        String projectRootPath =  AppProps.getInstance().getProjectRoot();
-        if (projectRootPath == null)
-            projectRootPath = System.getProperty("user.dir") + "/..";
-        _projectRoot = new File(projectRootPath);
     }
 
     public double[][] parse(File file, PlateTemplate template) throws ExperimentException
@@ -100,20 +94,20 @@ public class PlateParserTests
     private static List<Pair<String, String>> singlePlateTests = Arrays.asList(
             // The ".expected.tsv" files is a simple grid of numbers and are used to check the plate reader formats
             // We also check that the .expected.tsv validates against itself.
-            Pair.of("sampledata/Nab/m0902051;3997.expected.tsv", "sampledata/Nab/m0902051;3997.expected.tsv"),
+            Pair.of("Nab/m0902051;3997.expected.tsv", "Nab/m0902051;3997.expected.tsv"),
 
-            Pair.of("sampledata/Nab/m0902051;3997.xls", "sampledata/Nab/m0902051;3997.expected.tsv"),
-            Pair.of("sampledata/Nab/m0902055;4001.xlsx", "sampledata/Nab/m0902055;4001.expected.tsv"),
-            Pair.of("sampledata/Nab/Luc5Samples02NotLocked1.xls", "sampledata/Nab/Luc5Samples02NotLocked1.expected.tsv"),
-            Pair.of("sampledata/Nab/16AUG11 KK CD3-1-1.8.xls", "sampledata/Nab/16AUG11 KK CD3-1-1.8.expected.tsv"),
+            Pair.of("Nab/m0902051;3997.xls", "Nab/m0902051;3997.expected.tsv"),
+            Pair.of("Nab/m0902055;4001.xlsx", "Nab/m0902055;4001.expected.tsv"),
+            Pair.of("Nab/Luc5Samples02NotLocked1.xls", "Nab/Luc5Samples02NotLocked1.expected.tsv"),
+            Pair.of("Nab/16AUG11 KK CD3-1-1.8.xls", "Nab/16AUG11 KK CD3-1-1.8.expected.tsv"),
             // Issue 22153: detect xls file without extension
-            Pair.of("sampledata/Nab/seaman/MS010407", "sampledata/Nab/seaman/MS010407.expected.tsv"),
+            Pair.of("Nab/seaman/MS010407", "Nab/seaman/MS010407.expected.tsv"),
             // TODO: contains multiple plates
-            //Pair.of("sampledata/Nab/seaman/RC121306.xls", "sampledata/Nab/seaman/RC121306.expected.tsv")
-            Pair.of("sampledata/Nab/SpectraMax/20140612_0588.txt", "sampledata/Nab/SpectraMax/20140612_0588.expected.tsv"),
-            Pair.of("sampledata/Nab/SpectraMax/20140102_140152 0063_PLATE.002.txt", "sampledata/Nab/SpectraMax/20140102_140152 0063_PLATE.002.expected.tsv"),
-            Pair.of("sampledata/Nab/EnVision/4 plate data set _001.csv", "sampledata/Nab/EnVision/4 plate data set _001.expected.tsv"),
-            Pair.of("sampledata/Nab/sheet2row6/ID50.xlsx", "sampledata/Nab/sheet2row6/ID50.expected.tsv")
+            //Pair.of("Nab/seaman/RC121306.xls", "Nab/seaman/RC121306.expected.tsv")
+            Pair.of("Nab/SpectraMax/20140612_0588.txt", "Nab/SpectraMax/20140612_0588.expected.tsv"),
+            Pair.of("Nab/SpectraMax/20140102_140152 0063_PLATE.002.txt", "Nab/SpectraMax/20140102_140152 0063_PLATE.002.expected.tsv"),
+            Pair.of("Nab/EnVision/4 plate data set _001.csv", "Nab/EnVision/4 plate data set _001.expected.tsv"),
+            Pair.of("Nab/sheet2row6/ID50.xlsx", "Nab/sheet2row6/ID50.expected.tsv")
     );
 
     @Test
@@ -121,8 +115,8 @@ public class PlateParserTests
     {
         for (Pair<String, String> test : singlePlateTests)
         {
-            File nabFile = new File(_projectRoot, test.first);
-            File expectedFile = new File(_projectRoot, test.second);
+            File nabFile = JunitUtil.getSampleData(null, test.first);
+            File expectedFile = JunitUtil.getSampleData(null, test.second);
 
             final double[][] expected = parseExpected(expectedFile);
             PlateTemplate template = template(nabFile.getName(), expected.length, expected[0].length);
@@ -131,7 +125,7 @@ public class PlateParserTests
     }
 
     private static List<Pair<String, String>> multiPlateTests = Arrays.asList(
-            Pair.of("sampledata/Nab/seaman/RC121306.xls", "sampledata/Nab/seaman/RC121306.expected.tsv")
+            Pair.of("Nab/seaman/RC121306.xls", "Nab/seaman/RC121306.expected.tsv")
     );
 
     @Test
@@ -139,5 +133,4 @@ public class PlateParserTests
     {
         // TODO:
     }
-
 }

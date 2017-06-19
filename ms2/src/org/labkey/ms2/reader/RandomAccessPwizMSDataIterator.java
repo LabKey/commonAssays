@@ -17,7 +17,7 @@ package org.labkey.ms2.reader;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.massSpecDataFileType;
 import proteowizard.pwiz.RAMPAdapter.Scan;
@@ -175,11 +175,9 @@ public class RandomAccessPwizMSDataIterator extends RandomAccessMzxmlIterator
         public void testPwizMSData() throws java.io.IOException
         {
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
-            String projectRoot = AppProps.getInstance().getProjectRoot();
-            if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
-            File mzxml2File = new File(projectRoot + "/sampledata/mzxml/test_nocompression.mzXML");
-            File mzxml3File = new File(projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML");
-            File mzxml4File = new File(projectRoot + "/sampledata/mzxml/test_gzipcompression.mzXML.gz");
+            File mzxml2File = JunitUtil.getSampleData(null, "mzxml/test_nocompression.mzXML");
+            File mzxml3File = JunitUtil.getSampleData(null, "mzxml/test_zlibcompression.mzXML");
+            File mzxml4File = JunitUtil.getSampleData(null, "mzxml/test_gzipcompression.mzXML.gz");
             if (massSpecDataFileType.isMZmlAvailable())
             {
                 assertTrue(FT_MZXML.isType(mzxml2File));

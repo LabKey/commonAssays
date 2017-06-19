@@ -36,6 +36,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.NumberUtilsLabKey;
 import org.labkey.api.util.Pair;
 import org.labkey.luminex.model.Analyte;
@@ -785,14 +786,11 @@ public class LuminexExcelParser
 
         private LuminexExcelParser createParser(String fileName)
         {
-            AppProps props = AppProps.getInstance();
-            if (!props.isDevMode()) // We can only run the excel tests if we're in dev mode and have access to our samples
+            if (!AppProps.getInstance().isDevMode()) // We can only run the excel tests if we're in dev mode and have access to our samples
                 return null;
 
-            String projectRootPath = props.getProjectRoot();
-            File projectRoot = new File(projectRootPath);
-            File luminexDir = new File(projectRoot, "sampledata/Luminex/");
-            assertTrue("Couldn't find " + luminexDir, luminexDir.isDirectory());
+            File luminexDir = JunitUtil.getSampleData(null, "Luminex");
+            assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
 
             Domain dummyDomain = PropertyService.get().createDomain(ContainerManager.getRoot(), "fakeURI", "dummyDomain");
             return new LuminexExcelParser(dummyDomain, Arrays.asList(new File(luminexDir, fileName)));

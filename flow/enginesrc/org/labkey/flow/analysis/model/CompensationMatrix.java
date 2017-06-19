@@ -20,7 +20,7 @@ import Jama.Matrix;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.data.NumberArray;
 import org.w3c.dom.Document;
@@ -699,12 +699,7 @@ public class CompensationMatrix implements Serializable
         @Test
         public void testFcsLoad() throws IOException
         {
-            AppProps props = AppProps.getInstance();
-
-            String projectRootPath =  props.getProjectRoot();
-            File projectRoot = new File(projectRootPath);
-
-            File fcsFile = new File(projectRoot + "/sampledata/flow/FCS/", "version3_1_spillover.fcs");
+            File fcsFile = JunitUtil.getSampleData(null, "flow/FCS/version3_1_spillover.fcs");
             FCS fcs = new FCS(fcsFile);
             CompensationMatrix compensationMatrix = fromSpillKeyword(fcs.getKeywords());
             Assert.assertEquals(compensationMatrix,compensationMatrix);
@@ -713,7 +708,6 @@ public class CompensationMatrix implements Serializable
             Assert.assertArrayEquals(expectedNames,compensationMatrix.getChannelNames());
             Assert.assertEquals(1.0,compensationMatrix.getRow(0)[0],0);
             Assert.assertEquals(0.03153153525207893,compensationMatrix.getRow(0)[1],0);
-
         }
     }
 }

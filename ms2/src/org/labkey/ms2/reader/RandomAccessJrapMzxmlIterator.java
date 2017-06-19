@@ -18,7 +18,7 @@ package org.labkey.ms2.reader;
 import org.apache.xmlbeans.GDuration;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.massSpecDataFileType;
 import org.systemsbiology.jrap.MSXMLParser;
@@ -162,10 +162,8 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
         public void testMzxml()
         {
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
-            String projectRoot = AppProps.getInstance().getProjectRoot();
-            if (projectRoot == null || projectRoot.equals("")) projectRoot = "C:/Labkey";
-            File mzxml2File = new File(projectRoot + "/sampledata/mzxml/test_nocompression.mzXML");
-            File mzxml3File = new File(projectRoot + "/sampledata/mzxml/test_zlibcompression.mzXML");
+            File mzxml2File = JunitUtil.getSampleData(null, "mzxml/test_nocompression.mzXML");
+            File mzxml3File = JunitUtil.getSampleData(null, "mzxml/test_zlibcompression.mzXML");
             assertTrue(FT_MZXML.isType(mzxml2File));
             assertTrue(FT_MZXML.isType(mzxml3File));
             try

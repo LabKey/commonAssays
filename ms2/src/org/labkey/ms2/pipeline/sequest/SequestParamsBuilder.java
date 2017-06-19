@@ -24,7 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -1052,8 +1052,7 @@ public abstract class SequestParamsBuilder
         public void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
-            String projectRoot = AppProps.getInstance().getProjectRoot();
-            root = new File(new File(projectRoot), "/sampledata/xarfiles/ms2pipe/databases");
+            root = JunitUtil.getSampleData(null, "xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
             spb = createParamsBuilder();
         }

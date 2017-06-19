@@ -39,6 +39,7 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 
@@ -392,12 +393,12 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     public static class TestCase extends Assert
     {
-        private File projectRoot()
+        private File getViabilitySampleDirectory()
         {
-            String projectRootPath =  AppProps.getInstance().getProjectRoot();
-            if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir") + "/..";
-            return new File(projectRootPath);
+            File viabilityFiles = JunitUtil.getSampleData(null, "viability");
+            assertTrue("Expected to find viability test files", null != viabilityFiles && viabilityFiles.exists());
+
+            return viabilityFiles;
         }
 
         // NOTE: Running this test from within IntelliJ will fail due to ConvertHelper not registering
@@ -405,12 +406,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testTsv() throws Exception
         {
-            File projectRoot = projectRoot();
-
-            File viabilityFiles = new File(projectRoot, "sampledata/viability");
-            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
-
-            ViabilityTsvDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(null, null, new File(viabilityFiles, "simple.tsv"));
+            ViabilityTsvDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "simple.tsv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 3 rows", 3, rows.size());
@@ -439,12 +435,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testGuava() throws Exception
         {
-            File projectRoot = projectRoot();
-
-            File viabilityFiles = new File(projectRoot, "sampledata/viability");
-            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
-
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "small.VIA.csv"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "small.VIA.csv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 7 rows", 7, rows.size());
@@ -473,14 +464,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testExpressPlus() throws Exception
         {
-            AppProps props = AppProps.getInstance();
-            String projectRootPath =  props.getProjectRoot();
-            File projectRoot = new File(projectRootPath);
-
-            File viabilityFiles = new File(projectRoot, "sampledata/viability");
-            assertTrue("Expected to find viability test files: " + viabilityFiles.getAbsolutePath(), viabilityFiles.exists());
-
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(viabilityFiles, "122810.EP5.CSV"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "122810.EP5.CSV"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 16 rows", 16, rows.size());

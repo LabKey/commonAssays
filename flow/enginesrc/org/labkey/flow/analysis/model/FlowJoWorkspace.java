@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.VersionNumber;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -791,51 +791,43 @@ abstract public class FlowJoWorkspace extends Workspace
 
     public static class LoadTests extends Assert
     {
-        private File projectRoot()
-        {
-            String projectRootPath =  AppProps.getInstance().getProjectRoot();
-            if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir");
-            return new File(projectRootPath);
-        }
-
         private Workspace loadWorkspace(String path) throws Exception
         {
-            File file = new File(projectRoot(), path);
+            File file = JunitUtil.getSampleData(null, path);
             return Workspace.readWorkspace(file.getName(), path, new FileInputStream(file));
         }
 
         @Test
         public void loadOldMac() throws Exception
         {
-            loadWorkspace("sampledata/flow/8color/workspace.xml");
+            loadWorkspace("flow/8color/workspace.xml");
         }
 
         @Test
         public void loadPC_5_7_2() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/versions/v5.7.2.xml");
+            Workspace workspace = loadWorkspace("flow/versions/v5.7.2.xml");
             assertPC(workspace, "5.7.2");
         }
 
         @Test
         public void loadPC_7_2_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/versions/v7.2.5.wsp");
+            Workspace workspace = loadWorkspace("flow/versions/v7.2.5.wsp");
             assertPC(workspace, "7.2.5");
         }
 
         @Test
         public void loadPC_7_6_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/versions/v7.6.5.wsp");
+            Workspace workspace = loadWorkspace("flow/versions/v7.6.5.wsp");
             assertPC(workspace, "7.6.5");
         }
 
         @Test
         public void loadPC_10_0_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/versions/v10.0.5.wsp");
+            Workspace workspace = loadWorkspace("flow/versions/v10.0.5.wsp");
             assertPC(workspace, "10.0.5");
         }
 
@@ -885,77 +877,77 @@ abstract public class FlowJoWorkspace extends Workspace
         @Test
         public void loadMacAdvanced_8_5_3() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v8.5.3.xml");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v8.5.3.xml");
             assertAdvanced(workspace, "8.5.3", true);
         }
 
         @Test
         public void loadMacAdvanced_9_6_4() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v9.6.4.xml");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v9.6.4.xml");
             assertAdvanced(workspace, "9.6.4", true);
         }
 
         @Test
         public void loadMacAdvanced_9_7_2() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v9.7.2.xml");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v9.7.2.xml");
             assertAdvanced(workspace, "9.7.2", true);
         }
 
         @Test
         public void loadPCAdvanced_7_2_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.2.5.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v7.2.5.wsp");
             assertAdvanced(workspace, "7.2.5", false);
         }
 
         @Test
         public void loadPCAdvanced_7_5_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.5.5.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v7.5.5.wsp");
             assertAdvanced(workspace, "7.5.5", false);
         }
 
         @Test
         public void loadPCAdvanced_7_6_3() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.6.3.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v7.6.3.wsp");
             assertAdvanced(workspace, "7.6.3", false);
         }
 
         @Test
         public void loadPCAdvanced_7_6_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v7.6.5.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v7.6.5.wsp");
             assertAdvanced(workspace, "7.6.5", false);
         }
 
         @Test
         public void loadPCAdvanced_10_0_5() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.5.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.0.5.wsp");
             assertAdvanced(workspace, "10.0.5", false);
         }
 
         @Test
         public void loadPCAdvanced_10_0_6() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.6.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.0.6.wsp");
             assertAdvanced(workspace, "10.0.6", false);
         }
 
         @Test
         public void loadPCAdvanced_10_0_7() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.7.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.0.7.wsp");
             assertAdvanced(workspace, "10.0.7", false);
         }
 
         @Test
         public void loadPCAdvanced_10_0_8() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/advanced/advanced-v10.0.8.wsp");
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.0.8.wsp");
             assertAdvanced(workspace, "10.0.8", false);
         }
 
@@ -1186,13 +1178,13 @@ abstract public class FlowJoWorkspace extends Workspace
         @Test
         public void loadPV1() throws Exception
         {
-            loadWorkspace("sampledata/flow/flowjoquery/Workspaces/PV1-public.xml");
+            loadWorkspace("flow/flowjoquery/Workspaces/PV1-public.xml");
         }
 
         @Test
         public void loadMiniFCS() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/miniFCS/mini-fcs.xml");
+            Workspace workspace = loadWorkspace("flow/flowjoquery/miniFCS/mini-fcs.xml");
             GroupInfo group = workspace.getGroup("3");
             Analysis analysis = workspace.getGroupAnalysis(group);
 
@@ -1204,7 +1196,7 @@ abstract public class FlowJoWorkspace extends Workspace
         @Test
         public void loadSubsets() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/subset-parsing.xml");
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/subset-parsing.xml");
             SampleInfo sampleInfo = workspace.getSample("2");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
@@ -1275,7 +1267,7 @@ abstract public class FlowJoWorkspace extends Workspace
         @Test
         public void loadBooleanSubPopulations() throws Exception
         {
-            Workspace workspace = loadWorkspace("sampledata/flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
             SampleInfo sampleInfo = workspace.getSample("1");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 

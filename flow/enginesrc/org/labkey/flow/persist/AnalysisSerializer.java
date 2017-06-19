@@ -27,8 +27,8 @@ import org.labkey.api.data.TSVWriter;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.writer.FileSystemFile;
@@ -1499,14 +1499,6 @@ public class AnalysisSerializer
 
     public static class TestCase extends Assert
     {
-        private File projectRoot()
-        {
-            String projectRootPath = AppProps.getInstance().getProjectRoot();
-            if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir") + "/..";
-            return new File(projectRootPath);
-        }
-
         static class TestLog implements AnalysisSerializer.JobLog
         {
             List<String> _info = new ArrayList<>();
@@ -1522,7 +1514,7 @@ public class AnalysisSerializer
         @Test
         public void testRead() throws Exception
         {
-            File dir = new File(projectRoot(), "sampledata/flow/external-analysis");
+            File dir = JunitUtil.getSampleData(null,  "flow/external-analysis");
             FileSystemFile rootDir = new FileSystemFile(dir);
             TestLog log = new TestLog();
             AnalysisSerializer serializer = new AnalysisSerializer(log, rootDir);
