@@ -18,7 +18,7 @@ package org.labkey.ms2.pipeline;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
-import org.labkey.api.action.LabKey_Error;
+import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
@@ -842,14 +842,14 @@ public class PipelineController extends SpringActionController
             catch (FileNotFoundException e)
             {
                 if (e.getMessage().contains("Access"))
-                    errors.addError(new LabKey_Error("Access denied attempting to write defaults. Contact the server administrator."));
+                    errors.addError(new LabKeyError("Access denied attempting to write defaults. Contact the server administrator."));
                 else
-                    errors.addError(new LabKey_Error("Failure attempting to write defaults.  Please try again."));
+                    errors.addError(new LabKeyError("Failure attempting to write defaults.  Please try again."));
                 return false;
             }
             catch (IOException eio)
             {
-                errors.addError(new LabKey_Error("Failure attempting to write defaults.  Please try again."));
+                errors.addError(new LabKeyError("Failure attempting to write defaults.  Please try again."));
                 return false;
             }
 

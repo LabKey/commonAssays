@@ -18,7 +18,7 @@ package org.labkey.luminex;
 
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.action.LabKey_Error;
+import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ActionButton;
@@ -171,7 +171,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     catch (ExperimentException e)
                     {
-                        errors.addError(new LabKey_Error(e));
+                        errors.addError(new LabKeyError(e));
                     }
                     defaultAnalytePropertyValues.put(defaultValueKey,  defaultValues);
                 }
@@ -832,7 +832,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 catch (ValidationException ve)
                 {
                     for (ValidationError error : ve.getErrors())
-                        errors.addError(new LabKey_Error(error.getMessage()));
+                        errors.addError(new LabKeyError(error.getMessage()));
                 }
                 catch (ExperimentException e)
                 {

@@ -17,7 +17,7 @@
 package org.labkey.microarray;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.action.LabKey_Error;
+import org.labkey.api.action.LabKeyError;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ProtocolParameter;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -152,7 +152,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
         catch (ExperimentException e)
         {
-            errors.addError(new LabKey_Error("Unable to get properties from MageML file: " + e.getMessage()));
+            errors.addError(new LabKeyError("Unable to get properties from MageML file: " + e.getMessage()));
             mageMLProperties = new HashMap<>();
         }
 
@@ -193,7 +193,7 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
         }
         catch (ExperimentException e)
         {
-            errors.addError(new LabKey_Error("Unable to get barcode and channel count from MageML file:" + e.getMessage()));
+            errors.addError(new LabKeyError("Unable to get barcode and channel count from MageML file:" + e.getMessage()));
         }
         return result;
     }

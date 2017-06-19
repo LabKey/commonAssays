@@ -17,7 +17,7 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.action.LabKey_Error;
+import org.labkey.api.action.LabKeyError;
 import org.springframework.validation.BindException;
 
 import java.util.Collection;
@@ -55,7 +55,7 @@ public class RunListException extends Exception
     {
         for (String message : _messages)
         {
-            errors.addError(new LabKey_Error(message));
+            errors.addError(new LabKeyError(message));
         }
     }
 }
