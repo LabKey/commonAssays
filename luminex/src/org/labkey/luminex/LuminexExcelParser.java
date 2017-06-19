@@ -704,7 +704,6 @@ public class LuminexExcelParser
         public void testRaw() throws ExperimentException
         {
             LuminexExcelParser parser = createParser("plate 1_IgA-Biot (Standard2).xls");
-            if (parser == null) return;
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 5, m.size());
             validateAnalyte(m.keySet(), "ENV6", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
@@ -739,8 +738,7 @@ public class LuminexExcelParser
         public void testSummary() throws ExperimentException
         {
             LuminexExcelParser parser = createParser("Guide Set plate 2.xls");
-            if (parser == null) return;
-            
+
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 2, m.size());
             validateAnalyte(m.keySet(), "GS Analyte A", null, null, null);
@@ -758,7 +756,6 @@ public class LuminexExcelParser
         public void testSummaryAndRaw() throws ExperimentException
         {
             LuminexExcelParser parser = createParser("RawAndSummary.xlsx");
-            if (parser == null) return;
 
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
             assertEquals("Wrong number of analytes", 3, m.size());
@@ -786,9 +783,6 @@ public class LuminexExcelParser
 
         private LuminexExcelParser createParser(String fileName)
         {
-            if (!AppProps.getInstance().isDevMode()) // We can only run the excel tests if we're in dev mode and have access to our samples
-                return null;
-
             File luminexDir = JunitUtil.getSampleData(null, "Luminex");
             assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
 
