@@ -159,7 +159,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     public static class TestCase extends Assert
     {
         @Test
-        public void testMzxml()
+        public void testMzxml() throws IOException
         {
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             File mzxml2File = JunitUtil.getSampleData(null, "mzxml/test_nocompression.mzXML");

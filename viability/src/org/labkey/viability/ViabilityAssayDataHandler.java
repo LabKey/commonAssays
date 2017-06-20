@@ -34,7 +34,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.study.assay.AssayProvider;
@@ -393,7 +392,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
 
     public static class TestCase extends Assert
     {
-        private File getViabilitySampleDirectory()
+        private File getViabilitySampleDirectory() throws IOException
         {
             File viabilityFiles = JunitUtil.getSampleData(null, "viability");
             assertTrue("Expected to find viability test files", null != viabilityFiles && viabilityFiles.exists());

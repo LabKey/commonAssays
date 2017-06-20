@@ -34,7 +34,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.NumberUtilsLabKey;
@@ -701,7 +700,7 @@ public class LuminexExcelParser
     public static class TestCase extends Assert
     {
         @Test
-        public void testRaw() throws ExperimentException
+        public void testRaw() throws ExperimentException, IOException
         {
             LuminexExcelParser parser = createParser("plate 1_IgA-Biot (Standard2).xls");
             Map<Analyte, List<LuminexDataRow>> m = parser.getSheets();
@@ -735,7 +734,7 @@ public class LuminexExcelParser
         }
 
         @Test
-        public void testSummary() throws ExperimentException
+        public void testSummary() throws ExperimentException, IOException
         {
             LuminexExcelParser parser = createParser("Guide Set plate 2.xls");
 
@@ -753,7 +752,7 @@ public class LuminexExcelParser
         }
 
         @Test
-        public void testSummaryAndRaw() throws ExperimentException
+        public void testSummaryAndRaw() throws ExperimentException, IOException
         {
             LuminexExcelParser parser = createParser("RawAndSummary.xlsx");
 
@@ -781,7 +780,7 @@ public class LuminexExcelParser
             }
         }
 
-        private LuminexExcelParser createParser(String fileName)
+        private LuminexExcelParser createParser(String fileName) throws IOException
         {
             File luminexDir = JunitUtil.getSampleData(null, "Luminex");
             assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
