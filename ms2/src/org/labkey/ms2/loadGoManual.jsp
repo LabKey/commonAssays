@@ -24,9 +24,6 @@
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>
-<script type="text/javascript">
-    LABKEY.requiresScript('util.js');
-</script>
 <br>
 <table><tr><td>
 You are about to <%=loaded ? "reload" : "load"%> Gene Ontology (GO) annotation files from your computer into your
