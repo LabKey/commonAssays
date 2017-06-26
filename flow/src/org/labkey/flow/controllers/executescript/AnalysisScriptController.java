@@ -420,10 +420,6 @@ public class AnalysisScriptController extends BaseFlowController
         {
             return true;
         }
-
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
     }
 
     abstract static public class Page extends FlowPage

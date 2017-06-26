@@ -135,9 +135,6 @@ public class MicroarrayController extends SpringActionController
         }
 
         @Override
-        public void validateCommand(PipelinePathForm target, Errors errors) {}
-
-        @Override
         public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
         {
             String baseURL = GeneDataPipelineProvider.getGeneDataBaseURL();

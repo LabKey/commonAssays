@@ -3517,10 +3517,6 @@ public class MS2Controller extends SpringActionController
 
             return true;
         }
-
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
     }
 
 

@@ -96,11 +96,6 @@ public class FeatureAnnotationSetController extends SpringActionController
         {
             return true;
         }
-
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
     }
 
     @RequiresPermission(ReadPermission.class)

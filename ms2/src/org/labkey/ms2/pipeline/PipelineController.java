@@ -133,10 +133,6 @@ public class PipelineController extends SpringActionController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
-        public void validateCommand(PipelinePathForm form, Errors errors)
-        {
-        }
-
         public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
         {
             for (File file : form.getValidatedFiles(getContainer()))
