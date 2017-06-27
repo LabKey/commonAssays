@@ -15,26 +15,25 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
-<%@ page import="java.util.Date" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
+    ActionURL loadGo = urlFor(MS2Controller.LoadGoAction.class).addParameter("manual", 1);
 %>
-<br>
 <table><tr><td>
-You are about to <%=loaded ? "reload" : "load"%> Gene Ontology (GO) annotation files from your computer into your
-LabKey database.  Use this method if the automatic FTP method doesn't work for you (e.g., your LabKey server can't
+You are about to <%=text(loaded ? "reload" : "load")%> Gene Ontology (GO) annotation files from your computer into your
+LabKey database. Use this method if the automatic FTP method doesn't work for you (e.g., your LabKey server can't
 connect to ftp.geneontology.org) or you need to upload a specific version of the GO annotations.<br><br>
 
-Click the "Browse..." button to choose a file to upload.  The file must be a GZIP compressed archive that includes all
-five GO annotation files (graph_path.txt, term.txt, term_definition.txt, term_synonym.txt, and term2term.txt) in the
-proper format.  See <a href="ftp://ftp.geneontology.org/godatabase/archive/latest-full"
-target="go">ftp://ftp.geneontology.org/godatabase/archive/latest-full</a> for examples of these files.  The GO archive
-to use has a name like go_<%=DateUtil.formatDateTime(new Date(), "yyyyMM")%>-termdb-tables.tar.gz.<br><br>
+Click the "Browse..." or "Choose File..." button below to choose a file to upload. The file must be a GZIP compressed
+archive that includes all five GO annotation files (graph_path.txt, term.txt, term_definition.txt, term_synonym.txt,
+and term2term.txt) in the proper format. See <a href="ftp://ftp.geneontology.org/godatabase/archive/latest-full" target="go">
+ftp://ftp.geneontology.org/godatabase/archive/latest-full</a> for examples of these files. The GO archive to use is an
+approximately 12MB file named go_monthly-termdb-tables.tar.gz.<br><br>
 
 After choosing a file, click "Continue" and your LabKey Server will:
 
@@ -50,14 +49,14 @@ After choosing a file, click "Continue" and your LabKey Server will:
     }
 
     %>
-    <li><%=loaded ? "Reload" : "Load"%> the database tables with information from the specified GO file</li>
+    <li><%=text(loaded ? "Reload" : "Load")%> the database tables with information from the specified GO file</li>
 </ul>
 
-The loading will take place in the background and you can continue to use your LabKey Server normally. If you want,
-you can monitor the process by refreshing the status information on the next page.<br><br>
+Loading will take place in the background and you can continue to use your LabKey Server normally. If you want,
+you can monitor the progress by refreshing the status information on the next page.<br><br>
 
-Click "Cancel" to return to the Protein Databases Admin page.<br><br><br>
-<labkey:form action="loadGo.post?manual=1" enctype="multipart/form-data" method="post">
+Click "Cancel" to return to the Protein Databases Admin page.<br><br>
+<labkey:form action="<%=h(loadGo)%>" enctype="multipart/form-data" method="post">
     <input type="file" name="gofile" size="60" onChange="showPathname(this, 'filename')">&nbsp;<label id="filename"></label><br><br>
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>

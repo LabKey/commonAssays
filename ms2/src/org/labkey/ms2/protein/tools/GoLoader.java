@@ -22,9 +22,11 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.CheckedInputStream;
 import org.labkey.api.util.ExceptionUtil;
@@ -36,15 +38,14 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.ServletException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,22 +118,19 @@ public abstract class GoLoader
         if (isComplete())
             return;
 
-        JobRunner.getDefault().execute(new Runnable()
+        JobRunner.getDefault().execute(() ->
         {
-            public void run()
+            try
             {
-                try
-                {
-                    loadGoFromGz();
-                }
-                catch (Exception e)
-                {
-                    logException(e);
-                }
-                finally
-                {
-                    _complete = true;
-                }
+                loadGoFromGz();
+            }
+            catch (Exception e)
+            {
+                logException(e);
+            }
+            finally
+            {
+                _complete = true;
             }
         });
     }
@@ -186,24 +184,24 @@ public abstract class GoLoader
         new SqlExecutor(ProteinManager.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
 
         logStatus("Starting to load " + filename);
-        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader isr = Readers.getReader(is);
         TabLoader t = new TabLoader(isr, false);
-        String SQLCommand = "INSERT INTO " + ti + "(";
-        String QMarkPart = "VALUES (";
+        StringBuilder SQLCommand = new StringBuilder("INSERT INTO " + ti + "(");
+        StringBuilder QMarkPart = new StringBuilder("VALUES (");
 
         for (int i = 0; i < cols.length; i++)
         {
-            SQLCommand += cols[i];
-            QMarkPart += "?";
+            SQLCommand.append(cols[i]);
+            QMarkPart.append("?");
             if (i < (cols.length - 1))
             {
-                SQLCommand += ",";
-                QMarkPart += ",";
+                SQLCommand.append(",");
+                QMarkPart.append(",");
             }
             else
             {
-                SQLCommand += ") ";
-                QMarkPart += ") ";
+                SQLCommand.append(") ");
+                QMarkPart.append(") ");
             }
         }
 
@@ -217,13 +215,13 @@ public abstract class GoLoader
         {
             conn = scope.getConnection();
             conn.setAutoCommit(false);
-            ps = conn.prepareStatement(SQLCommand + QMarkPart);
+            ps = conn.prepareStatement(SQLCommand + QMarkPart.toString());
 
             for (Map<String, Object> curRec : t)
             {
                 boolean addRow = true;
                 for (int i = 0; i < cols.length; i++)
-                    ps.setNull(i + 1, columns.get(i).getSqlTypeInt());
+                    ps.setNull(i + 1, columns.get(i).getJdbcType().sqlType);
 
                 for (String key : curRec.keySet())
                 {
@@ -241,7 +239,7 @@ public abstract class GoLoader
                         if (s.equals("\\N"))
                             continue;
 
-                        if (column.getSqlTypeInt() == Types.VARCHAR)
+                        if (column.getJdbcType() == JdbcType.VARCHAR)
                         {
                             int limit = column.getScale();
 
@@ -385,20 +383,15 @@ public abstract class GoLoader
     {
         private final static String SERVER = "ftp.geneontology.org";
         private final static String PATH = "godatabase/archive/latest-full";
-        private final static String PATTERN = "go_[0-9]{6}-termdb-tables.tar.gz";
+        private final static String FILENAME = "go_monthly-termdb-tables.tar.gz";
 
         protected InputStream getInputStream() throws IOException, ServletException
         {
             logStatus("Searching for the latest GO annotation files at " + SERVER);
-            List<String> filenames = FTPUtil.listFiles("anonymous", "anonymous", SERVER, PATH, PATTERN);
-
-            if (filenames.size() != 1)
-                throw new ServletException("Expected to find one file matching pattern \"" + PATTERN + "\" but found " + filenames.size());
-
-            logStatus("Starting to download " + filenames.get(0) + " from " + SERVER);
-            File file = FTPUtil.downloadFile("anonymous", "anonymous", SERVER, PATH, filenames.get(0));
+            logStatus("Starting to download " + FILENAME + " from " + SERVER);
+            File file = FTPUtil.downloadFile("anonymous", "anonymous", SERVER, PATH, FILENAME);
             file.deleteOnExit();
-            logStatus("Finished downloading " + filenames.get(0));
+            logStatus("Finished downloading " + FILENAME);
             logStatus("");
 
             return new FileInputStream(file);

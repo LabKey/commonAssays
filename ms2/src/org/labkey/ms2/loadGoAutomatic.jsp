@@ -23,7 +23,6 @@
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>
-<br>
 <table><tr><td>
 You are about to <%=h(loaded ? "reload" : "load")%> the latest Gene Ontology (GO) annotation files into your
 LabKey database.  If you click "Continue" your LabKey Server will automatically:
