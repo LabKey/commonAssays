@@ -99,9 +99,6 @@
                 ,showToolbar:false
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
                 ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
-                ,autoResize: {
-                    skipHeight: true
-                }
                 ,listeners: {
                     <% if (!PageFlowUtil.useExperimentalCoreUI()) { %>
                     afterrender: {
