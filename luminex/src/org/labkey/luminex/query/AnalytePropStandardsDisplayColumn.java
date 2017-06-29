@@ -25,7 +25,6 @@ import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.Titration;
-import org.labkey.luminex.query.LuminexProtocolSchema;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -111,17 +110,28 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
             }
         }
 
-        out.write("<input type='checkbox' value='" + value + "' name='" + propertyName + "' " + checked + " />");
+        out.write("<input type=\"checkbox\" value='" + 1 + "' name='" + propertyName + "' " + checked + " />");
     }
 
     @Override
-    public void renderInputCell(RenderContext ctx, Writer out, int span) throws IOException
+    public void renderInputWrapperBegin(Writer out, int span) throws IOException
     {
-        String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td colspan=" + span + " name='" + titrationCellName
-                + "' style='display:" + (_hideCell ? "none" : "table-cell") + "' >");
-        renderInputHtml(ctx, out, 1);
-        out.write("</td>");
+        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+
+        if (newUI)
+            out.write("<div class=\"col-sm-9 col-lg-10\"");
+        else
+            out.write("<td colspan=" + span + "");
+
+        if (!_hideCell)
+            out.write(" style=\"display:none;\"");
+        out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
+    }
+
+    public void renderInputWrapperEnd(Writer out) throws IOException
+    {
+        out.write(PageFlowUtil.useExperimentalCoreUI() ? "</div>" : "</td>");
     }
 
     @Override
