@@ -28,9 +28,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
-/**
- * Created by cnathe on 7/21/14.
- */
 public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
 {
     private String _analyteName;
@@ -60,23 +57,32 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             @Override
             public void renderTitle(RenderContext ctx, Writer out) throws IOException
             {
-                out.write("<script type='text/javascript'>"
-                        + "   LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');"
-                        + "</script>");
+                out.write("<script type=\"text/javascript\">\n" +
+                        "LABKEY.requiresExt4Sandbox(function() {\n" +
+                            "LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');\n" +
+                        "});\n" +
+                    "</script>\n");
+
                 out.write(PageFlowUtil.filter(_displayName));
             }
 
             @Override
             public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
             {
-                out.write("<td class='labkey-form-label'>");
+                boolean newUI = PageFlowUtil.useExperimentalCoreUI();
+                if (newUI)
+                    out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+                else
+                    out.write("<td class='labkey-form-label'>");
+
                 renderTitle(ctx, out);
                 StringBuilder sb = new StringBuilder();
                 sb.append("The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are " +
                         "those selected as Negative Control analytes.\n\n");
                 sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
                 out.write(PageFlowUtil.helpPopup(_displayName, sb.toString()));
-                out.write("</td>");
+
+                out.write(newUI ? "</label>" : "</td>");
             }
 
             @Override

@@ -31,9 +31,6 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by cnathe on 7/21/14.
- */
 public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 {
     private LuminexRunUploadForm _form;
@@ -124,8 +121,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
         else
             out.write("<td colspan=" + span + "");
 
-        if (!_hideCell)
-            out.write(" style=\"display:none;\"");
+        out.write(" style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\"");
         out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
     }
 
@@ -137,10 +133,21 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
     {
+        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td name='" + titrationCellName + "' "
-                + " class='labkey-form-label' style='display:" + (_hideCell ? "none" : "table-cell") + "' >");
-        renderTitle(ctx, out);
+        out.write("<td name=\"" + titrationCellName + "\""
+                + (newUI ? "" : " class=\"labkey-form-label\"")
+                + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
+        if (newUI)
+        {
+            out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+            renderTitle(ctx, out);
+            out.write("</label>");
+        }
+        else
+        {
+            renderTitle(ctx, out);
+        }
         out.write("</td>");
     }
 

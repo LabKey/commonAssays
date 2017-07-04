@@ -455,15 +455,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             });
         }
 
+        _stepDescription = "Analyte Properties";
+
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
-
-        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
-        bbar.add(cancelButton);
-
-        _stepDescription = "Analyte Properties";
-
+        bbar.add(new ActionButton("Cancel", getSummaryLink(_protocol)));
+        bbar.setStyle(ButtonBar.Style.separateButtons);
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
 
         vbox.addView(view);
@@ -565,11 +563,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             @Override
             public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
             {
-                out.write("<td class='labkey-form-label'>");
+                boolean newUI = PageFlowUtil.useExperimentalCoreUI();
+                if (newUI)
+                    out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+                else
+                    out.write("<td class='labkey-form-label'>");
+
                 renderTitle(ctx, out);
                 String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
                 out.write(PageFlowUtil.helpPopup(displayName, sb));
-                out.write("</td>");
+
+                out.write(newUI ? "</label>" : "</td>");
             }
         };
     }
