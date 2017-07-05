@@ -308,10 +308,8 @@ public class LuminexController extends SpringActionController
                 throw new NotFoundException("No control name specified");
             }
             VBox result = new VBox();
-            AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
-            result.addView(header);
-            JspView report = new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form);
-            result.addView(report);
+            result.addView(new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null));
+            result.addView(new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form));
             setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
             return result;
         }
@@ -337,8 +335,7 @@ public class LuminexController extends SpringActionController
         {
             _form = form;
             VBox result = new VBox();
-            AssayHeaderView header = new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null);
-            result.addView(header);
+            result.addView(new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null));
             result.addView(new LeveyJenningsMenuView(form.getProtocol()));
             return result;
         }

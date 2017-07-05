@@ -384,7 +384,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         }
         qcReportMenu.addChild(new NavTree("view single point control qc report", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
-        // add link to view Levey-Jenning reports
+        // add link to view Levey-Jennings reports
         qcReportMenu.addChild("view levey-jennings reports", new ActionURL(LuminexController.LeveyJenningsMenuAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()));
 
         // add link to manage guide sets
