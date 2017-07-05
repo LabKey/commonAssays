@@ -114,41 +114,37 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         });
 
         AliasedColumn detailsCol = new AliasedColumn("Details", wrapColumn(getRealTable().getColumn(FieldKey.fromParts("RowId"))));
-        detailsCol.setDisplayColumnFactory(new DisplayColumnFactory()
+        detailsCol.setDisplayColumnFactory(colInfo ->
         {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            Collection<String> dependencies = Arrays.asList("Ext4", "luminex/GuideSetWindow.js");
+            String javaScriptEvent = "onclick=\"createGuideSetWindow(${ProtocolId:jsString}, ${RowId:jsString}, true);\"";
+            return new JavaScriptDisplayColumn(colInfo, dependencies, javaScriptEvent, "labkey-text-link")
             {
-                Collection<String> dependencies = Collections.singletonList("luminex/GuideSetWindow.js");
-                String javaScriptEvent = "onclick=\"createGuideSetWindow(${ProtocolId:jsString}, ${RowId:jsString}, true);\"";
-                return new JavaScriptDisplayColumn(colInfo, dependencies, javaScriptEvent, "labkey-text-link")
+                @NotNull
+                @Override
+                public String getFormattedValue(RenderContext ctx)
                 {
-                    @NotNull
-                    @Override
-                    public String getFormattedValue(RenderContext ctx)
-                    {
-                        return "details";
-                    }
+                    return "details";
+                }
 
-                    @Override
-                    public void renderTitle(RenderContext ctx, Writer out) throws IOException
-                    {
-                        // no title
-                    }
+                @Override
+                public void renderTitle(RenderContext ctx, Writer out) throws IOException
+                {
+                    // no title
+                }
 
-                    @Override
-                    public boolean isSortable()
-                    {
-                        return false;
-                    }
+                @Override
+                public boolean isSortable()
+                {
+                    return false;
+                }
 
-                    @Override
-                    public boolean isFilterable()
-                    {
-                        return false;
-                    }
-                };
-            }
+                @Override
+                public boolean isFilterable()
+                {
+                    return false;
+                }
+            };
         });
         addColumn(detailsCol);
 

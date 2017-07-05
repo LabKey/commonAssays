@@ -236,7 +236,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("Data files must be in the multi-sheet BioPlex Excel file format. "
-            + "<EM>(multiple files must share the same standard curve)</EM>");
+            + "<span style=\"font-style: italic;\">Multiple files must share the same standard curve.</span>");
     }
 
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
