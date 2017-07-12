@@ -30,16 +30,23 @@
     if (calc != null)
     {
 %>
-<table border="1"><tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">
-    Negative</th></tr>
+<table class="labkey-data-region-legacy labkey-show-borders">
+    <tr>
+        <th rowspan="2">Channel</th>
+        <th colspan="3">Positive</th>
+        <th colspan="3">Negative</th>
+    </tr>
     <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
-    <% for (int i = 0; i < form.parameters.length; i++)
-    {
-        String channel = form.parameters[i];
-        if (channel == null)
-            continue;
+    <%
+        int counter = 0;
+        for (int i = 0; i < form.parameters.length; i++)
+        {
+            String channel = form.parameters[i];
+            if (channel == null)
+                continue;
     %>
-    <tr><td><%=h(channel)%></td>
+    <tr class="<%=getShadeRowClass(i % 2 == 0)%>">
+        <td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>
         <td><%=text(h(form.positiveSubset[i]))%></td>
@@ -47,7 +54,10 @@
         <td><%=h(form.negativeKeywordValue[i])%></td>
         <td><%=text(h(form.negativeSubset[i]))%></td>
     </tr>
-    <% } %>
+    <%
+            counter++;
+        }
+    %>
 </table>
 <% } %>
 <% if (form.canEdit()) { %>

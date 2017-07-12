@@ -191,26 +191,33 @@ var keywordValueSubsetListMap = KV;
     with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
     a workspace containing only one set of compensation controls, and upload that new workspace.
     </p>
-    <table border="1">
+    <table class="labkey-data-region-legacy labkey-show-borders">
         <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
         <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
-        <% for (int i = 0; i < form.parameters.length; i ++)
-        {
-            String parameter = form.parameters[i];
+        <%
+            int counter = 0;
+            for (int i = 0; i < form.parameters.length; i ++)
+            {
+                String parameter = form.parameters[i];
         %>
-        <tr id="<%=h(parameter)%>">
+        <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i % 2 == 0)%>">
             <td><%=h(parameter)%></td>
             <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
             <td><%=text(selectKeywordValues(Sign.positive, i))%></td>
             <td><%=text(selectSubsets(Sign.positive, i))%></td>
             <td><%=text(selectKeywordNames(Sign.negative, i))%></td>
             <td><%=text(selectKeywordValues(Sign.negative, i))%></td>
-            <td><%=text(selectSubsets(Sign.negative, i))%></td>
-            <% if (i == 0) { %>
-                <td><input type="button" value="Universal" onclick="universalNegative()"></td>
-            <% } %>
+            <td>
+                <%=text(selectSubsets(Sign.negative, i))%>
+                <% if (i == 0) { %>
+                    <input type="button" value="Universal" onclick="universalNegative()">
+                <% } %>
+            </td>
         </tr>
-        <% } %>
+        <%
+                counter++;
+            }
+        %>
     </table>
 
 <%

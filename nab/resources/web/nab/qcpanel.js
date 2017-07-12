@@ -243,7 +243,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     getPlateControlsTpl : function(){
         var tpl = [];
-        tpl.push('<table class="labkey-data-region labkey-show-borders">',
+        tpl.push('<table class="labkey-data-region-legacy labkey-show-borders">',
                     '<tr><th></th><th>Plate</th><th>Range</th><th>Virus Control</th><th>Cell Control</th></tr>',
                     '<tpl for="controls">',
                         '<tr>',

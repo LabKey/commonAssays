@@ -33,7 +33,7 @@
     LeveyJenningsMenuView.Bean bean = me.getModelBean();
 %>
 
-<table class="labkey-data-region labkey-show-borders">
+<table class="labkey-data-region-legacy labkey-show-borders">
     <tr>
         <td valign="top" style="padding: 5px" class="labkey-column-header">
             <strong>Titrations</strong>
