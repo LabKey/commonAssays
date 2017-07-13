@@ -159,7 +159,7 @@ public final class LuminexRTransformTest extends LuminexTest
         DataRegionTable table;
         table = new DataRegionTable("Data", this);
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/Properties/LotNumber");
+        _customizeViewsHelper.addColumn("Analyte/Properties/LotNumber");
         _customizeViewsHelper.applyCustomView();
         table.setFilter("Analyte/Properties/LotNumber", "Equals", TEST_ANALYTE_LOT_NUMBER);
         waitForElement(Locator.paginationText(1, 40, 40));
