@@ -16,7 +16,6 @@
 package org.labkey.test.tests.luminex;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
@@ -71,9 +70,10 @@ public final class LuminexPositivityTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
-    @Test// @Ignore //TODO: 28604: LuminexPositivityTest.testPositivity times out on TeamCity
+    @Test
     public void testPositivity()
     {
+        setupResultsDefaultView();
         test3xFoldChange();
         test5xFoldChange();
         testWithoutBaselineVisitOrFoldChange();
@@ -278,13 +278,17 @@ public final class LuminexPositivityTest extends LuminexTest
         checkPositivityValues("positive", posWells.length, posWells);
         String[] negWells = new String[] {"A3", "B3", "A5", "B5"};
         checkPositivityValues("negative", negWells.length, negWells);
-
-        _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("Date");
-        _customizeViewsHelper.saveCustomView();
-
         checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01");
         checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15");
+    }
+
+    private void setupResultsDefaultView()
+    {
+        goToTestAssayHome(TEST_ASSAY_LUM);
+        clickAndWait(Locator.linkContainingText("view results"));
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn("Date");
+        _customizeViewsHelper.saveCustomView();
     }
 
     private void setPositivityThresholdParams(int expectedValue, int newValue)
