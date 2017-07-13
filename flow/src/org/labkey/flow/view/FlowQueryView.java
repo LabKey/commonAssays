@@ -31,6 +31,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.assay.AssayPublishService;
 import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
@@ -45,6 +46,7 @@ import org.labkey.api.view.PopupMenu;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -268,6 +270,21 @@ public class FlowQueryView extends QueryView
                 bar.add(publishButton);
             }
         }
+
+        ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
+        URLHelper returnURL = getReturnURL();
+        editWellsURL.addReturnURL(returnURL);
+        editWellsURL.addParameter("editWellReturnUrl",getReturnURL().toString());
+        editWellsURL.addParameter("isBulkEdit",true);
+        editWellsURL.addParameter("isUpdate",false);
+
+        ActionButton versionButton = new ActionButton("Edit Keywords");
+        versionButton.setRequiresSelection(true, 1, null);
+        versionButton.setURL(editWellsURL);
+        versionButton.setActionType(ActionButton.Action.POST);
+        versionButton.setDisplayPermission(UpdatePermission.class);
+        bar.add(versionButton);
+
     }
 
     @Override

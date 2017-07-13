@@ -25,6 +25,7 @@ import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SqlExecutor;
@@ -81,9 +82,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -117,6 +120,52 @@ public class WellController extends BaseFlowController
     public FlowWell getWell()
     {
         return FlowWell.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
+    }
+
+    public List<FlowWell> getWells(boolean isBulkEdit)
+    {
+        List<FlowWell> ret = new ArrayList<>();
+
+        if (isBulkEdit)
+        {
+            String[] wellIds = getRequest().getParameterValues("ff_fileRowId");
+            if (wellIds != null && wellIds.length > 0)
+            {
+                for (String wellId : wellIds)
+                {
+                    FlowWell flowWell = FlowWell.fromWellId(Integer.parseInt(wellId));
+                    flowWell.checkContainer(getContainer(), getUser(), getActionURL());
+                    ret.add(flowWell);
+                }
+                return ret;
+            }
+        }
+
+        FlowWell well = FlowWell.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
+        if(well != null){
+            ret.add(well);
+        }
+
+        return ret;
+    }
+
+    public String[] getKeywordIntersection(List<FlowWell> wells, boolean excludeMetaDataKeywords)
+    {
+        Set<String> intersection = new HashSet<>(wells.get(0).getKeywords().keySet());
+        for (FlowWell well : wells)
+        {
+            Set<String> c = well.getKeywords().keySet();
+            intersection.retainAll(c);
+        }
+
+        if (excludeMetaDataKeywords)
+        {
+            intersection.removeIf(kw -> kw.startsWith("$"));
+        }
+
+        List<String> sortList = new ArrayList<>(intersection);
+        Collections.sort(sortList);
+        return sortList.toArray(new String[0]);
     }
 
     public Page getPage(String name)
@@ -159,19 +208,16 @@ public class WellController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditWellAction extends FormViewAction<EditWellForm>
     {
-        FlowWell well;
-
+        List<FlowWell> wells;
+        boolean isBulkEdit;
+        boolean isUpdate;
+        @Override
         public void validateCommand(EditWellForm form, Errors errors)
         {
-            well = getWell();
-            if (well == null)
-                throw new NotFoundException("Well not found");
-            form.setWell(well);
+            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
+            wells = getWells(isBulkEdit);
+            form.setWells(wells);
 
-            if (StringUtils.isEmpty(form.ff_name))
-            {
-                errors.reject(ERROR_MSG, "Name cannot be blank");
-            }
             if (form.ff_keywordName != null)
             {
                 Set<String> keywords = new HashSet<>();
@@ -179,46 +225,101 @@ public class WellController extends BaseFlowController
                 {
                     String name = form.ff_keywordName[i];
                     String value = form.ff_keywordValue[i];
+                    form.ff_keywordError[i] = null;
                     if (StringUtils.isEmpty(name))
                     {
                         if (!StringUtils.isEmpty(value))
                         {
-                            errors.reject(ERROR_MSG, "Missing name for value '" + value + "'");
+                            String missingNameMessage = "Missing name for value '" + value + "'";
+                            errors.reject(ERROR_MSG, missingNameMessage);
+                            form.ff_keywordError[i] = missingNameMessage;
                         }
                     }
                     else if (!keywords.add(name))
                     {
-                        errors.reject(ERROR_MSG, "There is already a keyword '" + name + "'");
+                        String duplicateNameMessage = "There is already a keyword '" + name + "'";
+                        errors.reject(ERROR_MSG, duplicateNameMessage);
+                        form.ff_keywordError[i] = duplicateNameMessage;
                         break;
                     }
                 }
             }
         }
 
+        @Override
         public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors) throws Exception
         {
-            if (well == null)
+            String returnUrl = getRequest().getParameter("editWellReturnUrl");
+            form.editWellReturnUrl = returnUrl;
+            if (returnUrl != null)
             {
-                well = getWell();
-                if (well == null)
-                    throw new NotFoundException("Well not found");
-                form.setWell(well);
+                form.editWellReturnUrl = returnUrl.toString();
+            }
+            isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
+            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
+            form.isBulkEdit = isBulkEdit;
+            if(!isUpdate)
+            {
+                if (wells == null)
+                {
+                    wells = getWells(isBulkEdit);
+                }
+                if (wells == null || wells.size() == 0)
+                {
+                    Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, true, false);
+                    wells = new ArrayList<>();
+
+                    for (String wellId : selected)
+                    {
+                        wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
+                    }
+                }
+                form.setWells(wells);
+                if (isBulkEdit && !isUpdate)
+                {
+                    form.ff_keywordName = getKeywordIntersection(wells, true);
+                }
             }
             return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
         }
 
+        @Override
         public boolean handlePost(EditWellForm form, BindException errors) throws Exception
         {
-            well.setName(getUser(), form.ff_name);
-            well.getExpObject().setComment(getUser(), form.ff_comment);
-            if (form.ff_keywordName != null)
+
+            form.editWellReturnUrl = getRequest().getParameter("editWellReturnUrl");
+            isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
+            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
+            form.isBulkEdit = isBulkEdit;
+
+            if (!isUpdate)
             {
-                for (int i = 0; i < form.ff_keywordName.length; i ++)
+                return false;
+            }
+
+            wells=getWells(isBulkEdit);
+
+            for (FlowWell well : wells)
+            {
+                if(!form.isBulkEdit)
                 {
-                    String name = form.ff_keywordName[i];
-                    if (StringUtils.isEmpty(name))
-                        continue;
-                    well.setKeyword(name, form.ff_keywordValue[i]);
+                    well.setName(getUser(), form.ff_name);
+                    well.getExpObject().setComment(getUser(), form.ff_comment);
+                }
+                if (form.ff_keywordName != null)
+                {
+                    for (int i = 0; i < form.ff_keywordName.length; i ++)
+                    {
+                        String name = form.ff_keywordName[i];
+                        if (StringUtils.isEmpty(name))
+                            continue;
+
+                        boolean isEmptyValueOnBulkEdit = form.isBulkEdit && form.ff_keywordValue[i] == null;
+                        if (!isEmptyValueOnBulkEdit)
+                        {
+                            well.setKeyword(name, form.ff_keywordValue[i]);
+                        }
+                    }
                 }
             }
             FlowManager.get().flowObjectModified();
@@ -227,15 +328,24 @@ public class WellController extends BaseFlowController
 
         public ActionURL getSuccessURL(EditWellForm form)
         {
-            return form.getWell().urlFor(ShowWellAction.class);
+            if (form.isBulkEdit)
+            {
+                return new ActionURL(form.editWellReturnUrl);
+            }
+            return form.getWells().get(0).urlFor(ShowWellAction.class);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
-            String label = well != null ? "Edit " + well.getLabel() : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, well, label);
+            if (isBulkEdit)
+            {
+                return null;
+            }
+            String label = wells != null && !wells.isEmpty() ? "Edit " + wells.get(0).getLabel() : "Well not found";
+            return appendFlowNavTrail(getPageConfig(), root, wells.get(0), label);
         }
     }
+
 
     @RequiresPermission(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
