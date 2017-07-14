@@ -84,12 +84,12 @@
             <td>Comment:</td>
             <td><textarea rows="5" cols="40" name="ff_comment"><%=h(form.ff_comment)%></textarea></td>
         </tr>
-        <tr>
-            <td colspan="2">Keywords:</td>
-        </tr>
         <%}%>
         <% if (well.getDataType() == FlowDataType.FCSFile)
         { %>
+        <tr>
+            <td colspan="2">Keywords:</td>
+        </tr>
         <%
             for (int i = 0; i < form.ff_keywordName.length; i++)
             { %>
@@ -124,9 +124,9 @@
         <%
             }
         %>
+        <i class="fa fa-plus-circle add-new-keyword" style="color: #116596"> Create a new keyword:</i>
         <% } %>
     </table>
-    <i class="fa fa-plus-circle add-new-keyword" style="color: #116596"> Create a new keyword:</i>
 
     <labkey:button text="update"/>
     <%

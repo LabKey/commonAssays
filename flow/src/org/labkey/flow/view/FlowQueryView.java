@@ -271,20 +271,22 @@ public class FlowQueryView extends QueryView
             }
         }
 
-        ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
-        URLHelper returnURL = getReturnURL();
-        editWellsURL.addReturnURL(returnURL);
-        editWellsURL.addParameter("editWellReturnUrl",getReturnURL().toString());
-        editWellsURL.addParameter("isBulkEdit",true);
-        editWellsURL.addParameter("isUpdate",false);
+        if (queryName.equals(FlowTableType.FCSFiles.toString()))
+        {
+            ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
+            URLHelper returnURL = getReturnURL();
+            editWellsURL.addReturnURL(returnURL);
+            editWellsURL.addParameter("editWellReturnUrl", getReturnURL().toString());
+            editWellsURL.addParameter("isBulkEdit", true);
+            editWellsURL.addParameter("isUpdate", false);
 
-        ActionButton versionButton = new ActionButton("Edit Keywords");
-        versionButton.setRequiresSelection(true, 1, null);
-        versionButton.setURL(editWellsURL);
-        versionButton.setActionType(ActionButton.Action.POST);
-        versionButton.setDisplayPermission(UpdatePermission.class);
-        bar.add(versionButton);
-
+            ActionButton versionButton = new ActionButton("Edit Keywords");
+            versionButton.setRequiresSelection(true, 1, null);
+            versionButton.setURL(editWellsURL);
+            versionButton.setActionType(ActionButton.Action.POST);
+            versionButton.setDisplayPermission(UpdatePermission.class);
+            bar.add(versionButton);
+        }
     }
 
     @Override
