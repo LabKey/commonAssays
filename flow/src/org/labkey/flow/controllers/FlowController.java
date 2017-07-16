@@ -422,7 +422,7 @@ public class FlowController extends BaseFlowController
 
             String folderName = StringUtils.trimToNull(form.getFolderName());
             StringBuilder error = new StringBuilder();
-            if (!Container.isLegalName(folderName, error))
+            if (!Container.isLegalName(folderName, parent.isRoot(), error))
             {
                 errors.rejectValue("folderName", ERROR_MSG, error.toString());
                 return false;
