@@ -124,7 +124,7 @@
         <%
             }
         %>
-        <i class="fa fa-plus-circle add-new-keyword" style="color: #116596"> Create a new keyword:</i>
+        <tr><td colspan="2"><i class="fa fa-plus-circle add-new-keyword" style="color: #116596"> Create a new keyword:</i></td></tr>
         <% } %>
     </table>
 
