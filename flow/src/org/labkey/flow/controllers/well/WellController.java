@@ -274,6 +274,7 @@ public class WellController extends BaseFlowController
                     {
                         wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
                     }
+                    DataRegionSelection.clearAll(form.getViewContext());
                 }
                 form.setWells(wells, isBulkEdit);
                 if (isBulkEdit && !isUpdate)
