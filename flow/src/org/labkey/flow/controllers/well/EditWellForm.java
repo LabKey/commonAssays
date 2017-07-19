@@ -70,19 +70,22 @@ public class EditWellForm extends ViewForm
     }
 
 
-    public void setWells(List<FlowWell> wells){
+    public void setWells(List<FlowWell> wells, boolean isBulkEdit){
         _wells = wells;
         if (wells != null && wells.size() > 0)
         {
             setFormKeywords(wells);
-            if(wells.size()==1)
-            if (ff_comment == null)
+
+            if (!isBulkEdit)
             {
-                ff_comment = wells.get(0).getComment();
-            }
-            if (ff_name == null)
-            {
-                ff_name = wells.get(0).getName();
+                if (ff_comment == null)
+                {
+                    ff_comment = wells.get(0).getComment();
+                }
+                if (ff_name == null)
+                {
+                    ff_name = wells.get(0).getName();
+                }
             }
         }
     }
@@ -95,7 +98,7 @@ public class EditWellForm extends ViewForm
             ff_keywordName = new String[entries.length];
             ff_keywordValue = new String[entries.length];
             ff_keywordError = new String[entries.length];
-            for (int i = 0; i < entries.length; i ++)
+            for (int i = 0; i < entries.length; i++)
             {
                 ff_keywordName[i] = entries[i].getKey();
                 if(!isBulkEdit)

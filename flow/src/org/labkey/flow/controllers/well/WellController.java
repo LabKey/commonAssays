@@ -122,7 +122,7 @@ public class WellController extends BaseFlowController
         return FlowWell.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
     }
 
-    public List<FlowWell> getWells(boolean isBulkEdit)
+    protected List<FlowWell> getWells(boolean isBulkEdit)
     {
         List<FlowWell> ret = new ArrayList<>();
 
@@ -142,14 +142,15 @@ public class WellController extends BaseFlowController
         }
 
         FlowWell well = FlowWell.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
-        if(well != null){
+        if(well != null)
+        {
             ret.add(well);
         }
 
         return ret;
     }
 
-    public String[] getKeywordIntersection(List<FlowWell> wells, boolean excludeMetaDataKeywords)
+    protected String[] getKeywordIntersection(List<FlowWell> wells, boolean excludeMetaDataKeywords)
     {
         Set<String> intersection = new HashSet<>(wells.get(0).getKeywords().keySet());
         for (FlowWell well : wells)
@@ -216,7 +217,7 @@ public class WellController extends BaseFlowController
         {
             isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
             wells = getWells(isBulkEdit);
-            form.setWells(wells);
+            form.setWells(wells, isBulkEdit);
 
             if (form.ff_keywordName != null)
             {
@@ -274,7 +275,7 @@ public class WellController extends BaseFlowController
                         wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
                     }
                 }
-                form.setWells(wells);
+                form.setWells(wells, isBulkEdit);
                 if (isBulkEdit && !isUpdate)
                 {
                     form.ff_keywordName = getKeywordIntersection(wells, true);
@@ -297,18 +298,18 @@ public class WellController extends BaseFlowController
                 return false;
             }
 
-            wells=getWells(isBulkEdit);
+            wells = getWells(isBulkEdit);
 
             for (FlowWell well : wells)
             {
-                if(!form.isBulkEdit)
+                if (!form.isBulkEdit)
                 {
                     well.setName(getUser(), form.ff_name);
                     well.getExpObject().setComment(getUser(), form.ff_comment);
                 }
                 if (form.ff_keywordName != null)
                 {
-                    for (int i = 0; i < form.ff_keywordName.length; i ++)
+                    for (int i = 0; i < form.ff_keywordName.length; i++)
                     {
                         String name = form.ff_keywordName[i];
                         if (StringUtils.isEmpty(name))
@@ -345,7 +346,6 @@ public class WellController extends BaseFlowController
             return appendFlowNavTrail(getPageConfig(), root, wells.get(0), label);
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
