@@ -215,9 +215,8 @@ public class WellController extends BaseFlowController
         @Override
         public void validateCommand(EditWellForm form, Errors errors)
         {
-            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
-            wells = getWells(isBulkEdit);
-            form.setWells(wells, isBulkEdit);
+            wells = getWells(form.ff_isBulkEdit);
+            form.setWells(wells, form.ff_isBulkEdit);
 
             if (form.ff_keywordName != null)
             {
@@ -257,13 +256,11 @@ public class WellController extends BaseFlowController
                 form.editWellReturnUrl = returnUrl.toString();
             }
             isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
-            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
-            form.isBulkEdit = isBulkEdit;
             if(!isUpdate)
             {
                 if (wells == null)
                 {
-                    wells = getWells(isBulkEdit);
+                    wells = getWells(form.ff_isBulkEdit);
                 }
                 if (wells == null || wells.size() == 0)
                 {
@@ -276,8 +273,8 @@ public class WellController extends BaseFlowController
                     }
                     DataRegionSelection.clearAll(form.getViewContext());
                 }
-                form.setWells(wells, isBulkEdit);
-                if (isBulkEdit && !isUpdate)
+                form.setWells(wells, form.ff_isBulkEdit);
+                if (form.ff_isBulkEdit && !isUpdate)
                 {
                     form.ff_keywordName = getKeywordIntersection(wells, true);
                 }
@@ -288,22 +285,19 @@ public class WellController extends BaseFlowController
         @Override
         public boolean handlePost(EditWellForm form, BindException errors) throws Exception
         {
-
             form.editWellReturnUrl = getRequest().getParameter("editWellReturnUrl");
             isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
-            isBulkEdit = Boolean.parseBoolean(getRequest().getParameter("isBulkEdit"));
-            form.isBulkEdit = isBulkEdit;
 
             if (!isUpdate)
             {
                 return false;
             }
 
-            wells = getWells(isBulkEdit);
+            wells = getWells(form.ff_isBulkEdit);
 
             for (FlowWell well : wells)
             {
-                if (!form.isBulkEdit)
+                if (!form.ff_isBulkEdit)
                 {
                     well.setName(getUser(), form.ff_name);
                     well.getExpObject().setComment(getUser(), form.ff_comment);
@@ -316,7 +310,7 @@ public class WellController extends BaseFlowController
                         if (StringUtils.isEmpty(name))
                             continue;
 
-                        boolean isEmptyValueOnBulkEdit = form.isBulkEdit && form.ff_keywordValue[i] == null;
+                        boolean isEmptyValueOnBulkEdit = form.ff_isBulkEdit && form.ff_keywordValue[i] == null;
                         if (!isEmptyValueOnBulkEdit)
                         {
                             well.setKeyword(name, form.ff_keywordValue[i]);
@@ -330,7 +324,7 @@ public class WellController extends BaseFlowController
 
         public ActionURL getSuccessURL(EditWellForm form)
         {
-            if (form.isBulkEdit)
+            if (form.ff_isBulkEdit)
             {
                 return new ActionURL(form.editWellReturnUrl);
             }

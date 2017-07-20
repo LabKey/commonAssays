@@ -31,7 +31,7 @@
 <labkey:errors/>
 <labkey:form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>">
     <input name="editWellReturnUrl" type="hidden" value="<%=h(form.editWellReturnUrl)%>"/>
-    <input name="isBulkEdit" type="hidden" value="<%=h(form.isBulkEdit)%>"/>
+    <input name="ff_isBulkEdit" type="hidden" value="<%=h(form.ff_isBulkEdit)%>"/>
     <input name="isUpdate" type="hidden" value="true" />
     <table id="keywordTable">
         <tr>
@@ -40,7 +40,7 @@
                 <a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer())%>?runId=<%=well.getRun().getRunId()%>"><%=h(well.getRun().getName())%>
                 </a></td>
         </tr>
-        <% if (form.isBulkEdit)
+        <% if (form.ff_isBulkEdit)
         { %>
         <tr>
             <td colspan="2"><h1>Edit Keywords</h1></td>
@@ -131,7 +131,7 @@
     <labkey:button text="update"/>
     <%
         String cancelURL = String.valueOf(well.urlFor(WellController.ShowWellAction.class));
-        if (form.isBulkEdit)
+        if (form.ff_isBulkEdit)
         {
             cancelURL = new ActionURL(form.editWellReturnUrl).toString();
         }

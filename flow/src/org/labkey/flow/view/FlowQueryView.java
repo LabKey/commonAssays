@@ -277,15 +277,15 @@ public class FlowQueryView extends QueryView
             URLHelper returnURL = getReturnURL();
             editWellsURL.addReturnURL(returnURL);
             editWellsURL.addParameter("editWellReturnUrl", getReturnURL().toString());
-            editWellsURL.addParameter("isBulkEdit", true);
+            editWellsURL.addParameter("ff_isBulkEdit", true);
             editWellsURL.addParameter("isUpdate", false);
 
-            ActionButton versionButton = new ActionButton("Edit Keywords");
-            versionButton.setRequiresSelection(true, 1, null);
-            versionButton.setURL(editWellsURL);
-            versionButton.setActionType(ActionButton.Action.POST);
-            versionButton.setDisplayPermission(UpdatePermission.class);
-            bar.add(versionButton);
+            ActionButton editKeyordsButton = new ActionButton("Edit Keywords");
+            editKeyordsButton.setRequiresSelection(true, 1, null);
+            editKeyordsButton.setURL(editWellsURL);
+            editKeyordsButton.setActionType(ActionButton.Action.POST);
+            editKeyordsButton.setDisplayPermission(UpdatePermission.class);
+            bar.add(editKeyordsButton);
         }
     }
 

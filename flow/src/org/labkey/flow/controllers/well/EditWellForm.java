@@ -33,7 +33,7 @@ public class EditWellForm extends ViewForm
     public String[] ff_keywordError;
     public String ff_comment;
     public String editWellReturnUrl;
-    public boolean isBulkEdit;
+    public boolean ff_isBulkEdit;
 
     public void setWell(FlowWell well)
     {
@@ -101,7 +101,7 @@ public class EditWellForm extends ViewForm
             for (int i = 0; i < entries.length; i++)
             {
                 ff_keywordName[i] = entries[i].getKey();
-                if(!isBulkEdit)
+                if(!ff_isBulkEdit)
                 {
                     ff_keywordValue[i] = entries[i].getValue();
                 }
@@ -136,5 +136,10 @@ public class EditWellForm extends ViewForm
     public void setFf_keywordError(String[] values)
     {
         ff_keywordError = values;
+    }
+
+    public void setFf_isBulkEdit(boolean ff_isBulkEdit)
+    {
+        this.ff_isBulkEdit = ff_isBulkEdit;
     }
 }
