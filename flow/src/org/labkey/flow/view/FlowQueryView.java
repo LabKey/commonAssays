@@ -16,6 +16,7 @@
 
 package org.labkey.flow.view;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -290,6 +291,7 @@ public class FlowQueryView extends QueryView
     }
 
     @Override
+    @NotNull
     public PanelButton createExportButton(@Nullable List<String> recordSelectorColumns)
     {
         PanelButton panelButton = super.createExportButton(recordSelectorColumns);
