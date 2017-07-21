@@ -70,6 +70,7 @@ import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.util.KeywordUtil;
 import org.labkey.flow.view.GraphColumn;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -150,7 +151,7 @@ public class WellController extends BaseFlowController
         return ret;
     }
 
-    protected String[] getKeywordIntersection(List<FlowWell> wells, boolean excludeMetaDataKeywords)
+    protected String[] getKeywordIntersection(List<FlowWell> wells, boolean filterHiddenKeywords)
     {
         Set<String> intersection = new HashSet<>(wells.get(0).getKeywords().keySet());
         for (FlowWell well : wells)
@@ -159,12 +160,13 @@ public class WellController extends BaseFlowController
             intersection.retainAll(c);
         }
 
-        if (excludeMetaDataKeywords)
+        List<String> sortList = new ArrayList<>(intersection);
+
+        if (filterHiddenKeywords)
         {
-            intersection.removeIf(kw -> kw.startsWith("$"));
+            sortList = (List<String>) KeywordUtil.filterHidden(sortList);
         }
 
-        List<String> sortList = new ArrayList<>(intersection);
         Collections.sort(sortList);
         return sortList.toArray(new String[0]);
     }
