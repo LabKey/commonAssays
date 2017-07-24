@@ -33,6 +33,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
@@ -69,6 +70,7 @@ import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.labkey.flow.util.KeywordUtil;
 import org.labkey.flow.view.GraphColumn;
@@ -214,6 +216,7 @@ public class WellController extends BaseFlowController
         List<FlowWell> wells;
         boolean isBulkEdit;
         boolean isUpdate;
+        String returnURL;
         @Override
         public void validateCommand(EditWellForm form, Errors errors)
         {
@@ -287,7 +290,9 @@ public class WellController extends BaseFlowController
         @Override
         public boolean handlePost(EditWellForm form, BindException errors) throws Exception
         {
+            isBulkEdit = form.ff_isBulkEdit;
             form.editWellReturnUrl = getRequest().getParameter("editWellReturnUrl");
+            returnURL = form.editWellReturnUrl;
             isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
 
             if (!isUpdate)
@@ -337,7 +342,10 @@ public class WellController extends BaseFlowController
         {
             if (isBulkEdit)
             {
-                return null;
+                ActionURL urlFcsFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
+                root.addChild(new NavTree("FSC Files",urlFcsFiles));
+                root.addChild(new NavTree("Edit Keywords"));
+                return root;
             }
             String label = wells != null && !wells.isEmpty() ? "Edit " + wells.get(0).getLabel() : "Well not found";
             return appendFlowNavTrail(getPageConfig(), root, wells.get(0), label);

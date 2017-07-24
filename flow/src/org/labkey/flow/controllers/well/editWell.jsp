@@ -37,14 +37,11 @@
         <tr>
             <td>Run Name:</td>
             <td>
-                <a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer())%>?runId=<%=well.getRun().getRunId()%>"><%=h(well.getRun().getName())%>
+                <a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer()).addParameter("runId",well.getRun().getRunId())%>"><%=h(well.getRun().getName())%>
                 </a></td>
         </tr>
         <% if (form.ff_isBulkEdit)
         { %>
-        <tr>
-            <td colspan="2"><h1>Edit Keywords</h1></td>
-        </tr>
         <tr>
             <td colspan="2">
                 <h4>Press Update to save the input values for multiple keywords for the selected FCS files.
