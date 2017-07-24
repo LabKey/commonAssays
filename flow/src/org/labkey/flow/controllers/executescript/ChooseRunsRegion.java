@@ -46,7 +46,7 @@ public class ChooseRunsRegion extends DataRegion
 
 
     @Override
-    protected void renderFormHeader(RenderContext ctx, Writer out, int mode) throws IOException
+    protected void renderFormBegin(RenderContext ctx, Writer out, int mode) throws IOException
     {
         renderHiddenFormFields(ctx, out, mode);
     }
