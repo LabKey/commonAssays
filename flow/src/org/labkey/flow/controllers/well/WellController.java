@@ -245,6 +245,13 @@ public class WellController extends BaseFlowController
                         String duplicateNameMessage = "There is already a keyword '" + name + "'";
                         errors.reject(ERROR_MSG, duplicateNameMessage);
                         form.ff_keywordError[i] = duplicateNameMessage;
+                        for (int j = 0; j < form.ff_keywordName.length; j ++){
+                            if (j != i && name.equals(form.ff_keywordName[j]))
+                            {
+                                form.ff_keywordError[j] = "Duplicate keyword";
+                            }
+                        }
+
                         break;
                     }
                 }
