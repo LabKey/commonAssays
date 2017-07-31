@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 @Category({Assays.class, DailyA.class})
 public final class AssayTransformWarningTest extends BaseWebDriverTest
 {
+//    {setIsBootstrapWhitelisted(true);} // whitelist this test
     public static final File JAVA_TRANSFORM_SCRIPT = TestFileUtils.getSampleData("qc/transformWarning.jar");
     public static final File R_TRANSFORM_SCRIPT = TestFileUtils.getSampleData("qc/assayTransformWarning.R");
 
