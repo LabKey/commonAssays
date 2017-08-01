@@ -19,10 +19,27 @@ package org.labkey.flow.query;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
-import org.labkey.api.data.*;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerForeignKey;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.FilterInfo;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MaterializedQueryHelper;
+import org.labkey.api.data.NullColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
@@ -53,6 +70,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.RowIdForeignKey;
+import org.labkey.api.query.SchemaKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
@@ -63,18 +81,16 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.FileLinkDisplayColumn;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.util.ContainerContext;
-import org.labkey.api.util.GUID;
-import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
@@ -816,6 +832,9 @@ public class FlowSchema extends UserSchema
             return FlowSchema.this;
         }
 
+        // NOTE: The download column is slightly different from the file column in that it wraps
+        // the dataId instead of the flow.object.uri column.  For example, the CompensationMatrix
+        // table has no uri value but does support being downloaded.
         ColumnInfo addDownloadColumn()
         {
             // Replace ExpDataTable's DownloadLink column with ours
@@ -850,7 +869,7 @@ public class FlowSchema extends UserSchema
                             String url = renderURL(ctx);
                             if (url != null)
                             {
-                                out.write(PageFlowUtil.textLink("download", url, null, null));
+                                out.write(PageFlowUtil.iconLink("fa fa-download", null, url, null, null, null));
                             }
                         }
                     };
@@ -858,6 +877,36 @@ public class FlowSchema extends UserSchema
             });
             addColumn(colDownload);
             return colDownload;
+        }
+
+        ColumnInfo createUriColumnAlias(String columnAlias)
+        {
+            ColumnInfo uriColumn = _flowObject.getColumn("uri");
+            ColumnInfo ret = new AliasedColumn(this, columnAlias, uriColumn);
+            return ret;
+        }
+
+        ColumnInfo addFileColumn(String columnAlias)
+        {
+            ColumnInfo ret = createUriColumnAlias(columnAlias);
+
+            DetailsURL detailsURL = new DetailsURL(new ActionURL(FlowController.DownloadAction.class, getContainer()).addParameter("dataId", "${rowId}"));
+            //DetailsURL detailsURL = DetailsURL.fromString("/flow/download.view?dataId=${rowId}", getContainer());
+            PropertyDescriptor pd = new PropertyDescriptor();
+            pd.setURL(detailsURL);
+            ret.setDisplayColumnFactory(new FileLinkDisplayColumn.Factory(pd, getContainer(), SchemaKey.fromParts(FlowSchema.SCHEMANAME), FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId")));
+            ret.setURL(detailsURL);
+            ret.setHidden(true);
+            addColumn(ret);
+            return ret;
+        }
+
+        ColumnInfo addFilePathColumn(String columnAlias)
+        {
+            ColumnInfo ret = createUriColumnAlias(columnAlias);
+            ret.setHidden(true);
+            addColumn(ret);
+            return ret;
         }
 
         ColumnInfo addStatisticColumn(String columnAlias)
@@ -1287,7 +1336,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo flag = ret.addColumn(ExpDataTable.Column.Flag);
         if (type != null)
             flag.setDescription(type.getLabel() + " Flag");
-        ret.addDownloadColumn();
+
         ret.addColumn(ExpDataTable.Column.Created).setHidden(true);
         ret.addColumn(ExpDataTable.Column.CreatedBy).setHidden(true);
         ret.setTitleColumn("Name");
@@ -1317,7 +1366,7 @@ public class FlowSchema extends UserSchema
 
         return ret;
     }
-    
+
 
 
     static private class DeferredFCSFileVisibleColumns implements Iterable<FieldKey>
@@ -1344,7 +1393,7 @@ public class FlowSchema extends UserSchema
             }
             return ret.iterator();
         }
-    }   
+    }
 
     static private class DeferredFCSAnalysisVisibleColumns implements Iterable<FieldKey>
     {
@@ -1396,7 +1445,7 @@ public class FlowSchema extends UserSchema
                     }
                 }
             }
-            
+
             lookup = _colGraph.getFk().getLookupTableInfo();
             if (lookup != null)
             {
@@ -1517,14 +1566,15 @@ public class FlowSchema extends UserSchema
         String bTRUE = _dbSchema.getSqlDialect().getBooleanTRUE();
         String bFALSE = _dbSchema.getSqlDialect().getBooleanFALSE();
 
+        ret.addFileColumn("File");
+        // Similar to 'ExpDataTable.Column.DataFileUrl' except uses the flow.object.uri column
+        ret.addFilePathColumn("FilePath");
+        ret.addDownloadColumn();
+
         // flow.object.uri -- not to be confused with exp.data.datafileurl
         ExprColumn colHasFile = new ExprColumn(ret, "HasFile", new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN " + bTRUE +" ELSE " + bFALSE + " END)"), JdbcType.BOOLEAN);
         ret.addColumn(colHasFile);
         colHasFile.setHidden(true);
-
-        //ColumnInfo colURI = new ExprColumn(ret, "URI", new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".uri"), JdbcType.VARCHAR);
-        //ret.addColumn(colURI);
-
 
         // Original input FCSFile (the FCSFile marked as a DataInput of this FCSFile)
         ColumnInfo colFCSFile = new ExprColumn(ret, ORIGINAL_FCSFILE_FIELDKEY, new SQLFragment(ExprColumn.STR_TABLE_ALIAS  + ".fcsid"), JdbcType.INTEGER);
@@ -1599,6 +1649,11 @@ public class FlowSchema extends UserSchema
                     return detach().createFCSFileTable("FCSFile", false);
                 }
             });
+
+        ret.addFileColumn("File");
+        // Similar to 'ExpDataTable.Column.DataFileUrl' except uses the flow.object.uri column
+        ret.addFilePathColumn("FilePath");
+        ret.addDownloadColumn();
 
         for (FlowReport report : FlowReportManager.getFlowReports(getContainer(), getUser()))
         {
@@ -1683,6 +1738,8 @@ public class FlowSchema extends UserSchema
         ret.setDetailsURL(detailsURL);
         ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
         ret.addStatisticColumn("Value");
+        // Only add download column -- the file column will always be blank
+        ret.addDownloadColumn();
         return ret;
     }
 
@@ -1699,6 +1756,12 @@ public class FlowSchema extends UserSchema
         DetailsURL detailsURL = new DetailsURL(new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()), Collections.singletonMap(FlowParam.scriptId.toString(), "RowId"));
         ret.setDetailsURL(detailsURL);
         ret.getColumn(ExpDataTable.Column.Name).setURL(detailsURL);
+
+        ret.addFileColumn("File");
+        // Similar to 'ExpDataTable.Column.DataFileUrl' except uses the flow.object.uri column
+        ret.addFilePathColumn("FilePath");
+        ret.addDownloadColumn();
+
         return ret;
     }
 

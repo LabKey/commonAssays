@@ -57,6 +57,7 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.FlowSettings;
+import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -577,6 +578,30 @@ public class FlowController extends BaseFlowController
             return null;
         }
     }
+
+    // redirect to appropriate download URL
+    @RequiresPermission(ReadPermission.class)
+    public class DownloadAction extends SimpleViewAction<FlowDataObjectForm>
+    {
+        @Override
+        public ModelAndView getView(FlowDataObjectForm form, BindException errors) throws Exception
+        {
+            FlowDataObject fdo = form.getFlowObject();
+            if (fdo == null)
+                throw new NotFoundException();
+
+            checkContainer(fdo);
+
+            throw new RedirectException(fdo.urlDownload());
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return null;
+        }
+    }
+
 
     public static class TestCase extends AbstractActionPermissionTest
     {
