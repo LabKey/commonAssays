@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.util.JunitUtil;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.VersionNumber;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -791,9 +791,17 @@ abstract public class FlowJoWorkspace extends Workspace
 
     public static class LoadTests extends Assert
     {
+        private File projectRoot()
+        {
+            String projectRootPath =  AppProps.getInstance().getProjectRoot();
+            if (projectRootPath == null)
+                projectRootPath = System.getProperty("user.dir");
+            return new File(projectRootPath);
+        }
+
         private Workspace loadWorkspace(String path) throws Exception
         {
-            File file = JunitUtil.getSampleData(null, path);
+            File file = new File(projectRoot(), "sampledata/" + path);
             return Workspace.readWorkspace(file.getName(), path, new FileInputStream(file));
         }
 
@@ -951,12 +959,53 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "10.0.8", false);
         }
 
+        @Test
+        public void loadPCAdvanced_10_2() throws Exception
+        {
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.2.wsp");
+            assertAdvanced(workspace, "10.2", false);
+        }
+
+        private boolean isVersionGreaterThan10_0_7(String version)
+        {
+            int[] version10_0_7 = new int[]{10, 0, 7};
+
+            String[] testVersion = version.split("\\.");
+
+            for (int i = 0; i < version10_0_7.length; i++)
+            {
+                if (testVersion[i] == null)
+                {
+                    return false;
+                }
+
+                int testVersionPart = Integer.parseInt(testVersion[i]);
+                int version_10_0_7_Part = version10_0_7[i];
+
+                if (testVersionPart != version_10_0_7_Part)
+                {
+                    return testVersionPart > version_10_0_7_Part;
+                }
+            }
+
+            return false;
+        }
+
+        @Test
+        public void testVersionMethod()
+        {
+            assertEquals(true, isVersionGreaterThan10_0_7("10.2"));
+            assertEquals(true, isVersionGreaterThan10_0_7("10.0.8"));
+            assertEquals(false, isVersionGreaterThan10_0_7("10.0.7"));
+            assertEquals(false, isVersionGreaterThan10_0_7("7.2.5"));
+        }
+
         private void assertAdvanced(Workspace workspace, String version, boolean mac)
         {
             assertEquals(16, workspace.getSampleCount());
             assertEquals(16, workspace._sampleAnalyses.size());
             assertEquals(16, workspace._sampleAnalysisResults.size());
-            if ("10.0.8".equals(version))
+            if (isVersionGreaterThan10_0_7(version))
             {
                 // 10.0.8 automagically added a "Compensation" group
                 assertTrue(workspace._groupInfos.containsKey("Compensation"));
@@ -978,15 +1027,28 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertTrue(workspace.getWarnings().get(0).contains("Coefficient of Variation statistic value missing"));
                 assertTrue(workspace.getWarnings().get(1).contains("Mode statistic not yet supported"));
             }
+            else if ("10.2".equals(version))
+            {
+                assertEquals(4, workspace.getWarnings().size());
+                assertTrue(workspace.getWarnings().get(0).contains("Lymphocytes/CD45+: Median statistic value missing"));
+                assertTrue(workspace.getWarnings().get(1).contains("Lymphocytes/T cells/CD4 T: Coefficient of Variation statistic value missing"));
+            }
             else
             {
                 assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 1, workspace.getWarnings().size());
                 assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
             }
 
-            String sampleId = mac ? "268435458" : "2";
+            String windowsSampleId = "2";
+            String sampleFileName = "931115-B02- Sample 01.fcs";
+            if ("10.2".equals(version))
+            {
+                windowsSampleId = "6";
+                sampleFileName = "931115-C02- Sample 02.fcs";
+            }
+            String sampleId = mac ? "268435458" : windowsSampleId;
             SampleInfo sample = workspace.getSample(sampleId);
-            assertEquals("931115-B02- Sample 01.fcs", sample.getLabel());
+            assertEquals(sampleFileName, sample.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sample);
             assertEquals(20, analysis.getPopulations().size());
@@ -1128,7 +1190,24 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                     assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
-                else if ("10.0.6".equals(version) || "10.0.7".equals(version) || "10.0.8".equals(version))
+                else if ("10.2".equals(version))
+                {
+                    assertEquals(105,      stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
+                    assertEquals(1.05d,    stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
+                    assertEquals(35.238d,  stats.get(new StatisticSpec("Lymphocytes/T cells:Freq_Of_Parent")), 0.001d);
+                    assertEquals(4d,       stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
+                    assertEquals(4.0d,     stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Count")), 0.001d);
+                    assertEquals(26.979d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Percentile(Fluor:90)")), 0.001d);
+                    assertEquals(36.198d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:CV(Fluor)")), 0.001d);
+                    assertEquals(16.998d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Geometric_Mean(Fluor)")), 0.001d);
+                    assertEquals(17.776d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Mean(Fluor)")), 0.001d);
+                    assertEquals(15.795d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Median(Fluor)")), 0.001d);
+                    assertEquals(3.809d,   stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Ancestor(Lymphocytes)")), 0.001d);
+                    assertEquals(10.810d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Freq_Of_Parent")), 0.001d);
+                    assertEquals(0.0400d,  stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
+                    assertEquals(2616.0d,  stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
+                }
+                else if ("10.0.6".equals(version) || "10.0.7".equals(version) || "10.0.8".equals(version) || "10.2".equals(version))
                 {
                     // It's tiresome caring about stat values
                     assertNotEquals(0,    stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
