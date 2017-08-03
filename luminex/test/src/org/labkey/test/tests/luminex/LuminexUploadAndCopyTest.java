@@ -30,6 +30,8 @@ import static org.junit.Assert.assertEquals;
 @Category({DailyA.class, Assays.class})
 public final class LuminexUploadAndCopyTest extends LuminexTest
 {
+    private final boolean IS_BOOTSTRAP_LAYOUT_WHITELISTED = setIsBootstrapWhitelisted(true);
+
     private static final String THAW_LIST_NAME = "LuminexThawList";
     private static final String TEST_ASSAY_LUM_SET_PROP_SPECIES2 = "testSpecies2";
     private static final String TEST_ASSAY_LUM_RUN_NAME = "testRunName1";
@@ -72,9 +74,9 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         setFormElement(Locator.name("name"), TEST_ASSAY_LUM_RUN_NAME2);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE2);
         clickButton("Next", 60000);
-        setFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]"), "StandardName1b");
-        setFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]/../../../tr[4]//input[@type='text']"), "StandardName2");
-        setFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]/../../../tr[5]//input[@type='text']"), "StandardName4");
+        setFormElement(Locator.name("_analyte_IL-1b_StandardName"), "StandardName1b");
+        setFormElement(Locator.name("_analyte_IL-2_StandardName"), "StandardName2");
+        setFormElement(Locator.name("_analyte_IL-4_StandardName"), "StandardName4");
         clickButton("Save and Finish");
 
         // Upload another run using a thaw list pasted in as a TSV
@@ -148,8 +150,8 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         clickButton("Next");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE3);
         clickButton("Next", 60000);
-        assertEquals("StandardName1b", getFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]")));
-        assertEquals("StandardName4", getFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]/../../../tr[4]//input[@type='text'][1]")));
+        assertEquals("StandardName1b", getFormElement(Locator.name("_analyte_IL-1b_StandardName")));
+        assertEquals("StandardName4", getFormElement(Locator.name("_analyte_IL-4_StandardName")));
         clickButton("Save and Finish");
 
         // Upload another run using a thaw list that pointed at the list we uploaded earlier
@@ -169,8 +171,8 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE3);
         waitForText("A file with name '" + TEST_ASSAY_LUM_FILE3.getName() + "' already exists");
         clickButton("Next", 60000);
-        assertEquals("StandardName1b", getFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]")));
-        assertEquals("StandardName4", getFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_analyte_')][1]/../../../tr[4]//input[@type='text'][1]")));
+        assertEquals("StandardName1b", getFormElement(Locator.name("_analyte_IL-1b_StandardName")));
+        assertEquals("StandardName4", getFormElement(Locator.name("_analyte_IL-4_StandardName")));
         clickButton("Save and Finish");
 
         log("Check that upload worked");
@@ -242,8 +244,9 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         _customizeViewsHelper.addColumn("ANALYTE/ANALYTEWITHBEAD");
         _customizeViewsHelper.addColumn("ANALYTE/BEADNUMBER");
         _customizeViewsHelper.applyCustomView();
+
         // show all rows (> 100 in full data file)
-        _extHelper.clickMenuButton(true, "Paging", "Show All");
+        addUrlParameter("Data.showRows=all");
 
         // check that both the raw and summary data were uploaded together
         DataRegionTable table = new DataRegionTable("Data", this);
