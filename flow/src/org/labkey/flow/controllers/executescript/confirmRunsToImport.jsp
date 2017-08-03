@@ -65,16 +65,14 @@
             <%=h(FlowModule.getLongProductName())%> will read the keywords from these FCS files into the database.  The FCS files
             themselves will not be modified, and will remain in the file system.
         </p>
-        <table class="labkey-indented"><%
+        <ul class="labkey-indented"><%
         for (Map.Entry<String, String> entry : paths.entrySet())
         {
-            %><tr>
-            <td><input type="hidden" name="file" value="<%=h(entry.getKey())%>"></td>
-            <td><%=h(entry.getValue())%></td>
-            </tr><%
-        }
-
-        %></table>
+            %>
+            <li><label><%=h(entry.getValue())%></label><input type="hidden" name="file" value="<%=h(entry.getKey())%>"></li>
+            <%
+        }%>
+        </ul>
 
         <% if (targetStudies.size() > 0) { %>
             <p>

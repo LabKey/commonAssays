@@ -477,6 +477,7 @@ flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text
 flow/src/org/labkey/flow/script/BaseHandler.java -text
 flow/src/org/labkey/flow/script/CompensationCalculationHandler.java -text
+flow/src/org/labkey/flow/script/FCSDirectoryFileType.java -text
 flow/src/org/labkey/flow/script/FlowAnalyzer.java -text
 flow/src/org/labkey/flow/script/FlowExperimentJob.java -text
 flow/src/org/labkey/flow/script/FlowJob.java -text
@@ -486,6 +487,7 @@ flow/src/org/labkey/flow/script/FlowThreadPool.java -text
 flow/src/org/labkey/flow/script/ImportResultsJob.java -text
 flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/KeywordsJob.java -text
+flow/src/org/labkey/flow/script/KeywordsTask.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
 flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
@@ -511,6 +513,7 @@ flow/src/org/labkey/flow/webparts/FlowOverview.java -text
 flow/src/org/labkey/flow/webparts/FlowSummary.jsp -text
 flow/src/org/labkey/flow/webparts/FlowSummaryWebPart.java -text
 flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
+flow/webapp/WEB-INF/flow/flowContext.xml -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
 luminex/resources/schemas/dbscripts/postgresql/luminex-0.00-15.10.sql -text

@@ -23,10 +23,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.flow.api.FlowService;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
@@ -80,7 +80,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FlowModule extends DefaultModule
+public class FlowModule extends SpringModule
 {
     public static final String NAME = "Flow";
 
@@ -165,7 +165,8 @@ public class FlowModule extends DefaultModule
         return false;
     }
 
-    public void doStartup(ModuleContext moduleContext)
+    @Override
+    protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider(this));
         FlowDataType.register();
@@ -181,7 +182,6 @@ public class FlowModule extends DefaultModule
 
         ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
     }
-
 
     @Override
     @NotNull
