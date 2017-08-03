@@ -39,6 +39,12 @@ public class SubsetSpec implements Serializable
 
     public SubsetSpec(SubsetSpec parent, @NotNull SubsetPart part)
     {
+//        The @NotNull annotation should have caught this but did not (Exception Report 25013/ Issue 30837).
+        if(part == null)
+        {
+            throw new IllegalArgumentException("The annotation preventing a null part failed.");
+        }
+
         _parent = parent;
         _subset = part;
         // NOT SURE: Disable the following check to allow subset expression mid-subsetspec so we can generate aliases from boolean gates.
@@ -80,6 +86,11 @@ public class SubsetSpec implements Serializable
                 spec = new SubsetSpec(spec, PopulationName.fromString(str));
         }
 
+        if(spec != null && spec.getSubset() == null)
+        {
+            throw new FlowException("A SubsetSpec with a null Subset is not valid.");
+        }
+
         return spec;
     }
 
@@ -108,7 +119,14 @@ public class SubsetSpec implements Serializable
         {
             return null;
         }
-        return SubsetExpression.subset(strSubset);
+        SubsetSpec spec = SubsetExpression.subset(strSubset);
+
+        if(spec != null && spec.getSubset() == null)
+        {
+            throw new FlowException("A SubsetSpec with a null Subset is not valid.");
+        }
+
+        return spec;
     }
 
     public SubsetSpec getParent()
