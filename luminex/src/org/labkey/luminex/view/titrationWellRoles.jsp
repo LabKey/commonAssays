@@ -18,6 +18,7 @@
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
 <%@ page import="org.labkey.luminex.LuminexUploadWizardAction" %>
 <%@ page import="org.labkey.luminex.model.Titration" %>
@@ -25,6 +26,13 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("Ext4");
+    }
+%>
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
@@ -174,7 +182,7 @@
                 showcols[0].value = (isChecked ? "true" : "");
 
             // show/hide the column associated with this titration
-            var elements = Ext.select('*[name=' + titrationCellName + ']').elements;
+            var elements = Ext4.select('*[name=' + titrationCellName + ']').elements;
             for (var i = 0; i < elements.length; i++)
             {
                 if (isChecked)
@@ -224,7 +232,7 @@
         return null;
     }
 
-    Ext.onReady(setInitialWellRoles);
+    Ext4.onReady(setInitialWellRoles);
     function setInitialWellRoles()
     {
 <%
