@@ -25,13 +25,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     padding: 10,
 
-    constructor: function (config)
-    {
-        this.callParent([config]);
-    },
-
-    initComponent: function ()
-    {
+    initComponent: function() {
         this.activeItem = 'selectionpanel';
 
         this.prevBtn = new Ext4.Button({text: 'Previous', disabled: true, scope: this, handler: function(){
@@ -67,13 +61,14 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 window.location = this.returnUrl;
             }}];
 
-        this.items = [];
-        this.items.push(this.getSelectionPanel());
-        this.items.push(this.getConfirmationPanel());
+        this.items = [
+            this.getSelectionPanel(),
+            this.getConfirmationPanel()
+        ];
 
         // create a delayed task for checkbox change events
-         this.checkboxChangeTask = new Ext4.util.DelayedTask(this.exclusionChanged, this);
-         this.checkboxChangeQueue = {};
+        this.checkboxChangeTask = new Ext4.util.DelayedTask(this.exclusionChanged, this);
+        this.checkboxChangeQueue = {};
 
         this.callParent(arguments);
     },
@@ -241,24 +236,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         return tpl.join('');
     },
 
-    getPlateControlsTpl : function(){
-        var tpl = [];
-        tpl.push('<table class="labkey-data-region-legacy labkey-show-borders">',
-                    '<tr><th></th><th>Plate</th><th>Range</th><th>Virus Control</th><th>Cell Control</th></tr>',
-                    '<tpl for="controls">',
-                        '<tr>',
-                            '<td class="plate-checkbox" plateNumm="{[xindex]}" id="{[this.getId(this)]}"></td>',
-                            '<td style="font-weight:bold">{[xindex]}</td>',
-                            '<td align="left">{controlRange}</td>',
-                            '<td align="left">{virusControlMean} &plusmn; {virusControlPlusMinus}</td>',
-                            '<td align="left">{cellControlMean} &plusmn; {cellControlPlusMinus}</td>',
-                        '</tr>',
-                    '</tpl>',
-                '</table>'
-        );
-        return tpl.join('');
-    },
-
     getControlWellsTpl : function(){
         var tpl = [];
 
@@ -302,10 +279,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
         tpl.push(
                 '<tpl for="dilutionSummaries">',
-/*
-                '<tpl if="xindex % 2 === 1"><tr><td colspan="2"></tpl>',
-                '<tpl if="xindex % 2 != 1"><td colspan="2"></tpl>',
-*/
                 '<tr><td colspan="2"><table class="dilution-summary">',
                 '<tr><td colspan="10" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
                 '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
@@ -322,10 +295,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         '</tpl>',               // end dilutions
                     '</table></td></tr>',
                 '</td></tr></table>',
-/*
-                '<tpl if="xindex % 2 != 0"></td></tpl>',
-                '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
-*/
                 '</tpl>'
         );
         return tpl.join('');
@@ -662,7 +631,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     failureHandler : function(response)
     {
         this.getEl().unmask();
-        var msg = response.status == 403 ? response.statusText : Ext4.JSON.decode(response.responseText).exception;
+        var msg = response.status === 403 ? response.statusText : Ext4.decode(response.responseText).exception;
         Ext4.Msg.show({
             title:'Error',
             msg: msg,
@@ -725,7 +694,7 @@ LABKEY.nab.QCUtil = new function() {
                 elements.each(function(el){
                     if (excluded && el) {
                         el.addCls('excluded');
-                        el.dom.setAttribute('data-qtip', comment ? Ext4.util.Format.htmlEncode(comment) : 'excluded from calculations');
+                        el.dom.setAttribute('data-qtip', comment ? Ext4.htmlEncode(comment) : 'excluded from calculations');
                     }
                     else if (el) {
                         el.removeCls('excluded');
