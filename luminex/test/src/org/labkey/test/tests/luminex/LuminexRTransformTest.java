@@ -31,6 +31,8 @@ import static org.junit.Assert.assertNotNull;
 @Category({DailyA.class, Assays.class})
 public final class LuminexRTransformTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     private static final String TEST_ANALYTE_LOT_NUMBER = "ABC 123";
     private static final String ANALYTE1 = "MyAnalyte";
     private static final String ANALYTE2 = "MyAnalyte B";
