@@ -26,6 +26,7 @@ import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class KeywordsJob extends ScriptJob
     private final List<File> _paths;
     private final Container _targetStudy;
 
-    public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, Container targetStudy, PipeRoot root) throws Exception
+    public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, Container targetStudy, PipeRoot root) throws IOException
     {
         super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords, root);
 

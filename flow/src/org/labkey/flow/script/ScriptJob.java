@@ -45,6 +45,7 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
@@ -119,7 +120,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         }
     }
 
-    public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step, PipeRoot root) throws Exception
+    public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step, PipeRoot root) throws IOException
     {
         super(info, root, experimentLSID, protocol, experimentName, step);
         _runAnalysisScript = script;

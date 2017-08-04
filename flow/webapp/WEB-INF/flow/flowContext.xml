@@ -19,11 +19,7 @@
                     <property name="protocolFactoryName" value="keywords"/>
                     <property name="defaultDisplayState" value="hidden"/>
                     <property name="allowForTriggerConfiguration" value="true"/>
-                    <property name="initialInputExts">
-                        <list>
-                            <ref bean="fcsFileType"/>
-                        </list>
-                    </property>
+                    <property name="initialInputFileFilter" ref="fcsDirectoryFileFilter"/>
                     <property name="taskProgressionSpec">
                         <list>
                             <bean id="fcsKeywordsTask" class="org.labkey.api.pipeline.TaskId">
@@ -36,9 +32,6 @@
         </property>
     </bean>
 
-    <bean id="fcsDirectoryFileType" class="org.labkey.flow.script.FCSDirectoryFileType" />
-    <bean id="fcsFileType" class="org.labkey.api.util.FileType">
-        <constructor-arg value=".fcs"/>
-    </bean>
+    <bean id="fcsDirectoryFileFilter" class="org.labkey.flow.script.FCSDirectoryFileFilter" />
 
 </beans>

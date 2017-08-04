@@ -179,22 +179,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             if (getKeywordDirectories() != null && getKeywordDirectories().size() > 0)
             {
                 // CONSIDER: Only import FCSFiles in keyword directories that are in selectedFCSFiles if not null
-                KeywordsJob keywordsJob = new KeywordsJob(getInfo(), _protocol, getKeywordDirectories(), getTargetStudy(), PipelineService.get().findPipelineRoot(getContainer()));
-                keywordsJob.setLogFile(getLogFile());
-                keywordsJob.setLogLevel(getLogLevel());
-                keywordsJob.setSubmitted();
-
-                List<FlowRun> runs = keywordsJob.go();
-                if (keywordsJob.hasErrors())
-                {
-                    getLogger().error("Failed to import keywords.");
-                    setStatus(TaskStatus.error);
-                }
-                else
-                {
-                    for (FlowRun run : runs)
-                        info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");
-                }
+                List<FlowRun> runs = KeywordsTask.importFlowRuns(this, _protocol, getKeywordDirectories(), getTargetStudy());
 
                 // Consider the newly imported files as the resolved FCSFiles, but don't add any new selectedFCSFiles unless there are no selected files.
                 // NOTE: Duplicate samples are ignored.

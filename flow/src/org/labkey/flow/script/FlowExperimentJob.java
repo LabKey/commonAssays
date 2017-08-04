@@ -45,8 +45,7 @@ public abstract class FlowExperimentJob extends FlowJob
     String _experimentName;
     RunData _runData;
 
-    public FlowExperimentJob(ViewBackgroundInfo info, PipeRoot root, String experimentLSID, FlowProtocol protocol, String experimentName, FlowProtocolStep step)
-            throws Exception
+    public FlowExperimentJob(ViewBackgroundInfo info, PipeRoot root, String experimentLSID, FlowProtocol protocol, String experimentName, FlowProtocolStep step) throws IOException
     {
         super(FlowPipelineProvider.NAME, info, root);
         _experimentLSID = experimentLSID;
@@ -57,7 +56,7 @@ public abstract class FlowExperimentJob extends FlowJob
         initStatus();
     }
 
-    private void initStatus() throws Exception
+    private void initStatus() throws IOException
     {
         String guid = GUID.makeGUID();
         File logFile = new File(_containerFolder, guid + ".flow.log");
@@ -123,7 +122,7 @@ public abstract class FlowExperimentJob extends FlowJob
         return true;
     }
 
-    protected File getWorkingFolder(Container container) throws Exception
+    protected File getWorkingFolder(Container container) throws IOException
     {
         File dirRoot = FlowAnalyzer.getAnalysisDirectory();
         File dirFolder = new File(dirRoot, "Folder" + container.getRowId());

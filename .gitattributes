@@ -477,7 +477,7 @@ flow/src/org/labkey/flow/script/AnalysisHandler.java -text
 flow/src/org/labkey/flow/script/AnalyzeJob.java -text
 flow/src/org/labkey/flow/script/BaseHandler.java -text
 flow/src/org/labkey/flow/script/CompensationCalculationHandler.java -text
-flow/src/org/labkey/flow/script/FCSDirectoryFileType.java -text
+flow/src/org/labkey/flow/script/FCSDirectoryFileFilter.java -text
 flow/src/org/labkey/flow/script/FlowAnalyzer.java -text
 flow/src/org/labkey/flow/script/FlowExperimentJob.java -text
 flow/src/org/labkey/flow/script/FlowJob.java -text
