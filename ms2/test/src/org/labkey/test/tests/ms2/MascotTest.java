@@ -29,6 +29,7 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.Mascot;
+import org.labkey.test.components.BodyWebPart;
 import org.labkey.test.credentials.Login;
 import org.labkey.test.ms2.AbstractMS2SearchEngineTest;
 import org.labkey.test.pages.ms2.MascotConfigPage;
@@ -235,7 +236,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         log("Spot check results loaded from .dat file");
         clickAndWait(Locator.linkWithText(mascotDatLabel));
-        String overviewText = getText(PortalHelper.Locators.webPart.withDescendant(PortalHelper.Locators.webPartTitle("Run Overview")));
+        String overviewText = new BodyWebPart(getDriver(), "Run Overview").getComponentElement().getText();
         assertTextPresent(new TextSearcher(() -> overviewText),
                 "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
                 "MASCOT",
@@ -301,7 +302,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         log("Spot check results loaded from .dat file");
         clickAndWait(Locator.linkWithText(mascotDatLabel));
-        String overviewText = getText(PortalHelper.Locators.webPart.withDescendant(PortalHelper.Locators.webPartTitle("Run Overview")));
+        String overviewText = new BodyWebPart(getDriver(), "Run Overview").getComponentElement().getText();
         assertTextPresent(new TextSearcher(() -> overviewText),
                 "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
                 "MASCOT",
