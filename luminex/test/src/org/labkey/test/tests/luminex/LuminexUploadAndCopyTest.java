@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 @Category({DailyA.class, Assays.class})
 public final class LuminexUploadAndCopyTest extends LuminexTest
 {
-    private final boolean IS_BOOTSTRAP_LAYOUT_WHITELISTED = setIsBootstrapWhitelisted(true);
+    {setIsBootstrapWhitelisted(true);}
 
     private static final String THAW_LIST_NAME = "LuminexThawList";
     private static final String TEST_ASSAY_LUM_SET_PROP_SPECIES2 = "testSpecies2";

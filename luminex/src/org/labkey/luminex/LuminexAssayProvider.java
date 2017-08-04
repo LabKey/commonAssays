@@ -72,6 +72,7 @@ import org.labkey.luminex.query.LuminexProtocolSchema;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -322,30 +323,23 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
 
-        String name = protocol.getName() + " Analyte Properties";
-        boolean flag = false;
-        for (NavTree nt : result)
+        // Override the Manage assay design > Set default values > Analyte Properties action url for the Luminex assays
+        NavTree manageAssayDesignTree = findTreeByText(result, MANAGE_ASSAY_DESIGN_LINK);
+        if (manageAssayDesignTree != null && manageAssayDesignTree.hasChildren())
         {
-            if(nt.getText().equals("manage assay design"))
+            NavTree setDefaultValuesTree = findTreeByText(Arrays.asList(manageAssayDesignTree.getChildren()), SET_DEFAULT_VALUES_LINK);
+            if (setDefaultValuesTree != null && setDefaultValuesTree.hasChildren())
             {
-                for(NavTree child : nt.getChildren())
+                String name = protocol.getName() + " Analyte Properties";
+                NavTree analytePropsTree = findTreeByText(Arrays.asList(setDefaultValuesTree.getChildren()), name);
+                if (analytePropsTree != null)
                 {
-                    if(child.getText().equals("set default values"))
-                    {
-                        for(NavTree grandchild : child.getChildren())
-                        {
-                            if(grandchild.getText().equals(name))
-                            {
-                                grandchild.setHref(new ActionURL(LuminexController.SetAnalyteDefaultValuesAction.class, viewContext.getContainer()).addParameter("rowId", protocol.getRowId()).addReturnURL(viewContext.getActionURL()).toString());
-                                flag = true;
-                                break;
-                            }
-                        }
-                    }
-                    if(flag) break;
+                    ActionURL analytePropsUrl = new ActionURL(LuminexController.SetAnalyteDefaultValuesAction.class, viewContext.getContainer());
+                    analytePropsUrl.addParameter("rowId", protocol.getRowId());
+                    analytePropsUrl.addReturnURL(viewContext.getActionURL());
+                    analytePropsTree.setHref(analytePropsUrl.toString());
                 }
             }
-            if(flag) break;
         }
 
         String currentRunId = viewContext.getRequest().getParameter("Data.Data/Run/RowId~eq");
@@ -354,9 +348,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         ActionURL url = getExcludedReportUrl(viewContext.getContainer(), protocol, containerFilter, currentRunId);
         result.add(new NavTree("view excluded data", PageFlowUtil.addLastFilterParameter(url, AssayProtocolSchema.getLastFilterScope(protocol))));
 
-        /*
-         * add header menu for the QC Report
-         */
+        // add header menu for the QC Report
         NavTree qcReportMenu = new NavTree("view qc report");
 
         // add a URL for the titration report
@@ -393,6 +385,19 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         result.add(qcReportMenu);
 
         return result;
+    }
+
+    private NavTree findTreeByText(Collection<NavTree> trees, String childText)
+    {
+        if (trees != null && !trees.isEmpty())
+        {
+            for (NavTree tree : trees)
+            {
+                if (tree.getText() != null && tree.getText().equalsIgnoreCase(childText))
+                    return tree;
+            }
+        }
+        return null;
     }
 
     public static ActionURL getExcludedReportUrl(Container container, ExpProtocol protocol, ContainerFilter containerFilter, String currentRunId)
