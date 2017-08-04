@@ -45,8 +45,8 @@ public class SetAnalyteDefaultValuesPage
     {
         ensureOnImportPage();
 
-        _test.click(PortalHelper.Locators.webPartTitle.containing("Copy/paste text"));
-        _test.click(PortalHelper.Locators.webPartTitle.containing("Upload file"));
+        _test.click(PortalHelper.Locators.webPartTitle().containing("Copy/paste text"));
+        _test.click(PortalHelper.Locators.webPartTitle().containing("Upload file"));
         _test.setFormElement(Locator.name("file"), defaultsFile);
 
         submitDefaults(errorText);
@@ -61,8 +61,8 @@ public class SetAnalyteDefaultValuesPage
     {
         ensureOnImportPage();
 
-        _test.click(PortalHelper.Locators.webPartTitle.containing("Upload file"));
-        _test.click(PortalHelper.Locators.webPartTitle.containing("Copy/paste text"));
+        _test.click(PortalHelper.Locators.webPartTitle().containing("Upload file"));
+        _test.click(PortalHelper.Locators.webPartTitle().containing("Copy/paste text"));
         _test.setFormElement(Locator.name("text"), defaultsTsvContents);
 
         submitDefaults(errorText);
