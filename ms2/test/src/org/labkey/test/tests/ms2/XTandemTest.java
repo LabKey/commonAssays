@@ -64,17 +64,15 @@ public class XTandemTest extends AbstractXTandemTest
 
     protected void basicChecks()
     {
-        goToModule("Query");
-        selectQuery("ms2", "Fractions");
-        waitForElement(Locator.linkWithText("view data"), WAIT_FOR_JAVASCRIPT);
-        clickAndWait(Locator.linkWithText("view data"));
+        goToSchemaBrowser();
+        viewQueryData("ms2", "Fractions");
         assertTextPresent("CAexample_mini.mzXML");
         // There should be 200 scans total
         assertTextPresent("200");
         // There should be 100 MS1 scans and 100 MS2 scans
         assertTextPresent("100");
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user
@@ -82,7 +80,7 @@ public class XTandemTest extends AbstractXTandemTest
         clickButton("Go");
 
         log("Test filtering and sorting");
-        DataRegionTable peptidesRegion = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable peptidesRegion = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesRegion.setFilter("Mass", "Is Greater Than", "1000");
         assertTextNotPresent(PEPTIDE);
         peptidesRegion.setSort("Scan", SortDirection.DESC);
@@ -111,10 +109,10 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", this);
+        navigateToFolder(FOLDER_NAME);
+        DataRegionTable ms2Runs = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         ms2Runs.checkAll();
-        ms2Runs.clickHeaderMenu("Compare", true, "Peptide (Legacy)");
+        ms2Runs.clickHeaderMenu("Compare", "Peptide (Legacy)");
         selectOptionByText(Locator.name("viewParams"), VIEW);
         clickButton("Compare");
         assertTextPresent("(Mass > 1000.0)");
@@ -126,7 +124,7 @@ public class XTandemTest extends AbstractXTandemTest
         compareRegion.setSort("Peptide", SortDirection.DESC);
         assertTextBefore(PEPTIDE5, PEPTIDE4);
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         verifyPeptideCrosstab();
         verifyComparePeptides();
     }
@@ -141,7 +139,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextNotPresent(PEPTIDE);
 
         log("Navigate to folder Portal");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         log("Verify experiment information in MS2 runs.");
         assertElementPresent(Locator.linkWithText(PROTOCOL));
@@ -170,7 +168,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextPresent("No data to show");
 
         log("Search for a protein in the second fasta file.");
-        clickTab("MS2 Dashboard");
+        navigateToFolder(FOLDER_NAME);
         setFormElement(Locator.name("identifier"), SEARCH_FASTA2);
         checkCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
@@ -178,7 +176,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
 
         log("Search for a protein in the third fasta file.");
-        clickTab("MS2 Dashboard");
+        navigateToFolder(FOLDER_NAME);
         setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");

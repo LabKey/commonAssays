@@ -103,7 +103,7 @@ public class SequestTest extends AbstractMS2SearchEngineTest
         clickButton("Go");
 
         log("Test filtering and sorting");
-        DataRegionTable peptidesRegion = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable peptidesRegion = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesRegion.setFilter("Mass", "Is Greater Than", "1000");
         assertTextNotPresent(PEPTIDE);
         peptidesRegion.setSort("Scan", SortDirection.DESC);

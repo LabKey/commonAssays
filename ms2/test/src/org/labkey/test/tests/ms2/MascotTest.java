@@ -244,7 +244,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test3",
                 "Bovine_mini1.fasta");
 
-        DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
 
         // really 466 peptides in the .dat import, but only first 100 show in default view
         assertEquals("Wrong number of peptides found", 100, peptidesTable.getDataRowCount());
@@ -278,7 +278,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         click(Locator.linkWithText("K.GTPAAGDP.-"));
 
         switchToWindow(1);
-        peptidesTable = new DataRegionTable("MS2Peptides", this);
+        peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         List<String> peptides = peptidesTable.getColumnDataAsText("Peptide");
         assertEquals("peptide grid not filtered on the current fraction/scan/charge", Arrays.asList("K.GTPAAGDP.-", "K.GAQAPLK.G", "K.VVKVLK.A"), peptides);
         getDriver().close();
@@ -310,9 +310,9 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "sampledata/xarfiles/ms2pipe/bov_sample/mascot/test4",
                 "Bovine_mini1.fasta");
 
-        DataRegionTable peptidesTable = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesTable.ensureColumnsPresent("HitRank", "QueryNumber", "Decoy");
-        peptidesTable = new DataRegionTable("MS2Peptides", this);
+        peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
 
         assertEquals("Wrong number of peptides found", 67, peptidesTable.getDataRowCount());
         List<String> peptideRow = peptidesTable.getRowDataAsText(0);
@@ -385,7 +385,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         // TODO: Would be good to test the functionality of the "Adjust FDR To" dropdown, but we may still have further tweaking on this UI to do pending client feedback.
 
-        DataRegionTable drt = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable drt = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         drt.setFilter("Peptide", "Equals", "R.KPLAPK.K");
         drt.setSort("Ion", SortDirection.DESC);
         assertTrue("Not enough results to test filtering", drt.getDataRowCount() > 1);
@@ -430,7 +430,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         clickButton("Go");
 
         log("Test filtering and sorting");
-        DataRegionTable peptidesRegion = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable peptidesRegion = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesRegion.setFilter("Mass", "Is Greater Than", "1000");
         assertTextNotPresent(PEPTIDE);
         peptidesRegion.setSort("Scan", SortDirection.DESC);

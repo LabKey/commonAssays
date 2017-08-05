@@ -100,8 +100,9 @@ public class LibraTest extends MS2TestBase
     private void spectraCountTest()
     {
         clickProject(getProjectName());
-        checkAllOnPage("MS2SearchRuns");
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Spectra Count");
+        DataRegionTable table = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
+        table.checkAllOnPage();
+        table.clickHeaderMenu("Compare", "Spectra Count");
         click(Locator.radioButtonById("SpectraCountPeptide"));
         clickButton("Compare");
         assertTextPresent("-.MM'EILRGSPALSAFR.I");
@@ -119,10 +120,10 @@ public class LibraTest extends MS2TestBase
 
         // Customize view to pull in other columns
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("TrimmedPeptide");
-        _customizeViewsHelper.addCustomizeViewColumn(new String[] {"Protein", "ProtSequence"});
-        _customizeViewsHelper.addCustomizeViewColumn(new String[] {"Protein", "BestName"});
-        _customizeViewsHelper.addCustomizeViewColumn(new String[] {"Protein", "Mass"});
+        _customizeViewsHelper.addColumn("TrimmedPeptide");
+        _customizeViewsHelper.addColumn(new String[] {"Protein", "ProtSequence"});
+        _customizeViewsHelper.addColumn(new String[] {"Protein", "BestName"});
+        _customizeViewsHelper.addColumn(new String[] {"Protein", "Mass"});
         _customizeViewsHelper.saveDefaultView();
         assertTextPresent("84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
@@ -136,7 +137,7 @@ public class LibraTest extends MS2TestBase
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         click(Locator.linkWithText("Create or Edit View"));
         findButton("Save");
-        _customizeViewsHelper.addCustomizeViewFilter("Hyper", "Hyper", "Is Greater Than", "250");
+        _customizeViewsHelper.addFilter("Hyper", "Hyper", "Is Greater Than", "250");
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptide"));
         _customizeViewsHelper.saveCustomView("HyperFilter");
         click(Locator.radioButtonById("SpectraCountPeptideCharge"));
@@ -157,7 +158,7 @@ public class LibraTest extends MS2TestBase
         // Validate that it remembers our options
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptideCharge"));
-        assertFormElementEquals(Locator.id("PeptidesFilter.viewName"), "HyperFilter");
+        assertEquals("HyperFilter", getFormElement(Locator.id("PeptidesFilter.viewName")));
     }
 
     protected void newWindowTest(String linkToClick, String verificationString, String... additionalChecks)
@@ -174,11 +175,10 @@ public class LibraTest extends MS2TestBase
         assertTextPresent(additionalChecks);
         getDriver().close();
         getDriver().switchTo().window((String)windows[0]);
-
     }
+
     private void specificProteinTest()
     {
-
         newWindowTest("gi|2144275|JC5226_ubiquitin_", "Protein Sequence");
         //TODO:  single cell check
     }
@@ -200,30 +200,29 @@ public class LibraTest extends MS2TestBase
 
     protected void checkForNormalizationCountofSomething(String toCheck)
     {
-        for(int i = 1; i <= normalizationCount; i++)
+        for (int i = 1; i <= normalizationCount; i++)
         {
             assertTextPresent(toCheck + i);
         }
-
     }
 
     private void addNormalizationCount()
     {
-        for(int i = 1; i <= normalizationCount; i++)
+        for (int i = 1; i <= normalizationCount; i++)
         {
-            _customizeViewsHelper.addCustomizeViewColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
+            _customizeViewsHelper.addColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
         }
     }
 
     private void proteinProphetTest()
     {
-        DataRegionTable.findDataRegion(this).clickHeaderMenu("Grid Views", "ProteinProphet");
+        DataRegionTable.findDataRegion(this).goToView("ProteinProphet");
 
         waitForElement(Locator.lkButton("Grid Views"), WAIT_FOR_JAVASCRIPT);
         _customizeViewsHelper.openCustomizeViewPanel();
-        for(int i=1; i<=normalizationCount; i++)
+        for (int i = 1; i <= normalizationCount; i++)
         {
-            _customizeViewsHelper.addCustomizeViewColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
+            _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
         }
 
         addNormalizationCount();
@@ -231,7 +230,7 @@ public class LibraTest extends MS2TestBase
         _customizeViewsHelper.saveCustomView(proteinProphetView);
         checkForITRAQQuantitation();
 
-        DataRegionTable pepTable = new DataRegionTable("MS2Peptides", this);
+        DataRegionTable pepTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         assertEquals("Wrong ratio for peptide", "0.71", pepTable.getDataAsText(0, "Ratio 1"));
 
         Locator img = Locator.xpath("//img[contains(@id,'MS2Peptides-Handle')]");

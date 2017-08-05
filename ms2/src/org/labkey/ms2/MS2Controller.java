@@ -350,8 +350,13 @@ public class MS2Controller extends SpringActionController
         compareMenu.addMenuItem("Peptide (Legacy)", null, view.createVerifySelectedScript(peptidesURL, "runs"));
 
         ActionURL proteinProphetURL = new ActionURL(MS2Controller.CompareProteinProphetSetupAction.class, container);
+
         String selectionKey = view.getDataRegion().getSelectionKey();
-        proteinProphetURL.addParameter("selectionKey", selectionKey);
+        if (selectionKey != null)
+        {
+            proteinProphetURL.addParameter("selectionKey", selectionKey);
+        }
+
         if (experimentRunIds)
         {
             proteinProphetURL.addParameter("experimentRunIds", "true");

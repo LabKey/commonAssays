@@ -29,7 +29,6 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExcelHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.TextSearcher;
-import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.io.IOException;
 @Category({MS2.class, DailyA.class})
 public class MS2ExportTest extends AbstractMS2ImportTest
 {
+    {setIsBootstrapWhitelisted(true);}
     @Override
     @LogMethod
     protected void setupMS2()
@@ -56,11 +56,10 @@ public class MS2ExportTest extends AbstractMS2ImportTest
 
     private void validatePeptideComparisonExport()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        clickAndWait(Locator.linkWithText("MS2 Runs"));
-        DataRegionTable RunsTable = new DataRegionTable("MS2SearchRuns", this);
-        RunsTable.checkAllOnPage();
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide");
+        navigateToFolder(FOLDER_NAME);
+        DataRegionTable runsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
+        runsTable.checkAllOnPage();
+        runsTable.clickHeaderMenu("Compare", "Peptide");
         clickButton("Compare");
         Assert.assertEquals("Wrong number of rows in exported Excel file", 111, getCompExcelExportRowCount());
     }
@@ -111,84 +110,64 @@ public class MS2ExportTest extends AbstractMS2ImportTest
     private void validateBulkExport()
     {
         log("Test export 2 runs together");
-        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", this);
+        DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         searchRunsTable.checkAllOnPage();
-        clickButton("MS2 Export");
+        searchRunsTable.clickHeaderButton("MS2 Export");
 
         assertTextPresent("BiblioSpec");
         Assert.assertEquals("Wrong number of rows in exported Excel file", 116, getBulkExcelExportRowCount());
 
-        Runnable tsvPeptideValidator = new Runnable()
+        Runnable tsvPeptideValidator = () ->
         {
-            @Override
-            public void run()
-            {
-                File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-                TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
-                assertTextPresent(exportFileSearcher, "Scan", "Protein", "gi|5002198|AF143203_1_interle", "1386.6970", "gi|6049221|AF144467_1_nonstru");
-                assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
-                assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
-                assertTextPresent(exportFileSearcher, "\n", 86);
-            }
+            File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
+            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            assertTextPresent(exportFileSearcher, "Scan", "Protein", "gi|5002198|AF143203_1_interle", "1386.6970", "gi|6049221|AF144467_1_nonstru");
+            assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
+            assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
+            assertTextPresent(exportFileSearcher, "\n", 86);
         };
         validateExport("TSV", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, tsvPeptideValidator);
         validateExport("TSV", QUERY_PEPTIDES_VIEW_NAME, tsvPeptideValidator);
 
-        Runnable amtPeptideValidator = new Runnable()
+        Runnable amtPeptideValidator = () ->
         {
-            @Override
-            public void run()
-            {
-                File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-                TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
-                assertTextPresent(exportFileSearcher, "Run", "Peptide", "-.MELFSNELLYK.T", "1386.6970");
-                assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
-                assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
-                assertTextPresent(exportFileSearcher, "\n", 89);
-            }
+            File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
+            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            assertTextPresent(exportFileSearcher, "Run", "Peptide", "-.MELFSNELLYK.T", "1386.6970");
+            assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
+            assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
+            assertTextPresent(exportFileSearcher, "\n", 89);
         };
         validateExport("AMT", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, amtPeptideValidator);
         validateExport("AMT", QUERY_PEPTIDES_VIEW_NAME, amtPeptideValidator);
 
-        Runnable pklPeptideValidator = new Runnable()
+        Runnable pklPeptideValidator = () ->
         {
-            @Override
-            public void run()
-            {
-                File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-                TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
-                assertTextPresent(exportFileSearcher, "515.9 1684.0");
-                assertTextNotPresent(exportFileSearcher, "717.4 4043.0");
-                assertTextPresent(exportFileSearcher, "\n", 4271);
-            }
+            File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
+            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            assertTextPresent(exportFileSearcher, "515.9 1684.0");
+            assertTextNotPresent(exportFileSearcher, "717.4 4043.0");
+            assertTextPresent(exportFileSearcher, "\n", 4271);
         };
         validateExport("PKL", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, pklPeptideValidator);
         validateExport("PKL", QUERY_PEPTIDES_VIEW_NAME, pklPeptideValidator);
 
-        Runnable tsvProteinProphetValidator = new Runnable()
+        Runnable tsvProteinProphetValidator = () ->
         {
-            @Override
-            public void run()
-            {
-                File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-                TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
-                assertTextPresent(exportFileSearcher, "gi|16078254|similar_to_riboso", "20925.0", "gi|13470573|30S_ribosomal_pro, gi|16125519|ribosomal_protein");
-                assertTextPresent(exportFileSearcher, "\n", 7);
-            }
+            File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
+            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            assertTextPresent(exportFileSearcher, "gi|16078254|similar_to_riboso", "20925.0", "gi|13470573|30S_ribosomal_pro, gi|16125519|ribosomal_protein");
+            assertTextPresent(exportFileSearcher, "\n", 7);
         };
         validateExport("TSV", QUERY_PROTEINPROPHET_VIEW_NAME, tsvProteinProphetValidator);
         validateExport("TSV", LEGACY_PROTEIN_PROPHET_VIEW_NAME, tsvProteinProphetValidator);
 
-        Runnable pklProteinProphetValidator = new Runnable()
+        Runnable pklProteinProphetValidator = () ->
         {
-            @Override
-            public void run()
-            {
-                File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-                TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
-                assertTextPresent(exportFileSearcher, "426.9465 1 3", "174.8 2400.0");
-                assertTextPresent(exportFileSearcher,"\n", 245);
-            }
+            File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
+            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            assertTextPresent(exportFileSearcher, "426.9465 1 3", "174.8 2400.0");
+            assertTextPresent(exportFileSearcher,"\n", 245);
         };
         validateExport("PKL", QUERY_PROTEINPROPHET_VIEW_NAME, pklProteinProphetValidator);
         validateExport("PKL", LEGACY_PROTEIN_PROPHET_VIEW_NAME, pklProteinProphetValidator);

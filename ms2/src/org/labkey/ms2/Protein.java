@@ -387,7 +387,7 @@ public class Protein
                 trimmedPeptide= _sequence.substring(range.start,(range.start + range.length));
                 if (showRunViewUrl != null)
                 {
-                    onClickScript="window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" + trimmedPeptide
+                    onClickScript = "window.open('" +  showRunViewUrl + "&" + MS2Manager.getDataRegionNamePeptides() + ".TrimmedPeptide~eq=" + trimmedPeptide
                             +"', 'showMatchingPeptides');";
                 }
             }

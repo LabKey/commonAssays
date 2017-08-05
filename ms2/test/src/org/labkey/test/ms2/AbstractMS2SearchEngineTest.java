@@ -45,7 +45,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         createProjectAndFolder();
 
         log("Start analysis running.");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Create New Mass Spec Metadata Assay Design");
 
@@ -61,7 +61,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         clickButton("Save", 0);
         waitForText(20000, "Save successful.");
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Use " + TEST_ASSAY_NAME);
 
@@ -84,7 +84,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         clickButton("Save and Finish");
 
         log("Return to search page");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         assertElementPresent(Locator.linkWithText(ANNOTATION_RUN_NAME));
 
@@ -102,7 +102,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         setFormElement(Locator.name("protocolDescription"), "This is a test protocol for Verify.");
         selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
 
-        if(!_useOnlyOneFasta)
+        if (!_useOnlyOneFasta)
         {
             selectOptionByText(Locator.name("sequenceDB"), DATABASE2);
             selectOptionByText(Locator.name("sequenceDB"), DATABASE3);
@@ -137,7 +137,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
             return;
 
         log("Analyze again.");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/");
 
@@ -188,7 +188,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 
         assertTextPresent("verify:001", "Not a member of a sample set");
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user
@@ -206,7 +206,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         basicChecks();
     }
 
-    protected  void searchMS2LibraCheck()
+    protected void searchMS2LibraCheck()
     {
         selectOptionByText(Locator.xpath("//tr[td/table/tbody/tr/td/div[contains(text(),'Quantitation engine')]]/td/select"),"Libra");
         assertTextPresent("Libra config name", "Libra normalization channel");

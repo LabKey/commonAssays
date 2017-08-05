@@ -45,6 +45,7 @@ import static org.labkey.test.Locator.NBSP;
 @Category({MS2.class, DailyA.class})
 public class MS2Test extends AbstractMS2ImportTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String RUN_GROUP1_NAME1 = "Test Run Group 1";
     //Issue #16260, "Exception when including run group with tricky characters in name," has been updated
     protected static final String RUN_GROUP1_NAME2 = "Test Run Group 1 New Name" + TRICKY_CHARACTERS;
@@ -88,7 +89,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void verifyFirstRun()
     {
         log("Verify run view.");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkContainingText("DRT1"));
 
         // Make sure we're not using a custom default view for the current user
@@ -113,7 +114,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Show Peptide Prophet Details");
         pushLocation();
-        beginAt(getLinkHref("Show Peptide Prophet Details", "MS2", "/" + PROJECT_NAME + "/" + FOLDER_NAME));
+        beginAt(getLinkHref("Show Peptide Prophet Details", "MS2", "/" + getProjectName() + "/" + FOLDER_NAME));
         assertTextPresent(
                 "Minimum probability",
                 "Error rate",
@@ -127,7 +128,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Show Protein Prophet Details");
         pushLocation();
-        beginAt(getLinkHref("Show Protein Prophet Details", "MS2", "/" + PROJECT_NAME + "/" + FOLDER_NAME));
+        beginAt(getLinkHref("Show Protein Prophet Details", "MS2", "/" + getProjectName() + "/" + FOLDER_NAME));
         assertTextPresent(
                 "Minimum probability",
                 "Error rate",
@@ -142,7 +143,7 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.id("viewTypeSubmitButton"));
 
         log("Test export selected");
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         pushLocation();
         peptidesTable.checkCheckbox(0);
         File peptides = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export Selected", false, "TSV"));
@@ -317,7 +318,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 getFilters(ViewType.peptide));
 
         log("Test filters in Protein View");
-        DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, getDriver());
+        DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, this);
         proteinsTable.setFilter("SequenceMass", "Is Greater Than", "17000", "Is Less Than", "50000");
         assertTextNotPresent("gi|15925226|30S_ribosomal_pro",
                 "gi|19703691|Nicotinate_phosph");
@@ -403,7 +404,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertEquals("Wrong peptide sort", Arrays.asList("Scan DESC"), getSorts(ViewType.peptide));
         assertTextNotPresent("gi|30089158|low_density_lipop");
 
-        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
+        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
         quantitationTable.setFilter("PercentCoverage", "Is Not Blank", null);
         assertTextNotPresent("gi|13442951|MAIL");
         assertEquals("Wrong protein group filters",
@@ -437,15 +438,15 @@ public class MS2Test extends AbstractMS2ImportTest
         peptidesTable.clearSort("Scan");
 
         log("Test customize view");
-        fireEvent(Locator.lkButton("Clear All"), SeleniumEvent.click);
+        peptidesTable.clearAllFilters();
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewSort("Charge", "Z", "Descending");
-        _customizeViewsHelper.addCustomizeViewSort("Mass", "CalcMH+", "Descending");
-        _customizeViewsHelper.addCustomizeViewFilter("DeltaMass", "dMass", "Is Less Than", "0");
-        _customizeViewsHelper.addCustomizeViewFilter("RowId", "Row Id", "Is Greater Than", "3");
-        _customizeViewsHelper.addCustomizeViewColumn("NextAA", "Next AA");
-        _customizeViewsHelper.removeCustomizeViewColumn("Expect");
-        _customizeViewsHelper.removeCustomizeViewColumn("ProteinHits");
+        _customizeViewsHelper.addSort("Charge", "Z", SortDirection.DESC);
+        _customizeViewsHelper.addSort("Mass", "CalcMH+", SortDirection.DESC);
+        _customizeViewsHelper.addFilter("DeltaMass", "dMass", "Is Less Than", "0");
+        _customizeViewsHelper.addFilter("RowId", "Row Id", "Is Greater Than", "3");
+        _customizeViewsHelper.addColumn("NextAA", "Next AA");
+        _customizeViewsHelper.removeColumn("Expect");
+        _customizeViewsHelper.removeColumn("ProteinHits");
         _customizeViewsHelper.saveCustomView(VIEW4);
 
         log("Test that the sorting and filtering worked and that the columns were changed");
@@ -463,22 +464,17 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test changing order of sorts and columns");
         _customizeViewsHelper.openCustomizeViewPanel();
-        sleep(500);
-        _customizeViewsHelper.moveCustomizeViewSort("Charge", false);
-        // XXX: selenium test can't move columns that require scrolling the column list
-        //_customizeViewsHelper.moveCustomizeViewColumn(this, "Peptide", false);
+        _customizeViewsHelper.moveSort("Charge", false);
         _customizeViewsHelper.applyCustomView();
 
         assertTextBefore("K.TESGYGSESSLR.R", "K.HVSGKIIGFFY.-");
-        //assertTextBefore("gi|30519530|A38R_protein", "K.ISNFIANNDCRYYIDAEHQKIISDEINR.Q");
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.moveCustomizeViewSort("Mass", false);
-        // XXX: selenium test can't move columns that require scrolling the column list
+        _customizeViewsHelper.moveSort("Mass", false);
         _customizeViewsHelper.applyCustomView();
 
         log("Test Ignore View Filter");
-        peptidesTable.clickHeaderMenu("Grid Views", "Apply Grid Filter");
+        peptidesTable.clickApplyGridFilter();
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Next AA");
@@ -486,7 +482,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore(PEPTIDE4, PEPTIDE3);
 
         log("Test Apply View Filter");
-        peptidesTable.clickHeaderMenu("Grid Views", "Apply Grid Filter");
+        peptidesTable.clickApplyGridFilter();
         assertTextPresent("Next AA");
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
@@ -529,7 +525,7 @@ public class MS2Test extends AbstractMS2ImportTest
         peptidesTable.uncheckAll();
         peptidesTable.checkCheckbox(0);
         peptidesTable.checkCheckbox(1);
-        File selectedStuffFile = doAndWaitForDownload(() -> _extHelper.clickMenuButton(false, "Export Selected", "TSV"));
+        File selectedStuffFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export Selected", false, "TSV"));
         TextSearcher selectedStuffSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedStuffFile));
         assertTextPresent(selectedStuffSrch, "Next AA",
                 "gi|25027045|putative_50S_ribo");
@@ -541,7 +537,7 @@ public class MS2Test extends AbstractMS2ImportTest
         peptidesTable.uncheckAll();
         peptidesTable.checkCheckbox(0);
         peptidesTable.checkCheckbox(1);
-        File selectedAmtFile = doAndWaitForDownload(() ->  _extHelper.clickMenuButton(false, "Export Selected", "AMT"));
+        File selectedAmtFile = doAndWaitForDownload(() ->  peptidesTable.clickHeaderMenu("Export Selected", false, "AMT"));
         TextSearcher selectedAmtSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedAmtFile));
         assertTextPresent(selectedAmtSrch, "Peptide");
         assertTextPresent(selectedAmtSrch, "\n", 5);
@@ -549,7 +545,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(selectedAmtSrch, "Next AA");
 
         log("Test default view");
-        _extHelper.clickMenuButton("Grid Views", "default");
+        peptidesTable.goToView("default");
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Expect",
@@ -559,7 +555,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Next AA");
 
         log("Test load saved view");
-        peptidesTable.clickHeaderMenu("Grid Views", VIEW4);
+        peptidesTable.goToView(VIEW4);
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
         assertTextNotPresent("R.GGNEESTK.T",
@@ -568,14 +564,14 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test changing default view");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.clearCustomizeViewFilters();
-        _customizeViewsHelper.clearCustomizeViewSorts();
-        _customizeViewsHelper.addCustomizeViewSort("DeltaMass", "dMass", "Ascending");
-        _customizeViewsHelper.addCustomizeViewFilter("Mass", "CalcMH+", "Is Greater Than", "1000");
-        _customizeViewsHelper.addCustomizeViewColumn("Fraction");
-        _customizeViewsHelper.removeCustomizeViewColumn("IonPercent");
-        _customizeViewsHelper.saveCustomView("");
-        peptidesTable.clickHeaderMenu("Grid Views", "default");
+        _customizeViewsHelper.clearFilters();
+        _customizeViewsHelper.clearSorts();
+        _customizeViewsHelper.addSort("DeltaMass", "dMass", SortDirection.ASC);
+        _customizeViewsHelper.addFilter("Mass", "CalcMH+", "Is Greater Than", "1000");
+        _customizeViewsHelper.addColumn("Fraction");
+        _customizeViewsHelper.removeColumn("IonPercent");
+        _customizeViewsHelper.saveDefaultView();
+        peptidesTable.goToView("default");
         assertTextPresent("Fraction");
         assertTextBefore("K.TKDYEGMQVPVK.V", "R.LGARRVSPVR.A");
         assertTextNotPresent("K.LLASMLAK.A",
@@ -590,7 +586,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("Fraction");
 
         log("Test delete view");
-        peptidesTable.clickHeaderMenu("Grid Views", VIEW4);
+        peptidesTable.goToView(VIEW4);
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.deleteView();
         assertTextPresent("K.LLASMLAK.A",
@@ -603,14 +599,14 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Protein Prophet view in Query - Peptides grouping");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("ProteinProphetData/ProteinGroupId/Group", "Group");
-        _customizeViewsHelper.addCustomizeViewColumn("ProteinProphetData/ProteinGroupId/TotalNumberPeptides", "Peptides");
-        _customizeViewsHelper.addCustomizeViewColumn("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob");
-        _customizeViewsHelper.addCustomizeViewColumn("ProteinProphetData/ProteinGroupId/BestName", "Best Name");
-        _customizeViewsHelper.removeCustomizeViewColumn("Mass");
-        _customizeViewsHelper.addCustomizeViewFilter("DeltaMass", "dMass", "Is Greater Than", "0");
-        _customizeViewsHelper.addCustomizeViewFilter("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", "Is Greater Than", "0.7");
-        _customizeViewsHelper.addCustomizeViewSort("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", "Ascending");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/Group", "Group");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/TotalNumberPeptides", "Peptides");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/BestName", "Best Name");
+        _customizeViewsHelper.removeColumn("Mass");
+        _customizeViewsHelper.addFilter("DeltaMass", "dMass", "Is Greater Than", "0");
+        _customizeViewsHelper.addFilter("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", "Is Greater Than", "0.7");
+        _customizeViewsHelper.addSort("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", SortDirection.ASC);
         _customizeViewsHelper.saveCustomView(VIEW4);
 
         log("Test that Protein Prophet view is displayed and that it sorts and filters correctly");
@@ -669,10 +665,10 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test customize view");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.removeCustomizeViewColumn("UniquePeptidesCount");
-        _customizeViewsHelper.addCustomizeViewColumn("Proteins/Protein/ProtSequence", "Protein Sequence");
-        _customizeViewsHelper.addCustomizeViewFilter("GroupProbability", "Prob", "Is Greater Than", "0.7");
-        _customizeViewsHelper.addCustomizeViewSort("ErrorRate", "Error", "Descending");
+        _customizeViewsHelper.removeColumn("UniquePeptidesCount");
+        _customizeViewsHelper.addColumn("Proteins/Protein/ProtSequence", "Protein Sequence");
+        _customizeViewsHelper.addFilter("GroupProbability", "Prob", "Is Greater Than", "0.7");
+        _customizeViewsHelper.addSort("ErrorRate", "Error", SortDirection.DESC);
         _customizeViewsHelper.saveCustomView(VIEW4);
 
         log("Test that sorting, filtering, and columns are correct");
@@ -683,7 +679,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "gi|30089158|low_density_lipop");
 
         log("Test exporting in Query - Protein View");
-        DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, getDriver());
+        DataRegionTable proteinGroupsTable = new DataRegionTable(REGION_NAME_PROTEINGROUPS, this);
 
         log("Test exporting in TSV");
         File proteinGroupFile = doAndWaitForDownload(() -> proteinGroupsTable.clickHeaderMenu("Export All", false, "TSV"));
@@ -705,14 +701,12 @@ public class MS2Test extends AbstractMS2ImportTest
         TextSearcher selectedProtGroupSrch = new TextSearcher(() -> TestFileUtils.getFileContents(selectedProtGroupFile));
         assertTextPresentInThisOrder(selectedProtGroupSrch, "0.74", "0.78");
         assertTextPresent(selectedProtGroupSrch, "\n", 3);
-
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
     }
 
     private void validateLegacySingleRunExport()
     {
         log("Test export");
-        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, getDriver());
+        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
         File qTableFile = doAndWaitForDownload(() -> quantitationTable.clickHeaderMenu("Export All", false, "AMT"));
         TextSearcher qTableSrch = new TextSearcher(() -> TestFileUtils.getFileContents(qTableFile));
         assertTextPresent(qTableSrch, "Run",
@@ -762,7 +756,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
     protected void validateSecondRun()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
 
         selectOptionByText(Locator.name("viewParams"), "<Standard View>");
@@ -802,7 +796,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Return to run and set a filter");
         popLocation();
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesTable.setFilter("Scan", "Is Less Than", "25");
         address = getAttribute(Locator.linkWithText("gi|15645924|ribosomal_protein"), "href");
         pushLocation();
@@ -824,21 +818,21 @@ public class MS2Test extends AbstractMS2ImportTest
         }
 
         popLocation();
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         validateCompare();
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         String retTimeColumn = "RetentionTime";
         String retMinsColumn = "RetentionTimeMinutes";
 
         clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn(retTimeColumn);
-        _customizeViewsHelper.addCustomizeViewColumn(retMinsColumn);
+        _customizeViewsHelper.addColumn(retTimeColumn);
+        _customizeViewsHelper.addColumn(retMinsColumn);
         _customizeViewsHelper.saveCustomView(VIEW6);
 
-        DataRegionTable drt = new DataRegionTable("MS2Peptides", getDriver());
+        DataRegionTable drt = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         int row = drt.getRowIndex("Peptide","K.KLYNEELK.A");
         Double retTime = Double.parseDouble( drt.getDataAsText(row, retTimeColumn));
         Double retTimeMinutes = Double.parseDouble(drt.getDataAsText(row, retMinsColumn));
@@ -852,7 +846,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void validateRunGroups()
     {
         log("Test creating run groups");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/Experiment/images/graphIcon.gif"));
         clickAndWait(Locator.id("expandCollapse-experimentRunGroup"), 0);
         clickButton("Create new group");
@@ -866,7 +860,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(RUN_GROUP1_NAME1,
                 RUN_GROUP1_HYPOTHESIS,
                 RUN_GROUP1_COMMENTS);
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         assertTextPresent(RUN_GROUP1_NAME1);
 
         clickAndWait(Locator.linkWithText("Run Groups"));
@@ -892,12 +886,12 @@ public class MS2Test extends AbstractMS2ImportTest
         clickButton("Submit");
 
         log("Test customizing view to include the run groups");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("MS2 Runs"));
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn(new String[] { "RunGroupToggle", EscapeUtil.fieldKeyEncodePart(RUN_GROUP1_NAME2) }, RUN_GROUP1_NAME2);
-        _customizeViewsHelper.addCustomizeViewColumn(new String[]{"RunGroupToggle", RUN_GROUP2_NAME}, "Run Groups " + RUN_GROUP2_NAME);
-        _customizeViewsHelper.addCustomizeViewColumn(new String[]{"RunGroupToggle", "Default Experiment"}, "Run Groups Default Experiment");
+        _customizeViewsHelper.addColumn(new String[] { "RunGroupToggle", EscapeUtil.fieldKeyEncodePart(RUN_GROUP1_NAME2) }, RUN_GROUP1_NAME2);
+        _customizeViewsHelper.addColumn(new String[]{"RunGroupToggle", RUN_GROUP2_NAME}, "Run Groups " + RUN_GROUP2_NAME);
+        _customizeViewsHelper.addColumn(new String[]{"RunGroupToggle", "Default Experiment"}, "Run Groups Default Experiment");
         _customizeViewsHelper.applyCustomView();
 
         assertTextPresent(new TextSearcher(this).setSearchTransformer(TextSearcher.TextTransformers.FIELD_LABEL),
@@ -911,7 +905,7 @@ public class MS2Test extends AbstractMS2ImportTest
         }
 
         log("Test editing a run group's runs");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("Run Groups"));
         clickAndWait(Locator.linkWithText(RUN_GROUP2_NAME));
         assertTextPresent(RUN_GROUP1_NAME2,
@@ -924,12 +918,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("DRT1");
 
         verifyRunGroupMapQuery();
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         log("Test that the compare run groups works");
-        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", getDriver());
+        DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, getDriver());
         searchRunsTable.checkAllOnPage();
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "ProteinProphet");
+        searchRunsTable.clickHeaderMenu("Compare", "ProteinProphet");
         clickButton("Compare");
 
         click(Locator.linkWithText("Comparison Overview"));
@@ -941,23 +935,23 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Customize View");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("SeqId/Mass", "Protein Mass");
-        _customizeViewsHelper.addCustomizeViewFilter("SeqId/Mass", "Protein Mass", "Is Less Than", "30000");
+        _customizeViewsHelper.addColumn("SeqId/Mass", "Protein Mass");
+        _customizeViewsHelper.addFilter("SeqId/Mass", "Protein Mass", "Is Less Than", "30000");
         _customizeViewsHelper.saveCustomView(VIEW5);
 
-        DataRegionTable peptidesTable = new DataRegionTable("query", getDriver());
+        DataRegionTable peptidesTable = new DataRegionTable("query", this);
         Locator seqIdMassHeader = DataRegionTable.Locators.columnHeader("query", "SeqId/Mass");
         log("Make sure the filtering and new columns worked");
         assertElementPresent(seqIdMassHeader);
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
 
         log("Check default view works");
-        peptidesTable.clickHeaderMenu("Grid Views", "default");
+        peptidesTable.goToView("default");
         assertElementNotPresent(seqIdMassHeader);
         assertTextPresent("gi|34849400|");
 
         log("Check sorting");
-        peptidesTable.clickHeaderMenu("Grid Views", VIEW5);
+        peptidesTable.goToView(VIEW5);
         peptidesTable.setSort("SeqId", SortDirection.ASC);
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|15828808|ref|NP_326168.1|");
 
@@ -970,15 +964,16 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(compareRunExportSearcher, "gi|34849400|");
 
         log("Test delete run groups");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("Run Groups"));
-        new DataRegionTable("RunGroupWide", getDriver()).checkAll();
-        clickButton("Delete");
+        DataRegionTable runGroupTable = new DataRegionTable("RunGroupWide", getDriver());
+        runGroupTable.checkAll();
+        runGroupTable.clickHeaderButton("Delete");
         clickButton("Confirm Delete");
         assertTextNotPresent(RUN_GROUP1_NAME2,
                 RUN_GROUP2_NAME,
                 DEFAULT_EXPERIMENT);
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         assertTextNotPresent(RUN_GROUP1_NAME2);
 
         verifyGroupAudit();
@@ -991,32 +986,30 @@ public class MS2Test extends AbstractMS2ImportTest
         assertEquals("Unexpected number of audit rows", 9, rows.size());
         int addedCount = 0;
         int removedCount = 0;
-        for(Map row : rows)
+        for (Map row : rows)
         {
-            if(((String)row.get("Comment")).contains("was added to the run group"))
+            if (((String)row.get("Comment")).contains("was added to the run group"))
                 addedCount++;
-            else if(((String)row.get("Comment")).contains("was removed from the run group"))
+            else if (((String)row.get("Comment")).contains("was removed from the run group"))
                 removedCount++;
         }
 
         assertEquals(8, addedCount);
         assertEquals(1, removedCount);
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
     }
 
     private void verifyRunGroupMapQuery()
     {
         goToSchemaBrowser();
-
-        selectQuery("exp", "RunGroupMap");
-        waitAndClickAndWait(Locator.linkWithText("view data"));
+        viewQueryData("exp", "RunGroupMap");
 
         List<Map<String, Object>> rows = executeSelectRowCommand("exp", "RunGroupMap").getRows();
         assertEquals("Unexpected number of rows in RunGroupMap", 5, rows.size());
 
         Set<String> keys = rows.get(0).keySet();
-        for(String header : new String[] {"RunGroup", "Created", "CreatedBy", "Run"})
+        for (String header : new String[] {"RunGroup", "Created", "CreatedBy", "Run"})
         {
             assertTrue("Run Group Map missing column: " + header, keys.contains(header));
         }
@@ -1027,7 +1020,7 @@ public class MS2Test extends AbstractMS2ImportTest
         textAndCount.put("DRT2", 3);
         textAndCount.put("DRT1", 2);
 
-        for(String key : textAndCount.keySet())
+        for (String key : textAndCount.keySet())
         {
             assertTextPresent(key, textAndCount.get(key).intValue());
         }
@@ -1039,9 +1032,9 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test Compare MS2 Runs");
 
         log("Test Compare Peptides using Query");
-        DataRegionTable searchRunsTable = new DataRegionTable("MS2SearchRuns", getDriver());
+        DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         searchRunsTable.checkAllOnPage();
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide");
+        searchRunsTable.clickHeaderMenu("Compare", "Peptide");
         click(Locator.radioButtonByNameAndValue("peptideFilterType", "none"));
         setFormElement(Locator.input("targetProtein"), "");
         clickButton("Compare");
@@ -1052,7 +1045,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export
-        File proteinCoverageFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        File proteinCoverageFile = doAndWaitForDownload(() -> new DataRegionTable("query", this).clickHeaderButton("Export Protein Coverage"));
         TextSearcher coverageSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(proteinCoverageFile));
         assertTextPresent(coverageSearcher,
                 "22001886|sp|Q963B6",
@@ -1079,7 +1072,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("K.GSDSLSDGPACKR.S");
 
         // verify the bulk protein coverage map export for the peptideProphet probability filter
-        File protCoverageFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        File protCoverageFile = doAndWaitForDownload(() -> new DataRegionTable("query", this).clickHeaderButton("Export Protein Coverage"));
         TextSearcher protCoverageFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(protCoverageFile));
         assertTextPresent(protCoverageFileSearcher,
                 "4689022|emb|CAA80880.2",
@@ -1105,7 +1098,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export for peptideProphet filter with target protein
-        File peptideProphetFile = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        File peptideProphetFile = doAndWaitForDownload(() -> new DataRegionTable("query", this).clickHeaderButton("Export Protein Coverage"));
         TextSearcher peptideProphetSearcher = new TextSearcher(()-> TestFileUtils.getFileContents(peptideProphetFile));
         assertTextPresent(peptideProphetSearcher,
                 "18311790|ref|NP_558457.1",
@@ -1138,7 +1131,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "K.EYYLLHKPPKTISSTK.D");
 
         // verify the bulk protein coverage map export for target protein
-        File bulkProteinCoverageMap = doAndWaitForDownload(() -> clickButton("Export Protein Coverage", 0));
+        File bulkProteinCoverageMap = doAndWaitForDownload(() -> new DataRegionTable("query", this).clickHeaderButton("Export Protein Coverage"));
         TextSearcher bulkProteinCoverageSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(bulkProteinCoverageMap));
         assertTextPresent(bulkProteinCoverageSearcher,
                 "15645924|ref|NP_208103.1",
@@ -1160,8 +1153,8 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(bulkProteinCoverageSearcher, "peptide-marker", 2);
 
         log("Test Compare Runs using Query Peptides");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        DataRegionTable ms2Runs = new DataRegionTable("MS2SearchRuns", getDriver());
+        navigateToFolder(FOLDER_NAME);
+        DataRegionTable ms2Runs = new DataRegionTable(REGION_NAME_SEARCH_RUNS, getDriver());
         ms2Runs.checkAll();
         ms2Runs.clickHeaderMenu("Compare", "Peptide");
         checkRadioButton(Locator.radioButtonByNameAndValue("peptideFilterType", "none"));
@@ -1174,9 +1167,9 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Customize View in Query Peptides");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("CTAGG_AVG_XCorr");
-        _customizeViewsHelper.removeCustomizeViewColumn("InstanceCount");
-        _customizeViewsHelper.addCustomizeViewFilter("CTAGG_AVG_XCorr", "Avg XCorr", "Is Greater Than", "10");
+        _customizeViewsHelper.addColumn("CTAGG_AVG_XCorr");
+        _customizeViewsHelper.removeColumn("InstanceCount");
+        _customizeViewsHelper.addFilter("CTAGG_AVG_XCorr", "Avg XCorr", "Is Greater Than", "10");
         _customizeViewsHelper.saveCustomView();
 
         log("Check filtering and columns were added correctly");
@@ -1189,13 +1182,14 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Check Ignore/Apply View Filter");
-        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Grid Views"), false, "Apply Grid Filter");
+        DataRegionTable table = new DataRegionTable("query", this);
+        table.clickApplyGridFilter();
         assertTextPresent(
                 "K.EIRQRQGDDLDGLSFAELR.G",
                 "R.TQMPAASICVNYK.G",
                 "Avg XCorr");
 
-        _ext4Helper.clickExt4MenuButton(true, DataRegionTable.Locators.headerMenuButton("query", "Grid Views"), false, "Apply Grid Filter");
+        table.clickApplyGridFilter();
         assertTextPresent(
                 "Avg XCorr",
                 "K.EIRQRQGDDLDGLSFAELR.G");
@@ -1203,7 +1197,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.TQMPAASICVNYK.G");
 
         log("Test exporting in Query Peptides Comparision");
-        File lastPeptideFile = new DataRegionExportHelper(new DataRegionTable("query", getDriver())).exportText(ColumnHeaderType.Caption, DataRegionExportHelper.TextSeparator.TAB);
+        File lastPeptideFile = new DataRegionExportHelper(table).exportText(ColumnHeaderType.Caption, DataRegionExportHelper.TextSeparator.TAB);
         TextSearcher lastPeptideSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(lastPeptideFile));
         assertTextPresent(lastPeptideSearcher,
                 "Avg XCorr",
@@ -1238,7 +1232,7 @@ public class MS2Test extends AbstractMS2ImportTest
     //issue 12342
     private void queryValidationTest()
     {
-        log("Validate previously failing queiries");
+        log("Validate previously failing queries");
 
         String  sqlGroupNumberDisplay =    "SELECT ProteinGroups.\"Group\", \n" +
                 "ProteinGroups.GroupProbability, \n" +
@@ -1269,16 +1263,16 @@ public class MS2Test extends AbstractMS2ImportTest
         clickButtonContainingText("Execute Query", 0);
         assertTextNotPresent(expectedError);
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
     }
 
     private void fractionRollupTest()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.selectFileBrowserItem("bov_fract/xtandem/test1/CAexample_mini1.xtan.xml");
         _fileBrowserHelper.checkFileBrowserFileCheckbox("CAexample_mini2.xtan.xml");
-        if(isElementPresent(Locator.tagWithClassContaining("span", "x4-toolbar-more-icon")))
+        if (isElementPresent(Locator.tagWithClassContaining("span", "x4-toolbar-more-icon")))
         {
             click(Locator.tagWithClassContaining("span", "x4-toolbar-more-icon"));
             click(Locator.tagWithText("span", "Fraction Rollup Analysis"));
@@ -1295,7 +1289,7 @@ public class MS2Test extends AbstractMS2ImportTest
         waitForElementWithRefresh(Locator.linkContainingText(PROTOCOL_NAME), WAIT_FOR_JAVASCRIPT);
         waitAndClick(Locator.linkContainingText(PROTOCOL_NAME));
         waitForElement(Locator.linkWithText("K.LLASMLAK.A"));
-        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
+        DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         List<String> peptides = peptidesTable.getColumnDataAsText("Peptide");
         assertEquals(Arrays.asList("K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A", "K.LLASMLAK.A", "R.Q^YALHVDGVGTK.A", "R.EFAEVVSKIRR.S", "A.KKVVAVIK.L", "K.ELQAAQAR.L", "R.EYDTSKIEAAIWK.E", "K.TEGVIPSR.E", "R.LGRHPNK.A"), peptides);
     }

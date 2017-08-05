@@ -21,6 +21,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
+import org.labkey.test.components.html.ProjectMenu;
 
 import java.io.File;
 import java.util.Arrays;
@@ -28,7 +29,6 @@ import java.util.List;
 
 abstract public class MS2TestBase extends BaseWebDriverTest
 {
-    protected static final String PROJECT_NAME = "MS2VerifyProject";
     protected static final String FOLDER_NAME = "ms2folder";
     protected static final String SAMPLE_BASE_NAME = "CAexample_mini";
     protected static final String VIEW = "filterView";
@@ -52,6 +52,12 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     public final static String PIPELINE_PATH = TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe";
 
+    protected static final String REGION_NAME_PEPTIDES = "MS2Peptides";
+    protected static final String REGION_NAME_PROTEINS = "MS2Proteins";
+    protected static final String REGION_NAME_PROTEINGROUPS = "ProteinGroups";
+    protected static final String REGION_NAME_QUANTITATION = "ProteinGroupsWithQuantitation";
+    protected static final String REGION_NAME_SEARCH_RUNS = "MS2SearchRuns";
+
     public List<String> getAssociatedModules()
     {
         return Arrays.asList("ms2");
@@ -60,7 +66,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     @Override
     protected String getProjectName()
     {
-        return PROJECT_NAME;
+        return "MS2VerifyProject";
     }
 
     @Override
@@ -77,8 +83,8 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     protected void createProjectAndFolder()
     {
-        _containerHelper.createProject(PROJECT_NAME, null);
-        _containerHelper.createSubfolder(PROJECT_NAME, PROJECT_NAME, FOLDER_NAME, "MS2", new String[] { });
+        _containerHelper.createProject(getProjectName(), null);
+        _containerHelper.createSubfolder(getProjectName(), FOLDER_NAME, "MS2");
 
         log("Setup pipeline.");
         clickButton("Setup");
@@ -93,8 +99,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     protected void deleteViews(String... viewNames)
     {
-        clickProject(PROJECT_NAME);
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         if (isElementPresent(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif")))
         {
             clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
@@ -114,8 +119,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     protected void deleteRuns()
     {
         log("Delete runs.");
-        clickProject(PROJECT_NAME);
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         clickAndWait(Locator.linkWithText("MS2 Runs"));
         doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("experimentRunFilter"), "All Runs"));
@@ -157,5 +161,16 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         delete(new File(rootDir, ".labkey/protocols/mass_spec/TestMS2Protocol.xml"));
         delete(new File(rootDir, ".labkey/protocols/"+search_type+"/default.xml"));
         delete(new File(rootDir, ".labkey/protocols/"+search_type+"/test2.xml"));
+    }
+
+    protected void navigateToFolder(String folderName)
+    {
+        if (IS_BOOTSTRAP_LAYOUT)
+            new ProjectMenu(getDriver()).navigateToFolder(getProjectName(), folderName);
+        else
+        {
+            clickProject(getProjectName());
+            clickFolder(folderName);
+        }
     }
 }

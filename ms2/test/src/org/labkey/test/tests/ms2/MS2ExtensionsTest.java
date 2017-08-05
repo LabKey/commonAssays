@@ -31,9 +31,9 @@ import static org.junit.Assert.assertTrue;
 @Category({MS2.class, DailyA.class})
 public class MS2ExtensionsTest extends AbstractMS2ImportTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String MS2EXTENSIONS_WEBPART = "MS2 Runs With Peptide Counts";
     protected static final String MS2EXTENSIONS_MODULE = "MS2Extensions";
-    protected static final String MS2_FOLDER_NAME = "ms2folder";
     protected static final String SEARCH_STRING = "gi|11";
     protected static final String MS2EXTENSIONS_DATAREGION_NAME = "MS2ExtensionsRunGrid";
     protected static final String MULTI_PROTEIN_MSG = "Multiple proteins match your search. Please choose the applicable proteins below";
@@ -90,15 +90,14 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
 
     private void compareWithCriteria(String matchCriteria)
     {
-        clickFolder(MS2_FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         targetProteinInput.waitForElement(getDriver(), 1000);
         setFormElement(targetProteinInput, SEARCH_STRING);
         selectOptionByText(matchCriteriaComo, matchCriteria);
         DataRegionTable runsTable = new DataRegionTable(MS2EXTENSIONS_DATAREGION_NAME, getDriver());
         runsTable.checkAll();
-        sleep(1000);
-        clickButton("Compare Peptides");
+        runsTable.clickHeaderButton("Compare Peptides");
     }
 
     private void cleanPipeline()
@@ -108,5 +107,4 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         File rootDir = new File(PIPELINE_PATH);
         delete(new File(rootDir, ".labkey/protocols/rollup/Protocol Rollup 1.xml"));
     }
-
 }

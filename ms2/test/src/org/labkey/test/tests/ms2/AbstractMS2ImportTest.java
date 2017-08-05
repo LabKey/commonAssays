@@ -41,7 +41,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     public void testSteps()
     {
         setupMS2();
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         verifyMS2();
     }
 
@@ -59,11 +59,6 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected static final String ENZYME = "trypsin";
     protected static final String MASS_SPEC = "ThermoFinnigan";
 
-    protected static final String REGION_NAME_PEPTIDES = "MS2Peptides";
-    protected static final String REGION_NAME_PROTEINS = "MS2Proteins";
-    protected static final String REGION_NAME_PROTEINGROUPS = "ProteinGroups";
-    protected static final String REGION_NAME_QUANTITATION = "ProteinGroupsWithQuantitation";
-
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(SEARCH_TYPE);
@@ -73,7 +68,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected void importMS2Run(String directoryName, int totalJobCount)
     {
         log("Upload existing MS2 data: ");
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/" + directoryName + "/" + SAMPLE_BASE_NAME + ".search.xar.xml", "Import Experiment");
 
@@ -99,7 +94,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
 
         importMS2Run("DRT1", 1);
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkContainingText("DRT1"));
 
         // Create some saved MS2 views
@@ -157,7 +152,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         clickButton("Go");
         selectOptionByText(Locator.name("grouping"), "Standard");
         clickAndWait(Locator.id("viewTypeSubmitButton"));
-        peptidesTable.clickHeaderMenu("Grid Views", "ProteinProphet");
+        peptidesTable.goToView("ProteinProphet");
         peptidesTable.setFilter("ProteinProphetData/ProteinGroupId/GroupProbability", "Is Greater Than", "0.7");
         clickButton("Save View");
         setFormElement(Locator.name("name"), QUERY_PROTEINPROPHET_VIEW_NAME);
