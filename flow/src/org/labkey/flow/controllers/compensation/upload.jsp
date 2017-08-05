@@ -22,13 +22,17 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% UploadCompensationForm form = (UploadCompensationForm) __form; %>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=new ActionURL(UploadAction.class, getContainer())%>" enctype="multipart/form-data">
-    <p>Give your new compensation matrix a name.<br>
-        <input type="text" name="ff_compensationMatrixName" value="<%=h(form.ff_compensationMatrixName)%>"/>
-    </p>
-
-    <p>You can upload a compensation matrix file that was saved from FlowJo.<br>
-        <input type="file" name="ff_compensationMatrixFile">
-    </p>
+<labkey:form method="POST" action="<%=new ActionURL(UploadAction.class, getContainer())%>" enctype="multipart/form-data" layout="vertical">
+    <labkey:input type="text"
+        label="Compensation Matrix Name"
+        contextContent="Give your new compensation matrix a name."
+        name="ff_compensationMatrixName"
+        value="<%=h(form.ff_compensationMatrixName)%>"
+    />
+    <labkey:input type="file"
+        label="Compensation Matrix File"
+        contextContent="You can upload a compensation matrix file that was saved from FlowJo."
+        name="ff_compensationMatrixFile"
+    />
     <labkey:button text="submit"/>
 </labkey:form>
