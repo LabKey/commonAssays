@@ -35,6 +35,8 @@ import java.util.TreeMap;
 @Category({DailyA.class, Assays.class})
 public final class LuminexValueBasedGuideSetTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
     private final String[] UPDATED_EXPECTED_FLAGS = {"AUC, PCV", "", "", "", "PCV"};

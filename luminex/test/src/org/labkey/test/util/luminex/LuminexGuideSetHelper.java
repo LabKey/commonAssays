@@ -179,7 +179,7 @@ public class LuminexGuideSetHelper
     public void goToManageGuideSetsPage(String assayName)
     {
         _test.goToQCAnalysisPage(assayName, "view guide sets");
-        _test.waitForElement(Locator.tagWithClass("span", "labkey-nav-page-header").withText("Manage Guide Sets"));
+        _test.waitForElement(Locator.pageHeader("Manage Guide Sets"));
     }
 
     @LogMethod

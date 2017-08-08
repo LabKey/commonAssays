@@ -30,6 +30,8 @@ import static org.junit.Assert.assertEquals;
 @Category({DailyA.class, Assays.class})
 public final class LuminexJavaTransformTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     @Override
     protected boolean useXarImport()
     {

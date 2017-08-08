@@ -44,27 +44,9 @@ public class SetAnalyteDefaultValuesPage
     public void importDefaultsExpectError(File defaultsFile, String errorText)
     {
         ensureOnImportPage();
-
-        _test.click(PortalHelper.Locators.webPartTitle().containing("Copy/paste text"));
-        _test.click(PortalHelper.Locators.webPartTitle().containing("Upload file"));
+        _test.click(Locator.tagWithClass("span", "labkey-wp-title-text").containing("Copy/paste text"));
+        _test.click(Locator.tagWithClass("span", "labkey-wp-title-text").containing("Upload file"));
         _test.setFormElement(Locator.name("file"), defaultsFile);
-
-        submitDefaults(errorText);
-    }
-
-    public void importDefaults(String defaultsTsvContents)
-    {
-        importDefaultsExpectError(defaultsTsvContents, null);
-    }
-
-    public void importDefaultsExpectError(String defaultsTsvContents, String errorText)
-    {
-        ensureOnImportPage();
-
-        _test.click(PortalHelper.Locators.webPartTitle().containing("Upload file"));
-        _test.click(PortalHelper.Locators.webPartTitle().containing("Copy/paste text"));
-        _test.setFormElement(Locator.name("text"), defaultsTsvContents);
-
         submitDefaults(errorText);
     }
 

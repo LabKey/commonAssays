@@ -28,6 +28,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
+import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
@@ -157,6 +158,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         log("Testing Luminex Assay Designer");
         //create a new test project
         _containerHelper.createProject(getProjectName(), "Study");
+        goToProjectHome(getProjectName());
         createDefaultStudy();
 
         //create a study within this project to which we will publish
@@ -273,7 +275,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment)
     {
-        _extHelper.clickMenuButton(false, "Exclusions", "Exclude Analytes");
+        DataRegionTable table = new DataRegionTable("Data", getDriver());
+        table.clickHeaderMenu("Exclusions", false, "Exclude Analytes");
         _extHelper.waitForExtDialog("Exclude Analytes from Analysis");
         if (!firstExclusion)
             waitForText("Uncheck analytes to remove exclusions");
@@ -315,7 +318,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobId, String...analytes)
     {
-        _extHelper.clickMenuButton(false, "Exclusions", "Exclude Titrations");
+        DataRegionTable table = new DataRegionTable("Data", getDriver());
+        table.clickHeaderMenu("Exclusions", false, "Exclude Titrations");
         _extHelper.waitForExtDialog("Exclude Titrations from Analysis");
         assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a replicate group, singlepoint unknown, "
                 + "or at the assay level will not be re-included by changes in titration exclusions."));
@@ -527,8 +531,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public void goToQCAnalysisPage(String assayName, String submenuText)
     {
         goToTestAssayHome(assayName);
-
-        _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), submenuText);
+        BootstrapMenu.find(getDriver(), "view qc report").clickSubMenu(true,submenuText);
     }
 
     /**

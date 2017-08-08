@@ -48,6 +48,8 @@ import static org.junit.Assert.assertNotEquals;
 @Category({DailyA.class, Assays.class})
 public final class LuminexGuideSetDisablingTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     private LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     private static final File[] GUIDE_SET_FILES = {
             TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls"),

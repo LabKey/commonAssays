@@ -24,6 +24,7 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
+import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
@@ -38,6 +39,8 @@ import java.util.TreeMap;
 @Category({DailyA.class, Assays.class})
 public class LuminexSinglePointTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
     private static final String file1 = "01-11A12-IgA-Biotin.xls";
@@ -71,7 +74,7 @@ public class LuminexSinglePointTest extends LuminexTest
         assertElementNotPresent(Locator.linkWithText("ERROR"));
         goToTestAssayHome();
         waitForElement(Locator.tagWithText("a", "view qc report"));
-        _extHelper.clickExtMenuButton(true, Locator.tagWithText("a", "view qc report"), "view single point control qc report");
+        BootstrapMenu.find(getDriver(), "view qc report").clickSubMenu(true,"view single point control qc report");
         waitForText("Average Fi Bkgd");
 
         DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
@@ -151,7 +154,7 @@ public class LuminexSinglePointTest extends LuminexTest
     private void goToLeviJennings()
     {
         goToTestAssayHome();
-        _extHelper.clickExtMenuButton(true, Locator.xpath("//a[text() = 'view qc report']"), "view single point control qc report");
+        BootstrapMenu.find(getDriver(), "view qc report").clickSubMenu(true, "view single point control qc report");
         DataRegionTable table = new DataRegionTable("AnalyteSinglePointControl", getDriver());
         table.setFilter("Analyte", "Equals", "ENV1");
         clickAndWait(Locator.linkContainingText("graph"));
