@@ -39,6 +39,8 @@ import static org.junit.Assert.assertTrue;
 @Category({DailyA.class, Assays.class})
 public final class LuminexGuideSetTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     public LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     public static final File[] GUIDE_SET_FILES = {TEST_ASSAY_LUM_FILE5, TEST_ASSAY_LUM_FILE6, TEST_ASSAY_LUM_FILE7, TEST_ASSAY_LUM_FILE8, TEST_ASSAY_LUM_FILE9};
     public static final String[] INITIAL_EXPECTED_FLAGS = {"AUC, EC50-4, HMFI, PCV", "AUC, EC50-4, EC50-5, HMFI", "EC50-5, HMFI", "", "PCV"};
@@ -85,7 +87,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.verifyGuideSetsApplied(TEST_ASSAY_LUM, guideSetIds, LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES, 2);
 
         //nav trail check
-        assertElementPresent(Locator.id("navTrailAncestors").append("/a").withText("assay.Luminex." + TEST_ASSAY_LUM + " Schema"));
+        assertElementPresent(Locator.tagWithClass("ol", "breadcrumb").append(Locator.linkWithText("assay.Luminex." + TEST_ASSAY_LUM + " Schema")));
 
         // verify the guide set threshold values for the first set of runs
         int[] rowCounts = {2, 2};
@@ -447,20 +449,20 @@ public final class LuminexGuideSetTest extends LuminexTest
         _customizeViewsHelper.addCustomizeViewColumn("QCFlags");
         _customizeViewsHelper.saveCustomView("QC Flags View");
 
-        DataRegionTable drt = new DataRegionTable("Runs", getDriver());
-
         //2. exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 for GS Analyte B is changed to be under the Guide Set range so new QC Flag inserted for that
         excludeWellFromRun("Guide Set plate 5", "A4,B4", 3, 2);
         clickAndWait(Locator.linkContainingText("view runs"));
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
+        DataRegionTable drt = new DataRegionTable("Runs", getDriver());
+        drt.goToView("QC Flags View");
         assertTrue(drt.getDataAsText(1, "QC Flags").contains("EC50-4"));
 
         //3. un-exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 QC Flag for GS Analyte B that was inserted in the previous step is removed
         includeWellFromRun("Guide Set plate 5", "A4,B4", 4);
         clickAndWait(Locator.linkContainingText("view runs"));
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
+        drt = new DataRegionTable("Runs", getDriver());
+        drt.goToView("QC Flags View");
         assertTrue(!drt.getDataAsText(1, "QC Flags").contains("EC50-4"));
 
         //4. For GS Analyte B, apply the non-current guide set to plate 5a
@@ -478,7 +480,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         assertTextPresent(newQcFlags);
         //verify new flags present in run list
         goToTestAssayHome();
-        _extHelper.clickExtMenuButton(true, Locator.lkButton("Grid Views"), "QC Flags View");
+        drt = new DataRegionTable("Runs", getDriver());
+        drt.goToView("QC Flags View");
         assertTextPresent("AUC, EC50-4, EC50-5, HMFI, PCV");
 
         //5. For GS Analyte B, apply the guide set for plate 5a back to the current guide set

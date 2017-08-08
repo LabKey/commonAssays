@@ -380,6 +380,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         for (int i=0; i < drt.getDataRowCount(); i++)
             if (drt.getDataAsText(i, "Comment").equals(comment))
                 drt.checkCheckbox(i);
-        drt.clickHeaderButtonByText("Delete");
+        drt.clickHeaderButton("Delete");
     }
 }

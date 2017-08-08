@@ -17,6 +17,7 @@ package org.labkey.test.components.luminex.dialogs;
 
 import org.labkey.test.Locator;
 import org.labkey.test.pages.LabKeyPage;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.openqa.selenium.WebDriver;
@@ -39,8 +40,9 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
     @Override
     protected void openDialog()
     {
-        clickButton(MENU_BUTTON, 0);
-        elements().exclusionMenuItem.click();
+        DataRegionTable table = new DataRegionTable("Data", getDriver());
+        table.clickHeaderMenu(MENU_BUTTON, false, MENU_BUTTON_ITEM);
+        _extHelper.waitForExtDialog(TITLE);
     }
 
     public static SinglepointExclusionDialog beginAt(WebDriver driver)
@@ -83,13 +85,9 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
 
     public class Elements extends LabKeyPage.ElementCache
     {
-        protected WebElement exclusionMenuItem = Ext4Helper.Locators.menuItem(MENU_BUTTON_ITEM).findWhenNeeded(this);
-//        protected WebElement
-
     }
 
     public static class Locators extends org.labkey.test.Locators
     {
-
     }
 }

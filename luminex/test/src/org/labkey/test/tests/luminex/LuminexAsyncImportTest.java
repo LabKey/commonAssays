@@ -32,6 +32,8 @@ import java.util.Calendar;
 @Category({DailyA.class, Assays.class})
 public final class LuminexAsyncImportTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     @BeforeClass
     public static void updateAssayDefinition()
     {

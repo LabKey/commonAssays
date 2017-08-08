@@ -36,6 +36,8 @@ import java.io.File;
 @Category({DailyA.class, Assays.class})
 public final class LuminexExclusionRetentionTest extends LuminexTest
 {
+    {setIsBootstrapWhitelisted(true);}
+
     private static final File BASE_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
     private static final File REIMPORT_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin_reimport.xls");
     private static final String RUN_NAME = "ReimportTestRun";
@@ -83,7 +85,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         if(runTable.getDataRowCount() > 0)
         {
             runTable.checkAll();
-            clickButton("Delete");
+            runTable.clickHeaderButton("Delete");
             clickButton("Confirm Delete");
         }
     }

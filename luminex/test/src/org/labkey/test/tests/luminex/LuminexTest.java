@@ -745,7 +745,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         if(table.getDataRowCount() > 0)
         {
             table.checkAll();
-            clickButton("Delete");
+            table.clickHeaderButton("Delete");
             clickButton("Confirm Delete");
         }
     }
