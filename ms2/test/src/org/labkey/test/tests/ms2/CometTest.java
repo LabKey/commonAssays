@@ -33,6 +33,7 @@ import static org.junit.Assert.fail;
 @Category({MS2.class, DailyB.class, FileBrowser.class})
 public class CometTest extends AbstractMS2SearchEngineTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String SEARCH_BUTTON = "Comet";
     protected static final String SEARCH_TYPE = "comet";
 
@@ -75,7 +76,7 @@ public class CometTest extends AbstractMS2SearchEngineTest
         // There should be 100 MS1 scans and 100 MS2 scans
         assertTextPresent("100");
 
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        projectMenu().navigateToFolder(getProjectName(), getCurrentContainer()); // with tabs invisible, navigate to the container
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user
