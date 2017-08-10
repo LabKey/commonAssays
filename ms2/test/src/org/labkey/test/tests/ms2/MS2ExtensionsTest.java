@@ -64,7 +64,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         _portalHelper.addWebPart(MS2EXTENSIONS_WEBPART);
 
         log("Verify protein search with match criteria of Prefix");
-        assertEquals("Default match criteria should be Prefix", "Prefix", getSelectedOptionText(matchCriteriaComo));
+        assertEquals("Default match criteria should be Prefix", "Prefix", getSelectedOptionText(matchCriteriaComo.waitForElement(shortWait())));
 
         compareWithCriteria("Prefix");
 
