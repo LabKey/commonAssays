@@ -80,7 +80,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         log("Verify protein search with match criteria of Substring");
         compareWithCriteria("Substring");
         int proteinCountsSubString = matchedProteinCheckbox.findElements(getDriver()).size();
-        assertTrue("Wrong number of proteins found for \"" + SEARCH_STRING + "\" with match criteria \"Substring\"", proteinCounts == proteinCountsSubString);
+        assertEquals("Wrong number of proteins found for \"" + SEARCH_STRING + "\" with match criteria \"Substring\"", proteinCounts, proteinCountsSubString);
 
         log("Verify protein search with match criteria of Suffix");
         compareWithCriteria("Suffix");
@@ -97,7 +97,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         selectOptionByText(matchCriteriaComo, matchCriteria);
         DataRegionTable runsTable = new DataRegionTable(MS2EXTENSIONS_DATAREGION_NAME, getDriver());
         runsTable.checkAll();
-        runsTable.clickHeaderButton("Compare Peptides");
+        runsTable.clickHeaderButtonAndWait("Compare Peptides");
     }
 
     private void cleanPipeline()
