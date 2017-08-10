@@ -98,8 +98,9 @@ public final class LuminexJavaTransformTest extends LuminexTest
         clickButton("Cancel", longWaitForPage);
 
         // Delete the first run, files should be archived
-        checkCheckbox(Locator.checkboxByName(".select"));
-        clickButton("Delete");
+        DataRegionTable runs = new DataRegionTable("Runs", getDriver());
+        runs.checkCheckbox(0);
+        runs.clickHeaderButton("Delete");
         waitForText(WAIT_FOR_JAVASCRIPT, "Confirm Deletion");
         clickButton("Confirm Delete");
         waitForText(WAIT_FOR_JAVASCRIPT, "Description for Luminex assay");

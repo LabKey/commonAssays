@@ -86,6 +86,20 @@ public class RunPropertiesWebPart extends WebPartPanel
         {
             return new RunPropertiesWebPart(el, driver);
         }
+
+        @Override
+        protected Locator.XPathLocator locator()
+        {
+            Locator.XPathLocator webPartTitle = titleLocator();
+            webPartTitle = isPartialTitle() ? webPartTitle.containing(getTitle()) : webPartTitle.withText(getTitle());
+            return Locator.tagWithClass("div", "labkey-portal-container").withDescendant(webPartTitle);
+        }
+
+        @Override
+        protected Locator.XPathLocator titleLocator()
+        {
+            return Locator.tagWithClass("span", "labkey-wp-title-text");
+        }
     }
 
     public Elements elements()

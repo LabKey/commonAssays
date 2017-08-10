@@ -189,7 +189,7 @@ public final class LuminexPositivityTest extends LuminexTest
         runs.checkCheckbox(1);
         runs.checkCheckbox(2);
         runs.checkCheckbox(3);
-        clickButton("Delete");
+        runs.clickHeaderButton("Delete");
         assertEquals(4, getElementCount(Locator.linkContainingText("Positivity ")));
         assertTextNotPresent(runToKeep);
         clickButton("Confirm Delete");
