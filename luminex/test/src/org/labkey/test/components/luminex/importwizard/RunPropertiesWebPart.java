@@ -22,9 +22,6 @@ import org.openqa.selenium.WebElement;
 
 import java.io.File;
 
-/**
- * Created by iansigmon on 12/29/16.
- */
 public class RunPropertiesWebPart extends WebPartPanel
 {
     private static final String TITLE = "Run Properties";
@@ -85,20 +82,6 @@ public class RunPropertiesWebPart extends WebPartPanel
         protected RunPropertiesWebPart construct(WebElement el, WebDriver driver)
         {
             return new RunPropertiesWebPart(el, driver);
-        }
-
-        @Override
-        protected Locator.XPathLocator locator()
-        {
-            Locator.XPathLocator webPartTitle = titleLocator();
-            webPartTitle = isPartialTitle() ? webPartTitle.containing(getTitle()) : webPartTitle.withText(getTitle());
-            return Locator.tagWithClass("div", "labkey-portal-container").withDescendant(webPartTitle);
-        }
-
-        @Override
-        protected Locator.XPathLocator titleLocator()
-        {
-            return Locator.tagWithClass("span", "labkey-wp-title-text");
         }
     }
 

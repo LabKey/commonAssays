@@ -15,14 +15,10 @@
  */
 package org.labkey.test.components.luminex.importwizard;
 
-import org.labkey.test.Locator;
 import org.labkey.test.components.WebPartPanel;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-/**
- * Created by iansigmon on 12/29/16.
- */
 public class AnalytePropertiesWebPart extends WebPartPanel
 {
     private static final String TITLE = "Analyte Properties";
@@ -49,20 +45,6 @@ public class AnalytePropertiesWebPart extends WebPartPanel
         protected AnalytePropertiesWebPart construct(WebElement el, WebDriver driver)
         {
             return new AnalytePropertiesWebPart(el, driver);
-        }
-
-        @Override
-        protected Locator.XPathLocator locator()
-        {
-            Locator.XPathLocator webPartTitle = titleLocator();
-            webPartTitle = isPartialTitle() ? webPartTitle.containing(getTitle()) : webPartTitle.withText(getTitle());
-            return Locator.tagWithClass("div", "labkey-portal-container").withDescendant(webPartTitle);
-        }
-
-        @Override
-        protected Locator.XPathLocator titleLocator()
-        {
-            return Locator.tagWithClass("span", "labkey-wp-title-text");
         }
     }
 
