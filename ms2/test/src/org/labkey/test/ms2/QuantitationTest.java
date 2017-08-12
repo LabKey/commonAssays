@@ -25,6 +25,7 @@ import java.io.File;
 @Category({DailyA.class})
 public class QuantitationTest extends AbstractXTandemTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String LIBRA_PROTOCOL_NAME = "BasicLibra";
 
     protected static final String LIBRA_INPUT_XML =
@@ -45,7 +46,7 @@ public class QuantitationTest extends AbstractXTandemTest
         createProjectAndFolder();
 
         log("Start analysis running.");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        projectMenu().navigateToFolder(getProjectName(),"ms2folder");
         clickButton("Process and Import Data");
 
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/" + SAMPLE_BASE_NAME + ".mzXML");
