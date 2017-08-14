@@ -162,7 +162,7 @@ public final class LuminexPositivityTest extends LuminexTest
     {
         DataRegionTable runs = new DataRegionTable("Runs", this);
         runs.checkCheckbox(runIndex);
-        runs.clickHeaderButtonByText("Re-import run");
+        runs.clickHeaderButton("Re-import run");
         clickButton("Next"); // batch
         clickButton("Next"); // run
         for (String analyteName : _analyteNames)
@@ -189,8 +189,8 @@ public final class LuminexPositivityTest extends LuminexTest
         runs.checkCheckbox(1);
         runs.checkCheckbox(2);
         runs.checkCheckbox(3);
-        clickButton("Delete");
-        assertEquals(4, getElementCount(Locator.linkContainingText("Positivity ")));
+        runs.clickHeaderButtonAndWait("Delete");
+        assertEquals(4, Locator.linkContainingText("Positivity ").findElements(getDriver()).size());
         assertTextNotPresent(runToKeep);
         clickButton("Confirm Delete");
 
