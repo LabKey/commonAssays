@@ -36,6 +36,7 @@ import java.util.List;
 @Category({DailyB.class, MS2.class, FileBrowser.class})
 public class SequestImportTest extends BaseWebDriverTest
 {
+    {setIsBootstrapWhitelisted(true);}
     private static final String PROJECT_NAME = "SequestImport" + TRICKY_CHARACTERS_FOR_PROJECT_NAMES;
 
     private static final String[] TOTAL_PEPTIDES_FIELD_KEY = {"PeptideCounts", "TotalPeptides"};
@@ -59,7 +60,7 @@ public class SequestImportTest extends BaseWebDriverTest
     @LogMethod
     private void verifyRunGrid()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        clickFolder(PROJECT_NAME);
 
         // Customize the view to show the distinct and total peptide counts based on the criteria established
         // by the custom query
@@ -85,7 +86,7 @@ public class SequestImportTest extends BaseWebDriverTest
         assertTextNotPresent("A.ADSNPAP.S", "A.VPSGQDNIHR.F");
 
         // Make sure that our target protein is remembered across page views
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        clickFolder(PROJECT_NAME);
         assertTextPresent("IPI00176617");
     }
 
@@ -103,7 +104,7 @@ public class SequestImportTest extends BaseWebDriverTest
         {
             waitForElement(FileBrowserHelper.Locators.gridRowWithNodeId(file).append(runLink));
         }
-        clickAt(runLink, 5, 5, getDefaultWaitForPage());  // The library is having a hard time clicking on the element, so changing the click to be on an X,Y coordinate.
+        clickAndWait(runLink);
         assertElementPresent(Locator.pageHeader(runName));
         clickAndWait(Locator.linkWithText(runProtocol));
 
@@ -114,12 +115,12 @@ public class SequestImportTest extends BaseWebDriverTest
     @LogMethod
     private void importSequestRun()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        clickFolder(PROJECT_NAME);  // go to MS2 Dashboard
         // Import a Sequest run
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("raftflow10.pep.xml", "Import Search Results");
 
-        click(Locator.linkWithText("MS2 Dashboard"));
+        clickFolder(PROJECT_NAME);
         waitAndClick(Locator.linkWithText("Data Pipeline"));
         waitForPipelineJobsToComplete(1, "Experiment Import", false);
     }
