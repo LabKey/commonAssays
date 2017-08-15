@@ -37,6 +37,7 @@ import static org.junit.Assert.*;
 @Category({DailyB.class, MS2.class, XTandem.class})
 public class XTandemTest extends AbstractXTandemTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String SEARCH_FASTA1 = "gi|4689022";
     protected static final String SEARCH_FIND_FASTA1 = "SCHIZOSACCHAROMYCES";
     protected static final String SEARCH_FIND_ALT_FASTA1 = "Schizosaccharomyces";
@@ -204,8 +205,9 @@ public class XTandemTest extends AbstractXTandemTest
     private void verifyPeptideCrosstab()
     {
         log("Test PeptideCrosstab");
-        click(Locator.name(".toggle"));
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide");
+        DataRegionTable dt = new DataRegionTable("MS2SearchRuns", getDriver());
+        dt.checkAllOnPage();
+        dt.clickHeaderMenu("Compare", "Peptide");
 
         checkRadioButton(Locator.radioButtonByNameAndValue(PEPTIDE_CROSSTAB_RADIO_NAME, PEPTIDE_CROSSTAB_RADIO_VALUE_NONE));
         clickButton("Compare");
