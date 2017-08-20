@@ -112,11 +112,9 @@
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
 <%
     }
-%>
 
-<%
-    FlowRun[] allKeywordRuns = FlowRun.getRunsForContainer(container, FlowProtocolStep.keywords);
-    Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.length);
+    List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(container, FlowProtocolStep.keywords);
+    Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.size());
     for (FlowRun keywordRun : allKeywordRuns)
     {
         if (keywordRun.getPath() == null)

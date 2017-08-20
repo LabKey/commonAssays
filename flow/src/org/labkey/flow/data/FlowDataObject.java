@@ -242,7 +242,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return true;
     }
 
-    public FlowRun[] getTargetRuns()
+    public List<FlowRun> getTargetRuns()
     {
         return FlowRun.fromRuns(getData().getTargetRuns());
     }

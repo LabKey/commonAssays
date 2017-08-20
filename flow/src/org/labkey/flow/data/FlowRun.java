@@ -50,6 +50,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +59,9 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
 
-    public static Comparator<FlowRun> NAME_COMPARATOR = Comparator.comparing(FlowObject::getName);
+    public static final Comparator<FlowRun> NAME_COMPARATOR = Comparator.comparing(FlowObject::getName);
 
-    public static Comparator<FlowRun> CREATED_COMPARATOR = Comparator.comparing(o -> o.getExperimentRun().getCreated());
+    public static final Comparator<FlowRun> CREATED_COMPARATOR = Comparator.comparing(o -> o.getExperimentRun().getCreated());
 
 
     static public String getRunLSIDPrefix()
@@ -69,13 +70,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return "Run";
     }
 
-    static public FlowRun[] fromRuns(List<? extends ExpRun> runs)
+    static public List<FlowRun> fromRuns(List<? extends ExpRun> runs)
     {
-        FlowRun[] ret = new FlowRun[runs.size()];
-        for (int i = 0; i < runs.size(); i ++)
-        {
-            ret[i] = new FlowRun(runs.get(i));
-        }
+        List<FlowRun> ret = new ArrayList<>(runs.size());
+        for (ExpRun run : runs)
+            ret.add(new FlowRun(run));
         return ret;
     }
 
@@ -347,27 +346,27 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return new FlowExperiment(experiments.get(0));
     }
 
-    static public FlowRun[] getRunsForContainer(Container container, FlowProtocolStep step)
+    static public List<FlowRun> getRunsForContainer(Container container, FlowProtocolStep step)
     {
         return getRunsForPath(container, step, null);
     }
 
-    static public FlowRun[] getRunsWithRealFCSFiles(Container container, FlowProtocolStep step)
+    static public List<FlowRun> getRunsWithRealFCSFiles(Container container, FlowProtocolStep step)
     {
-        FlowRun[] runs = FlowRun.getRunsForContainer(container, step);
+        List<FlowRun> runs = FlowRun.getRunsForContainer(container, step);
         List<FlowRun> ret = new ArrayList<>();
         for (FlowRun run : runs)
         {
             if (run.hasRealWells())
                 ret.add(run);
         }
-        return ret.toArray(new FlowRun[ret.size()]);
+        return ret;
     }
 
-    static public FlowRun[] getRunsForScript(Container container, FlowProtocolStep step, int scriptId)
+    static public List<FlowRun> getRunsForScript(Container container, FlowProtocolStep step, int scriptId)
     {
         if (scriptId == 0)
-            return new FlowRun[0];
+            return Collections.emptyList();
 
         List<FlowRun> ret = new ArrayList<>();
         for (FlowRun run : getRunsForContainer(container, step))
@@ -375,15 +374,17 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             if (scriptId == run.getScriptId())
                 ret.add(run);
         }
-        return ret.toArray(new FlowRun[ret.size()]);
+        return ret;
     }
 
-    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
+    @NotNull
+    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
     {
         return getRunsForPath(container, step, runFilePathRoot, NAME_COMPARATOR);
     }
 
-    static public FlowRun[] getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot, Comparator<FlowRun> comparator)
+    @NotNull
+    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot, Comparator<FlowRun> comparator)
     {
         List<FlowRun> ret = new ArrayList<>();
         ExpProtocol childProtocol = null;
@@ -392,7 +393,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             FlowProtocol childFlowProtocol = step.getForContainer(container);
             if (childFlowProtocol == null)
             {
-                return new FlowRun[0];
+                return Collections.emptyList();
             }
             childProtocol = childFlowProtocol.getProtocol();
         }
@@ -405,20 +406,17 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         if (comparator != null)
             ret.sort(comparator);
 
-        return ret.toArray(new FlowRun[0]);
+        return ret;
     }
 
     public static String findMostRecentTargetStudy(Container container)
     {
-        FlowRun[] runs = FlowRun.getRunsForPath(container, FlowProtocolStep.keywords, null, FlowRun.CREATED_COMPARATOR);
-        if (runs != null)
+        List<FlowRun> runs = FlowRun.getRunsForPath(container, FlowProtocolStep.keywords, null, FlowRun.CREATED_COMPARATOR);
+        for (FlowRun run : runs)
         {
-            for (FlowRun run : runs)
-            {
-                String targetStudy = (String)run.getProperty(FlowProperty.TargetStudy);
-                if (targetStudy != null && targetStudy.length() > 0)
-                    return targetStudy;
-            }
+            String targetStudy = (String)run.getProperty(FlowProperty.TargetStudy);
+            if (targetStudy != null && targetStudy.length() > 0)
+                return targetStudy;
         }
 
         return null;

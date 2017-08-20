@@ -25,13 +25,20 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
-import org.labkey.flow.data.*;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowProtocolStep;
+import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: kevink
@@ -82,12 +89,12 @@ public abstract class FlowExperimentJob extends FlowJob
         return experiment.urlShow();
     }
 
-    public FlowRun[] findRuns(File path, FlowProtocolStep step)
+    public List<FlowRun> findRuns(File path, FlowProtocolStep step)
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
         {
-            return new FlowRun[0];
+            return Collections.emptyList();
         }
         return experiment.findRun(path, step);
     }
@@ -112,8 +119,8 @@ public abstract class FlowExperimentJob extends FlowJob
 
     protected boolean checkProcessPath(File path, FlowProtocolStep step)
     {
-        FlowRun[] existing = findRuns(path, step);
-        if (existing.length > 0)
+        List<FlowRun> existing = findRuns(path, step);
+        if (!existing.isEmpty())
         {
             addStatus("Skipping " + path.toString() + " for " + step.getName() + " step because it already exists.");
             return false;
@@ -202,9 +209,9 @@ public abstract class FlowExperimentJob extends FlowJob
         }
         ExperimentRunType _run;
         List<String> _errors = new ArrayList<>();
-        Map<String, ScriptJob.StartingInput> _runOutputs = new LinkedHashMap();
-        Map<String, ScriptJob.StartingInput> _startingDataInputs = new HashMap();
-        Map<String, ScriptJob.StartingInput> _startingMaterialInputs = new HashMap();
+        Map<String, ScriptJob.StartingInput> _runOutputs = new LinkedHashMap<>();
+        Map<String, ScriptJob.StartingInput> _startingDataInputs = new HashMap<>();
+        Map<String, ScriptJob.StartingInput> _startingMaterialInputs = new HashMap<>();
         public void logError(String message)
         {
             _errors.add(message);

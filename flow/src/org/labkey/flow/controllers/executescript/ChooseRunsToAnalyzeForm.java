@@ -216,7 +216,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         {
             SimpleFilter ret = new SimpleFilter(filter);
 
-            FlowRun[] runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            List<FlowRun> runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
             int runCount = 0;
             StringBuilder sql = new StringBuilder("RowId IN (");
             String comma = "";

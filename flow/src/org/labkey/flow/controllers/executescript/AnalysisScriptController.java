@@ -1027,8 +1027,8 @@ public class AnalysisScriptController extends BaseFlowController
                 if (form.getExistingKeywordRunId() == 0)
                 {
                     // Translate selected keyword directory into a existing keyword run if possible.
-                    FlowRun[] keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, keywordDir);
-                    if (keywordRuns != null && keywordRuns.length > 0)
+                    List<FlowRun> keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, keywordDir);
+                    if (keywordRuns.size() > 0)
                     {
                         for (FlowRun keywordRun : keywordRuns)
                         {
@@ -1498,7 +1498,7 @@ public class AnalysisScriptController extends BaseFlowController
                 return;
             }
 
-            FlowJob job = null;
+            FlowJob job;
             if (analysisEngine == null || AnalysisEngine.FlowJoWorkspace == analysisEngine)
             {
                 assert (workspaceData.getWorkspaceObject() instanceof Workspace);

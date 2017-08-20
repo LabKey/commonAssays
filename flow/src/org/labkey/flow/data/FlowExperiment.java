@@ -31,7 +31,7 @@ import org.labkey.flow.query.FlowSchema;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -240,7 +240,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     public boolean hasRun(File filePath, @Nullable FlowProtocolStep step)
     {
-        FlowRun[] runs = getRuns(step);
+        List<FlowRun> runs = getRuns(step);
         for (FlowRun run : runs)
         {
             if (filePath.equals(run.getExperimentRun().getFilePathRoot()))
@@ -249,44 +249,32 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return false;
     }
 
-    public FlowRun[] findRun(File filePath, FlowProtocolStep step)
+    public List<FlowRun> findRun(File filePath, FlowProtocolStep step)
     {
-        List<FlowRun> ret = new ArrayList();
-        FlowRun[] runs = getRuns(step);
-        for (FlowRun run : runs)
+        List<FlowRun> ret = new ArrayList<>();
+        for (FlowRun run : getRuns(step))
         {
             if (filePath.equals(run.getExperimentRun().getFilePathRoot()))
             {
                 ret.add(run);
             }
         }
-        return ret.toArray(new FlowRun[0]);
-    }
-
-    public int[] getRunIds(FlowProtocolStep step)
-    {
-        FlowRun[] runs = getRuns(step);
-        int[] ret = new int[runs.length];
-        for (int i = 0; i < runs.length; i ++)
-        {
-            ret[i] = runs[i].getRunId();
-        }
         return ret;
     }
 
     public int getRunCount(FlowProtocolStep step)
     {
-        return getRuns(step).length;
+        return getRuns(step).size();
     }
 
-    public FlowRun[] getRuns(@Nullable FlowProtocolStep step)
+    public List<FlowRun> getRuns(@Nullable FlowProtocolStep step)
     {
         ExpProtocol protocol = null;
         if (step != null)
         {
             protocol = ExperimentService.get().getExpProtocol(step.getLSID(getContainer()));
             if (protocol == null)
-                return new FlowRun[0];
+                return Collections.emptyList();
         }
         return FlowRun.fromRuns(getExperiment().getRuns(null, protocol));
     }
@@ -364,9 +352,9 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     public FlowCompensationMatrix findCompensationMatrix(FlowRun run)
     {
-        List<FlowRun> runs = new ArrayList();
-        runs.addAll(Arrays.asList(findRun(new File(run.getPath()), FlowProtocolStep.analysis)));
-        runs.addAll(Arrays.asList(findRun(new File(run.getPath()), FlowProtocolStep.calculateCompensation)));
+        List<FlowRun> runs = new ArrayList<>();
+        runs.addAll(findRun(new File(run.getPath()), FlowProtocolStep.analysis));
+        runs.addAll(findRun(new File(run.getPath()), FlowProtocolStep.calculateCompensation));
         for (FlowRun runComp : runs)
         {
             FlowCompensationMatrix comp = runComp.getCompensationMatrix();
@@ -374,6 +362,5 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
                 return comp;
         }
         return null;
-
     }
 }

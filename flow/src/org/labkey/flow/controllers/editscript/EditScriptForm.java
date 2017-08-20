@@ -167,7 +167,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         }
         try
         {
-            FlowRun[] available = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            List<FlowRun> available = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
             for (FlowRun runTry : available)
             {
                 if (runTry.getPath() != null)
@@ -326,7 +326,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
     public Map<Integer, String> getExperimentRuns(boolean realFiles)
     {
         LinkedHashMap<Integer, String> ret = new LinkedHashMap<>();
-        FlowRun[] runs = realFiles ?
+        List<FlowRun> runs = realFiles ?
                 FlowRun.getRunsWithRealFCSFiles(getContainer(), FlowProtocolStep.keywords) :
                 FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
         for (FlowRun run : runs)
@@ -335,5 +335,4 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         }
         return ret;
     }
-    
 }
