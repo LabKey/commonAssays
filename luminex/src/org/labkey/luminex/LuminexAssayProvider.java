@@ -327,11 +327,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         NavTree manageAssayDesignTree = findTreeByText(result, MANAGE_ASSAY_DESIGN_LINK);
         if (manageAssayDesignTree != null && manageAssayDesignTree.hasChildren())
         {
-            NavTree setDefaultValuesTree = findTreeByText(Arrays.asList(manageAssayDesignTree.getChildren()), SET_DEFAULT_VALUES_LINK);
+            NavTree setDefaultValuesTree = findTreeByText(manageAssayDesignTree.getChildren(), SET_DEFAULT_VALUES_LINK);
             if (setDefaultValuesTree != null && setDefaultValuesTree.hasChildren())
             {
                 String name = protocol.getName() + " Analyte Properties";
-                NavTree analytePropsTree = findTreeByText(Arrays.asList(setDefaultValuesTree.getChildren()), name);
+                NavTree analytePropsTree = findTreeByText(setDefaultValuesTree.getChildren(), name);
                 if (analytePropsTree != null)
                 {
                     ActionURL analytePropsUrl = new ActionURL(LuminexController.SetAnalyteDefaultValuesAction.class, viewContext.getContainer());
