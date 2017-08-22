@@ -24,6 +24,14 @@ import org.labkey.flow.persist.AnalysisSerializer;
  */
 public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyForm
 {
+    public enum SendTo
+    {
+        Browser,
+        PipelineZip,
+        PipelineFiles,
+        Script
+    }
+
     private int[] _runId;
     private int[] _wellId;
     private boolean _includeFCSFiles = false;
@@ -33,6 +41,8 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     private boolean _includeCompensation = false;
     private boolean _useShortStatNames = false;
     private AnalysisSerializer.Options _exportFormat = AnalysisSerializer.Options.FormatGroupBySamplePopulation;
+    private SendTo _sendTo = SendTo.Browser;
+
     private String _dataRegionSelectionKey = null;
     private String _selectionType;
 
@@ -129,11 +139,23 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
         _exportFormat = exportFormat;
     }
 
+    public SendTo getSendTo()
+    {
+        return _sendTo;
+    }
+
+    public void setSendTo(SendTo sendTo)
+    {
+        _sendTo = sendTo;
+    }
+
+    @Override
     public String getDataRegionSelectionKey()
     {
         return _dataRegionSelectionKey;
     }
 
+    @Override
     public void setDataRegionSelectionKey(String dataRegionSelectionKey)
     {
         _dataRegionSelectionKey = dataRegionSelectionKey;

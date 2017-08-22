@@ -303,6 +303,11 @@ public class FlowQueryView extends QueryView
             if (queryName.equals(FlowTableType.Runs.toString()))
             {
                 ExportAnalysisForm form = new ExportAnalysisForm();
+                form.setIncludeKeywords(false);
+                form.setIncludeGraphs(true);
+                form.setIncludeCompensation(true);
+                form.setIncludeStatistics(true);
+                form.setIncludeFCSFiles(false);
                 form.setSelectionType("runs");
                 HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
@@ -310,6 +315,11 @@ public class FlowQueryView extends QueryView
             else if (queryName.equals(FlowTableType.FCSFiles.toString()) || queryName.equals(FlowTableType.FCSAnalyses.toString()) || queryName.equals(FlowTableType.CompensationControls.toString()))
             {
                 ExportAnalysisForm form = new ExportAnalysisForm();
+                form.setIncludeKeywords(true);
+                form.setIncludeGraphs(false);
+                form.setIncludeCompensation(false);
+                form.setIncludeStatistics(false);
+                form.setIncludeFCSFiles(true);
                 form.setSelectionType("wells");
                 HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);

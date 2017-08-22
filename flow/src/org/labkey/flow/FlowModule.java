@@ -26,6 +26,7 @@ import org.labkey.api.flow.api.FlowService;
 import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.DefaultSchema;
@@ -136,6 +137,12 @@ public class FlowModule extends SpringModule
         ReportService.get().registerReport(new PositivityFlowReport());
 
         ServiceRegistry.get().registerService(FlowService.class, new FlowServiceImpl());
+
+        ModuleProperty prop = new ModuleProperty(this, "ExportToScript", ModuleProperty.InputType.text);
+        prop.setDescription("Set the script that will be invoked when exporting FCS files");
+        prop.setCanSetPerContainer(true);
+        prop.setLabel("Export to Script");
+        addModuleProperty(prop);
     }
 
     @NotNull

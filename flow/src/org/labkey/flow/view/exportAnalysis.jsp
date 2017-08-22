@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.module.ModuleLoader" %>
+<%@ page import="org.labkey.api.module.ModuleProperty" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.persist.AnalysisSerializer" %>
 <%@ page import="org.labkey.flow.view.ExportAnalysisForm" %>
@@ -35,6 +37,16 @@
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySamplePopulation, "Grouped by sample and population");
     exportFormats.put(AnalysisSerializer.Options.FormatGroupBySamplePopulationParameter, "Grouped by sample, popuplation, and parameter");
     exportFormats.put(AnalysisSerializer.Options.FormatRowPerStatistic, "One row per sample and statistic");
+
+    Map<ExportAnalysisForm.SendTo, String> sendToOptions = new EnumMap<>(ExportAnalysisForm.SendTo.class);
+    sendToOptions.put(ExportAnalysisForm.SendTo.Browser, "Browser");
+    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineZip, "Pipeline root as zip");
+    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineFiles, "Pipeline root as files");
+
+    FlowModule module = ModuleLoader.getInstance().getModule(FlowModule.class);
+    ModuleProperty prop = module.getModuleProperties().get("ExportToScript");
+    if (prop != null && prop.getEffectiveValue(getContainer()) != null)
+        sendToOptions.put(ExportAnalysisForm.SendTo.Script, "External script as files");
 
     boolean renderForm = bean._renderForm;
     String selectionType = bean.getSelectionType() == null ? "runs" : bean.getSelectionType();
@@ -59,14 +71,14 @@
     <tr>
         <td class="labkey-export-tab-options">Include:</td>
         <td class="labkey-export-tab-options">
-            <input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" /> <label for="includeFCSFiles">FCS Files</label><br>
-            <input id="includeGraphs" name="includeGraphs" type="checkbox" checked /> <label for="includeGraphs">Graphs</label><br>
-            <input id="includeCompensation" name="includeCompensation" type="checkbox" checked /> <label for="includeCompensation">Compensation</label>
+            <input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" <%=checked(bean.isIncludeFCSFiles())%> /> <label for="includeFCSFiles">FCS Files</label><br>
+            <input id="includeGraphs" name="includeGraphs" type="checkbox" <%=checked(bean.isIncludeGraphs())%> /> <label for="includeGraphs">Graphs</label><br>
+            <input id="includeCompensation" name="includeCompensation" type="checkbox" <%=checked(bean.isIncludeCompensation())%> /> <label for="includeCompensation">Compensation</label>
         </td>
         <td class="labkey-export-tab-options" style="padding-left:2em;">
-            <input id="includeKeywords" name="includeKeywords" type="checkbox" /> <label for="includeKeywords">Keywords</label><br>
-            <input id="includeStatistics" name="includeStatistics" type="checkbox" checked onchange="toggleShortNames(this.checked)" /> <label for="includeStatistics">Statistics</label><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: smaller;">(<input id="useShortStatNames" name="useShortStatNames" type="checkbox" checked /> <label for="useShortStatNames">Short stat names</label>)</span>
+            <input id="includeKeywords" name="includeKeywords" type="checkbox" <%=checked(bean.isIncludeKeywords())%> /> <label for="includeKeywords">Keywords</label><br>
+            <input id="includeStatistics" name="includeStatistics" type="checkbox" <%=checked(bean.isIncludeStatistics())%> onchange="toggleShortNames(this.checked)" /> <label for="includeStatistics">Statistics</label><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: smaller;">(<input id="useShortStatNames" name="useShortStatNames" type="checkbox" <%=checked(bean.isUseShortStatNames())%> /> <label for="useShortStatNames">Short stat names</label>)</span>
         </td>
         <td>&nbsp;</td>
     </tr>
@@ -75,6 +87,14 @@
         <td colspan=2>
             <select name="exportFormat">
                 <labkey:options value="<%=bean.getExportFormat()%>" map="<%=exportFormats%>" />
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Export to:</td>
+        <td colspan=2>
+            <select name="sendTo">
+                <labkey:options value="<%=bean.getSendTo()%>" map="<%=sendToOptions%>" />
             </select>
         </td>
     </tr>
