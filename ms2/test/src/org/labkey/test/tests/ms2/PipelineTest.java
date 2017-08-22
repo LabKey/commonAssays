@@ -43,6 +43,8 @@ import static org.junit.Assert.*;
 @Category({BVT.class, FileBrowser.class})
 public class PipelineTest extends PipelineWebTestBase
 {
+    {setIsBootstrapWhitelisted(true);}
+    
     protected static final int MAX_WAIT_SECONDS = 60*5;
 
     protected PipelineTestsBase _testSetMS2 = new PipelineTestsBase(this);
