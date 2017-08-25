@@ -921,6 +921,7 @@ public class LuminexController extends SpringActionController
                     urlDelete.addReturnURL(getReturnURL());
                     urlDelete.addParameter("rowId", protocolId);
                     ActionButton btnDelete = new ActionButton(urlDelete, "Delete");
+                    btnDelete.setIconCls("trash");
                     btnDelete.setActionType(ActionButton.Action.POST);
                     btnDelete.setDisplayPermission(DeletePermission.class);
                     btnDelete.setRequiresSelection(true);
