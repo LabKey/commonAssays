@@ -100,13 +100,6 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         bar.add(btnNewScript);
     }
 
-    @Override
-    protected void configureDataRegion(DataRegion rgn)
-    {
-        super.configureDataRegion(rgn);
-        rgn.setFixedWidthColumns(false);
-    }
-
     public class ScriptActionColumn extends DataColumn
     {
         String _actionName;

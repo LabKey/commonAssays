@@ -39,35 +39,20 @@ public class MultiValueInputColumn extends DataColumn
         _values = values;
     }
 
-    private void renderRequiresScript(RenderContext ctx, Writer out) throws IOException
-    {
-        if (ctx.get("renderedRequiresMultiValueInputScript") == null)
-        {
-            out.write("<script type='text/javascript'>LABKEY.requiresScript('viability/MultiValueInput.js');</script>\n");
-            out.write("<style>.labkey-multi-value-input { margin-top: 4px; margin-bottom: 4px; }</style>\n");
-            ctx.put("renderedRequiresMultiValueInputScript", true);
-        }
-    }
-
     @Override
     public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
     {
-        boolean disabledInput = isDisabledInput();
         String formFieldName = ctx.getForm().getFormFieldName(getColumnInfo());
         String id = getInputPrefix() + formFieldName;
 
-        renderRequiresScript(ctx, out);
-
-        out.write("<div id='");
-        out.write(id);
-        out.write("' class='extContainer labkey-multi-value-input'></div>");
-
-        out.write("<script text='text/javascript'>\n");
+        out.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
+        out.write("<script text=\"text/javascript\">\n");
+        out.write("LABKEY.requiresScript('viability/MultiValueInput', function(){\n");
         out.write("new MultiValueInput('");
         out.write(PageFlowUtil.filter(id));
         out.write("'");
 
-        // XXX: hack. ignore the value in the render context. take the value as pased in during view creation.
+        // XXX: hack. ignore the value in the render context. take the value as passed in during view creation.
         if (_values != null && _values.size() > 0)
         {
             out.write(", [");
@@ -82,7 +67,7 @@ public class MultiValueInputColumn extends DataColumn
             out.write("]");
         }
 
-        out.write(");\n");
+        out.write(");\n});\n");
         out.write("</script>\n");
     }
 

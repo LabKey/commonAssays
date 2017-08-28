@@ -1,0 +1,9 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="viability/MultiValueInput.css"/>
+        <script path="viability/MultiValueInput.js"/>
+    </library>
+    <dependencies>
+        <dependency path="Ext3"/>
+    </dependencies>
+</libraries>

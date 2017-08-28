@@ -67,7 +67,7 @@
     <form action='<%=exportURL%>' method='POST'>
 <% } %>
 
-<table class="labkey-export-tab-contents">
+<table class="lk-fields-table">
     <tr>
         <td class="labkey-export-tab-options">Include:</td>
         <td class="labkey-export-tab-options">

@@ -3,7 +3,7 @@
  *
  * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
  */
-function checkRunUploadForm(form)
+function checkRunUploadForm(form, $)
 {
     var suffixes = [ "ParticipantID", "VisitID", "SpecimenIDs" ];
     var haserrors = false;
@@ -56,7 +56,7 @@ function checkRunUploadForm(form)
         LABKEY.setDirty(false);
     else {
         // user canceled so reactivate the form buttons by removing their style labkey-disabled-button
-        Ext4.get(Ext4.DomQuery.select('a[@class*=labkey-disabled-button]:contains(Save)'), form).removeCls("labkey-disabled-button");
+        $(form).find('a.labkey-button:contains("Save")').removeClass('labkey-disabled-button');
     }
     return submit;
 }

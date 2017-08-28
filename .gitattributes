@@ -1567,4 +1567,6 @@ viability/src/org/labkey/viability/ViabilityTsvDataHandler.java -text
 viability/src/org/labkey/viability/data/MultiSpecimenPropertyColumnDecorator.java -text
 viability/src/org/labkey/viability/data/MultiValueInputColumn.java -text
 viability/webapp/viability/CheckRunUploadForm.js -text
+viability/webapp/viability/MultiValueInput.css -text
 viability/webapp/viability/MultiValueInput.js -text
+viability/webapp/viability/MultiValueInput.lib.xml -text

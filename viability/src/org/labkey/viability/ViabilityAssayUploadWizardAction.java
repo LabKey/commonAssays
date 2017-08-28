@@ -117,15 +117,14 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
     protected ModelAndView getResultsView(ViabilityAssayRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView view = _getResultsView(form, errorReshow, errors);
+        String formRef = view.getDataRegion().getJavascriptFormReference();
 
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        sb.append("<script type='text/javascript'>\n");
-        sb.append("LABKEY.requiresScript('viability/CheckRunUploadForm.js');\n");
-        sb.append("</script>\n");
-        sb.append("<script type='text/javascript'>\n");
-        String formRef = view.getDataRegion().getJavascriptFormReference();
-        sb.append(formRef).append(".onsubmit = function () { return checkRunUploadForm(").append(formRef).append("); }\n");
+        sb.append("<script type=\"text/javascript\">\n");
+        sb.append("LABKEY.requiresScript(['internal/jQuery', 'viability/CheckRunUploadForm.js'],function(){\n");
+        sb.append(formRef).append(".onsubmit = function(){return checkRunUploadForm(").append(formRef).append(", jQuery);};\n");
+        sb.append("});\n");
         sb.append("</script>\n");
 
         VBox vbox = new VBox();

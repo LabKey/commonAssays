@@ -59,7 +59,6 @@ var MultiValueInput = function (fieldId, initialValues)
             name: fieldId,
             editable: true,
             value: value,
-            style: "display:block;font-family:monospace",
             cls: "labkey-multi-value-input",
             listeners: {
                 'specialkey': function (f, e) {
