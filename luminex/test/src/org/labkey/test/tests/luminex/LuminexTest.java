@@ -167,7 +167,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
         //add the Assay List web part so we can create a new luminex assay
         portalHelper.addWebPart("Assay List");
 
-
         if (useXarImport())
         {
             // import the assay design from the XAR file
@@ -176,8 +175,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             // since we want to test special characters in the assay name, copy the assay design to rename
             goToManageAssays();
             clickAndWait(Locator.linkWithText(TEST_ASSAY_XAR_NAME));
-            _assayHelper.copyAssayDesign();
-            AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
+            AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
@@ -189,17 +187,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         }
         else
         {
-            //create a new luminex assay
-            clickButton("Manage Assays");
-            clickButton("New Assay Design");
-
-            checkCheckbox(Locator.radioButtonByNameAndValue("providerName", "Luminex"));
-            clickButton("Next");
-
             log("Setting up Luminex assay");
 
-            AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
-            assayDesigner.setName(TEST_ASSAY_LUM);
+            clickButton("Manage Assays");
+            AssayDesignerPage assayDesigner = _assayHelper.createAssayAndEdit("Luminex", TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
             // add batch properties for transform and Ruminex version numbers
@@ -299,7 +290,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickExclusionMenuIconForWell(wellName);
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), exclusionComment);
 
-        if(analytes == null || analytes.length == 0)
+        if (analytes == null || analytes.length == 0)
         {
             click(Locator.radioButtonById(EXCLUDE_ALL_BUTTON));
         }
@@ -477,7 +468,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         goToTestAssayHome(assayName);
 
-        if(!isTextPresent(MULTIPLE_CURVE_ASSAY_RUN_NAME)) //right now this is a good enough check.  May have to be
+        if (!isTextPresent(MULTIPLE_CURVE_ASSAY_RUN_NAME)) //right now this is a good enough check.  May have to be
         // more rigorous if tests start substantially altering data
         {
             log("multiple curve data not present, adding now");
@@ -602,7 +593,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected void createAndImpersonateUser(String user, String perms)
     {
         goToHome();
-        createUser(user, null, false);
+        _userHelper.createUser(user, false);
         goToProjectHome();
         _permissionsHelper.setUserPermissions(user, perms);
         impersonate(user);
@@ -646,15 +637,15 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         goToTestAssayHome(assayName);
 
-        //add QC flag colum
+        //add QC flag column
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("QCFlags");
+        _customizeViewsHelper.addColumn("QCFlags");
         _customizeViewsHelper.saveCustomView();
 
         //verify expected values in column
         List<String> var = getColumnValues("Runs", "QC Flags").get(0);
         String[] flags = var.toArray(new String[var.size()]);
-        for(int i=0; i<flags.length; i++)
+        for (int i=0; i<flags.length; i++)
         {
             assertEquals(expectedFlags[i], flags[i].trim());
         }
@@ -700,23 +691,23 @@ public abstract class LuminexTest extends BaseWebDriverTest
         //make sure all the columns we want are viable
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.showHiddenItems();
-        _customizeViewsHelper.addCustomizeViewColumn("Five ParameterCurveFit/FailureFlag");
-        _customizeViewsHelper.addCustomizeViewColumn("Four ParameterCurveFit/FailureFlag");
-        _customizeViewsHelper.addCustomizeViewColumn("Five ParameterCurveFit/EC50");
+        _customizeViewsHelper.addColumn("Five ParameterCurveFit/FailureFlag");
+        _customizeViewsHelper.addColumn("Four ParameterCurveFit/FailureFlag");
+        _customizeViewsHelper.addColumn("Five ParameterCurveFit/EC50");
         _customizeViewsHelper.saveCustomView();
 
         assertTextPresent("Titration QC Report");
         DataRegionTable drt = new DataRegionTable("AnalyteTitration", this);
         String isotype = drt.getDataAsText(0, "Isotype");
-        if(isotype.length()==0)
+        if (isotype.length() == 0)
             isotype = "[None]";
         String conjugate = drt.getDataAsText(0, "Conjugate");
-        if(conjugate.length()==0)
+        if (conjugate.length() == 0)
             conjugate =  "[None]";
 
         log("verify the calculation failure flag");
         List<String> fourParamFlag = drt.getColumnDataAsText("Four Parameter Curve Fit Failure Flag");
-        for(String flag: fourParamFlag)
+        for (String flag : fourParamFlag)
         {
             assertEquals(" ", flag);
         }
@@ -724,11 +715,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         List<String> fiveParamFlag = drt.getColumnDataAsText("Five Parameter Curve Fit Failure Flag");
         List<String> fiveParamData = drt.getColumnDataAsText("Five Parameter Curve Fit EC50");
 
-        for(int i=0; i<fiveParamData.size(); i++)
+        for (int i=0; i < fiveParamData.size(); i++)
         {
             assertTrue("Row " + i + " was flagged as 5PL failure but had EC50 data", ((fiveParamFlag.get(i).equals(" ")) ^ (fiveParamData.get(i).equals(" "))));
         }
-
 
         //verify link to Levey-Jennings plot
         clickAndWait(Locator.linkWithText("graph").index(0));
@@ -742,12 +732,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
         goToModule("Pipeline");
         PipelineStatusTable table = new PipelineStatusTable(this);
 
-        if(table.getDataRowCount() > 0)
+        if (table.getDataRowCount() > 0)
         {
             table.checkAll();
             table.clickHeaderButton("Delete");
             clickButton("Confirm Delete");
         }
     }
-
 }
