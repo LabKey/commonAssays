@@ -42,8 +42,9 @@
 
     <div style="margin-left: 25px;">
         <%--default to checked--%>
-        <label><input type="checkbox" name="retainExclusions" <%=checked(bean.getRetainExclusions())%> onchange="retainExclusionsChanged(this)" />
-            <%=text("Retain matched exclusion" + (exclusionCount == 1 ? "" :"s"))%></label><br/>
+        <input type="checkbox" name="retainExclusions" <%=checked(bean.getRetainExclusions())%> onchange="retainExclusionsChanged(this)" />
+        <%=text("Retain matched exclusion" + (exclusionCount == 1 ? "" :"s"))%>
+        <br/>
     </div>
     <br/><%
         ActionURL url = LuminexAssayProvider.getExcludedReportUrl(bean.getContainer(), bean.getProtocol(), ContainerFilter.CURRENT, bean.getReRunId().toString());

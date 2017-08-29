@@ -35,16 +35,26 @@
     LABKEY.requiresCss("fileAddRemoveIcon.css");
 </script>
 
+<style type="text/css">
+    table.lk-default-val td {
+        padding: 0 3px 3px 0;
+    }
+
+    table.lk-default-val .lk-default-val-header {
+        font-weight: bold;
+    }
+</style>
+
 <labkey:errors/>
 
 <labkey:form action="<%=getViewContext().getActionURL()%>" method="post">
     <p>Update default values for standard analyte properties.</p>
     <!-- cheap trick -- watch out for if this is ever nested in any other code -->
-    <table id="defaultValues">
+    <table id="defaultValues" class="lk-default-val">
         <tr>
-            <th><div class="labkey-form-label">Analyte</div></th>
-            <th><div class="labkey-form-label">Positivity Threshold</div></th>
-            <th><div class="labkey-form-label">Negative Bead</div></th>
+            <td class="lk-default-val-header">Analyte</td>
+            <td class="lk-default-val-header">Positivity Threshold</td>
+            <td class="lk-default-val-header">Negative Bead</td>
         </tr>
 
         <% if (analytes.size() > 0) { %>
@@ -53,8 +63,7 @@
                 <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
                 <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
                 <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('<%=h(analytes.get(i))%>')"><span style="display: inline-block">&nbsp;</span></a></td>
-                <td><a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a onclick="deleteRow('<%=h(analytes.get(i))%>')"><i class="fa fa-close"></i></a></td>
             </tr>
             <% } %>
             <%-- Treat last row as special case  (and yes I hate the copy pasta here too) --%>
@@ -62,26 +71,27 @@
                 <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
                 <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
                 <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('<%=h(analytes.get(i))%>')"><span style="display: inline-block">&nbsp;</span></a></td>
-                <td><a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a onclick="deleteRow('<%=h(analytes.get(i))%>')"><i class="fa fa-close"></i></a></td>
             </tr>
         <% } else { %>
             <tr id="InsertRow0">
                 <td><input name="analytes" value="" size=30></td>
                 <td><input name="positivityThresholds" value="" size=20></td>
                 <td><input name="negativeBeads" value="" size=30></td>
-                <td><a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick="deleteRow('InsertRow0')"><span style="display: inline-block">&nbsp;</span></a></td>
-                <td><a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick="addRow()"><span style="display: inline-block">&nbsp;</span></a></td>
+                <td><a onclick="deleteRow('InsertRow0')"><i class="fa fa-close"></i></a></td>
             </tr>
         <% } %>
-    </table>
-    <br>
-    <table>
         <tr>
-            <td><%= button("Save Defaults").submit(true) %></td>
-            <td><%= button("Cancel").href(bean.getReturnURLHelper()) %></td>
-            <td><%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%></td>
-            <td><%= button("Export TSV").href(new ActionURL(LuminexController.ExportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()))%></td>
+            <td colspan="2">
+                <%= button("Add Row").onClick("addRow();")%>
+                <%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%>
+                <%= button("Export TSV").href(new ActionURL(LuminexController.ExportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()))%>
+            </td>
+            <td align="right">
+                <%= button("Cancel").href(bean.getReturnURLHelper()) %>
+                <%= button("Save Defaults").submit(true) %>
+            </td>
+            <td>&nbsp;</td>
         </tr>
     </table>
 </labkey:form>
@@ -91,10 +101,7 @@
     var table = document.getElementById("defaultValues");
 
     function addRow() {
-        // need to disable add button on previous row
-        getLastCell(getLastRow()).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-disabled'><span style=\"display: inline-block\">&nbsp;</span></a>";
-
-        var row = table.insertRow(-1);
+        var row = table.insertRow(table.rows.length - 1);
         var rowId = "InsertRow"+rowCount;
         row.id = rowId;
 
@@ -105,9 +112,7 @@
         var negativeBeads = row.insertCell(-1);
         negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"\" size=30>";
         var deleteRowButton = row.insertCell(-1);
-        deleteRowButton.innerHTML = "<a class='labkey-file-remove-icon labkey-file-remove-icon-enabled' onclick=deleteRow('" + rowId + "')><span style=\"display: inline-block\">&nbsp;</span></a>";
-        var addRowButton = row.insertCell(-1);
-        addRowButton.innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
+        deleteRowButton.innerHTML = "<a onclick=deleteRow('" + rowId + "')><i class=\"fa fa-close\"></i></a>";
     }
 
     function deleteRow(rowId) {
@@ -116,10 +121,6 @@
             // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
             var row = document.getElementById(rowId);
             row.parentNode.removeChild(row);
-
-            // need to insure the add button is enabled on the last row
-            row = getLastRow(document.getElementById("defaultValues"))
-            getLastCell(row).innerHTML = "<a class='labkey-file-add-icon labkey-file-add-icon-enabled' onclick=addRow()><span style=\"display: inline-block\">&nbsp;</span></a>";
         }
     }
 

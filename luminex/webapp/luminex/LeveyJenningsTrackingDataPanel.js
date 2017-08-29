@@ -64,7 +64,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             menu: [
                 {
                     text: 'Excel',
-                    tooltip: 'Click to Export the data to Excel',
                     handler: function ()
                     {
                         this.exportData('excel');
@@ -73,7 +72,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 },
                 {
                     text: 'TSV',
-                    tooltip: 'Click to Export the data to TSV',
                     handler: function ()
                     {
                         this.exportData('tsv');
@@ -104,12 +102,12 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         if (this.controlType == "Titration")
         {
             // if the user has permissions to update in this container, show them the Apply Guide Set button
-            this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton, '-', this.viewCurvesButton] : [this.exportMenuButton, '-', this.viewCurvesButton];
+            this.tbar = this.userCanUpdate ? [this.exportMenuButton, this.applyGuideSetButton, this.viewCurvesButton] : [this.exportMenuButton, this.viewCurvesButton];
         }
         else
         {
             // if the user has permissions to update in this container, show them the Apply Guide Set button
-            this.tbar = this.userCanUpdate ? [this.exportMenuButton, '-', this.applyGuideSetButton ] : [this.exportMenuButton];
+            this.tbar = this.userCanUpdate ? [this.exportMenuButton, this.applyGuideSetButton ] : [this.exportMenuButton];
         }
 
         this.fbar = [
@@ -307,7 +305,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // create a pop-up window to display the apply guide set UI
         var win = new Ext.Window({
             layout: 'fit',
-            width: 1140,
+            width: 1115,
             height: 500,
             closeAction: 'close',
             modal: true,
@@ -368,10 +366,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             closeAction: 'hide',
             modal: true,
             cls: 'extContainer',
-            bodyStyle: 'background-color: white;',
             title: 'Curve Comparison',
             items: [plotDiv, pdfDiv],
             logComparisonPlot: false,
+            buttonAlign: 'left',
             buttons: [
                 {
                     text: 'Export to PDF',
@@ -391,6 +389,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                     },
                     scope: this
                 },
+                '->',
                 {
                     text: 'Close',
                     handler: function ()

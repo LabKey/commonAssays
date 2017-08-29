@@ -70,7 +70,7 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
     addHeaderPanel: function(descText)
     {
         this.add(new Ext.form.FormPanel({
-            style: 'padding-bottom: 10px; background: #ffffff',
+            style: 'padding-bottom: 10px;',
             html: this.getExclusionPanelHeader(),
             timeout: Ext.Ajax.timeout,
             border: false
@@ -89,7 +89,7 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
     {
         this.add(new Ext.form.FormPanel({
             height: 75,
-            style: 'padding-top: 20px; background: #ffffff',
+            style: 'padding-top: 20px;',
             timeout: Ext.Ajax.timeout,
             labelAlign: 'top',
             items: [
@@ -273,7 +273,7 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 LABKEY.Exclusions.BaseWindow = Ext.extend(Ext.Window, {
     cls: 'extContainer',
     layout:'fit',
-    padding: 15,
+    padding: 10,
     modal: true,
     closeAction:'close',
     bodyStyle: 'background-color: white;',

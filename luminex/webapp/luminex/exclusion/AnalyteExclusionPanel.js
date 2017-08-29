@@ -65,10 +65,10 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         var selMod = this.getGridCheckboxSelectionModel();
 
         // set the title for the grid panel based on previous exclusions
-        var title = "Select the checkbox next to the analytes to be excluded";
+        var title = "Select the checkbox next to the analyte(s) to be excluded:";
         if (this.exclusionsExist)
         {
-            title += "<BR/><span style='color:red;font-style:italic;'>Uncheck analytes to remove exclusions</span>";
+            title += "<BR/><span style='color:red;'>To remove an exclusion, uncheck the analyte(s).</span>";
         }
 
         // grid of avaialble/excluded analytes
@@ -76,7 +76,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             id: 'availableanalytes',
             style: 'padding-top: 10px;',
             title: title,
-            headerStyle: 'font-weight: normal; background-color: #ffffff',            
+            headerStyle: 'font-weight: normal;',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                     + " FROM Data AS x WHERE x.Data.Run.RowId = " + this.runId

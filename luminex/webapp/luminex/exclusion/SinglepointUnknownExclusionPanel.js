@@ -206,7 +206,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             this.availableItemsGrid = new Ext.grid.GridPanel({
                 style: 'padding: 10px 0;',
                 title: "Select a " + this.DISPLAY_NOUN.toLowerCase() + " to view a list of available analytes.",
-                headerStyle: 'font-weight: normal; background-color: #ffffff',
+                headerStyle: 'font-weight: normal;',
                 store: this.getCombinedItemAnalytesStore(),
                 colModel: new Ext.grid.ColumnModel({
                     columns: [
@@ -340,8 +340,8 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         if (!this.availableAnalytesGrid)
         {
             this.availableAnalytesGrid = new Ext.grid.GridPanel({
-                title: "Select the checkbox next to the analytes within the selected " + this.DISPLAY_NOUN.toLowerCase() + " to be excluded.",
-                headerStyle: 'font-weight: normal; background-color: #ffffff',
+                title: "For the selected " + this.DISPLAY_NOUN.toLowerCase() + ", select the checkbox next to the analyte(s) to be excluded:",
+                headerStyle: 'font-weight: normal;',
                 store: new LABKEY.ext.Store({
                     schemaName: this.protocolSchemaName,
                     sql: "SELECT DISTINCT (CONVERT(x.Data.RowId, VARCHAR) || \'|\' || x.Description || \'|\' || CONVERT(x.Dilution, VARCHAR)) AS SinglepointKey, "

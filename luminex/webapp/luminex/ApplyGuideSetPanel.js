@@ -40,7 +40,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         Ext.apply(config, {
             border: false,
             items: [],
-            buttonAlign: 'left',
+            buttonAlign: 'right',
             buttons: [],
             autoScroll: true
         });
@@ -244,27 +244,23 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // add all of the built up items to the panel items array
         this.items = [
             new Ext.Panel({
-                title: 'Selected Runs',
+                title: 'Selected runs for which the guide set below will be applied:',
                 width:1075,
                 items: [
-                    {
-                        xtype: 'displayfield',
-                        value: 'List of all of the selected runs for which the guide set below will be applied.'
-                    },
                     this.selectedRunsGrid,
                     {
                         id: 'highlightedRowDisplayField',
                         xtype: 'displayfield',
-                        value: 'NOTICE: Highlighted rows indicate that the selected assay is a member of a run-based guide set. '
+                        value: '<span class="labkey-error">Highlighted rows indicate that the selected assay is a member of a run-based guide set. '
                             + 'You are currently not allowed to apply guide sets to these assays, so they will be ignored '
-                            + 'with the \'Apply Thresholds\' action.',
+                            + 'with the \'Apply Thresholds\' action.</span>',
                         hidden: true
                     }
                 ]
             }),
             new Ext.Spacer({height: 20}),
             new Ext.Panel({
-                title: Ext.util.Format.htmlEncode('Guide Sets for ' + this.controlName + ' : ' + this.analyte + ' '
+                title: Ext.util.Format.htmlEncode('Guide sets for ' + this.controlName + ' : ' + this.analyte + ' '
                         + (this.isotype == '' ? '[None]' : this.isotype) + ' '
                         + (this.conjugate == '' ? '[None]' : this.conjugate)),
                 width:1075,
@@ -278,6 +274,14 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         // buttons to apply the selected guide set to the selected runs and cancel
         this.buttons = [
+            {
+                id: 'cancelButton',
+                text: 'Cancel',
+                handler: function(){
+                    this.fireEvent('closeApplyGuideSetPanel');
+                },
+                scope: this
+            },
             {
                 id: 'applyThresholdsButton',
                 text: 'Apply Thresholds',
@@ -342,15 +346,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
                     }
                 },
                 scope: this
-            },
-            {
-                id: 'cancelButton',
-                text: 'Cancel',
-                handler: function(){
-                    this.fireEvent('closeApplyGuideSetPanel');
-                },
-                scope: this
-            }                
+            }
         ];
 
         LABKEY.ApplyGuideSetPanel.superclass.initComponent.call(this);

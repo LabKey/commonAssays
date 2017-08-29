@@ -7,23 +7,19 @@ table.guideset-tbl {
     width: 100%;
 }
 
-table.guideset-tbl td {
-    background-color: #DDDDDD;
+table.guideset-tbl td,
+div.guideset-no {
     padding: 4px;
-    border: solid #CCCCCC 1px;
 }
 
 td.guideset-hdr {
     width: 75px;
-    text-align: right;
     vertical-align: top;
     font-weight: bold;
 }
 
-div.guideset-no {
-    background-color: #DDDDDD;
-    padding: 3px;
-    border: solid #CCCCCC 1px;
+.x-fieldset {
+    border: none;
 }
 
 .x-fieldset legend {
@@ -32,6 +28,7 @@ div.guideset-no {
     font: inherit;
     font-weight: bold;
     color: black;
+    margin: 8px 0;
 }
 
 div .guideset-numberfield {
@@ -40,7 +37,7 @@ div .guideset-numberfield {
 }
 
 div.guideset-label {
-    background-color: #EEEEEE;
     padding: 3px;
     font-weight: bold;
+    font-size: 13px;
 }

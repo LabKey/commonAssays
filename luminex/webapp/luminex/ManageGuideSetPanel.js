@@ -28,7 +28,7 @@ Ext.QuickTips.init();
  */
 LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
-    labelStyleStr : 'background-color:#EEEEEE; padding:3px; font-weight:bold;',
+    labelStyleStr : 'padding: 0; margin: 0;',
 
     metrics : [
         {name: 'EC504PL', label: 'EC50 4PL', includeForSinglePointControl: false},
@@ -48,7 +48,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         Ext.apply(config, {
             border: false,
             items: [],
-            buttonAlign: 'left',
+            padding: 10,
+            buttonAlign: 'right',
             buttons: [],
             cls: 'extContainer',
             autoScroll: true
@@ -117,7 +118,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 items: [{
                     defaults:{xtype: 'label', labelStyle: this.labelStyleStr},
                     items: [
-                        {fieldLabel: 'Guide Set ID', text: this.guideSetId ? this.guideSetId : "TBD", id: 'guideSetIdLabel'},
+                        {fieldLabel: 'Guide Set Id', text: this.guideSetId ? this.guideSetId : "TBD", id: 'guideSetIdLabel'},
                         {fieldLabel: 'Control Name', text: this.controlName},
                         {fieldLabel: 'Analyte', text: this.analyte, id: 'analyteLabel'}
                     ]
@@ -140,7 +141,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                         xtype:'fieldset',
                         title: 'Guide Set Type',
                         collapsible: false,
-                        padding: 20,
+                        padding: '0 5px 5px 5px',
                         defaultType: 'radio',
                         layout: 'hbox',
                         hidden: this.guideSetId,
@@ -262,11 +263,12 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 items: [
                     {
                         xtype: 'displayfield',
+                        style: 'padding: 5px;',
                         value: Ext.util.Format.htmlEncode('List of all of the runs from the "' + this.assayName + '" assay that contain '
                             + this.controlName + ' ' + this.analyte + ' '
                             + (this.isotype == "" ? '[None]' : this.isotype) + ' '
-                            + (this.conjugate == "" ? '[None]' : this.conjugate) + '.'
-                            + ' Note that runs that are already members of a different guide set will not be displayed.')
+                            + (this.conjugate == "" ? '[None]' : this.conjugate) + '.')
+                            + '<br/>Note that runs that are already members of a different guide set will not be displayed.'
                     },
                     this.allRunsGrid
                 ]
@@ -339,7 +341,11 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             hidden: true,
             width:1075,
             items: [
-                {xtype: 'displayfield', value: 'List of all of the runs included in the guide set calculations for the selected guide set.'},
+                {
+                    xtype: 'displayfield',
+                    style: 'padding: 5px;',
+                    value: 'List of all of the runs included in the guide set calculations for the selected guide set.'
+                },
                 this.guideRunSetGrid
             ]
         }));
@@ -355,9 +361,9 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             hidden: true,
             layout: 'column',
             width: 1075,
-            padding: 20,
+            padding: 5,
             defaults: {
-                columnWidth: .15,
+                columnWidth: .16,
                 border: false
             },
             items: [
@@ -375,7 +381,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // add a comment text field for the guide set
         this.commentTextField = new Ext.form.TextField({
             id: 'commentTextField',
-            labelStyle: this.labelStyleStr,
+            labelStyle: 'padding: 3px 0 0 0; margin: 0;',
             fieldLabel: 'Comment',
             value: this.guideSetRowData["Comment"],
             disabled: this.currentGuideSetIsInactive(),
@@ -395,18 +401,19 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         if (!this.guideSetId || this.guideSetRowData["CurrentGuideSet"])
         {
             this.addButton({
-                id: 'saveButton',
-                text: this.guideSetId ? 'Save' : 'Create',
-                disabled: true,
-                handler: this.guideSetId ? this.saveGuideSetData : this.createGuideSet,
-                scope: this
-            });
-            this.addButton({
                 id: 'cancelButton',
                 text: 'Cancel',
                 handler: function(){
                     this.fireEvent('closeManageGuideSetPanel');
                 },
+                scope: this
+            });
+            
+            this.addButton({
+                id: 'saveButton',
+                text: this.guideSetId ? 'Save' : 'Create',
+                disabled: true,
+                handler: this.guideSetId ? this.saveGuideSetData : this.createGuideSet,
                 scope: this
             });
         }
@@ -432,7 +439,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             hideLabel: true,
             height: 25,
             cls: 'guideset-label',
-            style: style || 'text-align: right; margin: 5px;',
+            style: style || 'margin: 3px;',
             value: txt
         };
     },
@@ -479,7 +486,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
             this.metricLabelsPanel = new Ext.Panel({
                 items: [
-                    this.createLabelField('&nbsp;', 'margin: 5px; background-color: #FFFFFF;')
+                    this.createLabelField('&nbsp;', 'margin: 3px;')
                 ]
             });
 
@@ -497,7 +504,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
             this.metricMeanValuesPanel = new Ext.Panel({
                 items: [
-                    this.createLabelField('Mean',  'text-align: center; margin: 5px;')
+                    this.createLabelField('Mean',  'text-align: center; margin: 3px;')
                 ]
             });
 
@@ -515,7 +522,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         {
             this.metricStdDevValuesPanel = new Ext.Panel({
                 items: [
-                    this.createLabelField('Std. Dev.',  'text-align: center; margin: 5px;')
+                    this.createLabelField('Std. Dev.',  'text-align: center; margin: 3px;')
                 ]
             });
 

@@ -42,16 +42,16 @@
 %>
 
 <div class="leveljenningsreport">
-<table cellpadding="0" cellspacing="15">
+<table>
     <tr>
-        <td rowspan="2"><div id="graphParamsPanel"></div></td>
-        <td><div id="guideSetOverviewPanel"></div></td>
+        <td rowspan="2" valign="top"><div id="graphParamsPanel"></div></td>
+        <td><div id="guideSetOverviewPanel" style="padding-left: 15px;"></div></td>
     </tr>
     <tr>
-        <td><div id="rPlotPanel"></div></td>
+        <td><div id="ljPlotPanel" style="padding: 15px 0 0 15px;"></div></td>
     </tr>
 </table>
-<div id="trackingDataPanel" style="margin-left:15px"></div>
+<div id="trackingDataPanel" style="padding-top: 15px;"></div>
 </div>
 
 <script type="text/javascript">
@@ -224,7 +224,7 @@
 
             // initialize the panel that displays the R plot for the trend plotting of EC50, AUC, and High MFI
             var trendPlotPanel = new LABKEY.LeveyJenningsTrendPlotPanel({
-                renderTo: 'rPlotPanel',
+                renderTo: 'ljPlotPanel',
                 cls: 'extContainer',
                 controlName: _controlName,
                 controlType: _controlType,

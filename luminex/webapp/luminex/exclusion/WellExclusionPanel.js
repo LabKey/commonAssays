@@ -83,8 +83,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
         // radio group for selecting "exclude all" or "exclude selected"
         this.add(new Ext.form.FormPanel({
-            style: 'padding-top: 10px; padding-bottom: 10px; background: #ffffff',
-            border: true,
+            style: 'padding: 10px 0 5px 0;',
+            border: false,
             padding: 3,
             items: new Ext.form.RadioGroup({
                 id: 'excluderadiogroup',
@@ -131,7 +131,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         var selMod = this.getGridCheckboxSelectionModel();
 
         // set the title for the grid panel based on previous exclusions
-        var title = "Select the checkbox next to the analytes to be excluded";
+        var title = "Select the checkbox next to the analyte(s) to be excluded:";
         if (this.exclusionsExist)
         {
             title += "<BR/><span style='color:red;font-style:italic;'>Uncheck all analytes to remove exclusions</span>";
@@ -142,7 +142,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             id: 'availableanalytes',
             cls: 'extContainer',
             title: title,
-            headerStyle: 'font-weight: normal; background-color: #ffffff',
+            headerStyle: 'font-weight: normal;',
             store:  new LABKEY.ext.Store({
                 sql: "SELECT DISTINCT x.Analyte.RowId AS RowId, x.Analyte.Name AS Name "
                     + " FROM Data AS x "
@@ -218,10 +218,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             id: 'reCalcDisplay',
             hidden: true,
             value: 'With this exclusion, your titration curve will be out-of-date and will be re-calculated.',
-            style: {
-                color: 'red',
-                fontStyle: 'italic'
-            }
+            style: {color: 'red'}
         }));
 
         this.addStandardButtons();
@@ -292,10 +289,10 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
     {
         // return an HTML table with the description and type and place holder divs for the file name and wells
         return "<table cellspacing='0' width='100%' style='border-collapse: collapse'>"
-                    + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell' colspan='3'><div id='replicate_group_filename'>...</div></td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell' colspan='3'>" + (this.description != null ? this.description : "") + "</td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Type:</td><td class='labkey-exclusion-td-cell'>" + this.type + "</td>"
-                    + "<td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_filename'>...</div></td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell'>" + (this.description != null ? this.description : "") + "</td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Type:</td><td class='labkey-exclusion-td-cell'>" + this.type + "</td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
                     + "</table>";
     },
 

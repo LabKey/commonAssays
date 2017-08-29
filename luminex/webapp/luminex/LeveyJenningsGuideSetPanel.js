@@ -169,7 +169,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     },
 
     getRelatedGuideSetLabel: function() {
-        var html = '<div style="padding-top: 8px;">Current Guide Set:</div>';
+        var html = '<div style="padding-top: 4px;">Current Guide Set:</div>';
 
         if (Ext.isDefined(this.currentGuideSetId))
         {
@@ -194,7 +194,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 props['GuideSet.Conjugate~eq'] = this.conjugate;
             }
 
-            html += '<div style="padding-top: 11px;" class="related-guidesets">'
+            html += '<div style="padding-top: 8px;" class="related-guidesets">'
                 + LABKEY.Utils.textLink({text: 'All Related Guide Sets', href: LABKEY.ActionURL.buildURL('luminex', 'manageGuideSet', null, props)})
                 + '</div>';
         }
@@ -246,7 +246,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
     updateGuideSetDisplayField: function(data) {
         if (data.rows.length == 0)
         {
-            this.guideSetDisplayField.setValue("<div class='guideset-no'>No current guide set for the selected graph parameters</div>");
+            this.guideSetDisplayField.setValue("<div class='guideset-no'>No current guide set for the selected graph parameters.</div>");
 
             // remove any reference to a current guide set and enable/disable buttons
             this.currentGuideSetId = undefined;
@@ -288,13 +288,11 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // create a pop-up window to display the manage guide set UI
         var win = new Ext.Window({
             layout:'fit',
-            width:1150,
+            width:1115,
             height:650,
             closeAction:'close',
             modal: true,
-            padding: 15,
             cls : 'leveljenningsreport',
-            bodyStyle: 'background-color: white;',
             title: (createNewGuideSet ? 'Create' : 'Manage') + ' Guide Set...',
             items: [new LABKEY.ManageGuideSetPanel({
                 cls: 'extContainer',

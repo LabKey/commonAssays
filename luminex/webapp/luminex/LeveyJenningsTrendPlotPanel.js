@@ -32,7 +32,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'left',
             width: 865,
-            height: 370,
             border: false,
             cls: 'extContainer',
             disabled: true,
@@ -45,6 +44,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
+        var labelStyle = 'font-size: 13px; padding-top: 4px;';
         this.ANY_FIELD = '[ANY]';  // constant value used for turning filtering off
 
         this.startDate = null;
@@ -55,7 +55,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.protocolAny = true; // false - turns on the filter in R and in Data Panel
 
         // initialize the y-axis scale combo for the top toolbar
-        this.scaleLabel = new Ext.form.Label({text: 'Y-Axis Scale:'});
+        this.scaleLabel = new Ext.form.Label({
+            text: 'Y-Axis Scale:',
+            style: labelStyle
+        });
         this.scaleCombo = new Ext.form.ComboBox({
             id: 'scale-combo-box',
             width: 75,
@@ -80,7 +83,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
 
         // initialize the date range selection fields for the top toolbar
-        this.startDateLabel = new Ext.form.Label({text: 'Start Date:'});
+        this.startDateLabel = new Ext.form.Label({
+            text: 'Start Date:',
+            style: labelStyle
+        });
         this.startDateField = new Ext.form.DateField({
             id: 'start-date-field',
             format:  'Y-m-d',
@@ -95,7 +101,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
                 }
             }
         });
-        this.endDateLabel = new Ext.form.Label({text: 'End Date:'});
+        this.endDateLabel = new Ext.form.Label({
+            text: 'End Date:',
+            style: labelStyle
+        });
         this.endDateField = new Ext.form.DateField({
             id: 'end-date-field',
             format:  'Y-m-d',
@@ -114,7 +123,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // Only create the network store and combobox if the Network column exists
         if (this.networkExists) {
             // Add Network field for filtering
-            this.networkLabel = new Ext.form.Label({text: 'Network:'});
+            this.networkLabel = new Ext.form.Label({
+                text: 'Network:',
+                style: labelStyle
+            });
             this.networkCombobox = new Ext.form.ComboBox({
                 id: 'network-combo-box',
                 width: 75,
@@ -158,7 +170,10 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         // Only create the protocol if the CustomProtocol column exists
         if (this.protocolExists) {
             // Add Protocol field for filtering
-            this.protocolLabel = new Ext.form.Label({text: 'Protocol:'});
+            this.protocolLabel = new Ext.form.Label({
+                text: 'Protocol:',
+                style: labelStyle
+            });
             this.protocolCombobox = new Ext.form.ComboBox({
                 id: 'protocol-combo-box',
                 width: 75,
@@ -225,7 +240,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         var items = [
             this.scaleLabel, tbspacer,
             this.scaleCombo, tbspacer,
-            {xtype: 'tbseparator'}, tbspacer,
+            '->',
             this.startDateLabel, tbspacer,
             this.startDateField, tbspacer,
             this.endDateLabel, tbspacer,
@@ -249,8 +264,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         items.push(this.clearFilterButton);
 
         this.tbar = new Ext.Toolbar({
-            height: 30,
-            buttonAlign: 'center',
+            style: 'border: solid 1px #d0d0d0; padding: 5px 10px;',
             items: items
         });
 
