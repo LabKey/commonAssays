@@ -88,7 +88,7 @@
     <input type="hidden" name="<%=h(param.getKey())%>" value="<%=h(param.getValue())%>"/>
     <% } %>
 
-    <table >
+    <table class="lk-fields-table">
         <tr>
             <td class="labkey-form-label">P Value</td>
             <td style="text-align:right;"><%=h(pVal)%></td>

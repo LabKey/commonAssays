@@ -41,7 +41,7 @@
         fastas.add(file.getFilename());
     }
 %>
-<table>
+<table class="lk-fields-table">
     <tr>
     <td class="labkey-form-label">Search Enzyme</td><td><%=h(MS2Controller.defaultIfNull(run.getSearchEnzyme(), "n/a"))%></td>
     <td class="labkey-form-label">File Name</td><td><%=h(MS2Controller.defaultIfNull(run.getFileName(), "n/a"))%></td>

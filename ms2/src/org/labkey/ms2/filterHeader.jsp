@@ -35,7 +35,7 @@
         isStandardView = grouping.equals("query");
 %>
 <labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
-    <table id="ms2RunViewConfig">
+    <table id="ms2RunViewConfig" class="lk-fields-table">
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
             <td valign=bottom><%= button("Go").submit(true) %></td>
@@ -64,7 +64,7 @@
             <td style="height: 100%; padding-right: 1em" id="ms2RunGrouping">
                 <fieldset>
                     <legend>Grouping</legend>
-                    <table class="labkey-data-region">
+                    <table class="labkey-data-region-legacy">
                         <tr>
                             <td style="vertical-align: middle;" nowrap>
                                 <select id="viewTypeGrouping" name="grouping" onchange="document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];"><%
@@ -89,7 +89,7 @@
                     <% if (bean.run.getChargeFilterColumnName() != null) { %>
                         <fieldset>
                             <legend><%=h(bean.run.getChargeFilterColumnName())%> charge filter</legend>
-                            <table class="labkey-data-region">
+                            <table class="labkey-data-region-legacy">
                                 <tr>
                                     <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>

@@ -69,6 +69,7 @@ import static org.junit.Assert.assertTrue;
 @Category({MS2.class, Mascot.class, DailyB.class})
 public class MascotTest extends AbstractMS2SearchEngineTest
 {
+    {setIsBootstrapWhitelisted(true);}
     protected static final String PEPTIDE = "R.RLPVGADR.G";
     protected static final String PEPTIDE2 = "R.SREVYIVATGYK.G";
     protected static final String PEPTIDE3 = "K.ENEPFEAALRR.F";
@@ -114,8 +115,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         createProjectAndFolder();
         PortalHelper _portalHelper = new PortalHelper(this);
-        goToProjectHome();
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         _portalHelper.addWebPart("MS2 Runs Browser");
     }
 
@@ -225,8 +225,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     {
         // test import of .dat file
         log("Upload existing Mascot .dat result file.");
-        goToProjectHome();
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test3/", "Import Search Results");
 
@@ -266,7 +265,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Wrong value for 'Expect' in first row", 1.47, Double.parseDouble(value), 0.01);
         value = peptidesTable.getDataAsText(0, "CalcMH+");
         assertEquals("Wrong value for 'CalcMH+' in first row", 1272.43, Double.parseDouble(value), 0.01);
-        clickTab("MS2 Dashboard");
+        navigateToFolder(FOLDER_NAME);
         waitForElement(Locator.id("filter-engine"));
         setFormElement(Locator.id("filter-engine"), "MASCOT");
         setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
@@ -291,8 +290,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     {
         // test import of .dat file
         log("Upload existing Mascot .dat result file.");
-        goToProjectHome();
-        clickFolder(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/test4/", "Import Search Results");
 
@@ -361,7 +359,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         peptidesTable.clearSort("HitRank");
         peptidesTable.clearAllFilters("HitRank");
         _customizeViewsHelper.revertUnsavedViewGridClosed();
-        clickTab("MS2 Dashboard");
+        navigateToFolder(FOLDER_NAME);
         waitForElement(Locator.id("filter-engine"));
         setFormElement(Locator.id("filter-engine"), "MASCOT");
         setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
@@ -391,7 +389,6 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertTrue("Not enough results to test filtering", drt.getDataRowCount() > 1);
 
         String greatest = drt.getDataAsText(0, "Ion");
-        String secondGreatest = drt.getDataAsText(1, "Ion");
 
         //Apply filter
         checkCheckbox(Locator.checkboxByName("highestScore"));
@@ -402,7 +399,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertEquals("Highest ion value not shown", greatest, filteredIonValue);
 
         checkCheckbox(Locator.checkboxById("isIonCutoff"));
-        waitForElement(Locator.tagContainingText("div","(Ion >= 13.1)"));
+        waitForElement(Locator.tagContainingText("span","Ion >= 13.1"));
         assertEquals("All results should be filtered", 0, drt.getDataRowCount());
 
         selectOptionByText(Locator.tagWithName("select", "desiredFdr"),"1.0%");
@@ -422,7 +419,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
     protected void basicChecks()
     {
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user
@@ -459,9 +456,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
-        click(Locator.name(".toggle"));
-        _ext4Helper.clickExt4MenuButton(true, Locator.lkButton("Compare"), false, "Peptide");
+        navigateToFolder(FOLDER_NAME);
+        DataRegionTable MS2SearchRunsTable = new DataRegionTable("MS2SearchRuns", this);
+        MS2SearchRunsTable.checkAllOnPage();
+        MS2SearchRunsTable.clickHeaderMenu("Compare", "Peptide");
         selectOptionByText(Locator.name("viewParams"), VIEW);
         clickButton("Go");
         assertTextPresent("(Mass > 1000)");
@@ -470,8 +468,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         compareRegion.setSort("Peptide", SortDirection.DESC);
         assertTextBefore(PEPTIDE5, PEPTIDE4);
 
-        log("Navigate to folder Portal");
-        clickAndWait(Locator.linkWithText("MS2 Dashboard"));
+        navigateToFolder(FOLDER_NAME);
 
         log("Verify experiment information in MS2 runs.");
         assertElementPresent(Locator.linkWithText(PROTOCOL));

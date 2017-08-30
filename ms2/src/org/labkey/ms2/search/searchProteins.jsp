@@ -22,21 +22,25 @@
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("MS2/inlineViewDesigner.js");
+    }
+%>
 <%
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = getViewContext();
 
-    ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer());
     String viewName = bean.getPeptideCustomViewName(ctx);
 %>
-
-<script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
-
-<labkey:form action="<%= url %>" method="get">
-    <table>
+<labkey:form action="<%= new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer()) %>">
+    <table class="lk-fields-table">
         <tr>
             <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
             <td nowrap><input size="20" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/></td>
