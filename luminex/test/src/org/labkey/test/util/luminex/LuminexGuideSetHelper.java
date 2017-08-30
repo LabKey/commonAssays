@@ -83,13 +83,13 @@ public class LuminexGuideSetHelper
         if (creating)
         {
             _test.waitForText("Create Guide Set...");
-            _test.waitForText("Guide Set ID:");
+            _test.waitForText("Guide Set Id:");
             _test.assertTextPresent("TBD", 2);
         }
         else
         {
             _test.waitForText("Manage Guide Set...");
-            _test.waitForText("Guide Set ID:");
+            _test.waitForText("Guide Set Id:");
             Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(_test.shortWait()).getText());
             _test.assertTextPresentInThisOrder("Created:", timestamps.get(id));
         }

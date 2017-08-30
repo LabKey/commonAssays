@@ -270,7 +270,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         table.clickHeaderMenu("Exclusions", false, "Exclude Analytes");
         _extHelper.waitForExtDialog("Exclude Analytes from Analysis");
         if (!firstExclusion)
-            waitForText("Uncheck analytes to remove exclusions");
+            waitForText("To remove an exclusion, uncheck the analyte(s).");
 
         clickExcludeAnalyteCheckBox(analyte);
         setFormElement(Locator.id(EXCLUDE_COMMENT_FIELD), comment);

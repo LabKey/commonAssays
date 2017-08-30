@@ -64,7 +64,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     private static final String RUN_BASED_COMMENT = "LuminexGuideSetDisablingTest "+RUN_BASED_ANALYTE;
     private static final String VALUE_BASED_COMMENT = "LuminexGuideSetDisablingTest "+VALUE_BASED_ANALYTE;
     private static final String CONTROL_NAME = "Standard1";
-    private static final Locator.XPathLocator TABLE_LOCATOR = Locator.xpath("//table").withClass("gsDetails");
+    private static final Locator.XPathLocator TABLE_HEADER_LOCATOR = Locator.xpath("//table").withClass("gsDetails");
+    private static final Locator.XPathLocator TABLE_METRICS_LOCATOR = Locator.xpath("//table").withClass("gsMetricDetails");
     private static final Locator SAVE_BTN = Ext4Helper.Locators.ext4Button("Save");
 
     public LuminexGuideSetDisablingTest()
@@ -273,28 +274,28 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         clickGuideSetDetailsByComment(RUN_BASED_COMMENT);
         validateGuideSetRunDetails("Run-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
-            {"0.323", "5.284", "2" },
-            {"0.540", "5.339", "2" },
-            {"331.633", "32086.500", "2" },
-            {"149.318", "63299.346", "2" },
+            {"5.284", "0.323", "2" },
+            {"5.339", "0.540", "2" },
+            {"32086.500", "331.633", "2" },
+            {"63299.346", "149.318", "2" },
         });
         // validate checkboxes are not displayed
-        assertTextPresent("Num Runs");
-        assertElementPresent(TABLE_LOCATOR.append("//input[@type='checkbox']"));
+        assertTextPresent("# Runs");
+        assertElementPresent(TABLE_METRICS_LOCATOR.append("//input[@type='checkbox']"));
         // this gets a mis-fire and selenium raises error that element is not the expected click element.
         click(cancelBtn);
 
         clickGuideSetDetailsByComment(VALUE_BASED_COMMENT);
         validateGuideSetRunDetails("Value-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
-            {"4833.760", "42158.220"},
-            {"4280.840", "40987.310"},
-            {"189.830", "32507.270"},
-            {"738.550", "85268.040"}
+            {"42158.220", "4833.760"},
+            {"40987.310", "4280.840"},
+            {"32507.270", "189.830"},
+            {"85268.040", "738.550"}
         });
         // validate checkboxes are not displayed
-        assertTextNotPresent("Num Runs");
-        assertElementNotPresent(TABLE_LOCATOR.append("//input[@type='checkbox']"));
+        assertTextNotPresent("# Runs");
+        assertElementNotPresent(TABLE_METRICS_LOCATOR.append("//input[@type='checkbox']"));
         click(cancelBtn);
     }
 
@@ -304,7 +305,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         int row = drt.getRowIndex("Comment", comment);
         Assert.assertTrue("There is no GuideSet with the comment: " + comment, row >= 0);
         drt.link(row, 1).click();
-        waitForElement(TABLE_LOCATOR);
+        waitForElement(TABLE_HEADER_LOCATOR);
     }
 
     private void validateGuideSetRunDetails(String type, String controlType)
@@ -322,7 +323,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         }
 
         // check guide set details at top of window
-        Locator.XPathLocator table = TABLE_LOCATOR.append("[1]");
+        Locator.XPathLocator table = TABLE_HEADER_LOCATOR;
         assertNotEquals("", getTableCellText(table, 0, 1)); // find better check
         assertNotEquals("", getTableCellText(table, 1, 3)); // find better check...
         assertEquals(CONTROL_NAME, getTableCellText(table, 1, 1));
@@ -335,19 +336,16 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     }
 
     private void validateGuideSetMetricsDetails(String[][] metricsData) {
-        Locator.XPathLocator table = Locator.xpath("//table").withClass("gsDetails").append("[2]");
-
         for(int i=1; i < 4; i++) // iterate rows
         {
-            assertEquals(metricsData[i - 1][0], getTableCellText(table, i, 1));
-            assertEquals(metricsData[i - 1][1], getTableCellText(table, i, 2));
+            assertEquals(metricsData[i - 1][0], getTableCellText(TABLE_METRICS_LOCATOR, i, 1));
+            assertEquals(metricsData[i - 1][1], getTableCellText(TABLE_METRICS_LOCATOR, i, 2));
         }
 
         // check if counts included and validate if so (e.g. run-based)
         if (metricsData[0].length == 3)
             for(int i=1; i < 4; i++) // iterate rows
-                assertEquals(metricsData[i-1][2], getTableCellText(table,i, 3));
-
+                assertEquals(metricsData[i-1][2], getTableCellText(TABLE_METRICS_LOCATOR, i, 3));
     }
 
     @Test
