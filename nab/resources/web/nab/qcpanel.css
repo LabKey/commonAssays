@@ -5,7 +5,6 @@
  */
 
 table.run-summary {
-    margin-bottom: 25px;
     width: 100%;
 }
 
@@ -18,15 +17,16 @@ table.plate-summary td {
     padding: 2px 2px 0 2px;
 }
 
-td.prop-name {
-    font-weight: bold;
+table.plate-summary td.plate-columnlabel {
+    border-bottom: solid black 1px;
 }
 
-table.plate-controls,
-table.dilution-summary,
-table.field-exclusions,
-table.plate-summary {
-    margin-bottom: 25px;
+table.plate-summary td.plate-rowlabel {
+    border-right: solid black 1px;
+}
+
+td.prop-name {
+    font-weight: bold;
 }
 
 td.control-checkbox,

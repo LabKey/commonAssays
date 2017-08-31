@@ -14,16 +14,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     border: false,
 
-    header : false,
+    bodyStyle : 'background-color: transparent;',
 
     layout : {
         type : 'card',
         deferredRender : true
     },
-
-    alias: 'widget.labkey-nab-qc-panel',
-
-    padding: 10,
 
     initComponent: function() {
         this.activeItem = 'selectionpanel';
@@ -54,12 +50,24 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             window.location = this.returnUrl;
         }});
 
-        if (this.edit)
-            this.bbar = ['->', this.nextBtn, this.prevBtn, this.cancelBtn];
-        else
-            this.bbar = ['->', {text: 'Done', scope: this, handler: function(){
+        var bbar = {
+            xtype: 'toolbar',
+            dock: 'bottom',
+            border: false,
+            style: 'background-color: transparent;',
+            ui: 'footer',
+            items: []
+        };
+        if (this.edit) {
+            bbar.items = ['->', this.cancelBtn, this.prevBtn, this.nextBtn];
+        }
+        else {
+            bbar.items = ['->', {text: 'Done', scope: this, handler: function(){
                 window.location = this.returnUrl;
             }}];
+        }
+
+        this.dockedItems = [bbar];
 
         this.items = [
             this.getSelectionPanel(),
@@ -127,8 +135,12 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             // create a placeholder component and swap it out after we get the QC information for the run
             this.selectionPanel = Ext4.create('Ext.panel.Panel', {
                 itemId : 'selectionpanel',
+                border: false,
+                bodyStyle : 'background-color: transparent;',
                 items : [{
                     xtype : 'panel',
+                    border: false,
+                    bodyStyle : 'background-color: transparent;',
                     height : 700
 
                 }],
@@ -182,6 +194,8 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     // create the template and add the template functions to the configuration
                     items.push({
                         xtype : 'panel',
+                        border : false,
+                        bodyStyle : 'background-color: transparent;',
                         tpl : new Ext4.XTemplate(tplText.join(''),
                                 {
                                     getId : function(cmp) {
@@ -221,17 +235,19 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
      */
     getSummaryTpl : function(){
         var tpl = [];
-        tpl.push('<table class="run-summary">',
-                    '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="8">Run Summary: {runName}</th></tr>',
-                        '<tr><td>',
-                    '<tr>',
-                        '<tpl for="runProperties">',
-                            '<td class="prop-name">{name}</td>',
-                            '<td class="prop-value">{value}</td>',
-                            '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
-                        '</tpl>',
-                    '</td></tr>',
-                '</table>'
+        tpl.push(
+            '<div class="panel panel-default">',
+                '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">Run Summary: {runName}</h3></div>',
+                '<div class=" panel-body">',
+                    '<table class="run-summary">',
+                    '<tpl for="runProperties">',
+                        '<td class="prop-name">{name}</td>',
+                        '<td class="prop-value">{value}</td>',
+                        '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
+                    '</tpl>',
+                    '</table>',
+                '</div>',
+            '</div>'
         );
         return tpl.join('');
     },
@@ -239,34 +255,37 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getControlWellsTpl : function(){
         var tpl = [];
 
-        tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
-                '<tpl for="plates">',
-                    '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
-                    '<tpl if="xindex % 2 != 1"><td></tpl>',
-                    '<table class="plate-controls">',
-                        '<tpl for="controls">',
-                            '<tr><th colspan="5" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName} Controls</th></tr>',
-                            '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
-                            '<tr><td class="prop-value" colspan="{[this.getColspan(this, values) + 1]}">{virusControlMean} &plusmn; {virusControlPlusMinus}</td><td class="prop-value" colspan="{[this.getColspan(this, values)]}">{cellControlMean} &plusmn; {cellControlPlusMinus}</td></tr>',
-                            '<tr><td><div class="plate-columnlabel"></div></td>',
-                            '<tpl for="columnLabel">',
-                            '<td><div class="plate-columnlabel">{.}</div></td>',
-                            '</tpl>',
-                            '</tr>',
-                            '<tpl for="rows">',
-                                '<tr>',
-                                    '<tpl for=".">',
-                                    '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
-                                    '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{sampleName}" plate="{plate}"></td>',
-                                    '</tpl>',           // end cols
+        tpl.push(
+            '<tpl for="plates">',
+                '<tpl if="xindex % 2 === 1"><tr><td></tpl>',
+                '<tpl if="xindex % 2 != 1"><td></tpl>',
+                '<tpl for="controls">',
+                    '<div class="panel panel-default">',
+                        '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{parent.plateName} Controls</h3></div>',
+                        '<div class=" panel-body">',
+                            '<table class="plate-controls">',
+                                '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
+                                '<tr><td class="prop-value" colspan="{[this.getColspan(this, values) + 1]}">{virusControlMean} &plusmn; {virusControlPlusMinus}</td><td class="prop-value" colspan="{[this.getColspan(this, values)]}">{cellControlMean} &plusmn; {cellControlPlusMinus}</td></tr>',
+                                '<tr><td><div class="plate-columnlabel"></div></td>',
+                                    '<tpl for="columnLabel">',
+                                        '<td><div class="plate-columnlabel">{.}</div></td>',
+                                    '</tpl>',
                                 '</tr>',
-                            '</tpl>',                   // end rows
-                        '</tpl>',                       // end controls
-                    '</table>',
-                    '<tpl if="xindex % 2 != 0"></td></tpl>',
-                    '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
-                '</tpl>'           // end plates
-                //'</table>'
+                                '<tpl for="rows">',
+                                    '<tr>',
+                                        '<tpl for=".">',
+                                            '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
+                                            '<td class="control-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{sampleName}" plate="{plate}"></td>',
+                                        '</tpl>',           // end cols
+                                    '</tr>',
+                                '</tpl>',                   // end rows
+                            '</table>',
+                        '</div>',
+                    '</div>',
+                '</tpl>',                       // end controls
+                '<tpl if="xindex % 2 != 0"></td></tpl>',
+                '<tpl if="xindex % 2 === 0"></td></tr></tpl>',
+            '</tpl>'           // end plates
         );
         return tpl.join('');
     },
@@ -278,24 +297,30 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         var tpl = [];
 
         tpl.push(
-                '<tpl for="dilutionSummaries">',
-                '<tr><td colspan="2"><table class="dilution-summary">',
-                '<tr><td colspan="10" class="labkey-data-region-header-container" style="text-align:center;">{name}</td></tr>',
-                '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
-                    '<td valign="top"><table class="labkey-data-region">',
-                        '<tr>',
-                            '<td class="prop-name">{methodLabel}</td><td class="prop-name">{neutLabel}</td>',
-                            '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}" samplenum="{sampleNum}"></td><td></td></tr>',
-                        '<tpl for="dilutions">',
-                        '<tr><td>{dilution}</td><td>{neut} &plusmn; {neutPlusMinus}</td>',
-                            '<tpl for="wells">',
-                            '<td class="dilution-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{parent.sampleName}" plate="{plateNum}" samplenum="{parent.sampleNum}"></td>',
-                            '</tpl>',           // end wells
-                        '</tr>',
-                        '</tpl>',               // end dilutions
-                    '</table></td></tr>',
-                '</td></tr></table>',
-                '</tpl>'
+            '<tpl for="dilutionSummaries">',
+                '<tr><td colspan="2">',
+                '<div class="panel panel-default">',
+                    '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{name}</h3></div>',
+                    '<div class=" panel-body">',
+                        '<table class="dilution-summary">',
+                            '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
+                                '<td valign="top"><table class="labkey-data-region">',
+                                '<tr>',
+                                    '<td class="prop-name">{methodLabel}</td><td class="prop-name">{neutLabel}</td>',
+                                    '<td class="dilution-checkbox-addall" id="{[this.getId(this)]}" specimen="{name}" samplenum="{sampleNum}"></td><td></td></tr>',
+                                    '<tpl for="dilutions">',
+                                        '<tr><td>{dilution}</td><td>{neut} &plusmn; {neutPlusMinus}</td>',
+                                        '<tpl for="wells">',
+                                            '<td class="dilution-checkbox" id="{[this.getId(this)]}" label="{value}" col="{col}" rowlabel="{rowlabel}" row="{row}" specimen="{parent.sampleName}" plate="{plateNum}" samplenum="{parent.sampleNum}"></td>',
+                                        '</tpl>',           // end wells
+                                        '</tr>',
+                                    '</tpl>',               // end dilutions
+                                '</table></td></tr>',
+                        '</table>',
+                    '</div>',
+                '</div>',
+                '</td></tr>',
+            '</tpl>'
         );
         return tpl.join('');
     },
@@ -383,17 +408,19 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         if (!this.confirmationPanel){
 
             var tplText = [];
-
             tplText.push('<table class="qc-panel"><tr><td colspan="2">');
             tplText.push(this.getSummaryTpl());
             tplText.push('</td></tr></table>');
 
             this.confirmationPanel = Ext4.create('Ext.panel.Panel', {
                 itemId : 'confirmationpanel',
+                border : false,
+                bodyStyle : 'background-color: transparent;',
                 items : [{
                     xtype : 'panel',
-                    tpl : new Ext4.XTemplate(tplText.join('')),
                     border  : false,
+                    bodyStyle : 'background-color: transparent;',
+                    tpl : new Ext4.XTemplate(tplText.join('')),
                     data : {
                         runName         : this.runName,
                         runProperties   : this.runProperties
@@ -402,8 +429,6 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                     xtype   : 'dataview',
                     itemId  : 'field-selection-view',
                     border  : false,
-                    frame   : false,
-                    flex    : 1.2,
                     tpl     : this.getFieldSelectionTpl(),
                     autoScroll : true,
                     store   : this.getFieldSelectionStore(),
@@ -446,6 +471,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                         cmp.add({
                             xtype : 'panel',
                             border  : false,
+                            bodyStyle : 'background-color: transparent;',
                             tpl : new Ext4.XTemplate(plateTpl.join(''),
                                     {
                                         getKey : function(rec) {
@@ -481,21 +507,25 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
 
     getFieldSelectionTpl : function(){
         return new Ext4.XTemplate(
-            '<table class="field-exclusions">',
-            '<tr style="text-align:center;"><th class="labkey-data-region-header-container" colspan="6">Excluded Field Wells</th></tr>',
-            '<tr><td colspan="6">The following wells will be excluded from the curve fit calculations:</td></tr>',
-            '<tr><td></td><td class="prop-name">Row</td><td class="prop-name">Column</td><td class="prop-name">Specimen</td><td class="prop-name">Plate</td><td class="prop-name">Comment</td></tr>',
-            '<tpl for=".">',
-                '<tr class="field-exclusion">',
-                '<td class="remove-exclusion" data-qtip="Click to delete">{[this.getDeleteIcon(values)]}</td>',
-                '<td style="text-align: left">{rowlabel}</td>',
-                '<td style="text-align: left">{[this.getColumnLabel(values)]}</td>',
-                '<td style="text-align: left">{specimen}</td>',
-                '<td style="text-align: left">Plate {plate}</td>',
-                '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment:htmlEncode}"></td>',
-                '</tr>',
-            '</tpl>',
-            '</table>',
+            '<div class="panel panel-default">',
+                '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">Excluded Field Wells</h3></div>',
+                '<div class=" panel-body">',
+                    '<p>The following wells will be excluded from the curve fit calculations:</p>',
+                    '<table class="field-exclusions">',
+                        '<tr><td></td><td class="prop-name">Row</td><td class="prop-name">Column</td><td class="prop-name">Specimen</td><td class="prop-name">Plate</td><td class="prop-name">Comment</td></tr>',
+                        '<tpl for=".">',
+                            '<tr class="field-exclusion">',
+                                '<td class="remove-exclusion" data-qtip="Click to delete">{[this.getDeleteIcon(values)]}</td>',
+                                '<td style="text-align: left">{rowlabel}</td>',
+                                '<td style="text-align: left">{[this.getColumnLabel(values)]}</td>',
+                                '<td style="text-align: left">{specimen}</td>',
+                                '<td style="text-align: left">Plate {plate}</td>',
+                                '<td style="text-align: left"><input class="field-exclusion-comment" key="{[this.getKey(values)]}" {[this.getReadonly()]} type="text" name="comment" size="60" value="{comment:htmlEncode}"></td>',
+                            '</tr>',
+                        '</tpl>',
+                    '</table>',
+                '</div>',
+            '</div>',
             {
                 // don't show the remove icon if we aren't in edit mode
                 getDeleteIcon : function(rec){
@@ -522,28 +552,31 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getPlateTpl : function(){
         var tpl = [];
 
-        tpl.push(//'<table class="labkey-data-region labkey-show-borders">',
-                '<tpl for="plates">',
-                    '<table class="plate-summary">',
-                        '<tpl for="rawdata">',
-                            '<tr><th colspan="40" class="labkey-data-region-header-container" style="text-align:center;">{parent.plateName}</th></tr>',
-                            '<tr><td><div class="plate-columnlabel"></div></td>',
-                            '<tpl for="columnLabel">',
-                                '<td><div class="plate-columnlabel">{.}</div></td>',
-                            '</tpl>',
-                            '</tr>',
-                            '<tpl for="data">',
-                                '<tr>',
-                                '<tpl for=".">',
-                                '<tpl if="xindex === 1"><td>{rowlabel}</td></tpl>',
-                                '<td class="{[this.getKey(values)]}">{value}</td>',
-                                '</tpl>',           // end cols
+        tpl.push(
+            '<tpl for="plates">',
+                '<tpl for="rawdata">',
+                    '<div class="panel panel-default">',
+                        '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{parent.plateName}</h3></div>',
+                        '<div class=" panel-body">',
+                            '<table class="labkey-data-region-legacy labkey-show-borders plate-summary">',
+                                '<tr><td>&nbsp;</td>',
+                                    '<tpl for="columnLabel">',
+                                        '<td class="plate-columnlabel">{.}</td>',
+                                    '</tpl>',
                                 '</tr>',
-                            '</tpl>',               // end rows
-                        '</tpl>',                   // end controls
-                    '</table>',
-                '</tpl>'                            // end plates
-                //'</table>'
+                                '<tpl for="data">',
+                                    '<tr>',
+                                        '<tpl for=".">',
+                                            '<tpl if="xindex === 1"><td class="plate-rowlabel">{rowlabel}</td></tpl>',
+                                                '<td class="{[this.getKey(values)]}">{value}</td>',
+                                        '</tpl>',           // end cols
+                                    '</tr>',
+                                '</tpl>',               // end data
+                            '</table>',
+                        '</div>',
+                    '</div>',
+                '</tpl>',                   // end rawdata
+            '</tpl>'                            // end plates
         );
         return tpl.join('');
     },

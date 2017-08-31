@@ -65,7 +65,7 @@
 <div id="nabQCDiv"></div>
 <script type="text/javascript">
     Ext4.onReady(function() {
-        new LABKEY.ext4.NabQCPanel({
+        Ext4.create('LABKEY.ext4.NabQCPanel', {
             renderTo    : 'nabQCDiv',
             edit        : <%=bean.isEdit()%>,
             runId       : <%=bean.getRunId()%>,
