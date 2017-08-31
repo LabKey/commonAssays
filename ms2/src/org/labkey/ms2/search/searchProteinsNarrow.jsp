@@ -28,15 +28,11 @@
     ProteinSearchBean bean = me.getModelBean();
 
     ActionURL url = new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer());
-//    String viewName = bean.getPeptideCustomViewName(ctx);
-//    String separator = bean.isHorizontal() ? "<td>&nbsp;</td>" : "</tr><tr>";
 %>
-
-<script type="text/javascript" src="<%=getContextPath()%>/MS2/inlineViewDesigner.js"></script>
 
 <labkey:form action="<%= url %>" method="get">
     <input type="hidden" name="restrictProteins" value="true" />
-    <table>
+    <table class="lk-fields-table">
         <tr>
             <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
             <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/></td>
@@ -54,8 +50,9 @@
             <td nowrap><input type="checkbox" name="exactMatch"<%=checked(bean.getForm().isExactMatch())%>/></td>
         </tr>
         <tr>
-            <td></td>
-            <td><labkey:button text="Search" /></td>
+            <td colspan="2" style="padding-top: 10px;">
+                <labkey:button text="Search" />
+            </td>
         </tr>
     </table>
 </labkey:form>

@@ -47,8 +47,6 @@
 
             <td nowrap class="labkey-form-label">Minimum prob<%= helpPopup("Minimum probability", "If entered, only ProteinProphet protein groups that have an associated probability greater than or equal to the value will be included.") %></td>
             <td nowrap><input type="text" size="4" name="minimumProbability" <% if (bean.getForm().getMinimumProbability() != null ) { %>value="<%= bean.getForm().getMinimumProbability() %>"<% } %>/></td>
-
-            <td><labkey:button text="Search" /></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Search in subfolders<%= helpPopup("Search in subfolders", "If checked, the search will also look in all of this folder's children.") %></td>
@@ -74,6 +72,11 @@
                     <%= PageFlowUtil.textLink("Create or Edit View", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
                 </div>
                 <span id="peptidesCustomizeView"></span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding-top: 10px;">
+                <labkey:button text="Search" />
             </td>
         </tr>
     </table>

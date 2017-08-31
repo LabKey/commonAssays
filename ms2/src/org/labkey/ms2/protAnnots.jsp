@@ -23,7 +23,7 @@
 <%
     AnnotationView.AnnotViewBean bean = ((JspView<AnnotationView.AnnotViewBean>) HttpView.currentView()).getModelBean();
 %>
-<table>
+<table class="lk-fields-table">
 <tr>
    <td class="labkey-form-label" nowrap="true">Sequence name</td><td><%=h(bean.seqName)%></td>
 </tr>
@@ -56,9 +56,15 @@
 </tr>
 </table>
 <br>
-<table class="labkey-prot-annots">
+<table class="labkey-data-region-legacy labkey-show-borders labkey-prot-annots">
 <tr>
-   <th>Genbank IDs</th><th>GIs</th><th>Swiss-Prot Accessions</th><th>Swiss-Prot Names</th><th>Ensembl</th><th>IPI numbers</th><th>GO Categories</th>
+    <td class="labkey-column-header">Genbank IDs</td>
+    <td class="labkey-column-header">GIs</td>
+    <td class="labkey-column-header">Swiss-Prot Accessions</td>
+    <td class="labkey-column-header">Swiss-Prot Names</td>
+    <td class="labkey-column-header">Ensembl</td>
+    <td class="labkey-column-header">IPI numbers</td>
+    <td class="labkey-column-header">GO Categories</td>
 </tr>
 <tr valign="top">
    <td><%

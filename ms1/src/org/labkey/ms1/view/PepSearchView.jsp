@@ -34,7 +34,6 @@
         <tr>
             <td class="labkey-form-label"><label for="pepSeq">Peptide sequence</label> *<%=helpPopup("Peptide Sequence", "Enter the peptide sequence to find, or multiple sequences separated by commas. Use * to match any sequence of characters.")%></td>
             <td><input id="pepSeq" type="text" name="<%=ProteinService.PeptideSearchForm.ParamNames.pepSeq.name()%>" value="<%=h(model.getPepSeq())%>" size="40"/></td>
-            <td><%= button("Search").submit(true).attributes("id=\"btnSearch\" name=\"submit\"")%></td>
         </tr>
         <tr>
             <td class="labkey-form-label"><label for="cbxExact">Exact matches only</label><%=helpPopup("Exact matches only", "If checked, the search will match the peptides exactly; if unchecked, it will match any peptide that starts with the specified sequence and ignore modifications.")%></td>
@@ -43,6 +42,11 @@
         <tr>
             <td class="labkey-form-label"><label for="cbxSubfolders">Search in subfolders</label><%=helpPopup("Search in subfolders", "Check to search this folder and all of its descendants.")%></td>
             <td><input id="cbxSubfolders" type="checkbox" name="<%=ProteinService.PeptideSearchForm.ParamNames.subfolders.name()%>" style="vertical-align:middle"<%=checked(model.includeSubfolders())%> /></td>
+        </tr>
+        <tr>
+            <td colspan="2" style="padding-top: 10px;">
+                <%= button("Search").submit(true).attributes("id=\"btnSearch\" name=\"submit\"")%>
+            </td>
         </tr>
     </table>
 </labkey:form>
