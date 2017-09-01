@@ -66,12 +66,12 @@ public class SequestImportTest extends BaseWebDriverTest
         // by the custom query
         CustomizeView viewsHelper = new DataRegionTable("MS2ExtensionsRunGrid", this).getCustomizeView();
         viewsHelper.openCustomizeViewPanel();
-        viewsHelper.addCustomizeViewColumn(TOTAL_PEPTIDES_FIELD_KEY);
-        viewsHelper.addCustomizeViewColumn(UNIQUE_PEPTIDES_FIELD_KEY);
+        viewsHelper.addColumn(TOTAL_PEPTIDES_FIELD_KEY);
+        viewsHelper.addColumn(UNIQUE_PEPTIDES_FIELD_KEY);
 
         // Add a filter so that we can check the values were calculated and shown correctly
-        viewsHelper.addCustomizeViewFilter(TOTAL_PEPTIDES_FIELD_KEY, "Total Peptides", "Equals", "2");
-        viewsHelper.addCustomizeViewFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Distinct Peptides", "Equals", "1");
+        viewsHelper.addFilter(TOTAL_PEPTIDES_FIELD_KEY, "Total Peptides", "Equals", "2");
+        viewsHelper.addFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Distinct Peptides", "Equals", "1");
         viewsHelper.saveDefaultView();
 
         // Make sure that our run is still showing
@@ -104,7 +104,7 @@ public class SequestImportTest extends BaseWebDriverTest
         {
             waitForElement(FileBrowserHelper.Locators.gridRowWithNodeId(file).append(runLink));
         }
-        clickAndWait(runLink);
+        clickAndWait(runLink.parent().parent()); /* Clicking the anchor doesn't work, but this does, shrug */
         assertElementPresent(Locator.pageHeader(runName));
         clickAndWait(Locator.linkWithText(runProtocol));
 
