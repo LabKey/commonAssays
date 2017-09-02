@@ -422,7 +422,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
                     String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
-                    out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
+                    out.write("<td><div name='" + titrationCellName + "' style='padding-left: 2px; display:" + (hideCell ? "none" : "table-cell") + "' >");
                     out.write("<input type=checkbox name='" + groupName + "CheckBox' id='" + groupName + "CheckBox' onchange=\"");
                     out.write(" b = this.checked;");
                     for (int i = 1; i < getColumns().size(); i++)
@@ -431,7 +431,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         out.write("document.getElementsByName('" + col.getFormFieldName(ctx) + "')[0].style.display = b ? 'none' : 'block';\n");
                     }
                     out.write(" if (b) { " + groupName + "Updated(); }\">");
-                    out.write("</td>");
+                    out.write("</div></td>");
                 }
 
                 @Override
@@ -561,11 +561,11 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             @Override
-            public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+            public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
             {
                 boolean newUI = PageFlowUtil.useExperimentalCoreUI();
                 if (newUI)
-                    out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+                    out.write("<label class=\"control-header-label\">");
                 else
                     out.write("<td class='labkey-form-label'>");
 

@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.query;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
@@ -131,7 +132,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+    public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
     {
         boolean newUI = PageFlowUtil.useExperimentalCoreUI();
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
@@ -140,7 +141,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
                 + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
         if (newUI)
         {
-            out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+            out.write("<label class=\"control-header-label\">");
             renderTitle(ctx, out);
             out.write("</label>");
         }

@@ -16,6 +16,7 @@
 package org.labkey.luminex.query;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -67,11 +68,11 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             }
 
             @Override
-            public void renderDetailsCaptionCell(RenderContext ctx, Writer out) throws IOException
+            public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
             {
                 boolean newUI = PageFlowUtil.useExperimentalCoreUI();
                 if (newUI)
-                    out.write("<label class=\"col-sm-3 col-lg-2 control-label\">");
+                    out.write("<label class=\"control-header-label\">");
                 else
                     out.write("<td class='labkey-form-label'>");
 
@@ -92,7 +93,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                 boolean hidden = _initNegativeControlAnalytes.contains(_analyteName);
 
                 out.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
-                        "class=\"negative-bead-input\" " + // used by NegativeBeadPopulation.js
+                        "class=\"form-control negative-bead-input\" " + // used by NegativeBeadPopulation.js
                         "analytename=\"" + PageFlowUtil.filter(_analyteName) + "\" " + // used by NegativeBeadPopulation.js
                         "width=\"200\" style=\"width:200px;" +
                         (hidden ? "display:none;" : "display:inline-block;") + "\">");

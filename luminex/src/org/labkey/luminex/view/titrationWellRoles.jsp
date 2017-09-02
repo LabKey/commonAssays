@@ -60,102 +60,107 @@
     if (nonUnknownTitrations.size() > 0)
     {
 %>
-        <table>
-            <tr>
-                <td>&nbsp;</td>
-                <td class="labkey-form-label">Standard</td>
-                <td class="labkey-form-label">QC Control</td>
-                <td class="labkey-form-label">Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
-            </tr>
+        <div class="panel panel-default" style="display: inline-block; margin-right: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Titrations</h3>
+            </div>
+            <div class="panel-body">
+                <table class="lk-fields-table" style="width: 100%;">
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td style="padding-right: 10px; font-weight: bold;">Standard</td>
+                        <td style="padding-right: 10px; font-weight: bold;">QC Control</td>
+                        <td style="font-weight: bold;">Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
+                    </tr>
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
 %>
-            <tr>
-                <td class="labkey-form-label"><%= h(titrationEntry.getValue().getName()) %></td>
-                <td>
-                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
-                </td>
-                <td>
-                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);' />
-                </td>
-                <td>
-                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);' />
-                </td>
-            </tr>
+                    <tr>
+                        <td style="padding-right: 10px;"><%= h(titrationEntry.getValue().getName()) %></td>
+                        <td align="center">
+                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
+                                   value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
+                        </td>
+                        <td align="center">
+                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
+                                   value='1' onClick='titrationRoleChecked(this);' />
+                        </td>
+                        <td align="center">
+                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue())) %>'
+                                   value='1' onClick='titrationRoleChecked(this);' />
+                        </td>
+                    </tr>
 <%
         }
 %>
-        </table>
+                </table>
+            </div>
+        </div>
 <%
     }
 
-%>
-    <table><tr> <!-- Show a table containing both Titrated Unknowns and Tracked single point controls -->
-<%
-
-    // show a table for the user to select which titrations are Titrated Unknowns
+    // show section for the user to select which titrations are Titrated Unknowns
     if (unknownTitrations.size() > 0)
     {
 %>
-        <td valign="top">
-        <table>
-            <tr>
-                <td>&nbsp;</td>
-                <td class="labkey-form-label">Titrated Unknown</td>
-            </tr>
+        <div class="panel panel-default" style="display: inline-block; margin-right: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Titrated Unknowns</h3>
+            </div>
+            <div class="panel-body">
+                <table class="lk-fields-table" style="width: 100%;">
 <%
         for (Map.Entry<String, Titration> titrationEntry : unknownTitrations.entrySet())
         {
 %>
-            <tr>
-                <td class="labkey-form-label"><%= h(titrationEntry.getValue().getName()) %></td>
-                <td>
-                    <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
-                           value='1' onClick='titrationRoleChecked(this);' />
-                </td>
-            </tr>
+                    <tr>
+                        <td style="padding-right: 10px;"><%= h(titrationEntry.getValue().getName()) %></td>
+                        <td>
+                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
+                                   value='1' onClick='titrationRoleChecked(this);' />
+                        </td>
+                    </tr>
 <%
         }
 %>
-        </table>
-        </td>
+                </table>
+            </div>
+        </div>
 <%
     }
+
+    // show section for the user to select trackec single point controls
     if (trackedSinglePointControls.size() >0)
     {
 %>
-        <td valign="top">
-            <table>
-                <tr>
-                <td>&nbsp;</td>
-                <td class="labkey-form-label">Tracked Single Point Controls</td>
-                </tr>
+        <div class="panel panel-default" style="display: inline-block;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Tracked Single Point Controls</h3>
+            </div>
+            <div class="panel-body">
+                <table class="lk-fields-table" style="width: 100%;">
 <%
                     for (String trackedSinglePointControl : trackedSinglePointControls)
                     {
 %>
-                <tr>
-                    <td class="labkey-form-label"><%= h(trackedSinglePointControl) %></td>
-                    <td>
-                        <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
-                               value='1' onClick='titrationRoleChecked(this);' />
-                    </td>
-                </tr>
+                    <tr>
+                        <td style="padding-right: 10px;"><%= h(trackedSinglePointControl) %></td>
+                        <td>
+                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
+                                   value='1' onClick='titrationRoleChecked(this);' />
+                        </td>
+                    </tr>
 <%
                     }
 %>
 
-            </table>
-        </td>
+                </table>
+            </div>
+        </div>
 <%
     }
 %>
-    </tr></table>
-
 
 <script type="text/javascript">
     // function to handle click of titration well role checkbox to set the corresponding hidden form element accordingly
