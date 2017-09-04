@@ -1244,7 +1244,7 @@ public class MS2Test extends AbstractMS2ImportTest
         String expectedError = "Could not resolve IndistinguishableCollectionId column";
 
         createQuery(getProjectName() + "/ms2folder", "GroupNumberTest", "ms2", sqlGroupNumberDisplay, "", false);
-        _extHelper.clickExtTab("Source");
+        _ext4Helper.clickExt4Tab("Source");
         clickButtonContainingText("Execute Query", 0);
         waitForText(expectedError);
         assertTextPresent(expectedError, 13);
@@ -1259,7 +1259,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "FROM ProteinGroups ";
 
         createQuery(getProjectName() + "/ms2folder", "GroupNumberTestCorrect", "ms2", sqlGroupNumberDisplay2 + "\n", "", false);
-        _extHelper.clickExtTab("Source");
+        _ext4Helper.clickExt4Tab("Source");
         clickButtonContainingText("Execute Query", 0);
         assertTextNotPresent(expectedError);
 
