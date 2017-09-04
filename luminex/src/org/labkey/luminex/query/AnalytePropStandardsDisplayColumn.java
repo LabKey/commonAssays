@@ -136,12 +136,12 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     {
         boolean newUI = PageFlowUtil.useExperimentalCoreUI();
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td name=\"" + titrationCellName + "\""
-                + (newUI ? "" : " class=\"labkey-form-label\"")
+        String tag = newUI ? "div" : "td";
+        out.write("<" + tag + " name=\"" + titrationCellName + "\""
                 + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
         if (newUI)
         {
-            out.write("<label class=\"control-header-label\">");
+            out.write("<label class=\"" + cls + "\">");
             renderTitle(ctx, out);
             out.write("</label>");
         }
@@ -149,7 +149,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
         {
             renderTitle(ctx, out);
         }
-        out.write("</td>");
+        out.write("</" + tag + ">");
     }
 
     @Override
