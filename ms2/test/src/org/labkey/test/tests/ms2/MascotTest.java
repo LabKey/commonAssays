@@ -369,17 +369,17 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         waitForText("Decoy Summary");
         //get and check values in Decoy Summary table
-        List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[@class='labkey-form-label']").toBy());
-        List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[not(@class='labkey-form-label')]").toBy());
+        List<WebElement> headers = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[@class='labkey-form-label']"));
+        List<WebElement> values = getDriver().findElements(Locator.xpath("//table[tbody/tr/th/span[text()='Decoy Summary']]//table//td[not(@class='labkey-form-label')]"));
         Map<String,String> decoySummary = new LinkedHashMap<>();
         for(int i = 0; i < headers.size(); i++)
         {
             decoySummary.put(headers.get(i).getText(), values.get(i).getText());
         }
-        assertEquals("Incorrect Identity Threshold in Decoy Summary", "13.1", getDriver().findElement(Locator.id("ionThresholdValue").toBy()).getText());
-        assertEquals("Incorrect In Target count in Decoy Summary", "3", getDriver().findElement(Locator.id("inTargetValue").toBy()).getText());
-        assertEquals("Incorrect In Decoy count in Decoy Summary", "0", getDriver().findElement(Locator.id("inDecoyValue").toBy()).getText());
-        assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", getDriver().findElement(Locator.id("fdrValue").toBy()).getText());
+        assertEquals("Incorrect Identity Threshold in Decoy Summary", "13.1", getDriver().findElement(Locator.id("ionThresholdValue")).getText());
+        assertEquals("Incorrect In Target count in Decoy Summary", "3", getDriver().findElement(Locator.id("inTargetValue")).getText());
+        assertEquals("Incorrect In Decoy count in Decoy Summary", "0", getDriver().findElement(Locator.id("inDecoyValue")).getText());
+        assertEquals("Incorrect FDR % in Decoy Summary", "0.00%", getDriver().findElement(Locator.id("fdrValue")).getText());
 
         // TODO: Would be good to test the functionality of the "Adjust FDR To" dropdown, but we may still have further tweaking on this UI to do pending client feedback.
 

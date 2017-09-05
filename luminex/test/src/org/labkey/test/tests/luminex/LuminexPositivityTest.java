@@ -123,7 +123,7 @@ public final class LuminexPositivityTest extends LuminexTest
         selectPositivityFile(TEST_ASSAY_LUM_FILE13, false);
 
         List<WebElement> analytePropertyRows = PortalHelper.Locators.webPart("Analyte Properties").findElement(getDriver())
-                .findElements(Locator.css("tr.labkey-row, tr.labkey-alternate-row").toBy());
+                .findElements(Locator.css("tr.labkey-row, tr.labkey-alternate-row"));
 
         for (WebElement row : analytePropertyRows)
         {
