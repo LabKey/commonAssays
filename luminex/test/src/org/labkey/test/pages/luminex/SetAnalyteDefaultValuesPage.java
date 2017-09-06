@@ -19,8 +19,7 @@ import org.junit.Assert;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.Locators;
-import org.labkey.test.util.PortalHelper;
-import org.openqa.selenium.By;
+import org.labkey.test.WebDriverWrapper;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
@@ -78,11 +77,11 @@ public class SetAnalyteDefaultValuesPage
 
         for (WebElement row : defaultValueRows)
         {
-            String analyteName = row.findElement(By.name("analytes")).getAttribute("value");
-            String positivityThresholdValue = row.findElement(By.name("positivityThresholds")).getAttribute("value");
-            String negativeBead = row.findElement(By.name("negativeBeads")).getAttribute("value");
+            String analyteName = Locator.name("analytes").waitForElement(row, WebDriverWrapper.WAIT_FOR_JAVASCRIPT).getAttribute("value");
+            String positivityThresholdValue = Locator.name("positivityThresholds").findElement(row).getAttribute("value");
+            String negativeBead = Locator.name("negativeBeads").findElement(row).getAttribute("value");
 
-            Integer positivityThreshold = 0;
+            Integer positivityThreshold = null;
 
             try
             {
