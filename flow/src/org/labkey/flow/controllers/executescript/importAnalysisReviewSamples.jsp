@@ -94,7 +94,7 @@
 <% } %>
 <input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 
-<p>Please choose which samples from the analysis should be imported. Only selected rows will be imported.
+<p>Please choose which samples from the analysis should be imported. Only <b>selected rows</b> will be imported.
 </p>
 <% if (form.isResolving()) { %>
 <p>If a sample from the analysis couldn't be resolved or was incorrectly resolved, you may correct it by
@@ -155,7 +155,7 @@ if (groups.size() > 1)
             }
         }
     </script>
-    <label for="importGroupNames">Select a group to import from the <%=h(workspace.getKindName())%>.</label>
+    Select a group to import from the <%=h(workspace.getKindName())%>.
     <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
         <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
     </select>

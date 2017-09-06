@@ -60,103 +60,106 @@
         submitURL.addParameter(ActionURL.Param.returnUrl, form.getReturnActionURL().toString());
 %>
 <labkey:errors />
-<br>
 <labkey:form action="<%=submitURL%>" method="POST">
-    <table class="labkey-wp">
-        <tr class="labkey-wp-header"><th align="left">Sample Columns</th></tr>
-        <tr><td>
-            The LabKey study module uses the pair of participant and visit/date to identify the sample and uses
-            this information to combine multiple assays together.
-            <br><br>
-            Select the columns that identify the sample using FCSFile keywords or sample properties.
-            Select either a specimen ID column or a participant column and one of visit or date columns.
-        </td></tr>
-    </table>
-    <br>
-    <table>
-        <tr>
-            <td>Specimen ID column</td>
-            <td>
-                <select name="ff_specimenIdColumn"><labkey:options value="<%=form.specimenIdColumn%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
-        <tr>
-            <td>Participant column</td>
-            <td>
-                <select name="ff_participantColumn"><labkey:options value="<%=form.participantColumn%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
-        <tr>
-            <td>Visit column</td>
-            <td>
-                <select name="ff_visitColumn"><labkey:options value="<%=form.visitColumn%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
-        <tr>
-            <td>Date column</td>
-            <td>
-                <select name="ff_dateColumn"><labkey:options value="<%=form.dateColumn%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
-    </table>
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Sample Columns
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>The LabKey study module uses the pair of participant and visit/date to identify the sample and uses
+            this information to combine multiple assays together.</p>
+            <p>Select the columns that identify the sample using FCSFile keywords or sample properties.
+            Select either a specimen ID column or a participant column and one of visit or date columns.</p>
+            <table class="lk-fields-table">
+                <tr>
+                    <td>Specimen ID column</td>
+                    <td>
+                        <select name="ff_specimenIdColumn"><labkey:options value="<%=form.specimenIdColumn%>" map="<%=keywordSampleOptions%>" /></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Participant column</td>
+                    <td>
+                        <select name="ff_participantColumn"><labkey:options value="<%=form.participantColumn%>" map="<%=keywordSampleOptions%>" /></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Visit column</td>
+                    <td>
+                        <select name="ff_visitColumn"><labkey:options value="<%=form.visitColumn%>" map="<%=keywordSampleOptions%>" /></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Date column</td>
+                    <td>
+                        <select name="ff_dateColumn"><labkey:options value="<%=form.dateColumn%>" map="<%=keywordSampleOptions%>" /></select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-    <br><br>
-    <table class="labkey-wp">
-        <tr class="labkey-wp-header"><th align="left">Background and Foreground Match Columns</th></tr>
-        <tr><td>
-            Select the columns that match between both the foreground and background wells.<br><br>
-            For example, you usually want to match wells from the same FCSAnalysis Run and from
-            the sample draw.
-        </td></tr>
-    </table>
-    <br>
-    <table>
-        <% for (int i = 0; i < EditICSMetadataForm.MATCH_COLUMNS_MAX; i++) { %>
-        <tr>
-            <td><%=i == 0 ? "&nbsp;" : "and"%></td>
-            <td>
-                <select name="ff_matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=keywordSampleOptions%>" /></select>
-            </td>
-        </tr>
-        <% } %>
-    </table>
-
-    <br><br>
-    <table class="labkey-wp">
-        <tr class="labkey-wp-header"><th align="left">Background Column and Value</th></tr>
-        <tr><td>
-            Specify the column and value filter(s) which uniquely identify the background wells from
-            the foreground wells.<br>If multiple wells match the background criteria, the
-            background value will be the average of all the matched wells.<br><br>
-            For example, if your background wells may have either "neg" or "NegControl" for
-            the "Peptide" keyword then select column "Keyword Peptide", select operator "Equals One Of",
-            and set the value to "neg;NegControl".
-            Multiple values are combined with ';' when using the "Equals One Of" operator.
-        </td></tr>
-    </table>
-    <br>
-    <table>
-        <tr>
-            <td>&nbsp;</td>
-            <td align="center" class="labkey-form-label"><em>Background Column</em></td>
-            <td align="center" class="labkey-form-label"><em>Operator</em></td>
-            <td align="center" class="labkey-form-label"><em>Value</em></td>
-        </tr>
-        <%
-            for (int i = 0; i < EditICSMetadataForm.BACKGROUND_COLUMNS_MAX; i++) {
-                FilterInfo filter = form.backgroundFilter[i];
-                %>
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Background and Foreground Match Columns
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>Select the columns that match between both the foreground and background wells.</p>
+            <p>For example, you usually want to match wells from the same FCSAnalysis Run and from
+            the sample draw.</p>
+            <table class="lk-fields-table">
+                <% for (int i = 0; i < EditICSMetadataForm.MATCH_COLUMNS_MAX; i++) { %>
                 <tr>
                     <td><%=i == 0 ? "&nbsp;" : "and"%></td>
-                    <td><select name="ff_backgroundFilterField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=keywordSampleStatsOptions%>" /></select></td>
-                    <td><select name="ff_backgroundFilterOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
-                    <td><input name="ff_backgroundFilterValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
+                    <td>
+                        <select name="ff_matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=keywordSampleOptions%>" /></select>
+                    </td>
+                </tr>
+                <% } %>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Background Column and Value
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>Specify the column and value filter(s) which uniquely identify the background wells from
+            the foreground wells.<br>If multiple wells match the background criteria, the
+            background value will be the average of all the matched wells.</p>
+            <p>For example, if your background wells may have either "neg" or "NegControl" for
+            the "Peptide" keyword then select column "Keyword Peptide", select operator "Equals One Of",
+            and set the value to "neg;NegControl".
+            Multiple values are combined with ';' when using the "Equals One Of" operator.</p>
+            <table class="lk-fields-table">
+                <tr>
+                    <td>&nbsp;</td>
+                    <td style="font-weight: bold;">Background Column</td>
+                    <td style="font-weight: bold;">Operator</td>
+                    <td style="font-weight: bold;">Value</td>
                 </tr>
                 <%
-            }
-        %>
-    </table>
-
-    <br>
+                    for (int i = 0; i < EditICSMetadataForm.BACKGROUND_COLUMNS_MAX; i++) {
+                        FilterInfo filter = form.backgroundFilter[i];
+                        %>
+                        <tr>
+                            <td><%=i == 0 ? "&nbsp;" : "and"%></td>
+                            <td><select name="ff_backgroundFilterField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=keywordSampleStatsOptions%>" /></select></td>
+                            <td><select name="ff_backgroundFilterOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
+                            <td><input name="ff_backgroundFilterValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>
+                        </tr>
+                        <%
+                    }
+                %>
+            </table>
+        </div>
+    </div>
     <labkey:button text="Set ICS Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </labkey:form>

@@ -31,9 +31,9 @@
 
     <p>
         You can define the compensation calculation by uploading a FlowJo XML workspace<br>
-        <input type="file" name="workspaceFile"><br>
-        Important: This workspace must contain only one set of compensation controls, or you will not be able to select
+        <input type="file" name="workspaceFile" style="border: none; background-color: transparent;"><br>
+        <b>Important:</b> This workspace must contain only one set of compensation controls, or you will not be able to select
         the keywords that you want to.
     </p>
-        <input type="submit" value="Submit">
+    <input class="labkey-button" type="submit" value="Submit">
 </labkey:form>

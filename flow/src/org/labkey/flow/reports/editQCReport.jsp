@@ -46,8 +46,14 @@
 
     String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
 %>
-<style>
-    .x-form-item { margin:2px;}
+<style type="text/css">
+    .x-form-item {
+        margin:2px;
+    }
+
+    .labkey-text-link {
+        cursor: pointer;
+    }
 </style>
 <div id="form"></div>
 <script type="text/javascript">
@@ -176,12 +182,7 @@ Ext.onReady(function() {
     var items = [
         {fieldLabel:'Name', name:'reportName', value:report.name, allowBlank:false},
         {fieldLabel:'Description', name:'reportDescription', value:report.description, allowBlank:true},
-
-        spacer,
-        {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false},
-
-        spacer,
-        spacer
+        {fieldLabel:'Statistic', name:'statistic', xtype:'statisticField', value:report.statistic, allowBlank:false}
     ];
 
     var filterItems = [];
@@ -268,7 +269,7 @@ Ext.onReady(function() {
     filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].op', value:'eq'});
     filterItems.push({
         xtype: 'combo',
-        fieldLabel: 'Analysis Folder',
+        fieldLabel: 'Analysis folder',
         name: 'filter[' + filterIdx + '].value',
         value: analysisFolder,
         displayField: 'Name',
@@ -297,7 +298,7 @@ Ext.onReady(function() {
     filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'keyword'});
     filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].property', value:'EXPORT TIME'});
     filterItems.push({xtype:'hidden', name:'filter[' + filterIdx + '].op', value:'gte'});
-    filterItems.push({xtype:'datefield', fieldLabel:'On or After', name:'filter[' + filterIdx + '].value', value:startDate});
+    filterItems.push({xtype:'datefield', fieldLabel:'On or after', name:'filter[' + filterIdx + '].value', value:startDate});
 
     filterItems.push(spacer);
 
@@ -308,17 +309,26 @@ Ext.onReady(function() {
     filterItems.push({xtype:'datefield', fieldLabel:'Before', name:'filter[' + filterIdx + '].value', value:endDate});
 
     items.push({
+        xtype: 'box',
+        html: '<div>Filters:</div>'
+    },{
         xtype:'fieldset',
         id:'filtersFieldSet',
-        title:'Filters',
-        padding:'10px 10px 10px 10px',
+        padding: 10,
+        defaults: {
+            labelStyle: 'font-weight: normal;'
+        },
         items: filterItems
     });
 
     form = new LABKEY.ext.FormPanel({
         id:'reportForm',
         url:window.location,
-        defaults:{msgTarget:'side', width:700},
+        defaults:{
+            msgTarget:'side',
+            width:700,
+            labelStyle: 'font-weight: normal;'
+        },
         border:false,
         bodyStyle: 'background:transparent;',
         padding:10,
@@ -327,9 +337,9 @@ Ext.onReady(function() {
         filterCount: filterIdx,
         items:items,
         buttons:[
-            {text:'Save', handler:Form_onSave},
+            {text:'Delete', handler:Form_onDelete, style:'margin-right: 10px;'},
             {text:'Cancel', handler:Form_onCancel},
-            {text:'Delete', handler:Form_onDelete}
+            {text:'Save', handler:Form_onSave}
         ],
         buttonAlign:'left'
     });

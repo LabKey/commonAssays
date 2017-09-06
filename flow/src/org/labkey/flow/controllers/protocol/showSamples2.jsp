@@ -105,7 +105,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
             <td valign="top">
                 <h3>Linked Samples</h3>
 
-    <table class="labkey-data-region labkey-show-borders" width="100%" style="min-width: 300px">
+    <table class="labkey-data-region-legacy labkey-show-borders" width="100%" style="min-width: 300px">
         <thead>
         <tr>
             <td class="labkey-column-header">Sample Name</td>
@@ -150,7 +150,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
 
             <td valign="top">
                 <h3>Unlinked Samples</h3>
-                <table class="labkey-data-region labkey-show-borders" width="100%" style="min-width: 200px">
+                <table class="labkey-data-region-legacy labkey-show-borders" width="100%" style="min-width: 200px">
                     <thead>
                     <tr>
                         <td class="labkey-column-header">Sample Name</td>
@@ -176,7 +176,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
 
             <td valign="top">
                 <h3>Unlinked FCSFiles</h3>
-                <table class="labkey-data-region labkey-show-borders" width="100%" style="min-width: 200px">
+                <table class="labkey-data-region-legacy labkey-show-borders" width="100%" style="min-width: 200px">
                     <thead>
                     <tr>
                         <td class="labkey-column-header">FCSFile</td>

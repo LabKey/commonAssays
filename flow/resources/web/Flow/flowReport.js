@@ -22,7 +22,7 @@ function createKeywordFilter(filterIdx, filter)
             {xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'keyword'},
             {xtype:'combo', name:'filter[' + filterIdx + '].property', store:FlowPropertySet.keywords, value:filter.property},
             {xtype:'textfield', name:'filter[' + filterIdx + '].value', value:filter.value},
-            {xtype:'button', text:'X', handler: function () { removeFilter(filterIdx); } }
+            {xtype:'button', text:'Remove', handler: function () { removeFilter(filterIdx); } }
         ]
     };
 }
@@ -44,7 +44,7 @@ function createSampleFilter(filterIdx, filter)
             {xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'sample'},
             {xtype:'combo', name:'filter[' + filterIdx + '].property', store:SampleSet.properties, value:filter.property},
             {xtype:'textfield', name:'filter[' + filterIdx + '].value', value:filter.value},
-            {xtype:'button', text:'X', handler: function () { removeFilter(filterIdx); } }
+            {xtype:'button', text:'Remove', handler: function () { removeFilter(filterIdx); } }
         ]
     };
 }
@@ -67,7 +67,7 @@ function createStatisticFilter(filterIdx, filter)
         {xtype:'compositefield', items: [
             {xtype:'opCombo', name:'filter[' + filterIdx + '].op', value:filter.op},
             {xtype:'textfield', name:'filter[' + filterIdx + '].value', value:filter.value},
-            {xtype:'button', text:'X', handler: function () { removeFilter(filterIdx); } }
+            {xtype:'button', text:'Remove', handler: function () { removeFilter(filterIdx); } }
         ]},
     ]};
 }
@@ -87,10 +87,10 @@ function createFieldKeyFilter(filterIdx, filter)
     return {
         xtype:'compositefield', filterIdx: filterIdx, fieldLabel: 'Field', items: [
             {xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'fieldkey'},
-            {xtype:'textfield', name:'filter[' + filterIdx + '].property', value:filter.property, width:'230px'},
-            {xtype:'opCombo', name:'filter[' + filterIdx + '].op', value:filter.op},
+            {xtype:'textfield', name:'filter[' + filterIdx + '].property', value:filter.property, width: 175},
+            {xtype:'opCombo', name:'filter[' + filterIdx + '].op', value:filter.op, width: 150},
             {xtype:'textfield', name:'filter[' + filterIdx + '].value', value:filter.value},
-            {xtype:'button', text:'X', handler: function () { removeFilter(filterIdx); } }
+            {xtype:'button', text:'Remove', handler: function () { removeFilter(filterIdx); } }
         ]
     };
 }

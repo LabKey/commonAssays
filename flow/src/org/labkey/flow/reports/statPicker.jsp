@@ -190,7 +190,7 @@ var SubsetField = Ext.extend(Ext.form.TriggerField,
 {
     initComponent : function ()
     {
-        this.width = 400;
+        this.width = 350;
         this.addEvents('selectionchange');
         SubsetField.superclass.initComponent.call(this);
     },
@@ -215,8 +215,6 @@ var SubsetField = Ext.extend(Ext.form.TriggerField,
             useArrows:true,
             autoScroll:false,
             containerScroll:true,
-            //width:800, height:400,
-            //autoHeight:true,
             animate:true,
             enableDD:false
         });
@@ -264,6 +262,8 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
 {
     constructor : function (config)
     {
+        config.labelStyle = 'font-weight: normal;',
+
         config.items = [{
             xtype: 'subsetField',
             name: config.name + "_subset",

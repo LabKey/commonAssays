@@ -35,16 +35,15 @@
     boolean canSetPipelineRoot = container.hasPermission(getUser(), AdminOperationsPermission.class)
                                     && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
-
 <p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline
     for an analysis archive or FlowJo workspace available to the server.
     Mac FlowJo workspaces must be saved as XML for <%=h(FlowModule.getLongProductName())%> to be able to read it.
 </p>
 <hr/>
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />
-<label for="uploadWorkspace">Upload file from your computer</label>
-<div style="padding-left: 2em; padding-bottom: 1em;">
-    <input type="file" id="workspace.file" name="workspace.file" onchange="selectUploadWorkspace();">
+Upload file from your computer
+<div style="padding: 5px 0 10px 2em;">
+    <input type="file" id="workspace.file" name="workspace.file" onchange="selectUploadWorkspace();" style="border: none; background-color: transparent;">
     <script type="text/javascript">
         function selectUploadWorkspace()
         {
@@ -53,7 +52,7 @@
     </script>
 </div>
 <input type="radio" name="selectWorkspace" id="browseWorkspace" value="browseWorkspace" />
-<label for="browseWorkspace">Browse the pipeline</label>
+Browse the pipeline
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot) {
         String inputId = "workspace.path";

@@ -69,16 +69,16 @@
 
 <table class="lk-fields-table">
     <tr>
-        <td class="labkey-export-tab-options">Include:</td>
+        <td class="labkey-export-tab-options" valign="top">Include:</td>
         <td class="labkey-export-tab-options">
-            <input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" <%=checked(bean.isIncludeFCSFiles())%> /> <label for="includeFCSFiles">FCS Files</label><br>
-            <input id="includeGraphs" name="includeGraphs" type="checkbox" <%=checked(bean.isIncludeGraphs())%> /> <label for="includeGraphs">Graphs</label><br>
-            <input id="includeCompensation" name="includeCompensation" type="checkbox" <%=checked(bean.isIncludeCompensation())%> /> <label for="includeCompensation">Compensation</label>
+            <input id="includeFCSFiles" name="includeFCSFiles" type="checkbox" <%=checked(bean.isIncludeFCSFiles())%> /> FCS Files<br>
+            <input id="includeGraphs" name="includeGraphs" type="checkbox" <%=checked(bean.isIncludeGraphs())%> /> Graphs<br>
+            <input id="includeCompensation" name="includeCompensation" type="checkbox" <%=checked(bean.isIncludeCompensation())%> /> Compensation
         </td>
         <td class="labkey-export-tab-options" style="padding-left:2em;">
-            <input id="includeKeywords" name="includeKeywords" type="checkbox" <%=checked(bean.isIncludeKeywords())%> /> <label for="includeKeywords">Keywords</label><br>
-            <input id="includeStatistics" name="includeStatistics" type="checkbox" <%=checked(bean.isIncludeStatistics())%> onchange="toggleShortNames(this.checked)" /> <label for="includeStatistics">Statistics</label><br>
-            &nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size: smaller;">(<input id="useShortStatNames" name="useShortStatNames" type="checkbox" <%=checked(bean.isUseShortStatNames())%> /> <label for="useShortStatNames">Short stat names</label>)</span>
+            <input id="includeKeywords" name="includeKeywords" type="checkbox" <%=checked(bean.isIncludeKeywords())%> /> Keywords<br>
+            <input id="includeStatistics" name="includeStatistics" type="checkbox" <%=checked(bean.isIncludeStatistics())%> onchange="toggleShortNames(this.checked)" /> Statistics<br>
+            <span style="font-size: smaller; padding-left: 20px;"><input id="useShortStatNames" name="useShortStatNames" type="checkbox" <%=checked(bean.isUseShortStatNames())%> /> Short stat name</span>
         </td>
         <td>&nbsp;</td>
     </tr>

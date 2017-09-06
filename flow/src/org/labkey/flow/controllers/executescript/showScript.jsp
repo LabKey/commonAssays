@@ -50,9 +50,11 @@
 
     boolean canEdit = context.hasPermission(UpdatePermission.class);
 %>
+<p>
 Analysis scripts may have up to two sections in them.
 The compensation calculation describes how to locate the compensation controls in each run, and which gates need to be applied to them.
 The analysis section describes which gates in the analysis, as well as the statistics that need to be calculated, and the graphs that need to be drawn.
+</p>
 <p>
 <% if (canEdit || script.getExpObject().getComment() != null) { %>
     Script Comment: <% include(new SetCommentView(script), out); %>

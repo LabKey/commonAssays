@@ -69,7 +69,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=samples.size()%> sample descripti
     </p>
 
     <p><% if (unlinkedOnly) { %><b>Showing Unlinked Samples</b><% } %>
-    <table class="labkey-data-region labkey-show-borders">
+    <table class="labkey-data-region-legacy labkey-show-borders">
         <thead>
         <tr>
             <td class="labkey-column-header">Sample Name</td>

@@ -47,7 +47,8 @@
     List<String> warnings = workspace.getWarnings();
     if (warnings.size() > 0)
     {
-        %><p class="labkey-warning-messages" style="display:inline-block">
+        %>
+        <p class="labkey-warning-messages" style="display:inline-block">
         <b>Warnings (<%=warnings.size()%>):</b><br>
         <textarea rows="10" cols="140" readonly><%
         for (String warning : warnings)
@@ -94,7 +95,7 @@
        id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None)%>
        onclick="clearSelections(this.value);" />
-<label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with the <%=h(workspace.getKindName())%>.</label>
+Don't associate FCS files with the <%=h(workspace.getKindName())%>.
 <div style="padding-left: 2em; padding-bottom: 1em;">
     Statistics from the <%=h(workspace.getKindName())%> will be imported but no graphs will be generated.<br>
     <em>NOTE:</em> Choosing this option will advance past the analysis engine step.
@@ -109,7 +110,7 @@
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Included)%>
        onclick="clearSelections(this.value);" />
-<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
+Import FCS files included in the analysis archive.
 <%
     }
 
@@ -138,7 +139,7 @@
         <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous)%>
         <%=disabled(keywordRuns.isEmpty())%>
        onclick="clearSelections(this.value);" />
-<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" style="<%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</label>
+<div style="display:inline-block; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 <div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
@@ -147,7 +148,7 @@
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
         <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse)%>
        onclick="clearSelections(this.value); renderFileBrowser();" />
-<label for="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>">Browse the pipeline for a directory of FCS files.</label>
+Browse the pipeline for a directory of FCS files.
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot)
     {

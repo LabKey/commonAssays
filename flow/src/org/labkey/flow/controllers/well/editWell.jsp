@@ -33,7 +33,7 @@
     <input name="editWellReturnUrl" type="hidden" value="<%=h(form.editWellReturnUrl)%>"/>
     <input name="ff_isBulkEdit" type="hidden" value="<%=h(form.ff_isBulkEdit)%>"/>
     <input name="isUpdate" type="hidden" value="true" />
-    <table id="keywordTable">
+    <table id="keywordTable" class="lk-fields-table">
         <tr>
             <td>Run Name:</td>
             <td>

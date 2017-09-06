@@ -33,11 +33,16 @@
     Use this page to rename populations.  To delete a population, delete its name.<br>
 </p>
 <labkey:form action="<%=formAction(ScriptController.EditGateTreeAction.class)%>" method="POST">
+<table class="lk-fields-table">
     <%
         for (int i = 0; i < form.populationNames.length; i ++)
         {
     %>
-    <%=indent(form.subsets[i])%> <input type="text" name="populationNames[<%=i%>]" value="<%=h(form.populationNames[i])%>"><br>
+    <tr><td>
+        <%=indent(form.subsets[i])%> <input type="text" name="populationNames[<%=i%>]" value="<%=h(form.populationNames[i])%>">
+    </td></tr>
     <% } %>
-    <input type="submit" value="Update">
+</table>
+<br/>
+<input class="labkey-button" type="submit" value="Update">
 </labkey:form>

@@ -249,7 +249,9 @@
     <% } %>
 </ul>
 
-<%=generateBackButton()%>
-<%= button("Finish").submit(true) %>
-<%= button("Cancel").href(cancelUrl) %>
-
+<p>
+    <%= button("Cancel").href(cancelUrl) %>
+    &nbsp;&nbsp;
+    <%=generateBackButton()%>
+    <%= button("Finish").submit(true) %>
+</p>

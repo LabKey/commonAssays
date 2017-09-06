@@ -47,12 +47,12 @@
     Alternatively, you may create filters on individual analysis scripts.
 </p>
 <labkey:form action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" method="POST">
-    <table>
+    <table class="lk-fields-table">
         <tr>
-            <th>&nbsp;</th>
-            <th align="center" class="labkey-form-label">Keyword</th>
-            <th align="center" class="labkey-form-label">Operator</th>
-            <th align="center" class="labkey-form-label">Value</th>
+            <td>&nbsp;</td>
+            <td style="font-weight: bold;">Keyword</td>
+            <td style="font-weight: bold;">Operator</td>
+            <td style="font-weight: bold;">Value</td>
         </tr>
         <% for (int i = 0; i < clauseCount; i ++) {
         FieldKey field = null;

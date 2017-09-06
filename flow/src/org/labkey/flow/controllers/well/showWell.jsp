@@ -354,7 +354,7 @@ var treeData;
 var stats;
 var keywords = <%=jsonKeywords%>;
 </script>
-<table><%
+<table class="lk-fields-table"><%
 
 if (getRun() == null)
 {
@@ -433,7 +433,7 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
 <%
     if (getContainer().hasPermission(getUser(), UpdatePermission.class))
     {
-%><br><%= button("edit").href(well.urlFor(WellController.EditWellAction.class)) %><br>
+%><%= button("edit").href(well.urlFor(WellController.EditWellAction.class)) %><br/><br/>
 <%
     }
 %>
@@ -445,6 +445,7 @@ for (Tuple3<FlowReport, Domain, FlowTableType> pair : FlowReportManager.getRepor
 if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
+    %><br/><%
     include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);
     for (GraphSpec graph : getGraphs())
     {
@@ -461,8 +462,9 @@ List<FlowFCSFile> relatedFiles = well.getFCSFileOutputs();
 if (relatedFiles.size() > 0)
 {
     %>
+    <br/><br/>
     <h4>FCS Files derived from this file and associated FCS Analyses:</h4>
-    <table class="labkey-data-region labkey-show-borders">
+    <table class="labkey-data-region-legacy labkey-show-borders">
         <tr>
             <td class="labkey-column-header">Name</td>
             <td class="labkey-column-header">Run Name</td>
@@ -516,8 +518,9 @@ if (originalFile != null)
 if (allAnalyses.size() > 0)
 {
     %>
+    <br/><br/>
     <h4>FCS Analyses performed on this file:</h4>
-    <table class="labkey-data-region labkey-show-borders">
+    <table class="labkey-data-region-legacy labkey-show-borders">
         <tr>
             <td class="labkey-column-header">Name</td>
             <td class="labkey-column-header">Run Name</td>
@@ -540,7 +543,7 @@ if (allAnalyses.size() > 0)
         <% } %>
         </tr><%
     }
-    %></table><%
+    %></table><br/><%
 }
 
 %><p><%
@@ -562,9 +565,9 @@ else
             File f = r.resolvePath(rel.getPath());
             if (f != null && f.canRead())
             {
-                %><a href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>">More Graphs</a><br><%
-                %><a href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>">Keywords from the FCS file</a><br><%
-                %><a href="<%=h(getWell().urlDownload())%>" rel="nofollow">Download FCS file</a><br><%
+                %><labkey:link href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>" text="More Graphs" /><br><%
+                %><labkey:link href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>" text="Keywords from the FCS file" /><br><%
+                %><labkey:link href="<%=h(getWell().urlDownload())%>" rel="nofollow" text="Download FCS file" /><br><%
             }
             else
             {
@@ -576,12 +579,12 @@ else
 
 if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
 {
-    %><a href="<%=well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells")%>" rel="nofollow">Download Analysis zip</a><br><%
+    %><a class="labkey-text-link" href="<%=well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells")%>" rel="nofollow">Download Analysis zip</a><br><%
 }
 
 if (getRun() != null)
 {
-    %><a href="<%=PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData())%>">Experiment Run Graph Details</a><br><%
+    %><labkey:link href="<%=PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData())%>" text="Experiment Run Graph Details" /><br><%
 }
 
 %></p><%

@@ -107,149 +107,159 @@ var keywordValueSubsetListMap = KV;
 <labkey:form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
 
 <% if (hasAutoCompScripts) { %>
-    <p/>
-    <table width="100%">
-        <tr class="labkey-wp-header">
-            <th align="left">Choose AutoCompensation script:</th>
-        </tr>
-    </table>
-    Your FlowJo workspace contains AutoCompensation scripts; you can optionally
-    select a script from the drop down below to quickly populate the compensation
-    calculation form fields.
-    <br/>
-    <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
-    <%
-        %><option value=""></option><%
-        for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
-        {
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Choose AutoCompensation script
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>Your FlowJo workspace contains AutoCompensation scripts; you can optionally
+            select a script from the drop down below to quickly populate the compensation
+            calculation form fields.</p>
+            <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
+            <%
+                %><option value=""></option><%
+                for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
+                {
+                    %>
+                    <option value="<%=h(autoComp.getName())%>"<%=selected(autoComp.getName().equals(form.selectAutoCompScript))%>><%=h(autoComp.getName())%></option><%
+                }
             %>
-            <option value="<%=h(autoComp.getName())%>"<%=selected(autoComp.getName().equals(form.selectAutoCompScript))%>><%=h(autoComp.getName())%></option><%
-        }
-    %>
-    </select>
+            </select>
+        </div>
+    </div>
 <% } %>
 
-    <p/>
-    <table width="100%">
-        <tr class="labkey-wp-header">
-            <th align="left">Analyze FCS Files Where:</th>
-        </tr>
-    </table>
-    Filters may optionally be applied to this analysis script.  The set of keyword and
-    value pairs <i>must all</i> match in the FCS header to be included in the analysis.
-    You can change the filter later by editing the script settings from the
-    analysis script start page.
-    <table>
-        <tr><th/><th>Keyword</th><th/><th>Value</th></tr>
-        <%
-        for (int i = 0; i < clauseCount; i++)
-        {
-            FieldKey field = null;
-            String op = null;
-            String value = null;
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Analyze FCS Files where
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>Filters may optionally be applied to this analysis script.  The set of keyword and
+            value pairs <i>must all</i> match in the FCS header to be included in the analysis.
+            You can change the filter later by editing the script settings from the
+            analysis script start page.</p>
+            <table class="lk-fields-table">
+                <tr>
+                    <td>&nbsp;</td>
+                    <td style="font-weight: bold;">Keyword</td>
+                    <td style="font-weight: bold;">Operator</td>
+                    <td style="font-weight: bold;">Value</td>
+                </tr>
+                <%
+                for (int i = 0; i < clauseCount; i++)
+                {
+                    FieldKey field = null;
+                    String op = null;
+                    String value = null;
 
-            if (i < form.ff_filter_field.length)
-            {
-                field = form.ff_filter_field[i];
-                op = form.ff_filter_op[i];
-                value = form.ff_filter_value[i];
-            }
+                    if (i < form.ff_filter_field.length)
+                    {
+                        field = form.ff_filter_field[i];
+                        op = form.ff_filter_op[i];
+                        value = form.ff_filter_value[i];
+                    }
 
-            if (!canEdit && field == null)
-                continue;
+                    if (!canEdit && field == null)
+                        continue;
 
-            %>
-            <tr>
-                <td><%= text(i == 0 ? "" : "and") %></td>
-            <% if (canEdit) { %>
-                <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
-                <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
-                <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
-            <% } else { %>
-                <td><%=h(fieldOptions.get(field))%></td>
-                <td><%=h(opOptions.get(op))%></td>
-                <td><%=h(value)%></td>
-            <% } %>
-            </tr>
-            <%
-        }
-        %>
-    </table>
+                    %>
+                    <tr>
+                        <td><%= text(i == 0 ? "" : "and") %></td>
+                    <% if (canEdit) { %>
+                        <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
+                        <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
+                        <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
+                    <% } else { %>
+                        <td><%=h(fieldOptions.get(field))%></td>
+                        <td><%=h(opOptions.get(op))%></td>
+                        <td><%=h(value)%></td>
+                    <% } %>
+                    </tr>
+                    <%
+                }
+                %>
+            </table>
+        </div>
+    </div>
 
-    <p/>
-    <table width="100%">
-        <tr class="labkey-wp-header">
-            <th align="left">Select Compensation:</th>
-        </tr>
-    </table>
-    For each parameter which requires compensation, specify the keyword name and value
-    which are to be used to identify the compensation control in experiment runs.
-    <p><b>If you do not see the keyword you are looking for:</b><br>
-    This page only allows you to choose keyword/value pairs that uniquely identify a
-    sample in the workspace.  If you do not see the keyword that you would like to use,
-    this might be because the workspace that you uploaded contained more than one sample
-    with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
-    a workspace containing only one set of compensation controls, and upload that new workspace.
-    </p>
-    <table class="labkey-data-region-legacy labkey-show-borders">
-        <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
-        <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
-        <%
-            int counter = 0;
-            for (int i = 0; i < form.parameters.length; i ++)
-            {
-                String parameter = form.parameters[i];
-        %>
-        <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i % 2 == 0)%>">
-            <td><%=h(parameter)%></td>
-            <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
-            <td><%=text(selectKeywordValues(Sign.positive, i))%></td>
-            <td><%=text(selectSubsets(Sign.positive, i))%></td>
-            <td><%=text(selectKeywordNames(Sign.negative, i))%></td>
-            <td><%=text(selectKeywordValues(Sign.negative, i))%></td>
-            <td>
-                <%=text(selectSubsets(Sign.negative, i))%>
-                <% if (i == 0) { %>
-                    <input type="button" value="Universal" onclick="universalNegative()">
-                <% } %>
-            </td>
-        </tr>
-        <%
-                counter++;
-            }
-        %>
-    </table>
-
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Select compensation
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>For each parameter which requires compensation, specify the keyword name and value
+            which are to be used to identify the compensation control in experiment runs.</p>
+            <p><b>If you do not see the keyword you are looking for:</b><br>
+            This page only allows you to choose keyword/value pairs that uniquely identify a
+            sample in the workspace.  If you do not see the keyword that you would like to use,
+            this might be because the workspace that you uploaded contained more than one sample
+            with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
+            a workspace containing only one set of compensation controls, and upload that new workspace.
+            </p>
+            <table class="labkey-data-region-legacy labkey-show-borders">
+                <tr><th rowspan="2">Channel</th><th colspan="3">Positive</th><th colspan="3">Negative</th></tr>
+                <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
+                <%
+                    for (int i = 0; i < form.parameters.length; i ++)
+                    {
+                        String parameter = form.parameters[i];
+                %>
+                <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i % 2 == 0)%>">
+                    <td><%=h(parameter)%></td>
+                    <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
+                    <td><%=text(selectKeywordValues(Sign.positive, i))%></td>
+                    <td><%=text(selectSubsets(Sign.positive, i))%></td>
+                    <td><%=text(selectKeywordNames(Sign.negative, i))%></td>
+                    <td><%=text(selectKeywordValues(Sign.negative, i))%></td>
+                    <td>
+                        <%=text(selectSubsets(Sign.negative, i))%>
+                        <% if (i == 0) { %>
+                            <input class="labkey-button" type="button" value="Universal" onclick="universalNegative()">
+                        <% } %>
+                    </td>
+                </tr>
+                <%
+                    }
+                %>
+            </table>
+        </div>
+    </div>
 <%
 String[] analysisNames = this.getGroupAnalysisDisplayNames();
 if (analysisNames.length > 0)
 {
 %>
-    <p/>
-    <table width="100%">
-        <tr class="labkey-wp-header">
-            <th align="left">Choose Source of Gating:</th>
-        </tr>
-    </table>
-    You can choose to use the gating from either the sample identified
-    by the unique keywork/value pair from the compensation
-    calculation above <i>or</i> from one of the named group's in the workspace.
-    <p>
-    By default, the sample's gating will be used.  However, if this is a
-    <b>workspace template</b>, you will most likely need to select a group name
-    from the drop down that has gating for the given subsets.
-    <br/>
-    <select name="selectGroupName" title="Use gating either from the sample or from a group">
-        <option value="" title="Use gating from the sample identified by the Keyword/Value pair">Sample</option>
-        <% for (String group : analysisNames)
-        { %>
-        <option value="<%=h(group)%>"<%=selected(group.equals(form.selectGroupName))%>>Group <%=h(group)%></option>
-        <% } %>
-    </select>
-    </p>
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Choose source of gating
+            </h3>
+        </div>
+        <div class="panel-body">
+            <p>You can choose to use the gating from either the sample identified
+            by the unique keywork/value pair from the compensation
+            calculation above <i>or</i> from one of the named group's in the workspace.</p>
+            <p>By default, the sample's gating will be used.  However, if this is a
+            <b>workspace template</b>, you will most likely need to select a group name
+            from the drop down that has gating for the given subsets.</p>
+            <select name="selectGroupName" title="Use gating either from the sample or from a group">
+                <option value="" title="Use gating from the sample identified by the Keyword/Value pair">Sample</option>
+                <% for (String group : analysisNames)
+                { %>
+                <option value="<%=h(group)%>"<%=selected(group.equals(form.selectGroupName))%>>Group <%=h(group)%></option>
+                <% } %>
+            </select>
+        </div>
+    </div>
 <% } %>
 
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
-    <input type="Submit" value="Submit">
+    <input class="labkey-button" type="Submit" value="Submit">
 </labkey:form>
 

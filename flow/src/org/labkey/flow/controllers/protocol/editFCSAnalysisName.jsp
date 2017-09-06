@@ -64,7 +64,7 @@
     <labkey:button text="Set names" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </labkey:form>
 <% } %>
-<hr>
+<br/>
 <labkey:form method="POST" action="<%=form.getProtocol().urlFor(ProtocolController.EditFCSAnalysisNameAction.class)%>">
     <p>Advanced users only:<br>You can also edit the expression that is used to build up the FCS analysis name.
         Use '\${' and '}' to denote substitutions.  Keyword names should be prefixed with 'Keyword'.

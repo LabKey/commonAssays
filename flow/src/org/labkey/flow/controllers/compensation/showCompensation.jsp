@@ -85,24 +85,24 @@
         </tr>
     <% } %>
 </table>
-
-<table class="labkey-data-region labkey-show-borders">
+<br/>
+<table class="labkey-data-region-legacy labkey-show-borders">
     <colgroup><% for (int i = 0; i < channelCount + 1; i ++)
         { %>
         <col>
         <% } %></colgroup>
-    <tr><td class="labkey-data-region-title">&nbsp;</td>
+    <tr><td class="labkey-column-header">&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <th class="labkey-col-header"><%=h(channelNames[iChannelValue])%></th>
+        <td class="labkey-column-header"><%=h(channelNames[iChannelValue])%></td>
         <% } %>
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
     {
         _HtmlString className = getShadeRowClass(0==(iChannel%2));
     %>
-    <tr>
-        <th class="labkey-row-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></th>
+    <tr class="labkey-row">
+        <td class="labkey-column-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
         %><td class="<%=className%>" style="text-align:right;"><%=text(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
@@ -155,22 +155,23 @@
                     }
             };
 %>
+<br/>
 <% include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);%>
 <% for (Callback callback : callbacks)
 { %>
-<p><%=h(callback.title)%></p>
-<table>
-    <tr><td>&nbsp;</td>
+<h4><%=h(callback.title)%></h4>
+<table class="labkey-data-region-legacy labkey-show-borders">
+    <tr><td class="labkey-column-header">&nbsp;</td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <td><%=h(channelNames[iChannelValue])%></td>
+        <td class="labkey-column-header"><%=h(channelNames[iChannelValue])%></td>
         <% } %>
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
     {
         FlowWell well = wellMap.get(channelNames[iChannel] + "+");
     %>
-    <tr>
+    <tr class="<%=h(iChannel % 2 == 0 ? "labkey-alternate-row" : "labkey-row")%>">
         <%if (well == null) { %>
         <td>N/A</td>
         <% } else { %>

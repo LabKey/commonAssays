@@ -38,7 +38,6 @@
     </tr>
     <tr><th>Keyword</th><th>Value</th><th>Subset</th><th>Keyword</th><th>Value</th><th>Subset</th></tr>
     <%
-        int counter = 0;
         for (int i = 0; i < form.parameters.length; i++)
         {
             String channel = form.parameters[i];
@@ -55,12 +54,12 @@
         <td><%=text(h(form.negativeSubset[i]))%></td>
     </tr>
     <%
-            counter++;
         }
     %>
 </table>
 <% } %>
 <% if (form.canEdit()) { %>
+    <br/>
     <p>
         This compensation calculation may be edited in a number of ways:<br>
         <labkey:link text="Upload a FlowJo workspace" href="<%=form.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>" /><br>

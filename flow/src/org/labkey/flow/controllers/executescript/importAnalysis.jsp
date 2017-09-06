@@ -48,7 +48,15 @@
         return a.length >= b.length && a.indexOf(b) == (a.length-b.length);
     }
 </script>
-<table border="0" style="border-collapse:collapse;" cellpadding="4">
+<style type="text/css">
+    .labkey-flow-import-steps {
+        border-collapse:collapse;
+    }
+    .labkey-flow-import-steps td {
+        padding: 4px;
+    }
+</style>
+<table class="labkey-flow-import-steps">
     <tr>
         <% for (AnalysisScriptController.ImportAnalysisStep step : AnalysisScriptController.ImportAnalysisStep.values())
         {
@@ -62,18 +70,9 @@
                 <%
             }
             %>
-            <td width="70" style="text-align:center;color:<%=text(futureStep ? "silver" : "black")%>" valign="top">
-                <span style="font-size:1.1em;font-family:<%=text(currentStep ? "Roboto-Bold":"Roboto")%>;"><%=step.getNumber()%></span><br/>
-                <span style="font-family:<%=text(currentStep ? "Roboto-Bold":"Roboto")%>"><%=h(step.getTitle())%></span>
-                <%--
-                <labkey:form name="step_<%=step.name()%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="step" value="<%=step.getNumber()-1%>">
-                    <a href="javascript:void" onclick="document.step_<%=step.name()%>.submit()" style="text-decoration:none;color:inherit;">
-                        <span style="font-size:2em;font-weight:<%=currentStep ? "bold":"normal"%>;<%=step.getNumber() == 0 ? "visibility:hidden;":""%>"><%=step.getNumber()%></span><br/>
-                        <span style="font-weight:<%=currentStep ? "bold":"normal"%>"><%=step.getTitle()%></span>
-                    </a>
-                </labkey:form>
-                --%>
+            <td width="70" style="text-align:center; opacity:<%=text(futureStep ? "0.6" : "1")%>" valign="top">
+                <span style="font-size:1.1em;font-weight:<%=text(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
+                <span style="font-weight:<%=text(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
             </td>
             <%
         }
@@ -107,10 +106,12 @@
     %>
 
 <% if (form.getWizardStep().getNumber() < AnalysisScriptController.ImportAnalysisStep.CONFIRM.getNumber()) { %>
-
+<p>
+    <%= button("Cancel").href(cancelUrl) %>
+    &nbsp;&nbsp;
     <%=generateBackButton()%>
     <%= button("Next").submit(true) %>
-    <%= button("Cancel").href(cancelUrl) %>
+</p>
 
     <%
         JspView<ImportAnalysisForm> view = null;
@@ -143,9 +144,12 @@
         include(view, out);
     %>
 
+<p>
+    <%= button("Cancel").href(cancelUrl) %>
+    &nbsp;&nbsp;
     <%=generateBackButton()%>
     <%= button("Next").submit(true) %>
-    <%= button("Cancel").href(cancelUrl) %>
+</p>
     
 <% } else { %>
     <%

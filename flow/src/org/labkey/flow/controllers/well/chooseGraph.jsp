@@ -111,7 +111,7 @@
 %>
 <form>
     <input type="hidden" name="wellId" value="<%=form.getWellId()%>">
-    <table>
+    <table class="lk-fields-table">
         <% if (hasScripts)
         {
         %>
@@ -154,7 +154,8 @@
     <input type="hidden" name="wellId" value="<%=form.getWellId()%>">
     <input type="hidden" name="scriptId" value="<%=form.getScriptId()%>">
     <input type="hidden" name="compId" value="<%=form.getCompId()%>">
-    <table><tr><th>Subset</th><th>X-Axis</th><th>Y-Axis</th></tr>
+    <table class="lk-fields-table">
+        <tr><th>Subset</th><th>X-Axis</th><th>Y-Axis</th></tr>
         <tr>
             <td><select name="subset">
                 <option value="">Ungated</option>
@@ -185,7 +186,7 @@
         </tr>
 
     </table>
-    <input type="submit" value="Show Graph">
+    <input class="labkey-button" type="submit" value="Show Graph">
 </form>
 <%
     if (form.getXaxis() != null)
@@ -218,5 +219,6 @@
 
 %>
 <script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
+<br/>
 <p><img src="<%=h(urlGenerateGraph)%>" onerror="flowImgError(this);"></p>
 <% } %>

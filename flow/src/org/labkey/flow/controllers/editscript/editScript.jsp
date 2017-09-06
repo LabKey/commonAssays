@@ -70,5 +70,5 @@
         });
     </script>
 <br>
-<input type="Submit" value="Submit">
+<input class="labkey-button" type="Submit" value="Submit">
 </labkey:form>

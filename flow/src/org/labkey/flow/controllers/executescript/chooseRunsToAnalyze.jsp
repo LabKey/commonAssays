@@ -65,7 +65,7 @@
 </style>
 <labkey:errors/>
 <labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
-    <table>
+    <table class="lk-fields-table">
         <tr><td>Analysis script to use:</td>
             <td><select name="scriptId" onchange="this.form.submit()">
                 <labkey:options value="<%=form.getProtocol().getScriptId()%>"
@@ -91,5 +91,6 @@
         </tr>
         <% } %>
     </table>
+    <br/>
     <%include(view, out);%>
 </labkey:form>

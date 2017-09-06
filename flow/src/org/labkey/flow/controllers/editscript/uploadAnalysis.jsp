@@ -78,7 +78,7 @@
     <% if (form._workspaceObject == null)
     { %>
     <p>Upload a new FlowJo workspace XML file<br>
-        <input type="file" name="workspaceFile">
+        <input type="file" name="workspaceFile" style="border: none; background-color: transparent;">
     </p>
 
     <p>Which statistics should be calculated?<br>
@@ -111,5 +111,5 @@
         <input type="hidden" name="ff_statisticSet" value="<%=h(statset)%>">
     <% }} %>
 
-    <input type="Submit" value="Submit"/>
+    <input class="labkey-button" type="Submit" value="Submit"/>
 </labkey:form>

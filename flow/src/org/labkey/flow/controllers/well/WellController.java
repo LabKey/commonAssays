@@ -374,11 +374,11 @@ public class WellController extends BaseFlowController
 
             URI fileURI = well.getFCSURI();
             if (fileURI == null)
-                return new HtmlView("<span class='error'>There is no file on disk for this well.</span>");
+                return new HtmlView("<span class='labkey-error'>There is no file on disk for this well.</span>");
 
             PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
             if (r == null)
-                return new HtmlView("<span class='error'>Pipeline not configured</span>");
+                return new HtmlView("<span class='labkey-error'>Pipeline not configured</span>");
 
             // UNDONE: PipeRoot should have wrapper for this
             //NOTE: we are specifically not inheriting policies from the parent container
@@ -387,7 +387,7 @@ public class WellController extends BaseFlowController
             //be checking a different (more specific) permission.
             SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
             if (!policy.hasPermission(getUser(), ReadPermission.class))
-                return new HtmlView("<span class='error'>You don't have permission to the FCS file.</span>");
+                return new HtmlView("<span class='labkey-error'>You don't have permission to the FCS file.</span>");
 
             boolean canRead = false;
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
@@ -397,7 +397,7 @@ public class WellController extends BaseFlowController
                 canRead = f != null && f.canRead();
             }
             if (!canRead)
-                return new HtmlView("<span class='error'>The original FCS file is no longer available or is not readable: " + PageFlowUtil.filter(rel.getPath()) + "</span>");
+                return new HtmlView("<span class='labkey-error'>The original FCS file is no longer available or is not readable: " + PageFlowUtil.filter(rel.getPath()) + "</span>");
 
             FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
             return new JspView(page);

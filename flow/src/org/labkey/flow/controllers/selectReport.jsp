@@ -45,7 +45,7 @@
     ReportIdentifier id = ((ReportsController.IdForm) HttpView.currentModel()).getReportId();
 
     Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
-    %><select onchange="Select_onChange(this.value)"><%
+    %><p><select onchange="Select_onChange(this.value)"><%
     for (FlowReport r : reports)
     {
         ReportDescriptor d = r.getDescriptor();
@@ -57,7 +57,8 @@
     <% if (canEdit && id != null) { %>
     <%= button("Edit").href(id.getReport(context).getEditReportURL(context)) %>
     <% } %>
-    
+    </p>
+
 <script type="text/javascript">
     function Select_onChange(url)
     {

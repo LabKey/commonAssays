@@ -35,6 +35,13 @@
     sizes.put("200", "Medium Graphs");
     sizes.put("150", "Small Graphs");
 %>
+<style type="text/css">
+    .labkey-graph-size {
+        display: inline-block;
+        cursor: pointer;
+    }
+</style>
+
 <script type="text/javascript">
 
     (function($) {
@@ -131,8 +138,11 @@
 
     })(jQuery);
 </script>
+
 <%
-    for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
-[<a class="<%=entry.getKey().equals(graphSize) ? "labkey-selected-link" : ""%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
+for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
+    <div class="labkey-graph-size">
+        [<a class="<%=entry.getKey().equals(graphSize) ? "labkey-selected-link" : ""%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
+    </div>
 <% } %>
 <img id="updateGraphSize" height="1" width="1" src="<%=getWebappURL("_.gif")%>">

@@ -72,7 +72,7 @@ table.reports td {
 }
 </style>
 
-<table class='reports'>
+<table class='reports lk-fields-table'>
 <%
     for (List<FlowReport> rs : reportsByType.values())
     {

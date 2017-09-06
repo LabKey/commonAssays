@@ -119,11 +119,11 @@
         <%=checked(normalizationEnabled && form.isrEngineNormalization())%>
         <%=disabled(!normalizationEnabled)%> >
     <input type="hidden" name="<%=text(SpringActionController.FIELD_MARKER)%>rEngineNormalization"/>
-    <label for="rEngineNormalization">Perform normalization using flowWorkspace R library? (experimental)</label>
+    Perform normalization using flowWorkspace R library? (experimental)
 </div>
 
 <div style="padding-left: 2em; padding-bottom: 1em;">
-    <label for="rEngineNormalizationReference">Select sample to be use as normalization reference.</label><br>
+    Select sample to be use as normalization reference.<br>
     <em>NOTE:</em> The list of available samples is restricted to those selected in a previous step.<br>
     <select name="rEngineNormalizationReference" id="rEngineNormalizationReference"
         <%=disabled(!normalizationEnabled)%> onchange="onNormalizationReferenceChanged(this.value);" >
@@ -179,7 +179,7 @@
             }
         }
     %>
-    <label for="rEngineNormalizationSubsets">Select subsets to be normalized.  At least one subset must be selected.</label><br>
+    Select subsets to be normalized.  At least one subset must be selected.<br>
     <em>NOTE:</em> The list of available subsets is restricted to those in the reference sample and excludes boolean subsets.<br>
     <div id="rEngineNormalizationSubsetsDiv"></div>
     <script>
@@ -224,7 +224,7 @@
             }
         }
     %>
-    <label for="rEngineNormalizationParameters">Select the compensated parameters to be normalized.  At least one parameter must be selected.</label>
+    Select the compensated parameters to be normalized.  At least one parameter must be selected.
     <div id="rEngineNormalizationParametersDiv"></div>
     <script>
         LABKEY.requiresScript('Ext.ux.form.LovCombo.js');

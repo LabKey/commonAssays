@@ -167,8 +167,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseExistingAnalysis" name="createAnalysis" value="false" checked>
             </td>
             <td>
-                <label for="chooseExistingAnalysis">Choose an analysis folder to put the results into:</label>
-                <br>
+                Choose an analysis folder to put the results into:<br>
                 <select name="existingAnalysisId" onfocus="document.forms.importAnalysis.chooseExistingAnalysis.checked = true;">
                     <%
                         FlowExperiment recentAnalysis = FlowExperiment.getMostRecentAnalysis(container);
@@ -199,8 +198,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseNewAnalysis" name="createAnalysis" value="true">
             </td>
             <td>
-                <label for="chooseNewAnalysis">Create a new analysis folder:</label>
-                <br>
+                Create a new analysis folder:<br>
                 <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>" onfocus="document.forms.importAnalysis.chooseNewAnalysis.checked = true;">
                 <br><br>
             </td>
@@ -237,7 +235,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
         <br>
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <br>
-            <label for="targetStudy">Choose a target study folder:</label><br>
+            Choose a target study folder:<br>
             <select id="targetStudy" name="targetStudy">
                 <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
             </select>
