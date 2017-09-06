@@ -24,7 +24,7 @@
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
 <labkey:form method="post" action="<%=h(buildURL(MS2Controller.SaveViewAction.class))%>" className="labkey-data-region">
-    <table>
+    <table class="lk-fields-table">
         <tr>
             <td>Name:</td>
             <td>
@@ -40,7 +40,10 @@ if (bean.canShare)
         </tr><%
 } %>
         <tr>
-            <td colspan=2><%= button("Save View").submit(true) %><%= button("Cancel").href(bean.returnURL) %></td>
+            <td colspan=2>
+                <%= button("Save View").submit(true) %>
+                <%= button("Cancel").href(bean.returnURL) %>
+            </td>
         </tr>
     </table>
 </labkey:form>

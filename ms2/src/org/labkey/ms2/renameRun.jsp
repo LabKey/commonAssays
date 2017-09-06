@@ -26,13 +26,16 @@
 <labkey:form action="<%=h(buildURL(MS2Controller.RenameRunAction.class))%>" method="post">
 <%=generateReturnUrlFormField(bean.returnURL)%>
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
-<table class="labkey-data-region">
+<table class="lk-fields-table">
     <tr>
         <td class='labkey-form-label'>Description:</td>
         <td><input type="text" size="70" name="description" id="description" value="<%=h(bean.description)%>"/></td>
     </tr>
     <tr>
-        <td colspan="2" style="padding-top: 10px;"><%= button("Rename").submit(true) %><%= button("Cancel").href(bean.returnURL) %></td>
+        <td colspan="2" style="padding-top: 10px;">
+            <%= button("Rename").submit(true) %>
+            <%= button("Cancel").href(bean.returnURL) %>
+        </td>
     </tr>
 </table>
 </labkey:form>

@@ -33,12 +33,24 @@
 <table>
 <tr>
     <td><img src="<%=h(sensitivityURL)%>" alt="Sensitivity Plot"></td>
-    <td><table class="labkey-data-region" border="1">
-        <tr><td><b>Minimum probability</b></td><td><b>Sensitivity</b></td><td><b>Error rate</b></td></tr>
+    <td>
+        <table class="labkey-data-region-legacy labkey-show-borders">
+            <tr>
+                <td class="labkey-column-header">Minimum probability</td>
+                <td class="labkey-column-header">Sensitivity</td>
+                <td class="labkey-column-header">Error rate</td>
+            </tr>
 <%
     for (int i = 0; i < sensitivity.length; i++)
-        out.print("<tr><td>" + df2.format(minProb[i]) + "</td><td>" + df4.format(sensitivity[i]) + "</td><td>" + df4.format(error[i]) + "</td></tr>");
+    {
+        out.print("<tr class=\"" + (getShadeRowClass(i % 2 == 0)) + "\">");
+        out.print("<td align=\"right\">" + df2.format(minProb[i]) + "</td>");
+        out.print("<td align=\"right\">" + df4.format(sensitivity[i]) + "</td>");
+        out.print("<td align=\"right\">" + df4.format(error[i]) + "</td>");
+        out.print("</tr>");
+    }
 %>
-    </table></td>
+        </table>
+    </td>
 </tr>
 </table>

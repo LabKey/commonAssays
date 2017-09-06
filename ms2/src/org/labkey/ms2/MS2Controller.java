@@ -4313,7 +4313,7 @@ public class MS2Controller extends SpringActionController
             {
                 fastaNames.add(ProteinManager.getFastaFile(i).getFilename());
             }
-            HttpView summary = new HtmlView("<table><tr><td><span class=\"navPageHeader\">All protein sequences in FASTA file" + (run.getFastaIds().length > 1 ? "s" : "") + " " + StringUtils.join(fastaNames, ", ") + " that contain the peptide " + peptide + "</span></td></tr></table>");
+            HttpView summary = new HtmlView("<p><span class=\"navPageHeader\">All protein sequences in FASTA file" + (run.getFastaIds().length > 1 ? "s" : "") + " " + StringUtils.join(fastaNames, ", ") + " that contain the peptide " + peptide + "</span></p>");
             return new VBox(summary, view);
         }
 

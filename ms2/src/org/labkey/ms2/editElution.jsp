@@ -36,174 +36,177 @@
 <labkey:errors />
 <labkey:form name="elutionForm" method="post">
 
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr class="labkey-wp-header">
-        <th class="labkey-wp-title-left" colspan="2" align="center">Peptide Summary</th>
-        <th class="labkey-wp-title-right">&nbsp;</th>
-    </tr>
-    <tr>
-        <td>
-           <table>
-               <tr>
-                   <td class="labkey-form-label">Sequence</td>
-                   <td><%=h(p.getPeptide())%></td>
-               </tr>
-               <tr>
-                   <td class="labkey-form-label">Charge</td>
-                   <td>+<%=h(p.getCharge())%></td>
-               </tr>
-               <tr>
-                   <td class="labkey-form-label">Scan</td>
-                   <td>+<%=h(p.getScan())%></td>
-               </tr>
-               <tr>
-                   <td class="labkey-form-label">Light to heavy ratio</td>
-                   <td><strong><div id="ratio"><%= quant.getRatio() %></div></strong></td>
-               </tr>
-               <tr>
-                   <td class="labkey-form-label">Heavy to light ratio</td>
-                   <td><strong><div id="heavy2LightRatio"><%= quant.getHeavy2LightRatio() %></div></strong></td>
-               </tr>
-               <tr>
-                   <td class="labkey-form-label">Decimal ratio</td>
-                   <td><strong><div id="decimalRatio"><%= decimalRatioFormat.format(quant.getDecimalRatio()) %></div></strong></td>
-               </tr>
-               <tr>
-                   <td/>
-                   <td>
-                       <labkey:button text="Save Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
-                   </td>
-               </tr>
-           </table>
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <h3 class="panel-title pull-left">
+            Peptide Summary
+        </h3>
+    </div>
+    <div class="panel-body">
+       <table class="lk-fields-table">
+           <tr>
+               <td class="labkey-form-label">Sequence</td>
+               <td><%=h(p.getPeptide())%></td>
+           </tr>
+           <tr>
+               <td class="labkey-form-label">Charge</td>
+               <td>+<%=h(p.getCharge())%></td>
+           </tr>
+           <tr>
+               <td class="labkey-form-label">Scan</td>
+               <td>+<%=h(p.getScan())%></td>
+           </tr>
+           <tr>
+               <td class="labkey-form-label">Light to heavy ratio</td>
+               <td><strong><div id="ratio"><%= quant.getRatio() %></div></strong></td>
+           </tr>
+           <tr>
+               <td class="labkey-form-label">Heavy to light ratio</td>
+               <td><strong><div id="heavy2LightRatio"><%= quant.getHeavy2LightRatio() %></div></strong></td>
+           </tr>
+           <tr>
+               <td class="labkey-form-label">Decimal ratio</td>
+               <td><strong><div id="decimalRatio"><%= decimalRatioFormat.format(quant.getDecimalRatio()) %></div></strong></td>
+           </tr>
+           <tr>
+               <td/>
+               <td>
+                   <labkey:button text="Save Profiles" onclick="var valuesOK = (document.elutionForm.lightFirstScan.value <= document.elutionForm.lightLastScan.value && document.elutionForm.heavyFirstScan.value <= document.elutionForm.heavyLastScan.value); if (!valuesOK) { alert('The first scan must come before the last scan.'); } return valuesOK;" />
+               </td>
+           </tr>
+       </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <h3 class="panel-title pull-left">
+            Light Elution Profile
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td>
+                <table class="lk-fields-table">
+                    <tr>
+                        <td>Selected area:</td>
+                        <td><div id="lightArea"><%= format.format(quant.getLightArea()) %></div></td>
+                    </tr>
+                    <tr>
+                        <td>Scans:</td>
+                        <td>
+                            <input type="text" onkeyup="updateRange('light');" name="lightFirstScan" value="<%= quant.getLightFirstScan() %>" size="4"/> -
+                            <input type="text" onkeyup="updateRange('light');" name="lightLastScan" value="<%= quant.getLightLastScan() %>" size="4"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Click to set:</td>
+                        <td>
+                            <input type="radio" name="lightBoundary" value="first" checked/>First scan
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input type="radio" name="lightBoundary" value="last"/>Last scan<br/>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td height="250" valign="bottom">
+        <%
+        for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
+        {
+            if (ctx.getLightValue(i) != null)
+            {
+                if (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan())
+                {
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                }
+                else
+                {
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                }
+            }
+            else
+            {
+                %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
+            }
+        }
+        %>
         </td>
-    </tr>
-</table>
-
-<p/>
-
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr class="labkey-wp-header">
-        <th class="labkey-wp-title-left" colspan="2" align="center">Light Elution Profile</th>
-        <th class="labkey-wp-title-right">&nbsp;</th>
-    </tr>
-    <tr><td><br/></td></tr>
-<tr>
-    <td>
-        <table>
-            <tr>
-                <td>Selected area:</td>
-                <td><div id="lightArea"><%= format.format(quant.getLightArea()) %></div></td>
-            </tr>
-            <tr>
-                <td>Scans:</td>
-                <td>
-                    <input type="text" onkeyup="updateRange('light');" name="lightFirstScan" value="<%= quant.getLightFirstScan() %>" size="4"/> -
-                    <input type="text" onkeyup="updateRange('light');" name="lightLastScan" value="<%= quant.getLightLastScan() %>" size="4"/>
-                </td>
-            </tr>
-            <tr>
-                <td>Click to set:</td>
-                <td>
-                    <input type="radio" name="lightBoundary" value="first" checked/>First scan
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <input type="radio" name="lightBoundary" value="last"/>Last scan<br/>
-                </td>
-            </tr>
+            <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxLightIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
+        </tr>
+        <tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    </td>
-    <td height="250" valign="bottom">
-<%
-for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
-{
-    if (ctx.getLightValue(i) != null)
-    {
-        if (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan())
-        {
-            %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-        }
-        else
-        {
-            %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-        }
-    }
-    else
-    {
-        %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
-    }
-}
-%>
-</td>
-    <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxLightIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
-</tr>
-<tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
-</table>
+    </div>
+</div>
 
-    <p/>
-
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr class="labkey-wp-header">
-        <th class="labkey-wp-title-left" colspan="2" align="center">Heavy Elution Profile</th>
-        <th class="labkey-wp-title-right">&nbsp;</th>
-    </tr>
-    <tr><td><br/></td></tr>
-    <tr>
-    <td>
-        <table>
+<div class="panel panel-default">
+    <div class="panel-heading clearfix">
+        <h3 class="panel-title pull-left">
+            Heavy Elution Profile
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tr>
-                <td>Selected area:</td>
-                <td><div id="heavyArea"><%= format.format(quant.getHeavyArea()) %></div></td>
-            </tr>
-            <tr>
-                <td>Scans:</td>
-                <td>
-                    <input type="text" onkeyup="updateRange('heavy');" name="heavyFirstScan" value="<%= quant.getHeavyFirstScan() %>" size="4"/> -
-                    <input type="text" onkeyup="updateRange('heavy');" name="heavyLastScan" value="<%= quant.getHeavyLastScan() %>" size="4"/>
-                </td>
-            </tr>
-            <tr>
-                <td>Click to set:</td>
-                <td>
-                    <input type="radio" name="heavyBoundary" value="first" checked/>First scan
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>
-                    <input type="radio" name="heavyBoundary" value="last"/>Last scan<br/>
-                </td>
-            </tr>
+            <td>
+                <table class="lk-fields-table">
+                    <tr>
+                        <td>Selected area:</td>
+                        <td><div id="heavyArea"><%= format.format(quant.getHeavyArea()) %></div></td>
+                    </tr>
+                    <tr>
+                        <td>Scans:</td>
+                        <td>
+                            <input type="text" onkeyup="updateRange('heavy');" name="heavyFirstScan" value="<%= quant.getHeavyFirstScan() %>" size="4"/> -
+                            <input type="text" onkeyup="updateRange('heavy');" name="heavyLastScan" value="<%= quant.getHeavyLastScan() %>" size="4"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Click to set:</td>
+                        <td>
+                            <input type="radio" name="heavyBoundary" value="first" checked/>First scan
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input type="radio" name="heavyBoundary" value="last"/>Last scan<br/>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td height="250" valign="bottom">
+        <%
+        for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
+        {
+            if (ctx.getHeavyValue(i) != null)
+            {
+                if (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan())
+                {
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                }
+                else
+                {
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                }
+            }
+            else
+            {
+                %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
+            }
+        }
+        %>
+        </td>
+        <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxHeavyIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
+        </tr>
+        <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    </td>
-    <td height="250" valign="bottom">
-<%
-for (int i = quant.getMinDisplayScan(); i <= quant.getMaxDisplayScan(); i++)
-{
-    if (ctx.getHeavyValue(i) != null)
-    {
-        if (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan())
-        {
-            %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-        }
-        else
-        {
-            %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-        }
-    }
-    else
-    {
-        %><img src="<%=getWebappURL("_.gif")%>" height="0" width="5" class="labkey-bordered" alt="Scan <%= i %>"/><%
-    }
-}
-%>
-</td>
-<td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxHeavyIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
-</tr>
-<tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
-</table>
+    </div>
+</div>
 
 </labkey:form>
 

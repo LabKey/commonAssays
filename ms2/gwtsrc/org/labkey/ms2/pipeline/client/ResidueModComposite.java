@@ -105,7 +105,9 @@ public abstract class ResidueModComposite extends SearchFormComposite
         staticPanel.add(deleteStaticButton);
         dynamicPanel.add(dynamicListBox);
         dynamicPanel.add(deleteDynamicButton);
+        staticFlexTable.setStylePrimaryName("lk-fields-table");
         modTabPanel.add(staticFlexTable, "Fixed");
+        dynamicFlexTable.setStylePrimaryName("lk-fields-table");
         modTabPanel.add(dynamicFlexTable, "Variable");
         modTabPanel.selectTab(0);
         readOnlyPanel.add(staticReadOnlyLabel);
@@ -360,6 +362,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             loadResidues(residues);
             dialog.setText("Create new residue modification");
             FlexTable table = new FlexTable();
+            table.setStylePrimaryName("lk-fields-table");
             table.setWidget(0, 0, new Label("Residue"));
             table.setWidget(0, 1, residues);
             table.setWidget(1, 0, new Label("Weight"));

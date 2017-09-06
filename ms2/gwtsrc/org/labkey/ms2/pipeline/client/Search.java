@@ -366,6 +366,7 @@ public class Search implements EntryPoint
         inputs.add(otherParametersComposite);
 
         int row = 0;
+        formGrid.setStylePrimaryName("lk-fields-table");
         formGrid.setWidget(row, 0, protocolComposite.getLabel());
         formGrid.setWidget(row++, 1, protocolComposite);
         formGrid.setWidget(row, 0, searchEngineLabel);

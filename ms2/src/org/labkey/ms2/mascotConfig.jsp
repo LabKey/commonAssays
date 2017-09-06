@@ -63,11 +63,7 @@
 
 <labkey:form name="preferences" enctype="multipart/form-data" method="post">
     <input type="hidden" name="reset" value="false" id="resetInput" />
-    <table>
-        <tr>
-            <th></th>
-            <th></th>
-        </tr>
+    <table class="lk-fields-table">
         <tr>
             <td colspan=2>Configure Mascot settings (<%=text(new HelpTopic("configMascot").getSimpleLinkHtml("more info..."))%>)</td>
         </tr> <%

@@ -39,8 +39,14 @@
     MS2Fraction fraction = MS2Manager.getFraction(p.getFraction());
     org.labkey.ms2.MS2Run run = ctx.run;
 %>
+<style type="text/css">
+    .lk-show-peptide-table td {
+        padding: 4px 0;
+    }
+</style>
+
 <!--OUTER-->
-<table cellspacing="8px">
+<table class="lk-show-peptide-table">
 
 <!--FIRST ROW-->
 <tr><td colspan="2" valign=top width="850px">
@@ -70,7 +76,7 @@
 
     <tr>
         <td>
-            <table width="100%">
+            <table  class="lk-fields-table">
                 <tr>
                     <td class="labkey-form-label" width="85px">Scan</td><td width="95px"><%=p.getScan()%></td>
                     <td class="labkey-form-label" width="110px">Delta Mass</td><td width="95px"><%= h(Formats.signf4.format(p.getDeltaMass())) %></td>
@@ -111,7 +117,7 @@
             {
 %>
             <br/>
-            <table>
+            <table class="lk-fields-table">
                 <tr>
                     <td class="labkey-form-label">iTRAQ/TMT Channel</td>
                     <td class="labkey-form-label">Target Mass</td>

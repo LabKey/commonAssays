@@ -31,7 +31,7 @@
     Format intFormat = Formats.commaf0;
     Format percentFormat = Formats.percent;
 %>
-<table>
+<table class="lk-fields-table">
     <% if (bean.run != null) { %>
         <tr><td class="labkey-form-label">Run</td><td><%= h(bean.run.getDescription()) %></td></tr>
     <% } %>

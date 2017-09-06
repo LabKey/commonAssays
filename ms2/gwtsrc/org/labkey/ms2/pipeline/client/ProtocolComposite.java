@@ -55,6 +55,7 @@ public class ProtocolComposite extends SearchFormComposite
         textBoxLabel = new Label("Name");
         descriptionLabel = new Label("Description");
 
+        instance.setStylePrimaryName("lk-fields-table");
         instance.setWidget(0,0,protocolListBox);
         instance.getFlexCellFormatter().setColSpan(0,0,2);
 

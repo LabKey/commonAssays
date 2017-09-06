@@ -32,16 +32,18 @@
             <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
         <% } %>
     </p>
-    <table class="labkey-data-region" border="1">
+    <table class="labkey-data-region-legacy labkey-show-borders">
         <tr>
-            <td><strong>Use as Default</strong></td><td><strong>Delete</strong></td><td><strong>View Name</strong></td>
+            <td class="labkey-column-header">Use as Default</td>
+            <td class="labkey-column-header">Delete</td>
+            <td class="labkey-column-header">View Name</td>
         </tr>
         <%
         // Use TreeSet to sort by name
         TreeSet<String> names = new TreeSet<>(bean.getViews().keySet());
         for (String name : names)
         { %>
-            <tr>
+            <tr class="labkey-row">
                 <td>
                     <input <% if (name.equals(bean.getViewName())) { %>checked <% } %> type="radio" name="defaultViewName" value="<%=h(name) %>" />
                 </td>
@@ -52,7 +54,17 @@
                     <%=h(name) %>
                 </td>
             </tr>
-        <% } %>
+        <%
+        }
+
+        if (names.isEmpty())
+        { %>
+            <tr class="labkey-row">
+                <td colspan="3"><em>No data to show</em></td>
+            </tr>
+        <%
+        }
+        %>
     </table><br/>
     <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnURL()) %>
 </labkey:form>

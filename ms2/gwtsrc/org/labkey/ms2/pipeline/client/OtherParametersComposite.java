@@ -105,6 +105,7 @@ public class OtherParametersComposite extends SearchFormComposite
         DOM.setStyleAttribute(_newParameterNameTextBox.getElement(), "color", "grey");
         _newParameterNameTextBox.setWidth("20em");
 
+        _table.setStylePrimaryName("lk-fields-table");
         _table.setCellPadding(1);
         initWidget(_table);
     }

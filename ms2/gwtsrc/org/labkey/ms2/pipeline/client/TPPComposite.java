@@ -60,6 +60,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         HorizontalPanel minPepPropLabel = new HorizontalPanel();
         minPepPropLabel.add(new Label("Minimum PeptideProphet prob"));
         minPepPropLabel.add(new HelpPopup("Minimum PeptideProphet prob", "The minimum value for a peptide's probability, as determined by <a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:PeptideProphet\" target=\"_blank\">PeptideProphet</a>, to be retained in the analysis results. Values should be between 0 and 1, inclusive."));
+        _instance.setStylePrimaryName("lk-fields-table");
         _instance.setWidget(row, 0, minPepPropLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _peptideProphetTextBox.setVisibleLength(4);
