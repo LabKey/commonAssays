@@ -72,12 +72,12 @@ public class SetAnalyteDefaultValuesPage
 
     public List<AnalyteDefault> getAnalyteDefaults()
     {
-        List<WebElement> defaultValueRows = Locator.id("defaultValues").append(Locator.xpath("/tbody/tr").withPredicate("preceding-sibling::tr")).findElements(_test.getDriver());
+        List<WebElement> defaultValueRows = Locator.id("defaultValues").append(Locator.tag("tr").withAttribute("id")).findElements(_test.getDriver());
         List<AnalyteDefault> defaultValues = new ArrayList<>();
 
         for (WebElement row : defaultValueRows)
         {
-            String analyteName = Locator.name("analytes").waitForElement(row, WebDriverWrapper.WAIT_FOR_JAVASCRIPT).getAttribute("value");
+            String analyteName = Locator.name("analytes").findElement(row).getAttribute("value");
             String positivityThresholdValue = Locator.name("positivityThresholds").findElement(row).getAttribute("value");
             String negativeBead = Locator.name("negativeBeads").findElement(row).getAttribute("value");
 
