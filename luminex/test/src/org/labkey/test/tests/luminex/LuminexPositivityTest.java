@@ -15,11 +15,13 @@
  */
 package org.labkey.test.tests.luminex;
 
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.AssayDesignerPage;
@@ -75,6 +77,7 @@ public final class LuminexPositivityTest extends LuminexTest
     @Test
     public void testPositivity()
     {
+        Assume.assumeTrue("Skipping test on SQL Server: TODO 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
         setupResultsDefaultView();
         test3xFoldChange();
         test5xFoldChange();
