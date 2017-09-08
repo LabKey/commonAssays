@@ -49,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Handles parsing of .dat files and inserting into the database.
  * Created by susanh on 10/22/15.
  */
 public class MascotDatLoader extends MS2Loader implements AutoCloseable
@@ -153,6 +154,12 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     // decoded to:
     // Spectrum270258 scans:6721,
     public static final Pattern SPECTRUM_SCANS_REGEX = Pattern.compile(".*\\s+scans:(\\d+).*");
+
+    // the title line may also look like this:
+    // title=Description%2e4276%2e4276%2e2%20File%3a%22Description%2eraw%22%2c%20NativeID%3a%22controllerType%3d0%20controllerNumber%3d1%20scan%3d4276%22
+    // decoded to:
+    // Description.4276.4276.2 File:"Description.raw", NativeID:"controllerType=0 controllerNumber=1 scan=4276"
+    public static final Pattern SPECTRUM_SCAN_REGEX = Pattern.compile(".*\\s+scan=(\\d+).*");
     public static final int START_SCAN_GROUP_NUM = 1;
     public static final int END_SCAN_GROUP_NUM = 2;
     @SuppressWarnings({"UnusedDeclaration"})
@@ -609,8 +616,8 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         return peptide;
     }
 
-    @Nullable
     /** @return start and end scan numbers for the current query section */
+    @Nullable
     private Pair<Integer, Integer> getScanInfo() throws UnsupportedEncodingException
     {
         if (_currentLine.startsWith(QUERY_TITLE_PREFIX))
@@ -628,6 +635,15 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 {
                     int scan = Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM));
                     return new Pair<>(scan, scan);
+                }
+                else
+                {
+                    matcher = SPECTRUM_SCAN_REGEX.matcher(title);
+                    if (matcher.find())
+                    {
+                        int scan = Integer.parseInt(matcher.group(START_SCAN_GROUP_NUM));
+                        return new Pair<>(scan, scan);
+                    }
                 }
             }
         }

@@ -33,9 +33,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Drives the higher-level workflow of parsing .dat files, but defers most of the actual work of reading the lines and
+ * stashing the results into the DB.
  * User: adam
  * Date: Jul 23, 2007
- * Time: 11:06:32 AM
  */
 public class MascotDatImporter extends PeptideImporter
 {
