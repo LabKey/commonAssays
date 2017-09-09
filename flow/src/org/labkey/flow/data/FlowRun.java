@@ -493,18 +493,6 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     }
 
     @Override
-    public String getDownloadURL(ViewContext context, String name)
-    {
-        return null;
-    }
-
-    @Override
-    public SecurityPolicy getSecurityPolicy()
-    {
-        return null;
-    }
-
-    @Override
     public @NotNull AttachmentType getAttachmentType()
     {
         return AttachmentType.UNKNOWN;
