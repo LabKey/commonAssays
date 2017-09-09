@@ -228,7 +228,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             }
             if (!fileWorkDAT.exists())
             {
-                throw new IOException("Did not get excepted results file from Mascot: " + fileWorkDAT);
+                throw new IOException("Did not get expected results file from Mascot: " + fileWorkDAT);
             }
 
             getJob().header("Sequence Database Synchronization output");
