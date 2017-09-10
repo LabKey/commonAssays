@@ -30,7 +30,15 @@
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("TargetedMS/lorikeet");
+    }
+%>
 <%
     JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
     ShowPeptideContext ctx = me.getModelBean();
@@ -40,6 +48,9 @@
     org.labkey.ms2.MS2Run run = ctx.run;
 %>
 <style type="text/css">
+    /*Hide the redundant peptide sequence info*/
+    div#seqinfo { display: none; }
+
     .lk-show-peptide-table td {
         padding: 4px 0;
     }
@@ -73,10 +84,9 @@
 %>
 
     </td></tr>
-
     <tr>
         <td>
-            <table  class="lk-fields-table">
+            <table class="lk-fields-table">
                 <tr>
                     <td class="labkey-form-label" width="85px">Scan</td><td width="95px"><%=p.getScan()%></td>
                     <td class="labkey-form-label" width="110px">Delta Mass</td><td width="95px"><%= h(Formats.signf4.format(p.getDeltaMass())) %></td>
@@ -219,45 +229,24 @@ float[] intensities = p.getSpectrumIntensity();
 if (mzs != null && intensities != null && mzs.length == intensities.length && mzs.length > 0)
 {
 %>
-
-<!--[if IE]><script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="<%=getContextPath()%>/MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"></script>
-
-
 <!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
 <div id="lorikeet"></div>
-
-
 <script type="text/javascript">
 
-LABKEY.requiresCss("MS2/lorikeet_0.3/css/lorikeet.css");
-
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/jquery.flot.js");
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/jquery.flot.selection.js");
-
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/specview.js");
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/peptide.js");
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/aminoacid.js");
-LABKEY.requiresScript("MS2/lorikeet_0.3/js/ion.js");
-
-$(document).ready(function () {
-
-    /* render the spectrum with the given options */
-    $("#lorikeet").specview({sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
-                                precursorMz: 1,
-                                staticMods: staticMods,
-                                variableMods: varMods,
-                                width: 600,
-                                // Pretend to be one charge state higher so that the viewer shows the right number of y/b charge ions
-                                charge: <%= p.getCharge() + 1 %>,
-//								ntermMod: ntermMod,
-                                //ctermMod: ctermMod,
-                                peaks: peaks,
-                                extraPeakSeries: extraPeakSeries
-                                });
-
-});
+    $(function() {
+        /* render the spectrum with the given options */
+        $("#lorikeet").specview({
+            sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
+            precursorMz: 1,
+            staticMods: staticMods,
+            variableMods: varMods,
+            width: 600,
+            // Pretend to be one charge state higher so that the viewer shows the right number of y/b charge ions
+            charge: <%= p.getCharge() + 1 %>,
+            peaks: peaks,
+            extraPeakSeries: extraPeakSeries
+        });
+    });
 
 var staticMods = [];
 <%
@@ -334,9 +323,3 @@ for (Map.Entry<String,java.util.List<Pair<Float,Float>>> customHit : customHits.
 </script>
 <% }
 else { %> Spectra not available.<% }%>
-
-
-<style type="text/css">
-    /*Hide the redundant peptide sequence info*/
-    div#seqinfo { display: none; }
-</style>
