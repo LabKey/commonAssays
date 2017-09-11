@@ -1419,6 +1419,7 @@ ms2/test/src/org/labkey/test/utils/ms2/Ms2DataRegionExportHelper.java -text
 ms2/webapp/MS2/externalData/ProtSprotOrgMap.txt -text
 ms2/webapp/MS2/images/runIcon.gif -text
 ms2/webapp/MS2/inlineViewDesigner.js -text
+ms2/webapp/MS2/lorikeet.lib.xml -text
 ms2/webapp/MS2/lorikeet_0.3/README -text
 ms2/webapp/MS2/lorikeet_0.3/css/lorikeet.css -text
 ms2/webapp/MS2/lorikeet_0.3/images/lorikeet/header_lorikeet.png -text
