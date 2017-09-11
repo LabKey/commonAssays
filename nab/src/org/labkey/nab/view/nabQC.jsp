@@ -47,7 +47,8 @@
     {
         runProperties.add(PageFlowUtil.map(
                 "name", String.valueOf(entry.getKey()),
-                "value", String.valueOf(entry.getValue())));
+                "value", PageFlowUtil.filter(String.valueOf(entry.getValue()))
+        ));
     }
 
     // control properties
