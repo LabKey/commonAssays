@@ -37,6 +37,12 @@
     String renderId = "plate-summary-div-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
 %>
 
+<style type="text/css">
+    div.panel-portal {
+        margin-top: 20px;
+    }
+</style>
+
 <script type="text/javascript">
 
     Ext4.onReady(function(){
