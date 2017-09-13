@@ -206,9 +206,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
     private DataRegion getPeptideGridForDisplay(String columnNames)
     {
         DataRegion rgn = getPeptideGrid(columnNames, _maxPeptideRows, _offset);
-
         rgn.setShowRecordSelectors(true);
-        rgn.setFixedWidthColumns(true);
 
         setPeptideUrls(rgn, null);
 

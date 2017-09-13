@@ -94,7 +94,6 @@ public abstract class AbstractLegacyProteinMS2RunView extends AbstractMS2RunView
         rgn.setShowPagination(false);
 
         rgn.setShowRecordSelectors(false);
-        rgn.setFixedWidthColumns(true);
 
         ActionURL showUrl = _url.clone();
         String seqId = showUrl.getParameter("seqId");

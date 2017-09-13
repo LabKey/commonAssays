@@ -2782,7 +2782,6 @@ public class MS2Controller extends SpringActionController
             rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
             String runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot()) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
             rgn.getDisplayColumn("Runs").setURL(runsURL);
-            rgn.setFixedWidthColumns(false);
             rgn.setShowRecordSelectors(true);
 
             GridView result = new GridView(rgn, (BindException)null);

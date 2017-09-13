@@ -379,7 +379,6 @@ public abstract class CompareQuery extends SQLFragment
         }
 
         rgn.addColumns(ti.getColumns("RunCount, Pattern"));
-        rgn.setFixedWidthColumns(false);
         rgn.setShowFilters(false);
 
         ButtonBar bb = new ButtonBar();
