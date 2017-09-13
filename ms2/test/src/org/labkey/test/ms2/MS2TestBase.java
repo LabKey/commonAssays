@@ -165,12 +165,6 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     protected void navigateToFolder(String folderName)
     {
-        if (IS_BOOTSTRAP_LAYOUT)
-            new ProjectMenu(getDriver()).navigateToFolder(getProjectName(), folderName);
-        else
-        {
-            clickProject(getProjectName());
-            clickFolder(folderName);
-        }
+        navigateToFolder(getProjectName(), folderName);
     }
 }
