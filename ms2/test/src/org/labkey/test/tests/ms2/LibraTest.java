@@ -15,7 +15,7 @@
  */
 package org.labkey.test.tests.ms2;
 
-import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
@@ -23,6 +23,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.components.CustomizeView;
 import org.labkey.test.ms2.MS2TestBase;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
@@ -33,18 +34,28 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.labkey.test.components.WebPartPanel.WebPart;
+import static org.labkey.test.util.DataRegionTable.DataRegion;
 
 @Category({DailyB.class, MS2.class})
 public class LibraTest extends MS2TestBase
 {
-    private String standardView = "Standard View";
+    {setIsBootstrapWhitelisted(true);}
+    private static final String standardView = "Standard View";
     protected String proteinProphetView = "Protein Prophet View";
-    private String iTRAQ_QUANTITATION_RATIO = "Ratio ";
+    private static final String iTRAQ_QUANTITATION_RATIO = "Ratio ";
 
     @Override
     protected String getProjectName()
     {
         return "LibraTest" + TRICKY_CHARACTERS_FOR_PROJECT_NAMES;
+    }
+
+    @BeforeClass
+    public static void doSetup() throws Exception
+    {
+        LibraTest init = (LibraTest)getCurrentTest();
+        init.configure();
     }
 
     protected void configure()
@@ -57,19 +68,6 @@ public class LibraTest extends MS2TestBase
         _fileBrowserHelper.importFile("xtandem/Libra/iTRAQ.search.xar.xml", "Import Experiment");
         goToModule("Pipeline");
         waitForPipelineJobsToComplete(1, "Experiment Import - iTRAQ.search.xar.xml", false);
-        clickProject(getProjectName());
-        for (int i = 0; i < 10; i++)
-        {
-            refresh();
-            if (isElementPresent(Locator.linkContainingText(runName)))
-            {
-                break;
-            }
-            // Takes a moment for run to appear after import.
-            sleep(1000);
-        }
-
-        clickAndWait(Locator.linkContainingText(runName));
     }
 
 
@@ -79,14 +77,16 @@ public class LibraTest extends MS2TestBase
     @Test
     public void testSteps()
     {
-        configure();
+        goToProjectHome();
+        clickAndWait(Locator.linkContainingText(runName));
         waitForText("Grouping");
         selectOptionByText(Locator.id("viewTypeGrouping"), "Standard");
         clickButton("Go");
-        _customizeViewsHelper.openCustomizeViewPanel();
-        addNormalizationCount();
+        DataRegionTable dataRegionTable = DataRegion(getDriver()).find();
+        CustomizeView customizeView = dataRegionTable.openCustomizeGrid();
+        addNormalizationCount(customizeView);
 
-        _customizeViewsHelper.saveCustomView(standardView);
+        customizeView.saveCustomView(standardView);
 
         checkForITRAQNormalization();
 
@@ -161,31 +161,36 @@ public class LibraTest extends MS2TestBase
         assertEquals("HyperFilter", getFormElement(Locator.id("PeptidesFilter.viewName")));
     }
 
-    protected void newWindowTest(String linkToClick, String verificationString, String... additionalChecks)
+    private void specificProteinTest()
     {
-        click(Locator.linkContainingText(linkToClick));
-        Object[] windows = getDriver().getWindowHandles().toArray();
-        Assert.assertTrue("Didn't find newly opened window", windows.length > 1);
-        getDriver().switchTo().window((String)windows[1]);
-        waitForText(verificationString);
+        click(Locator.linkWithText("gi|2144275|JC5226_ubiquitin_/"));
+        switchToWindow(1);
+        waitForText("Protein Sequence");
 
         checkForITRAQNormalization();
         checkForITRAQQuantitation();
 
-        assertTextPresent(additionalChecks);
+        assertTextPresent();
         getDriver().close();
-        getDriver().switchTo().window((String)windows[0]);
-    }
-
-    private void specificProteinTest()
-    {
-        newWindowTest("gi|2144275|JC5226_ubiquitin_", "Protein Sequence");
+        switchToMainWindow();
         //TODO:  single cell check
     }
 
     private void groupTest()
     {
-        newWindowTest("4", "Scan", "gi|28189228|similar_to_polyub");
+        click(Locator.linkWithText("1"));
+        switchToWindow(1);
+        waitForText("Scan");
+
+        new DataRegionTable("MS2Peptides", getDriver()).goToView(proteinProphetView);
+        checkForITRAQNormalization();
+        checkForITRAQQuantitation();
+
+        List webparts = WebPart(getDriver()).withTitle("Protein Sequence").findAll();
+        assertEquals("Wrong number of Protein Sequenes in group 1", 12, webparts.size());
+        assertTextPresent("gi|28189228|similar_to_polyub", "gi|28189228|dbj|BAC56305.1|");
+        getDriver().close();
+        switchToMainWindow();
     }
 
     private void checkForITRAQNormalization()
@@ -206,28 +211,27 @@ public class LibraTest extends MS2TestBase
         }
     }
 
-    private void addNormalizationCount()
+    private void addNormalizationCount(CustomizeView customizeView)
     {
         for (int i = 1; i <= normalizationCount; i++)
         {
-            _customizeViewsHelper.addColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
+            customizeView.addColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
         }
     }
 
     private void proteinProphetTest()
     {
-        DataRegionTable.findDataRegion(this).goToView("ProteinProphet");
+        DataRegionTable dataRegionTable = DataRegion(getDriver()).find();
+        dataRegionTable.goToView("ProteinProphet");
+        CustomizeView customizeView = dataRegionTable.openCustomizeGrid();
 
-        waitForElement(Locator.lkButton("Grid Views"), WAIT_FOR_JAVASCRIPT);
-        _customizeViewsHelper.openCustomizeViewPanel();
         for (int i = 1; i <= normalizationCount; i++)
         {
-            _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
+            customizeView.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
         }
+        addNormalizationCount(customizeView);
+        customizeView.saveCustomView(proteinProphetView);
 
-        addNormalizationCount();
-
-        _customizeViewsHelper.saveCustomView(proteinProphetView);
         checkForITRAQQuantitation();
 
         DataRegionTable pepTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
@@ -241,7 +245,7 @@ public class LibraTest extends MS2TestBase
     @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
-        deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
     @Override
