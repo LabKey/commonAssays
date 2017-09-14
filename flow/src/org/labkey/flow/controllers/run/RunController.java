@@ -16,15 +16,16 @@
 
 package org.labkey.flow.controllers.run;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobException;
@@ -38,6 +39,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.FileNameUniquifier;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.UnexpectedException;
@@ -296,7 +298,13 @@ public class RunController extends BaseFlowController
         List<FlowWell> _wells = null;
         boolean _success = false;
         URLHelper _successURL = null;
-        private String _exportToScript;
+
+        private String _exportToScriptPath;
+        private String _exportToScriptCommandLine;
+        private String _exportToScriptLocation;
+        private String _exportToScriptFormat;
+        private Integer _exportToScriptTimeout;
+        private String _guid;
 
         @Override
         public void validateCommand(ExportAnalysisForm form, Errors errors)
@@ -312,13 +320,32 @@ public class RunController extends BaseFlowController
             else if (form.getSendTo() == ExportAnalysisForm.SendTo.Script)
             {
                 FlowModule module = ModuleLoader.getInstance().getModule(FlowModule.class);
-                ModuleProperty prop = module.getModuleProperties().get("ExportToScript");
-                _exportToScript = prop.getEffectiveValue(getContainer());
-                if (_exportToScript == null)
-                    throw new IllegalStateException("Export script must be configured in the folder settings");
+                _exportToScriptPath = module.getExportToScriptPath(getContainer());
+                if (_exportToScriptPath == null)
+                    throw new IllegalStateException("Export script path must be configured in the folder settings");
+                if (!new File(_exportToScriptPath).exists())
+                    throw new IllegalStateException("Export script not found: " + _exportToScriptPath);
 
-                if (!new File(_exportToScript).exists())
-                    throw new IllegalStateException("Export script not found: " + _exportToScript);
+                _exportToScriptCommandLine = module.getExportToScriptCommandLine(getContainer());
+                if (_exportToScriptCommandLine == null)
+                    throw new IllegalStateException("Export script command line must be configured in the folder settings");
+
+                _exportToScriptLocation = module.getExportToScriptLocation(getContainer());
+                if (_exportToScriptLocation == null)
+                    throw new IllegalStateException("Export location must be configured in the folder settings");
+                if (!new File(_exportToScriptLocation).exists())
+                    throw new IllegalStateException("Export location not found: " + _exportToScriptLocation);
+
+                _exportToScriptFormat = module.getExportToScriptFormat(getContainer());
+                String exportToScriptTimeout = module.getExportToScriptTimeout(getContainer());
+                if (exportToScriptTimeout != null)
+                {
+                    try
+                    {
+                        _exportToScriptTimeout = Integer.parseInt(exportToScriptTimeout);
+                    }
+                    catch (NumberFormatException ex) { }
+                }
             }
 
             int[] runId = form.getRunId();
@@ -396,6 +423,8 @@ public class RunController extends BaseFlowController
         @Override
         public boolean handlePost(ExportAnalysisForm form, BindException errors) throws Exception
         {
+            _guid = GUID.makeGUID();
+
             final String fcsDirName = "FCSFiles";
             final HttpServletResponse response = getViewContext().getResponse();
 
@@ -489,10 +518,20 @@ public class RunController extends BaseFlowController
 
                 case Script:
                 {
-                    File tmp = new File(FileUtil.getTempDirectory(), "flow-export-to-script");
-                    File dir = new File(tmp, FileUtil.makeLegalName(name + "_" + getTimestamp()));
-                    dir.mkdirs();
-                    return new FileSystemFile(dir);
+                    File dir = new File(FileUtil.getTempDirectory(), "flow-export-to-script");
+                    if (_exportToScriptLocation != null)
+                        dir = new File(_exportToScriptLocation);
+
+                    if ("zip".equalsIgnoreCase(_exportToScriptFormat))
+                    {
+                        return new ZipFile(dir, FileUtil.makeFileNameWithTimestamp(name, ".zip"));
+                    }
+                    else
+                    {
+                        File child = new File(dir, FileUtil.makeLegalName(name + "_" + getTimestamp()));
+                        child.mkdirs();
+                        return new FileSystemFile(child);
+                    }
                 }
 
                 case Browser:
@@ -514,7 +553,7 @@ public class RunController extends BaseFlowController
                     File location = new File(vf.getLocation());
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     ViewBackgroundInfo vbi = new ViewBackgroundInfo(getContainer(), getUser(), null);
-                    PipelineJob job = new ExportToScriptJob(_exportToScript, location, vbi, root);
+                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, form.getLabel(), location, vbi, root);
                     String jobGuid = null;
                     try
                     {
@@ -555,13 +594,19 @@ public class RunController extends BaseFlowController
 
     private static class ExportToScriptJob extends PipelineJob
     {
-        private final String _exportToScript;
+        private final String _guid;
+        private final String _exportToScriptPath;
+        private final String _exportToScriptCommandLine;
+        private final String _label;
         private final File _location;
 
-        public ExportToScriptJob(String exportToScript, File location, ViewBackgroundInfo info, @NotNull PipeRoot root)
+        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String label, File location, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
-            _exportToScript = exportToScript;
+            _guid = guid;
+            _exportToScriptPath = exportToScriptPath;
+            _exportToScriptCommandLine = exportToScriptCommandLine;
+            _label = label;
             _location = location;
 
             // setup the log file
@@ -582,18 +627,52 @@ public class RunController extends BaseFlowController
             return "Export to script";
         }
 
+        private List<String> parse(String command, Map<String, String> env)
+        {
+            List<String> ret = new ArrayList<>();
+
+            String[] parts = command.split(" ");
+            for (String part : parts)
+            {
+                part = part.trim();
+                if (part.length() == 0)
+                    continue;
+
+                String arg = part;
+                if (part.startsWith("${") && part.endsWith("}"))
+                {
+                    String key = part.substring("${".length(), part.length() - "}".length());
+                    arg = env.getOrDefault(key, part);
+                }
+
+                if (arg != null)
+                    ret.add(arg);
+            }
+
+            return ret;
+        }
+
         @Override
         public void run()
         {
             setStatus(TaskStatus.running);
-            info("Executing script: " + _exportToScript);
+
+            Map<String, String> env = new CaseInsensitiveHashMap<>();
+            env.put("guid", _guid);
+            env.put("scriptPath", _exportToScriptPath);
+            env.put("label", _label);
+            env.put("location", _location.toString());
+            // TODO:
+            //env.put("timeout", _timeout);
+            //env.put("exportFormat", _exportFormat);
+            List<String> params = parse(_exportToScriptCommandLine, env);
 
             File dir = _location.getParentFile();
 
-            List<String> params = new ArrayList<>();
-            params.add(_exportToScript);
-            params.add(_location.toString());
             ProcessBuilder pb = new ProcessBuilder(params);
+            info("Executing script: " + StringUtils.join(pb.command(), " "));
+
+            // TODO: add support for timeout
 
             try
             {

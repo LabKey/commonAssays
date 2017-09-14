@@ -17,6 +17,7 @@
 package org.labkey.flow;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
@@ -85,6 +86,12 @@ public class FlowModule extends SpringModule
 {
     public static final String NAME = "Flow";
 
+    private static String EXPORT_TO_SCRIPT_PATH = "ExportToScriptPath";
+    private static String EXPORT_TO_SCRIPT_COMMAND_LINE = "ExportToScriptCommandLine";
+    private static String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
+    private static String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
+    private static String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
+
     public String getName()
     {
         return "Flow";
@@ -138,11 +145,64 @@ public class FlowModule extends SpringModule
 
         ServiceRegistry.get().registerService(FlowService.class, new FlowServiceImpl());
 
-        ModuleProperty prop = new ModuleProperty(this, "ExportToScript", ModuleProperty.InputType.text);
-        prop.setDescription("Set the script that will be invoked when exporting FCS files");
+        registerModuleProperty(EXPORT_TO_SCRIPT_PATH, "Set the path of the script that will be invoked when exporting FCS files", "Export To Script - Path", ModuleProperty.InputType.text);
+        registerModuleProperty(EXPORT_TO_SCRIPT_COMMAND_LINE, "Set the export to script command line with token replacements", "Export To Script - Command Line", ModuleProperty.InputType.text,
+                "${scriptPath} --timeout ${timeout} --guid ${guid} --location ${location} --exportFormat ${exportFormat}");
+        registerModuleProperty(EXPORT_TO_SCRIPT_LOCATION, "Set the directory location where the exported files will be saved before executing the script", "Export To Script - Location", ModuleProperty.InputType.text);
+        registerModuleProperty(EXPORT_TO_SCRIPT_FORMAT, "Set the format type of the exported files - either 'zip' or 'directory'", "Export To Script - Format", ModuleProperty.InputType.text, "directory");
+        registerModuleProperty(EXPORT_TO_SCRIPT_TIMEOUT, "Set timeout in seconds the export script will be allowed to run", "Export To Script - Timeout", ModuleProperty.InputType.text);
+    }
+
+    private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type)
+    {
+        return registerModuleProperty(name, description, label, type, null);
+    }
+
+    private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type, String defaultValue)
+    {
+        ModuleProperty prop = new ModuleProperty(this, name, type);
+        prop.setDescription(description);
         prop.setCanSetPerContainer(true);
-        prop.setLabel("Export to Script");
+        prop.setLabel(label);
+        if (defaultValue != null)
+            prop.setDefaultValue(defaultValue);
         addModuleProperty(prop);
+        return prop;
+    }
+
+    @Nullable
+    public String getExportToScriptPath(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_PATH);
+        return prop.getEffectiveValue(c);
+    }
+
+    @Nullable
+    public String getExportToScriptCommandLine(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_COMMAND_LINE);
+        return prop.getEffectiveValue(c);
+    }
+
+    @Nullable
+    public String getExportToScriptLocation(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_LOCATION);
+        return prop.getEffectiveValue(c);
+    }
+
+    @Nullable
+    public String getExportToScriptFormat(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_FORMAT);
+        return prop.getEffectiveValue(c);
+    }
+
+    @Nullable
+    public String getExportToScriptTimeout(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_TIMEOUT);
+        return prop.getEffectiveValue(c);
     }
 
     @NotNull

@@ -42,6 +42,7 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     private boolean _useShortStatNames = false;
     private AnalysisSerializer.Options _exportFormat = AnalysisSerializer.Options.FormatGroupBySamplePopulation;
     private SendTo _sendTo = SendTo.Browser;
+    private String _label;
 
     private String _dataRegionSelectionKey = null;
     private String _selectionType;
@@ -147,6 +148,16 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     public void setSendTo(SendTo sendTo)
     {
         _sendTo = sendTo;
+    }
+
+    public String getLabel()
+    {
+        return _label;
+    }
+
+    public void setLabel(String label)
+    {
+        _label = label;
     }
 
     @Override
