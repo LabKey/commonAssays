@@ -48,9 +48,9 @@ import java.util.TreeSet;
 
 public class AttributeSet implements Serializable
 {
-
     ObjectType _type;
     URI _uri;
+
     SortedMap<String, String> _keywords;
     SortedMap<StatisticSpec, Double> _statistics;
     SortedMap<GraphSpec, byte[]> _graphs;
@@ -145,7 +145,7 @@ public class AttributeSet implements Serializable
     public AttributeSet(FCSKeywordData data)
     {
         this(ObjectType.fcsKeywords, data.getURI());
-        _keywords = new TreeMap();
+        _keywords = new TreeMap<>();
         for (String keyword : data.getKeywordNames())
         {
             setKeyword(keyword, data.getKeyword(keyword));
@@ -224,7 +224,7 @@ public class AttributeSet implements Serializable
     public void setKeyword(@NotNull String keyword, @Nullable String value)
     {
         if (_keywords == null)
-            _keywords = new TreeMap();
+            _keywords = new TreeMap<>();
         if (StringUtils.isBlank(value))
             value = null;
         _keywords.put(keyword, value);
@@ -239,7 +239,7 @@ public class AttributeSet implements Serializable
 
     public void setKeywords(Map<String, String> keywords)
     {
-        _keywords = new TreeMap();
+        _keywords = new TreeMap<>();
         _keywords.putAll(keywords);
     }
 
@@ -280,7 +280,7 @@ public class AttributeSet implements Serializable
     public void setStatistic(StatisticSpec stat, double value)
     {
         if (_statistics == null)
-            _statistics = new TreeMap();
+            _statistics = new TreeMap<>();
         if (Double.isNaN(value) || Double.isInfinite(value))
         {
             _statistics.remove(stat);
@@ -337,7 +337,7 @@ public class AttributeSet implements Serializable
     public void setGraph(GraphSpec graph, byte[] data)
     {
         if (_graphs == null)
-            _graphs = new TreeMap();
+            _graphs = new TreeMap<>();
         _graphs.put(graph, data);
     }
 

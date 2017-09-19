@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.TSVMapWriter;
 import org.labkey.api.data.TSVWriter;
@@ -37,6 +38,7 @@ import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.ExternalAnalysis;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -49,12 +51,10 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,11 +111,14 @@ public class AnalysisSerializer
     public static final String GRAPHS_FILENAME = "graphs.tsv";
     public static final String COMPENSATION_FILENAME = "compensation.tsv";
 
+    private static final String CLEAN_KEYWORD_PREFIX = "Keyword_";
+
     private final JobLog _log;
     private final VirtualFile _rootDir;
 
     private enum KeywordColumnName
     {
+        ID,
         Sample,
         Keyword,
         Value
@@ -123,6 +126,7 @@ public class AnalysisSerializer
 
     private enum StatColumnName
     {
+        ID,
         Sample,
         Population,
         Parameter,
@@ -132,6 +136,7 @@ public class AnalysisSerializer
 
     private enum GraphColumnName
     {
+        ID,
         Sample,
         Population,
         Graph,
@@ -140,6 +145,14 @@ public class AnalysisSerializer
 
     private enum CompensationColumnName
     {
+        ID,
+        Sample,
+        Path
+    }
+
+    public enum FCSFilesColumnName
+    {
+        ID,
         Sample,
         Path
     }
@@ -160,6 +173,7 @@ public class AnalysisSerializer
     {
         void info(String msg);
         void info(String msg, Throwable t);
+        void warn(String msg);
         void error(String msg);
         void error(String msg, Throwable t);
     }
@@ -183,6 +197,12 @@ public class AnalysisSerializer
         public void info(String msg, Throwable t)
         {
             _logger.info(msg, t);
+        }
+
+        @Override
+        public void warn(String msg)
+        {
+            _logger.warn(msg);
         }
 
         @Override
@@ -211,6 +231,12 @@ public class AnalysisSerializer
         {
             System.out.println(msg);
             t.printStackTrace(System.out);
+        }
+
+        @Override
+        public void warn(String msg)
+        {
+            System.out.println("WARN: " + msg);
         }
 
         @Override
@@ -301,13 +327,14 @@ public class AnalysisSerializer
         _rootDir = rootDir;
     }
 
-    private void readStatsRowPerStatistic(TabLoader loader, Map<String, AttributeSet> results)
+    private void readStatsRowPerStatistic(TabLoader loader, SampleIdMap<AttributeSet> results)
     {
         Map<String, StatisticSpec> stats = new TreeMap<>();
         int index = 0;
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(StatColumnName.ID.toString());
             String name = (String)row.get(StatColumnName.Sample.toString());
             String population = (String)(row.get(StatColumnName.Population.toString()));
             String statistic = (String)(row.get(StatColumnName.Statistic.toString()));
@@ -331,7 +358,11 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
+
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             String spec = (population == null ? "" : population + ":") + statistic;
             StatisticSpec stat = stats.computeIfAbsent(spec, StatisticSpec::new);
@@ -340,13 +371,14 @@ public class AnalysisSerializer
         }
     }
 
-    private void readStatsGroupBySample(TabLoader loader, Map<String, AttributeSet> results)
+    private void readStatsGroupedBySample(TabLoader loader, SampleIdMap<AttributeSet> results)
     {
         int index = 0;
         Map<String, StatisticSpec> stats = null;
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(StatColumnName.ID.toString());
             String name = (String)row.get(StatColumnName.Sample.toString());
             if (StringUtils.isEmpty(name))
             {
@@ -354,7 +386,11 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
+
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -367,7 +403,7 @@ public class AnalysisSerializer
                         continue;
                     }
 
-                    if (statistic.equalsIgnoreCase(StatColumnName.Sample.toString()))
+                    if (statistic.equalsIgnoreCase(StatColumnName.ID.toString()) || statistic.equalsIgnoreCase(StatColumnName.Sample.toString()))
                         continue;
 
                     // XXX: catch SubsetException ?
@@ -387,13 +423,14 @@ public class AnalysisSerializer
         }
     }
 
-    private void readStatsGroupedBySamplePopulation(TabLoader loader, Map<String, AttributeSet> results)
+    private void readStatsGroupedBySamplePopulation(TabLoader loader, SampleIdMap<AttributeSet> results)
     {
         int index = 0;
         Map<String, StatisticSpec> stats = null;
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(StatColumnName.ID.toString());
             String name = (String)row.get(StatColumnName.Sample.toString());
             if (StringUtils.isEmpty(name))
             {
@@ -404,7 +441,11 @@ public class AnalysisSerializer
             String population = (String)row.get(StatColumnName.Population.toString());
             SubsetSpec subset = (population == null ? null : SubsetSpec.fromEscapedString(population));
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
+
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -417,7 +458,7 @@ public class AnalysisSerializer
                         continue;
                     }
 
-                    if (statistic.equalsIgnoreCase(StatColumnName.Sample.toString()) || statistic.equalsIgnoreCase(StatColumnName.Population.toString()))
+                    if (statistic.equalsIgnoreCase(StatColumnName.ID.toString()) || statistic.equalsIgnoreCase(StatColumnName.Sample.toString()) || statistic.equalsIgnoreCase(StatColumnName.Population.toString()))
                         continue;
 
                     // For the %ile(NN) parameter, extract the "NN" number from between the parens.
@@ -450,13 +491,14 @@ public class AnalysisSerializer
         }
     }
 
-    private void readStatsGroupedBySamplePopulationParameter(TabLoader loader, Map<String, AttributeSet> results)
+    private void readStatsGroupedBySamplePopulationParameter(TabLoader loader, SampleIdMap<AttributeSet> results)
     {
         int index = 0;
         Map<String, StatisticSpec> stats = null;
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(StatColumnName.ID.toString());
             String name = (String)row.get(StatColumnName.Sample.toString());
             if (StringUtils.isEmpty(name))
             {
@@ -474,7 +516,11 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
+
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
             if (stats == null)
             {
@@ -487,7 +533,7 @@ public class AnalysisSerializer
                         continue;
                     }
 
-                    if (statistic.equalsIgnoreCase(StatColumnName.Sample.toString()) || statistic.equalsIgnoreCase(StatColumnName.Population.toString()) || statistic.equalsIgnoreCase(StatColumnName.Parameter.toString()))
+                    if (statistic.equalsIgnoreCase(StatColumnName.ID.toString()) || statistic.equalsIgnoreCase(StatColumnName.Sample.toString()) || statistic.equalsIgnoreCase(StatColumnName.Population.toString()) || statistic.equalsIgnoreCase(StatColumnName.Parameter.toString()))
                         continue;
 
                     // For the %ile(NN) parameter, extract the "NN" number from between the parens.
@@ -528,7 +574,7 @@ public class AnalysisSerializer
         }
     }
 
-    private void readStatistics(InputStream statFile, Map<String, AttributeSet> results) throws IOException
+    private void readStatistics(InputStream statFile, SampleIdMap<AttributeSet> results) throws IOException
     {
         try (Reader reader = Readers.getReader(statFile))
         {
@@ -537,6 +583,7 @@ public class AnalysisSerializer
             loader.setInferTypes(false);
 
             // Determine if the stat file is long-skinny or short-wide
+            boolean foundIdColumn = false;
             boolean foundSampleColumn = false;
             boolean foundPopulationColumn = false;
             boolean foundParameterColumn = false;
@@ -545,7 +592,9 @@ public class AnalysisSerializer
             ColumnDescriptor[] columns = loader.getColumns();
             for (ColumnDescriptor col : columns)
             {
-                if (col.name.equalsIgnoreCase(StatColumnName.Sample.toString()))
+                if (col.name.equalsIgnoreCase(StatColumnName.ID.toString()))
+                    foundIdColumn = true;
+                else if (col.name.equalsIgnoreCase(StatColumnName.Sample.toString()))
                     foundSampleColumn = true;
                 else if (col.name.equalsIgnoreCase(StatColumnName.Population.toString()))
                     foundPopulationColumn = true;
@@ -566,7 +615,10 @@ public class AnalysisSerializer
             }
 
             if (!foundSampleColumn)
-                throw new RuntimeException("Statistics file must contain a sample column.");
+                throw new RuntimeException("Statistics file must contain a 'Sample' column.");
+
+            if (!foundIdColumn)
+                _log.warn("Statistics file doesn't contain an 'ID' column.  The sample ID can be used to uniquely identify samples when sample name is not unique.");
 
             if (foundPopulationColumn && foundStatisticColumn && foundValueColumn)
                 readStatsRowPerStatistic(loader, results);
@@ -575,16 +627,17 @@ public class AnalysisSerializer
             else if (foundPopulationColumn)
                 readStatsGroupedBySamplePopulation(loader, results);
             else
-                readStatsGroupBySample(loader, results);
+                readStatsGroupedBySample(loader, results);
         }
     }
 
-    private void readKeywordsRowPerKeyword(TabLoader loader, Map<String, AttributeSet> results)
+    private void readKeywordsRowPerKeyword(TabLoader loader, SampleIdMap<AttributeSet> results)
     {
         int index = 0;
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(KeywordColumnName.ID.toString());
             String name = (String)row.get(KeywordColumnName.Sample.toString());
             String keyword = (String)(row.get(KeywordColumnName.Keyword.toString()));
             String value = (String)row.get(StatColumnName.Value.toString());
@@ -604,19 +657,24 @@ public class AnalysisSerializer
             // Trim keyword values to null -- FCS files encode empty keyword values as a single space character.
             value = StringUtils.trimToNull(value);
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
+
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
 
             attrs.setKeyword(keyword, value);
         }
     }
 
-    private void readKeywordsGroupBySample(TabLoader loader, Map<String, AttributeSet> results)
+    private void readKeywordsGroupedBySample(TabLoader loader, Map<String, String> remappedKeywords, SampleIdMap<AttributeSet> results)
     {
         int index = 0;
-        Set<String> keywords = null;
+
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = (String)row.get(KeywordColumnName.ID.toString());
             String name = (String)row.get(KeywordColumnName.Sample.toString());
             if (StringUtils.isEmpty(name))
             {
@@ -624,36 +682,25 @@ public class AnalysisSerializer
                 continue;
             }
 
-            AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = name;
 
-            if (keywords == null)
-            {
-                keywords = new LinkedHashSet<>();
-                for (String keyword : row.keySet())
-                {
-                    if (StringUtils.isEmpty(keyword))
-                    {
-                        _log.error("Keyword name must not be empty");
-                        continue;
-                    }
+            AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsKeywords, null));
 
-                    if (keyword.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
-                        continue;
-
-                    keywords.add(keyword);
-                }
-            }
-
-            for (String keyword : keywords)
+            for (String prefixedKeyword : remappedKeywords.keySet())
             {
                 // Trim keyword values to null -- FCS files encode empty keyword values as a single space character.
-                String value = StringUtils.trimToNull((String)row.get(keyword));
-                attrs.setKeyword(keyword, value);
+                String value = StringUtils.trimToNull((String)row.get(prefixedKeyword));
+
+                // Get the actual keyword with the "Keyword_" prefix removed
+                String actualKeyword = remappedKeywords.get(prefixedKeyword);
+                attrs.setKeyword(actualKeyword, value);
             }
         }
     }
 
-    private void readKeywords(InputStream statFile, Map<String, AttributeSet> results) throws IOException
+    private void readKeywords(InputStream statFile, SampleIdMap<AttributeSet> results) throws IOException
     {
         try (Reader reader = Readers.getReader(statFile))
         {
@@ -661,37 +708,70 @@ public class AnalysisSerializer
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
+            // mapping from prefixed keyword to actual keyword
+            Map<String, String> remappedKeywords = new CaseInsensitiveHashMap<>(new LinkedHashMap<>());
+
             // Determine if the stat file is long-skinny or short-wide
+            boolean foundIdColumn = false;
             boolean foundSampleColumn = false;
             boolean foundKeywordColumn = false;
             boolean foundValueColumn = false;
+            boolean foundExtraColumns = false;
             ColumnDescriptor[] columns = loader.getColumns();
-            for (ColumnDescriptor col : columns)
+            for (int i = 0; i < columns.length; i++)
             {
-                if (col.name.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
+                ColumnDescriptor col = columns[i];
+                if (!foundIdColumn && col.name.equalsIgnoreCase(KeywordColumnName.ID.toString()))
+                    foundIdColumn = true;
+                else if (!foundSampleColumn && col.name.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
                     foundSampleColumn = true;
-                else if (col.name.equalsIgnoreCase(KeywordColumnName.Keyword.toString()))
+                else if (!foundKeywordColumn && col.name.equalsIgnoreCase(KeywordColumnName.Keyword.toString()))
                     foundKeywordColumn = true;
-                else if (col.name.equalsIgnoreCase(KeywordColumnName.Value.toString()))
+                else if (!foundValueColumn && col.name.equalsIgnoreCase(KeywordColumnName.Value.toString()))
                     foundValueColumn = true;
                 else
                 {
+                    foundExtraColumns = true;
+
                     // assume any other column is a String keyword value
                     col.clazz = String.class;
+
+                    if (StringUtils.isEmpty(col.name))
+                    {
+                        _log.error(String.format("Keyword name must not be empty in column '%d'", i));
+                        continue;
+                    }
+
+                    if (col.name.startsWith(CLEAN_KEYWORD_PREFIX))
+                    {
+                        // remove the "Keyword_" prefix that was added during export
+                        String actualKeyword = col.name.substring(CLEAN_KEYWORD_PREFIX.length());
+                        remappedKeywords.put(col.name, actualKeyword);
+                    }
+                    else
+                    {
+                        // prefix the keyword columns with "Keyword_" to avoid the "Sample" keyword from colliding with the Sample column
+                        String prefixed = CLEAN_KEYWORD_PREFIX + col.name;
+                        remappedKeywords.put(prefixed, col.name);
+                        col.name = prefixed;
+                    }
                 }
             }
 
             if (!foundSampleColumn)
-                throw new RuntimeException("Keywords file must contain a sample column.");
+                throw new RuntimeException("Keywords file must contain a 'Sample' column.");
+
+            if (!foundIdColumn)
+                _log.warn("Keywords file doesn't contain an 'ID' column.  The sample ID can be used to uniquely identify samples when sample name is not unique.");
 
             if (foundKeywordColumn && foundValueColumn)
                 readKeywordsRowPerKeyword(loader, results);
             else
-                readKeywordsGroupBySample(loader, results);
+                readKeywordsGroupedBySample(loader, remappedKeywords, results);
         }
     }
 
-    private void readGraphs(InputStream graphsFile, Map<String, AttributeSet> results) throws IOException
+    private void readGraphs(InputStream graphsFile, SampleIdMap<AttributeSet> results) throws IOException
     {
         try (Reader reader = Readers.getReader(graphsFile))
         {
@@ -699,6 +779,7 @@ public class AnalysisSerializer
             loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
+            boolean foundIdColumn = false;
             boolean foundSampleColumn = false;
             boolean foundPopulationColumn = false;
             boolean foundGraphColumn = false;
@@ -706,7 +787,9 @@ public class AnalysisSerializer
             ColumnDescriptor[] columns = loader.getColumns();
             for (ColumnDescriptor col : columns)
             {
-                if (col.name.equalsIgnoreCase(GraphColumnName.Sample.toString()))
+                if (col.name.equalsIgnoreCase(GraphColumnName.ID.toString()))
+                    foundIdColumn = true;
+                else if (col.name.equalsIgnoreCase(GraphColumnName.Sample.toString()))
                     foundSampleColumn = true;
                 else if (col.name.equalsIgnoreCase(GraphColumnName.Population.toString()))
                     foundPopulationColumn = true;
@@ -717,13 +800,17 @@ public class AnalysisSerializer
             }
 
             if (!foundSampleColumn || !foundPopulationColumn || !foundGraphColumn || !foundPathColumn)
-                throw new RuntimeException("Graphs file must contain sample, population, graph, and path columns.");
+                throw new RuntimeException("Graphs file must contain 'Sample', 'Population', 'Graph', and 'Path' columns.");
+
+            if (!foundIdColumn)
+                _log.warn("Keywords file doesn't contain an 'ID' column.  The sample ID can be used to uniquely identify samples when sample name is not unique.");
 
             Map<String, GraphSpec> graphs = new TreeMap<>();
             int index = 0;
             ROWS_LOOP: for (Map<String, Object> row : loader)
             {
                 index++;
+                String id = (String)row.get(GraphColumnName.ID.toString());
                 String name = (String)row.get(GraphColumnName.Sample.toString());
                 String population = (String)row.get(GraphColumnName.Population.toString());
                 String graph = (String)row.get(GraphColumnName.Graph.toString());
@@ -747,7 +834,11 @@ public class AnalysisSerializer
                     continue;
                 }
 
-                AttributeSet attrs = results.computeIfAbsent(name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
+                // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+                if (id == null)
+                    id = name;
+
+                AttributeSet attrs = results.computeIfAbsent(id, name, k -> new AttributeSet(ObjectType.fcsAnalysis, null));
 
                 if (!graph.startsWith("(") && !graph.endsWith(")"))
                     graph = "(" + graph + ")";
@@ -783,7 +874,7 @@ public class AnalysisSerializer
         }
     }
 
-    private void readCompMatrices(InputStream compensationFile, Map<String, CompensationMatrix> matrices) throws IOException
+    private void readCompMatrices(InputStream compensationFile, SampleIdMap<CompensationMatrix> matrices) throws IOException
     {
         try (Reader reader = Readers.getReader(compensationFile))
         {
@@ -792,11 +883,14 @@ public class AnalysisSerializer
             loader.setInferTypes(false);
 
             // Determine if the stat file is long-skinny or short-wide
+            boolean foundIdColumn = false;
             boolean foundSampleColumn = false;
             boolean foundPathColumn = false;
             ColumnDescriptor[] columns = loader.getColumns();
             for (ColumnDescriptor col : columns)
             {
+                if (col.name.equalsIgnoreCase(CompensationColumnName.ID.toString()))
+                    foundIdColumn = true;
                 if (col.name.equalsIgnoreCase(CompensationColumnName.Sample.toString()))
                     foundSampleColumn = true;
                 else if (col.name.equalsIgnoreCase(CompensationColumnName.Path.toString()))
@@ -804,25 +898,30 @@ public class AnalysisSerializer
             }
 
             if (!foundSampleColumn || !foundPathColumn)
-                throw new RuntimeException("Compensation file must contain a sample and path column.");
+                throw new RuntimeException("Compensation file must contain a 'Sample' and 'Path' column.");
+
+            if (!foundIdColumn)
+                _log.warn("Keywords file doesn't contain an 'ID' column.  The sample ID can be used to uniquely identify samples when sample name is not unique.");
 
             readCompMatrices(loader, matrices);
         }
     }
 
-    private void readCompMatrices(TabLoader loader, Map<String, CompensationMatrix> matrices) throws IOException
+    private void readCompMatrices(TabLoader loader, SampleIdMap<CompensationMatrix> matrices) throws IOException
     {
         int index = 0;
         Map<String, CompensationMatrix> compPaths = new HashMap<>();
         for (Map<String, Object> row : loader)
         {
             index++;
+            String id = StringUtils.trimToNull((String)row.get(CompensationColumnName.ID.toString()));
             String sampleName = StringUtils.trimToNull((String)row.get(CompensationColumnName.Sample.toString()));
             String path = StringUtils.trimToNull((String)row.get(CompensationColumnName.Path.toString()));
 
             if (sampleName == null || path == null)
             {
                 _log.error(String.format("Compensation file requires sample name and path on line %d", index));
+                continue;
             }
 
             CompensationMatrix matrix = compPaths.get(path);
@@ -851,13 +950,17 @@ public class AnalysisSerializer
                 compPaths.put(path, matrix);
             }
 
-            matrices.put(sampleName, matrix);
+            // Previous versions of archive format didn't emit sample ID.  Fallback to using sample name as the id.
+            if (id == null)
+                id = sampleName;
+
+            matrices.put(id, sampleName, matrix);
         }
     }
 
     public ExternalAnalysis readAnalysis() throws IOException
     {
-        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = readAnalysisTuple();
+        Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> analysis = readAnalysisTuple();
         if (analysis == null)
             return null;
 
@@ -866,11 +969,11 @@ public class AnalysisSerializer
     }
 
     // Read keywords, stats, graphs, and compensation matrices.
-    public Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readAnalysisTuple() throws IOException
+    public Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> readAnalysisTuple() throws IOException
     {
-        Map<String, AttributeSet> keywords = new LinkedHashMap<>();
-        Map<String, AttributeSet> results = new LinkedHashMap<>();
-        Map<String, CompensationMatrix> matrices = new LinkedHashMap<>();
+        SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
+        SampleIdMap<AttributeSet> results = new SampleIdMap<>();
+        SampleIdMap<CompensationMatrix> matrices = new SampleIdMap<>();
 
         InputStream keywordsFile = _rootDir.getInputStream(KEYWORDS_FILENAME);
         if (keywordsFile != null)
@@ -926,7 +1029,7 @@ public class AnalysisSerializer
         if (keywords.isEmpty() && results.isEmpty())
         {
             _log.error("Nothing to import");
-            return Tuple3.of(Collections.<String, AttributeSet>emptyMap(), Collections.<String, AttributeSet>emptyMap(), Collections.<String, CompensationMatrix>emptyMap());
+            return Tuple3.of(SampleIdMap.emptyMap(), SampleIdMap.emptyMap(), SampleIdMap.emptyMap());
         }
         else
         {
@@ -936,9 +1039,10 @@ public class AnalysisSerializer
         return Tuple3.of(keywords, results, matrices);
     }
 
-    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeRowPerStatistic(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeStatisticsRowPerStatistic(SampleIdMap<AttributeSet> analysis, boolean shortStatNames)
     {
         List<String> columns = new ArrayList<>();
+        columns.add(StatColumnName.ID.toString());
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         columns.add(StatColumnName.Statistic.toString());
@@ -947,11 +1051,13 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
+
+            String name = analysis.getNameForId(id);
 
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             for (StatisticSpec stat : statistics.keySet())
@@ -960,7 +1066,8 @@ public class AnalysisSerializer
 
                 // now create a row to be written
                 List<Object> values = new ArrayList<>(columns.size());
-                values.add(sampleName);
+                values.add(id);
+                values.add(name);
                 values.add(stat.getSubset());
                 StatisticSpec statOnly = new StatisticSpec(null, stat.getStatistic(), stat.getParameter());
                 values.add(shortStatNames ? statOnly.toShortString(true) : statOnly.toString());
@@ -973,13 +1080,13 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySample(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeStatisticsGroupedBySample(SampleIdMap<AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics
         Set<StatisticSpec> stats = new TreeSet<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
 
@@ -987,6 +1094,7 @@ public class AnalysisSerializer
         }
 
         List<String> columns = new ArrayList<>();
+        columns.add(StatColumnName.ID.toString());
         columns.add(StatColumnName.Sample.toString());
         for (StatisticSpec stat : stats)
             columns.add(shortStatNames ? stat.toShortString(true) : stat.toString());
@@ -994,15 +1102,18 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
 
+            String name = analysis.getNameForId(id);
+
             // now create a row to be written
             List<Object> values = new ArrayList<>(columns.size());
-            values.add(sampleName);
+            values.add(id);
+            values.add(name);
 
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             for (StatisticSpec stat : stats)
@@ -1017,13 +1128,13 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulation(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeStatisticsGroupedBySamplePopulation(SampleIdMap<AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population removed
         Set<StatisticSpec> stats = new TreeSet<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
 
@@ -1033,6 +1144,7 @@ public class AnalysisSerializer
 
         // Columns in the statistics.tsv output
         List<String> columns = new ArrayList<>(2+stats.size());
+        columns.add(StatColumnName.ID.toString());
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         for (StatisticSpec stat : stats)
@@ -1041,11 +1153,13 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
+
+            String name = analysis.getNameForId(id);
 
             // collect the samples statistics grouped by population
             Map<SubsetSpec, Map<StatisticSpec, Double>> populations = new TreeMap<>(SubsetSpec.COMPARATOR);
@@ -1065,7 +1179,8 @@ public class AnalysisSerializer
             for (Map.Entry<SubsetSpec, Map<StatisticSpec, Double>> entry : populations.entrySet())
             {
                 List<Object> values = new ArrayList<>(columns.size());
-                values.add(sampleName);
+                values.add(id);
+                values.add(name);
                 values.add(entry.getKey());
 
                 for (StatisticSpec stat : stats)
@@ -1081,14 +1196,14 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeGroupBySamplePopulationParameter(Map<String, AttributeSet> analysis, boolean shortStatNames)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeStatisticsGroupedBySamplePopulationParameter(SampleIdMap<AttributeSet> analysis, boolean shortStatNames)
     {
         // collect all used statistics with the population and parameter removed
         Set<StatisticSpec> stats = new TreeSet<>();
         Set<String> parameters = new TreeSet<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
 
@@ -1116,6 +1231,7 @@ public class AnalysisSerializer
 
         // Columns in the statistics.tsv output
         List<String> columns = new ArrayList<>(2+stats.size());
+        columns.add(StatColumnName.ID.toString());
         columns.add(StatColumnName.Sample.toString());
         columns.add(StatColumnName.Population.toString());
         columns.add(StatColumnName.Parameter.toString());
@@ -1125,11 +1241,13 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
+
+            String name = analysis.getNameForId(id);
 
             // collect the samples statistics grouped by population and parameter
             Map<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>> map = new TreeMap<>(SUBSET_POPULATION_COMPARATOR);
@@ -1165,7 +1283,8 @@ public class AnalysisSerializer
             for (Map.Entry<Pair<SubsetSpec, String>, Map<StatisticSpec, Double>> entry : map.entrySet())
             {
                 List<Object> values = new ArrayList<>(columns.size());
-                values.add(sampleName);
+                values.add(id);
+                values.add(name);
                 values.add(entry.getKey().first);
                 values.add(entry.getKey().second);
 
@@ -1206,7 +1325,7 @@ public class AnalysisSerializer
         return -1;
     };
 
-    private void writeStatistics(Map<String, AttributeSet> analysis, EnumSet<Options> saveOptions) throws IOException
+    private void writeStatistics(SampleIdMap<AttributeSet> analysis, EnumSet<Options> saveOptions) throws IOException
     {
         if (analysis == null || analysis.isEmpty())
             return;
@@ -1215,13 +1334,13 @@ public class AnalysisSerializer
 
         Pair<List<String>, List<Map<String, Object>>> results;
         if (saveOptions.contains(Options.FormatRowPerStatistic))
-            results = writeRowPerStatistic(analysis, shortStatNames);
+            results = writeStatisticsRowPerStatistic(analysis, shortStatNames);
         else if (saveOptions.contains(Options.FormatGroupBySample))
-            results = writeGroupBySample(analysis, shortStatNames);
+            results = writeStatisticsGroupedBySample(analysis, shortStatNames);
         else if (saveOptions.contains(Options.FormatGroupBySamplePopulationParameter))
-            results = writeGroupBySamplePopulationParameter(analysis, shortStatNames);
+            results = writeStatisticsGroupedBySamplePopulationParameter(analysis, shortStatNames);
         else //default: (saveOptions.contains(Options.FormatGroupBySamplePopulation))
-            results = writeGroupBySamplePopulation(analysis, shortStatNames);
+            results = writeStatisticsGroupedBySamplePopulation(analysis, shortStatNames);
 
         // write the tsv file
         if (results.second.size() > 0)
@@ -1235,9 +1354,10 @@ public class AnalysisSerializer
         }
     }
 
-    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeRowPerKeyword(Map<String, AttributeSet> keywords)
+    private @NotNull Pair<List<String>, List<Map<String, Object>>> writeKeywordsRowPerKeyword(SampleIdMap<AttributeSet> keywords)
     {
         List<String> columns = new ArrayList<>();
+        columns.add(KeywordColumnName.ID.toString());
         columns.add(KeywordColumnName.Sample.toString());
         columns.add(KeywordColumnName.Keyword.toString());
         columns.add(KeywordColumnName.Value.toString());
@@ -1245,11 +1365,13 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : keywords.keySet())
+        for (String id : keywords.idSet())
         {
-            AttributeSet attrs = keywords.get(sampleName);
+            AttributeSet attrs = keywords.getById(id);
             if (attrs == null)
                 continue;
+
+            String name = keywords.getNameForId(id);
 
             Map<String, String> keys = attrs.getKeywords();
             for (String key : keys.keySet())
@@ -1258,7 +1380,8 @@ public class AnalysisSerializer
 
                 // now create a row to be written
                 List<Object> values = new ArrayList<>(columns.size());
-                values.add(sampleName);
+                values.add(id);
+                values.add(name);
                 values.add(key);
                 values.add(value);
 
@@ -1269,40 +1392,62 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private Pair<List<String>, List<Map<String, Object>>> writeGroupByKeyword(Map<String, AttributeSet> keywords)
+    private Pair<List<String>, List<Map<String, Object>>> writeKeywordsGroupedBySample(SampleIdMap<AttributeSet> keywords)
     {
-        // collect all used keywords
-        Set<String> allKeywords = new TreeSet<>();
-        for (String sampleName : keywords.keySet())
+        // collect all keywords used in the header row
+        Set<String> allCleanKeywords = new TreeSet<>();
+
+        // mapping from cleaned keyword to actual keyword
+        Map<String, String> remappedKeywords = new CaseInsensitiveHashMap<>();
+
+        for (String id : keywords.idSet())
         {
-            AttributeSet attrs = keywords.get(sampleName);
+            AttributeSet attrs = keywords.getById(id);
             if (attrs == null)
                 continue;
 
-            allKeywords.addAll(attrs.getKeywordNames());
+            for (String keyword : attrs.getKeywordNames())
+            {
+                String cleanKeyword = keyword;
+                if (keyword.equalsIgnoreCase(KeywordColumnName.ID.toString()) || keyword.equalsIgnoreCase(KeywordColumnName.Sample.toString()))
+                {
+                    cleanKeyword = CLEAN_KEYWORD_PREFIX + keyword;
+                }
+
+                if (allCleanKeywords.contains(cleanKeyword))
+                    continue;
+
+                allCleanKeywords.add(cleanKeyword);
+                remappedKeywords.put(cleanKeyword, keyword);
+            }
         }
 
         List<String> columns = new ArrayList<>();
+        columns.add(KeywordColumnName.ID.toString());
         columns.add(KeywordColumnName.Sample.toString());
-        columns.addAll(allKeywords);
+        columns.addAll(allCleanKeywords);
 
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : keywords.keySet())
+        for (String id : keywords.idSet())
         {
-            AttributeSet attrs = keywords.get(sampleName);
+            AttributeSet attrs = keywords.getById(id);
             if (attrs == null)
                 continue;
 
+            String name = keywords.getNameForId(id);
+
             // now create a row to be written
             List<Object> values = new ArrayList<>(columns.size());
-            values.add(sampleName);
+            values.add(id);
+            values.add(name);
 
             Map<String, String> keys = attrs.getKeywords();
-            for (String key : allKeywords)
+            for (String cleanKey : allCleanKeywords)
             {
-                String value = keys.get(key);
+                String actualKey = remappedKeywords.get(cleanKey);
+                String value = keys.get(actualKey);
 
                 values.add(value);
             }
@@ -1312,19 +1457,16 @@ public class AnalysisSerializer
         return Pair.of(columns, rows);
     }
 
-    private void writeKeywords(Map<String, AttributeSet> keywords, EnumSet<Options> saveOptions) throws IOException
+    private void writeKeywords(SampleIdMap<AttributeSet> keywords, EnumSet<Options> saveOptions) throws IOException
     {
         if (keywords == null || keywords.isEmpty())
             return;
 
-        // UNDONE: writeGroupByKeyword: 'Sample' keyword and Sample name column collide
-        //Pair<List<String>, List<Map<String, Object>>> results;
-        //if (saveOptions.contains(Options.FormatRowPerKeyword))
-        //    results = writeRowPerKeyword(keywords);
-        //else /*if (saveOptions.contains(Options.FormatGroupBySample))*/
-        //    results = writeGroupByKeyword(keywords);
-
-        Pair<List<String>, List<Map<String, Object>>> results = writeRowPerKeyword(keywords);
+        Pair<List<String>, List<Map<String, Object>>> results;
+        if (saveOptions.contains(Options.FormatRowPerKeyword))
+            results = writeKeywordsRowPerKeyword(keywords);
+        else /* default: if (saveOptions.contains(Options.FormatGroupBySample)) */
+            results = writeKeywordsGroupedBySample(keywords);
 
         // write the tsv file
         if (results.second.size() > 0)
@@ -1338,21 +1480,26 @@ public class AnalysisSerializer
         }
     }
 
-    private void writeCompMatrices(Map<String, CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
+    private void writeCompMatrices(SampleIdMap<CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
     {
         if (matrices == null || matrices.isEmpty())
             return;
 
-        List<String> columns = Arrays.asList(CompensationColumnName.Sample.toString(), CompensationColumnName.Path.toString());
+        List<String> columns = Arrays.asList(
+                CompensationColumnName.ID.toString(),
+                CompensationColumnName.Sample.toString(),
+                CompensationColumnName.Path.toString());
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
         List<Map<String, Object>> rows = new ArrayList<>();
 
         Map<CompensationMatrix, String> compPaths = new HashMap<>();
-        for (String sampleName : matrices.keySet())
+        for (String id : matrices.idSet())
         {
-            CompensationMatrix matrix = matrices.get(sampleName);
+            CompensationMatrix matrix = matrices.getById(id);
             if (matrix == null)
                 continue;
+
+            String name = matrices.getNameForId(id);
 
             String path = compPaths.get(matrix);
             if (path == null)
@@ -1366,7 +1513,7 @@ public class AnalysisSerializer
                 os.close();
             }
 
-            rows.add(rowMapFactory.getRowMap(new String[] { sampleName, path }));
+            rows.add(rowMapFactory.getRowMap(id, name, path));
         }
 
         // write the tsv file
@@ -1410,12 +1557,13 @@ public class AnalysisSerializer
         return path.toString();
     }
 
-    private void writeGraphs(Map<String, AttributeSet> analysis, boolean friendlyImageNames) throws IOException
+    private void writeGraphs(SampleIdMap<AttributeSet> analysis, boolean friendlyImageNames) throws IOException
     {
         if (analysis == null || analysis.isEmpty())
             return;
 
         List<String> columns = new ArrayList<>();
+        columns.add(GraphColumnName.ID.toString());
         columns.add(GraphColumnName.Sample.toString());
         columns.add(GraphColumnName.Population.toString());
         columns.add(GraphColumnName.Graph.toString());
@@ -1424,13 +1572,15 @@ public class AnalysisSerializer
         RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
 
         List<Map<String, Object>> rows = new ArrayList<>();
-        for (String sampleName : analysis.keySet())
+        for (String id : analysis.idSet())
         {
-            AttributeSet attrs = analysis.get(sampleName);
+            AttributeSet attrs = analysis.getById(id);
             if (attrs == null)
                 continue;
 
-            String graphDirName = FileUtil.getBaseName(sampleName);
+            String name = analysis.getNameForId(id);
+
+            String graphDirName = FileUtil.getBaseName(id); // NOTE: We used to use the name for the graph dir, but it isn't always unique
             VirtualFile graphDir = null;
 
             Map<GraphSpec, byte[]> graphs = attrs.getGraphs();
@@ -1458,7 +1608,8 @@ public class AnalysisSerializer
 
                 // create a row to be written
                 List<Object> values = new ArrayList<>(columns.size());
-                values.add(sampleName);
+                values.add(id);
+                values.add(name);
                 values.add(graph.getSubset()); // XXX: need to write "" instead of null
                 String graphParams = null;
                 if (graph.getParameters() != null && graph.getParameters().length > 0)
@@ -1484,12 +1635,12 @@ public class AnalysisSerializer
         }
     }
 
-    public void writeAnalysis(Map<String, AttributeSet> keywords, Map<String, AttributeSet> analysis, Map<String, CompensationMatrix> matrices) throws IOException
+    public void writeAnalysis(SampleIdMap<AttributeSet> keywords, SampleIdMap<AttributeSet> analysis, SampleIdMap<CompensationMatrix> matrices) throws IOException
     {
         writeAnalysis(keywords, analysis, matrices, EnumSet.noneOf(Options.class));
     }
 
-    public void writeAnalysis(Map<String, AttributeSet> keywords, Map<String, AttributeSet> analysis, Map<String, CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
+    public void writeAnalysis(SampleIdMap<AttributeSet> keywords, SampleIdMap<AttributeSet> analysis, SampleIdMap<CompensationMatrix> matrices, EnumSet<Options> saveOptions) throws IOException
     {
         writeGraphs(analysis, saveOptions.contains(Options.FriendlyImageNames));
         writeStatistics(analysis, saveOptions);
@@ -1502,10 +1653,13 @@ public class AnalysisSerializer
         static class TestLog implements AnalysisSerializer.JobLog
         {
             List<String> _info = new ArrayList<>();
+            List<String> _warn = new ArrayList<>();
             List<String> _error = new ArrayList<>();
 
             public void info(String msg) { _info.add(msg); }
             public void info(String msg, Throwable t) { _info.add(msg); }
+
+            public void warn(String msg) { _warn.add(msg); }
 
             public void error(String msg) { _error.add(msg); }
             public void error(String msg, Throwable t) { _error.add(msg); }
@@ -1518,17 +1672,19 @@ public class AnalysisSerializer
             FileSystemFile rootDir = new FileSystemFile(dir);
             TestLog log = new TestLog();
             AnalysisSerializer serializer = new AnalysisSerializer(log, rootDir);
-            Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> tuple = serializer.readAnalysisTuple();
+            Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> tuple = serializer.readAnalysisTuple();
 
-            Map<String, AttributeSet> keywords = tuple.first;
-            Map<String, AttributeSet> results = tuple.second;
-            Map<String, CompensationMatrix> matrices = tuple.third;
+            SampleIdMap<AttributeSet> keywords = tuple.first;
+            SampleIdMap<AttributeSet> results = tuple.second;
+            SampleIdMap<CompensationMatrix> matrices = tuple.third;
 
             assertEquals("Expected to load two samples", 2, results.size());
-            assertTrue(results.containsKey("118760.fcs"));
-            assertTrue(results.containsKey("119043.fcs"));
+            assertTrue(results.containsName("118760.fcs"));
+            assertTrue(results.containsName("119043.fcs"));
 
-            AttributeSet attrs = results.get("119043.fcs");
+            List<AttributeSet> attrsList = results.getByName("119043.fcs");
+            assertEquals("Expected only one attribute set for 119043.fcs", 1, attrsList.size());
+            AttributeSet attrs = attrsList.get(0);
             assertEquals("Expected 117 statistics for 119043.fcs", 117, attrs.getStatisticNames().size());
             assertEquals("Expected 12 statistics for 119043.fcs", 13, attrs.getGraphNames().size());
         }

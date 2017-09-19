@@ -29,6 +29,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
@@ -224,7 +225,7 @@ public class RScriptJob extends FlowExperimentJob
     {
         info("Writing compensation matrices...");
         Workspace workspace = Workspace.readWorkspace(new FileInputStream(_workspaceFile));
-        Map<String, CompensationMatrix> matrices = new HashMap<>();
+        SampleIdMap<CompensationMatrix> matrices = new SampleIdMap<>();
         for (Workspace.SampleInfo sampleInfo : workspace.getSamples())
         {
             CompensationMatrix matrix = null;
@@ -233,7 +234,7 @@ public class RScriptJob extends FlowExperimentJob
             if (matrix == null)
                 continue;
 
-            matrices.put(sampleInfo.getLabel(), matrix);
+            matrices.put(sampleInfo.getSampleId(), sampleInfo.getLabel(), matrix);
         }
 
         FileSystemFile rootDir = new FileSystemFile(workingDir);

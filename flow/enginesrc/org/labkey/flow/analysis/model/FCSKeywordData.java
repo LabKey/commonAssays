@@ -18,19 +18,21 @@ package org.labkey.flow.analysis.model;
 
 import org.labkey.flow.analysis.web.FCSRef;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FCSKeywordData
 {
     FCSRef _ref;
     FCSHeader _header;
+
     public FCSKeywordData(FCSRef ref, FCSHeader header)
     {
         _ref = ref;
         _header = header;
     }
+
     public String getKeyword(String key)
     {
         String ret = _ref.getKeyword(key);
@@ -46,11 +48,12 @@ public class FCSKeywordData
         }
         return null;
     }
+
     public String[] getKeywordNames()
     {
-
         return _header.getKeywords().keySet().toArray(new String[0]);
     }
+
     public Map<String,String> getAllKeywords()
     {
         HashMap<String,String> ret = new HashMap();
@@ -66,6 +69,7 @@ public class FCSKeywordData
         }
         return ret;
     }
+
     public URI getURI()
     {
         return _ref.getURI();

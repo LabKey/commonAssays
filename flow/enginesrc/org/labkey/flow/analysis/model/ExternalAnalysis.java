@@ -58,24 +58,30 @@ public class ExternalAnalysis implements IWorkspace, Serializable
     {
     }
 
-    public ExternalAnalysis(String path, Map<String, AttributeSet> keywords, Map<String, AttributeSet> results, Map<String, CompensationMatrix> matrices)
+    public ExternalAnalysis(String path, SampleIdMap<AttributeSet> keywords, SampleIdMap<AttributeSet> results, SampleIdMap<CompensationMatrix> matrices)
     {
         _path = path;
         _name = new File(path).getName();
 
-        for (Map.Entry<String, AttributeSet> entry : keywords.entrySet())
+        for (String id : keywords.idSet())
         {
-            addSampleKeywords(entry.getKey(), entry.getValue());
+            String name = keywords.getNameForId(id);
+            AttributeSet attrs = keywords.getById(id);
+            addSampleKeywords(id, name, attrs);
         }
 
-        for (Map.Entry<String, AttributeSet> entry : results.entrySet())
+        for (String id : results.idSet())
         {
-            addSampleAnalysisResults(entry.getKey(), entry.getValue());
+            String name = results.getNameForId(id);
+            AttributeSet attrs = results.getById(id);
+            addSampleAnalysisResults(id, name, attrs);
         }
 
-        for (Map.Entry<String, CompensationMatrix> entry : matrices.entrySet())
+        for (String id : matrices.idSet())
         {
-            addSampleCompMatrix(entry.getKey(), entry.getValue());
+            String name = matrices.getNameForId(id);
+            CompensationMatrix matrix = matrices.getById(id);
+            addSampleCompMatrix(id, name, matrix);
         }
     }
 
@@ -92,22 +98,22 @@ public class ExternalAnalysis implements IWorkspace, Serializable
         return as.readAnalysis();
     }
 
-    private SampleInfo ensureSample(String sampleId)
+    private SampleInfo ensureSample(String id, String name)
     {
-        SampleInfo sample = _sampleInfos.get(sampleId);
+        SampleInfo sample = _sampleInfos.get(id);
         if (sample == null)
         {
             sample = new SampleInfo();
-            sample._sampleId = sampleId;
-            sample._sampleName = sampleId;
-            _sampleInfos.put(sampleId, sample);
+            sample._sampleId = id;
+            sample._sampleName = name;
+            _sampleInfos.put(id, sample);
         }
         return sample;
     }
 
-    private void addSampleKeywords(String sampleId, AttributeSet keywords)
+    private void addSampleKeywords(String id, String name, AttributeSet keywords)
     {
-        SampleInfo sample = ensureSample(sampleId);
+        SampleInfo sample = ensureSample(id, name);
         sample._keywords.putAll(keywords.getKeywords());
         _keywords.addAll(keywords.getKeywords().keySet());
 
@@ -124,17 +130,17 @@ public class ExternalAnalysis implements IWorkspace, Serializable
         }
     }
 
-    private void addSampleAnalysisResults(String sampleId, AttributeSet results)
+    private void addSampleAnalysisResults(String id, String name, AttributeSet results)
     {
-        SampleInfo sample = ensureSample(sampleId);
-        _sampleAnalysisResults.put(sampleId, results);
+        SampleInfo sample = ensureSample(id, name);
+        _sampleAnalysisResults.put(sample._sampleId, results);
     }
 
-    private void addSampleCompMatrix(String sampleId, CompensationMatrix matrix)
+    private void addSampleCompMatrix(String id, String name, CompensationMatrix matrix)
     {
-        SampleInfo sample = ensureSample(sampleId);
+        SampleInfo sample = ensureSample(id, name);
         _compensatrionMatrices.add(matrix);
-        _sampleCompensationMatrices.put(sampleId, matrix);
+        _sampleCompensationMatrices.put(sample._sampleId, matrix);
     }
 
     @Override

@@ -206,6 +206,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/PopulationSet.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RegionGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/RemapExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SampleCriteria.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/SampleIdMap.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/SampleInfoBase.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScalingFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/ScriptComponent.java -text

@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.script;
 
-import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.labkey.api.collections.CaseInsensitiveArrayListValuedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.DataType;
@@ -29,13 +30,12 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
-import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowRun;
-import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
@@ -45,7 +45,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         return "Import External Analysis " + _analysisRunName;
     }
 
-    private Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> loadAnalysis() throws Exception
+    private Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> loadAnalysis() throws Exception
     {
         addStatus("Loading external analysis from '" + _analysisPathRoot + "'");
         FileSystemFile rootDir = new FileSystemFile(_analysisPathRoot);
@@ -101,18 +100,22 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
     @Override
     protected FlowRun createExperimentRun() throws Exception
     {
-        Map<String, AttributeSet> keywordsMap = new LinkedHashMap();
-        Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap();
-        Map<String, AttributeSet> resultsMap = new LinkedHashMap();
-        //Map<String, Analysis> analysisMap = new LinkedHashMap();
+        SampleIdMap<AttributeSet> keywordsMap;
+        SampleIdMap<CompensationMatrix> sampleCompMatrixMap;
+        SampleIdMap<AttributeSet> resultsMap;
+        //SampleIdMap<Analysis> analysisMap = new LinkedHashMap();
         //Map<Analysis, ScriptDocument> scriptDocs = new HashMap();
         //Map<Analysis, FlowScript> scripts = new HashMap();
 
-        Set<String> sampleLabels = new LinkedHashSet<>();
+        Set<String> sampleIds = new LinkedHashSet<>();
+        MultiValuedMap<String, String> sampleIdToNameMap = new CaseInsensitiveArrayListValuedMap<>();
 
-        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> analysis = loadAnalysis();
+        Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> analysis = loadAnalysis();
         if (analysis == null)
+        {
             error("Failed to parse analysis from");
+            return null;
+        }
         keywordsMap = analysis.first;
         resultsMap = analysis.second;
         sampleCompMatrixMap = analysis.third;
@@ -124,12 +127,13 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         if (keywordsMap.size() > 0)
             info("Preparing keywords for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : keywordsMap.size()) + " samples...");
-        for (Map.Entry<String, AttributeSet> entry : keywordsMap.entrySet())
+        for (String id : keywordsMap.idSet())
         {
-            String sampleLabel = entry.getKey();
-            sampleLabels.add(sampleLabel);
+            String sampleLabel = keywordsMap.getNameForId(id);
+            sampleIds.add(id);
+            sampleIdToNameMap.put(id, sampleLabel);
 
-            AttributeSet keywordAttrs = entry.getValue();
+            AttributeSet keywordAttrs = keywordsMap.getById(id);
 
             // Only import the selected FCS files.
             // Set the keywords URI using the resolved FCS file or the FCS file in the runFilePathRoot directory
@@ -164,17 +168,17 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         if (resultsMap.size() > 0)
             info("Preparing results for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : resultsMap.size()) + " samples...");
-        for (Map.Entry<String, AttributeSet> entry : resultsMap.entrySet())
+        for (String id : resultsMap.idSet())
         {
-            String sampleLabel = entry.getKey();
+            String sampleLabel = resultsMap.getNameForId(id);
 
             // Don't import unless the sample label is selected.
             if (selectedFCSFiles != null && !selectedFCSFiles.containsKey(sampleLabel))
                 continue;
 
-            sampleLabels.add(sampleLabel);
+            sampleIds.add(id);
 
-            AttributeSet resultsAttrs = entry.getValue();
+            AttributeSet resultsAttrs = resultsMap.getById(id);
             AttributeSetHelper.prepareForSave(resultsAttrs, getContainer(), false);
 
             // UNDONE: comp matrix
@@ -189,10 +193,12 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 keywordsMap,
                 sampleCompMatrixMap,
                 resultsMap,
+                SampleIdMap.emptyMap(),
                 Collections.emptyMap(),
                 Collections.emptyMap(),
-                Collections.emptyMap(),
-                new ArrayList<>(sampleLabels));
+                new ArrayList<>(sampleIds),
+                sampleIdToNameMap
+        );
     }
 
     @Override

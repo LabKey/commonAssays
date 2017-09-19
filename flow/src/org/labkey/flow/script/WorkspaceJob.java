@@ -16,8 +16,10 @@
 
 package org.labkey.flow.script;
 
+import org.apache.commons.collections4.MultiValuedMap;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.api.collections.CaseInsensitiveArrayListValuedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.exp.api.ExpData;
@@ -31,6 +33,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
@@ -60,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -137,15 +139,16 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                         File runFilePathRoot, Map<String, FlowFCSFile> resolvedFCSFiles,
                                         boolean failOnError) throws Exception
     {
-        Map<String, AttributeSet> keywordsMap = new LinkedHashMap<>();
-        Map<String, CompensationMatrix> sampleCompMatrixMap = new LinkedHashMap<>();
-        Map<String, AttributeSet> resultsMap = new LinkedHashMap<>();
-        Map<String, Analysis> analysisMap = new LinkedHashMap<>();
+        SampleIdMap<AttributeSet> keywordsMap = new SampleIdMap<>();
+        SampleIdMap<CompensationMatrix> sampleCompMatrixMap = new SampleIdMap<>();
+        SampleIdMap<AttributeSet> resultsMap = new SampleIdMap<>();
+        SampleIdMap<Analysis> analysisMap = new SampleIdMap<>();
         Map<Analysis, ScriptDocument> scriptDocs = new HashMap<>();
         Map<Analysis, FlowScript> scripts = new HashMap<>();
-        List<String> sampleLabels = new ArrayList<>(workspace.getSampleCount());
+        List<String> allSampleIds = new ArrayList<>(workspace.getSampleCount());
+        MultiValuedMap<String, String> sampleIdToNameMap = new CaseInsensitiveArrayListValuedMap<>();
 
-        if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, sampleLabels))
+        if (extractAnalysis(container, workspace, runFilePathRoot, resolvedFCSFiles, failOnError, keywordsMap, sampleCompMatrixMap, resultsMap, analysisMap, scriptDocs, allSampleIds, sampleIdToNameMap))
             return null;
 
         if (checkInterrupted())
@@ -161,7 +164,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 analysisMap,
                 scriptDocs,
                 scripts,
-                sampleLabels);
+                allSampleIds,
+                sampleIdToNameMap);
     }
 
     private List<String> filterSamples(Workspace workspace, List<String> sampleIDs)
@@ -225,12 +229,13 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                     Map<String, FlowFCSFile> selectedFCSFiles,
                                     //List<String> importGroupNames,
                                     boolean failOnError,
-                                    Map<String, AttributeSet> keywordsMap,
-                                    Map<String, CompensationMatrix> sampleCompMatrixMap,
-                                    Map<String, AttributeSet> resultsMap,
-                                    Map<String, Analysis> analysisMap,
+                                    SampleIdMap<AttributeSet> keywordsMap,
+                                    SampleIdMap<CompensationMatrix> sampleCompMatrixMap,
+                                    SampleIdMap<AttributeSet> resultsMap,
+                                    SampleIdMap<Analysis> analysisMap,
                                     Map<Analysis, ScriptDocument> scriptDocs,
-                                    Collection<String> sampleLabels) throws IOException
+                                    Collection<String> allSampleIds,
+                                    MultiValuedMap<String, String> sampleIdToNameMap) throws IOException
     {
         List<String> sampleIDs = getSampleIDs(workspace, selectedFCSFiles);
         if (sampleIDs == null || sampleIDs.isEmpty())
@@ -243,7 +248,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         for (String sampleID : sampleIDs)
         {
             Workspace.SampleInfo sample = workspace.getSample(sampleID);
-            sampleLabels.add(sample.getLabel());
+
+            allSampleIds.add(sampleID);
+            sampleIdToNameMap.put(sampleID, sample.getLabel());
             if (checkInterrupted())
                 return true;
 
@@ -258,7 +265,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             File file = null;
             if (selectedFCSFiles != null)
             {
-                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sample.getSampleId());
+                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sampleID);
                 if (resolvedFCSFile == null)
                     resolvedFCSFile = selectedFCSFiles.get(sample.getLabel());
                 if (resolvedFCSFile != null)
@@ -280,7 +287,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
             attrs.setKeywords(sample.getKeywords());
             AttributeSetHelper.prepareForSave(attrs, container, false);
-            keywordsMap.put(sample.getLabel(), attrs);
+            keywordsMap.put(sampleID, sample.getLabel(), attrs);
 
             CompensationMatrix comp = sample.getCompensationMatrix();
 
@@ -290,7 +297,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 Analysis analysis = workspace.getSampleAnalysis(sample);
                 if (analysis != null)
                 {
-                    analysisMap.put(sample.getLabel(), analysis);
+                    analysisMap.put(sampleID, sample.getLabel(), analysis);
 
                     ScriptDocument scriptDoc = ScriptDocument.Factory.newInstance();
                     ScriptDef scriptDef = scriptDoc.addNewScript();
@@ -343,7 +350,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                     warn("Analysis results only contains '" + results.getStatistics().keySet().iterator().next() + "' statistic for '" + sample + "'.");
 
                 AttributeSetHelper.prepareForSave(results, container, false);
-                resultsMap.put(sample.getLabel(), results);
+                resultsMap.put(sampleID, sample.getLabel(), results);
             }
             else
             {
@@ -352,7 +359,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
             if (comp != null)
             {
-                sampleCompMatrixMap.put(sample.getLabel(), comp);
+                sampleCompMatrixMap.put(sampleID, sample.getLabel(), comp);
             }
         }
 

@@ -29,6 +29,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.model.WorkspaceParser;
@@ -55,7 +56,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -311,7 +311,7 @@ public class Main
         }
     }
 
-    private static void writeAnalysisResults(File outDir, Map<String, AttributeSet> keywords, Map<String, AttributeSet> results, Map<String, CompensationMatrix> matrices, AnalysisResultsOutputFormat outputFormat)
+    private static void writeAnalysisResults(File outDir, SampleIdMap<AttributeSet> keywords, SampleIdMap<AttributeSet> results, SampleIdMap<CompensationMatrix> matrices, AnalysisResultsOutputFormat outputFormat)
     {
         if (outputFormat == AnalysisResultsOutputFormat.tsv)
         {
@@ -337,18 +337,18 @@ public class Main
         }
     }
 
-    private static Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
+    private static Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> readWorkspaceAnalysisResults(File workspaceFile, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats)
     {
         Workspace workspace = readWorkspace(workspaceFile, true);
 
         Set<Workspace.SampleInfo> sampleInfos = workspace.getSamples(groupNames, sampleIds);
 
-        Map<String, AttributeSet> keywords = new LinkedHashMap<>();
-        Map<String, AttributeSet> analysis = new LinkedHashMap<>();
-        Map<String, CompensationMatrix> matrices = new LinkedHashMap<>();
+        SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
+        SampleIdMap<AttributeSet> analysis = new SampleIdMap<>();
+        SampleIdMap<CompensationMatrix> matrices = new SampleIdMap<>();
         for (Workspace.SampleInfo sampleInfo : sampleInfos)
         {
-            if (analysis.containsKey(sampleInfo.getLabel()))
+            if (analysis.containsName(sampleInfo.getLabel()))
             {
                 System.err.printf("warning: sample label '%s' appears on more than one sample info", sampleInfo.getLabel());
                 continue;
@@ -356,7 +356,7 @@ public class Main
 
             AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
             if (attrs != null)
-                analysis.put(sampleInfo.getLabel(), attrs);
+                analysis.put(sampleInfo, attrs);
 
 
             Map<String, String> sampleKeywords = sampleInfo.getKeywords();
@@ -364,12 +364,12 @@ public class Main
             {
                 AttributeSet keywordAttrs = new AttributeSet(ObjectType.fcsKeywords, null);
                 keywordAttrs.setKeywords(sampleKeywords);
-                keywords.put(sampleInfo.getLabel(), keywordAttrs);
+                keywords.put(sampleInfo, keywordAttrs);
             }
 
             CompensationMatrix matrix = sampleInfo.getCompensationMatrix();
             if (matrix != null)
-                matrices.put(sampleInfo.getLabel(), matrix);
+                matrices.put(sampleInfo, matrix);
 
             // UNDONE: generate graphs if fcs file is available
         }
@@ -461,7 +461,7 @@ public class Main
 
     private static void executeConvertAnalysis(File outDir, File workspaceOrAnalysisResults, File fcsDir, Set<PopulationName> groupNames, Set<String> sampleIds, Set<StatisticSet> stats, AnalysisResultsOutputFormat outputFormat)
     {
-        Tuple3<Map<String, AttributeSet>, Map<String, AttributeSet>, Map<String, CompensationMatrix>> results = null;//readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
+        Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> results = null;//readAnalysisResults(workspaceOrAnalysisResults, fcsDir, groupNames, sampleIds, stats);
         if (results == null)
             return;
 

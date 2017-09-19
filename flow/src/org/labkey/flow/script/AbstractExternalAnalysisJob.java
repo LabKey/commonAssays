@@ -16,6 +16,8 @@
 
 package org.labkey.flow.script;
 
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -27,13 +29,13 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataType;
@@ -58,6 +60,7 @@ import org.labkey.flow.util.KeywordUtil;
 import java.io.File;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -277,13 +280,14 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    String analysisName, File externalAnalysisFile, File originalImportedFile,
                                    File runFilePathRoot,
                                    Map<String, FlowFCSFile> selectedFCSFiles,
-                                   Map<String, AttributeSet> keywordsMap,
-                                   Map<String, CompensationMatrix> sampleCompMatrixMap,
-                                   Map<String, AttributeSet> resultsMap,
-                                   Map<String, Analysis> analysisMap,
+                                   SampleIdMap<AttributeSet> keywordsMap,
+                                   SampleIdMap<CompensationMatrix> sampleCompMatrixMap,
+                                   SampleIdMap<AttributeSet> resultsMap,
+                                   SampleIdMap<Analysis> analysisMap,
                                    Map<Analysis, ScriptDocument> scriptDocs,
                                    Map<Analysis, FlowScript> scripts,
-                                   List<String> allSampleLabels) throws Exception
+                                   List<String> allSampleIds,
+                                   MultiValuedMap<String, String> sampleIdToNameMap) throws Exception
     {
         // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
         URI dataFileURI = new File(externalAnalysisFile.getParent(), "attributes.flowdata.xml").toURI();
@@ -323,13 +327,22 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
             ExpData externalAnalysisData = createExternalAnalysisData(svc, run, user, container, analysisName, externalAnalysisFile, originalImportedFile);
 
-            Map<String, FlowFCSFile> fcsFiles = new HashMap();
-            int totSamples = allSampleLabels.size();
+            // map from Sample ID -> FlowFCSFile
+            Map<String, FlowFCSFile> fcsFiles = new HashMap<>();
+            int totSamples = allSampleIds.size();
             int iSample = 0;
-            for (String sampleLabel : allSampleLabels)
+            for (String sampleId : allSampleIds)
             {
                 if (checkInterrupted())
                     return null;
+
+                Collection<String> sampleNames = sampleIdToNameMap.get(sampleId);
+                if (sampleNames.size() > 1)
+                {
+                    error("Duplicate sample names not yet supported.  More than one sample name for id '" + sampleId + "' found: " + StringUtils.join(sampleNames, ", "));
+                    continue;
+                }
+                String sampleLabel = sampleNames.iterator().next();
 
                 iSample++;
                 FlowFCSFile resolvedFCSFile = null;
@@ -344,7 +357,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 // - If there is an 'original' FCSFile and the extra keywords are a subset of the original FCSFile, the 'original' FCSFile will be used as the DataInput of the FCSAnalysis (no 'fake' FCS file is created.)
                 // - If there is an 'original' FCSFile and there are additional extra keywords, the 'original' FCSFile is a DataInput of the 'fake' FCSFile (which in turn is a DatInput of the FCSAnalysis.)
                 FlowFCSFile flowFCSFile = resolvedFCSFile;
-                AttributeSet keywordAttrs = keywordsMap.get(sampleLabel);
+                AttributeSet keywordAttrs = keywordsMap.getById(sampleId);
                 if (resolvedFCSFile == null || (keywordAttrs != null && !isSubset(keywordAttrs.getKeywords(), resolvedFCSFile.getKeywords())))
                 {
                     flowFCSFile = createFakeFCSFile(user, container,
@@ -354,12 +367,12 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                             iSample, totSamples, sampleLabel);
                 }
 
-                fcsFiles.put(sampleLabel, flowFCSFile);
+                fcsFiles.put(sampleId, flowFCSFile);
             }
 
             int totComps = compMatrixMap.size();
             int iComp = 0;
-            Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap();
+            Map<CompensationMatrix, FlowCompensationMatrix> flowCompMatrices = new HashMap<>();
             for (Map.Entry<CompensationMatrix, AttributeSet> entry : compMatrixMap.entrySet())
             {
                 if (checkInterrupted())
@@ -388,10 +401,18 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 if (checkInterrupted())
                     return null;
 
-                String sampleLabel = entry.getKey();
+                String sampleId = entry.getKey();
                 FlowFCSFile fcsFile = entry.getValue();
 
-                AttributeSet results = resultsMap.get(sampleLabel);
+                Collection<String> sampleNames = sampleIdToNameMap.get(sampleId);
+                if (sampleNames.size() > 1)
+                {
+                    error("Duplicate sample names not yet supported.  More than one sample name for id '" + sampleId + "' found: " + StringUtils.join(sampleNames, ", "));
+                    continue;
+                }
+                String sampleLabel = sampleNames.iterator().next();
+
+                AttributeSet results = resultsMap.getById(sampleId);
                 if (results != null)
                 {
                     iAnalysis++;
@@ -417,7 +438,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                     fcsAnalysis.save(user);
                     AttributeSetHelper.doSave(results, user, fcsAnalysis);
 
-                    Analysis analysis = analysisMap.get(sampleLabel);
+                    Analysis analysis = analysisMap.getById(sampleId);
                     if (analysis != null)
                     {
                         FlowScript script = scripts.get(analysis);
@@ -434,7 +455,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                         }
                     }
 
-                    CompensationMatrix comp = sampleCompMatrixMap.get(sampleLabel);
+                    CompensationMatrix comp = sampleCompMatrixMap.getById(sampleId);
                     if (comp != null)
                     {
                         FlowCompensationMatrix flowComp = flowCompMatrices.get(comp);

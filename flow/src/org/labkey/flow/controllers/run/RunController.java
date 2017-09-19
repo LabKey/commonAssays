@@ -24,7 +24,11 @@ import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.TSVMapWriter;
+import org.labkey.api.data.TSVWriter;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -51,10 +55,12 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.FileSystemFile;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.api.writer.ZipFile;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.data.FlowCompensationMatrix;
@@ -78,12 +84,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +234,7 @@ public class RunController extends BaseFlowController
                 HttpServletResponse response = getViewContext().getResponse();
                 try (ZipFile zipFile = new ZipFile(response, _run.getName() + ".zip"))
                 {
-                    exportFCSFiles(zipFile, _run, form.getEventCount() == null ? 0 : form.getEventCount());
+                    exportFCSFiles(zipFile, null, _run, form.getEventCount() == null ? 0 : form.getEventCount());
                 }
 
                 return null;
@@ -242,19 +248,23 @@ public class RunController extends BaseFlowController
         }
     }
 
-    protected void exportFCSFiles(VirtualFile dir, FlowRun run, int eventCount)
+    protected SampleIdMap<String> exportFCSFiles(VirtualFile dir, String dirName, FlowRun run, int eventCount)
             throws Exception
     {
         FlowWell[] wells = run.getWells(true);
-        exportFCSFiles(dir, Arrays.asList(wells), eventCount);
+        return exportFCSFiles(dir, dirName, Arrays.asList(wells), eventCount);
     }
 
-    protected void exportFCSFiles(VirtualFile dir, Collection<FlowWell> wells, int eventCount)
+    protected SampleIdMap<String> exportFCSFiles(VirtualFile dir, String dirName, Collection<FlowWell> wells, int eventCount)
             throws Exception
     {
-        // 118754: The list of wells may contain both FlowFCSFile and FlowFCSAnalysis wells representing the same FCS file URI.
+        SampleIdMap<String> files = new SampleIdMap<>();
+        FileNameUniquifier uniquifier = new FileNameUniquifier(true);
+
+        // Issue 13557: The list of wells may contain both FlowFCSFile and FlowFCSAnalysis wells representing the same FCS file URI.
         // Keep track of which ones we've already seen during export.
-        Set<String> seen = new HashSet<>();
+        Set<String> seen = new CaseInsensitiveHashSet();
+
         byte[] buffer = new byte[524288];
         for (FlowWell well : wells)
         {
@@ -262,31 +272,65 @@ public class RunController extends BaseFlowController
             if (uri == null)
                 continue;
 
+            // CONSIDER: If we see the same URI again but for a different well, we may want to write out a row to the catalog tsv file for the well
+            String uriString = uri.toString();
+            if (seen.contains(uriString))
+                continue;
+
+            seen.add(uriString);
+
             File file = new File(uri);
             if (file.canRead())
             {
-                String fileName = file.getName();
-                if (!seen.contains(fileName))
+                String fileName = uniquifier.uniquify(FileUtil.makeLegalName(file.getName()));
+                OutputStream os = dir.getOutputStream(fileName);
+                InputStream is;
+                if (eventCount == 0)
                 {
-                    seen.add(fileName);
-                    OutputStream os = dir.getOutputStream(fileName);
-                    InputStream is;
-                    if (eventCount == 0)
-                    {
-                        is = new FileInputStream(file);
-                    }
-                    else
-                    {
-                        is = new ByteArrayInputStream(FCSAnalyzer.get().getFCSBytes(uri, eventCount));
-                    }
-                    int cb;
-                    while((cb = is.read(buffer)) > 0)
-                    {
-                        os.write(buffer, 0, cb);
-                    }
-                    os.close();
+                    is = new FileInputStream(file);
                 }
+                else
+                {
+                    is = new ByteArrayInputStream(FCSAnalyzer.get().getFCSBytes(uri, eventCount));
+                }
+                int cb;
+                while((cb = is.read(buffer)) > 0)
+                {
+                    os.write(buffer, 0, cb);
+                }
+                os.close();
+
+                String path = dirName == null ? fileName : dirName + "/" + fileName;
+                files.put(String.valueOf(well.getRowId()), well.getName(), path);
             }
+        }
+
+        return files;
+    }
+
+    void writeFCSFileCatalog(VirtualFile dir, SampleIdMap<String> files) throws IOException
+    {
+        List<String> columns = new ArrayList<>();
+        columns.add(AnalysisSerializer.FCSFilesColumnName.ID.toString());
+        columns.add(AnalysisSerializer.FCSFilesColumnName.Sample.toString());
+        columns.add(AnalysisSerializer.FCSFilesColumnName.Path.toString());
+        RowMapFactory<Object> rowMapFactory = new RowMapFactory<>(columns);
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+
+        for (String id : files.idSet())
+        {
+            String name = files.getNameForId(id);
+            String path = files.getById(id);
+
+            rows.add(rowMapFactory.getRowMap(Arrays.asList(id, name, path)));
+        }
+
+        // write out the catalog file
+        OutputStream tsv = dir.getOutputStream("FCSFiles.tsv");
+        try (PrintWriter pw = PrintWriters.getPrintWriter(tsv); TSVWriter writer = new TSVMapWriter(columns, rows))
+        {
+            writer.write(pw);
         }
     }
 
@@ -376,20 +420,12 @@ public class RunController extends BaseFlowController
             }
             else if (wellId != null && wellId.length > 0)
             {
-                Set<String> names = new HashSet<>();
                 List<FlowWell> wells = new ArrayList<>();
                 for (int id : wellId)
                 {
                     FlowWell well = FlowWell.fromWellId(id);
                     if (well == null)
                         throw new NotFoundException("Flow well not found");
-
-                    if (names.contains(well.getName()))
-                    {
-                        errors.rejectValue("wellId", ERROR_MSG, "Duplicate sample name '" + well.getName() + "'.  All exported sample well names must be unique.  Contact LabKey support if you see this error.");
-                        return;
-                    }
-                    names.add(well.getName());
 
                     wells.add(well);
                 }
@@ -445,9 +481,9 @@ public class RunController extends BaseFlowController
                 {
                     for (FlowRun run : _runs)
                     {
-                        Map<String, AttributeSet> keywords = new TreeMap<>();
-                        Map<String, AttributeSet> analysis = new TreeMap<>();
-                        Map<String, CompensationMatrix> matrices = new TreeMap<>();
+                        SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
+                        SampleIdMap<AttributeSet> analysis = new SampleIdMap<>();
+                        SampleIdMap<CompensationMatrix> matrices = new SampleIdMap<>();
                         getAnalysis(Arrays.asList(run.getWells()), keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                         String dirName = getBaseName(run.getName());
@@ -459,7 +495,8 @@ public class RunController extends BaseFlowController
 
                         if (form.isIncludeFCSFiles())
                         {
-                            exportFCSFiles(dir.getDir(fcsDirName), run, 0);
+                            SampleIdMap<String> files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, run, 0);
+                            writeFCSFileCatalog(dir, files);
                         }
                     }
 
@@ -475,19 +512,21 @@ public class RunController extends BaseFlowController
                     zipName = getBaseName(well.getName());
                 }
 
-                Map<String, AttributeSet> keywords = new TreeMap<>();
-                Map<String, AttributeSet> analysis = new TreeMap<>();
-                Map<String, CompensationMatrix> matrices = new TreeMap<>();
+                SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
+                SampleIdMap<AttributeSet> analysis = new SampleIdMap<>();
+                SampleIdMap<CompensationMatrix> matrices = new SampleIdMap<>();
                 getAnalysis(_wells, keywords, analysis, matrices, form.isIncludeKeywords(), form.isIncludeGraphs(), form.isIncludeCompensation(), form.isIncludeStatistics());
 
                 try (VirtualFile vf = createVirtualFile(form, zipName))
                 {
-                    AnalysisSerializer writer = new AnalysisSerializer(_log, vf);
+                    VirtualFile dir = vf.getDir(zipName);
+                    AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
                     writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
 
                     if (form.isIncludeFCSFiles())
                     {
-                        exportFCSFiles(vf.getDir(fcsDirName), _wells, 0);
+                        SampleIdMap<String> files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, _wells, 0);
+                        writeFCSFileCatalog(dir, files);
                     }
 
                     _successURL = onExportComplete(form, vf);
@@ -505,6 +544,7 @@ public class RunController extends BaseFlowController
                 {
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     File exportDir = new File(root.resolvePath(PipelineService.EXPORT_DIR), name);
+                    exportDir.mkdirs();
                     return new FileSystemFile(exportDir);
                 }
 
@@ -694,31 +734,29 @@ public class RunController extends BaseFlowController
     }
 
     public void getAnalysis(List<FlowWell> wells,
-                            Map<String, AttributeSet> keywordAttrs,
-                            Map<String, AttributeSet> analysisAttrs,
-                            Map<String, CompensationMatrix> matrices,
+                            SampleIdMap<AttributeSet> keywordAttrs,
+                            SampleIdMap<AttributeSet> analysisAttrs,
+                            SampleIdMap<CompensationMatrix> matrices,
                             boolean includeKeywords, boolean includeGraphBytes, boolean includeCompMatrices, boolean includeStatistics)
     {
         // CONSIDER: Uniquify well names if the same well has been imported into two different runs and is now being exported.
-        // CONSIDER: Unfortunately, the original sample name will be lost -- consider adding a id column to the export format containing the lsid of the well.
-        //FileNameUniquifier uniquifier = new FileNameUniquifier(false);
         for (FlowWell well : wells)
         {
-            //String name = uniquifier.uniquify(FileUtil.getBaseName(well.getName()));
-            String name = getBaseName(well.getName());
+            String id = String.valueOf(well.getRowId());
+            String name = well.getName();
 
             if (well instanceof FlowFCSAnalysis && (includeStatistics || includeGraphBytes))
             {
                 FlowFCSAnalysis analysis = (FlowFCSAnalysis) well;
                 AttributeSet attrs = analysis.getAttributeSet(includeGraphBytes);
-                analysisAttrs.put(name, attrs);
+                analysisAttrs.put(id, name, attrs);
             }
 
             if (includeKeywords)
             {
                 FlowFCSFile file = well.getFCSFileInput();
                 AttributeSet attrs = file.getAttributeSet();
-                keywordAttrs.put(name, attrs);
+                keywordAttrs.put(id, name, attrs);
             }
 
             if (includeCompMatrices)
@@ -728,7 +766,7 @@ public class RunController extends BaseFlowController
                 {
                     CompensationMatrix matrix = flowCompMatrix.getCompensationMatrix();
                     if (matrix != null)
-                        matrices.put(name, matrix);
+                        matrices.put(id, name, matrix);
                 }
             }
         }
