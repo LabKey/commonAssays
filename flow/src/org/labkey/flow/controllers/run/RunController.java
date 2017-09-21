@@ -19,10 +19,12 @@ package org.labkey.flow.controllers.run;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.AttachmentParent;
+import org.labkey.api.attachments.BaseDownloadAction;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.collections.RowMapFactory;
@@ -45,6 +47,7 @@ import org.labkey.api.util.FileNameUniquifier;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
@@ -53,7 +56,6 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.api.writer.VirtualFile;
@@ -76,7 +78,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -789,9 +790,10 @@ public class RunController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class DownloadImageAction extends SimpleViewAction<AttachmentForm>
+    public class DownloadImageAction extends BaseDownloadAction<AttachmentForm>
     {
-        public ModelAndView getView(final AttachmentForm form, BindException errors) throws Exception
+        @Override
+        public @Nullable Pair<AttachmentParent, String> getAttachment(AttachmentForm form)
         {
             final FlowRun run = form.getRun();
             if (null == run)
@@ -799,21 +801,7 @@ public class RunController extends BaseFlowController
                 throw new NotFoundException();
             }
 
-            getPageConfig().setTemplate(PageConfig.Template.None);
-
-            return new HttpView()
-            {
-                protected void renderInternal(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
-                {
-                    AttachmentService.get().download(response, run, form.getName());
-                }
-            };
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
+            return new Pair<>(run, form.getName());
         }
     }
-
 }
