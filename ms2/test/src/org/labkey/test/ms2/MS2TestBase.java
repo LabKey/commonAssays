@@ -98,7 +98,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     protected void deleteViews(String... viewNames)
     {
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         if (isElementPresent(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif")))
         {
             clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
@@ -118,7 +118,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     protected void deleteRuns()
     {
         log("Delete runs.");
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
 
         clickAndWait(Locator.linkWithText("MS2 Runs"));
         doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("experimentRunFilter"), "All Runs"));
@@ -162,8 +162,8 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         delete(new File(rootDir, ".labkey/protocols/"+search_type+"/test2.xml"));
     }
 
-    protected void navigateToFolder(String folderName)
+    protected void navigateToMenuLink(String folderName)
     {
-        navigateToFolder(getProjectName(), folderName);
+        navigateToMenuLink(getProjectName(), folderName);
     }
 }

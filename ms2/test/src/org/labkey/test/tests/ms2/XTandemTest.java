@@ -73,7 +73,7 @@ public class XTandemTest extends AbstractXTandemTest
         // There should be 100 MS1 scans and 100 MS2 scans
         assertTextPresent("100");
 
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user
@@ -110,7 +110,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextPresent(tsvSearcher, PROTEIN);
 
         log("Test Comparing Peptides");
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         DataRegionTable ms2Runs = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         ms2Runs.checkAll();
         ms2Runs.clickHeaderMenu("Compare", "Peptide (Legacy)");
@@ -125,7 +125,7 @@ public class XTandemTest extends AbstractXTandemTest
         compareRegion.setSort("Peptide", SortDirection.DESC);
         assertTextBefore(PEPTIDE5, PEPTIDE4);
 
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         verifyPeptideCrosstab();
         verifyComparePeptides();
     }
@@ -140,7 +140,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextNotPresent(PEPTIDE);
 
         log("Navigate to folder Portal");
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
 
         log("Verify experiment information in MS2 runs.");
         assertElementPresent(Locator.linkWithText(PROTOCOL));
@@ -169,7 +169,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTextPresent("No data to show");
 
         log("Search for a protein in the second fasta file.");
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         setFormElement(Locator.name("identifier"), SEARCH_FASTA2);
         checkCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
@@ -177,7 +177,7 @@ public class XTandemTest extends AbstractXTandemTest
         assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
 
         log("Search for a protein in the third fasta file.");
-        navigateToFolder(FOLDER_NAME);
+        navigateToMenuLink(FOLDER_NAME);
         setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
