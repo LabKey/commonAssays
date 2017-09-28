@@ -559,7 +559,7 @@ abstract public class FlowJoWorkspace extends Workspace
         {
             // FlowJo v9.7 changed attribute 'value' to 'statValue'
             String strValue = StringUtils.trimToNull(getAttribute(elStat, "value", "statValue"));
-            if (strValue != null && !strValue.equals("\ufffd"))
+            if (strValue != null && !strValue.equals("\ufffd") && !strValue.equals("¥"))
             {
                 double value;
                 try
