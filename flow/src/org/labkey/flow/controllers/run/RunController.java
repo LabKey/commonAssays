@@ -16,6 +16,7 @@
 
 package org.labkey.flow.controllers.run;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -74,6 +75,7 @@ import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.view.ExportAnalysisForm;
+import org.labkey.flow.view.ExportAnalysisManifest;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -82,6 +84,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -90,6 +93,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,6 +103,7 @@ import java.util.TreeMap;
 
 import static org.labkey.api.util.FileUtil.getBaseName;
 import static org.labkey.api.util.FileUtil.getTimestamp;
+import static org.labkey.flow.controllers.run.StatusJsonHelper.getStatusUrl;
 
 public class RunController extends BaseFlowController
 {
@@ -339,17 +344,21 @@ public class RunController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class ExportAnalysis extends FormViewAction<ExportAnalysisForm>
     {
+        private static final String MANIFEST_FILENAME = "manifest.json";
         List<FlowRun> _runs = null;
         List<FlowWell> _wells = null;
         boolean _success = false;
-        URLHelper _successURL = null;
 
+        URLHelper _successURL = null;
         private String _exportToScriptPath;
         private String _exportToScriptCommandLine;
         private String _exportToScriptLocation;
         private String _exportToScriptFormat;
         private Integer _exportToScriptTimeout;
+
         private String _guid;
+        private File exportToScriptDir;
+
 
         @Override
         public void validateCommand(ExportAnalysisForm form, Errors errors)
@@ -480,6 +489,7 @@ public class RunController extends BaseFlowController
 
                 try (VirtualFile vf = createVirtualFile(form, zipName))
                 {
+                    SampleIdMap<String> files = null;
                     for (FlowRun run : _runs)
                     {
                         SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
@@ -492,16 +502,16 @@ public class RunController extends BaseFlowController
 
                         VirtualFile dir = vf.getDir(dirName);
                         AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
-                        writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
-
                         if (form.isIncludeFCSFiles())
                         {
-                            SampleIdMap<String> files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, run, 0);
+                            files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, run, 0);
                             writeFCSFileCatalog(dir, files);
                         }
+
+                        writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
                     }
 
-                    _successURL = onExportComplete(form, vf);
+                    _successURL = onExportComplete(form, vf, files);
                 }
             }
             else if (_wells != null && _wells.size() > 0)
@@ -522,19 +532,49 @@ public class RunController extends BaseFlowController
                 {
                     VirtualFile dir = vf.getDir(zipName);
                     AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
-                    writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
 
+                    SampleIdMap<String> files = null;
                     if (form.isIncludeFCSFiles())
                     {
-                        SampleIdMap<String> files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, _wells, 0);
+                        files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, _wells, 0);
                         writeFCSFileCatalog(dir, files);
                     }
 
-                    _successURL = onExportComplete(form, vf);
+                    writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
+
+                    _successURL = onExportComplete(form, vf, files);
                 }
             }
 
             return _success = true;
+        }
+
+        private void writeManifest(String manifestJson, String dir) throws IOException
+        {
+            if (manifestJson == null || manifestJson.isEmpty())
+                return;
+
+
+            File file = new File(dir,MANIFEST_FILENAME);
+            FileOutputStream statisticsFile = new FileOutputStream(file);
+
+            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile))
+            {
+                pw.write(manifestJson);
+            }
+        }
+
+        @NotNull
+        private ExportAnalysisManifest buildExportAnalysisManifest(ExportAnalysisForm form, SampleIdMap<String> files)
+        {
+            ExportAnalysisManifest analysisManifest = new ExportAnalysisManifest();
+            analysisManifest.setExportedBy(getUser().getDisplayName(getUser()));
+            analysisManifest.setExportedDatetime(new Date());
+            analysisManifest.setLabel(form.getLabel());
+            analysisManifest.setSampleIdMap(files);
+            analysisManifest.setExportFormat(form.getSendTo().name());
+            analysisManifest.setGuid(_guid);
+            return analysisManifest;
         }
 
         VirtualFile createVirtualFile(ExportAnalysisForm form, String name) throws IOException
@@ -554,7 +594,7 @@ public class RunController extends BaseFlowController
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     File exportDir = root.resolvePath(PipelineService.EXPORT_DIR);
                     exportDir.mkdir();
-                    return new ZipFile(exportDir, FileUtil.makeFileNameWithTimestamp(name, ".zip"));
+                    return new ZipFile(exportDir, FileUtil.makeFileNameWithTimestamp(name, "zip"));
                 }
 
                 case Script:
@@ -565,7 +605,8 @@ public class RunController extends BaseFlowController
 
                     if ("zip".equalsIgnoreCase(_exportToScriptFormat))
                     {
-                        return new ZipFile(dir, FileUtil.makeFileNameWithTimestamp(name, ".zip"));
+                        exportToScriptDir = new File(_exportToScriptLocation + "/" +  FileUtil.makeFileNameWithTimestamp(name));
+                        return new ZipFile(exportToScriptDir, "export.zip");
                     }
                     else
                     {
@@ -581,7 +622,7 @@ public class RunController extends BaseFlowController
             }
         }
 
-        URLHelper onExportComplete(ExportAnalysisForm form, VirtualFile vf)
+        URLHelper onExportComplete(ExportAnalysisForm form, VirtualFile vf, SampleIdMap<String> files) throws IOException
         {
             switch (form.getSendTo())
             {
@@ -594,6 +635,10 @@ public class RunController extends BaseFlowController
                     File location = new File(vf.getLocation());
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     ViewBackgroundInfo vbi = new ViewBackgroundInfo(getContainer(), getUser(), null);
+
+                    ExportAnalysisManifest analysisManifest = buildExportAnalysisManifest(form, files);
+                    writeManifest(analysisManifest.toJSON(), vf.getLocation());
+
                     PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, form.getLabel(), location, vbi, root);
                     String jobGuid = null;
                     try
@@ -658,8 +703,22 @@ public class RunController extends BaseFlowController
         @Override
         public URLHelper getStatusHref()
         {
-            // TODO: Could add link to, e.g. the galaxy run, but will need the script to communicate back to us
-            return null;
+            URLHelper urlHelper = null;
+            try
+            {
+                File log = getLogFile();
+                List<String> lines = FileUtils.readLines(log);
+                String url = getStatusUrl(lines);
+                if(url != null)
+                {
+                    urlHelper = new URLHelper(url);
+                }
+            }
+            catch (Exception e)
+            {
+                urlHelper = null;
+            }
+            return urlHelper;
         }
 
         @Override

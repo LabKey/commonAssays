@@ -404,6 +404,7 @@ flow/src/org/labkey/flow/controllers/run/DownloadRunForm.java -text
 flow/src/org/labkey/flow/controllers/run/RunController.java -text
 flow/src/org/labkey/flow/controllers/run/RunForm.java -text
 flow/src/org/labkey/flow/controllers/run/RunsForm.java -text
+flow/src/org/labkey/flow/controllers/run/StatusJsonHelper.java -text
 flow/src/org/labkey/flow/controllers/run/download.jsp -text
 flow/src/org/labkey/flow/controllers/run/plate.jsp -text
 flow/src/org/labkey/flow/controllers/run/showRun.jsp -text
@@ -496,6 +497,7 @@ flow/src/org/labkey/flow/script/ScriptXarSource.java -text
 flow/src/org/labkey/flow/script/WorkspaceJob.java -text
 flow/src/org/labkey/flow/util/SampleUtil.java -text
 flow/src/org/labkey/flow/view/ExportAnalysisForm.java -text
+flow/src/org/labkey/flow/view/ExportAnalysisManifest.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphDataRegion.java -text

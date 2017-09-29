@@ -70,6 +70,7 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.reports.PositivityFlowReport;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.flow.view.ExportAnalysisManifest;
 import org.labkey.flow.webparts.AnalysesWebPart;
 import org.labkey.flow.webparts.AnalysisScriptsWebPart;
 import org.labkey.flow.webparts.FlowFolderType;
@@ -269,7 +270,9 @@ public class FlowModule extends SpringModule
                 StatisticSpec.TestCase.class,
                 FlowJoWorkspace.LoadTests.class,
                 AnalysisSerializer.TestCase.class,
-                CompensationMatrix.TestFCS.class));
+                CompensationMatrix.TestFCS.class,
+                ExportAnalysisManifest.class
+                ));
     }
 
     @NotNull
