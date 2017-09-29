@@ -41,7 +41,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     public void testSteps()
     {
         setupMS2();
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         verifyMS2();
     }
 
@@ -68,7 +68,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected void importMS2Run(String directoryName, int totalJobCount)
     {
         log("Upload existing MS2 data: ");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("bov_sample/" + SEARCH_TYPE + "/" + directoryName + "/" + SAMPLE_BASE_NAME + ".search.xar.xml", "Import Experiment");
 
@@ -94,7 +94,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
 
         importMS2Run("DRT1", 1);
 
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkContainingText("DRT1"));
 
         // Create some saved MS2 views

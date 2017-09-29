@@ -90,7 +90,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
 
     private void compareWithCriteria(String matchCriteria)
     {
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         targetProteinInput.waitForElement(getDriver(), 1000);
         setFormElement(targetProteinInput, SEARCH_STRING);

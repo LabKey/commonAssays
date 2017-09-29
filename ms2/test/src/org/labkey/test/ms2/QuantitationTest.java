@@ -46,7 +46,7 @@ public class QuantitationTest extends AbstractXTandemTest
         createProjectAndFolder();
 
         log("Start analysis running.");
-        projectMenu().navigateToMenuLink(getProjectName(),"ms2folder");
+        projectMenu().navigateToFolder(getProjectName(),"ms2folder");
         clickButton("Process and Import Data");
 
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/" + SAMPLE_BASE_NAME + ".mzXML");

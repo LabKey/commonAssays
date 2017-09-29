@@ -43,7 +43,7 @@ public class MS2GZTest extends AbstractMS2ImportTest
     protected void verifyMS2()
     {
         log("Test Protein Prophet Compare");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         searchRunsTable.checkAllOnPage();
@@ -62,7 +62,7 @@ public class MS2GZTest extends AbstractMS2ImportTest
         assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|13442951|dbj|BAB39767.1|");
 
         log("Test adding columns");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         searchRunsTable.checkAllOnPage();
         searchRunsTable.clickHeaderMenu("Compare", "ProteinProphet (Legacy)");
@@ -73,7 +73,7 @@ public class MS2GZTest extends AbstractMS2ImportTest
         assertTextNotPresent("GroupProbability");
 
         log("Test Compare Search Engine Proteins");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         searchRunsTable.checkAllOnPage();
         searchRunsTable.clickHeaderMenu("Compare", "Search Engine Protein");
@@ -91,7 +91,7 @@ public class MS2GZTest extends AbstractMS2ImportTest
         assertTextBefore("gi|11499506|ref|NP_070747.1|", "gi|13507919|");
 
         log("Test Compare Peptides (Legacy)");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         searchRunsTable.checkAllOnPage();
         searchRunsTable.clickHeaderMenu("Compare", "Peptide (Legacy)");

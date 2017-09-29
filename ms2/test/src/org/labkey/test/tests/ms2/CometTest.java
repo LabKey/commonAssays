@@ -76,7 +76,7 @@ public class CometTest extends AbstractMS2SearchEngineTest
         // There should be 100 MS1 scans and 100 MS2 scans
         assertTextPresent("100");
 
-        projectMenu().navigateToMenuLink(getProjectName(), getCurrentContainer()); // with tabs invisible, navigate to the container
+        projectMenu().navigateToFolder(getProjectName(), getCurrentContainer()); // with tabs invisible, navigate to the container
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
 
         // Make sure we're not using a custom default view for the current user

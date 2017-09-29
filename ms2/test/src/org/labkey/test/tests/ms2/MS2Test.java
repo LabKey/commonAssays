@@ -89,7 +89,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void verifyFirstRun()
     {
         log("Verify run view.");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkContainingText("DRT1"));
 
         // Make sure we're not using a custom default view for the current user
@@ -756,7 +756,7 @@ public class MS2Test extends AbstractMS2ImportTest
 
     protected void validateSecondRun()
     {
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
 
         selectOptionByText(Locator.name("viewParams"), "<Standard View>");
@@ -818,10 +818,10 @@ public class MS2Test extends AbstractMS2ImportTest
         }
 
         popLocation();
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         validateCompare();
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         String retTimeColumn = "RetentionTime";
         String retMinsColumn = "RetentionTimeMinutes";
@@ -846,7 +846,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void validateRunGroups()
     {
         log("Test creating run groups");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/Experiment/images/graphIcon.gif"));
         clickAndWait(Locator.id("expandCollapse-experimentRunGroup"), 0);
         clickButton("Create new group");
@@ -860,7 +860,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(RUN_GROUP1_NAME1,
                 RUN_GROUP1_HYPOTHESIS,
                 RUN_GROUP1_COMMENTS);
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         assertTextPresent(RUN_GROUP1_NAME1);
 
         clickAndWait(Locator.linkWithText("Run Groups"));
@@ -886,7 +886,7 @@ public class MS2Test extends AbstractMS2ImportTest
         clickButton("Submit");
 
         log("Test customizing view to include the run groups");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("MS2 Runs"));
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn(new String[] { "RunGroupToggle", EscapeUtil.fieldKeyEncodePart(RUN_GROUP1_NAME2) }, RUN_GROUP1_NAME2);
@@ -905,7 +905,7 @@ public class MS2Test extends AbstractMS2ImportTest
         }
 
         log("Test editing a run group's runs");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("Run Groups"));
         clickAndWait(Locator.linkWithText(RUN_GROUP2_NAME));
         assertTextPresent(RUN_GROUP1_NAME2,
@@ -918,7 +918,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("DRT1");
 
         verifyRunGroupMapQuery();
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
 
         log("Test that the compare run groups works");
         DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, getDriver());
@@ -964,7 +964,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(compareRunExportSearcher, "gi|34849400|");
 
         log("Test delete run groups");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("Run Groups"));
         DataRegionTable runGroupTable = new DataRegionTable("RunGroupWide", getDriver());
         runGroupTable.checkAll();
@@ -973,7 +973,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(RUN_GROUP1_NAME2,
                 RUN_GROUP2_NAME,
                 DEFAULT_EXPERIMENT);
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         assertTextNotPresent(RUN_GROUP1_NAME2);
 
         verifyGroupAudit();
@@ -997,7 +997,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertEquals(8, addedCount);
         assertEquals(1, removedCount);
 
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
     }
 
     private void verifyRunGroupMapQuery()
@@ -1153,7 +1153,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(bulkProteinCoverageSearcher, "peptide-marker", 2);
 
         log("Test Compare Runs using Query Peptides");
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         DataRegionTable ms2Runs = new DataRegionTable(REGION_NAME_SEARCH_RUNS, getDriver());
         ms2Runs.checkAll();
         ms2Runs.clickHeaderMenu("Compare", "Peptide");
@@ -1263,12 +1263,12 @@ public class MS2Test extends AbstractMS2ImportTest
         clickButtonContainingText("Execute Query", 0);
         assertTextNotPresent(expectedError);
 
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
     }
 
     private void fractionRollupTest()
     {
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
         _fileBrowserHelper.selectFileBrowserItem("bov_fract/xtandem/test1/CAexample_mini1.xtan.xml");
         _fileBrowserHelper.checkFileBrowserFileCheckbox("CAexample_mini2.xtan.xml");

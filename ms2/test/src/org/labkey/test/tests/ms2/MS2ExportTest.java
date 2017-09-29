@@ -56,7 +56,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
 
     private void validatePeptideComparisonExport()
     {
-        navigateToMenuLink(FOLDER_NAME);
+        navigateToFolder(FOLDER_NAME);
         DataRegionTable runsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         runsTable.checkAllOnPage();
         runsTable.clickHeaderMenu("Compare", "Peptide");
