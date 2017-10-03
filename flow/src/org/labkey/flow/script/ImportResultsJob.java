@@ -177,6 +177,8 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 continue;
 
             sampleIds.add(id);
+            if (sampleIdToNameMap.get(id) != null && !sampleIdToNameMap.get(id).contains(sampleLabel))
+                sampleIdToNameMap.put(id, sampleLabel);
 
             AttributeSet resultsAttrs = resultsMap.getById(id);
             AttributeSetHelper.prepareForSave(resultsAttrs, getContainer(), false);

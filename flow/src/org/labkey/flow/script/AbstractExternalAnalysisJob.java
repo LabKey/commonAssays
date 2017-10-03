@@ -337,7 +337,12 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                     return null;
 
                 Collection<String> sampleNames = sampleIdToNameMap.get(sampleId);
-                if (sampleNames.size() > 1)
+                if (sampleNames.size() == 0)
+                {
+                    error("Sample name not found for id '" + sampleId + "'.");
+                    continue;
+                }
+                else if (sampleNames.size() > 1)
                 {
                     error("Duplicate sample names not yet supported.  More than one sample name for id '" + sampleId + "' found: " + StringUtils.join(sampleNames, ", "));
                     continue;
@@ -465,6 +470,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             }
 
             if (checkInterrupted())
+                return null;
+
+            if (hasErrors())
                 return null;
 
             if (experiment != null)
