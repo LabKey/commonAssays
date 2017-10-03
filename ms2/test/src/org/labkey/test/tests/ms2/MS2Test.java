@@ -462,17 +462,6 @@ public class MS2Test extends AbstractMS2ImportTest
                 "Expect",
                 "SeqHits");
 
-        log("Test changing order of sorts and columns");
-        _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.moveSort("Charge", false);
-        _customizeViewsHelper.applyCustomView();
-
-        assertTextBefore("K.TESGYGSESSLR.R", "K.HVSGKIIGFFY.-");
-
-        _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.moveSort("Mass", false);
-        _customizeViewsHelper.applyCustomView();
-
         log("Test Ignore View Filter");
         peptidesTable.clickApplyGridFilter();
         assertTextPresent("K.LLASMLAK.A",
