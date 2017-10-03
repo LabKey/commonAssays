@@ -357,7 +357,6 @@ public class RunController extends BaseFlowController
         private Integer _exportToScriptTimeout;
 
         private String _guid;
-        private File exportToScriptDir;
 
 
         @Override
@@ -605,7 +604,7 @@ public class RunController extends BaseFlowController
 
                     if ("zip".equalsIgnoreCase(_exportToScriptFormat))
                     {
-                        exportToScriptDir = new File(_exportToScriptLocation + "/" +  FileUtil.makeFileNameWithTimestamp(name));
+                        File exportToScriptDir = new File(_exportToScriptLocation + "/" +  FileUtil.makeFileNameWithTimestamp(name));
                         return new ZipFile(exportToScriptDir, "export.zip");
                     }
                     else
