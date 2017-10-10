@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.ms2.PeptideQuantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
+<%@ page import="org.labkey.api.view.template.FrameFactoryClassic" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
@@ -36,13 +37,7 @@
 <labkey:errors />
 <labkey:form name="elutionForm" method="post">
 
-<div class="panel panel-default">
-    <div class="panel-heading clearfix">
-        <h3 class="panel-title pull-left">
-            Peptide Summary
-        </h3>
-    </div>
-    <div class="panel-body">
+    <%FrameFactoryClassic.startPanelFrame(out, "Peptide Summary");%>
        <table class="lk-fields-table">
            <tr>
                <td class="labkey-form-label">Sequence</td>
@@ -75,16 +70,9 @@
                </td>
            </tr>
        </table>
-    </div>
-</div>
+    <%FrameFactoryClassic.endPanelFrame(out);%>
 
-<div class="panel panel-default">
-    <div class="panel-heading clearfix">
-        <h3 class="panel-title pull-left">
-            Light Elution Profile
-        </h3>
-    </div>
-    <div class="panel-body">
+    <%FrameFactoryClassic.startPanelFrame(out, "Light Elution Profile");%>
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
             <td>
@@ -140,16 +128,9 @@
         </tr>
         <tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    </div>
-</div>
+    <%FrameFactoryClassic.endPanelFrame(out);%>
 
-<div class="panel panel-default">
-    <div class="panel-heading clearfix">
-        <h3 class="panel-title pull-left">
-            Heavy Elution Profile
-        </h3>
-    </div>
-    <div class="panel-body">
+    <%FrameFactoryClassic.startPanelFrame(out, "Heavy Elution Profile");%>
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tr>
             <td>
@@ -205,8 +186,7 @@
         </tr>
         <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    </div>
-</div>
+    <%FrameFactoryClassic.endPanelFrame(out);%>
 
 </labkey:form>
 

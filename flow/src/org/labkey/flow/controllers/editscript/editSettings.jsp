@@ -21,6 +21,7 @@
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.view.template.FrameFactoryClassic" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib"%>
 <% EditSettingsForm form = (EditSettingsForm) this.form;
@@ -34,13 +35,7 @@
 %>
 <labkey:errors/>
 <labkey:form action="<%=form.urlFor(ScriptController.EditSettingsAction.class)%>" method="POST">
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">
-                Filter FCS files by keyword
-            </h3>
-        </div>
-        <div class="panel-body">
+        <%FrameFactoryClassic.startPanelFrame(out, "Filter FCS files by keyword");%>
             <p>Filters may be applied to this analysis script.  The set of keyword and
             value pairs <i>must</i> all match in the FCS header to be included in the analysis.
             <% if (protocol != null) { %>
@@ -96,16 +91,9 @@
             <% } else { %>
                 <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
             <% } %>
-        </div>
-    </div>
+        <%FrameFactoryClassic.endPanelFrame(out);%>
 
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">
-                Edit Minimum Values
-            </h3>
-        </div>
-        <div class="panel-body">
+        <%FrameFactoryClassic.startPanelFrame(out, "Edit Minimum Values");%>
             <p>For each parameter, specify the minimum value.  This value will be used when drawing graphs.
                 Also, for the purpose of calculating statistics, and applying gates, values will be constrained to be greater than
                 or equal to this minimum value.</p>
@@ -135,8 +123,7 @@
             <% } else { %>
                 <labkey:button text="Go Back" href="<%=form.urlFor(ScriptController.BeginAction.class)%>" />
             <% } %>
-        </div>
-    </div>
+        <%FrameFactoryClassic.endPanelFrame(out);%>
 </labkey:form>
 
 <script type="text/javascript">

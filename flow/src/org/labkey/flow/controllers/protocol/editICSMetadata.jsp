@@ -23,6 +23,7 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.template.FrameFactoryClassic" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -61,13 +62,7 @@
 %>
 <labkey:errors />
 <labkey:form action="<%=submitURL%>" method="POST">
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">
-                Sample Columns
-            </h3>
-        </div>
-        <div class="panel-body">
+        <%FrameFactoryClassic.startPanelFrame(out, "Sample Columns");%>
             <p>The LabKey study module uses the pair of participant and visit/date to identify the sample and uses
             this information to combine multiple assays together.</p>
             <p>Select the columns that identify the sample using FCSFile keywords or sample properties.
@@ -98,16 +93,9 @@
                     </td>
                 </tr>
             </table>
-        </div>
-    </div>
+        <%FrameFactoryClassic.endPanelFrame(out);%>
 
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">
-                Background and Foreground Match Columns
-            </h3>
-        </div>
-        <div class="panel-body">
+        <%FrameFactoryClassic.startPanelFrame(out, "Background and Foreground Match Columns");%>
             <p>Select the columns that match between both the foreground and background wells.</p>
             <p>For example, you usually want to match wells from the same FCSAnalysis Run and from
             the sample draw.</p>
@@ -121,16 +109,9 @@
                 </tr>
                 <% } %>
             </table>
-        </div>
-    </div>
+        <%FrameFactoryClassic.endPanelFrame(out);%>
 
-    <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">
-                Background Column and Value
-            </h3>
-        </div>
-        <div class="panel-body">
+        <%FrameFactoryClassic.startPanelFrame(out, "Background Column and Value");%>
             <p>Specify the column and value filter(s) which uniquely identify the background wells from
             the foreground wells.<br>If multiple wells match the background criteria, the
             background value will be the average of all the matched wells.</p>
@@ -159,7 +140,6 @@
                     }
                 %>
             </table>
-        </div>
-    </div>
+        <%FrameFactoryClassic.endPanelFrame(out);%>
     <labkey:button text="Set ICS Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </labkey:form>
