@@ -598,12 +598,9 @@ public abstract class FilterFlowReport extends FlowReport
         @Override
         public File getReportDir(@NotNull String executingContainerId)
         {
-            // Workaround for Issue 12625: Create unique directory for the background report job
-            File tempRoot = getTempRoot(getDescriptor());
-            String name = FileUtil.makeLegalName(getDescriptor().getReportId().toString() + "_" + GUID.makeHash()).replaceAll(" ", "_");
-            File file = new File(tempRoot, executingContainerId + File.separator + "Report_" + name);
-            file.mkdirs();
-            return file;
+            // Issue 12625: Create unique directory for the background report job
+            boolean isPipeline = _report.saveToDomain();
+            return super.getReportDir(executingContainerId, isPipeline);
         }
     }
 
