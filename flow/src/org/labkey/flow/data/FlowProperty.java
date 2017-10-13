@@ -37,6 +37,9 @@ abstract public class FlowProperty
     // Property on FlowFCSFile ExpData object: true when the FlowFCSFile was created from an external analysis (extracted from FlowJo workspace or analysis archive)
     //static public final SystemProperty ExtraKeywordsFCSFile = new SystemProperty(PROPERTY_BASE + "ExtraKeywordsFCSFile", PropertyType.BOOLEAN);
 
+    // Property on FlowRun ExpRun object: original source path of file being processed (OriginalSourcePath)
+    static public final SystemProperty OriginalSourcePath = new SystemProperty(PROPERTY_BASE + "OriginalSourcePath", PropertyType.STRING);
+
     static public void register()
     {
     }

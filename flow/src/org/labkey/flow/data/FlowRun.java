@@ -294,6 +294,11 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         }
     }
 
+    public String getOriginalSourcePath()
+    {
+        return (String)getProperty(FlowProperty.OriginalSourcePath);
+    }
+
     public FlowWorkspace getWorkspace()
     {
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);

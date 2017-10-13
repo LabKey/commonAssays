@@ -465,6 +465,10 @@ public class FlowSchema extends UserSchema
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
 
+        PropertyDescriptor pd = FlowProperty.OriginalSourcePath.getPropertyDescriptor();
+        PropertyColumn osp = new PropertyColumn(pd, colLSID, getContainer(), getUser(), true);
+        ret.addColumn(osp);
+
         return ret;
     }
 

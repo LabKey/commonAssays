@@ -11,11 +11,13 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
 import org.labkey.api.util.FileType;
+import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
         return new RecordedActionSet();
     }
 
-    public static List<FlowRun> importFlowRuns(PipelineJob job, FlowProtocol protocol, List<File> paths, Container targetStudyContainer) throws IOException
+    public static List<FlowRun> importFlowRuns(PipelineJob job, FlowProtocol protocol, List<File> paths, Container targetStudyContainer) throws IOException, SQLException
     {
         PipeRoot pr = PipelineService.get().findPipelineRoot(job.getContainer());
 
@@ -64,7 +66,16 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
         else
         {
             for (FlowRun run : runs)
-                job.info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");
+            {
+                String originalSourcePath = job.getParameters().get("OriginalSourcePath");
+                if (null != originalSourcePath)
+                {
+                    job.info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "' having original source path '" + originalSourcePath + "'");
+                    run.setProperty(job.getUser(), FlowProperty.OriginalSourcePath.getPropertyDescriptor(), originalSourcePath);
+                }
+                else
+                    job.info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");
+            }
         }
 
         return runs;
