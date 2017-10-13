@@ -17,6 +17,7 @@ package org.labkey.test.util.luminex;
 
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.Locators;
 import org.labkey.test.tests.luminex.LuminexTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
@@ -25,9 +26,11 @@ import org.labkey.test.util.LogMethod;
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class LuminexGuideSetHelper
 {
@@ -60,7 +63,8 @@ public class LuminexGuideSetHelper
         _test.uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         _test.checkCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
         _test.clickButton("Save and Finish");
-        _test.assertElementNotPresent(Locator.css(".labkey-error").containing("error"));
+        List<String> errors = _test.getTexts(Locators.labkeyError.withText().findElements(_test.getDriver()));
+        assertTrue("Unexpected error(s): " + errors, errors.isEmpty());
         return _runNumber++;
     }
 
