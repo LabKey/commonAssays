@@ -15,10 +15,12 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.exp.ExperimentMaterialListener;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.security.User;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.util.List;
@@ -30,7 +32,7 @@ import java.util.List;
 public class ExpressionMatrixMaterialListener implements ExperimentMaterialListener
 {
     @Override
-    public void beforeDelete(List<? extends ExpMaterial> materials)
+    public void beforeDelete(List<? extends ExpMaterial> materials, Container container, User user)
     {
         SqlExecutor sqlExecutor = new SqlExecutor(MicroarrayUserSchema.getSchema());
         for (ExpMaterial material : materials)
