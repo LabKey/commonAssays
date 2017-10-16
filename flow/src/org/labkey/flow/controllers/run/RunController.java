@@ -98,8 +98,10 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import static org.labkey.api.util.FileUtil.getBaseName;
 import static org.labkey.api.util.FileUtil.getTimestamp;
@@ -638,7 +640,7 @@ public class RunController extends BaseFlowController
                     ExportAnalysisManifest analysisManifest = buildExportAnalysisManifest(form, files);
                     writeManifest(analysisManifest.toJSON(), vf.getLocation());
 
-                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, form.getLabel(), location, vbi, root);
+                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, form.getLabel(), location, _exportToScriptTimeout, vbi, root);
                     String jobGuid = null;
                     try
                     {
@@ -684,8 +686,9 @@ public class RunController extends BaseFlowController
         private final String _exportToScriptCommandLine;
         private final String _label;
         private final File _location;
+        private final Integer _timeout;
 
-        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String label, File location, ViewBackgroundInfo info, @NotNull PipeRoot root)
+        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String label, File location, Integer timeout, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
             _guid = guid;
@@ -693,6 +696,7 @@ public class RunController extends BaseFlowController
             _exportToScriptCommandLine = exportToScriptCommandLine;
             _label = label;
             _location = location;
+            _timeout = timeout;
 
             // setup the log file
             File logFile = new File(root.getRootPath(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
@@ -761,8 +765,7 @@ public class RunController extends BaseFlowController
             env.put("scriptPath", _exportToScriptPath);
             env.put("label", _label);
             env.put("location", _location.toString());
-            // TODO:
-            //env.put("timeout", _timeout);
+            env.put("timeout", Objects.toString(_timeout, ""));
             //env.put("exportFormat", _exportFormat);
             List<String> params = parse(_exportToScriptCommandLine, env);
 
@@ -771,11 +774,13 @@ public class RunController extends BaseFlowController
             ProcessBuilder pb = new ProcessBuilder(params);
             info("Executing script: " + StringUtils.join(pb.command(), " "));
 
-            // TODO: add support for timeout
-
             try
             {
-                runSubProcess(pb, dir);
+                if (_timeout == null)
+                    runSubProcess(pb, dir);
+                else
+                    runSubProcess(pb, dir, null, 0, false, _timeout, TimeUnit.SECONDS);
+
                 if (getErrors() == 0)
                 {
                     info("Deleting temp directory: " + _location);

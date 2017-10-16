@@ -44,8 +44,7 @@
     sendToOptions.put(ExportAnalysisForm.SendTo.PipelineFiles, "Pipeline root as files");
 
     FlowModule module = ModuleLoader.getInstance().getModule(FlowModule.class);
-    ModuleProperty prop = module.getModuleProperties().get("ExportToScript");
-    if (prop != null && prop.getEffectiveValue(getContainer()) != null)
+    if (module.getExportToScriptCommandLine(getContainer()) != null)
         sendToOptions.put(ExportAnalysisForm.SendTo.Script, "External script as files");
 
     boolean renderForm = bean._renderForm;
