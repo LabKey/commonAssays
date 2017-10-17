@@ -94,11 +94,15 @@
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Mass</td><td><%= h(Formats.f4.format(p.getMass())) %></td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= h(p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())) %></td>
+                    <% if (run.getRunType().getScoreColumnList().size() >= 2) { %>
+                        <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(1)) %></td><td><%= h(p.getDiffScore() == null ? "" : Formats.f3.format(p.getDiffScore())) %></td>
+                    <% } %>
                     <td class="labkey-form-label">Fraction</td><td><%= h(fraction.getFileName()) %></td>
                 </tr>
                 <tr>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
+                    <% if (run.getRunType().getScoreColumnList().size() >= 1) { %>
+                        <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
+                    <% } %>
                     <td class="labkey-form-label">PeptideProphet</td><td><%= h((p.getPeptideProphet() == null) ? "" : Formats.f2.format(p.getPeptideProphet())) %></td>
                     <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
                 </tr>
@@ -108,7 +112,9 @@
                 </tr>
                 <tr>
                     <td class="labkey-form-label">Charge</td><td><%=p.getCharge()%>+</td>
-                    <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= h(p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())) %></td>
+                    <% if (run.getRunType().getScoreColumnList().size() >= 3) { %>
+                        <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= h(p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())) %></td>
+                    <% } %>
                 </tr>
                 <% if (MS2RunType.Mascot.equals(run.getRunType())) { %>
                     <tr>
