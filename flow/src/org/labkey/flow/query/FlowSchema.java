@@ -402,12 +402,20 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpRunTable.Column.Name).setURL(detailsURL);
         ret.addColumn(ExpRunTable.Column.Created);
         ret.addColumn(ExpRunTable.Column.CreatedBy);
+
         ColumnInfo containerCol = ret.addColumn(ExpRunTable.Column.Folder);
         containerCol.setHidden(true);
         ContainerForeignKey.initColumn(containerCol, this, null);
-        ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
+
         ColumnInfo colLSID = ret.addColumn(ExpRunTable.Column.LSID);
         colLSID.setHidden(true);
+
+        ret.addColumn(ExpRunTable.Column.FilePathRoot).setHidden(true);
+
+        PropertyColumn osp = new PropertyColumn(FlowProperty.OriginalSourcePath.getPropertyDescriptor(), colLSID, getContainer(), getUser(), true);
+        osp.setHidden(true);
+        ret.addColumn(osp);
+
         ret.addColumn(ExpRunTable.Column.ProtocolStep);
 
         ColumnInfo analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
@@ -464,10 +472,6 @@ public class FlowSchema extends UserSchema
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
-
-        PropertyDescriptor pd = FlowProperty.OriginalSourcePath.getPropertyDescriptor();
-        PropertyColumn osp = new PropertyColumn(pd, colLSID, getContainer(), getUser(), true);
-        ret.addColumn(osp);
 
         return ret;
     }
