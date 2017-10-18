@@ -66,7 +66,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         region.setFilter("Description", "Equals", excludedTitration);
         region.setFilter("Analyte", "Contains", excludedAnalyte);
         waitForElement(Locator.paginationText(1, 12, 12));
-        List<List<String>> vals = getColumnValues(DATA_TABLE_NAME, "Well", "Description", "Type", "Exclusion Comment", "Analyte");
+        List<List<String>> vals = region.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
         List<String> descriptions = vals.get(1);
         List<String> types = vals.get(2);
@@ -119,7 +119,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         region.setFilter("Description", "Equals", excludedTitration);
         waitForElement(Locator.paginationText(1, 60, 60));
-        List<List<String>> vals = getColumnValues(DATA_TABLE_NAME, "Well", "Description", "Type", "Exclusion Comment", "Analyte");
+        List<List<String>> vals = region.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
         List<String> descriptions = vals.get(1);
         List<String> types = vals.get(2);

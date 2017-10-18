@@ -644,7 +644,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         _customizeViewsHelper.saveCustomView();
 
         //verify expected values in column
-        List<String> var = getColumnValues("Runs", "QC Flags").get(0);
+        List<String> var = new DataRegionTable("Runs", getDriver()).getFullColumnValues("QC Flags").get(0);
         String[] flags = var.toArray(new String[var.size()]);
         for (int i=0; i<flags.length; i++)
         {
