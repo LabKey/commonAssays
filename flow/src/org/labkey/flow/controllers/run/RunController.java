@@ -640,7 +640,7 @@ public class RunController extends BaseFlowController
                     ExportAnalysisManifest analysisManifest = buildExportAnalysisManifest(form, files);
                     writeManifest(analysisManifest.toJSON(), vf.getLocation());
 
-                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, form.getLabel(), location, _exportToScriptTimeout, vbi, root);
+                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, _exportToScriptFormat, form.getLabel(), location, _exportToScriptTimeout, vbi, root);
                     String jobGuid = null;
                     try
                     {
@@ -684,16 +684,18 @@ public class RunController extends BaseFlowController
         private final String _guid;
         private final String _exportToScriptPath;
         private final String _exportToScriptCommandLine;
+        private final String _exportToScriptFormat;
         private final String _label;
         private final File _location;
         private final Integer _timeout;
 
-        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String label, File location, Integer timeout, ViewBackgroundInfo info, @NotNull PipeRoot root)
+        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, File location, Integer timeout, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
             _guid = guid;
             _exportToScriptPath = exportToScriptPath;
             _exportToScriptCommandLine = exportToScriptCommandLine;
+            _exportToScriptFormat = exportToScriptFormat;
             _label = label;
             _location = location;
             _timeout = timeout;
@@ -766,7 +768,7 @@ public class RunController extends BaseFlowController
             env.put("label", _label);
             env.put("location", _location.toString());
             env.put("timeout", Objects.toString(_timeout, ""));
-            //env.put("exportFormat", _exportFormat);
+            env.put("exportFormat", _exportToScriptFormat);
             List<String> params = parse(_exportToScriptCommandLine, env);
 
             File dir = _location.getParentFile();
