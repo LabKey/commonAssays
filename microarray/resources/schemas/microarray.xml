@@ -67,6 +67,8 @@
               <isUserEditable>false</isUserEditable>
               <datatype>entityid</datatype>
           </column>
+          <column columnName="Comment">
+          </column>
       </columns>
   </table>
 

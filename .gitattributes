@@ -707,6 +707,7 @@ microarray/module.properties -text
 microarray/resources/ExpressionMatrix/queries/data/PreviewGrid.qview.xml -text
 microarray/resources/credits/jars.txt -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-15.20.sql -text
+microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-17.20-17.21.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-12.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-13.30.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-14.10.sql -text
@@ -720,6 +721,7 @@ microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.10-15.1
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.10-15.20.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.11-15.12.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-15.20.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-17.20-17.21.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-12.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-13.30.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-14.10.sql -text
