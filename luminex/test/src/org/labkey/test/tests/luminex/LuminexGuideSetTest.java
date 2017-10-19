@@ -569,7 +569,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         assertTextPresent("Apply Guide Set");
         stopImpersonating();
-        deleteUsers(true, editor);
+        _userHelper.deleteUsers(true, editor);
 
         createAndImpersonateUser(reader, "Reader");
 
@@ -578,7 +578,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         assertTextPresent("Levey-Jennings Reports", "Standard1");
         assertTextNotPresent("Apply Guide Set");
         stopImpersonating();
-        deleteUsers(true, reader);
+        _userHelper.deleteUsers(true, reader);
     }
 
     @LogMethod
