@@ -120,7 +120,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         // test Luminex re-run import, check for identical values
         int i = index;
         goToTestAssayHome();
-        checkDataRegionCheckbox("Runs", 1);
+        new DataRegionTable("Runs", getDriver()).checkCheckbox(1);
         clickButton("Re-import run");
         Assert.assertEquals("Form did not remember values from first import", "NETWORK1", getFormElement(Locator.name("network")));
         clickButton("Next");
