@@ -18,7 +18,6 @@ package org.labkey.elispot;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
