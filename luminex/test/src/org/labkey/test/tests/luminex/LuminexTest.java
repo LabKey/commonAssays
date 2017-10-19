@@ -183,7 +183,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
             // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
             if (renameTargetStudy())
-                _listHelper.setColumnName(this.getPropertyXPath("Batch Fields"), 1, "TargetStudyTemp");
+                assayDesigner.batchFields().selectField(1).setName("TargetStudyTemp");
 
             assayDesigner.saveAndClose();
         }
