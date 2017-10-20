@@ -18,6 +18,7 @@ package org.labkey.flow;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpData;
@@ -62,5 +63,12 @@ public class FlowServiceImpl implements FlowService
         }
 
         return ret;
+    }
+
+    @Override
+    public int getTempTableCount()
+    {
+        return new SqlSelector(DbScope.getLabKeyScope(), "SELECT COUNT(*) FROM information_schema.tables \n" +
+                "WHERE TABLE_SCHEMA = 'temp' and (table_name LIKE 'ffo%' or table_name LIKE 'fbg%')").getArrayList(Integer.class).get(0);
     }
 }
