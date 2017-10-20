@@ -16,6 +16,8 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.collections4.MultiValuedMap;
+import org.labkey.api.attachments.AttachmentService;
+import org.labkey.api.attachments.FileAttachmentFile;
 import org.labkey.api.collections.CaseInsensitiveArrayListValuedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -44,11 +46,15 @@ import org.labkey.flow.persist.InputRole;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -188,7 +194,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         File statisticsFile = new File(_analysisPathRoot, AnalysisSerializer.STATISTICS_FILENAME);
 
-        return saveAnalysis(getUser(), getContainer(), getExperiment(),
+        FlowRun run = saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
                 getRunFilePathRoot(),
                 selectedFCSFiles,
@@ -201,6 +207,19 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 new ArrayList<>(sampleIds),
                 sampleIdToNameMap
         );
+
+        // Add attachments to the run
+        File attachmentsDir = new File(_analysisPathRoot, "attachments");
+        if (attachmentsDir.isDirectory())
+        {
+            AttachmentService svc = AttachmentService.get();
+            File[] files = attachmentsDir.listFiles(File::isFile);
+            if (files != null && files.length > 0)
+                info("Attaching files to run: " + Arrays.stream(files).map(File::getName).collect(joining(", ")));
+            svc.addAttachments(run, Arrays.stream(files).map(FileAttachmentFile::new).collect(toList()), getUser());
+        }
+
+        return run;
     }
 
     @Override

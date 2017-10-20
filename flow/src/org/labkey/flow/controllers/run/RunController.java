@@ -24,7 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentParent;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.BaseDownloadAction;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
@@ -84,6 +86,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,8 +96,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -510,6 +515,25 @@ public class RunController extends BaseFlowController
                         }
 
                         writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
+
+                        List<Attachment> attachments = run.getAttachments();
+                        if (attachments != null && !attachments.isEmpty())
+                        {
+                            VirtualFile attachmentsDir = dir.getDir("attachments");
+                            for (Attachment attachment : attachments)
+                            {
+                                try (InputStream is = AttachmentService.get().getInputStream(run, attachment.getName());
+                                     OutputStream os = attachmentsDir.getOutputStream(attachment.getName()))
+                                {
+                                    FileUtil.copyData(is, os);
+                                }
+                                catch (FileNotFoundException e)
+                                {
+                                    throw new FileNotFoundException("attachment file not found: " + attachment.getName());
+                                }
+                            }
+                        }
+
                     }
 
                     _successURL = onExportComplete(form, vf, files);
@@ -855,7 +879,7 @@ public class RunController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class DownloadImageAction extends BaseDownloadAction<AttachmentForm>
+    public class DownloadAttachmentAction extends BaseDownloadAction<AttachmentForm>
     {
         @Override
         public @Nullable Pair<AttachmentParent, String> getAttachment(AttachmentForm form)
@@ -869,4 +893,5 @@ public class RunController extends BaseFlowController
             return new Pair<>(run, form.getName());
         }
     }
+
 }

@@ -18,7 +18,6 @@
 <%@ page buffer="none" %>
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.attachments.Attachment"%>
-<%@ page import="org.labkey.api.attachments.AttachmentService"%>
 <%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.data.ContainerManager"%>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
@@ -27,7 +26,6 @@
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
 <%@ page import="org.labkey.api.study.StudyService" %>
-<%@ page import="org.labkey.api.util.MimeMap" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -41,7 +39,6 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -56,6 +53,7 @@
         dependencies.add("vis/ColumnVisualizationAnalytics.css");
         dependencies.add("query/ColumnQueryAnalytics.js");
         dependencies.add("query/ColumnSummaryStatistics");
+        dependencies.add("announcements/discuss.js");
     }
 %>
 <%
@@ -118,6 +116,13 @@
     }
 
 
+    for (Attachment a : run.getAttachments())
+    {
+        %><div>
+        <a href="<%=h(run.getAttachmentDownloadURL(a))%>"><i class="<%=h(Attachment.getFileIconFontCls(a.getName()))%>"></i> <%=h(a.getName())%></a>
+        </div><%
+    }
+
     DiscussionService service = DiscussionService.get();
     DiscussionService.DiscussionView discussion = service.getDiscussionArea(
             getViewContext(),
@@ -127,21 +132,5 @@
             false, true);
     include(discussion, out);
 
-    AttachmentService att = AttachmentService.get();
-    Collection<Attachment> attachments = att.getAttachments(run);
-    MimeMap mm = new MimeMap();
-    %><table><tr><%
-    for (Attachment a : attachments)
-    {
-        // Shouldn't Attachment have getContentType()
-        String contentType = mm.getContentType(a.getFileExtension());
-        if (contentType.startsWith("image/"))
-        {
-            ActionURL download = new ActionURL(RunController.DownloadImageAction.class, run.getContainer());
-            download.addParameter("runId", run.getRunId());
-            download.addParameter("name", a.getName());
-            %><td><img src="<%=h(download)%>"></td><%
-        }
-    }
-    %></tr></table>
+%>
 </p>

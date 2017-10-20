@@ -18,7 +18,9 @@ package org.labkey.flow.data;
 
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentParent;
+import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.AttachmentType;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -31,10 +33,8 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.security.SecurityPolicy;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.ScriptSettings;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
@@ -502,4 +502,18 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     {
         return AttachmentType.UNKNOWN;
     }
+
+    public List<Attachment> getAttachments()
+    {
+        return AttachmentService.get().getAttachments(this);
+    }
+
+    public ActionURL getAttachmentDownloadURL(Attachment att)
+    {
+        ActionURL url = new ActionURL(RunController.DownloadAttachmentAction.class, this.getContainer());
+        url.addParameter("runId", this.getRunId());
+        url.addParameter("name", att.getName());
+        return url;
+    }
+
 }

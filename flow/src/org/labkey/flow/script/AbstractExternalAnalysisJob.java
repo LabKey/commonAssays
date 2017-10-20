@@ -213,20 +213,6 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
             if (_run != null)
             {
-//                // Add run level graphs as attachments to the run
-//                File[] runImages = _analysisPathRoot.listFiles(new FilenameFilter() {
-//                    public boolean accept(File dir, String name)
-//                    {
-//                        return name.startsWith(_analysisRunName) && name.endsWith(".png");
-//                    }
-//                });
-//
-//                AttachmentService.Service att = AttachmentService.get();
-//                List<AttachmentFile> attachments = new LinkedList<AttachmentFile>();
-//                for (File runImage : runImages)
-//                    attachments.add(new FileAttachmentFile(runImage));
-//                att.addAttachments(flowRun, attachments, getUser());
-
                 runPostAnalysisJobs();
 
                 if (!hasErrors())
