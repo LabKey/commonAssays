@@ -32,7 +32,7 @@ public abstract class AbstractXTandemTest extends AbstractMS2SearchEngineTest
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(SEARCH_TYPE);
-        deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
     protected void setupEngine()

@@ -62,7 +62,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(SEARCH_TYPE);
-        deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
     protected void importMS2Run(String directoryName, int totalJobCount)

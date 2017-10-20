@@ -77,7 +77,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(PIPELINE_PATH);
-        deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
     protected void createProjectAndFolder()

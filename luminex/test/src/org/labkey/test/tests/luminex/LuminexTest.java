@@ -533,7 +533,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
      */
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
-        deleteProject(getProjectName(), afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
 
         QCAssayScriptHelper javaEngine = new QCAssayScriptHelper(this);
         javaEngine.deleteEngine();
