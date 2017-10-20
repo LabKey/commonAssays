@@ -87,7 +87,7 @@ public class LuminexEC50Test extends LuminexTest
         assertTextPresent("CurveFit");
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("TitrationId/Name");
+        _customizeViewsHelper.addColumn("TitrationId/Name");
         _customizeViewsHelper.applyCustomView();
 
         DataRegionTable table = new DataRegionTable("query", getDriver());

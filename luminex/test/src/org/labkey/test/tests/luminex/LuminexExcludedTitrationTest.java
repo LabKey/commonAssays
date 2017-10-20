@@ -44,7 +44,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         clickAndWait(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("ExclusionComment");
+        _customizeViewsHelper.addColumn("ExclusionComment");
         _customizeViewsHelper.applyCustomView();
 
         String titration = "Sample 1";

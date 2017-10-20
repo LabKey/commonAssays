@@ -367,7 +367,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText("view data"));
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.showHiddenItems();
-        _customizeViewsHelper.addCustomizeViewColumn("GuideSetId/RowId");
+        _customizeViewsHelper.addColumn("GuideSetId/RowId");
         _customizeViewsHelper.applyCustomView();
         DataRegionTable table = new DataRegionTable("query", getDriver());
         for (int i = 0; i < analytes.length; i++)
@@ -446,7 +446,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         //add QC flag colum
         assertTextPresent(TEST_ASSAY_LUM + " Runs");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("QCFlags");
+        _customizeViewsHelper.addColumn("QCFlags");
         _customizeViewsHelper.saveCustomView("QC Flags View");
 
         //2. exclude wells A4, B4 from plate 5a for both analytes
@@ -597,7 +597,7 @@ public final class LuminexGuideSetTest extends LuminexTest
                 "AnalyteTitration/Five ParameterCurveFit/AUCQCFlagsEnabled"};
         for(String column : newColumns)
         {
-            _customizeViewsHelper.addCustomizeViewColumn(column);
+            _customizeViewsHelper.addColumn(column);
         }
         _customizeViewsHelper.saveCustomView();
 

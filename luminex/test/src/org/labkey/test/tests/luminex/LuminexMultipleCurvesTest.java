@@ -70,10 +70,10 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
 
         //edit view to show Analyte Standard
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/Standard");
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/StdCurve");
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/FitProb");
-        _customizeViewsHelper.addCustomizeViewColumn("Analyte/ResVar");
+        _customizeViewsHelper.addColumn("Analyte/Standard");
+        _customizeViewsHelper.addColumn("Analyte/StdCurve");
+        _customizeViewsHelper.addColumn("Analyte/FitProb");
+        _customizeViewsHelper.addColumn("Analyte/ResVar");
         _customizeViewsHelper.saveCustomView();
         waitForText("Std Curve");
 

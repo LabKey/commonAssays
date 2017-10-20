@@ -264,9 +264,9 @@ public class LuminexGuideSetHelper
         _test.clickAndWait(Locator.linkContainingText("view data"));
         _test._customizeViewsHelper.openCustomizeViewPanel();
         _test._customizeViewsHelper.showHiddenItems();
-        _test._customizeViewsHelper.addCustomizeViewColumn("Analyte/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("Titration/RowId");
-        _test._customizeViewsHelper.addCustomizeViewColumn("GuideSet/RowId");
+        _test._customizeViewsHelper.addColumn("Analyte/RowId");
+        _test._customizeViewsHelper.addColumn("Titration/RowId");
+        _test._customizeViewsHelper.addColumn("GuideSet/RowId");
         _test._customizeViewsHelper.applyCustomView();
         DataRegionTable table = new DataRegionTable("query", _test.getDriver());
         for (String analyte : analytes)
@@ -286,7 +286,7 @@ public class LuminexGuideSetHelper
         Map<String, Integer> guideSetIds = new HashMap<>();
         _test._customizeViewsHelper.openCustomizeViewPanel();
         _test._customizeViewsHelper.showHiddenItems();
-        _test._customizeViewsHelper.addCustomizeViewColumn("RowId");
+        _test._customizeViewsHelper.addColumn("RowId");
         _test._customizeViewsHelper.applyCustomView();
         DataRegionTable table = new DataRegionTable("query", _test.getDriver());
         table.setFilter("CurrentGuideSet", "Equals", "true");

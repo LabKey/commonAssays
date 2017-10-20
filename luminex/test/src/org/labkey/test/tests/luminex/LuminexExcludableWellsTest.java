@@ -86,7 +86,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         String[] analytes = getListOfAnalytesMultipleCurveData();
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addCustomizeViewColumn("ExclusionComment");
+        _customizeViewsHelper.addColumn("ExclusionComment");
         _customizeViewsHelper.applyCustomView();
 
         // standard titration well group exclusion

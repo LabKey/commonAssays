@@ -85,7 +85,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         // add the R transform script to the assay
         goToTestAssayHome();
         _assayHelper.clickEditAssayDesign();
-        AssayDesignerPage assayDesigner = new AssayDesignerPage(this);
+        AssayDesignerPage assayDesigner = new AssayDesignerPage(this.getDriver());
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
         // save changes to assay design
