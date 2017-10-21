@@ -19,9 +19,7 @@ package org.labkey.flow.data;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.attachments.Attachment;
-import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.attachments.AttachmentService;
-import org.labkey.api.attachments.AttachmentType;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
@@ -31,6 +29,7 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
@@ -55,7 +54,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
+public class FlowRun extends FlowObject<ExpRun>
 {
     private static final Logger _log = Logger.getLogger(FlowRun.class);
 
@@ -84,6 +83,7 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
     }
 
 
+    @Override
     public String getEntityId()
     {
         return getExperimentRun().getEntityId();
@@ -453,18 +453,19 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        ResultSet rs = QueryService.get().select(table, new ArrayList<>(Arrays.asList(colRowId)), filter, null);
-        while (rs.next())
+        try (ResultSet rs = QueryService.get().select(table, new ArrayList<>(Arrays.asList(colRowId)), filter, null))
         {
-            FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
-            if (well instanceof FlowFCSFile)
+            while (rs.next())
             {
-                FlowFCSFile fcsFile = (FlowFCSFile)well;
-                if (fcsFile.getFCSURI() != null)
-                    ret.add(fcsFile);
+                FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
+                if (well instanceof FlowFCSFile)
+                {
+                    FlowFCSFile fcsFile = (FlowFCSFile) well;
+                    if (fcsFile.getFCSURI() != null)
+                        ret.add(fcsFile);
+                }
             }
         }
-        rs.close();
         return ret.toArray(new FlowFCSFile[0]);
     }
 
@@ -497,23 +498,16 @@ public class FlowRun extends FlowObject<ExpRun> implements AttachmentParent
         return FlowTableType.FCSFiles;
     }
 
-    @Override
-    public @NotNull AttachmentType getAttachmentType()
-    {
-        return AttachmentType.UNKNOWN;
-    }
-
     public List<Attachment> getAttachments()
     {
-        return AttachmentService.get().getAttachments(this);
+        return AttachmentService.get().getAttachments(new ExpRunAttachmentParent(getExperimentRun()));
     }
 
     public ActionURL getAttachmentDownloadURL(Attachment att)
     {
-        ActionURL url = new ActionURL(RunController.DownloadAttachmentAction.class, this.getContainer());
-        url.addParameter("runId", this.getRunId());
+        ActionURL url = new ActionURL(RunController.DownloadAttachmentAction.class, getContainer());
+        url.addParameter("runId", getRunId());
         url.addParameter("name", att.getName());
         return url;
     }
-
 }

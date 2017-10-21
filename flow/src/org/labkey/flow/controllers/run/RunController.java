@@ -34,6 +34,7 @@ import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.TSVMapWriter;
 import org.labkey.api.data.TSVWriter;
+import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -51,6 +52,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
@@ -96,10 +98,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -478,7 +478,6 @@ public class RunController extends BaseFlowController
             _guid = GUID.makeGUID();
 
             final String fcsDirName = "FCSFiles";
-            final HttpServletResponse response = getViewContext().getResponse();
 
             if (_runs != null && _runs.size() > 0)
             {
@@ -517,12 +516,13 @@ public class RunController extends BaseFlowController
                         writer.writeAnalysis(keywords, analysis, matrices, EnumSet.of(form.getExportFormat()));
 
                         List<Attachment> attachments = run.getAttachments();
+                        AttachmentParent parent = new ExpRunAttachmentParent(run.getExperimentRun());
                         if (attachments != null && !attachments.isEmpty())
                         {
                             VirtualFile attachmentsDir = dir.getDir("attachments");
                             for (Attachment attachment : attachments)
                             {
-                                try (InputStream is = AttachmentService.get().getInputStream(run, attachment.getName());
+                                try (InputStream is = AttachmentService.get().getInputStream(parent, attachment.getName());
                                      OutputStream os = attachmentsDir.getOutputStream(attachment.getName()))
                                 {
                                     FileUtil.copyData(is, os);
@@ -533,7 +533,6 @@ public class RunController extends BaseFlowController
                                 }
                             }
                         }
-
                     }
 
                     _successURL = onExportComplete(form, vf, files);
@@ -736,7 +735,7 @@ public class RunController extends BaseFlowController
             try
             {
                 File log = getLogFile();
-                List<String> lines = FileUtils.readLines(log);
+                List<String> lines = FileUtils.readLines(log, StringUtilsLabKey.DEFAULT_CHARSET);
                 String url = getStatusUrl(lines);
                 if(url != null)
                 {
@@ -890,8 +889,7 @@ public class RunController extends BaseFlowController
                 throw new NotFoundException();
             }
 
-            return new Pair<>(run, form.getName());
+            return new Pair<>(new ExpRunAttachmentParent(run.getExperimentRun()), form.getName());
         }
     }
-
 }

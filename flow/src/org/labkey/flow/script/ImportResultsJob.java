@@ -16,6 +16,7 @@
 package org.labkey.flow.script;
 
 import org.apache.commons.collections4.MultiValuedMap;
+import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.attachments.AttachmentService;
 import org.labkey.api.attachments.FileAttachmentFile;
 import org.labkey.api.collections.CaseInsensitiveArrayListValuedMap;
@@ -26,6 +27,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
@@ -215,8 +217,11 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             AttachmentService svc = AttachmentService.get();
             File[] files = attachmentsDir.listFiles(File::isFile);
             if (files != null && files.length > 0)
+            {
+                AttachmentParent parent = new ExpRunAttachmentParent(run.getExperimentRun());
                 info("Attaching files to run: " + Arrays.stream(files).map(File::getName).collect(joining(", ")));
-            svc.addAttachments(run, Arrays.stream(files).map(FileAttachmentFile::new).collect(toList()), getUser());
+                svc.addAttachments(parent, Arrays.stream(files).map(FileAttachmentFile::new).collect(toList()), getUser());
+            }
         }
 
         return run;
@@ -241,5 +246,4 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         return data;
     }
-
 }
