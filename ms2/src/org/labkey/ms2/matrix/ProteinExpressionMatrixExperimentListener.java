@@ -16,16 +16,16 @@
 package org.labkey.ms2.matrix;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentMaterialListener;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExperimentListener;
 import org.labkey.api.security.User;
 
 import java.util.List;
 
-public class ProteinExpressionMatrixMaterialListener implements ExperimentMaterialListener
+public class ProteinExpressionMatrixExperimentListener implements ExperimentListener
 {
     @Override
-    public void beforeDelete(List<? extends ExpMaterial> materials, Container container, User user)
+    public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user)
     {
         //TODO: commented to make the test pass. Uncomment after all is sorted.
 //        SqlExecutor sqlExecutor = new SqlExecutor(MS2Manager.getSchema());

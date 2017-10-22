@@ -768,7 +768,7 @@ microarray/src/org/labkey/microarray/controllers/FeatureAnnotationSetController.
 microarray/src/org/labkey/microarray/controllers/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixAssayProvider.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixDataHandler.java -text
-microarray/src/org/labkey/microarray/matrix/ExpressionMatrixMaterialListener.java -text
+microarray/src/org/labkey/microarray/matrix/ExpressionMatrixExperimentListener.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProtocolSchema.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixProviderSchema.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixRunCreator.java -text
@@ -1080,7 +1080,7 @@ ms2/src/org/labkey/ms2/manageViews.jsp -text
 ms2/src/org/labkey/ms2/mascotConfig.jsp -text
 ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixAssayProvider.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixDataHandler.java -text
-ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixMaterialListener.java -text
+ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixExperimentListener.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixProtocolSchema.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinSequenceDataTable.java -text
 ms2/src/org/labkey/ms2/metadata/FractionsDisplayColumn.java -text
