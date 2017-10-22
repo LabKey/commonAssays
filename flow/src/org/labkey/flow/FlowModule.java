@@ -110,7 +110,7 @@ public class FlowModule extends SpringModule
             @Override
             public boolean isAvailable(DefaultSchema schema, Module module)
             {
-                // UNDONE: schema must be available for backwards campatibility, but consider hiding it instead
+                // UNDONE: schema must be available for backwards compatibility, but consider hiding it instead
                 return true;
             }
 
