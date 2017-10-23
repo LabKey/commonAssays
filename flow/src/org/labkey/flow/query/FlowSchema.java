@@ -1017,7 +1017,7 @@ public class FlowSchema extends UserSchema
 //            }
             if (null != _experiment)
             {
-                where.append(and).append("ExperimentId = ").append(_experiment.getRowId());
+                where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList)\n");
                 and = " AND ";
             }
             if (_runSpecified)
@@ -1983,11 +1983,9 @@ public class FlowSchema extends UserSchema
                 "    flow.object.compid,\n" +
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
-                "    flow.object.uri,\n" +
-                "    exp.RunList.ExperimentId\n" +
+                "    flow.object.uri\n" +
                 "FROM exp.data\n" +
-                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n" +
-                "    LEFT OUTER JOIN exp.RunList ON exp.RunList.ExperimentRunid = exp.Data.RunId\n");
+                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n");
         select.append(" WHERE flow.Object.container = ").append(c).append(" AND TypeId = ").append(String.valueOf(typeid));
         List<String> indexes = Arrays.asList(
                 "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId);\n",
