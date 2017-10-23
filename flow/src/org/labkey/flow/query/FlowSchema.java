@@ -1017,7 +1017,7 @@ public class FlowSchema extends UserSchema
 //            }
             if (null != _experiment)
             {
-                where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList)\n");
+                where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList WHERE RunList.experimentId = ").append(_experiment.getRowId()).append(")\n");
                 and = " AND ";
             }
             if (_runSpecified)
