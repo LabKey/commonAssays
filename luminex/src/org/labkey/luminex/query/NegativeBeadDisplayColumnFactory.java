@@ -72,7 +72,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             {
                 boolean newUI = PageFlowUtil.useExperimentalCoreUI();
                 if (newUI)
-                    out.write("<label class=\"control-header-label\">");
+                    out.write("<td class=\"control-header-label\">");
                 else
                     out.write("<td class='labkey-form-label'>");
 
@@ -83,7 +83,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                 sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
                 out.write(PageFlowUtil.helpPopup(_displayName, sb.toString()));
 
-                out.write(newUI ? "</label>" : "</td>");
+                out.write("</td>");
             }
 
             @Override

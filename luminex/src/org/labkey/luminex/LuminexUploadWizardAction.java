@@ -565,7 +565,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             {
                 boolean newUI = PageFlowUtil.useExperimentalCoreUI();
                 if (newUI)
-                    out.write("<label class=\"control-header-label\">");
+                    out.write("<td class=\"control-header-label\">");
                 else
                     out.write("<td class='labkey-form-label'>");
 
@@ -573,7 +573,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
                 out.write(PageFlowUtil.helpPopup(displayName, sb));
 
-                out.write(newUI ? "</label>" : "</td>");
+                out.write("</td>");
             }
         };
     }

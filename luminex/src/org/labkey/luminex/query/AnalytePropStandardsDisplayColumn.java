@@ -114,42 +114,26 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public void renderInputWrapperBegin(Writer out, int span) throws IOException
     {
-        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
         String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
 
-        if (newUI)
-            out.write("<div class=\"col-sm-9 col-lg-10\"");
-        else
-            out.write("<td colspan=" + span + "");
-
+        out.write("<td colspan=" + span + "");
         out.write(" style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\"");
         out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
     }
 
     public void renderInputWrapperEnd(Writer out) throws IOException
     {
-        out.write(PageFlowUtil.useExperimentalCoreUI() ? "</div>" : "</td>");
+        out.write("</td>");
     }
 
     @Override
     public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
     {
-        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        String tag = newUI ? "div" : "td";
-        out.write("<" + tag + " name=\"" + titrationCellName + "\""
+        out.write("<td name=\"" + titrationCellName + "\"" + "class=\"" + PageFlowUtil.filter(cls)+ "\""
                 + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
-        if (newUI)
-        {
-            out.write("<label class=\"" + cls + "\">");
-            renderTitle(ctx, out);
-            out.write("</label>");
-        }
-        else
-        {
-            renderTitle(ctx, out);
-        }
-        out.write("</" + tag + ">");
+        renderTitle(ctx, out);
+        out.write("</td>");
     }
 
     @Override
