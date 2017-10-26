@@ -43,8 +43,8 @@ public class SetAnalyteDefaultValuesPage
     public void importDefaultsExpectError(File defaultsFile, String errorText)
     {
         ensureOnImportPage();
-        _test.click(Locator.tagWithClass("span", "labkey-wp-title-text").containing("Copy/paste text"));
-        _test.click(Locator.tagWithClass("span", "labkey-wp-title-text").containing("Upload file"));
+        _test.click(Locator.tagWithClass("h3", "panel-title").containing("Copy/paste text"));
+        _test.click(Locator.tagWithClass("h3", "panel-title").containing("Upload file"));
         _test.setFormElement(Locator.name("file"), defaultsFile);
         submitDefaults(errorText);
     }
