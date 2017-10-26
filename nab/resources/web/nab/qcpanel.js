@@ -237,7 +237,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
         var tpl = [];
         tpl.push(
             '<div class="panel panel-default">',
-                '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">Run Summary: {runName}</h3></div>',
+                '<div class="panel-heading"><h3 class="panel-title pull-left">Run Summary: {runName}</h3><div class="clearfix"></div></div>',
                 '<div class=" panel-body">',
                     '<table class="run-summary">',
                     '<tpl for="runProperties">',
@@ -261,7 +261,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<tpl if="xindex % 2 != 1"><td></tpl>',
                 '<tpl for="controls">',
                     '<div class="panel panel-default">',
-                        '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{parent.plateName} Controls</h3></div>',
+                        '<div class="panel-heading"><h3 class="panel-title pull-left">{parent.plateName} Controls</h3><div class="clearfix"></div></div>',
                         '<div class=" panel-body">',
                             '<table class="plate-controls">',
                                 '<tr><td class="prop-name" colspan="{[this.getColspan(this, values) + 1]}">Virus Control</td><td class="prop-name" colspan="{[this.getColspan(this, values)]}">Cell Control</td></tr>',
@@ -300,7 +300,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             '<tpl for="dilutionSummaries">',
                 '<tr><td colspan="2">',
                 '<div class="panel panel-default">',
-                    '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{name}</h3></div>',
+                    '<div class="panel-heading"><h3 class="panel-title pull-left">{name}</h3><div class="clearfix"></div></div>',
                     '<div class=" panel-body">',
                         '<table class="dilution-summary">',
                             '<tr><td><img src="{graphUrl}" height="300" width="425"></td>',
@@ -508,7 +508,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
     getFieldSelectionTpl : function(){
         return new Ext4.XTemplate(
             '<div class="panel panel-default">',
-                '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">Excluded Field Wells</h3></div>',
+                '<div class="panel-heading"><h3 class="panel-title pull-left">Excluded Field Wells</h3><div class="clearfix"></div></div>',
                 '<div class=" panel-body">',
                     '<p>The following wells will be excluded from the curve fit calculations:</p>',
                     '<table class="field-exclusions">',
@@ -556,7 +556,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
             '<tpl for="plates">',
                 '<tpl for="rawdata">',
                     '<div class="panel panel-default">',
-                        '<div class="panel-heading clearfix"><h3 class="panel-title pull-left">{parent.plateName}</h3></div>',
+                        '<div class="panel-heading"><h3 class="panel-title pull-left">{parent.plateName}</h3><div class="clearfix"></div></div>',
                         '<div class=" panel-body">',
                             '<table class="labkey-data-region-legacy labkey-show-borders plate-summary">',
                                 '<tr><td>&nbsp;</td>',
