@@ -134,7 +134,7 @@ public class MicroarrayManager
         }
     }
 
-    private Integer insertFeatureAnnotationSet(User user, Container container, String name, String vendor, String description, BatchValidationException errors)
+    private Integer insertFeatureAnnotationSet(User user, Container container, String name, String vendor, String description, String comment, BatchValidationException errors)
             throws SQLException, BatchValidationException, QueryUpdateServiceException, DuplicateKeyException
     {
         MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
@@ -146,6 +146,7 @@ public class MicroarrayManager
             row.put("Name", name);
             row.put("Vendor", vendor);
             row.put("Description", description);
+            row.put("Comment", comment);
             row.put("Container", container);
 
             List<Map<String, Object>> results = featureSetUpdateService.insertRows(user, container, Collections.singletonList(row), errors, null, null);
@@ -182,7 +183,7 @@ public class MicroarrayManager
     public Integer createFeatureAnnotationSet(User user, Container c, FeatureAnnotationSetController.FeatureAnnotationSetForm form, DataLoader loader, BatchValidationException errors)
             throws SQLException, BatchValidationException, QueryUpdateServiceException, DuplicateKeyException
     {
-        Integer rowId = insertFeatureAnnotationSet(user, c, form.getName(), form.getVendor(), form.getDescription(), errors);
+        Integer rowId = insertFeatureAnnotationSet(user, c, form.getName(), form.getVendor(), form.getDescription(), form.getComment(), errors);
 
         if (!errors.hasErrors() && rowId != null)
             return insertFeatureAnnotations(user, c, rowId, loader, errors);
@@ -299,7 +300,7 @@ public class MicroarrayManager
             }
 
             // CONSIDER: Insert feature annotation set into same container as assay definition
-            Integer newSetId = insertFeatureAnnotationSet(user, c, baseName, vendor, description, errors);
+            Integer newSetId = insertFeatureAnnotationSet(user, c, baseName, vendor, description, null, errors);
             if (!errors.hasErrors() && newSetId != null && newSetId > 0)
             {
                 int rowsInserted = insertFeatureAnnotations(user, c, newSetId, loader, errors);

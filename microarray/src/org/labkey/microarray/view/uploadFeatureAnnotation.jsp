@@ -42,6 +42,7 @@
     String vendor = me.getModelBean().getVendor();
     String name = me.getModelBean().getName();
     String description = me.getModelBean().getDescription();
+    String comment = me.getModelBean().getComment();
     Errors errors = me.getErrors();
     String returnUrl = me.getModelBean().getReturnActionURL(new ActionURL(FeatureAnnotationSetController.ManageAction.class, getContainer())).toString();
 
@@ -127,6 +128,14 @@
                 name: 'description',
                 value: "<%=text(description) == null ? "" : text(description)%>",
                 fieldLabel: 'Description',
+                allowBlank: true
+            }, {
+                xtype: 'textfield',
+                width: 580,
+                labelWidth: 125,
+                name: 'comment',
+                value: "<%=text(comment) == null ? "" : text(comment)%>",
+                fieldLabel: 'Comment',
                 allowBlank: true
             }, {
                 xtype: 'combobox',

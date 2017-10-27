@@ -404,6 +404,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         private String _name;
         private String _vendor;
         private String _description;
+        private String _comment;
         private Integer _rowId;
         private int _targetContainer;
 
@@ -435,6 +436,16 @@ public class FeatureAnnotationSetController extends SpringActionController
         public void setDescription(String description)
         {
             _description = description;
+        }
+
+        public String getComment()
+        {
+            return _comment;
+        }
+
+        public void setComment(String comment)
+        {
+            _comment = comment;
         }
 
         public Integer getRowId()
