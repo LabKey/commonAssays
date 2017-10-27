@@ -22,7 +22,6 @@
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.TreeMap" %>
-<%@ page import="org.labkey.api.view.template.FrameFactoryClassic" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -108,7 +107,7 @@ var keywordValueSubsetListMap = KV;
 <labkey:form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
 
 <% if (hasAutoCompScripts) { %>
-        <%FrameFactoryClassic.startPanelFrame(out, "Choose AutoCompensation script");%>
+        <labkey:panel title="Choose AutoCompensation script">
             <p>Your FlowJo workspace contains AutoCompensation scripts; you can optionally
             select a script from the drop down below to quickly populate the compensation
             calculation form fields.</p>
@@ -122,10 +121,10 @@ var keywordValueSubsetListMap = KV;
                 }
             %>
             </select>
-        <%FrameFactoryClassic.endPanelFrame(out);%>
+        </labkey:panel>
 <% } %>
 
-        <%FrameFactoryClassic.startPanelFrame(out, "Analyze FCS Files where");%>
+        <labkey:panel title="Analyze FCS Files where">
             <p>Filters may optionally be applied to this analysis script.  The set of keyword and
             value pairs <i>must all</i> match in the FCS header to be included in the analysis.
             You can change the filter later by editing the script settings from the
@@ -171,9 +170,9 @@ var keywordValueSubsetListMap = KV;
                 }
                 %>
             </table>
-        <%FrameFactoryClassic.endPanelFrame(out);%>
+        </labkey:panel>
 
-        <%FrameFactoryClassic.startPanelFrame(out, "Select compensation");%>
+        <labkey:panel title="Select compensation">
             <p>For each parameter which requires compensation, specify the keyword name and value
             which are to be used to identify the compensation control in experiment runs.</p>
             <p><b>If you do not see the keyword you are looking for:</b><br>
@@ -209,13 +208,13 @@ var keywordValueSubsetListMap = KV;
                     }
                 %>
             </table>
-        <%FrameFactoryClassic.endPanelFrame(out);%>
+        </labkey:panel>
 <%
 String[] analysisNames = this.getGroupAnalysisDisplayNames();
 if (analysisNames.length > 0)
 {
 %>
-        <%FrameFactoryClassic.startPanelFrame(out, "Choose source of gating");%>
+        <labkey:panel title="Choose source of gating">
             <p>You can choose to use the gating from either the sample identified
             by the unique keywork/value pair from the compensation
             calculation above <i>or</i> from one of the named group's in the workspace.</p>
@@ -229,7 +228,7 @@ if (analysisNames.length > 0)
                 <option value="<%=h(group)%>"<%=selected(group.equals(form.selectGroupName))%>>Group <%=h(group)%></option>
                 <% } %>
             </select>
-        <%FrameFactoryClassic.endPanelFrame(out);%>
+        </labkey:panel>
 <% } %>
 
     <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">

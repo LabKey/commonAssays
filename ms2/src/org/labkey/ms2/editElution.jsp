@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.ms2.MS2Peptide"%>
 <%@ page import="org.labkey.ms2.PeptideQuantitation"%>
 <%@ page import="java.text.DecimalFormat"%>
-<%@ page import="org.labkey.api.view.template.FrameFactoryClassic" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
@@ -37,7 +36,7 @@
 <labkey:errors />
 <labkey:form name="elutionForm" method="post">
 
-    <%FrameFactoryClassic.startPanelFrame(out, "Peptide Summary");%>
+    <labkey:panel title="Peptide Summary">
        <table class="lk-fields-table">
            <tr>
                <td class="labkey-form-label">Sequence</td>
@@ -70,9 +69,9 @@
                </td>
            </tr>
        </table>
-    <%FrameFactoryClassic.endPanelFrame(out);%>
+    </labkey:panel>
 
-    <%FrameFactoryClassic.startPanelFrame(out, "Light Elution Profile");%>
+    <labkey:panel title="Light Elution Profile">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
             <td>
@@ -128,9 +127,9 @@
         </tr>
         <tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    <%FrameFactoryClassic.endPanelFrame(out);%>
+    </labkey:panel>
 
-    <%FrameFactoryClassic.startPanelFrame(out, "Heavy Elution Profile");%>
+    <labkey:panel title="Heavy Elution Profile">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tr>
             <td>
@@ -186,7 +185,7 @@
         </tr>
         <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
-    <%FrameFactoryClassic.endPanelFrame(out);%>
+    </labkey:panel>
 
 </labkey:form>
 
