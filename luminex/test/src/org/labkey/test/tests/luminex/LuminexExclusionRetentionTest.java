@@ -30,14 +30,9 @@ import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
 
-/**
- * Created by iansigmon on 10/31/16.
- */
 @Category({DailyA.class, Assays.class})
 public final class LuminexExclusionRetentionTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private static final File BASE_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
     private static final File REIMPORT_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin_reimport.xls");
     private static final String RUN_NAME = "ReimportTestRun";

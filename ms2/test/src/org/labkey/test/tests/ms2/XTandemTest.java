@@ -32,12 +32,12 @@ import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @Category({DailyB.class, MS2.class, XTandem.class})
 public class XTandemTest extends AbstractXTandemTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String SEARCH_FASTA1 = "gi|4689022";
     protected static final String SEARCH_FIND_FASTA1 = "SCHIZOSACCHAROMYCES";
     protected static final String SEARCH_FIND_ALT_FASTA1 = "Schizosaccharomyces";

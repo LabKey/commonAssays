@@ -36,7 +36,6 @@ import java.io.IOException;
 @Category({MS2.class, DailyA.class})
 public class MS2ExportTest extends AbstractMS2ImportTest
 {
-    {setIsBootstrapWhitelisted(true);}
     @Override
     @LogMethod
     protected void setupMS2()

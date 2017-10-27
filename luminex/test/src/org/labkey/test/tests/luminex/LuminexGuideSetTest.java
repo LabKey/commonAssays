@@ -25,9 +25,9 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.ListHelper;
 import org.labkey.test.util.LogMethod;
-import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.WikiHelper;
+import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.io.File;
 import java.util.Calendar;
@@ -39,8 +39,6 @@ import static org.junit.Assert.assertTrue;
 @Category({DailyA.class, Assays.class})
 public final class LuminexGuideSetTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     public LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     public static final File[] GUIDE_SET_FILES = {TEST_ASSAY_LUM_FILE5, TEST_ASSAY_LUM_FILE6, TEST_ASSAY_LUM_FILE7, TEST_ASSAY_LUM_FILE8, TEST_ASSAY_LUM_FILE9};
     public static final String[] INITIAL_EXPECTED_FLAGS = {"AUC, EC50-4, HMFI, PCV", "AUC, EC50-4, EC50-5, HMFI", "EC50-5, HMFI", "", "PCV"};

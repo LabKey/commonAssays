@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 @Category({MS2.class, DailyA.class})
 public class MS2ExtensionsTest extends AbstractMS2ImportTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String MS2EXTENSIONS_WEBPART = "MS2 Runs With Peptide Counts";
     protected static final String MS2EXTENSIONS_MODULE = "MS2Extensions";
     protected static final String SEARCH_STRING = "gi|11";

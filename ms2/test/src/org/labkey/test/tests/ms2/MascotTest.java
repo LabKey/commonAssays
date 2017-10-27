@@ -69,7 +69,6 @@ import static org.junit.Assert.assertTrue;
 @Category({MS2.class, Mascot.class, DailyB.class})
 public class MascotTest extends AbstractMS2SearchEngineTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String PEPTIDE = "R.RLPVGADR.G";
     protected static final String PEPTIDE2 = "R.SREVYIVATGYK.G";
     protected static final String PEPTIDE3 = "K.ENEPFEAALRR.F";

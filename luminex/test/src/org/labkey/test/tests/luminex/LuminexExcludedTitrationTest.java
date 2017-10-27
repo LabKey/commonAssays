@@ -24,13 +24,11 @@ import org.labkey.test.util.DataRegionTable;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @Category({DailyA.class, Assays.class})
 public final class LuminexExcludedTitrationTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     /**
      * test of titration exclusion- the ability to exclude certain titrations and add a comment as to why
      * preconditions: LUMINEX project and assay list exist.  Having the Multiple Curve data will speed up execution

@@ -36,7 +36,6 @@ import java.util.List;
 @Category({DailyB.class, MS2.class, FileBrowser.class})
 public class SequestImportTest extends BaseWebDriverTest
 {
-    {setIsBootstrapWhitelisted(true);}
     private static final String PROJECT_NAME = "SequestImport" + TRICKY_CHARACTERS_FOR_PROJECT_NAMES;
 
     private static final String[] TOTAL_PEPTIDES_FIELD_KEY = {"PeptideCounts", "TotalPeptides"};

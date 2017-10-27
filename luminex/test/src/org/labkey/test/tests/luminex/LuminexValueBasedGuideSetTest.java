@@ -28,15 +28,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Created by cnathe on 4/25/14.
- *
  * This test is meant to mimic the LuminexGuideSetTest but use value-based guide sets instead of run-based guide sets.
  */
 @Category({DailyA.class, Assays.class})
 public final class LuminexValueBasedGuideSetTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
     private final String[] UPDATED_EXPECTED_FLAGS = {"AUC, PCV", "", "", "", "PCV"};

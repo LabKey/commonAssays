@@ -45,7 +45,6 @@ import static org.labkey.test.Locator.NBSP;
 @Category({MS2.class, DailyA.class})
 public class MS2Test extends AbstractMS2ImportTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String RUN_GROUP1_NAME1 = "Test Run Group 1";
     //Issue #16260, "Exception when including run group with tricky characters in name," has been updated
     protected static final String RUN_GROUP1_NAME2 = "Test Run Group 1 New Name" + TRICKY_CHARACTERS;

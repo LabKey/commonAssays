@@ -25,7 +25,6 @@ import java.io.File;
 @Category({DailyA.class})
 public class QuantitationTest extends AbstractXTandemTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String LIBRA_PROTOCOL_NAME = "BasicLibra";
 
     protected static final String LIBRA_INPUT_XML =

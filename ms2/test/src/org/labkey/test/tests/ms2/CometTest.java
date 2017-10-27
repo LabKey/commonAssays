@@ -33,7 +33,6 @@ import static org.junit.Assert.fail;
 @Category({MS2.class, DailyB.class, FileBrowser.class})
 public class CometTest extends AbstractMS2SearchEngineTest
 {
-    {setIsBootstrapWhitelisted(true);}
     protected static final String SEARCH_BUTTON = "Comet";
     protected static final String SEARCH_TYPE = "comet";
 

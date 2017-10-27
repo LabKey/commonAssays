@@ -39,8 +39,6 @@ import java.util.TreeMap;
 @Category({DailyA.class, Assays.class})
 public class LuminexSinglePointTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
 
     private static final String file1 = "01-11A12-IgA-Biotin.xls";

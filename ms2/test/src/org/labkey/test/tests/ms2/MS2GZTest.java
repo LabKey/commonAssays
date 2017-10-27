@@ -28,7 +28,6 @@ import org.labkey.test.util.LogMethod;
 @Category({MS2.class, DailyA.class})
 public class MS2GZTest extends AbstractMS2ImportTest
 {
-    {setIsBootstrapWhitelisted(true);}
     @Override
     @LogMethod
     protected void setupMS2()

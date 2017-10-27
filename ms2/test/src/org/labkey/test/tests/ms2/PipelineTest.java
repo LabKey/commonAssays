@@ -23,28 +23,26 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.BVT;
 import org.labkey.test.categories.FileBrowser;
+import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.ms2.MS2PipelineFolder;
 import org.labkey.test.ms2.params.MS2EmailSuccessParams;
+import org.labkey.test.params.ms1.FeaturesTestParams;
+import org.labkey.test.params.ms1.PepMatchTestParams;
 import org.labkey.test.pipeline.PipelineFolder;
+import org.labkey.test.pipeline.PipelineTestParams;
 import org.labkey.test.pipeline.PipelineTestsBase;
 import org.labkey.test.pipeline.PipelineWebTestBase;
-import org.labkey.test.pipeline.PipelineTestParams;
-import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.util.PipelineStatusTable;
-import org.labkey.test.params.ms1.PepMatchTestParams;
-import org.labkey.test.params.ms1.FeaturesTestParams;
 import org.labkey.test.util.PipelineToolsHelper;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @Category({BVT.class, FileBrowser.class})
 public class PipelineTest extends PipelineWebTestBase
 {
-    {setIsBootstrapWhitelisted(true);}
-    
     protected static final int MAX_WAIT_SECONDS = 60*5;
 
     protected PipelineTestsBase _testSetMS2 = new PipelineTestsBase(this);

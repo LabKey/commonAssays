@@ -37,8 +37,6 @@ import static org.junit.Assert.assertTrue;
 @Category({DailyA.class, Assays.class})
 public final class LuminexMultipleCurvesTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     /**
      * Test our ability to upload multiple files and set multiple standards
      *

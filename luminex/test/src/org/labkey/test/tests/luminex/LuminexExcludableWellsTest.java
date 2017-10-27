@@ -41,8 +41,6 @@ import static org.junit.Assert.assertTrue;
 @Category({DailyA.class, Assays.class})
 public final class LuminexExcludableWellsTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private static final String EXCLUDE_SELECTED_BUTTON = "excludeselected";
     private String excludedWellDescription = null;
     private String excludedWellType = null;

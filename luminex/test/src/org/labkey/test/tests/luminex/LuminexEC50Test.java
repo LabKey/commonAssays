@@ -35,8 +35,6 @@ import static org.junit.Assert.assertTrue;
 @Category({DailyA.class, Assays.class})
 public class LuminexEC50Test extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private final String EC50_RUN_NAME = "EC50";
     private final String rum4 = "Four Parameter";
     private final String rum5 = "Five Parameter";

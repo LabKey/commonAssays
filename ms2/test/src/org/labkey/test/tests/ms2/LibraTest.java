@@ -40,7 +40,6 @@ import static org.labkey.test.util.DataRegionTable.DataRegion;
 @Category({DailyB.class, MS2.class})
 public class LibraTest extends MS2TestBase
 {
-    {setIsBootstrapWhitelisted(true);}
     private static final String standardView = "Standard View";
     protected String proteinProphetView = "Protein Prophet View";
     private static final String iTRAQ_QUANTITATION_RATIO = "Ratio ";

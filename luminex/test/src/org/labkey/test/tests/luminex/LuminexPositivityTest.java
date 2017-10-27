@@ -47,8 +47,6 @@ import static org.junit.Assert.assertEquals;
 @Category({DailyA.class, Assays.class})
 public final class LuminexPositivityTest extends LuminexTest
 {
-    {setIsBootstrapWhitelisted(true);}
-
     private static List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
     private int _expectedThresholdValue = 100;
     private int _newThresholdValue = 100;
