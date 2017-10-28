@@ -41,7 +41,6 @@
                         allowableContainerFilters: [['Current', 'Current Folder'], ['CurrentAndSubfolders', 'Current folder and subfolders']],
                         includeRevert: false,
                         includeViewGrid: false,
-                        autoResize: false,
                         width: 700,
                         activeTab: 1,
                         listeners: {

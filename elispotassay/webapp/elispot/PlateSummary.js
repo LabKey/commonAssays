@@ -19,8 +19,6 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
     columnLabel : [1,2,3,4,5,6,7,8,9,10,11,12],
 
-    autoResize : false,
-
     constructor : function(config) {
 
         Ext4.QuickTips.init();
