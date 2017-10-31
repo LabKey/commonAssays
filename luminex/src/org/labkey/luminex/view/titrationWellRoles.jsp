@@ -26,6 +26,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
     @Override
     public void addClientDependencies(ClientDependencies dependencies)
@@ -33,6 +34,14 @@
         dependencies.add("Ext4");
     }
 %>
+
+<style type="text/css">
+    .lk-luminex-well-role-table td {
+        vertical-align: top;
+        padding-right: 10px;
+    }
+</style>
+
 <%
     JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
@@ -57,20 +66,21 @@
     Set<String> trackedSinglePointControls = bean.getParser().getSinglePointControls();
 
     // show a table for the user to select which titrations are Standards and/or QC Controls
+%>
+    <table class="lk-luminex-well-role-table">
+        <tr>
+<%
     if (nonUnknownTitrations.size() > 0)
     {
 %>
-        <div class="panel panel-default" style="display: inline-block; margin-right: 10px;">
-            <div class="panel-heading">
-                <h3 class="panel-title">Titrations</h3>
-            </div>
-            <div class="panel-body">
+        <td>
+            <labkey:panel title="Titrations">
                 <table class="lk-fields-table" style="width: 100%;">
                     <tr>
                         <td>&nbsp;</td>
-                        <td style="padding-right: 10px; font-weight: bold;">Standard</td>
-                        <td style="padding-right: 10px; font-weight: bold;">QC Control</td>
-                        <td style="font-weight: bold;">Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
+                        <td style="padding-right: 10px;">Standard</td>
+                        <td style="padding-right: 10px;">QC Control</td>
+                        <td>Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
                     </tr>
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
@@ -94,9 +104,9 @@
 <%
         }
 %>
-                </table>
-            </div>
-        </div>
+            </table>
+        </labkey:panel>
+        </td>
 <%
     }
 
@@ -104,11 +114,8 @@
     if (unknownTitrations.size() > 0)
     {
 %>
-        <div class="panel panel-default" style="display: inline-block; margin-right: 10px;">
-            <div class="panel-heading">
-                <h3 class="panel-title">Titrated Unknowns</h3>
-            </div>
-            <div class="panel-body">
+        <td>
+            <labkey:panel title="Titrated Unknowns">
                 <table class="lk-fields-table" style="width: 100%;">
 <%
         for (Map.Entry<String, Titration> titrationEntry : unknownTitrations.entrySet())
@@ -125,8 +132,8 @@
         }
 %>
                 </table>
-            </div>
-        </div>
+            </labkey:panel>
+        </td>
 <%
     }
 
@@ -134,11 +141,8 @@
     if (trackedSinglePointControls.size() >0)
     {
 %>
-        <div class="panel panel-default" style="display: inline-block;">
-            <div class="panel-heading">
-                <h3 class="panel-title">Tracked Single Point Controls</h3>
-            </div>
-            <div class="panel-body">
+        <td>
+            <labkey:panel title="Tracked Single Point Controls">
                 <table class="lk-fields-table" style="width: 100%;">
 <%
                     for (String trackedSinglePointControl : trackedSinglePointControls)
@@ -156,11 +160,13 @@
 %>
 
                 </table>
-            </div>
-        </div>
+            </labkey:panel>
+        </td>
 <%
     }
 %>
+        </tr>
+    </table>
 
 <script type="text/javascript">
     // function to handle click of titration well role checkbox to set the corresponding hidden form element accordingly

@@ -116,7 +116,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     {
         String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
 
-        out.write("<td colspan=" + span + "");
+        out.write("<td");
         out.write(" style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\"");
         out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
     }
