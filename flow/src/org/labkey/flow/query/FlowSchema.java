@@ -1604,6 +1604,10 @@ public class FlowSchema extends UserSchema
         ret.addColumn(colOriginal);
         colOriginal.setHidden(true);
 
+        PropertyColumn osf = new PropertyColumn(FlowProperty.OriginalSourceFile.getPropertyDescriptor(), ret.getColumn(ExpDataTable.Column.LSID), getContainer(), getUser(), true);
+        osf.setHidden(true);
+        ret.addColumn(osf);
+
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
     }

@@ -77,4 +77,10 @@ public class FlowFCSFile extends FlowWell
 
         return false;
     }
+
+    public String getOriginalSourceFile()
+    {
+        return (String)getProperty(FlowProperty.OriginalSourceFile);
+    }
+
 }

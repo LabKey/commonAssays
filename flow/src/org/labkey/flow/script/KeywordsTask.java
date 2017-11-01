@@ -26,6 +26,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
 import org.labkey.api.util.FileType;
+import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
@@ -87,6 +88,12 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
                 {
                     job.info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "' having original source path '" + originalSourcePath + "'");
                     run.setProperty(job.getUser(), FlowProperty.OriginalSourcePath.getPropertyDescriptor(), originalSourcePath);
+                    for (FlowFCSFile fcsFile : run.getFCSFiles())
+                    {
+                        String fcsFileName;
+                        fcsFileName = fcsFile.getKeyword("$FIL");
+                        fcsFile.setProperty(job.getUser(), FlowProperty.OriginalSourceFile.getPropertyDescriptor(), originalSourcePath + File.separatorChar + fcsFileName);
+                    }
                 }
                 else
                     job.info("Created keywords run '" + run.getName() + "' for path '" + run.getPath() + "'");

@@ -40,6 +40,9 @@ abstract public class FlowProperty
     // Property on FlowRun ExpRun object: original source path of file being processed (OriginalSourcePath)
     static public final SystemProperty OriginalSourcePath = new SystemProperty(PROPERTY_BASE + "OriginalSourcePath", PropertyType.STRING);
 
+    // Property on FlowFCSFile ExpData object: original source path and file name of file being processed (OriginalSourceFile)
+    static public final SystemProperty OriginalSourceFile = new SystemProperty(PROPERTY_BASE + "OriginalSourceFile", PropertyType.STRING);
+
     static public void register()
     {
     }
