@@ -248,7 +248,7 @@ public class FlowModule extends SpringModule
             ss.addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
     }
 
     @Override

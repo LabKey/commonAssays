@@ -103,7 +103,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return new ArrayList<WebPartFactory>(Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
+        return new ArrayList<>(Arrays.asList(new BaseWebPartFactory(WEBPART_MS1_RUNS)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
@@ -183,7 +183,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         containerFrag.append("SELECT d.Container FROM exp.Data d ");
         containerFrag.append("WHERE d.RowId = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".ExpDataFileId");
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri, "FileId", containerFrag));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS1Manager.get().getTable(MS1Manager.TABLE_FILES), "MzXMLURL", TableUpdaterFileListener.Type.uri, "FileId", containerFrag));
     }
 
 

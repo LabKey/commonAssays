@@ -306,7 +306,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             ss.addDocumentParser(new MGFDocumentParser());
         }
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -321,7 +321,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         containerFrag.append(MS2Manager.getTableInfoRuns(), "r");
         containerFrag.append(" WHERE r.Run = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".Run");
 
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
         {
             @Override
             public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
@@ -330,9 +330,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 MS2Manager.clearFractionCache();
             }
         });
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
-        ServiceRegistry.get(FileContentService.class).addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
     }
 
     @NotNull
