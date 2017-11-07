@@ -81,14 +81,6 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
         return new String(trimmed, 0, len);
     }
 
-    public List<String> getColumnNames()
-    {
-        if(_exact)
-            return Arrays.asList("TrimmedPeptide", "Peptide");
-        else
-            return Arrays.asList("TrimmedPeptide");
-    }
-
     public List<FieldKey> getFieldKeys()
     {
         if(_exact)

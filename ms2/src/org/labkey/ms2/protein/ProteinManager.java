@@ -326,7 +326,7 @@ public class ProteinManager
 
         // Add charge filter only if there's one or more valid values
         if (includeChargeFilter && run.getChargeFilterColumnName() != null)
-            filter.addClause(new ChargeFilter(run.getChargeFilterColumnName(), values));
+            filter.addClause(new ChargeFilter(FieldKey.fromString(run.getChargeFilterColumnName()), values));
 
         String tryptic = currentUrl.getParameter("tryptic");
 
@@ -694,23 +694,10 @@ public class ProteinManager
         private Float[] _values;
 
         // At least one value must be non-null
-        @Deprecated // Use FieldKey version instead.
-        public ChargeFilter(String columnName, Float[] values)
-        {
-            this(FieldKey.fromString(columnName), values);
-        }
-
-        // At least one value must be non-null
         public ChargeFilter(FieldKey fieldKey, Float[] values)
         {
             _fieldKey = fieldKey;
             _values = values;
-        }
-
-        @Deprecated // Use getFieldKeys() instead.
-        public List<String> getColumnNames()
-        {
-            return Arrays.asList(_fieldKey.toString(), "Charge");
         }
 
         @Override
@@ -817,12 +804,6 @@ public class ProteinManager
         private String cTerm(SqlDialect dialect)
         {
             return "(StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%-')";
-        }
-
-        @Deprecated // Use FieldKey version instead.
-        public List<String> getColumnNames()
-        {
-            return Arrays.asList("StrippedPeptide");
         }
 
         public List<FieldKey> getFieldKeys()
@@ -1075,12 +1056,6 @@ public class ProteinManager
             return sqlf;
         }
 
-        @Deprecated // Use FieldKey version instead.
-        public List<String> getColumnNames()
-        {
-            return Arrays.asList("TrimmedPeptide");
-        }
-
         public List<FieldKey> getFieldKeys()
         {
             return Arrays.asList(FieldKey.fromParts("TrimmedPeptide"));
@@ -1125,16 +1100,12 @@ public class ProteinManager
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
-            sqlf.append(" RowId IN (SELECT pm.PeptideId FROM " + MS2Manager.getTableInfoPeptideMemberships() + " pm ");
-            sqlf.append(" INNER JOIN " + MS2Manager.getTableInfoProteinGroups() + " pg  ON (pm.ProteinGroupId = pg.RowId) \n");
-            sqlf.append(" WHERE pg.GroupNumber = " + _groupNum + "  and pg.IndistinguishableCollectionId = " + _indistinguishableProteinId + " ) ");
+            sqlf.append(" RowId IN (SELECT pm.PeptideId FROM ").append(String.valueOf(MS2Manager.getTableInfoPeptideMemberships())).append(" pm ");
+            sqlf.append(" INNER JOIN ").append(String.valueOf(MS2Manager.getTableInfoProteinGroups())).append(" pg  ON (pm.ProteinGroupId = pg.RowId) \n");
+            sqlf.append(" WHERE pg.GroupNumber = ").append(String.valueOf(_groupNum)).append("  and pg.IndistinguishableCollectionId = ").append(String.valueOf(_indistinguishableProteinId)).append(" ) ");
             return sqlf;
         }
-        @Deprecated // Use getFieldKeys() instead.
-        public List<String> getColumnNames()
-        {
-            return Arrays.asList("RowId");
-        }
+
         public List<FieldKey> getFieldKeys()
         {
             return Arrays.asList(FieldKey.fromParts("RowId"));
