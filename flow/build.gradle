@@ -28,7 +28,7 @@ project.task("engineJar",
         description: "produce jar file for flow engine source",
         {
             classifier "engine"
-            from project.sourceSets['engine'].output.classesDir
+            from project.sourceSets.engine.output
             baseName "${project.name}_engine"
             destinationDir = project.file(project.labkey.explodedModuleLibDir)
         })
