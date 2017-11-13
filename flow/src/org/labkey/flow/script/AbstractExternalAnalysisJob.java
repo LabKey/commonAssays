@@ -239,26 +239,18 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     {
         // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
         // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
-        Map<String, String> fakeRowOld = new HashMap<>();
         Map<FieldKey, String> fakeRow = new HashMap<>();
-        fakeRowOld.put("Name", sampleName);
-        fakeRow.put(FieldKey.fromString("Name"), sampleName);
+        fakeRow.put(FieldKey.fromParts("Name"), sampleName);
         //fakeRow.put(FieldKey.fromParts("Run", "Name").toString(), "run name?");
 
         FieldKey keyKeyword = FieldKey.fromParts("Keyword");
         for (String keyword : KeywordUtil.filterHidden(keywords.keySet()))
         {
             String keywordValue = keywords.get(keyword);
-            fakeRowOld.put(new FieldKey(keyKeyword, keyword).toString(), keywordValue);
             fakeRow.put(new FieldKey(keyKeyword, keyword), keywordValue);
         }
 
-        boolean oldRet = filter.meetsCriteria(fakeRowOld);
-        boolean ret = filter.meetsCriteriaFK(fakeRow);
-
-        assert oldRet == ret;
-
-        return ret;
+        return filter.meetsCriteria(fakeRow);
     }
 
     protected abstract FlowRun createExperimentRun() throws Exception;
