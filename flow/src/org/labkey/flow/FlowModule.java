@@ -92,6 +92,7 @@ public class FlowModule extends SpringModule
     private static String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
     private static String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
     private static String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
+    private static String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
 
     public String getName()
     {
@@ -152,6 +153,14 @@ public class FlowModule extends SpringModule
         registerModuleProperty(EXPORT_TO_SCRIPT_LOCATION, "Set the directory location where the exported files will be saved before executing the script", "Export To Script - Location", ModuleProperty.InputType.text);
         registerModuleProperty(EXPORT_TO_SCRIPT_FORMAT, "Set the format type of the exported files - either 'zip' or 'directory'", "Export To Script - Format", ModuleProperty.InputType.text, "directory");
         registerModuleProperty(EXPORT_TO_SCRIPT_TIMEOUT, "Set timeout in seconds the export script will be allowed to run", "Export To Script - Timeout", ModuleProperty.InputType.text);
+
+        registerModuleProperty(
+                EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE,
+                "When unset or 'true', delete the export directory after the script completes successfully. " +
+                        "If 'false', the export directory will be preserved.",
+                "Export To Script - Delete on successful complete",
+                ModuleProperty.InputType.text,
+                "true");
     }
 
     private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type)
@@ -203,6 +212,13 @@ public class FlowModule extends SpringModule
     public String getExportToScriptTimeout(Container c)
     {
         ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_TIMEOUT);
+        return prop.getEffectiveValue(c);
+    }
+
+    @Nullable
+    public String getExportToScriptDeleteOnComplete(Container c)
+    {
+        ModuleProperty prop = this.getModuleProperties().get(EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE);
         return prop.getEffectiveValue(c);
     }
 

@@ -43,6 +43,7 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     private AnalysisSerializer.Options _exportFormat = AnalysisSerializer.Options.FormatGroupBySamplePopulation;
     private SendTo _sendTo = SendTo.Browser;
     private String _label;
+    private String _fcsDirName = "FCSFiles";
 
     private String _dataRegionSelectionKey = null;
     private String _selectionType;
@@ -158,6 +159,16 @@ public class ExportAnalysisForm implements DataRegionSelection.DataSelectionKeyF
     public void setLabel(String label)
     {
         _label = label;
+    }
+
+    public String getFcsDirName()
+    {
+        return _fcsDirName;
+    }
+
+    public void setFcsDirName(String fcsDirName)
+    {
+        _fcsDirName = fcsDirName;
     }
 
     @Override

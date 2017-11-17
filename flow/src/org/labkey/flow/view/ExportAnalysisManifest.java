@@ -142,6 +142,7 @@ public class ExportAnalysisManifest
             oc.setDateFormat(df);
             jsonGen.setCodec(oc);
             jsonGen.writeObject(this);
+            jsonGen.useDefaultPrettyPrinter();
             return sw.toString();
         }
         catch (IOException io)

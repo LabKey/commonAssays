@@ -261,16 +261,17 @@ public class RunController extends BaseFlowController
         }
     }
 
-    protected SampleIdMap<String> exportFCSFiles(VirtualFile dir, String dirName, FlowRun run, int eventCount)
+    protected SampleIdMap<String> exportFCSFiles(VirtualFile dir, @Nullable String dirName, FlowRun run, int eventCount)
             throws Exception
     {
         FlowWell[] wells = run.getWells(true);
         return exportFCSFiles(dir, dirName, Arrays.asList(wells), eventCount);
     }
 
-    protected SampleIdMap<String> exportFCSFiles(VirtualFile dir, String dirName, Collection<FlowWell> wells, int eventCount)
+    protected SampleIdMap<String> exportFCSFiles(VirtualFile parentDir, @Nullable String dirName, Collection<FlowWell> wells, int eventCount)
             throws Exception
     {
+        VirtualFile dir = dirName == null ? parentDir : parentDir.getDir(dirName);
         SampleIdMap<String> files = new SampleIdMap<>();
         FileNameUniquifier uniquifier = new FileNameUniquifier(true);
 
@@ -362,6 +363,7 @@ public class RunController extends BaseFlowController
         private String _exportToScriptLocation;
         private String _exportToScriptFormat;
         private Integer _exportToScriptTimeout;
+        private boolean _exportToScriptDeleteOnComplete = true;
 
         private String _guid;
 
@@ -406,6 +408,10 @@ public class RunController extends BaseFlowController
                     }
                     catch (NumberFormatException ex) { }
                 }
+
+                String exportToScriptDeleteOnComplete = module.getExportToScriptDeleteOnComplete(getContainer());
+                if (exportToScriptDeleteOnComplete != null)
+                    _exportToScriptDeleteOnComplete = Boolean.parseBoolean(exportToScriptDeleteOnComplete);
             }
 
             int[] runId = form.getRunId();
@@ -477,7 +483,9 @@ public class RunController extends BaseFlowController
         {
             _guid = GUID.makeGUID();
 
-            final String fcsDirName = "FCSFiles";
+            String fcsDirName = StringUtils.trimToNull(form.getFcsDirName());
+            if (fcsDirName != null)
+                fcsDirName = FileUtil.makeLegalName(fcsDirName);
 
             if (_runs != null && _runs.size() > 0)
             {
@@ -509,7 +517,7 @@ public class RunController extends BaseFlowController
                         AnalysisSerializer writer = new AnalysisSerializer(_log, dir);
                         if (form.isIncludeFCSFiles())
                         {
-                            files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, run, 0);
+                            files = exportFCSFiles(dir, fcsDirName, run, 0);
                             writeFCSFileCatalog(dir, files);
                         }
 
@@ -540,12 +548,7 @@ public class RunController extends BaseFlowController
             }
             else if (_wells != null && _wells.size() > 0)
             {
-                String zipName = "ExportedWells";
-                if (_wells.size() == 1)
-                {
-                    FlowWell well = _wells.get(0);
-                    zipName = getBaseName(well.getName());
-                }
+                String zipName = "data";
 
                 SampleIdMap<AttributeSet> keywords = new SampleIdMap<>();
                 SampleIdMap<AttributeSet> analysis = new SampleIdMap<>();
@@ -560,7 +563,7 @@ public class RunController extends BaseFlowController
                     SampleIdMap<String> files = null;
                     if (form.isIncludeFCSFiles())
                     {
-                        files = exportFCSFiles(dir.getDir(fcsDirName), fcsDirName, _wells, 0);
+                        files = exportFCSFiles(dir, fcsDirName, _wells, 0);
                         writeFCSFileCatalog(dir, files);
                     }
 
@@ -623,9 +626,11 @@ public class RunController extends BaseFlowController
 
                 case Script:
                 {
-                    File dir = new File(FileUtil.getTempDirectory(), "flow-export-to-script");
+                    File dir;
                     if (_exportToScriptLocation != null)
                         dir = new File(_exportToScriptLocation);
+                    else
+                        dir = new File(FileUtil.getTempDirectory(), "flow-export-to-script");
 
                     if ("zip".equalsIgnoreCase(_exportToScriptFormat))
                     {
@@ -663,7 +668,7 @@ public class RunController extends BaseFlowController
                     ExportAnalysisManifest analysisManifest = buildExportAnalysisManifest(form, files);
                     writeManifest(analysisManifest.toJSON(), vf.getLocation());
 
-                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, _exportToScriptFormat, form.getLabel(), location, _exportToScriptTimeout, vbi, root);
+                    PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, _exportToScriptFormat, form.getLabel(), location, _exportToScriptTimeout, _exportToScriptDeleteOnComplete, vbi, root);
                     String jobGuid = null;
                     try
                     {
@@ -711,8 +716,9 @@ public class RunController extends BaseFlowController
         private final String _label;
         private final File _location;
         private final Integer _timeout;
+        private final boolean _deleteOnComplete;
 
-        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, File location, Integer timeout, ViewBackgroundInfo info, @NotNull PipeRoot root)
+        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, File location, Integer timeout, boolean deleteOnComplete, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
             _guid = guid;
@@ -722,6 +728,7 @@ public class RunController extends BaseFlowController
             _label = label;
             _location = location;
             _timeout = timeout;
+            _deleteOnComplete = deleteOnComplete;
 
             // setup the log file
             File logFile = new File(root.getRootPath(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
@@ -794,21 +801,19 @@ public class RunController extends BaseFlowController
             env.put("exportFormat", _exportToScriptFormat);
             List<String> params = parse(_exportToScriptCommandLine, env);
 
-            File dir = _location.getParentFile();
-
             ProcessBuilder pb = new ProcessBuilder(params);
             info("Executing script: " + StringUtils.join(pb.command(), " "));
 
             try
             {
                 if (_timeout == null)
-                    runSubProcess(pb, dir);
+                    runSubProcess(pb, _location);
                 else
-                    runSubProcess(pb, dir, null, 0, false, _timeout, TimeUnit.SECONDS);
+                    runSubProcess(pb, _location, null, 0, false, _timeout, TimeUnit.SECONDS);
 
-                if (getErrors() == 0)
+                if (getErrors() == 0 && _deleteOnComplete)
                 {
-                    info("Deleting temp directory: " + _location);
+                    debug("Deleting export directory: " + _location);
                     FileUtil.deleteDir(_location);
                 }
 
