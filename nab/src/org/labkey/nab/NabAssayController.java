@@ -1241,7 +1241,7 @@ public class NabAssayController extends SpringActionController
 
         private String getSpecimenKey(Map<String, Object> row)
         {
-            return row.get("runId") + "-" + row.get("wellGroupName");
+            return String.valueOf(row.get("specimenLsid"));
         }
 
         private String getDilutionKey(DilutionDataRow row)
