@@ -99,15 +99,6 @@ Browse the pipeline
                 ,fileFilter : {test: function(data){ return !data.file || endsWith(data.name,".xml") || endsWith(data.name, ".wsp") || endsWith(data.name, ".zip"); }}
                 ,gridConfig : {selModel : {selType: 'checkboxmodel', mode : 'SINGLE'}}
                 ,listeners: {
-                    <% if (!PageFlowUtil.useExperimentalCoreUI()) { %>
-                    afterrender: {
-                        fn: function(f) {
-                            var size = Ext4.getBody().getSize();
-                            LABKEY.ext4.Util.resizeToViewport(f, size.width, size.height, 20, null);
-                        },
-                        single: true
-                    },
-                    <% } %>
                     doubleclick: function(record) {
                         if (record && !record.data.collection) {
                             selectRecord(record.data.id.replace(fileBrowser.getBaseURL(), '/'));

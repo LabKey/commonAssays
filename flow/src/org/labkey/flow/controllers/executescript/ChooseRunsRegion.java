@@ -66,8 +66,6 @@ public class ChooseRunsRegion extends DataRegion
     @Override
     protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
-        boolean newUI = PageFlowUtil.useExperimentalCoreUI();
-
         out.write("<tr");
         String disabledReason = getDisabledReason(ctx);
         if (disabledReason != null)
@@ -77,11 +75,11 @@ public class ChooseRunsRegion extends DataRegion
         }
         out.write(">");
 
-        DisplayColumn detailsColumn = newUI ? getDetailsUpdateColumn(ctx, renderers, true) : null;
-        DisplayColumn updateColumn = newUI ? getDetailsUpdateColumn(ctx, renderers, false) : null;;
+        DisplayColumn detailsColumn = getDetailsUpdateColumn(ctx, renderers, true);
+        DisplayColumn updateColumn = getDetailsUpdateColumn(ctx, renderers, false);
 
         int visibleCount = 0;
-        if (showRecordSelectors || (newUI && (detailsColumn != null || updateColumn != null)))
+        if (showRecordSelectors || (detailsColumn != null || updateColumn != null))
         {
             visibleCount++;
             renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
@@ -93,7 +91,7 @@ public class ChooseRunsRegion extends DataRegion
             DisplayColumn renderer = renderers.get(i);
             if (renderer.isVisible(ctx))
             {
-                if (newUI && (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn))
+                if (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn)
                     continue;
 
                 if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))

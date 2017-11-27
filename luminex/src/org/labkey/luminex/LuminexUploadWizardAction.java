@@ -563,11 +563,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             @Override
             public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
             {
-                boolean newUI = PageFlowUtil.useExperimentalCoreUI();
-                if (newUI)
-                    out.write("<td class=\"control-header-label\">");
-                else
-                    out.write("<td class='labkey-form-label'>");
+                out.write("<td class=\"control-header-label\">");
 
                 renderTitle(ctx, out);
                 String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
