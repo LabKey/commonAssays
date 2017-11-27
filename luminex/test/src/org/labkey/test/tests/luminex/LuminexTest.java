@@ -727,9 +727,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         assertTextPresent("Levey-Jennings Report", "Standard1");
     }
 
+    @LogMethod (quiet = true)
     protected void cleanupPipelineJobs()
     {
-        //Cleanup pipeline jobs
+        goToProjectHome();
         goToModule("Pipeline");
         PipelineStatusTable table = new PipelineStatusTable(this);
 
