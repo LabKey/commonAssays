@@ -112,7 +112,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputWrapperBegin(Writer out, int span) throws IOException
+    public void renderInputWrapperBegin(Writer out) throws IOException
     {
         String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
 

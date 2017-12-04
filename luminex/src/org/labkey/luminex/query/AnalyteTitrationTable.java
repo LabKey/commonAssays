@@ -152,7 +152,6 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                         PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
                         ljPlotsMenu.renderMenuButton(ctx, out, false, null);
-                        ljPlotsMenu.renderMenuScript(out);
                     }
 
                     @Override
