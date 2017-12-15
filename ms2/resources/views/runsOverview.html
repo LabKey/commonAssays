@@ -60,7 +60,7 @@ function init()
         scope: this,
         success: LABKEY.Utils.getCallbackWrapper(function(response)
         {
-            Ext4.iterate(response.properties, function(key, value)
+            Ext.iterate(response.properties, function(key, value)
             {
                 if (key == "searchEngine")
                 {
@@ -566,8 +566,7 @@ function validateFilters(exportOnly)
 function displayResults(runIds, formValues, exportOnly)
 {
     var inputs = formValues;
-    var columns = "";
-    var separator = "";
+    var columns = "RowId";
     var filterColumn = "Fraction/Run/Run";
     var exportFilterArray = [];
 
@@ -578,8 +577,7 @@ function displayResults(runIds, formValues, exportOnly)
         {
             if(key.toString().search(/filter-/) < 0)
             {
-                columns += separator + key.toString();
-                separator = ", ";
+                columns += ', ' + key.toString();
             }
         }
     }
