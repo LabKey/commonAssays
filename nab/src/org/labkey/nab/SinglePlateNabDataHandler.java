@@ -118,18 +118,18 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     Load load = new Load()
                     {
                         @Override
-                        DataLoader createList() throws IOException
+                        DataLoader createList()
                         {
                             return createLoader(true);
                         }
 
                         @Override
-                        DataLoader createGrid() throws IOException
+                        DataLoader createGrid()
                         {
                             return createLoader(false);
                         }
 
-                        DataLoader createLoader(boolean hasColumnHeaders) throws IOException
+                        DataLoader createLoader(boolean hasColumnHeaders)
                         {
                             ExcelLoader loader = new ExcelLoader(workbook, hasColumnHeaders, null);
                             loader.setInferTypes(false);
