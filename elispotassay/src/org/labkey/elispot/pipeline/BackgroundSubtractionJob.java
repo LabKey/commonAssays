@@ -71,7 +71,7 @@ public class BackgroundSubtractionJob extends PipelineJob
     {
         super(provider, info, root);
 
-        File logFile = File.createTempFile("backgroundSubtractionJob", ".log", root.getRootPath());
+        File logFile = File.createTempFile("backgroundSubtractionJob", ".log", root.getLogDirectory());
         setLogFile(logFile);
 
         _runs = runs;

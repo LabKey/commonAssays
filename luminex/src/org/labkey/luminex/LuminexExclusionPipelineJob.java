@@ -42,7 +42,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     {
         super(LuminexAssayProvider.NAME, info, root);
 
-        File logFile = new File(root.getRootPath(), FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log"));
+        File logFile = new File(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log"));
         setLogFile(logFile);
 
         _form = form;

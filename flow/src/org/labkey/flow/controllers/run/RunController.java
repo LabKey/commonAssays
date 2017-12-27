@@ -731,7 +731,7 @@ public class RunController extends BaseFlowController
             _deleteOnComplete = deleteOnComplete;
 
             // setup the log file
-            File logFile = new File(root.getRootPath(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
+            File logFile = new File(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
             setLogFile(logFile);
         }
 
