@@ -44,7 +44,7 @@ transformVersion = "10.0.20150910";
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
 
 source("${srcDirectory}/youtil.R");
-# Ruminex package available from http://labs.fhcrc.org/fong/Ruminex/index.html
+# Ruminex package available from https://labkey.org/Documentation/wiki-page.view?name=configureLuminexScript
 suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
 
