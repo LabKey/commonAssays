@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-/* nab-0.00-15.20.sql */
-
-/* nab-11.10-11.20.sql */
-
--- Set all of the NAb run properties that control the calculations to be not shown in update views
-UPDATE exp.propertydescriptor SET showninupdateview = false WHERE propertyid IN
-(
-	SELECT pd.propertyid
-	FROM exp.propertydescriptor pd, exp.propertydomain propdomain, exp.domaindescriptor dd
-	WHERE
-		(LOWER(pd.name) LIKE 'cutoff%' OR lower(pd.name) LIKE 'curvefitmethod' ) AND
-		pd.propertyid = propdomain.propertyid AND
-		dd.domainid = propdomain.domainid AND
-		domainuri IN
-		(
-			-- Find all the NAb run domain URIs
-			SELECT dd.domainuri
-			FROM exp.object o, exp.objectproperty op, exp.protocol p, exp.domaindescriptor dd
-			WHERE o.objecturi = p.lsid AND op.objectid = o.objectid AND op.stringvalue = dd.domainuri AND p.lsid LIKE '%:NabAssayProtocol.%' AND dd.domainuri LIKE '%:AssayDomain-Run.%'
-		)
-);
-
 /* nab-12.30-13.10.sql */
 
 CREATE SCHEMA nab;
@@ -44,15 +22,15 @@ CREATE TABLE nab.cutoffvalue
 (
     rowid SERIAL NOT NULL,
     nabspecimenid INT NOT NULL,
-    cutoff REAL,
-    point REAL,
+    cutoff DOUBLE PRECISION,
+    point DOUBLE PRECISION,
     pointoorindicator VARCHAR(20),
     
-    ic_poly REAL,
+    ic_poly DOUBLE PRECISION,
     ic_polyoorindicator VARCHAR(20),
-    ic_4pl REAL,
+    ic_4pl DOUBLE PRECISION,
     ic_4ploorindicator VARCHAR(20),
-    ic_5pl REAL,
+    ic_5pl DOUBLE PRECISION,
     ic_5ploorindicator VARCHAR(20),
 
     CONSTRAINT pk_nab_cutoffvalue PRIMARY KEY (rowid)
@@ -64,21 +42,22 @@ CREATE TABLE nab.nabspecimen
     dataid INT,
     runid INT NOT NULL,
     specimenlsid lsidtype NOT NULL,
-    FitError REAL,
+    FitError DOUBLE PRECISION,
     WellgroupName VARCHAR(100),
     
-    auc_poly REAL,
-    positiveauc_poly REAL,
-    auc_4pl REAL,
-    positiveauc_4pl REAL,
-    auc_5pl REAL,
-    positiveauc_5pl REAL,
+    auc_poly DOUBLE PRECISION,
+    positiveauc_poly DOUBLE PRECISION,
+    auc_4pl DOUBLE PRECISION,
+    positiveauc_4pl DOUBLE PRECISION,
+    auc_5pl DOUBLE PRECISION,
+    positiveauc_5pl DOUBLE PRECISION,
 
     -- For legacy migration purposes
     objecturi VARCHAR(300),
     objectid INT NOT NULL,
     protocolid INT,
-
+    viruslsid lsidtype,
+    
     CONSTRAINT pk_nab_specimen PRIMARY KEY (rowid),
     CONSTRAINT fk_nabspecimen_experimentrun FOREIGN KEY (runid)
       REFERENCES exp.experimentrun (rowid) MATCH SIMPLE
@@ -99,178 +78,58 @@ ALTER TABLE nab.nabspecimen ADD CONSTRAINT fk_nabspecimen_protocolid FOREIGN KEY
         REFERENCES exp.protocol (rowid) MATCH SIMPLE
         ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-/* Script to migrate existing Nab assay data from Object Properities to NabSpecimen and CutoffValue tables */
 
-delete from nab.cutoffvalue;
-delete from nab.nabspecimen;
-
-INSERT INTO nab.NAbSpecimen (DataId, RunID, ProtocolID, SpecimenLSID, FitError, WellGroupName, AUC_Poly, AUC_5PL, AUC_4PL, PositiveAUC_Poly, PositiveAUC_5PL, PositiveAUC_4PL, ObjectURI, ObjectId)
-SELECT * FROM (
-	SELECT
-		(SELECT RowId FROM exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId) AS DataId,
-		(SELECT RunId FROM exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId) AS RunId,
-		(SELECT p.RowId FROM exp.ExperimentRun er, exp.Protocol p, exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId AND er.RowId = d.RunId AND p.LSID = er.ProtocolLSID) AS ProtocolId,
-
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:SpecimenLsid' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS SpecimenLSID,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:Fit+Error' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS FitError,
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:WellgroupName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS WellGroupName,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:AUC_poly' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AUC_Poly,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:AUC_5pl' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AUC_5PL,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:AUC_4pl' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AUC_4PL,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:PositiveAUC_poly' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS PositiveAUC_Poly,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:PositiveAUC_5pl' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS PositiveAUC_5PL,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:PositiveAUC_4pl' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS PositiveAUC_4PL,
-		ObjectURI,
-		ObjectId
-	FROM exp.Object o WHERE ObjectURI LIKE '%AssayRunNabDataRow%') x
-	WHERE specimenlsid IS NOT NULL AND DataId IS NOT NULL AND RunID IS NOT NULL AND ProtocolID IS NOT NULL;
-
-INSERT INTO nab.CutoffValue (NAbSpecimenId, Cutoff, Point)
-	SELECT s.RowId, CAST (substr(pd.PropertyURI, POSITION(':Point+IC' IN pd.PropertyURI) + 9, 2) AS INT), op.FloatValue
-	FROM nab.NAbSpecimen s, exp.PropertyDescriptor pd, exp.ObjectProperty op, exp.Object o
-	WHERE pd.PropertyId = op.PropertyId AND op.ObjectId = o.ObjectId AND o.ObjectURI = s.ObjectURI AND pd.PropertyURI LIKE '%:NabProperty.%:Point+IC%' AND pd.PropertyURI NOT LIKE '%OORIndicator';
-
-UPDATE nab.CutoffValue SET
-	PointOORIndicator = (SELECT op.StringValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Point+IC' || CAST(Cutoff AS INT) || 'OORIndicator'),
-	IC_4PL = (SELECT op.FloatValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_4pl'),
-	IC_4PLOORIndicator = (SELECT op.StringValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_4plOORIndicator'),
-	IC_5PL = (SELECT op.FloatValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_5pl'),
-	IC_5PLOORIndicator = (SELECT op.StringValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_5plOORIndicator'),
-	IC_Poly = (SELECT op.FloatValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_poly'),
-	IC_PolyOORIndicator = (SELECT op.StringValue FROM
-		exp.ObjectProperty op,
-		exp.PropertyDescriptor pd,
-		nab.NAbSpecimen ns
-		WHERE op.PropertyId = pd.PropertyId AND ns.ObjectId = op.ObjectId AND ns.RowId = NAbSpecimenID AND pd.PropertyURI LIKE '%:Curve+IC' || CAST(Cutoff AS INT) || '_polyOORIndicator');
-
--- Change keyPropertyName in study.dataset
-UPDATE study.DataSet SET KeyPropertyName = 'RowId' WHERE ProtocolId IN (SELECT ProtocolId FROM nab.NAbSpecimen);
-
--- Remove stuff that we moved from properties
-DELETE FROM exp.ObjectProperty
-    WHERE ObjectId IN (SELECT ObjectID FROM nab.NabSpecimen) AND
-      (PropertyId IN
-        (SELECT PropertyId FROM exp.PropertyDescriptor pd
-			WHERE
-            (pd.PropertyURI LIKE '%:SpecimenLsid' OR
-             pd.PropertyURI LIKE '%:Fit+Error' OR
-             pd.PropertyURI LIKE '%:WellgroupName' OR
-             pd.PropertyURI LIKE '%:AUC_poly' OR
-             pd.PropertyURI LIKE '%:AUC_5pl' OR
-             pd.PropertyURI LIKE '%:AUC_4pl' OR
-             pd.PropertyURI LIKE '%:PositiveAUC_poly' OR
-             pd.PropertyURI LIKE '%:PositiveAUC_5pl' OR
-             pd.PropertyURI LIKE '%:PositiveAUC_4pl' OR
-             pd.PropertyURI LIKE '%:Point+IC' OR
-             pd.PropertyURI LIKE '%:Point+ICOORIndicator' OR
-             pd.PropertyURI LIKE '%:Curve+IC%_4pl%' OR
-             pd.PropertyURI LIKE '%:Curve+IC%_4plOORIndicator'OR
-             pd.PropertyURI LIKE '%:Curve+IC%_5pl%'OR
-             pd.PropertyURI LIKE '%:Curve+IC%_5plOORIndicator'OR
-             pd.PropertyURI LIKE '%:Curve+IC%_poly' OR
-             pd.PropertyURI LIKE '%:Curve+IC%_polyOORIndicator')));
-
--- remove leftover object properties
-DELETE FROM exp.ObjectProperty
-    WHERE ObjectId IN (SELECT ObjectId FROM exp.Object WHERE ObjectURI LIKE 'urn:lsid:%AssayRunNabDataRow.%') AND
-      (PropertyId IN (SELECT PropertyId FROM exp.PropertyDescriptor WHERE
-        (PropertyURI LIKE '%:NabProperty%:SpecimenLsid' OR
-         PropertyURI LIKE '%:NabProperty%:Fit+Error' OR
-         PropertyURI LIKE '%:NabProperty%:WellgroupName' OR
-         PropertyURI LIKE '%:NabProperty%:AUC%' OR
-         PropertyURI LIKE '%:NabProperty%:PositiveAUC%' OR
-         PropertyURI LIKE '%:NabProperty%:Point+IC%' OR
-         PropertyURI LIKE '%:NabProperty%:Curve+IC%')));
-
--- remove property descriptors we don't use anymore
-DELETE FROM exp.PropertyDescriptor
-    WHERE Container IN (SELECT Container FROM exp.ExperimentRun er, nab.NabSpecimen ns WHERE ns.RunId = er.RowId) AND
-	  (PropertyURI LIKE '%:NabProperty%:SpecimenLsid' OR
-	   PropertyURI LIKE '%:NabProperty%:Fit+Error' OR
-	   PropertyURI LIKE '%:NabProperty%:WellgroupName' OR
-	   PropertyURI LIKE '%:NabProperty%:AUC%' OR
-	   PropertyURI LIKE '%:NabProperty%:PositiveAUC%' OR
-	   PropertyURI LIKE '%:NabProperty%:Point+IC%' OR
-	   PropertyURI LIKE '%:NabProperty%:Curve+IC%');
-
-/* nab-13.10-13.20.sql */
-
-SELECT core.fn_dropifexists('NAbSpecimen', 'nab', 'INDEX', 'IDX_NAbSpecimen_ProtocolId');
 CREATE INDEX IDX_NAbSpecimen_ProtocolId ON nab.NAbSpecimen(ProtocolId);
-
-SELECT core.fn_dropifexists('CutoffValue', 'nab', 'INDEX', 'IDX_CutoffValue_NabSpecimenId');
 CREATE INDEX IDX_CutoffValue_NabSpecimenId ON nab.cutoffvalue USING btree (NabSpecimenId);
 
 /* nab-14.20-14.30.sql */
-
-ALTER TABLE nab.NabSpecimen ADD COLUMN viruslsid lsidtype;
 
 CREATE SCHEMA nabvirus;
 
 /* nab-15.10-15.11.sql */
 
-SELECT core.fn_dropifexists('NAbSpecimen', 'nab', 'INDEX', 'idx_nabspecimen_specimenlsid');
 CREATE INDEX IDX_NAbSpecimen_SpecimenLSID ON nab.NAbSpecimen(SpecimenLSID);
-
-/* nab-15.20-15.30.sql */
 
 /* nab-15.20-15.21.sql */
 
 CREATE TABLE nab.dilutiondata
 (
-  RowId SERIAL NOT NULL,
-  Dilution REAL,
-  DilutionOrder INT,
-  PercentNeutralization REAL,
-  NeutralizationPlusMinus REAL,
-  Min REAL,
-  Max REAL,
-  Mean REAL,
-  StdDev REAL,
+    RowId SERIAL NOT NULL,
+    Dilution DOUBLE PRECISION,
+    DilutionOrder INT,
+    PercentNeutralization DOUBLE PRECISION,
+    NeutralizationPlusMinus DOUBLE PRECISION,
+    Min DOUBLE PRECISION,
+    Max DOUBLE PRECISION,
+    Mean DOUBLE PRECISION,
+    StdDev DOUBLE PRECISION,
+    WellgroupName VARCHAR(100),
+    ReplicateName VARCHAR(100),
+    RunDataId INT,
+    MinDilution DOUBLE PRECISION,
+    MaxDilution DOUBLE PRECISION,
+    PlateNumber INT,
+    RunId INT,
+    ProtocolId INT,
+    Container ENTITYID NOT NULL,
 
-  CONSTRAINT pk_dilutiondata PRIMARY KEY (RowId)
+    CONSTRAINT pk_dilutiondata PRIMARY KEY (RowId)
 
 );
+
+ALTER TABLE nab.dilutiondata ADD CONSTRAINT fk_dilutiondata_experimentrun FOREIGN KEY (RunId)
+    REFERENCES exp.experimentrun (RowId) MATCH SIMPLE ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE nab.dilutiondata ADD CONSTRAINT fk_dilutiondata_rundataid FOREIGN KEY (RunDataId)
+    REFERENCES nab.nabspecimen (RowId) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+CREATE INDEX IDX_DilutionData_RunId ON nab.DilutionData(RunId);
 
 CREATE TABLE nab.welldata
 (
   RowId SERIAL NOT NULL,
   RunId INT NOT NULL,
-  SpecimenLsid lsidtype NOT NULL,
-  RunDataId INT NOT NULL,
+  SpecimenLsid lsidtype,
+  RunDataId INT,
   DilutionDataId INT,
   ProtocolId INT,
   "Row" INT,
@@ -282,8 +141,10 @@ CREATE TABLE nab.welldata
   ReplicateWellgroup VARCHAR(100),
   ReplicateNumber INT,
   Container ENTITYID NOT NULL,
+  PlateNumber INT,
+  PlateVirusName VARCHAR(100),
 
-  CONSTRAINT pk_welldata PRIMARY KEY (RowId),
+CONSTRAINT pk_welldata PRIMARY KEY (RowId),
   CONSTRAINT fk_welldata_experimentrun FOREIGN KEY (RunId)
     REFERENCES exp.experimentrun (RowId) MATCH SIMPLE
     ON UPDATE NO ACTION ON DELETE NO ACTION,
@@ -300,55 +161,3 @@ CREATE TABLE nab.welldata
 );
 
 CREATE INDEX idx_welldata_runid ON nab.welldata(RunId);
-
-/* nab-15.21-15.22.sql */
-
-ALTER TABLE nab.welldata ALTER COLUMN SpecimenLsid DROP NOT NULL;
-ALTER TABLE nab.welldata ALTER COLUMN RunDataId DROP NOT NULL;
-ALTER TABLE nab.welldata ADD COLUMN PlateNumber INT;
-ALTER TABLE nab.welldata ADD COLUMN PlateVirusName VARCHAR(100);
-
-ALTER TABLE nab.dilutiondata ALTER COLUMN Dilution TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN PercentNeutralization TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN NeutralizationPlusMinus TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN Min TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN Max TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN Mean TYPE DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ALTER COLUMN StdDev TYPE DOUBLE PRECISION;
-
-ALTER TABLE nab.dilutiondata ADD COLUMN WellgroupName VARCHAR(100);
-ALTER TABLE nab.dilutiondata ADD COLUMN ReplicateName VARCHAR(100);
-ALTER TABLE nab.dilutiondata ADD COLUMN RunDataId INT;
-ALTER TABLE nab.dilutiondata ADD COLUMN MinDilution DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ADD COLUMN MaxDilution DOUBLE PRECISION;
-ALTER TABLE nab.dilutiondata ADD COLUMN PlateNumber INT;
-ALTER TABLE nab.dilutiondata ADD COLUMN RunId INT;
-ALTER TABLE nab.dilutiondata ADD COLUMN ProtocolId INT;
-ALTER TABLE nab.dilutiondata ADD COLUMN Container ENTITYID NOT NULL;
-
-ALTER TABLE nab.dilutiondata ADD CONSTRAINT fk_dilutiondata_experimentrun FOREIGN KEY (RunId)
-  REFERENCES exp.experimentrun (RowId) MATCH SIMPLE
-  ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE nab.dilutiondata ADD CONSTRAINT fk_dilutiondata_rundataid FOREIGN KEY (RunDataId)
-  REFERENCES nab.nabspecimen (RowId)
-  ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-CREATE INDEX IDX_DilutionData_RunId ON nab.DilutionData(RunId);
-
-SELECT core.executeJavaUpgradeCode('upgradeDilutionAssayWithNewTables');
-
-/* nab-15.22-15.23.sql */
-
-ALTER TABLE nab.NabSpecimen ALTER COLUMN FitError TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN AUC_poly TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN PositiveAUC_Poly TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN AUC_4pl TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN PositiveAUC_4pl TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN AUC_5pl TYPE DOUBLE PRECISION;
-ALTER TABLE nab.NabSpecimen ALTER COLUMN PositiveAUC_5pl TYPE DOUBLE PRECISION;
-
-ALTER TABLE nab.CutoffValue ALTER COLUMN Cutoff TYPE DOUBLE PRECISION;
-ALTER TABLE nab.CutoffValue ALTER COLUMN Point TYPE DOUBLE PRECISION;
-ALTER TABLE nab.CutoffValue ALTER COLUMN IC_Poly TYPE DOUBLE PRECISION;
-ALTER TABLE nab.CutoffValue ALTER COLUMN IC_4pl TYPE DOUBLE PRECISION;
-ALTER TABLE nab.CutoffValue ALTER COLUMN IC_5pl TYPE DOUBLE PRECISION;

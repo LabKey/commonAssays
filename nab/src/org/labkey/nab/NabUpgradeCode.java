@@ -69,167 +69,6 @@ public class NabUpgradeCode implements UpgradeCode
 {
     private static final Logger _log = Logger.getLogger(NabUpgradeCode.class);
 
-    // Invoked by nab-15.20-15.30.sql
-    @SuppressWarnings({"UnusedDeclaration"})
-    @DeferredUpgrade
-    public void upgradeDilutionAssayWithNewTables(final ModuleContext context)
-    {
-        if (!context.isNewInstall())
-        {
-            try
-            {
-                Container c = ContainerManager.getSharedContainer();
-                ViewBackgroundInfo info = new ViewBackgroundInfo(c, context.getUpgradeUser(), PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(c));
-                NabDilutionUpgradeJob job = new NabDilutionUpgradeJob("NAb Upgrade Provider", info, PipelineService.get().findPipelineRoot(c));
-
-                PipelineService.get().queueJob(job);
-            }
-            catch (Exception e)
-            {
-                _log.error("NAb dilution table upgrade failed", e);
-            }
-        }
-    }
-
-    private static class NabDilutionUpgradeJob extends PipelineJob
-    {
-        public static final String PROCESSING_STATUS = "Processing";
-
-        public NabDilutionUpgradeJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException, SQLException
-        {
-            super(provider, info, root);
-
-            File logFile = File.createTempFile("nabDilutionUpgrade", ".log", root.getRootPath());
-            setLogFile(logFile);
-        }
-
-        @Override
-        public URLHelper getStatusHref()
-        {
-            return null;
-        }
-
-        @Override
-        public String getDescription()
-        {
-            return "NAb upgrade dilution data to new tables.";
-        }
-
-        public void run()
-        {
-            int runCount = 0;
-            int protocolCount = 0;
-            Set<ExpProtocol> protocols = new HashSet<>();   // protocols may be accessible by more than one container
-            Set<Container> allContainers = ContainerManager.getAllChildren(ContainerManager.getRoot());
-            for (Container container : allContainers)
-            {
-                if (null != container)
-                    for (ExpProtocol protocol : AssayService.get().getAssayProtocols(container))
-                        protocols.add(protocol);
-            }
-
-            setStatus(PROCESSING_STATUS, "Job started at: " + DateUtil.nowISO());
-            info("Starting NAb dilution table upgrade for " + protocols.size() + " assay instances.");
-
-            for (ExpProtocol protocol : protocols)
-            {
-                AssayProvider provider = AssayService.get().getProvider(protocol);
-                if (provider instanceof NabAssayProvider)
-                {
-                    protocolCount += 1;
-                    runCount += populateWellData(getUser(), protocol, (NabAssayProvider)provider, this);
-                    info("Runs processed: " + runCount);
-                }
-            }
-            info("Total runs processed: " + runCount + "; Total protocols: " + protocolCount);
-            setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
-        }
-    }
-
-    /**
-     * Calculates dilution and well level information for all runs in the protocol by re-parsing the data file
-     * and populating the tables.
-     *
-     * @return the count of runs processed
-     */
-    private static int populateWellData(User user, ExpProtocol protocol, NabAssayProvider provider, @Nullable PipelineJob job)
-    {
-        int runCount = 0;
-        for (ExpRun run : protocol.getExpRuns())
-        {
-            if (populateWellData(user, protocol, run, provider, job))
-                runCount++;
-        }
-        return runCount;
-    }
-
-    /**
-     * Calculates dilution and well level information for the specified run.
-     *
-     * @return true if the run was successfully processed
-     */
-    private static boolean populateWellData(User user, ExpProtocol protocol, ExpRun run, NabAssayProvider provider, @Nullable PipelineJob job)
-    {
-        if (!DilutionDataHandler.isWellDataPopulated(run))
-        {
-            DilutionDataHandler dilutionDataHandler = provider.getDataHandler();
-            final Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
-            Map<Integer, String> cutoffFormats = DilutionDataHandler.getCutoffFormats(protocol, run);
-            TableInfo tableInfo = DilutionManager.getTableInfoNAbSpecimen();
-            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("RunId"), run.getRowId());
-            new TableSelector(tableInfo, filter, null).forEach((NabSpecimen nabSpecimen) ->
-            {
-                wellGroupNameToNabSpecimen.put(nabSpecimen.getWellgroupName(), new Pair<>(nabSpecimen.getRowId(), nabSpecimen.getSpecimenLsid()));
-            }, NabSpecimen.class);
-
-            try
-            {
-                if (wellGroupNameToNabSpecimen.isEmpty())
-                {
-                    warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " + run.getRowId() + " (" +
-                            run.getName() + ") in container '" + run.getContainer().getPath() +
-                            "'. Run details will not be available. Continuing upgrade for other runs.", job);
-                }
-                else
-                {
-                    dilutionDataHandler.populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
-                    return true;
-                }
-            }
-            catch (DilutionDataHandler.MissingDataFileException e)
-            {
-                warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
-                        run.getName() + ") in container '" + run.getContainer().getPath() +
-                        "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.", job);
-            }
-            catch (ExperimentException e)
-            {
-                warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
-                        run.getContainer().getPath() + "' failed to upgrade due to exception: " +
-                        e.getMessage() + ". Continuing upgrade for other runs.", job);
-                for (StackTraceElement stackTraceElement : e.getStackTrace())
-                {
-                    warn("\t\t" + stackTraceElement.toString(), job);
-                }
-                warn("", job);
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-        return false;
-    }
-
-    private static void warn(String msg, @Nullable PipelineJob job)
-    {
-        if (job != null)
-            job.warn(msg);
-        else
-            _log.warn(msg);
-
-    }
-
     // Invoked by nab-16.20-16.30.sql
     @SuppressWarnings({"UnusedDeclaration"})
     @DeferredUpgrade
@@ -323,5 +162,72 @@ public class NabUpgradeCode implements UpgradeCode
             info("Completed repair of NAb cross plate dilution runs. Protocols processed : " + protocolCount + " runs processed : " + runCount);
             setStatus(TaskStatus.complete, "Job finished at: " + DateUtil.nowISO());
         }
+    }
+
+    /**
+     * Calculates dilution and well level information for the specified run.
+     *
+     * @return true if the run was successfully processed
+     */
+    private static boolean populateWellData(User user, ExpProtocol protocol, ExpRun run, NabAssayProvider provider, @Nullable PipelineJob job)
+    {
+        if (!DilutionDataHandler.isWellDataPopulated(run))
+        {
+            DilutionDataHandler dilutionDataHandler = provider.getDataHandler();
+            final Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
+            Map<Integer, String> cutoffFormats = DilutionDataHandler.getCutoffFormats(protocol, run);
+            TableInfo tableInfo = DilutionManager.getTableInfoNAbSpecimen();
+            SimpleFilter filter = new SimpleFilter(FieldKey.fromString("RunId"), run.getRowId());
+            new TableSelector(tableInfo, filter, null).forEach((NabSpecimen nabSpecimen) ->
+            {
+                wellGroupNameToNabSpecimen.put(nabSpecimen.getWellgroupName(), new Pair<>(nabSpecimen.getRowId(), nabSpecimen.getSpecimenLsid()));
+            }, NabSpecimen.class);
+
+            try
+            {
+                if (wellGroupNameToNabSpecimen.isEmpty())
+                {
+                    warn(dilutionDataHandler.getResourceName(run) + " run data could not be found for run " + run.getRowId() + " (" +
+                            run.getName() + ") in container '" + run.getContainer().getPath() +
+                            "'. Run details will not be available. Continuing upgrade for other runs.", job);
+                }
+                else
+                {
+                    dilutionDataHandler.populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
+                    return true;
+                }
+            }
+            catch (DilutionDataHandler.MissingDataFileException e)
+            {
+                warn(dilutionDataHandler.getResourceName(run) + " data file could not be found for run " + run.getRowId() + " (" +
+                        run.getName() + ") in container '" + run.getContainer().getPath() +
+                        "'. Deleted from file system? Run details will not be available. Continuing upgrade for other runs.", job);
+            }
+            catch (ExperimentException e)
+            {
+                warn("Run " + run.getRowId() + " (" + run.getName() + ") in container '" +
+                        run.getContainer().getPath() + "' failed to upgrade due to exception: " +
+                        e.getMessage() + ". Continuing upgrade for other runs.", job);
+                for (StackTraceElement stackTraceElement : e.getStackTrace())
+                {
+                    warn("\t\t" + stackTraceElement.toString(), job);
+                }
+                warn("", job);
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
+
+    private static void warn(String msg, @Nullable PipelineJob job)
+    {
+        if (job != null)
+            job.warn(msg);
+        else
+            _log.warn(msg);
+
     }
 }
