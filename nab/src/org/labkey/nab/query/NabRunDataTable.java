@@ -101,12 +101,12 @@ public class NabRunDataTable extends NabBaseTable
         setDescription("Contains one row per data for the \"" + protocol.getName() + "\" Neutralizing Antibodies assay design.");
     }
 
-    public PropertyDescriptor[] getExistingDataProperties(ExpProtocol protocol)
+    public Collection<PropertyDescriptor> getExistingDataProperties(ExpProtocol protocol)
     {
-        List<PropertyDescriptor>pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
+        List<PropertyDescriptor> pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
 
         pds.sort(Comparator.comparing(PropertyDescriptor::getName));
-        return pds.toArray(new PropertyDescriptor[pds.size()]);        
+        return pds;
     }
 
     public String getDataRowLsidPrefix()
@@ -216,7 +216,7 @@ public class NabRunDataTable extends NabBaseTable
             }
         }
         // get all the properties from this plated-based protocol:
-        PropertyDescriptor[] pds = getExistingDataProperties(protocol);
+        Collection<PropertyDescriptor> pds = getExistingDataProperties(protocol);
 
         ColumnInfo objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
         objectUriColumn.setIsUnselectable(true);
