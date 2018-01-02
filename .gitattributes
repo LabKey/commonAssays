@@ -710,7 +710,6 @@ microarray/module.properties -text
 microarray/resources/ExpressionMatrix/queries/data/PreviewGrid.qview.xml -text
 microarray/resources/credits/jars.txt -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-0.00-15.20.sql -text
-microarray/resources/schemas/dbscripts/postgresql/microarray-17.20-17.21.sql -text
 microarray/resources/schemas/dbscripts/postgresql/microarray-17.20-17.30.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-12.10.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-0.00-13.30.sql -text
@@ -724,8 +723,8 @@ microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-14.10-14.2
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.10-15.11.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.10-15.20.sql -text
 microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-15.11-15.12.sql -text
+microarray/resources/schemas/dbscripts/postgresql/obsolete/microarray-17.20-17.21.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-0.00-15.20.sql -text
-microarray/resources/schemas/dbscripts/sqlserver/microarray-17.20-17.21.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/microarray-17.20-17.30.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-12.10.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-0.00-13.30.sql -text
@@ -739,6 +738,7 @@ microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-14.10-14.20
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-15.10-15.11.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-15.10-15.20.sql -text
 microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-15.11-15.12.sql -text
+microarray/resources/schemas/dbscripts/sqlserver/obsolete/microarray-17.20-17.21.sql -text
 microarray/resources/schemas/microarray.xml -text
 microarray/resources/views/geo_export.html -text
 microarray/resources/views/geo_export.view.xml -text
