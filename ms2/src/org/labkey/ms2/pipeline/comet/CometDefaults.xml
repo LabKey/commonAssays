@@ -154,7 +154,7 @@
 		<note>Must be set to "xpress"; other options are not yet implemented</note>
 	<note label="pipeline quantitation, residue label mass" type="input"></note>
 		<note>mass@residue, For example 9.0@C  would be -lC -r9.0.         
-			Xpress usage statment:
+			Xpress usage statement:
 				-l<str>    change labeled residues (default='C')
           			-r<num>    change XPRESS residue mass difference (default=9.0)
           			-n<str>,<num>   when specifying multiple isotopic labels, use
