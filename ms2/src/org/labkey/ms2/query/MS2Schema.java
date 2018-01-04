@@ -221,6 +221,7 @@ public class MS2Schema extends UserSchema
             public TableInfo createTable(MS2Schema ms2Schema)
             {
                 FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), ms2Schema);
+                result.setName(MS2RunDetails.name());
                 result.addWrapColumn(result.getRealTable().getColumn("Run"));
                 result.addWrapColumn(result.getRealTable().getColumn("Description"));
                 result.addWrapColumn(result.getRealTable().getColumn("Created"));
