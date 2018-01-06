@@ -34,7 +34,7 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
     public AnnotationView(Protein protein)
     {
         super("/org/labkey/ms2/protAnnots.jsp", getBean(protein));
-        setTitle("Annotations");
+        setTitle("Annotations for " + protein.getBestName());
     }
 
     public static class AnnotViewBean

@@ -181,6 +181,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1111,7 +1112,7 @@ public class MS2Controller extends SpringActionController
 
             String chartTitle = "GO " + _goChartType + " Classifications";
             SQLFragment fragment = peptideView.getProteins(queryURL, _run, form);
-            PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, _goChartType);
+            PieJChartHelper pjch = PieJChartHelper.prepareGOPie(chartTitle, fragment, _goChartType, getContainer());
             pjch.renderAsPNG(new NullOutputStream());
 
             GoChartBean bean = new GoChartBean();
@@ -1133,9 +1134,7 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
-            ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer());
-            String queryString = getViewContext().getActionURL().getParameter("queryString");
-            runURL.setRawQuery(queryString);
+            ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer(), _run.getRun());
 
             return appendRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
         }
@@ -4846,10 +4845,16 @@ public class MS2Controller extends SpringActionController
 
             String sqids = form.getSqids();
             String sqidArr[] = sqids.split(",");
+            List<Protein> proteins = new ArrayList<>(sqidArr.length);
             for (String curSqid : sqidArr)
             {
                 int curSeqId = Integer.parseInt(curSqid);
-                Protein protein = ProteinManager.getProtein(curSeqId);
+                proteins.add(ProteinManager.getProtein(curSeqId));
+            }
+
+            proteins.sort(Comparator.comparing(Protein::getBestName));
+            for (Protein protein : proteins)
+            {
                 vbox.addView(new AnnotationView(protein));
             }
 

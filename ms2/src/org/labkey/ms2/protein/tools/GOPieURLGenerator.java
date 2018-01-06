@@ -16,12 +16,14 @@
 
 package org.labkey.ms2.protein.tools;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.urls.StandardPieURLGenerator;
 import org.jfree.data.general.PieDataset;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: tholzman
@@ -30,31 +32,24 @@ import java.util.HashSet;
  */
 public class GOPieURLGenerator extends StandardPieURLGenerator
 {
-    protected String urlPrefix;
+    protected ActionURL _url;
 
-    public GOPieURLGenerator(String urlPrefix)
+    public GOPieURLGenerator(ActionURL url)
     {
-        this.urlPrefix = urlPrefix;
+        _url = url;
     }
 
-    public String generateURL(
-            PieDataset dataset,
-            Comparable key,
-            int pieIndex
-    )
+    public String generateURL(PieDataset dataset, Comparable key, int pieIndex)
     {
-        HashMap<String, HashSet<Integer>> extra = ((ProteinPieDataset) dataset).getExtraInfo();
+        Map<String, Set<Integer>> extra = ((ProteinPieDataset) dataset).getExtraInfo();
         if (extra == null) return null;
-        HashSet<Integer> sqids = extra.get(key);
+        Set<Integer> sqids = extra.get(key);
         if (sqids == null) return null;
-        String sqdstr = "";
-        for (Integer i : sqids)
-        {
-            sqdstr += i.toString() + ",";
-        }
-        if (sqdstr.endsWith(",")) sqdstr = sqdstr.substring(0, sqdstr.length() - 1);
-        String retVal = urlPrefix + "?" + "sliceTitle=" + key.toString().replace(' ', '+') + "&sqids=" + sqdstr;
-        return PageFlowUtil.filter(retVal);
+
+        ActionURL url = _url.clone();
+        url.addParameter("sliceTitle", key.toString());
+        url.addParameter("sqids", StringUtils.join(sqids, ","));
+        return PageFlowUtil.filter(url);
     }
 }
 

@@ -27,7 +27,7 @@
     MS2Controller.GoChartBean bean = ((JspView<MS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
 %>
 <% for (Map.Entry<String, SimpleFilter> entry : bean.filterInfos.entrySet()) { %>
-    <%= h(entry.getKey()) %>: <%= h(entry.getValue().getFilterText())%><br/>
+    <%= h(entry.getKey()) %>: <%= entry.getValue().getFilterText().isEmpty() ? "<em>No filters applied</em>" : h(entry.getValue().getFilterText()) %><br/>
 <% } %>
 
 <% if (bean.foundData) { %>

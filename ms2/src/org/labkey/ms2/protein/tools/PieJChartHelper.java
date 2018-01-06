@@ -18,14 +18,18 @@ package org.labkey.ms2.protein.tools;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.plot.PiePlot;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,8 +37,10 @@ import java.util.Set;
  * Date: Oct 28, 2005
  * Time: 3:44:19 PM
  */
-public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
+public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
 {
+    private final Container _container;
+
     private void init()
     {
         this.setDataset(new ProteinPieDataset());
@@ -47,20 +53,21 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
                         true  // URLs?
                 )
         );
-        this.plot = chart.getPlot();
+        this.plot = (PiePlot) chart.getPlot();
         //Default visuals
-        ((PiePlot) plot).setLabelGenerator(new GOPieSectionLabelGenerator());
-        ((PiePlot) plot).setLabelFont(((PiePlot) plot).getLabelFont().deriveFont((float) 14.0));
-        ((PiePlot) plot).setLabelBackgroundPaint(null);
-        ((PiePlot) plot).setLabelOutlineStroke(null);
-        ((PiePlot) plot).setLabelShadowPaint(null);
-        ((PiePlot) plot).setShadowPaint(null);
-        ((PiePlot) plot).setToolTipGenerator(new GOPieToolTipGenerator());
-        ((PiePlot) plot).setURLGenerator(new GOPieURLGenerator("pieSliceSection.view"));
+        plot.setLabelGenerator(new GOPieSectionLabelGenerator());
+        plot.setLabelFont(plot.getLabelFont().deriveFont((float) 14.0));
+        plot.setLabelBackgroundPaint(null);
+        plot.setLabelOutlineStroke(null);
+        plot.setLabelShadowPaint(null);
+        plot.setShadowPaint(null);
+        plot.setToolTipGenerator(new GOPieToolTipGenerator());
+        plot.setURLGenerator(new GOPieURLGenerator(new ActionURL(MS2Controller.PieSliceSectionAction.class, _container)));
     }
 
-    public PieJChartHelper(String title)
+    public PieJChartHelper(String title, Container container)
     {
+        _container = container;
         this.chartTitle = title;
         init();
     }
@@ -103,7 +110,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
        single SeqId.
 
     */
-    public static PieJChartHelper prepareGOPie(String title, SQLFragment distinctSeqIdsSql, ProteinDictionaryHelpers.GoTypes goChartType) throws SQLException
+    public static PieJChartHelper prepareGOPie(String title, SQLFragment distinctSeqIdsSql, ProteinDictionaryHelpers.GoTypes goChartType, Container c) throws SQLException
     {
         SQLFragment sql = new SQLFragment();
 
@@ -128,9 +135,9 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
         sql.append(") y ON ThirdLevelId = Id\nGROUP BY SeqId, ThirdLevelId, LocId, Acc, Name\n");
         sql.append("ORDER BY SeqId, LocId, ThirdLevelId");
 
-        PieJChartHelper retVal = new PieJChartHelper(title);
-        HashMap<String, Integer> thirdLevTallies = new HashMap<>();
-        HashMap<String, HashSet<Integer>> extra = new HashMap<>();
+        PieJChartHelper retVal = new PieJChartHelper(title, c);
+        Map<String, Integer> thirdLevTallies = new HashMap<>();
+        Map<String, Set<Integer>> extra = new HashMap<>();
 
         try (ResultSet rs = new SqlSelector(ProteinManager.getSchema(), sql).getResultSet())
         {
@@ -156,19 +163,10 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset>
                 String thirdLevelName = rs.getString(4);
 
                 String key = thirdLevelAcc + " " + thirdLevelName;
-                Integer val = thirdLevTallies.get(key);
 
-                if (val == null)
-                    thirdLevTallies.put(key, 1);
-                else
-                    thirdLevTallies.put(key, thirdLevTallies.get(key) + 1);
+                thirdLevTallies.merge(key, 1, (a, b) -> a + b);
 
-                HashSet<Integer> sqids = extra.get(key);
-                if (sqids == null)
-                {
-                    sqids = new HashSet<>();
-                    extra.put(key, sqids);
-                }
+                Set<Integer> sqids = extra.computeIfAbsent(key, k -> new HashSet<>());
                 //store a copy of each seqid for each 3rd level GO accn.  sqids gets
                 //is in "extra" which goes into the ProteinPieDataset
                 sqids.add(seqId);

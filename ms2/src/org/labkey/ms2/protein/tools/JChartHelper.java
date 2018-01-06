@@ -32,7 +32,7 @@ import java.io.OutputStream;
  * Date: Oct 28, 2005
  * Time: 3:18:10 PM
  */
-public abstract class JChartHelper<DatasetType extends AbstractDataset>
+public abstract class JChartHelper<DatasetType extends AbstractDataset, PlotType extends Plot>
 {
     public JFreeChart getChart()
     {
@@ -46,17 +46,17 @@ public abstract class JChartHelper<DatasetType extends AbstractDataset>
 
     protected JFreeChart chart;
 
-    public Plot getPlot()
+    public PlotType getPlot()
     {
         return plot;
     }
 
-    public void setPlot(Plot plot)
+    public void setPlot(PlotType plot)
     {
         this.plot = plot;
     }
 
-    protected Plot plot;
+    protected PlotType plot;
 
     public String getChartTitle()
     {
