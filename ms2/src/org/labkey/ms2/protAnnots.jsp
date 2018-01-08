@@ -25,9 +25,6 @@
 %>
 <table class="lk-fields-table">
 <tr>
-   <td class="labkey-form-label" nowrap="true">Sequence name</td><td><%=h(bean.seqName)%></td>
-</tr>
-<tr>
    <td class="labkey-form-label" nowrap="true">Description</td><td><%=h(bean.seqDesc)%></td>
 </tr>
 <tr>
