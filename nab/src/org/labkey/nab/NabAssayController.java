@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -137,7 +138,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -191,7 +191,7 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
@@ -623,7 +623,7 @@ public class NabAssayController extends SpringActionController
             for (int column = 0; column < headers.size(); column++)
             {
                 String header = headers.get(column);
-                Cell cell = firstRow.getCell(column, Row.CREATE_NULL_AS_BLANK);
+                Cell cell = firstRow.getCell(column, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 cell.setCellValue(header);
                 cell.setCellStyle(getBoldFormat());
             }
@@ -692,8 +692,7 @@ public class NabAssayController extends SpringActionController
             AssayProvider provider = AssayService.get().getProvider(protocol);
             if (provider == null || !(provider instanceof NabAssayProvider))
             {
-                String message = "Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " +
-                        (protocol != null ? protocol.getName() : "null");
+                String message = "Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " + protocol.getName();
                 throw new NotFoundException(message);
             }
             NabAssayProvider nabProvider = ((NabAssayProvider) provider);

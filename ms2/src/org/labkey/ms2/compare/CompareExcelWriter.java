@@ -18,6 +18,7 @@ package org.labkey.ms2.compare;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.ExcelColumn;
@@ -70,7 +71,7 @@ public class CompareExcelWriter extends ExcelWriter
             {
                 row = sheet.createRow(getCurrentRow());
             }
-            Cell cell = row.getCell(column, Row.CREATE_NULL_AS_BLANK);
+            Cell cell = row.getCell(column, MissingCellPolicy.CREATE_NULL_AS_BLANK);
             cell.setCellValue(caption);
             cell.setCellStyle(getBoldFormat());
             column += _colSpan;
