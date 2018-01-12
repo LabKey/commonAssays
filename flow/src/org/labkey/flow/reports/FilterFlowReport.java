@@ -569,9 +569,9 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         @Override
-        protected String getScriptProlog(ScriptEngine engine, ViewContext context, File inputFile, Map<String, Object> inputParameters)
+        protected String getScriptProlog(ScriptEngine engine, ViewContext context, File inputFile, Map<String, Object> inputParameters, boolean isRStudio)
         {
-            String labkeyProlog = super.getScriptProlog(engine, context, inputFile, inputParameters);
+            String labkeyProlog = super.getScriptProlog(engine, context, inputFile, inputParameters, isRStudio);
 
             StringBuffer reportProlog = new StringBuffer(labkeyProlog);
             reportProlog.append("report.parameters <- list(");
