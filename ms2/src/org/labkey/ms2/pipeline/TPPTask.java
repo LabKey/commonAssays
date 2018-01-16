@@ -350,7 +350,23 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             }
             else
             {
-                StringBuilder prophetOpts = new StringBuilder("-Opt");
+                String[] versionParts = ver == null ? new String[0] : ver.split("\\.");
+                int majorVersion = -1;
+                if (versionParts.length > 0)
+                {
+                    try
+                    {
+                        majorVersion = Integer.parseInt(versionParts[0]);
+                    }
+                    catch (NumberFormatException ignored) {}
+                }
+                StringBuilder prophetOpts = new StringBuilder("-Op");
+                // Issue 32442 - TPP 5.0+ don't accept the 't' argument to xinteract to suppress plot generation
+                if (majorVersion < 5)
+                {
+                    prophetOpts.append("t");
+                }
+
                 if ("yes".equalsIgnoreCase(params.get("pipeline prophet, accurate mass")))
                     prophetOpts.append("A");
                 if ("yes".equalsIgnoreCase(params.get("pipeline prophet, allow multiple instruments")))
