@@ -993,6 +993,7 @@ public class MS2Manager
         executor.execute("DELETE FROM " + getTableInfoPeptideProphetSummaries() + runWhere, params);
         executor.execute("DELETE FROM " + getTableInfoModifications() + runWhere, params);
         executor.execute("DELETE FROM " + getTableInfoFractions() + runWhere, params);
+        executor.execute("DELETE FROM " + getTableInfoFastaRunMapping() + runWhere, params);
     }
 
 
