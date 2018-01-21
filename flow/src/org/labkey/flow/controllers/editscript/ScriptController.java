@@ -45,36 +45,27 @@ import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GWTView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.view.template.HomeTemplate;
 import org.labkey.flow.ScriptParser;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationCalculation;
 import org.labkey.flow.analysis.model.FlowException;
-import org.labkey.flow.analysis.model.Gate;
-import org.labkey.flow.analysis.model.IntervalGate;
-import org.labkey.flow.analysis.model.Polygon;
-import org.labkey.flow.analysis.model.PolygonGate;
 import org.labkey.flow.analysis.model.Population;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.model.PopulationSet;
-import org.labkey.flow.analysis.model.RegionGate;
 import org.labkey.flow.analysis.model.ScriptComponent;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.model.WorkspaceCompensation;
 import org.labkey.flow.analysis.web.GraphSpec;
-import org.labkey.flow.analysis.web.PlotInfo;
 import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
-import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowRunWorkspace;
 import org.labkey.flow.data.FlowScript;
@@ -83,13 +74,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -215,9 +200,10 @@ public class ScriptController extends BaseFlowController
                     return HttpView.redirect(forward);
             }
 
+            // TODO: Ensure this works and figure out a new strategy for setting focus element
             JspView<NewProtocolForm> page = FormPage.getView(ScriptController.class, form, errors, "newProtocol.jsp");
-            HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
-            template.getModelBean().setFocusId("ff_name");
+//            HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
+//            template.getModelBean().setFocusId("ff_name");
             return page;
         }
 
