@@ -710,6 +710,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
                 analyte: this.analyte,
                 controlName: this.controlName,
                 controlType: this.controlType,
+                editable: true,
                 listeners: {
                     scope: this,
                     'saveSuccess': function ()
