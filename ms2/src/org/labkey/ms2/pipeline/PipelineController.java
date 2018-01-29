@@ -38,6 +38,7 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -208,6 +209,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
+    @CSRF(CSRF.Method.NONE) // TODO remove this annotation possible (fix gwtview)
     public class SearchXTandemAction extends SearchAction
     {
         public String getProviderName()
