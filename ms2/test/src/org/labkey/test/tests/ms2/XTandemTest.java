@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
-import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
@@ -104,7 +103,7 @@ public class XTandemTest extends AbstractXTandemTest
         log("Test exporting");
         File expFile = new Ms2DataRegionExportHelper(peptidesRegion)
                 .exportText(Ms2DataRegionExportHelper.FileDownloadType.TSV, false);
-        TextSearcher tsvSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(expFile)).setSearchTransformer(t -> t);
+        TextSearcher tsvSearcher = new TextSearcher(expFile);
         assertTextNotPresent(tsvSearcher, PEPTIDE);
         assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
         assertTextPresent(tsvSearcher, PROTEIN);

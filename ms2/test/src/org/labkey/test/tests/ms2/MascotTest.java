@@ -23,7 +23,6 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestCredentials;
-import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
@@ -235,7 +234,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         log("Spot check results loaded from .dat file");
         clickAndWait(Locator.linkWithText(mascotDatLabel));
         String overviewText = new BodyWebPart(getDriver(), "Run Overview").getComponentElement().getText();
-        assertTextPresent(new TextSearcher(() -> overviewText),
+        assertTextPresent(new TextSearcher(overviewText),
                 "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
                 "MASCOT",
                 "CAexample_mini.dat",
@@ -300,7 +299,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         log("Spot check results loaded from .dat file");
         clickAndWait(Locator.linkWithText(mascotDatLabel));
         String overviewText = new BodyWebPart(getDriver(), "Run Overview").getComponentElement().getText();
-        assertTextPresent(new TextSearcher(() -> overviewText),
+        assertTextPresent(new TextSearcher(overviewText),
                 "Trypsin", // N.B. when importing via XML, this becomes lower case ("trypsin")
                 "MASCOT",
                 "CAexample_mini_decoy.dat",
@@ -447,8 +446,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         log("Test exporting");
         File expFile = new DataRegionExportHelper(new DataRegionTable("query", this))
                .exportText(DataRegionExportHelper.TextSeparator.COMMA);
-        String tsvContents = TestFileUtils.getFileContents(expFile);
-        TextSearcher tsvSearcher = new TextSearcher(() -> tsvContents).setSearchTransformer(t -> t);
+        TextSearcher tsvSearcher = new TextSearcher(expFile);
 
         assertTextNotPresent(tsvSearcher, PEPTIDE);
         assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);

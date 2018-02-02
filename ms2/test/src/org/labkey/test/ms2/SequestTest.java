@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
-import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Disabled;
@@ -124,8 +123,7 @@ public class SequestTest extends AbstractMS2SearchEngineTest
         log("Test exporting");
         DataRegionTable list = new DataRegionTable("query", this);
         File expFile = new DataRegionExportHelper(list).exportText(DataRegionExportHelper.TextSeparator.TAB);
-        String tsv = TestFileUtils.getFileContents(expFile);
-        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        TextSearcher tsvSearcher = new TextSearcher(expFile);
         assertTextPresent(tsvSearcher, PEPTIDE);
         assertTextPresentInThisOrder(tsvSearcher, PEPTIDE2, PEPTIDE3);
         assertTextPresent(tsvSearcher, PROTEIN);

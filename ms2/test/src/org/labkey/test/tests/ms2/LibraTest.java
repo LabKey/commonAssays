@@ -128,8 +128,7 @@ public class LibraTest extends MS2TestBase
 
         // Try a TSV export
         File expFile = new DataRegionExportHelper(new DataRegionTable("SpectraCount", this)).exportText(DataRegionExportHelper.TextSeparator.TAB);
-        String tsv = TestFileUtils.getFileContents(expFile);
-        TextSearcher tsvSearcher = new TextSearcher(() -> tsv).setSearchTransformer(t -> t);
+        TextSearcher tsvSearcher = new TextSearcher(expFile);
         assertTextPresent(tsvSearcher, "# Target protein: gi|34392343", "R.TDTGEPM'GR.G", "84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
         // Try filtering based on a custom view using a different grouping
@@ -149,8 +148,7 @@ public class LibraTest extends MS2TestBase
 
         // Try a TSV export
         File tsvFile = new DataRegionExportHelper(new DataRegionTable("SpectraCount", this)).exportText();
-        String tsvContent = TestFileUtils.getFileContents(tsvFile);
-        tsvSearcher = new TextSearcher(() -> tsvContent).setSearchTransformer(t -> t);
+        tsvSearcher = new TextSearcher(tsvFile);
         assertTextPresent(tsvSearcher, "# Peptide filter: (Hyper > 250)", "-.MM'EILRGSPALSAFR.I", "R.TDTGEPM'GR.G");
         assertTextNotPresent(tsvSearcher, "R.AEGTFPGK.I", "R.ILEKSGSPER.I");
 

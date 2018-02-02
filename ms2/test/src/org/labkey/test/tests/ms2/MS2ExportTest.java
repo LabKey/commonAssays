@@ -21,7 +21,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.Locator;
-import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.util.DataRegionExportHelper;
@@ -119,7 +118,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         Runnable tsvPeptideValidator = () ->
         {
             File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            TextSearcher exportFileSearcher = new TextSearcher(exportFile);
             assertTextPresent(exportFileSearcher, "Scan", "Protein", "gi|5002198|AF143203_1_interle", "1386.6970", "gi|6049221|AF144467_1_nonstru");
             assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
             assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
@@ -131,7 +130,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         Runnable amtPeptideValidator = () ->
         {
             File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            TextSearcher exportFileSearcher = new TextSearcher(exportFile);
             assertTextPresent(exportFileSearcher, "Run", "Peptide", "-.MELFSNELLYK.T", "1386.6970");
             assertTextPresentInThisOrder(exportFileSearcher, "K.QLDSIHVTILHK.E", "R.GRRNGPRPVHPTSHNR.Q");
             assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
@@ -143,7 +142,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         Runnable pklPeptideValidator = () ->
         {
             File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            TextSearcher exportFileSearcher = new TextSearcher(exportFile);
             assertTextPresent(exportFileSearcher, "515.9 1684.0");
             assertTextNotPresent(exportFileSearcher, "717.4 4043.0");
             assertTextPresent(exportFileSearcher, "\n", 4271);
@@ -154,7 +153,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         Runnable tsvProteinProphetValidator = () ->
         {
             File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            TextSearcher exportFileSearcher = new TextSearcher(exportFile);
             assertTextPresent(exportFileSearcher, "gi|16078254|similar_to_riboso", "20925.0", "gi|13470573|30S_ribosomal_pro, gi|16125519|ribosomal_protein");
             assertTextPresent(exportFileSearcher, "\n", 7);
         };
@@ -164,7 +163,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         Runnable pklProteinProphetValidator = () ->
         {
             File exportFile = doAndWaitForDownload(() -> clickButton("Export", 0));
-            TextSearcher exportFileSearcher = new TextSearcher(() -> TestFileUtils.getFileContents(exportFile));
+            TextSearcher exportFileSearcher = new TextSearcher(exportFile);
             assertTextPresent(exportFileSearcher, "426.9465 1 3", "174.8 2400.0");
             assertTextPresent(exportFileSearcher,"\n", 245);
         };
