@@ -209,7 +209,6 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    @CSRF(CSRF.Method.NONE) // TODO remove this annotation possible (fix gwtview)
     public class SearchXTandemAction extends SearchAction
     {
         public String getProviderName()

@@ -69,6 +69,7 @@ public class Search implements EntryPoint
     private                 Hidden                  pathHidden = new Hidden("path");
     private                 Hidden                  searchEngineHidden = new Hidden();
     private                 Hidden                  runSearch = new Hidden();
+    private                 Hidden                  csfrHidden = new Hidden();
     private                 VerticalPanel           messagesPanel = new VerticalPanel();
     private                 ProtocolComposite       protocolComposite;
     // Nullable
@@ -203,6 +204,9 @@ public class Search implements EntryPoint
         pathHidden.setValue(path);
         searchEngineHidden.setName("searchEngine");
         searchEngineHidden.setValue(searchEngine);
+
+        csfrHidden.setName("X-LABKEY-CSRF");
+        csfrHidden.setValue(ServiceUtil.getCsrfToken());
 
         fileNames = PropertyUtil.getServerProperty("file").split("/");
         for (String fileName : fileNames)
@@ -343,6 +347,7 @@ public class Search implements EntryPoint
     {
         subPanel.add(pathHidden);
         subPanel.add(searchEngineHidden);
+        subPanel.add(csfrHidden);
         subPanel.add(runSearch);
         subPanel.add(messagesPanel);
         subPanel.add(new Label("An MS2 search protocol is defined by a set of  options for the search engine and a set of protein databases to search."));
