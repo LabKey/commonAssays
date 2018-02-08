@@ -72,6 +72,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     public static final String EXCLUSION_COMMENT_COLUMN_NAME = "ExclusionComment";
     public static final String EXCLUSION_TOGGLE_COLUMN_NAME = "ExclusionToggle";
     public static final String EXCLUSION_WELL_GROUP_COMMENT = "Excluded for well replicate group";
+    public static final String EXCLUSION_WELL_COMMENT = "Excluded for individual well";
     public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
     public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
     public static final String EXCLUSION_SINGLEPOINT_UNKNOWN_COMMENT = "Excluded for singlepoint unknown";
@@ -371,12 +372,22 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             .append("\n AND (we.Type IS NULL)")
             .append("\n AND (we.Dilution = " + ExprColumn.STR_TABLE_ALIAS + ".Dilution OR (we.Dilution IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Dilution IS NULL))")
             .append(dataIdWhereClause).append(analyteIdWhereClause)
-            /* Well Exclusions */
+            // Well Replicate Group Exclusions
             .append("\nUNION SELECT ")
             .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_WELL_GROUP_COMMENT + "'"), repGroupCaseStatement)).append(" AS Comment, ")
             .append(wellExclusionBase)
             .append("\n AND (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL))")
             .append("\n AND (we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL))")
+            .append("\n AND (we.Dilution IS NULL)")
+            .append("\n AND (we.Well IS NULL)")
+            .append(dataIdWhereClause).append(analyteIdWhereClause)
+            // Well Exclusions
+            .append("\nUNION SELECT ")
+            .append(getSqlDialect().concatenate(new SQLFragment("'" + EXCLUSION_WELL_COMMENT + "'"), repGroupCaseStatement)).append(" AS Comment, ")
+            .append(wellExclusionBase)
+            .append("\n AND (we.Description = " + ExprColumn.STR_TABLE_ALIAS + ".Description OR (we.Description IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Description IS NULL))")
+            .append("\n AND (we.Type = " + ExprColumn.STR_TABLE_ALIAS + ".Type OR (we.Type IS NULL AND " + ExprColumn.STR_TABLE_ALIAS + ".Type IS NULL))")
+            .append("\n AND (we.Well = " + ExprColumn.STR_TABLE_ALIAS + ".Well)")
             .append("\n AND (we.Dilution IS NULL)")
             .append(dataIdWhereClause).append(analyteIdWhereClause);
 

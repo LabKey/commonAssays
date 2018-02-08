@@ -43,23 +43,29 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
             success: function(data)
             {
                 this.exclusionsExist = false;
-                if (data.rows.length == 1)
+                if (data.rows.length >= 1)
                 {
                     this.exclusionsExist = true;
-
-                    var row = data.rows[0];
-                    if (row.hasOwnProperty("RowId"))
-                        this.rowId = row["RowId"];
-                    if (row.hasOwnProperty("Comment"))
-                        this.comment = row["Comment"];
-                    if (row.hasOwnProperty("Analytes/RowId"))
-                        this.analytes = row["Analytes/RowId"];
+                    this.handleExistingExclusions(data.rows);
                 }
-
                 this.setupWindowPanelItems();
             },
             scope: this
         });
+    },
+
+    // success handler for queryExistingExclusions, may be overridden if applications need to access
+    // different data
+    handleExistingExclusions : function(rows){
+
+        // even if there are multiple exclusions for the data point, there should be a single
+        // comment and a single set of analytes.
+
+        var row = rows[0];
+        if (row.hasOwnProperty("Comment"))
+            this.comment = row["Comment"];
+        if (row.hasOwnProperty("Analytes/RowId"))
+            this.analytes = row["Analytes/RowId"];
     },
 
     setupWindowPanelItems: function()
@@ -143,6 +149,10 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         // disable the save button if no exclusions exist and no selection is made
         if (sm.getCount() == 0 && !grid.exclusionsExist)
             grid.getFooterToolbar().findById('saveBtn').disable();
+    },
+
+    enableSaveBtn : function(){
+        this.getFooterToolbar().findById('saveBtn').enable();
     },
 
     getGridCheckboxSelectionModel : function()

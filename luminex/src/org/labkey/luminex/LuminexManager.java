@@ -123,6 +123,7 @@ public class LuminexManager
                 {
                     row = form.getBaseRowMap();
                     row.put("Type", form.getType());
+                    row.put("Well", form.getWell());
                 }
                 row.put("RowId", form.getKey());
                 return row;

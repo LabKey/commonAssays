@@ -161,6 +161,7 @@
             <column columnName="Dilution" />
             <column columnName="Type" />
             <column columnName="DataId" />
+            <column columnName="Well" />
             <column columnName="Comment" />
             <column columnName="CreatedBy" />
             <column columnName="Created" />

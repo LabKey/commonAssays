@@ -37,6 +37,7 @@ public class LuminexSingleExclusionCommand
     private List<String> _analyteRowIds = new ArrayList<>();
     private List<String> _analyteNames = new ArrayList<>();
     private String _comment;
+    private String _well;
 
     private Integer _createdBy;
     private Timestamp _created;
@@ -140,6 +141,16 @@ public class LuminexSingleExclusionCommand
     public void setComment(String comment)
     {
         _comment = comment;
+    }
+
+    public String getWell()
+    {
+        return _well;
+    }
+
+    public void setWell(String well)
+    {
+        _well = well;
     }
 
     public String getCommand()

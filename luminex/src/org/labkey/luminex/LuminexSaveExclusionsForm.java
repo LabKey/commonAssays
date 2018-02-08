@@ -70,6 +70,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
             command.setAnalyteRowIds(getStringPropIfExists(commandJSON, "analyteRowIds"));
             command.setAnalyteNames(getStringPropIfExists(commandJSON, "analyteNames"));
             command.setComment(getStringPropIfExists(commandJSON, "comment"));
+            command.setWell(getStringPropIfExists(commandJSON, "well"));
             addCommand(command);
         }
     }
