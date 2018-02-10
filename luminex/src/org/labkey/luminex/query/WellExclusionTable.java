@@ -221,9 +221,9 @@ public class WellExclusionTable extends AbstractExclusionTable
 
                     SQLFragment dataRowSQL = new SQLFragment("SELECT * FROM ");
                     dataRowSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");
-                    dataRowSQL.append(" LEFT JOIN ").append(LuminexProtocolSchema.getTableInfoTitration(), "t").append(" ON dr.TitrationId = t.RowId ");
-                    dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL ");
-                    dataRowSQL.append(" AND dr.DataId = ? AND dr.Description ");
+                    //dataRowSQL.append(" LEFT JOIN ").append(LuminexProtocolSchema.getTableInfoTitration(), "t").append(" ON dr.TitrationId = t.RowId ");
+                    //dataRowSQL.append(" WHERE dr.TitrationId IS NOT NULL ");
+                    dataRowSQL.append(" WHERE dr.DataId = ? AND dr.Description ");
                     dataRowSQL.add(data.getRowId());
 
                     if (description == null)

@@ -72,7 +72,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     public static final String EXCLUSION_COMMENT_COLUMN_NAME = "ExclusionComment";
     public static final String EXCLUSION_TOGGLE_COLUMN_NAME = "ExclusionToggle";
     public static final String EXCLUSION_WELL_GROUP_COMMENT = "Excluded for well replicate group";
-    public static final String EXCLUSION_WELL_COMMENT = "Excluded for individual well";
+    public static final String EXCLUSION_WELL_COMMENT = "Excluded for well";
     public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
     public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
     public static final String EXCLUSION_SINGLEPOINT_UNKNOWN_COMMENT = "Excluded for singlepoint unknown";

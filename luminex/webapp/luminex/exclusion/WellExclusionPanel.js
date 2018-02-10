@@ -66,6 +66,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         this.selectedWells = {};
         this.replicateWells = true;
         this.existingExclusions = {};
+        this.allowWellExclusion = true;
     },
 
     initComponent : function()
@@ -106,46 +107,50 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             var panel = this.getComponent('wellFormPanel');
             if (panel){
 
-                var items = [{
-                    xtype : 'checkbox',
-                    hideLabel : true,
-                    boxLabel : 'Replicate Group',
-                    checked : this.replicateWells,
-                    listeners : {
-                        scope: this,
-                        check : function(cmp, checked){
-                            this.replicateWells = checked;
-                            var checkboxes = panel.findByType('checkbox');
-                            Ext.each(checkboxes, function(ck){
-                                if (ck.name === 'wellExclusion'){
-                                    ck.setValue(checked);
-                                    ck.setDisabled(checked);
-                                }
-                            }, this);
-                        }
-                    }
-                }];
+                var items = [];
+                if (this.allowWellExclusion){
 
-                for (var key in this.selectedWells){
-
-                    if (this.selectedWells.hasOwnProperty(key)){
-                        items.push({
-                            xtype : 'checkbox',
-                            name  : 'wellExclusion',
-                            hideLabel : true,
-                            boxLabel : key,
-                            checked : this.selectedWells[key] || this.replicateWells,
-                            disabled : this.replicateWells,
-                            style: 'margin-left: 10px;',
-
-                            listeners : {
-                                scope: this,
-                                check : function(cmp, checked){
-                                    this.selectedWells[cmp.boxLabel] = checked;
-                                    this.enableSaveBtn();
-                                }
+                    items.push({
+                        xtype : 'checkbox',
+                        hideLabel : true,
+                        boxLabel : 'Replicate Group',
+                        checked : this.replicateWells,
+                        listeners : {
+                            scope: this,
+                            check : function(cmp, checked){
+                                this.replicateWells = checked;
+                                var checkboxes = panel.findByType('checkbox');
+                                Ext.each(checkboxes, function(ck){
+                                    if (ck.name === 'wellExclusion'){
+                                        ck.setValue(checked);
+                                        ck.setDisabled(checked);
+                                    }
+                                }, this);
                             }
-                        });
+                        }
+                    });
+
+                    for (var key in this.selectedWells){
+
+                        if (this.selectedWells.hasOwnProperty(key)){
+                            items.push({
+                                xtype : 'checkbox',
+                                name  : 'wellExclusion',
+                                hideLabel : true,
+                                boxLabel : key,
+                                checked : this.selectedWells[key] || this.replicateWells,
+                                disabled : this.replicateWells,
+                                style: 'margin-left: 10px;',
+
+                                listeners : {
+                                    scope: this,
+                                    check : function(cmp, checked){
+                                        this.selectedWells[cmp.boxLabel] = checked;
+                                        this.enableSaveBtn();
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
 
@@ -331,13 +336,20 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 for (var i = 0; i < data.rows.length; i++)
                 {
                     // summary rows will have > 1 well (separated by a comma)
-                    Ext.each(data.rows[i].Well.split(","), function(well)
-                    {
-                        if (wells.indexOf(well) == -1) {
-                            wells.push(well);
-                            this.selectedWells[well] = this.existingExclusions[well] ? true : false;
-                        }
-                    }, this);
+                    var wellValue = data.rows[i].Well;
+                    if (wellValue.indexOf(",") != -1){
+
+                        this.allowWellExclusion = false;
+                        Ext.each(wellValue.split(","), function(well)
+                        {
+                            if (wells.indexOf(well) == -1)
+                                wells.push(well);
+                        }, this);
+                    }
+                    else {
+                        wells.push(wellValue);
+                        this.selectedWells[wellValue] = this.existingExclusions[wellValue] ? true : false;
+                    }
 
                     filename = data.rows[i].Name;
                     isTitration = data.rows[i].IsTitration;

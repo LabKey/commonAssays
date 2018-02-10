@@ -306,6 +306,8 @@ public class LuminexManager
         command.setComment((String) oldExclusion.get("comment"));
         command.setCreated((Timestamp) oldExclusion.get("created"));
         command.setCreatedBy((Integer) oldExclusion.get("createdBy"));
+        if (oldExclusion.get("well") != null)
+            command.setWell((String)oldExclusion.get("well"));
         return command;
     }
 
@@ -646,11 +648,15 @@ public class LuminexManager
         FieldKey descriptionFK = FieldKey.fromParts("Description");
         FieldKey typeFK = FieldKey.fromParts("Type");
         FieldKey dilutionFK = FieldKey.fromParts("Dilution");
-        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(readerSerialNumberFK, acquisitionDateFK, analyteFK, descriptionFK, dilutionFK, typeFK));
+        FieldKey wellFK = FieldKey.fromParts("Well");
+        Map<FieldKey, ColumnInfo> cols = QueryService.get().getColumns(table, Arrays.asList(readerSerialNumberFK, acquisitionDateFK, analyteFK, descriptionFK, dilutionFK, typeFK, wellFK));
 
         SimpleFilter filter = new SimpleFilter(provider.getTableMetadata(protocol).getRunFieldKeyFromResults(), runId);
         if(onlyExcludedWells)
-            filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_GROUP_COMMENT, CompareType.STARTS_WITH);
+        {
+            // filter should work for either entire replicate group or single well
+            filter.addCondition(FieldKey.fromParts(LuminexDataTable.EXCLUSION_COMMENT_COLUMN_NAME), LuminexDataTable.EXCLUSION_WELL_COMMENT, CompareType.STARTS_WITH);
+        }
 
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
@@ -663,8 +669,9 @@ public class LuminexManager
             String type = (String)row.get(cols.get(typeFK).getAlias());
             Object dilutionObj = row.get(cols.get(dilutionFK).getAlias());
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
+            String well = (String)row.get(cols.get(wellFK).getAlias());
 
-            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution));
+            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
         });
 
         return excludedWellKeys;
@@ -677,9 +684,9 @@ public class LuminexManager
     }
 
     /** Refine the key object with the individual analyte */
-    public String createWellKey(String dataFileHeaderKey, String analyteName, String description, String type, Double dilution)
+    public String createWellKey(String dataFileHeaderKey, String analyteName, String description, String type, Double dilution, String well)
     {
-        return getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type) + dilution;
+        return getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type) + dilution + "|" + well;
     }
 
     private String getReplicateGroupKey(String dataFileHeaderKey, String analyteName, String description, String type)

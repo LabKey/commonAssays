@@ -655,7 +655,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 for (LuminexDataRow statRow : dataRows)
                 {
                     // Only look for replicates within the same data file (plate)
-                    if (statRow.getFi() != null && !statRow.isSummary() &&
+                    if (statRow.getFi() != null && !statRow.isSummary() && !statRow.isExcluded() &&
                         Objects.equals(statRow.getDilution(), dataRow.getDilution()) &&
                         Objects.equals(statRow.getExpConc(), dataRow.getExpConc()) &&
                         Objects.equals(statRow.getDescription(), dataRow.getDescription()) &&
@@ -2081,7 +2081,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 // Merge in whether or not the data row is excluded via a "well exclusion".
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
                 String dataRowWellKey = LuminexManager.get().createWellKey(dataFileHeaderKey, entry.getKey().getName(),
-                        dataRow.getDescription(), dataRow.getType(), dataRow.getDilution());
+                        dataRow.getDescription(), dataRow.getType(), dataRow.getDilution(), dataRow.getWell());
                 dataMap.put(LuminexDataTable.FLAGGED_AS_EXCLUDED_COLUMN_NAME, excludedWells.contains(dataRowWellKey));
 
                 dataRows.add(dataMap);
