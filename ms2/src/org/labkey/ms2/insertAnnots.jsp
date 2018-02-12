@@ -28,7 +28,7 @@
 <labkey:errors />
 <br>
 <labkey:form method="post" action="<%=h(buildURL(MS2Controller.InsertAnnotsAction.class))%>" enctype="multipart/form-data">
-<table>
+<table class="lk-fields-table">
     <tr>
       <td class="labkey-form-label">Full file path</td>
       <td><input type="text" name="fileName" id='fname' size="70" value="<%= h(bean.getFileName())%>"></td>
