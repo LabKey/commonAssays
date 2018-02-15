@@ -467,6 +467,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             }
 
             FlowManager.get().updateFlowObjectCols(container);
+            ExperimentService.get().syncRunEdges(run);
 
             transaction.commit();
             success = true;
