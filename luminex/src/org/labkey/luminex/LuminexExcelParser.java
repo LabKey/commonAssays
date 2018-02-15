@@ -708,7 +708,7 @@ public class LuminexExcelParser
             validateAnalyte(m.keySet(), "ENV6", "FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1", .4790, .8266);
             for (Map.Entry<Analyte, List<LuminexDataRow>> entry : m.entrySet())
             {
-                assertEquals("Wrong number of data rows", 34, entry.getValue().size());
+                assertEquals("Wrong number of data rows", 36, entry.getValue().size());
                 for (LuminexDataRow dataRow : entry.getValue())
                 {
                     assertFalse("Shouldn't be summary", dataRow.isSummary());

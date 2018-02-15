@@ -371,7 +371,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
 
         DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
         table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);
-        waitForElement(Locator.paginationText(68)); // 4 are showing replicate group exclusion comment
+        waitForElement(Locator.paginationText(70)); // 4 are showing replicate group exclusion comment
         table.setFilter("Analyte", "Does Not Equal", analyte);
         waitForText("No data to show.");
         table.clearFilter("Analyte");
