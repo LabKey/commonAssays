@@ -47,6 +47,7 @@ import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.FileNameUniquifier;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
@@ -384,19 +385,19 @@ public class RunController extends BaseFlowController
                 FlowModule module = ModuleLoader.getInstance().getModule(FlowModule.class);
                 _exportToScriptPath = module.getExportToScriptPath(getContainer());
                 if (_exportToScriptPath == null)
-                    throw new IllegalStateException("Export script path must be configured in the folder settings");
+                    throw new ConfigurationException("Export script path must be configured in the folder settings");
                 if (!new File(_exportToScriptPath).exists())
-                    throw new IllegalStateException("Export script not found: " + _exportToScriptPath);
+                    throw new ConfigurationException("Export script not found: " + _exportToScriptPath);
 
                 _exportToScriptCommandLine = module.getExportToScriptCommandLine(getContainer());
                 if (_exportToScriptCommandLine == null)
-                    throw new IllegalStateException("Export script command line must be configured in the folder settings");
+                    throw new ConfigurationException("Export script command line must be configured in the folder settings");
 
                 _exportToScriptLocation = module.getExportToScriptLocation(getContainer());
                 if (_exportToScriptLocation == null)
-                    throw new IllegalStateException("Export location must be configured in the folder settings");
+                    throw new ConfigurationException("Export location must be configured in the folder settings");
                 if (!new File(_exportToScriptLocation).exists())
-                    throw new IllegalStateException("Export location not found: " + _exportToScriptLocation);
+                    throw new ConfigurationException("Export location not found: " + _exportToScriptLocation);
 
                 _exportToScriptFormat = module.getExportToScriptFormat(getContainer());
                 String exportToScriptTimeout = module.getExportToScriptTimeout(getContainer());
