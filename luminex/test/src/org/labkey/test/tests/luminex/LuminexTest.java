@@ -30,6 +30,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.components.PropertiesEditor;
 import org.labkey.test.components.html.BootstrapMenu;
+import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
@@ -40,6 +41,7 @@ import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.QCAssayScriptHelper;
 import org.labkey.test.util.RReportHelper;
+import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.io.IOException;
@@ -354,6 +356,15 @@ public abstract class LuminexTest extends BaseWebDriverTest
         waitAndClick(l);
     }
 
+    protected void clickReplicateGroupCheckBoxSelectSingleWell(String labelText, String well, boolean set)
+    {
+        WebElement element = Locator.checkboxByLabel(labelText,false)
+                .findWhenNeeded(getDriver()).withTimeout(4000);
+        uncheckCheckbox(element);
+        WebElement wellElement = Locator.checkboxByLabel(well,false)
+                .findWhenNeeded(getDriver()).withTimeout(4000);
+        new Checkbox(wellElement).set(set);
+    }
     protected void verifyExclusionPipelineJobComplete(int jobCount, String expectedInfo, String runName, String exclusionComment)
     {
         verifyExclusionPipelineJobComplete(jobCount, expectedInfo, runName, exclusionComment, 1, 1);

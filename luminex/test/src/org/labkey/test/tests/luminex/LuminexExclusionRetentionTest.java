@@ -29,6 +29,8 @@ import org.labkey.test.pages.luminex.ExclusionReportPage;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 
 @Category({DailyA.class, Assays.class})
 public final class LuminexExclusionRetentionTest extends LuminexTest
@@ -115,6 +117,15 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         String wellNonMatchDescriptionComment = "well description non-match";
         excludeWell("G2", "S2", "Standard1", wellNonMatchDescriptionComment, matchingAnalyte); //Description changed in re-import file (new value Standard1a)
         clickButton("No", 0);
+
+        String singleWellRemovedFromTheReplicate = "Replicate group with single well excluded";
+        String description = "116";
+        String analyte="ENV1";
+        excludeOneWellFromReplicateGroup("Unknown","A6",singleWellRemovedFromTheReplicate,description,analyte);
+        clickButton("No", 0);
+
+        clickAndWait(Locator.linkWithText("view runs"));
+        clickAndWait(Locator.linkContainingText(RUN_NAME));
 
         //Re-import
         reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
@@ -274,10 +285,24 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         exclusionReportPage.assertSinglepointUnknownExclusionNotPresent(RUN_NAME, dilutionNotMatched, dilutionDecimal, matchingAnalyte);
     }
 
+    private void excludeOneWellFromReplicateGroup(String wellRole,String wellName,String comment,String description,String analyte)
+    {
+        DataRegionTable table = new DataRegionTable("Data", this);
+        table.clearAllFilters("Type");
+        table.setFilter("WellRole", "Equals", wellRole);
+        table.setFilter("Description","Equals",description);
+        table.setFilter("Analyte","Equals",analyte);
+        clickExclusionMenuIconForWell(wellName);
+        setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
+        clickReplicateGroupCheckBoxSelectSingleWell("Replicate Group",wellName,true);
+        clickButton(SAVE_CHANGES_BUTTON,0);
+
+    }
+
     private void reimportAndReplaceRunFile(File replacedFile, File newFile, String titrationName)
     {
         DataRegionTable data = new DataRegionTable("Data", this.getWrappedDriver());
-        data.clickHeaderButtonByText("Re-import run");
+        data.clickHeaderButton("Re-import run");
         clickButton("Next"); // batch
         replaceFileInAssayRun(replacedFile, newFile);
         clickButton("Next"); // run

@@ -27,6 +27,7 @@ import org.labkey.test.components.luminex.dialogs.SinglepointExclusionDialog;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.ExclusionReportPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
+import org.labkey.test.util.DataRegion;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
@@ -70,7 +71,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * postconditions:  multiple curve data will be present, certain wells will be marked excluded
      */
     @Test
-    public void testWellExclusion()
+    public void testReplicateGroupExclusion()
     {
         int jobCount = 0;
 
@@ -106,22 +107,59 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, ++jobCount);
         excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], (jobCount += 2));
 
+        excludedWellDescription = "Sample 1";
+        excludedWellType = "X6";
+        excludedWells = new HashSet<>(Arrays.asList("A6","B6","A7","B7"));
+
+        String comment = "Replicate group with single well excluded";
+        excludeOneWellFromReplicateGroup("Unknown","A6",comment,++jobCount);
+
         // analyte exclusion
         excludeAnalyteForAllWellsTest(analytes[1], ++jobCount);
 
-        // Check out the exclusion report
-        clickAndWait(Locator.linkWithText("view excluded data"));
-        assertTextPresent("multipleCurvesTestRun", 4);
-        assertTextPresent("Changed for all analytes");
-        assertTextPresent("No data to show.", 2); // no titration or singlepoint unknown exclusions
-        assertTextPresent("exclude all for single well", 2);
-        assertTextPresent("exclude single analyte for single well", 1);
-        assertTextPresentInThisOrder("S3", "C2", "X25");
-        assertTextPresent("ENV7", 3);
-        assertTextPresent("ENV6", 3);
-        assertTextPresentInThisOrder("C3", "E2", "E1");
-    }
+        log("Verifying the highlight for the excluded row");
+        clickAndWait(Locator.linkWithText("view results"));
+        DataRegionTable data = new DataRegionTable("Data",getDriver());
+        data.setFilter("WellRole", "Equals", "Unknown");
+        data.setFilter("Analyte","Equals","ENV6");
+        data.setFilter("Well","Equals","A6");
+        assertEquals("Excluded well is not highlighted",1,Locator.css(".labkey-error-row").findElements(data).size());
 
+        log("Verifying the standard deviation is not blank");
+        data.setFilter("StdDev","Is Blank");
+        assertEquals("Standard deviation is blank",0,data.getDataRowCount());
+
+        log("Verification for all the operation performed");
+        clickAndWait(Locator.linkWithText("view excluded data"));
+
+        log("Verifying the data for excluded analytes");
+        DataRegionTable excludedAnalytesTable = new DataRegionTable("RunExclusion",getDriver());
+        assertEquals("Wrong value in comment for Excluded Analytes","Changed for all analytes",excludedAnalytesTable.getDataAsText(0,"Comment"));
+        assertEquals("Wrong value in Analytes for Excluded Analytes","ENV7",excludedAnalytesTable.getDataAsText(0,"Analytes"));
+        assertEquals("Mismatch in the number of row count for Excluded Analytes",1,excludedAnalytesTable.getDataRowCount());
+
+        log("Verifying the data for excluded titrations");
+        DataRegionTable excludedTitrationsTable = new DataRegionTable("TitrationExclusion",getDriver());
+        assertEquals("Rows should not be present in Excluded Titrations",0,excludedTitrationsTable.getDataRowCount());
+
+        log("Verifying the data for excluded Single Point Unknowns");
+        DataRegionTable excludedSinglePointUnknownsTable = new DataRegionTable("SinglepointUnknownExclusion",getDriver());
+        assertEquals("Rows should not be present in  Single point Unknown Exclusion",0,excludedSinglePointUnknownsTable.getDataRowCount());
+
+
+        log("Verifying the single well excluded from the replicate group");
+        DataRegionTable table = new DataRegionTable("WellExclusion",getDriver());
+        assertEquals("Mismatch in teh number of row count for Excluded wells",4,table.getDataRowCount());
+        table.setFilter("Comment","Equals","Replicate group with single well excluded");
+        assertEquals("Wrong Well excluded from the replicate","C5",table.getDataAsText(0,"Well"));
+        table.clearAllFilters();
+
+        log("Verifying the exclude single analyte for single well");
+        table.setFilter("Comment","Equals","exclude single analyte for single well");
+        assertEquals("Record for excluded single analyte for single well not found",1,table.getDataRowCount());
+        assertEquals("Wrong value for Excluded single analyte for single well","ENV6",table.getDataAsText(0,"Analytes"));
+        table.clearAllFilters();
+    }
 
     @Test
     public void testSinglePointExclusions()
@@ -243,7 +281,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         DataRegionTable table = new DataRegionTable("Data", this);
         table.setFilter("WellRole", "Equals", wellRole);
         clickExclusionMenuIconForWell(wellName);
-        String comment = "exclude all for single well";
+        String comment = "Exclude all for single well";
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
         clickButton(SAVE_CHANGES_BUTTON, 0);
         String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
@@ -262,6 +300,18 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         }
     }
 
+    private void excludeOneWellFromReplicateGroup(String wellRole,String wellName,String comment,int jobCount)
+    {
+        DataRegionTable table = new DataRegionTable("Data", this);
+        table.setFilter("WellRole", "Equals", wellRole);
+        clickExclusionMenuIconForWell(wellName);
+        setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
+        clickReplicateGroupCheckBoxSelectSingleWell("Replicate Group",wellName,true);
+        clickButton(SAVE_CHANGES_BUTTON,0);
+        String expectedInfo = "INSERT replicate group exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
+        verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment, 1, 1);
+
+    }
     private void clickSaveAndAcceptConfirm(String dialogTitle)
     {
         clickButton(SAVE_CHANGES_BUTTON, 0);
@@ -371,7 +421,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
 
         DataRegionTable table = new DataRegionTable(DATA_TABLE_NAME, this);
         table.setFilter("ExclusionComment", "Equals", exclusionPrefix + comment);
-        waitForElement(Locator.paginationText(70)); // 4 are showing replicate group exclusion comment
+        waitForElement(Locator.paginationText(69)); // 4 are showing replicate group exclusion comment
         table.setFilter("Analyte", "Does Not Equal", analyte);
         waitForText("No data to show.");
         table.clearFilter("Analyte");
