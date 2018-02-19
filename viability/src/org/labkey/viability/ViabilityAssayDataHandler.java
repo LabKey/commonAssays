@@ -257,11 +257,6 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         ViabilityManager.deleteAll(datas, c);
     }
 
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
     // check file data: all rows must have PoolID
     public static void validateData(List<Map<String, Object>> rows, boolean requireSpecimens) throws ExperimentException
     {

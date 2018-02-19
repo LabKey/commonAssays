@@ -19,10 +19,12 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.TaskPipeline;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -43,11 +45,11 @@ abstract public class AbstractMS2SearchPipelineProvider
         return true;
     }
 
-    public void initSystemDirectory(File rootDir, File systemDir)
+    public void initSystemDirectory(Path rootDir, Path systemDir)
     {
         AbstractMS2SearchProtocolFactory factory = getProtocolFactory();
-        if (factory != null)
-            factory.initSystemDirectory(rootDir, systemDir);
+        if (factory != null && !FileUtil.hasCloudScheme(rootDir) && !FileUtil.hasCloudScheme(systemDir))
+            factory.initSystemDirectory(rootDir.toFile(), systemDir.toFile());
     }
 
     @Override

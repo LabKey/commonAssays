@@ -224,9 +224,4 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     {
         OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
     }
-
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-        throw new UnsupportedOperationException();
-    }
 }

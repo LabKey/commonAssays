@@ -24,10 +24,12 @@ import org.labkey.api.exp.XarFormatException;
 import org.labkey.api.exp.XarSource;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.util.FileUtil;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class ScriptXarSource extends XarSource
 {
@@ -63,12 +65,17 @@ public class ScriptXarSource extends XarSource
 
     public String canonicalizeDataFileURL(String dataFileURL) throws XarFormatException
     {
-        return new File(dataFileURL).toURI().toString();
+        return FileUtil.getAbsoluteCaseSensitivePathString(getXarContext().getContainer(), FileUtil.createUri(dataFileURL));   //new File(dataFileURL).toURI().toString();
     }
 
     public File getRoot()
     {
         return _root;
+    }
+
+    public Path getRootPath()
+    {
+        return null != getRoot() ? getRoot().toPath() : null;
     }
 
     public boolean allowImport(PipeRoot pr, Container container, File file)

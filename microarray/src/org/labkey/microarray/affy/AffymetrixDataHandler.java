@@ -196,12 +196,6 @@ public class AffymetrixDataHandler extends AbstractAssayTsvDataHandler
     }
 
     @Override
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     protected boolean allowEmptyData()
     {
         return false;

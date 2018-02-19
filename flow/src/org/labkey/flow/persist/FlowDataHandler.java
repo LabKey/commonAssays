@@ -149,9 +149,4 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
     {
         data.delete(user);
     }
-
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-
-    }
 }

@@ -2043,11 +2043,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         deleteDatas(Collections.singletonList(data.getRowId()));
     }
 
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
-    {
-        throw new UnsupportedOperationException();
-    }
-
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
