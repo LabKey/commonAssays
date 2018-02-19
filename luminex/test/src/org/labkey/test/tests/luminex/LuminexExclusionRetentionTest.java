@@ -15,6 +15,7 @@
  */
 package org.labkey.test.tests.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,8 +30,6 @@ import org.labkey.test.pages.luminex.ExclusionReportPage;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
 
 @Category({DailyA.class, Assays.class})
 public final class LuminexExclusionRetentionTest extends LuminexTest
@@ -95,40 +94,47 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
 
         //Add well exclusion that matches
         String wellMatchComment = "well match";
-        excludeWell("A1", "X1", "111", wellMatchComment, matchingAnalyte); //should be retained after import
+        excludeReplicateGroup("A1", "X1", "111", wellMatchComment, matchingAnalyte); //should be retained after import
         clickButton("No", 0);
 
         //Add well exclusion that partially matches
         String partialMatchComment = "partial well match";
-        excludeWell("A2", "X2", "112", partialMatchComment, matchingAnalyte, changedAnalyte);   //Should be kept, but only have one analyte after import
+        excludeReplicateGroup("A2", "X2", "112", partialMatchComment, matchingAnalyte, changedAnalyte);   //Should be kept, but only have one analyte after import
         clickButton("No", 0);
 
         //Add well exclusion that does not match Analyte
         String wellNonMatchAnalyteComment = "well Analyte non-match";
-        excludeWell("A3", "X3", "113", wellNonMatchAnalyteComment, changedAnalyte); //Analyte changed in re-import file (new value ENV66)
+        excludeReplicateGroup("A3", "X3", "113", wellNonMatchAnalyteComment, changedAnalyte); //Analyte changed in re-import file (new value ENV66)
         clickButton("No", 0);
 
         //Add well exclusion that does not match type
         String wellNonMatchTypeComment = "well Type non-match";
-        excludeWell("A4", "X4", "114", wellNonMatchTypeComment, matchingAnalyte); //Well changed in re-import file (new value X2)
+        excludeReplicateGroup("A4", "X4", "114", wellNonMatchTypeComment, matchingAnalyte); //Well changed in re-import file (new value X2)
         clickButton("No", 0);
 
         //Add well exclusion that does not match type
         String wellNonMatchDescriptionComment = "well description non-match";
-        excludeWell("G2", "S2", "Standard1", wellNonMatchDescriptionComment, matchingAnalyte); //Description changed in re-import file (new value Standard1a)
+        excludeReplicateGroup("G2", "S2", "Standard1", wellNonMatchDescriptionComment, matchingAnalyte); //Description changed in re-import file (new value Standard1a)
         clickButton("No", 0);
 
         String singleWellRemovedFromTheReplicate = "Replicate group with single well excluded";
         String description = "116";
-        String analyte="ENV1";
-        excludeOneWellFromReplicateGroup("Unknown","A6",singleWellRemovedFromTheReplicate,description,analyte);
+        String type = "X6";
+        String well = "A6";
+        excludeOneWellFromReplicateGroup("Unknown",well,singleWellRemovedFromTheReplicate,description);
         clickButton("No", 0);
 
-        clickAndWait(Locator.linkWithText("view runs"));
-        clickAndWait(Locator.linkContainingText(RUN_NAME));
+        // wait for the last pipeline job to finish
+        goToModule("Pipeline");
+        DataRegionTable table = new DataRegionTable("StatusFiles", getDriver());
+        table.setFilter("Info", "Equals", "INSERT replicate group exclusion (Description: " + description + ", Type: " + type + ")");
+        waitForPipelineJobsToComplete(1, "Luminex Exclusion: " + RUN_NAME, false);
+
+        // go to the run results grid from the pipeline job list
+        clickAndWait(Locator.linkContainingText("Luminex Exclusion: " + RUN_NAME));
 
         //Re-import
-        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
+        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a", "3 exclusions were not matched and will be lost");
 
         //verify exclusion page
         clickAndWait(Locator.linkContainingText(RUN_NAME));
@@ -137,7 +143,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent(wellMatchComment);
         assertTextPresent(partialMatchComment);
-        assertTextPresent(matchingAnalyte, 2);  //Once each for: match, partial-match
+        assertTextPresent(matchingAnalyte, 3);  //Once each for: match, partial-match, and single well exclusion
 
         assertTextNotPresent(wellNonMatchAnalyteComment);
         assertTextNotPresent(wellNonMatchTypeComment);
@@ -156,7 +162,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         excludeTitration("Standard1", titrationMatchComment, RUN_NAME, 1, matchingAnalyte);
 
         //Re-import
-        reimportAndReplaceRunFile(BASE_RUN_FILE, BASE_RUN_FILE, "Standard1");
+        reimportAndReplaceRunFile(BASE_RUN_FILE, BASE_RUN_FILE, "Standard1", null);
 
         //verify exclusion page
         clickAndWait(Locator.linkContainingText(RUN_NAME));
@@ -169,7 +175,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkContainingText(RUN_NAME));
 
         //Re-import
-        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
+        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a", "1 exclusion was not matched and will be lost");
 
         //verify exclusion page
         clickAndWait(Locator.linkContainingText(RUN_NAME));
@@ -193,11 +199,10 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         verifyExclusionPipelineJobComplete(1, "INSERT analyte exclusion", RUN_NAME, analyteNonMatchComment);
 
         //Re-import
-        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
+        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a", "1 exclusion was not matched and will be lost");
 
         //verify exclusion page
         clickAndWait(Locator.linkContainingText(RUN_NAME));
-        // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextNotPresent(analyteNonMatchComment);
         assertTextPresent("No data to show.", 4);
@@ -210,10 +215,11 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         excludeAnalyteForRun(matchingAnalyte, true, analyteMatchComment);
         verifyExclusionPipelineJobComplete(2, "INSERT analyte exclusion", RUN_NAME, analyteMatchComment, 1, 2);
 
-        reimportAndReplaceRunFile(REIMPORT_FILE, BASE_RUN_FILE, "Standard1");
+        //Re-import
+        reimportAndReplaceRunFile(REIMPORT_FILE, BASE_RUN_FILE, "Standard1", null);
+
         //verify retained exclusion
         clickAndWait(Locator.linkContainingText(RUN_NAME));
-        // Check out the exclusion report
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent(analyteMatchComment);
         assertTextNotPresent(analyteNonMatchComment);
@@ -260,21 +266,20 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         _extHelper.clickExtButton("Yes", 0);
         verifyExclusionPipelineJobComplete(1, "MULTIPLE singlepoint unknown exclusions", RUN_NAME, "", 4, 1);
 
-        //Verify exclusions created
+        //Verify exclusions retained
         ExclusionReportPage exclusionReportPage = ExclusionReportPage.beginAt(this);
         exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, toKeep, dilutionDecimal, matchingAnalyte);
         exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, partialAnalyteMatch, dilutionDecimal, matchingAnalyte, changedAnalyte);
         exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, analyteNotMatched, dilutionDecimal, changedAnalyte);
         exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, dilutionNotMatched, dilutionDecimal, matchingAnalyte);
 
+        //Re-import
         goToTestAssayHome();
         clickAndWait(Locator.linkWithText(RUN_NAME));
-        //Re-import
-        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a");
+        reimportAndReplaceRunFile(BASE_RUN_FILE, REIMPORT_FILE, "Standard1a", "2 exclusions were not matched and will be lost");
 
-        //Verify exclusions created
-        exclusionReportPage = ExclusionReportPage.beginAt(this);
         //Verify exclusion retained
+        exclusionReportPage = ExclusionReportPage.beginAt(this);
         exclusionReportPage.assertSinglepointUnknownExclusion(RUN_NAME, toKeep, dilutionDecimal, matchingAnalyte);
 
         //verify partial analyte exclusion retained
@@ -285,13 +290,12 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         exclusionReportPage.assertSinglepointUnknownExclusionNotPresent(RUN_NAME, dilutionNotMatched, dilutionDecimal, matchingAnalyte);
     }
 
-    private void excludeOneWellFromReplicateGroup(String wellRole,String wellName,String comment,String description,String analyte)
+    private void excludeOneWellFromReplicateGroup(String wellRole,String wellName,String comment,String description)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
         table.clearAllFilters("Type");
         table.setFilter("WellRole", "Equals", wellRole);
         table.setFilter("Description","Equals",description);
-        table.setFilter("Analyte","Equals",analyte);
         clickExclusionMenuIconForWell(wellName);
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
         clickReplicateGroupCheckBoxSelectSingleWell("Replicate Group",wellName,true);
@@ -299,7 +303,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
 
     }
 
-    private void reimportAndReplaceRunFile(File replacedFile, File newFile, String titrationName)
+    private void reimportAndReplaceRunFile(File replacedFile, File newFile, String titrationName, @Nullable String retentionWarningMsg)
     {
         DataRegionTable data = new DataRegionTable("Data", this.getWrappedDriver());
         data.clickHeaderButton("Re-import run");
@@ -309,7 +313,12 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         uncheckCheckbox(Locator.tagWithName("input", "_titrationRole_standard_" + titrationName));
         checkCheckbox(Locator.tagWithName("input", "_titrationRole_qccontrol_" + titrationName));
         waitForText("Save and Finish");
-        //TODO: verify warning message
+
+        if (retentionWarningMsg != null)
+            assertElementPresent(Locator.tagWithText("span", retentionWarningMsg));
+        else
+            assertElementNotPresent(Locator.tagWithClass("span", "labkey-error"));
+
         clickButton("Save and Finish");
     }
 }

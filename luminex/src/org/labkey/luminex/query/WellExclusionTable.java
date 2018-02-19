@@ -104,9 +104,9 @@ public class WellExclusionTable extends AbstractExclusionTable
         wellRoleSQL.append(") x");
         addColumn(new ExprColumn(this, "Well Role", schema.getDbSchema().getSqlDialect().getSelectConcat(wellRoleSQL, ","), JdbcType.VARCHAR));
 
-        SQLFragment wellSQL = new SQLFragment("SELECT Well FROM (SELECT DISTINCT dr.Well");
-        wellSQL.append(joinSQL);
-        wellSQL.append(") x");
+        SQLFragment wellSQL = new SQLFragment("SELECT Well FROM (SELECT DISTINCT dr.Well").append(joinSQL).append(") x");
+        //only pull in wells list for replicate group exclusions
+        wellSQL.append(" WHERE ").append(ExprColumn.STR_TABLE_ALIAS).append(".Well IS NULL");
         ExprColumn wellsCol = new ExprColumn(this, "Wells", schema.getDbSchema().getSqlDialect().getSelectConcat(wellSQL, ","), JdbcType.VARCHAR);
         wellsCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
         {

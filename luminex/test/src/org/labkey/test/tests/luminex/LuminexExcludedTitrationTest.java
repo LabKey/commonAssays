@@ -116,7 +116,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         DataRegionTable region = new DataRegionTable("Data", this);
 
         region.setFilter("Description", "Equals", excludedTitration);
-        waitForElement(Locator.paginationText(1, 60, 60));
+        waitForElement(Locator.paginationText(1, 70, 70));
         List<List<String>> vals = region.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
         List<String> descriptions = vals.get(1);

@@ -149,7 +149,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
 
         log("Verifying the single well excluded from the replicate group");
         DataRegionTable table = new DataRegionTable("WellExclusion",getDriver());
-        assertEquals("Mismatch in teh number of row count for Excluded wells",4,table.getDataRowCount());
+        assertEquals("Mismatch in the number of row count for Excluded wells",4,table.getDataRowCount());
         table.setFilter("Comment","Equals","Replicate group with single well excluded");
         assertEquals("Wrong Well excluded from the replicate","C5",table.getDataAsText(0,"Well"));
         table.clearAllFilters();

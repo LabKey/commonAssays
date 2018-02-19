@@ -284,9 +284,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
     }
 
     /**
-     * From the results table of a run will set a well type/wellRole as excluded
+     * From the results table of a run will set a well type/wellRole (i.e. replicate group) as excluded
      */
-    protected void excludeWell(String wellName, String type, String description, String exclusionComment, String... analytes)
+    protected void excludeReplicateGroup(String wellName, String type, String description, String exclusionComment, String... analytes)
     {
         DataRegionTable table = new DataRegionTable("Data", this.getWrappedDriver());
         table.setFilter("Type", "Equals", type);
@@ -311,7 +311,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickButton(SAVE_CHANGES_BUTTON, 0);
     }
 
-    protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobId, String...analytes)
+    protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobCount, String...analytes)
     {
         DataRegionTable table = new DataRegionTable("Data", getDriver());
         table.clickHeaderMenu("Exclusions", false, "Exclude Titrations");
@@ -334,7 +334,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickButton("Save", 0);
         _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
         clickButtonContainingText("Yes", 0);
-        verifyExclusionPipelineJobComplete(pipelineJobId, "INSERT titration exclusion (Description: " + titration + ")", runName, exclusionMessage);
+        verifyExclusionPipelineJobComplete(pipelineJobCount, "INSERT titration exclusion (Description: " + titration + ")", runName, exclusionMessage);
     }
 
     /**
@@ -365,6 +365,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
                 .findWhenNeeded(getDriver()).withTimeout(4000);
         new Checkbox(wellElement).set(set);
     }
+    
     protected void verifyExclusionPipelineJobComplete(int jobCount, String expectedInfo, String runName, String exclusionComment)
     {
         verifyExclusionPipelineJobComplete(jobCount, expectedInfo, runName, exclusionComment, 1, 1);
