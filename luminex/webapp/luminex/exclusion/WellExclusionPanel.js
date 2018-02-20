@@ -102,7 +102,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     setupWindowPanelItems: function()
     {
-        this.addHeaderPanel('Analytes excluded for a singlepoint unknown, titration, or at the assay level will not be re-included by changes in replicate group exclusions.');
+        this.addHeaderPanel('Analytes excluded for a singlepoint unknown, titration, or at the assay level will not be re-included by changes in well or replicate group exclusions.');
 
         // build the form panel for well and analyte exclusions
         var callback = function(){
@@ -307,7 +307,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         this.add(new Ext.form.DisplayField({
             id: 'reCalcDisplay',
             hidden: true,
-            value: 'With this exclusion, your titration curve will be out-of-date and will be re-calculated.',
+            value: 'With this exclusion, your results will be out-of-date and will be re-calculated.',
             style: {color: 'red'}
         }));
 
@@ -502,7 +502,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         if (analyteRowIds == null)
         {
             // ask the user if they are sure they want to remove the exclusions before deleting
-            this.confirmExclusionDeletion(config, 'Are you sure you want to remove all analyte exclusions for the selected replicate group?', 'replicate group');
+            this.confirmExclusionDeletion(config, 'Are you sure you want to remove all analyte exclusions for the selected well or replicate group?', 'replicate group');
         }
         else
         {

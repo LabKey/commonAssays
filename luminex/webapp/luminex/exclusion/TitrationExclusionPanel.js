@@ -52,7 +52,7 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
 
     DISPLAY_NOUN : 'Titration',
 
-    HEADER_TXT : 'Analytes excluded for a replicate group, singlepoint unknown, or at the assay level will not be '
+    HEADER_TXT : 'Analytes excluded for a well, replicate group, singlepoint unknown, or at the assay level will not be '
                     + 're-included by changes in titration exclusions.',
 
     ITEM_RECORD_KEY : 'Name',

@@ -316,7 +316,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         DataRegionTable table = new DataRegionTable("Data", getDriver());
         table.clickHeaderMenu("Exclusions", false, "Exclude Titrations");
         _extHelper.waitForExtDialog("Exclude Titrations from Analysis");
-        assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a replicate group, singlepoint unknown, "
+        assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a well, replicate group, singlepoint unknown, "
                 + "or at the assay level will not be re-included by changes in titration exclusions."));
 
         waitAndClick(Locator.tagWithClass("div", "x-grid3-cell-inner").withText(titration));

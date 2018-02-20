@@ -60,7 +60,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     setupWindowPanelItems: function()
     {
-        this.addHeaderPanel('Analytes excluded for a replicate group, singlepoint unknown, or titration will not be re-included by changes in assay level exclusions.');
+        this.addHeaderPanel('Analytes excluded for a well, replicate group, singlepoint unknown, or titration will not be re-included by changes in assay level exclusions.');
 
         var selMod = this.getGridCheckboxSelectionModel();
 

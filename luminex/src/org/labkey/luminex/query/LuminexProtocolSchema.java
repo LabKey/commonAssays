@@ -221,6 +221,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 result.addCondition(exclusionFilter);
                 result.removeColumn(new ColumnInfo("Dilution"));
                 result.removeColumn(new ColumnInfo("Type"));
+                result.removeColumn(new ColumnInfo("Well"));
                 result.removeColumn(new ColumnInfo("Wells"));
                 result.removeColumn(new ColumnInfo("Well Role"));
                 SQLFragment filter = new SQLFragment("DataId");
@@ -237,6 +238,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.NONBLANK);
                 result.addCondition(exclusionFilter);
                 result.removeColumn(new ColumnInfo("Type"));
+                result.removeColumn(new ColumnInfo("Well"));
                 result.removeColumn(new ColumnInfo("Wells"));
                 result.removeColumn(new ColumnInfo("Well Role"));
                 SQLFragment filter = new SQLFragment("DataId");
