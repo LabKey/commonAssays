@@ -401,8 +401,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected String[] getListOfAnalytesMultipleCurveData()
     {
         //TODO:  make this a dynamic list, acquired from the current data set, rather than hardcoded
-        return new String[] {"ENV6", "ENV7", "ENV4",
-                        "ENV5", "Blank"};
+        return new String[] {"ENV6", "ENV7", "ENV4", "ENV5", "Blank"};
     }
 
 

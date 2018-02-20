@@ -27,9 +27,7 @@ import org.labkey.test.components.luminex.dialogs.SinglepointExclusionDialog;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.luminex.ExclusionReportPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
-import org.labkey.test.util.DataRegion;
 import org.labkey.test.util.DataRegionTable;
-import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Arrays;
@@ -93,27 +91,27 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         excludedWellDescription = "Standard2";
         excludedWellType = "S3";
         excludedWells = new HashSet<>(Arrays.asList("C3", "D3"));
-        excludeAllAnalytesForSingleWellTest("Standard", "C3", false, ++jobCount);
+        excludeAllAnalytesForReplicateGroup("Standard", "C3", false, ++jobCount);
 
         // QC control titration well group exclusion
         excludedWellDescription = "Standard1";
         excludedWellType = "C2";
         excludedWells = new HashSet<>(Arrays.asList("E2", "F2"));
-        excludeAllAnalytesForSingleWellTest("QC Control", "E2", false, ++jobCount);
+        excludeAllAnalytesForReplicateGroup("QC Control", "E2", false, ++jobCount);
 
         // unknown titration well group exclusion
         excludedWellDescription = "Sample 2";
         excludedWellType = "X25";
         excludedWells = new HashSet<>(Arrays.asList("E1", "F1"));
-        excludeAllAnalytesForSingleWellTest("Unknown", "E1", true, ++jobCount);
-        excludeOneAnalyteForSingleWellTest("Unknown", "E1", analytes[0], (jobCount += 2));
+        excludeAllAnalytesForReplicateGroup("Unknown", "E1", true, ++jobCount);
+        excludeOneAnalyteForReplicateGroup("Unknown", "E1", analytes[0], (jobCount += 2));
 
+        // single well exclusion
         excludedWellDescription = "Sample 1";
         excludedWellType = "X6";
-        excludedWells = new HashSet<>(Arrays.asList("A6","B6","A7","B7"));
-
+        excludedWells = new HashSet<>(Arrays.asList("A6"));
         String comment = "Replicate group with single well excluded";
-        excludeOneWellFromReplicateGroup("Unknown","A6",comment,++jobCount);
+        excludeOneWellFromReplicateGroup("Unknown","A6", comment, ++jobCount);
 
         // analyte exclusion
         excludeAnalyteForAllWellsTest(analytes[1], ++jobCount);
@@ -156,12 +154,12 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         assertEquals("Wrong Well excluded from the replicate","A6",table.getDataAsText(0,"Well"));
         table.clearAllFilters();
 
-        log("Verifying the exclude single analyte for single well");
+        log("Verifying the exclude single analyte for replicate group");
         table.setFilter("Comment","Equals","exclude single analyte for single well");
         assertEquals("Record for excluded single analyte for single well not found",1,table.getDataRowCount());
         assertEquals("Wrong Type excluded for well exclusion","X25",table.getDataAsText(0,"Type"));
         assertEquals("Wrong value for Excluded single analyte for single well","ENV6",table.getDataAsText(0,"Analytes"));
-        //assertEquals("Wrong Well excluded from the replicate","E1",table.getDataAsText(0,"Well"));
+        assertEquals("Wrong Well excluded from the replicate"," ", table.getDataAsText(0,"Well"));
         table.clearAllFilters();
     }
 
@@ -273,14 +271,14 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         exclusionReportPage.assertSinglepointUnknownExclusion(runId, toUpdate, dilutionDecimal, analytes[1]);  //Verify update
     }
     /**
-     * verify that a user can exclude every analyte for a single well, and that this
-     * successfully applies to both the original well and its duplicates
+     * verify that a user can exclude every analyte for a replicate group, and that this
+     * successfully applies to both the original well and its replicates
      *
      * preconditions:  at run screen, wellName exists
      * postconditions: no change (exclusion is removed at end of test)
      * @param wellName name of well to excluse
      */
-    private void excludeAllAnalytesForSingleWellTest(String wellRole, String wellName, boolean removeExclusion, int jobCount)
+    private void excludeAllAnalytesForReplicateGroup(String wellRole, String wellName, boolean removeExclusion, int jobCount)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
         table.setFilter("WellRole", "Equals", wellRole);
@@ -304,7 +302,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         }
     }
 
-    private void excludeOneWellFromReplicateGroup(String wellRole,String wellName,String comment,int jobCount)
+    private void excludeOneWellFromReplicateGroup(String wellRole, String wellName, String comment, int jobCount)
     {
         DataRegionTable table = new DataRegionTable("Data", this);
         table.setFilter("WellRole", "Equals", wellRole);
@@ -323,7 +321,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         clickButton("Yes", 0);
     }
 
-    private void excludeOneAnalyteForSingleWellTest(String wellRole, String wellName, String excludedAnalyte, int jobCount)
+    private void excludeOneAnalyteForReplicateGroup(String wellRole, String wellName, String excludedAnalyte, int jobCount)
     {
         waitForText("Well Role");
         DataRegionTable table = new DataRegionTable("Data", this);
