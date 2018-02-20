@@ -103,16 +103,28 @@ public class LuminexManager
             }
 
             @Override
-            public String getInfo(@Nullable LuminexSingleExclusionCommand command)
+            public String getInfo(List<LuminexSingleExclusionCommand> commands)
             {
-                String info = getDescription(command).toLowerCase();
-                if (command != null)
+                StringBuilder sb = new StringBuilder();
+                if (commands.size() >= 1)
                 {
-                    info = command.getCommand().toUpperCase() + " " + info
-                            + " (Description: " + command.getDescription() + ", Type: " + command.getType() + ")";
-                }
+                    LuminexSingleExclusionCommand command = commands.get(0);
+                    sb.append(command.getCommand().toUpperCase()).
+                            append(" ").
+                            append(getDescription(command).toLowerCase()).
+                            append(" (Description: ").
+                            append(command.getDescription()).
+                            append(", Type: ").
+                            append(command.getType());
 
-                return info;
+                    if (command.getWell() != null)
+                        sb.append(", Well: ").append(command.getWell());
+                    sb.append(")");
+                }
+                else
+                    sb.append(getDescription(null).toLowerCase());
+
+                return sb.toString();
             }
 
             @Override
@@ -149,16 +161,16 @@ public class LuminexManager
             }
 
             @Override
-            public String getInfo(@Nullable LuminexSingleExclusionCommand command)
+            public String getInfo(List<LuminexSingleExclusionCommand> commands)
             {
                 // for singlepoint unknown exclusions, null command means that we have > 1 command in this job
-                String info = "MULTIPLE " + getDescription(command).toLowerCase() + "s";
-                if (command != null)
+                String info = "MULTIPLE " + getDescription(null).toLowerCase() + "s";
+                if (commands.size() == 1)
                 {
+                    LuminexSingleExclusionCommand command = commands.get(0);
                     info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ", Dilution: " + command.getDilution() + ")";
                 }
-
                 return info;
             }
 
@@ -184,16 +196,16 @@ public class LuminexManager
             }
 
             @Override
-            public String getInfo(@Nullable LuminexSingleExclusionCommand command)
+            public String getInfo(List<LuminexSingleExclusionCommand> commands)
             {
                 // for titration exclusions, null command means that we have > 1 command in this job
-                String info = "MULTIPLE " + getDescription(command).toLowerCase() + "s";
-                if (command != null)
+                String info = "MULTIPLE " + getDescription(null).toLowerCase() + "s";
+                if (commands.size() == 1)
                 {
+                    LuminexSingleExclusionCommand command = commands.get(0);
                     info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ")";
                 }
-
                 return info;
             }
 
@@ -218,14 +230,13 @@ public class LuminexManager
             }
 
             @Override
-            public String getInfo(@Nullable LuminexSingleExclusionCommand command)
+            public String getInfo(List<LuminexSingleExclusionCommand> commands)
             {
-                String info = getDescription(command).toLowerCase();
-                if (command != null)
+                String info = getDescription(null).toLowerCase();
+                if (commands.size() == 1)
                 {
-                    info = command.getCommand().toUpperCase() + " " + info;
+                    info = commands.get(0).getCommand().toUpperCase() + " " + info;
                 }
-
                 return info;
             }
 
@@ -255,7 +266,7 @@ public class LuminexManager
         }
 
         public abstract String getTableName();
-        public abstract String getInfo(@Nullable LuminexSingleExclusionCommand command);
+        public abstract String getInfo(List<LuminexSingleExclusionCommand> commands);
         public abstract Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly);
     }
 
@@ -430,7 +441,7 @@ public class LuminexManager
                 if (isTitrationTypeExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)));
                 else if (isSinglepointUnknownExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution + "|null"));
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution));
                 else if (isWellReplicateGroupTypeExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type)));
 

@@ -310,7 +310,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
         clickReplicateGroupCheckBoxSelectSingleWell("Replicate Group",wellName,true);
         clickButton(SAVE_CHANGES_BUTTON,0);
-        String expectedInfo = "INSERT well exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ")";
+        String expectedInfo = "INSERT well exclusion (Description: " + excludedWellDescription + ", Type: " + excludedWellType + ", Well: " + wellName + ")";
         verifyExclusionPipelineJobComplete(jobCount, expectedInfo, MULTIPLE_CURVE_ASSAY_RUN_NAME, comment, 1, 1);
 
     }

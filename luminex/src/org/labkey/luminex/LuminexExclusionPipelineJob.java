@@ -122,14 +122,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
 
     private String getJobInfo()
     {
-        // if we only have one command, use that in the info text
-        LuminexSingleExclusionCommand command = null;
-        if (_form.getCommands().size() == 1)
-        {
-            command = _form.getCommands().get(0);
-        }
-
-        return _exclusionType.getInfo(command);
+        return _exclusionType.getInfo(_form.getCommands());
     }
 
     private AssayProvider getAssayProvider()

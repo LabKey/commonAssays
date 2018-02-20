@@ -506,7 +506,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         }
         else
         {
-            this.saveExclusions(config, 'replicate group');
+            this.saveExclusions(config, this.replicateWells ? 'replicate group' : 'well');
         }
     },
 
@@ -521,7 +521,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     command : 'delete',
                     description : this.description,
                     type : this.type,
-                    comment : comment
+                    comment : comment ? comment : "Deleting exclusion",
+                    well : key === 'REPLICATE' ? null : key
                 });
             }
         }
