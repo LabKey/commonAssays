@@ -94,7 +94,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         if (canEdit)
         {
-            out.write("<a onclick=\"openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", "
+            out.write("<a onclick=\"openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", '" + wellID + "', "
                 + (description == null ? null : "'" + description + "'") + ", '" + type + "');\">");
         }
 
@@ -114,7 +114,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
             out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/exclusion/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
             if (canEdit)
             {
-                out.write("title=\"Click to add a replicate group exclusion\" alt=\"Click to add a replicate group exclusion\" ");
+                out.write("title=\"Click to add a well or replicate group exclusion\" alt=\"Click to add a well or replicate group exclusion\" ");
             }
             out.write(" />");
         }

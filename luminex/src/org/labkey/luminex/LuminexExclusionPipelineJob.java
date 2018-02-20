@@ -97,7 +97,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     private void logProperties(LuminexSingleExclusionCommand exclusion)
     {
         getLogger().info("----- Exclusion Properties ---------");
-        getLogger().info("Type: " + _exclusionType.getDescription());
+        getLogger().info("Type: " + _exclusionType.getDescription(exclusion));
         if (getRun() != null)
             getLogger().info("Assay Id: " + getRun().getName());
         getLogger().info("Run Id: " + _form.getRunId());

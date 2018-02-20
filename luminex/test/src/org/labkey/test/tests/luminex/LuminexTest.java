@@ -291,7 +291,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         DataRegionTable table = new DataRegionTable("Data", this.getWrappedDriver());
         table.setFilter("Type", "Equals", type);
         table.setFilter("Description", "Equals", description);
-        clickExclusionMenuIconForWell(wellName);
+        clickExclusionMenuIconForWell(wellName, true);
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), exclusionComment);
 
         if (analytes == null || analytes.length == 0)
@@ -343,11 +343,18 @@ public abstract class LuminexTest extends BaseWebDriverTest
      * postconditions: at Test Result Page with exclude Replicate Group From Analysis window up
      * @param wellName
      */
-    protected void clickExclusionMenuIconForWell(String wellName)
+    protected void clickExclusionMenuIconForWell(String wellName, boolean selectReplicateGroups)
     {
         waitAndClick(Locator.id("__changeExclusions__" + wellName));
-        _extHelper.waitForExtDialog("Exclude Replicate Group from Analysis");
+        _extHelper.waitForExtDialog("Exclude Well or Replicate Group from Analysis");
         waitForElement(Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
+
+        if (selectReplicateGroups)
+        {
+            WebElement element = Locator.checkboxByLabel("Replicate Group", false)
+                    .findWhenNeeded(getDriver()).withTimeout(4000);
+            checkCheckbox(element);
+        }
     }
 
     protected void clickExcludeAnalyteCheckBox(String analyte)
@@ -358,9 +365,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     protected void clickReplicateGroupCheckBoxSelectSingleWell(String labelText, String well, boolean set)
     {
+/*
         WebElement element = Locator.checkboxByLabel(labelText,false)
                 .findWhenNeeded(getDriver()).withTimeout(4000);
         uncheckCheckbox(element);
+*/
         WebElement wellElement = Locator.checkboxByLabel(well,false)
                 .findWhenNeeded(getDriver()).withTimeout(4000);
         new Checkbox(wellElement).set(set);

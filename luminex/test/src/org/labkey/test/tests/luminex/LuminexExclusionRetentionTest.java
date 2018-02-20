@@ -127,7 +127,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         // wait for the last pipeline job to finish
         goToModule("Pipeline");
         DataRegionTable table = new DataRegionTable("StatusFiles", getDriver());
-        table.setFilter("Info", "Equals", "INSERT replicate group exclusion (Description: " + description + ", Type: " + type + ")");
+        table.setFilter("Info", "Equals", "INSERT well exclusion (Description: " + description + ", Type: " + type + ")");
         waitForPipelineJobsToComplete(1, "Luminex Exclusion: " + RUN_NAME, false);
 
         // go to the run results grid from the pipeline job list
@@ -296,7 +296,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         table.clearAllFilters("Type");
         table.setFilter("WellRole", "Equals", wellRole);
         table.setFilter("Description","Equals",description);
-        clickExclusionMenuIconForWell(wellName);
+        clickExclusionMenuIconForWell(wellName, false);
         setFormElement(Locator.name(EXCLUDE_COMMENT_FIELD), comment);
         clickReplicateGroupCheckBoxSelectSingleWell("Replicate Group",wellName,true);
         clickButton(SAVE_CHANGES_BUTTON,0);

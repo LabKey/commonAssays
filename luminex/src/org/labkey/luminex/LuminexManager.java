@@ -105,7 +105,7 @@ public class LuminexManager
             @Override
             public String getInfo(@Nullable LuminexSingleExclusionCommand command)
             {
-                String info = getDescription().toLowerCase();
+                String info = getDescription(command).toLowerCase();
                 if (command != null)
                 {
                     info = command.getCommand().toUpperCase() + " " + info
@@ -128,6 +128,17 @@ public class LuminexManager
                 row.put("RowId", form.getKey());
                 return row;
             }
+
+            @Override
+            public String getDescription(@Nullable LuminexSingleExclusionCommand command)
+            {
+                if (command != null && command.getWell() != null)
+                {
+                    // single well exclusion
+                    return "Well Exclusion";
+                }
+                return super.getDescription(command);
+            }
         },
         SinglepointUnknownExclusion("Singlepoint Unknown Exclusion")
         {
@@ -141,10 +152,10 @@ public class LuminexManager
             public String getInfo(@Nullable LuminexSingleExclusionCommand command)
             {
                 // for singlepoint unknown exclusions, null command means that we have > 1 command in this job
-                String info = "MULTIPLE " + getDescription().toLowerCase() + "s";
+                String info = "MULTIPLE " + getDescription(command).toLowerCase() + "s";
                 if (command != null)
                 {
-                    info = command.getCommand().toUpperCase() + " " + getDescription().toLowerCase()
+                    info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ", Dilution: " + command.getDilution() + ")";
                 }
 
@@ -176,10 +187,10 @@ public class LuminexManager
             public String getInfo(@Nullable LuminexSingleExclusionCommand command)
             {
                 // for titration exclusions, null command means that we have > 1 command in this job
-                String info = "MULTIPLE " + getDescription().toLowerCase() + "s";
+                String info = "MULTIPLE " + getDescription(command).toLowerCase() + "s";
                 if (command != null)
                 {
-                    info = command.getCommand().toUpperCase() + " " + getDescription().toLowerCase()
+                    info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ")";
                 }
 
@@ -209,7 +220,7 @@ public class LuminexManager
             @Override
             public String getInfo(@Nullable LuminexSingleExclusionCommand command)
             {
-                String info = getDescription().toLowerCase();
+                String info = getDescription(command).toLowerCase();
                 if (command != null)
                 {
                     info = command.getCommand().toUpperCase() + " " + info;
@@ -238,7 +249,7 @@ public class LuminexManager
             _description = description;
         }
 
-        public String getDescription()
+        public String getDescription(@Nullable LuminexSingleExclusionCommand command)
         {
             return _description;
         }
@@ -419,7 +430,7 @@ public class LuminexManager
                 if (isTitrationTypeExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)));
                 else if (isSinglepointUnknownExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution));
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution + "|null"));
                 else if (isWellReplicateGroupTypeExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type)));
 
@@ -577,7 +588,7 @@ public class LuminexManager
                     if (exclusionType == null)
                         exclusionType = command.getExclusionType();
 
-                    logger.info("Starting " + command.getCommand() + " " +  exclusionType.getDescription().toLowerCase());
+                    logger.info("Starting " + command.getCommand() + " " +  exclusionType.getDescription(command).toLowerCase());
 
                     rows.add(exclusionType.getRowMap(command, runId, false));
                     keys.add(exclusionType.getRowMap(command, runId, true));
@@ -608,7 +619,7 @@ public class LuminexManager
                         throw errors;
                     }
 
-                    logger.info("Finished " + command.getCommand() + " " +  exclusionType.getDescription().toLowerCase());
+                    logger.info("Finished " + command.getCommand() + " " +  exclusionType.getDescription(command).toLowerCase());
                 }
             }
         }
@@ -669,7 +680,7 @@ public class LuminexManager
             String type = (String)row.get(cols.get(typeFK).getAlias());
             Object dilutionObj = row.get(cols.get(dilutionFK).getAlias());
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
-            String well = (String)row.get(cols.get(wellFK).getAlias());
+            String well = onlyExcludedWells ? (String)row.get(cols.get(wellFK).getAlias()) : null;
 
             excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
         });

@@ -145,7 +145,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText(run));
 
         log("Exclude well from run");
-        clickExclusionMenuIconForWell(well);
+        clickExclusionMenuIconForWell(well, true);
         clickButton("Save", 0);
         verifyExclusionPipelineJobComplete(jobCount, "INSERT replicate group exclusion", run, "", 1, jobInfoCount);
     }
@@ -156,7 +156,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText(run));
 
         log("Exclude well from from run");
-        clickExclusionMenuIconForWell(well);
+        clickExclusionMenuIconForWell(well, true);
         click(Locator.radioButtonById("excludeselected"));
         clickButton("Save", 0);
         _extHelper.clickExtButton("Yes", 0);

@@ -7,7 +7,7 @@
 Ext.namespace('LABKEY');
 
 // function called onclick of Exclusion Toggle to open the well exclusion window
-function openExclusionsWellWindow(assayId, runId, dataId, description, type)
+function openExclusionsWellWindow(assayId, runId, dataId, wellId, description, type)
 {
     // lookup the assay design information based on the Assay RowId
     LABKEY.Assay.getById({
@@ -17,7 +17,7 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
             if (Ext.isArray(assay) && assay.length == 1)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
-                    title: 'Exclude Replicate Group from Analysis',
+                    title: 'Exclude Well or Replicate Group from Analysis',
                     width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
                     height: Ext.getBody().getViewSize().height > 650 ? 630 : Ext.getBody().getViewSize().height * .75,
                     items: new LABKEY.Exclusions.WellPanel({
@@ -25,6 +25,7 @@ function openExclusionsWellWindow(assayId, runId, dataId, description, type)
                         assayId: assayId,
                         runId: runId,
                         dataId: dataId,
+                        wellId: wellId,
                         description: description,
                         type: type,
                         listeners: {
@@ -64,7 +65,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         LABKEY.Exclusions.WellPanel.superclass.constructor.call(this, config);
 
         this.selectedWells = {};
-        this.replicateWells = true;
+        this.replicateWells = false;
         this.existingExclusions = {};
         this.allowWellExclusion = true;
     },
@@ -91,9 +92,11 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         // comment and a single set of analytes.
 
         Ext.each(rows, function(row){
+            // if there are existing exclusions don't select this well by default
+            this.wellId = null;
             this.existingExclusions[row.Well ? row.Well : 'REPLICATE'] = row.RowId;
-            if (row.Well)
-                this.replicateWells = false;
+            if (row.Well == null)
+                this.replicateWells = true;
         }, this);
     },
 
@@ -348,7 +351,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     }
                     else {
                         wells.push(wellValue);
-                        this.selectedWells[wellValue] = this.existingExclusions[wellValue] ? true : false;
+                        this.selectedWells[wellValue] = (this.existingExclusions[wellValue] || (this.wellId == wellValue)) ? true : false;
                     }
 
                     filename = data.rows[i].Name;
@@ -357,7 +360,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 
                 Ext.get('replicate_group_wells').update(wells.join(", "));
                 Ext.get('replicate_group_filename').update(filename);
-                this.findById('reCalcDisplay').setVisible(isTitration);
+                this.findById('reCalcDisplay').setVisible(true);
 
                 // invoke the callback to update the well and analyte form panel
                 if (callback){
@@ -449,11 +452,12 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         }
         else {
             // adding individual well exclusions
-
+            var hasWellExclusion = false;
             for (var key in this.selectedWells){
                 if (this.selectedWells.hasOwnProperty(key)){
                     var well = this.selectedWells[key];
                     if (well){
+                        hasWellExclusion = true;
                         var rowid = undefined;
                         cmd = 'insert';
                         if (this.existingExclusions[well]){
@@ -477,7 +481,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 }
             }
             // delete remaining existing well exclusions
-            this.addDeleteCommands(this.existingExclusions, commands, comment);
+            if (hasWellExclusion)
+                this.addDeleteCommands(this.existingExclusions, commands, comment);
         }
 
         if (commands.length == 0){
