@@ -127,7 +127,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         // wait for the last pipeline job to finish
         goToModule("Pipeline");
         DataRegionTable table = new DataRegionTable("StatusFiles", getDriver());
-        table.setFilter("Info", "Equals", "INSERT well exclusion (Description: " + description + ", Type: " + type + ")");
+        table.setFilter("Info", "Equals", "INSERT well exclusion (Description: " + description + ", Type: " + type + ", Well: " + well + ")");
         waitForPipelineJobsToComplete(1, "Luminex Exclusion: " + RUN_NAME, false);
 
         // go to the run results grid from the pipeline job list
