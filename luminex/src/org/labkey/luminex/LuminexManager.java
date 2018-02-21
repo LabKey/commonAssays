@@ -106,7 +106,11 @@ public class LuminexManager
             public String getInfo(List<LuminexSingleExclusionCommand> commands)
             {
                 StringBuilder sb = new StringBuilder();
-                if (commands.size() >= 1)
+                if (commands.size() > 1)
+                {
+                    sb.append("MULTIPLE " + getDescription(commands.get(0)).toLowerCase() + "s");
+                }
+                else if (commands.size() == 1)
                 {
                     LuminexSingleExclusionCommand command = commands.get(0);
                     sb.append(command.getCommand().toUpperCase()).

@@ -516,7 +516,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
         for (var key in exclusions){
             if (exclusions.hasOwnProperty(key)){
-                commands.push({
+                // Issue 33266: make sure the delete commands happen before inserts so that we don't get duplicate key exceptions
+                commands.unshift({
                     key : this.existingExclusions[key],
                     command : 'delete',
                     description : this.description,
