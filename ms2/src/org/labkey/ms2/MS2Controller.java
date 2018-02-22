@@ -2732,7 +2732,7 @@ public class MS2Controller extends SpringActionController
         {
             WriteableAppProps props = AppProps.getWriteableInstance();
             props.setBLASTServerBaseURL(o.getBlastServerBaseURL());
-            props.save();
+            props.save(getUser());
             return true;
         }
 
@@ -4176,7 +4176,7 @@ public class MS2Controller extends SpringActionController
                 config.save();
 
                 //write an audit log event
-                config.writeAuditLogEvent(getContainer(), getViewContext().getUser(), config.getOldProperties());
+                config.writeAuditLogEvent(getContainer(), getViewContext().getUser());
             }
 
             return true;
