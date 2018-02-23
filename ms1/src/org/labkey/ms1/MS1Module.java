@@ -83,7 +83,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
 
     public double getVersion()
     {
-        return 17.30;
+        return 18.10;
     }
 
     protected void init()
