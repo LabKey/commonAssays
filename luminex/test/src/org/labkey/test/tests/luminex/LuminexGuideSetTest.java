@@ -134,29 +134,29 @@ public final class LuminexGuideSetTest extends LuminexTest
     {
         goToProjectHome();
         clickAndWait(Locator.linkContainingText(TEST_ASSAY_LUM));
-        excludeWellFromRun("Guide Set plate 5", "A6,B6", 2, 1);
+        excludeReplicateGroupFromRun("Guide Set plate 5", "A6,B6", 2, 1);
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         assertTextPresent("28040.51");
     }
 
-    private void excludeWellFromRun(String run, String well, int jobCount, int jobInfoCount)
+    private void excludeReplicateGroupFromRun(String run, String wells, int jobCount, int jobInfoCount)
     {
         clickAndWait(Locator.linkContainingText(run));
 
         log("Exclude well from run");
-        clickExclusionMenuIconForWell(well, true);
+        clickExclusionMenuIconForWell(wells, false);
         clickButton("Save", 0);
         verifyExclusionPipelineJobComplete(jobCount, "INSERT replicate group exclusion", run, "", 1, jobInfoCount);
     }
 
     //re-include an excluded well
-    private void includeWellFromRun(String run, String well, int jobCount)
+    private void includeReplicateGroupFromRun(String run, String wells, int jobCount)
     {
         clickAndWait(Locator.linkContainingText(run));
 
         log("Exclude well from from run");
-        clickExclusionMenuIconForWell(well, true);
+        clickExclusionMenuIconForWell(wells, false);
         click(Locator.radioButtonById("excludeselected"));
         clickButton("Save", 0);
         _extHelper.clickExtButton("Yes", 0);
@@ -449,7 +449,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         //2. exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 for GS Analyte B is changed to be under the Guide Set range so new QC Flag inserted for that
-        excludeWellFromRun("Guide Set plate 5", "A4,B4", 3, 2);
+        excludeReplicateGroupFromRun("Guide Set plate 5", "A4,B4", 3, 2);
         clickAndWait(Locator.linkContainingText("view runs"));
         DataRegionTable drt = new DataRegionTable("Runs", getDriver());
         drt.goToView("QC Flags View");
@@ -457,7 +457,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         //3. un-exclude wells A4, B4 from plate 5a for both analytes
         //	- the EC50 QC Flag for GS Analyte B that was inserted in the previous step is removed
-        includeWellFromRun("Guide Set plate 5", "A4,B4", 4);
+        includeReplicateGroupFromRun("Guide Set plate 5", "A4,B4", 4);
         clickAndWait(Locator.linkContainingText("view runs"));
         drt = new DataRegionTable("Runs", getDriver());
         drt.goToView("QC Flags View");

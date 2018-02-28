@@ -340,8 +340,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 {
                     // summary rows will have > 1 well (separated by a comma)
                     var wellValue = data.rows[i].Well;
-                    if (wellValue.indexOf(",") != -1){
-
+                    if (wellValue.indexOf(",") != -1) {
+                        this.replicateWells = true;
                         this.allowWellExclusion = false;
                         Ext.each(wellValue.split(","), function(well)
                         {
