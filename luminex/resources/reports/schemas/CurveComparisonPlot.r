@@ -27,9 +27,13 @@ if (is.null(labkey.url.params$Titration)){
     stop("No Titration Provided.")
 }
 
+yAxisCol = labkey.url.params$YAxisCol
+yAxisColName = tolower(labkey.url.params$YAxisCol)
+legendCol = paste("Data/Run/", labkey.url.params$LegendCol, sep="")
+legendColName = paste("data_run_", tolower(labkey.url.params$LegendCol), sep="")
+
 # create a list of the columns that are needed for the comparison plot
-colSelect = paste("Data/Run", "Data/Run/NotebookNo", "Analyte/Name", "Titration/Name", "Type", "Data/Run/StndCurveFitInput",
-                "FI", "FIBackground", "FIBackgroundNegative", "Dilution", "ExpConc",
+colSelect = paste("Data/Run", legendCol, "Analyte/Name", "Titration/Name", "Type", "FI", yAxisCol, "Dilution", "ExpConc",
                 "AnalyteTitration/Four ParameterCurveFit/MinAsymptote", "AnalyteTitration/Four ParameterCurveFit/MaxAsymptote",
                 "AnalyteTitration/Four ParameterCurveFit/Inflection", "AnalyteTitration/Four ParameterCurveFit/Slope", sep=",");
 
@@ -52,27 +56,22 @@ labkey.data <- labkey.selectRows(baseUrl=labkey.url.base,
                             containerFilter="AllFolders",
                             colNameOpt="rname");
 
-# get the list of runs (including notebookno if available, else use RunId)
-if (!("data_run_notebookno" %in% colnames(labkey.data))) {
-    labkey.data$data_run_notebookno = paste("RunID", labkey.data$data_run, sep=" ");    
+# get the list of runs (including the legendCol if available, else use RunId)
+labkey.data$data_run_legend_val = labkey.data[[legendColName]]
+if (!(legendColName %in% colnames(labkey.data))) {
+    labkey.data$data_run_legend_val = paste("RunID", labkey.data$data_run, sep=" ");
 }
-runs = unique(subset(labkey.data, select=c("data_run", "data_run_notebookno")));
+runs = unique(subset(labkey.data, select=c("data_run", "data_run_legend_val")));
 
 # get the list of run parameters (if available for this assay design)
 runsParams = unique(subset(labkey.data, select=c("data_run", "analytetitration_four_parametercurvefit_minasymptote",
 		"analytetitration_four_parametercurvefit_maxasymptote", "analytetitration_four_parametercurvefit_slope",
 		"analytetitration_four_parametercurvefit_inflection")));
 
-# default to using the FI-Bkgd values if no StndCurveFitInput run prop or if the value is NA
-if (!("data_run_stndcurvefitinput" %in% colnames(labkey.data))) {
-    labkey.data$data_run_stndcurvefitinput = "FI-Bkgd";
-}
-labkey.data$data_run_stndcurvefitinput[is.na(labkey.data$data_run_stndcurvefitinput)] = "FI-Bkgd"; 
-
 # process the data to set the proper FI and Dose values
-runsData = subset(labkey.data, select=c("data_run", "data_run_notebookno", "data_run_stndcurvefitinput", "type"));
-runsData$fi = NA;
-runsData$dose = NA;
+runsData = subset(labkey.data, select=c("data_run", "data_run_legend_val", "type"));
+runsData$yVal = NA;
+runsData$xVal = NA;
 hasDilutions = FALSE;
 hasExpConcs = FALSE;
 for (index in 1:nrow(runs))
@@ -82,35 +81,35 @@ for (index in 1:nrow(runs))
 
     if (nrow(runData) > 0)
     {
-        # set the y-axis values (fi) based on the StndCurveFitInput run prop (default: fiBackground)
-        fiCol = runData$data_run_stndcurvefitinput[1];
-        runsData$fi[runIndices] = labkey.data$fibackground[runIndices];
-        if (fiCol == "FI") {
-            runsData$fi[runIndices] = labkey.data$fi[runIndices];
-        } else if (fiCol == "FI-Bkgd-Blank" | fiCol == "FI-Bkgd-Neg") {
-            runsData$fi[runIndices] = labkey.data$fibackgroundnegative[runIndices];
-        }
+        # set the y-axis values
+        runsData$yVal[runIndices] = labkey.data[[yAxisColName]][runIndices];
+        # keep the FI value to use for y min/max defaults, if needed
+        runsData$fi[runIndices] = labkey.data$fi[runIndices];
 
         # set the x-axis values (dose) based on the titration type (default: dilution)
         if ((toupper(substr(runData$type[1],0,1)) == "S" || toupper(substr(runData$type[1],0,2)) == "ES")) {
-            runsData$dose[runIndices] = labkey.data$expconc[runIndices];
+            runsData$xVal[runIndices] = labkey.data$expconc[runIndices];
             hasExpConcs = TRUE;
         }
         else {
-            runsData$dose[runIndices] = labkey.data$dilution[runIndices];
+            runsData$xVal[runIndices] = labkey.data$dilution[runIndices];
             hasDilutions = TRUE;
         }
     }
 }
 
 # get the axis min and max values for plotting
-xmin = min(runsData$dose);
-xmax = max(runsData$dose);
-ymin = min(runsData$fi);
-ymax = max(runsData$fi);
+xmin = min(runsData$xVal);
+xmax = max(runsData$xVal);
+ymin = min(runsData$yVal);
+ymax = max(runsData$yVal);
+
+# if ymin or ymax is NA, default to the min/max from the FI column
+if (is.na(ymin)) ymin = min(runsData$fi)
+if (is.na(ymax)) ymax = max(runsData$fi)
 
 # get the axis labels based on the data
-yLabel = unique(labkey.data$data_run_stndcurvefitinput);
+yLabel = labkey.url.params$YAxisDisplay;
 xLabel = NA;
 if (hasDilutions & hasExpConcs) {
     xLabel = "Dilution / Expected Concentration";
@@ -143,8 +142,7 @@ for (plotIndex in 1:numPlots)
 {
     # set yaxis as log if requested by user
     logAxis = "x";
-    legendYloc = (ymax - ymin) / 2;
-    if (labkey.url.params$AsLog == "true" | plotIndex == 2)
+    if (labkey.url.params$YAxisScale == "Log" | plotIndex == 2)
     {
         logAxis = "xy";
         yLabel = paste("log(", yLabel, ")", sep="");
@@ -152,11 +150,15 @@ for (plotIndex in 1:numPlots)
         # if log y-axis, make sure axis limits are positive
         if (ymin <= 0) { ymin = 1; }
         if (ymax <= 0) { ymax = 1; }
-
-        legendYloc = exp((log(ymax) - log(ymin)) / 2);
     }
 
-    par(mar=c(5, 4, 4, 10) + 0.1);
+    # try to set the legend width based on the longest legend value
+    legendWidth = max(nchar(runs$data_run_legend_val), na.rm=TRUE)
+    if (is.na(legendWidth) | is.infinite(legendWidth) | legendWidth < 10) legendWidth = 10
+    legendMar = legendWidth / 1.25
+    if (legendMar > 15) legendMar = 15
+
+    par(mar=c(5, 4, 4, legendMar) + 0.1);
     plot(NA, NA, main=labkey.url.params$MainTitle, ylab = yLabel, xlab = xLabel, xlim=c(xmin, xmax), ylim=c(ymin, ymax), log=logAxis);
 
     # loop through the selected runs to plot the curve and the data points
@@ -178,10 +180,10 @@ for (plotIndex in 1:numPlots)
         }
 
         # plot the data points associated with the curve
-        points(runData$dose, runData$fi, col=curveTypes$col[index %% nrow(curveTypes)], pch=curveTypes$pch[index %% nrow(curveTypes)]);
+        points(runData$x, runData$y, col=curveTypes$col[index %% nrow(curveTypes)], pch=curveTypes$pch[index %% nrow(curveTypes)]);
     }
 
-    legend(exp(log(xmax) + 1), ymax, legend=runs$data_run_notebookno, pch=curveTypes$pch, col=curveTypes$col, lty=curveTypes$lty,
+    legend(exp(log(xmax) + 1), ymax, legend=runs$data_run_legend_val, pch=curveTypes$pch, col=curveTypes$col, lty=curveTypes$lty,
             yjust=1, bty="n", xpd=T, cex=0.9);
 }
 

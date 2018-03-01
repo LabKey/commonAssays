@@ -350,60 +350,141 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         // create a pop-up window to display the plot
         var plotDiv = new Ext.Container({
             height: 600,
-            width: 750,
+            width: 900,
             autoEl: {tag: 'div'}
         });
         var pdfDiv = new Ext.Container({
             hidden: true,
             autoEl: {tag: 'div'}
         });
+
+        var yAxisScaleDefault = 'Linear';
+        var yAxisScaleStore = new Ext.data.ArrayStore({
+            fields: ['value'],
+            data: [['Linear'], ['Log']]
+        });
+
+        var yAxisColDefault = 'FIBackground', yAxisColDisplayDefault = 'FI-Bkgd';
+        var yAxisColStore = new Ext.data.ArrayStore({
+            fields: ['name', 'value'],
+            data: [['FI', 'FI'], ['FI-Bkgd', 'FIBackground'], ['FI-Bkgd-Neg', 'FIBackgroundNegative']]
+        });
+
+        var legendColDefault = 'Name';
+        var legendColStore = new Ext.data.ArrayStore({
+            fields: ['name', 'value'],
+            data: [['Assay Type', 'AssayType'], ['Experiment Performer', 'ExpPerformer'], ['Assay Id', 'Name'], ['Notebook No.', 'NotebookNo']]
+        });
+
         var win = new Ext.Window({
             layout: 'fit',
-            width: 750,
-            minWidth: 400,
+            width: 900,
+            minWidth: 600,
             height: 660,
-            minHeight: 300,
+            minHeight: 500,
             closeAction: 'hide',
             modal: true,
             cls: 'extContainer',
             title: 'Curve Comparison',
             items: [plotDiv, pdfDiv],
-            logComparisonPlot: false,
+            // stash the default values for the plot options on the win component
+            yAxisScale: yAxisScaleDefault,
+            yAxisCol: yAxisColDefault,
+            yAxisDisplay: yAxisColDisplayDefault,
+            legendCol: legendColDefault,
             buttonAlign: 'left',
-            buttons: [
-                {
-                    text: 'Export to PDF',
-                    handler: function (btn)
-                    {
-                        this.updateCurvesPlot(win, pdfDiv.getId(), false, true);
-                    },
-                    scope: this
-                },
-                {
-                    text: 'View Log Y-Axis',
-                    handler: function (btn)
-                    {
-                        win.logComparisonPlot = !win.logComparisonPlot;
-                        this.updateCurvesPlot(win, plotDiv.getId(), win.logComparisonPlot, false);
-                        btn.setText(win.logComparisonPlot ? "View Linear Y-Axis" : "View Log Y-Axis");
-                    },
-                    scope: this
-                },
-                '->',
-                {
-                    text: 'Close',
-                    handler: function ()
-                    {
-                        win.hide();
+            buttons: [{
+                xtype: 'label',
+                text: 'Y-Axis:'
+            },{
+                xtype: 'combo',
+                width: 80,
+                id: 'curvecomparison-yaxis-combo',
+                store: yAxisColStore ,
+                displayField: 'name',
+                valueField: 'value',
+                mode: 'local',
+                editable: false,
+                forceSelection: true,
+                triggerAction: 'all',
+                value: yAxisColDefault,
+                listeners: {
+                    scope: this,
+                    select: function(cmp, record) {
+                        win.yAxisCol = record.data.value;
+                        win.yAxisDisplay = record.data.name;
+                        this.updateCurvesPlot(win, plotDiv.getId(), false);
                     }
                 }
-            ],
+            },{
+                xtype: 'label',
+                text: 'Scale:'
+            },{
+                xtype: 'combo',
+                width: 75,
+                id: 'curvecomparison-scale-combo',
+                store: yAxisScaleStore ,
+                displayField: 'value',
+                valueField: 'value',
+                mode: 'local',
+                editable: false,
+                forceSelection: true,
+                triggerAction: 'all',
+                value: yAxisScaleDefault,
+                listeners: {
+                    scope: this,
+                    select: function(cmp, record) {
+                        win.yAxisScale = record.data.value;
+                        this.updateCurvesPlot(win, plotDiv.getId(), false);
+                    }
+                }
+            },{
+                xtype: 'label',
+                text: 'Legend:'
+            },{
+                xtype: 'combo',
+                width: 140,
+                id: 'curvecomparison-legend-combo',
+                store: legendColStore ,
+                displayField: 'name',
+                valueField: 'value',
+                mode: 'local',
+                editable: false,
+                forceSelection: true,
+                triggerAction: 'all',
+                value: legendColDefault,
+                listeners: {
+                    scope: this,
+                    select: function(cmp, record) {
+                        win.legendCol = record.data.value;
+                        this.updateCurvesPlot(win, plotDiv.getId(), false);
+                    }
+                }
+            },
+            '->',
+            {
+                xtype: 'button',
+                text: 'Export to PDF',
+                handler: function (btn)
+                {
+                    this.updateCurvesPlot(win, pdfDiv.getId(), true);
+                },
+                scope: this
+            },
+            {
+                xtype: 'button',
+                text: 'Close',
+                handler: function ()
+                {
+                    win.hide();
+                }
+            }],
             listeners: {
                 scope: this,
                 'resize': function (w, width, height)
                 {
                     // update the curve plot to the new size of the window
-                    this.updateCurvesPlot(win, plotDiv.getId(), win.logComparisonPlot, false);
+                    this.updateCurvesPlot(win, plotDiv.getId(), false);
                 }
             }
         });
@@ -417,10 +498,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
 
         win.show(this);
 
-        this.updateCurvesPlot(win, plotDiv.getId(), false, false);
+        this.updateCurvesPlot(win, plotDiv.getId(), false);
     },
 
-    updateCurvesPlot: function (win, divId, logYaxis, outputPdf)
+    updateCurvesPlot: function (win, divId, outputPdf)
     {
         win.getEl().mask("loading curves...", "x-mask-loading");
 
@@ -438,10 +519,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         config['Protocol'] = this.assayName;
         config['Titration'] = this.controlName;
         config['Analyte'] = this.analyte;
-        config['AsLog'] = logYaxis;
+        config['YAxisScale'] = !outputPdf ? win.yAxisScale  : 'Linear';
+        config['YAxisCol'] = win.yAxisCol,
+        config['YAxisDisplay'] = win.yAxisDisplay,
+        config['LegendCol'] = win.legendCol,
         config['MainTitle'] = $h(this.controlName) + ' 4PL for ' + $h(this.analyte)
-                + ' - ' + $h(this.isotype == '' ? '[None]' : this.isotype)
-                + ' ' + $h(this.conjugate == '' ? '[None]' : this.conjugate);
+                + ' - ' + $h(this.isotype === '' ? '[None]' : this.isotype)
+                + ' ' + $h(this.conjugate === '' ? '[None]' : this.conjugate);
         config['PlotHeight'] = win.getHeight();
         config['PlotWidth'] = win.getWidth();
         if (outputPdf)

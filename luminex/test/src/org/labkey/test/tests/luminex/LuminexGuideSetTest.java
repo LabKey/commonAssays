@@ -415,8 +415,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         assertElementPresent(l,2);
         assertTextPresent("QC Flags");
 
-        // Verify as much of the Curve Comparison window as we can - most of its content is in the image, so it's opaque
-        // to the test
+        // Verify as much of the Curve Comparison window as we can - most of its content is in the image, so it's opaque to the test
         for (int i = 1; i <= 5; i++)
         {
             click(ExtHelper.locateGridRowCheckbox("NETWORK" + i));
@@ -425,15 +424,20 @@ public final class LuminexGuideSetTest extends LuminexTest
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
         assertTextPresent("Export to PDF");
-        clickButton("View Log Y-Axis", 0);
-        waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
-        assertTextNotPresent("Error executing command");
-        clickButton("View Linear Y-Axis", 0);
-        waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
-        assertTextNotPresent("Error executing command");
-        assertTextPresent("View Log Y-Axis");
-
+        selectCurveComparisonPlotOption("curvecomparison-scale-combo", "Log");
+        selectCurveComparisonPlotOption("curvecomparison-yaxis-combo", "FI-Bkgd-Neg");
+        selectCurveComparisonPlotOption("curvecomparison-yaxis-combo", "FI");
+        selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Assay Type");
+        selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Experiment Performer");
+        selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
         clickButton("Close", 0);
+    }
+
+    private void selectCurveComparisonPlotOption(String comboName, String value)
+    {
+        _extHelper.selectComboBoxItem(Locator.input(comboName).parent(), value);
+        waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
+        assertTextNotPresent("Error executing command");
     }
 
     @LogMethod
