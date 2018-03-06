@@ -315,7 +315,7 @@ public abstract class MS2Importer
             int totalScans = loadScanCounts(file, fraction);
             _log.info("Finished parsing to get scan counts. Total: " + totalScans + ", MS1: " + fraction.getMS1ScanCount() + ", MS2: " + fraction.getMS2ScanCount() + ", MS3: " + fraction.getMS3ScanCount() + ", MS4:" + fraction.getMS4ScanCount());
 
-            fraction.setMzXmlURL(FileUtil.resolveFile(FileUtil.getAbsoluteCaseSensitiveFile(file)).toURI().toString());
+            fraction.setMzXmlURL(FileUtil.resolveFile(FileUtil.getAbsoluteCaseSensitiveFile(file)).toPath().toUri().toString());
 
             massSpecDataFileType msdft = new massSpecDataFileType();
             String peptideFileName  = msdft.getBaseName(file); // strip off .mzxml or .mzxml.gz
@@ -384,7 +384,7 @@ public abstract class MS2Importer
             MS2Fraction existingFraction = new TableSelector(MS2Manager.getTableInfoFractions()).getObject(_fractionId, MS2Fraction.class);
             if (existingFraction != null && existingFraction.getMzXmlURL() == null)
             {
-                existingFraction.setMzXmlURL(FileUtil.resolveFile(spectrumFile).toURI().toString());
+                existingFraction.setMzXmlURL(FileUtil.resolveFile(spectrumFile).toPath().toUri().toString());
                 existingFraction.setFileName(spectrumFile.getName());
                 Table.update(_user, MS2Manager.getTableInfoFractions(), existingFraction, _fractionId);
             }

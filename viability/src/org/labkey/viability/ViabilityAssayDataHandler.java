@@ -456,6 +456,36 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
 
         @Test
+        public void testViabilityAndCountFormat() throws Exception
+        {
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "muse_ex.csv"));
+
+            List<Map<String, Object>> rows = parser.getResultData();
+            assertEquals("Expected 8 rows", 8, rows.size());
+
+            Map<String, Object> row = rows.get(0);
+            assertEquals(7, row.size());
+            assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            assertEquals("541001 v 11", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("541001", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(11.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertTrue(Math.abs(0.959 - (Double)row.get("Viability")) < 0.0001);
+            assertEquals(23952602.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(24976645.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+
+            row = rows.get(rows.size()-1);
+            assertEquals(6, row.size());
+            assertEquals(32, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
+            // NOTE: the pool id is split into participant and visit, but participant=Comp and visit is not parsed
+            assertEquals("Comp - RAC0096", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
+            assertEquals("Comp", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
+            assertEquals(null, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertTrue(Math.abs(0.965 - (Double)row.get("Viability")) < 0.0001);
+            assertEquals(34203120.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
+            assertEquals(35443647.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
+        }
+
+        @Test
         public void testExpressPlus() throws Exception
         {
             GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "122810.EP5.CSV"));

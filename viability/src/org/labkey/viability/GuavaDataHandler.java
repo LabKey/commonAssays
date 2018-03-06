@@ -19,6 +19,7 @@ package org.labkey.viability;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
 import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -36,12 +37,14 @@ import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.AssayUploadXarContext;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +106,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             _runData = new HashMap<>();
 
             boolean foundBlankLine = false;
-            Map<String, String> runHeaders = new HashMap<>();
+            Map<String, String> runHeaders = new CaseInsensitiveHashMap<>();
             String[] groupHeaders = null;
             String[] headers = null;
             int count = 0;
@@ -148,8 +151,12 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                     }
                     else
                     {
-                        // skip blank lines after the first
-                        if (line.length() == 0 || parts.length == 0)
+                        // skip blank or entirely empty lines after the first
+                        if (line.length() == 0 || parts.length == 0 || Arrays.stream(parts).allMatch(StringUtils::isEmpty))
+                            continue;
+
+                        // skip line containing disclaimer
+                        if (parts.length > 2 && parts[1].contains("For Research Use Only."))
                             continue;
 
                         if (groupHeaders == null)
@@ -182,6 +189,10 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                 if (softwareName.equals("ViaCount"))
                 {
                     columns = createViaCountColumns(groupHeaders, headers);
+                }
+                else if (softwareName.equalsIgnoreCase("Count & Viability"))
+                {
+                    columns = createCountAndViabilityColumns(groupHeaders, headers);
                 }
                 else if (softwareName.equals("ExpressPlus"))
                 {
@@ -297,6 +308,23 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             final int COL_VIABLE = 11; // cell 'L'
             final int COL_TOTAL_VIABLE = 42; // cell 'AQ'
             final int COL_TOTAL_CELLS = 45; // cell 'AT'
+
+            return createColumns(groupHeaders, headers,
+                    "Sample No.",
+                    COL_GROUP, "% of Total Information",
+                    COL_VIABLE, "Viable",
+                    COL_TOTAL_VIABLE, "Total Viable Cells in Original Sample",
+                    COL_TOTAL_CELLS, "Total Cells in Original Sample",
+                    -1, null);
+        }
+
+        private ColumnDescriptor[] createCountAndViabilityColumns(String[] groupHeaders, String[] headers)
+                throws ExperimentException
+        {
+            final int COL_GROUP = 9; // cell 'J'
+            final int COL_VIABLE = 9; // cell 'J'
+            final int COL_TOTAL_VIABLE = 30; // cell 'AE'
+            final int COL_TOTAL_CELLS = 32; // cell 'AG'
 
             return createColumns(groupHeaders, headers,
                     "Sample No.",
