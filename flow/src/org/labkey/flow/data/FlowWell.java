@@ -23,9 +23,16 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.roles.Role;
+import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowParam;
@@ -40,6 +47,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class FlowWell extends FlowDataObject
 {
@@ -93,6 +101,29 @@ public class FlowWell extends FlowDataObject
     public FlowWell(ExpData data)
     {
         super(data);
+    }
+
+    @Override
+    public void checkContainer(Container actionContainer, User user, ActionURL actionURL) throws NotFoundException
+    {
+        if (!getContainer().equals(actionContainer))
+        {
+            if (getContainer().hasPermission(user, ReadPermission.class))
+                throw new RedirectException(actionURL.clone().setContainer(getContainer()));
+
+            // Check if run has been copied to a study and the user has ReadPermission to the study folder
+            FlowRun run = getRun();
+            if (run != null)
+            {
+                ExpRun expRun = run.getExperimentRun();
+                FieldKey runIdFieldKey = FieldKey.fromParts("run");
+                Set<Role> role = RunDatasetContextualRoles.getContextualRolesForRun(getContainer(), user, expRun, runIdFieldKey);
+                if (getContainer().hasPermission(user, ReadPermission.class, role))
+                    throw new RedirectException(actionURL.clone().setContainer(getContainer()));
+            }
+
+            throw new NotFoundException("Flow object does not exist in this folder");
+        }
     }
 
     /**
