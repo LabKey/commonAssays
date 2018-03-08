@@ -556,8 +556,7 @@ if (null == fileURI)
 else
 {
     PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
-    boolean canReadFiles = canReadPipelineFiles(user, r);
-    if (null != r && canReadFiles)
+    if (null != r && canReadPipelineFiles(user, r))
     {
         URI rel = URIUtil.relativize(r.getUri(), fileURI);
         if (null != rel)
