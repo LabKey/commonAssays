@@ -42,7 +42,7 @@ public class NabVirusDomainKind extends AssayDomainKind
     {
         Set<PropertyStorageSpec> baseFields = new LinkedHashSet<>();
         baseFields.add(new PropertyStorageSpec(VIRUS_LSID_COLUMN_NAME, JdbcType.VARCHAR).setPrimaryKey(true));
-        baseFields.add(new PropertyStorageSpec("Container", JdbcType.VARCHAR).setEntityId(true));
+        baseFields.add(new PropertyStorageSpec("Container", JdbcType.GUID).setNullable(false));
         baseFields.add(new PropertyStorageSpec(DATLSID_COLUMN_NAME, JdbcType.VARCHAR));
 
         _baseFields = Collections.unmodifiableSet(baseFields);
