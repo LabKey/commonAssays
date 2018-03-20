@@ -235,20 +235,20 @@ public class PersistTests
         // verify updating keyword value
         {
             assertEquals("value1", FlowManager.get().getKeyword(data, "keyword1"));
-            FlowManager.get().setKeyword(c, data, "keyword1", "value1-updated");
+            FlowManager.get().setKeyword(c, user, data, "keyword1", "value1-updated");
             assertEquals("value1-updated", FlowManager.get().getKeyword(data, "keyword1"));
 
             assertEquals("value2", FlowManager.get().getKeyword(data, "keyword2"));
-            FlowManager.get().setKeyword(c, data, "keyword2-alias", "value2-updated");
+            FlowManager.get().setKeyword(c, user, data, "keyword2-alias", "value2-updated");
             assertEquals("value2-updated", FlowManager.get().getKeyword(data, "keyword2"));
         }
 
         // verify deleting keyword
         {
-            FlowManager.get().setKeyword(c, data, "keyword1", null);
+            FlowManager.get().setKeyword(c, user, data, "keyword1", null);
             assertNull(FlowManager.get().getKeyword(data, "keyword1"));
 
-            FlowManager.get().setKeyword(c, data, "keyword2-alias", null);
+            FlowManager.get().setKeyword(c, user, data, "keyword2-alias", null);
             assertNull(FlowManager.get().getKeyword(data, "keyword2"));
         }
     }

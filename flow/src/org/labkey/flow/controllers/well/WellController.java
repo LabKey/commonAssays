@@ -327,7 +327,7 @@ public class WellController extends BaseFlowController
                         boolean isEmptyValueOnBulkEdit = form.ff_isBulkEdit && form.ff_keywordValue[i] == null;
                         if (!isEmptyValueOnBulkEdit)
                         {
-                            well.setKeyword(name, form.ff_keywordValue[i]);
+                            well.setKeyword(name, form.ff_keywordValue[i], getUser());
                         }
                     }
                 }

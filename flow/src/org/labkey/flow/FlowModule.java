@@ -18,6 +18,8 @@ package org.labkey.flow;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.audit.AuditLogService;
+import org.labkey.api.audit.DefaultAuditProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
@@ -64,6 +66,7 @@ import org.labkey.flow.data.FlowProtocolImplementation;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.FlowContainerListener;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.persist.FlowKeywordAuditProvider;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.PersistTests;
 import org.labkey.flow.query.FlowSchema;
@@ -265,6 +268,11 @@ public class FlowModule extends SpringModule
         FlowController.registerAdminConsoleLinks();
 
         FileContentService.get().addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
+
+        if (null != AuditLogService.get() && AuditLogService.get().getClass() != DefaultAuditProvider.class)
+        {
+            AuditLogService.get().registerAuditType(new FlowKeywordAuditProvider());
+        }
     }
 
     @Override

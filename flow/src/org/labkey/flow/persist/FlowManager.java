@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -1191,8 +1192,7 @@ public class FlowManager
     static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
     static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, OriginalKeywordId, Value) VALUES (?, ?, ?, ?)";
 
-    // UNDONE: add audit log entries for keyword updates
-    public void setKeyword(Container c, ExpData data, String keyword, String value)
+    public void setKeyword(Container c, User user, ExpData data, String keyword, String value)
     {
         value = StringUtils.trimToNull(value);
         String oldValue = getKeyword(data, keyword);
@@ -1221,6 +1221,7 @@ public class FlowManager
             {
                 new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), preferredId, originalId, value);
             }
+            addKeywordAuditEvent(c, user, keyword, value, oldValue, data.getName());
             transaction.commit();
         }
         finally
@@ -1228,6 +1229,17 @@ public class FlowManager
             AttributeCache.uncacheAllAfterCommit(data.getContainer());
         }
 
+    }
+
+    private void addKeywordAuditEvent(Container c, User user, String keyword, String newValue, String oldValue, String fileName)
+    {
+
+        FlowKeywordAuditProvider.FlowKeywordAuditEvent event =  new FlowKeywordAuditProvider.FlowKeywordAuditEvent(c.getId(),"keyword");
+        event.setKeywordName(keyword);
+        event.setOldValue(oldValue);
+        event.setNewValue(newValue);
+        event.setFile(fileName);
+        AuditLogService.get().addEvent(user, event);
     }
 
     static private String sqlSelectStat = "SELECT flow.statistic.value FROM flow.object" +

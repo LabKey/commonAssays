@@ -451,6 +451,7 @@ flow/src/org/labkey/flow/persist/AttributeCache.java -text
 flow/src/org/labkey/flow/persist/AttributeSetHelper.java -text
 flow/src/org/labkey/flow/persist/FlowContainerListener.java -text
 flow/src/org/labkey/flow/persist/FlowDataHandler.java -text
+flow/src/org/labkey/flow/persist/FlowKeywordAuditProvider.java -text
 flow/src/org/labkey/flow/persist/FlowManager.java -text
 flow/src/org/labkey/flow/persist/PersistTests.java -text
 flow/src/org/labkey/flow/persist/Script.java -text

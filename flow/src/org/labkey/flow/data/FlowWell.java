@@ -214,9 +214,9 @@ public class FlowWell extends FlowDataObject
         return FlowManager.get().getKeywords(getData(), keywords);
     }
 
-    public void setKeyword(String keyword, String value)
+    public void setKeyword(String keyword, String value, User user)
     {
-        FlowManager.get().setKeyword(getContainer(), getData(), keyword, value);
+        FlowManager.get().setKeyword(getContainer(), user, getData(), keyword, value);
     }
 
     public Map<String, String> getKeywords()
