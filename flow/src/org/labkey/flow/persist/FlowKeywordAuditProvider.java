@@ -4,9 +4,13 @@ import org.labkey.api.audit.AbstractAuditTypeProvider;
 import org.labkey.api.audit.AuditTypeEvent;
 import org.labkey.api.audit.AuditTypeProvider;
 import org.labkey.api.audit.query.AbstractAuditDomainKind;
+import org.labkey.api.audit.query.DefaultAuditTypeTable;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.UserSchema;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +29,7 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
     public static final String COLUMN_NAME_KEYWORD_NAME = "KeywordName";
     public static final String COLUMN_NAME_KEYWORD_OLD_VALUE = "OldValue";
     public static final String COLUMN_NAME_KEYWORD_NEW_VALUE = "NewValue";
+    public static final String COLUMN_NAME_LSID = "LSID";
 
     static final List<FieldKey> defaultVisibleColumns = new ArrayList<>();
 
@@ -36,6 +41,21 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_NAME));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_OLD_VALUE));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_NEW_VALUE));
+    }
+
+    @Override
+    public TableInfo createTableInfo(UserSchema userSchema)
+    {
+        DefaultAuditTypeTable table = new DefaultAuditTypeTable(this, createStorageTableInfo(), userSchema, getDefaultVisibleColumns());
+
+
+        DetailsURL url = DetailsURL.fromString("experiment/resolveLSID.view?lsid=${lsid}");
+        url.setStrictContainerContextEval(true);
+        table.setDetailsURL(url);
+        table.getColumn(COLUMN_NAME_FILE).setURL(url);
+        table.getColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
+
+        return table;
     }
 
     @Override
@@ -86,11 +106,11 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
 
     public static class FlowKeywordAuditEvent extends AuditTypeEvent
     {
-        private String _directory;      // the directory name
         private String _file;           // the file name
         private String _keywordName;   // the webdav resource path
         private String _oldValue;
         private String _newValue;
+        private String _lsid;
 
         public FlowKeywordAuditEvent()
         {
@@ -100,16 +120,6 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         public FlowKeywordAuditEvent(String container, String comment)
         {
             super(EVENT_TYPE, container, comment);
-        }
-
-        public String getDirectory()
-        {
-            return _directory;
-        }
-
-        public void setDirectory(String directory)
-        {
-            _directory = directory;
         }
 
         public String getFile()
@@ -152,15 +162,25 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
             _newValue = newValue;
         }
 
+        public void setLsid(String lsid)
+        {
+            _lsid = lsid;
+        }
+
+        public String getLsid()
+        {
+            return _lsid;
+        }
+
         @Override
         public Map<String, Object> getAuditLogMessageElements()
         {
             Map<String, Object> elements = new LinkedHashMap<>();
-            elements.put("directory", getDirectory());
             elements.put("file", getFile());
             elements.put("keywordName", getKeywordName());
             elements.put("oldValue", getOldValue());
             elements.put("newValue", getNewValue());
+            elements.put("lsid", getLsid());
             elements.putAll(super.getAuditLogMessageElements());
             return elements;
         }
@@ -183,6 +203,7 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
             fields.add(createPropertyDescriptor(COLUMN_NAME_KEYWORD_NAME, PropertyType.STRING));
             fields.add(createPropertyDescriptor(COLUMN_NAME_KEYWORD_OLD_VALUE, PropertyType.STRING));
             fields.add(createPropertyDescriptor(COLUMN_NAME_KEYWORD_NEW_VALUE, PropertyType.STRING));
+            fields.add(createPropertyDescriptor(COLUMN_NAME_LSID, PropertyType.STRING));
             _fields = Collections.unmodifiableSet(fields);
         }
 

@@ -1221,7 +1221,7 @@ public class FlowManager
             {
                 new SqlExecutor(schema).execute(sqlInsertKeyword, obj.getRowId(), preferredId, originalId, value);
             }
-            addKeywordAuditEvent(c, user, keyword, value, oldValue, data.getName());
+            addKeywordAuditEvent(c, user, keyword, value, oldValue, data.getName(), data.getLSID());
             transaction.commit();
         }
         finally
@@ -1231,7 +1231,7 @@ public class FlowManager
 
     }
 
-    private void addKeywordAuditEvent(Container c, User user, String keyword, String newValue, String oldValue, String fileName)
+    private void addKeywordAuditEvent(Container c, User user, String keyword, String newValue, String oldValue, String fileName, String lsid)
     {
 
         FlowKeywordAuditProvider.FlowKeywordAuditEvent event =  new FlowKeywordAuditProvider.FlowKeywordAuditEvent(c.getId(),"keyword");
@@ -1239,6 +1239,7 @@ public class FlowManager
         event.setOldValue(oldValue);
         event.setNewValue(newValue);
         event.setFile(fileName);
+        event.setLsid(lsid);
         AuditLogService.get().addEvent(user, event);
     }
 
