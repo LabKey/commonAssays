@@ -966,6 +966,13 @@ abstract public class FlowJoWorkspace extends Workspace
             assertAdvanced(workspace, "10.2", false);
         }
 
+        @Test
+        public void loadPCAdvanced_10_4() throws Exception
+        {
+            Workspace workspace = loadWorkspace("flow/advanced/advanced-v10.4.wsp");
+            assertAdvanced(workspace, "10.4.2", false);
+        }
+
         private boolean isVersionGreaterThan10_0_7(String version)
         {
             int[] version10_0_7 = new int[]{10, 0, 7};
@@ -1033,6 +1040,12 @@ abstract public class FlowJoWorkspace extends Workspace
                 assertTrue(workspace.getWarnings().get(0).contains("Lymphocytes/CD45+: Median statistic value missing"));
                 assertTrue(workspace.getWarnings().get(1).contains("Lymphocytes/T cells/CD4 T: Coefficient of Variation statistic value missing"));
             }
+            else if ("10.4.2".equals(version))
+            {
+                assertEquals(4, workspace.getWarnings().size());
+                assertTrue(workspace.getWarnings().get(0).contains("Lymphocytes/T cells/CD4 T: Coefficient of Variation statistic value missing"));
+                assertTrue(workspace.getWarnings().get(3).contains("Lymphocytes/CD45+: Median statistic value missing"));
+            }
             else
             {
                 assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 1, workspace.getWarnings().size());
@@ -1041,7 +1054,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
             String windowsSampleId = "2";
             String sampleFileName = "931115-B02- Sample 01.fcs";
-            if ("10.2".equals(version))
+            if ("10.2".equals(version) || "10.4.2".equals(version))
             {
                 windowsSampleId = "6";
                 sampleFileName = "931115-C02- Sample 02.fcs";
@@ -1190,7 +1203,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     assertEquals(0.0500d, stats.get(new StatisticSpec("Lymphocytes/T cells/CD4 T:Frequency")), 0.001d);
                     assertEquals(2867.0d, stats.get(new StatisticSpec("A and not B:Count")).intValue(), 0.001d);
                 }
-                else if ("10.2".equals(version))
+                else if ("10.2".equals(version) || "10.4.2".equals(version))
                 {
                     assertEquals(105,      stats.get(new StatisticSpec("Lymphocytes:Count")).intValue());
                     assertEquals(1.05d,    stats.get(new StatisticSpec("Lymphocytes:Freq_Of_Parent")), 0.001d);
