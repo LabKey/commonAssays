@@ -24,13 +24,15 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Disabled;
+import org.labkey.test.categories.MS2;
+import org.labkey.test.categories.Sequest;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
 
-@Category({Disabled.class/*, MS2.class, Sequest.class*/})
+@Category({Disabled.class, MS2.class, Sequest.class})
 public class SequestTest extends AbstractMS2SearchEngineTest
 {
     protected static final String PEPTIDE = "K.VFHFVR.Q";
