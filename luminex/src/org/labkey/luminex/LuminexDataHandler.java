@@ -670,7 +670,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 if (fis.size() > 1)
                 {
-                    StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                    StatsService service = StatsService.get();
                     MathStat stats = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[fis.size()])));
                     double stdDev = stats.getStdDev();
                     double mean = Math.abs(stats.getMean());

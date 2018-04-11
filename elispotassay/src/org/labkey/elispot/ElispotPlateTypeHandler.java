@@ -186,7 +186,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
                 if (i > 0)
                 {
                     statsData = Arrays.copyOf(statsData, i);
-                    StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                    StatsService service = StatsService.get();
                     MathStat stats = service.getStats(statsData);
 
                     Map<String, Double> values = new HashMap<>();

@@ -174,6 +174,6 @@ public class ProteinServiceImpl implements ProteinService
 
     public static ProteinServiceImpl getInstance()
     {
-        return (ProteinServiceImpl) ServiceRegistry.get().getService(ProteinService.class);
+        return (ProteinServiceImpl) ProteinService.get();
     }
 }

@@ -93,7 +93,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
         MS1Schema.register(this);
 
         ServiceRegistry svcReg = ServiceRegistry.get();
-        svcReg.registerService(MS1Service.class, new MS1ServiceImpl());
+        MS1Service.setInstance(new MS1ServiceImpl());
         svcReg.registerService(MS1Urls.class, new MS1Controller.MS1UrlsImpl());
 
         //add the MS1 purge task to the list of system maintenance tasks

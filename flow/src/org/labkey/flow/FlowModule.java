@@ -148,7 +148,7 @@ public class FlowModule extends SpringModule
         ReportService.get().registerReport(new ControlsQCReport());
         ReportService.get().registerReport(new PositivityFlowReport());
 
-        ServiceRegistry.get().registerService(FlowService.class, new FlowServiceImpl());
+        FlowService.setInstance(new FlowServiceImpl());
 
         registerModuleProperty(EXPORT_TO_SCRIPT_PATH, "Set the path of the script that will be invoked when exporting FCS files", "Export To Script - Path", ModuleProperty.InputType.text);
         registerModuleProperty(EXPORT_TO_SCRIPT_COMMAND_LINE, "Set the export to script command line with token replacements", "Export To Script - Command Line", ModuleProperty.InputType.text,

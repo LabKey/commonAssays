@@ -289,7 +289,7 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
         MathStat doubleStats = stats.get(param);
         if (doubleStats == null)
         {
-            StatsService service = ServiceRegistry.get().getService(StatsService.class);
+            StatsService service = StatsService.get();
             doubleStats = service.getStats(subset.getDataFrame().getDoubleArray(param));
             stats.put(param, doubleStats);
         }

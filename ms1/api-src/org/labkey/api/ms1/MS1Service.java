@@ -19,6 +19,7 @@ package org.labkey.api.ms1;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
+import org.labkey.api.services.ServiceRegistry;
 
 /**
  * MS1 Module Service
@@ -48,6 +49,16 @@ public interface MS1Service
         {
             return DB_SCHEMA_NAME + "." + this.name();
         }
+    }
+
+    static MS1Service get()
+    {
+        return ServiceRegistry.get().getService(MS1Service.class);
+    }
+
+    static void setInstance(MS1Service impl)
+    {
+        ServiceRegistry.get().registerService(MS1Service.class, impl);
     }
 
     TableInfo createFeaturesTableInfo(User user, Container container);

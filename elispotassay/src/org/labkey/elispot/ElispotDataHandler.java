@@ -415,7 +415,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                             int i = 0;
                             for (Double doub : statsMapEntry.getValue())
                                 statsData[i++] = doub;
-                            StatsService service = ServiceRegistry.get().getService(StatsService.class);
+                            StatsService service = StatsService.get();
                             MathStat stats = service.getStats(statsData);
 
                             String key = UploadWizardAction.getInputName(antigenNameProp, antigenGroup.getName());

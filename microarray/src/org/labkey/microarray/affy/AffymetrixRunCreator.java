@@ -119,7 +119,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
                     }
 
                     //Issue 17799:Check file paths for Affy import to be sure they're under the file/pipeline root
-                    FileContentService fileService = ServiceRegistry.get().getService(FileContentService.class);
+                    FileContentService fileService = FileContentService.get();
                     Boolean inFileRoot = fileService != null && celFile.getAbsolutePath().startsWith(fileService.getFileRoot(context.getContainer()).getAbsolutePath());
                     PipeRoot pipelineRoot = PipelineService.get().getPipelineRootSetting(context.getContainer());
                     Boolean inPipelineRoot = celFile.getAbsolutePath().startsWith(pipelineRoot.getRootPath().getAbsolutePath());

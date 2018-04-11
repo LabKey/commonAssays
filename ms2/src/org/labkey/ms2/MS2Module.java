@@ -39,7 +39,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
@@ -225,7 +224,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         MS2Service.register(new MS2ServiceImpl());
 
-        ServiceRegistry.get().registerService(ProteinService.class, new ProteinServiceImpl());
+        ProteinService.setInstance(new ProteinServiceImpl());
     }
 
     @Override

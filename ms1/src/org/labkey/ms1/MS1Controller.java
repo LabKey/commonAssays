@@ -625,7 +625,7 @@ public class MS1Controller extends SpringActionController
             else if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
                 return getPeptidesView(pepSearchForm, bindErrors, forExport);
 
-            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ServiceRegistry.get().getService(ProteinService.class).getPeptideSearchViews())
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
             {
                 if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
                 {
@@ -695,7 +695,7 @@ public class MS1Controller extends SpringActionController
                 result.addView(pepView);
             }
 
-            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ServiceRegistry.get().getService(ProteinService.class).getPeptideSearchViews())
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
             {
                 QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
                 if (queryView != null)

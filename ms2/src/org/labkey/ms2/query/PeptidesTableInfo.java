@@ -414,7 +414,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                MS1Service ms1svc = ServiceRegistry.get().getService(MS1Service.class);
+                MS1Service ms1svc = MS1Service.get();
                 return null == ms1svc ? null : ms1svc.createFeaturesTableInfo(_userSchema.getUser(), _userSchema.getContainer(), false);
             }
         });
