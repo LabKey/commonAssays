@@ -216,8 +216,8 @@ if (analysisNames.length > 0)
 %>
         <labkey:panel title="Choose source of gating">
             <p>You can choose to use the gating from either the sample identified
-            by the unique keywork/value pair from the compensation
-            calculation above <i>or</i> from one of the named group's in the workspace.</p>
+            by the unique keyword/value pair from the compensation
+            calculation above <i>or</i> from one of the named groups in the workspace.</p>
             <p>By default, the sample's gating will be used.  However, if this is a
             <b>workspace template</b>, you will most likely need to select a group name
             from the drop down that has gating for the given subsets.</p>
