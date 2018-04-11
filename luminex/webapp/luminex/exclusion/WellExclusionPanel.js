@@ -395,7 +395,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     + "<tr><td class='labkey-exclusion-td-label'>File Name:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_filename'>...</div></td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Sample:</td><td class='labkey-exclusion-td-cell'>" + (this.description != null ? this.description : "") + "</td></tr>"
                     + "<tr><td class='labkey-exclusion-td-label'>Type:</td><td class='labkey-exclusion-td-cell'>" + this.type + "</td></tr>"
-                    + "<tr><td class='labkey-exclusion-td-label'>Wells:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
+                    + "<tr><td class='labkey-exclusion-td-label'>Wells in Group:</td><td class='labkey-exclusion-td-cell'><div id='replicate_group_wells'>...</div></td></tr>"
                     + "</table>";
     },
 
