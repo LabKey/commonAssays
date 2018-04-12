@@ -73,7 +73,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         return Collections.singletonList(new Pair<>(8, 12));
     }
 
-    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount) throws SQLException
+    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 

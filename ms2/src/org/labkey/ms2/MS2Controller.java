@@ -493,7 +493,7 @@ public class MS2Controller extends SpringActionController
 
     private class FilterHeaderView extends JspView<FilterHeaderBean>
     {
-        private FilterHeaderView(ActionURL currentURL, RunForm form, MS2Run run) throws ServletException
+        private FilterHeaderView(ActionURL currentURL, RunForm form, MS2Run run)
         {
             super("/org/labkey/ms2/filterHeader.jsp", new FilterHeaderBean());
 
@@ -785,7 +785,7 @@ public class MS2Controller extends SpringActionController
             return jview;
         }
 
-        public boolean handlePost(RenameForm form, BindException errors) throws Exception
+        public boolean handlePost(RenameForm form, BindException errors)
         {
             _run = form.validateRun();
             MS2Manager.renameRun(form.getRun(), form.getDescription());
@@ -1027,7 +1027,7 @@ public class MS2Controller extends SpringActionController
                 return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
             }
 
-            public HttpView getTabView(String tabId) throws Exception
+            public HttpView getTabView(String tabId)
             {
                 if ("manual".equals(tabId))
                     return new JspView("/org/labkey/ms2/loadGoManual.jsp");
@@ -1269,7 +1269,7 @@ public class MS2Controller extends SpringActionController
             return appendRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
         }
 
-        public boolean handlePost(ManageViewsForm form, BindException errors) throws Exception
+        public boolean handlePost(ManageViewsForm form, BindException errors)
         {
             String[] viewNames = form.getViewsToDelete();
 
@@ -2240,7 +2240,7 @@ public class MS2Controller extends SpringActionController
             _requiresSameType = requiresSameType;
         }
 
-        public final ModelAndView getView(FormType form, BindException errors) throws ServletException
+        public final ModelAndView getView(FormType form, BindException errors)
         {
             ActionURL currentURL = getViewContext().getActionURL();
             int runListId;
@@ -2379,7 +2379,7 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class);
         }
 
-        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion)
         {
             _form = form;
             _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
@@ -2437,7 +2437,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors) throws ServletException, SQLException
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors) throws SQLException
     {
         ActionURL currentURL = getViewContext().getActionURL();
 
@@ -2587,7 +2587,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public boolean handlePost(Object o, BindException errors) throws SQLException
+        public boolean handlePost(Object o, BindException errors)
         {
             Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
             Set<Integer> fastaIds = new HashSet<>();
@@ -2728,7 +2728,7 @@ public class MS2Controller extends SpringActionController
         public void validateCommand(BlastForm target, Errors errors) {}
 
         @Override
-        public boolean handlePost(BlastForm o, BindException errors) throws Exception
+        public boolean handlePost(BlastForm o, BindException errors)
         {
             WriteableAppProps props = AppProps.getWriteableInstance();
             props.setBLASTServerBaseURL(o.getBlastServerBaseURL());
@@ -2859,7 +2859,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public boolean handlePost(SetBestNameForm form, BindException errors) throws Exception
+        public boolean handlePost(SetBestNameForm form, BindException errors)
         {
             int[] fastaIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
             SetBestNameRunnable runnable = new SetBestNameRunnable(fastaIds, form.lookupNameType());
@@ -2949,7 +2949,7 @@ public class MS2Controller extends SpringActionController
             super(ProbabilityProteinSearchForm.class);
         }
 
-        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
         {
             if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
             {
@@ -2972,7 +2972,6 @@ public class MS2Controller extends SpringActionController
         }
 
         private QueryView createProteinSearchView(ProbabilityProteinSearchForm form, BindException errors)
-            throws ServletException
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             if (schema == null)
@@ -3004,7 +3003,7 @@ public class MS2Controller extends SpringActionController
             return proteinsView;
         }
 
-        private QueryView createProteinGroupSearchView(final ProbabilityProteinSearchForm form, BindException errors) throws ServletException
+        private QueryView createProteinGroupSearchView(final ProbabilityProteinSearchForm form, BindException errors)
         {
             UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
             QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
@@ -3512,7 +3511,7 @@ public class MS2Controller extends SpringActionController
             return getShowMS2AdminURL(_days);
         }
 
-        public boolean doAction(Object o, BindException errors) throws Exception
+        public boolean doAction(Object o, BindException errors)
         {
             _days = getDays();
 
@@ -3742,7 +3741,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public boolean handlePost(ColumnForm form, BindException errors) throws Exception
+        public boolean handlePost(ColumnForm form, BindException errors)
         {
             _returnURL = form.getReturnActionURL();
             String columnNames = form.getColumns();
@@ -3848,7 +3847,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public boolean handlePost(ColumnForm form, BindException errors) throws Exception
+        public boolean handlePost(ColumnForm form, BindException errors)
         {
             _returnURL = form.getReturnActionURL();
             String columnNames = form.getColumns();
@@ -3961,7 +3960,7 @@ public class MS2Controller extends SpringActionController
             return saveView;
         }
 
-        public boolean handlePost(MS2ViewForm form, BindException errors) throws Exception
+        public boolean handlePost(MS2ViewForm form, BindException errors)
         {
             String viewParams = (null == form.getViewParams() ? "" : form.getViewParams());
 
@@ -4160,7 +4159,7 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public boolean handlePost(MascotSettingsForm form, BindException errors) throws Exception
+        public boolean handlePost(MascotSettingsForm form, BindException errors)
         {
             if (form.isReset())
             {
@@ -4401,7 +4400,7 @@ public class MS2Controller extends SpringActionController
 
     private static class ProteinsView extends VBox
     {
-        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, List<Protein> proteins, String[] peptides, QueryPeptideMS2RunView peptideView) throws Exception
+        private ProteinsView(ActionURL currentURL, MS2Run run, DetailsForm form, List<Protein> proteins, String[] peptides, QueryPeptideMS2RunView peptideView)
         {
             // Limit to 100 proteins
             int proteinCount = Math.min(100, proteins.size());
@@ -5108,7 +5107,7 @@ public class MS2Controller extends SpringActionController
         private static final String CATEGORY = "MS2SearchOptions";
 
         @Override
-        public Object execute(MS2SearchOptions form, BindException errors) throws Exception
+        public Object execute(MS2SearchOptions form, BindException errors)
         {
             PropertyManager.PropertyMap properties = PropertyManager.getWritableProperties(getUser(), getContainer(), CATEGORY, true);
 
@@ -5160,7 +5159,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyRunViewAction extends SimpleRedirectAction<MS2ViewForm>
     {
-        public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
+        public ActionURL getRedirectURL(MS2ViewForm form)
         {
             // Redirect to have Spring fill in the form and ensure that the DataRegion JavaScript sees the showRun action
             return getApplyViewForwardURL(form, ShowRunAction.class);
@@ -5171,7 +5170,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyExportRunsViewAction extends SimpleForwardAction<MS2ViewForm>
     {
-        public ActionURL getForwardURL(MS2ViewForm form) throws Exception
+        public ActionURL getForwardURL(MS2ViewForm form)
         {
             // Forward without redirect: this lets Spring fill in the form but preserves the post data
             return getApplyViewForwardURL(form, ExportRunsAction.class);
@@ -5182,7 +5181,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyCompareViewAction extends SimpleRedirectAction<MS2ViewForm>
     {
-        public ActionURL getRedirectURL(MS2ViewForm form) throws Exception
+        public ActionURL getRedirectURL(MS2ViewForm form)
         {
             ActionURL redirectURL = getApplyViewForwardURL(form, ShowCompareAction.class);
 
@@ -5410,7 +5409,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class AddExtraFilterAction extends SimpleRedirectAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ActionURL getRedirectURL(Object o)
         {
             ViewContext ctx = getViewContext();
             HttpServletRequest request = ctx.getRequest();
@@ -5904,7 +5903,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class DeleteAnnotInsertEntriesAction extends SimpleRedirectAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ActionURL getRedirectURL(Object o)
         {
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
@@ -6146,7 +6145,7 @@ public class MS2Controller extends SpringActionController
     @RequiresNoPermission
     public class UpdateShowPeptideAction extends SimpleRedirectAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ActionURL getRedirectURL(Object o)
         {
             ViewContext ctx = getViewContext();
 
@@ -6408,7 +6407,7 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public boolean doAction(DetailsForm form, BindException errors) throws Exception
+        public boolean doAction(DetailsForm form, BindException errors)
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 

@@ -244,7 +244,7 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
         return map;
     }
 
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
+    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns)
     {
         throw new UnsupportedOperationException();
     }

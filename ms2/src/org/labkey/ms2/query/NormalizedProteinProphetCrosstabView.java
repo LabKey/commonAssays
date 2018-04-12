@@ -32,7 +32,7 @@ import java.sql.SQLException;
  */
 public class NormalizedProteinProphetCrosstabView extends AbstractQueryCrosstabView
 {
-    public NormalizedProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext) throws SQLException
+    public NormalizedProteinProphetCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext)
     {
         super(schema, form, viewContext, MS2Schema.HiddenTableType.ProteinProphetNormalizedCrosstab);
     }

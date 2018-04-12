@@ -97,7 +97,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
     }
 
     @Override
-    protected Type update(User user, Container container, Type bean, Pair<Integer, Integer> oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+    protected Type update(User user, Container container, Type bean, Pair<Integer, Integer> oldKey) throws ValidationException
     {
         Integer newGuideSetId = bean.getGuideSetId();
 
@@ -129,13 +129,13 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
     protected abstract void validate(Type bean, GuideSet guideSet, Analyte analyte) throws ValidationException;
 
     @Override
-    protected void delete(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException, SQLException
+    protected void delete(User user, Container container, Pair<Integer, Integer> key)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected Type insert(User user, Container container, Type bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+    protected Type insert(User user, Container container, Type bean)
     {
         throw new UnsupportedOperationException();
     }

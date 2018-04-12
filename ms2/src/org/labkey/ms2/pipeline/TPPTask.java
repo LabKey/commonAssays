@@ -247,7 +247,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             setJoin(true);
         }
 
-        public boolean isParticipant(PipelineJob job) throws IOException
+        public boolean isParticipant(PipelineJob job)
         {
             return job.getJobSupport(JobSupport.class).isFractions();
         }

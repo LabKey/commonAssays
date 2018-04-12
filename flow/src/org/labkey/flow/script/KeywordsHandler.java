@@ -195,7 +195,7 @@ public class KeywordsHandler extends BaseHandler
         return FCSAnalyzer.get();
     }
 
-    public void processRun(FlowRun srcRun, ExperimentRunType runElement, File workingDirectory) throws Exception
+    public void processRun(FlowRun srcRun, ExperimentRunType runElement, File workingDirectory)
     {
         throw new UnsupportedOperationException();
     }

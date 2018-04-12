@@ -139,7 +139,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         return plates;
     }
 
-    protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
+    protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate)
     {
         throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
     }

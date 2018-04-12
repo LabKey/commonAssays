@@ -236,21 +236,21 @@ public class ProteinDictionaryHelpers
     public static int gTypeF = 0;
     public static int gTypeP = 0;
 
-    public static int getgTypeC() throws SQLException
+    public static int getgTypeC()
     {
         if (gTypeC == 0) getGOTypes();
         return gTypeC;
     }
 
 
-    public static int getgTypeF() throws SQLException
+    public static int getgTypeF()
     {
         if (gTypeF == 0) getGOTypes();
         return gTypeF;
     }
 
 
-    public static int getgTypeP() throws SQLException
+    public static int getgTypeP()
     {
         if (gTypeP == 0) getGOTypes();
         return gTypeP;

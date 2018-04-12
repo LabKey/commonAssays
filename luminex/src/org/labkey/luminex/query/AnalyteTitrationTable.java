@@ -252,7 +252,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
 
             @Override
-            protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException
+            protected AnalyteTitration get(User user, Container container, Pair<Integer, Integer> key)
             {
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), key.getKey());
                 filter.addCondition(FieldKey.fromParts("TitrationId"), key.getValue());

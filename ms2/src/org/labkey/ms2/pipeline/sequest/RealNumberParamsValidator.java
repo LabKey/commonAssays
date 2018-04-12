@@ -55,7 +55,7 @@ public class RealNumberParamsValidator implements IParamsValidator
         private SequestParam _property;
 
         @Before
-        public void setUp() throws Exception
+        public void setUp()
         {
             _property = new SequestParam(
                 310,                                                       //sortOrder

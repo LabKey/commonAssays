@@ -97,17 +97,10 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
 
         if (form.isFractions())
         {
-            try
-            {
-                ExpSampleSet sampleSet = form.getProvider().getFractionSampleSet(form);
-                ArrayList<File> files = new ArrayList<>(form.getAllFiles());
-                MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, getContainer());
-                helper.addSampleColumns(parent, form.getUser());
-            }
-            catch (ExperimentException e)
-            {
-                errors.addError(new LabKeyError(e));
-            }
+            ExpSampleSet sampleSet = form.getProvider().getFractionSampleSet(form);
+            ArrayList<File> files = new ArrayList<>(form.getAllFiles());
+            MsFractionPropertyHelper helper = new MsFractionPropertyHelper(sampleSet, files, getContainer());
+            helper.addSampleColumns(parent, form.getUser());
         }
         return parent;
     }

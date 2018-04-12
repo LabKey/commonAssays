@@ -74,7 +74,7 @@ public class ListParamsValidator implements IParamsValidator
         private Param _property;
 
         @Before
-        public void setUp() throws Exception
+        public void setUp()
         {
                           _property = new SequestParam(
                           50,                                                       //sortOrder

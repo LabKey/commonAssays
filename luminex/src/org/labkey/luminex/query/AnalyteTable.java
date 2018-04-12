@@ -167,13 +167,13 @@ public class AnalyteTable extends AbstractLuminexTable
         return new RowIdQueryUpdateService<Analyte>(this)
         {
             @Override
-            public Analyte get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+            public Analyte get(User user, Container container, int key)
             {
                 return new TableSelector(LuminexProtocolSchema.getTableInfoAnalytes()).getObject(key, Analyte.class);
             }
 
             @Override
-            public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+            public void delete(User user, Container container, int key)
             {
                 throw new UnsupportedOperationException();
             }
@@ -185,13 +185,13 @@ public class AnalyteTable extends AbstractLuminexTable
             }
 
             @Override
-            protected Analyte insert(User user, Container container, Analyte bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+            protected Analyte insert(User user, Container container, Analyte bean)
             {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            protected Analyte update(User user, Container container, Analyte newAnalyte, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+            protected Analyte update(User user, Container container, Analyte newAnalyte, Integer oldKey)
             {
                 return Table.update(user, LuminexProtocolSchema.getTableInfoAnalytes(), newAnalyte, oldKey);
             }

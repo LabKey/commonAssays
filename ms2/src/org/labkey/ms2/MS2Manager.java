@@ -393,7 +393,7 @@ public class MS2Manager
             Map<ExpData, String> outputDatas = new HashMap<>();
             XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
             {
-                public File getLogFile() throws IOException
+                public File getLogFile()
                 {
                     throw new UnsupportedOperationException();
                 }
@@ -405,7 +405,7 @@ public class MS2Manager
                 }
 
                 @Override
-                public ExperimentArchiveDocument getDocument() throws XmlException, IOException
+                public ExperimentArchiveDocument getDocument()
                 {
                     throw new UnsupportedOperationException();
                 }
@@ -575,7 +575,7 @@ public class MS2Manager
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
                                                           File file,
-                                                          String description, PipeRoot root) throws SQLException, IOException
+                                                          String description, PipeRoot root) throws IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
@@ -593,7 +593,7 @@ public class MS2Manager
 
     public static MS2Importer.RunInfo addRunToQueue(ViewBackgroundInfo info,
                                                     File file,
-                                                    String description, PipeRoot root) throws SQLException, IOException
+                                                    String description, PipeRoot root) throws IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
         MS2Importer.RunInfo runInfo = importer.prepareRun(false);
@@ -611,7 +611,7 @@ public class MS2Manager
 
     public static MS2Run addRun(ViewBackgroundInfo info, Logger log,
                              File file,
-                             boolean restart, XarContext context) throws SQLException, IOException, XMLStreamException
+                             boolean restart, XarContext context) throws IOException, XMLStreamException
     {
         MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? " - " + context.getJobDescription() : ""), log, context);
         MS2Importer.RunInfo runInfo = importer.prepareRun(restart);
@@ -718,7 +718,7 @@ public class MS2Manager
         new SqlSelector(getSchema(), selectSQL).forEach(new Selector.ForEachBlock<String>()
         {
             @Override
-            public void exec(String containerId) throws SQLException
+            public void exec(String containerId)
             {
                 Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
                 if (!c.hasPermission(user, DeletePermission.class))

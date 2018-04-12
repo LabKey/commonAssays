@@ -128,7 +128,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 }
 
                 @Override
-                public void renderTitle(RenderContext ctx, Writer out) throws IOException
+                public void renderTitle(RenderContext ctx, Writer out)
                 {
                     // no title
                 }
@@ -423,13 +423,13 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         }
 
         @Override
-        public GuideSet get(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+        public GuideSet get(User user, Container container, int key)
         {
             return new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(key, GuideSet.class);
         }
 
         @Override
-        public void delete(User user, Container container, int key) throws QueryUpdateServiceException, SQLException
+        public void delete(User user, Container container, int key)
         {
             DbScope scope = LuminexProtocolSchema.getSchema().getScope();
             SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), key);
@@ -483,7 +483,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         }
 
         @Override
-        protected GuideSet insert(User user, Container container, GuideSet bean) throws ValidationException, DuplicateKeyException, QueryUpdateServiceException, SQLException
+        protected GuideSet insert(User user, Container container, GuideSet bean) throws ValidationException
         {
             validateProtocol(bean);
             validateGuideSetValues(bean);
@@ -496,7 +496,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         }
 
         @Override
-        protected GuideSet update(User user, Container container, GuideSet bean, Integer oldKey) throws ValidationException, QueryUpdateServiceException, SQLException
+        protected GuideSet update(User user, Container container, GuideSet bean, Integer oldKey) throws ValidationException
         {
             if (oldKey == null)
             {

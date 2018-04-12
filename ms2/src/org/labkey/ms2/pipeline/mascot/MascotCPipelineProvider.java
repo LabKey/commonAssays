@@ -104,7 +104,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out) throws Exception
+        protected void renderView(Object model, PrintWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -129,7 +129,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return MascotSearchProtocolFactory.get();
     }
 
-    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return null;//No directories for Mascot databases.
     }
@@ -279,7 +279,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return mods;
     }
 
-    public Map<String, String> getResidue1Mods(Container container) throws IOException
+    public Map<String, String> getResidue1Mods(Container container)
     {
         return null;  //no difference between static and dynamic mods in mascot 
     }

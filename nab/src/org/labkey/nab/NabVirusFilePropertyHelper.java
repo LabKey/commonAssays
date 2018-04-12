@@ -59,7 +59,7 @@ public class NabVirusFilePropertyHelper extends PlateSampleFilePropertyHelper
     }
 
     @Override
-    protected void validateMetadataRow(Map<String, Object> row, String wellGroupName, WellGroupTemplate wellgroup) throws ExperimentException
+    protected void validateMetadataRow(Map<String, Object> row, String wellGroupName, WellGroupTemplate wellgroup)
     {
         // no-op
     }

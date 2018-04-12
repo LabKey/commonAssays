@@ -268,7 +268,7 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderFormEnd(RenderContext ctx, Writer out) throws IOException
+        protected void renderFormEnd(RenderContext ctx, Writer out)
         {
             // No-op.  Don't close the form.
         }

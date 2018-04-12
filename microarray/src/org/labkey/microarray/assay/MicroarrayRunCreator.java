@@ -67,38 +67,30 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
     {
         super.addInputDatas(context, inputDatas, resolverType);
 
-        try
+        File mageMLFile = getMageMLFile(context);
+        // Look up two directories for a TIFF file that matches the naming convention
+        if (mageMLFile.getParentFile() != null && mageMLFile.getParentFile().getParentFile() != null
+                && mageMLFile.getParentFile().getParentFile().getParentFile() != null)
         {
-            File mageMLFile = getMageMLFile(context);
-            // Look up two directories for a TIFF file that matches the naming convention
-            if (mageMLFile.getParentFile() != null && mageMLFile.getParentFile().getParentFile() != null
-                    && mageMLFile.getParentFile().getParentFile().getParentFile() != null)
+            File dir = mageMLFile.getParentFile().getParentFile().getParentFile();
+            File[] files = dir.listFiles(new PipelineProvider.FileTypesEntryFilter(MicroarrayModule.TIFF_INPUT_TYPE.getFileType()));
+            if (files != null)
             {
-                File dir = mageMLFile.getParentFile().getParentFile().getParentFile();
-                File[] files = dir.listFiles(new PipelineProvider.FileTypesEntryFilter(MicroarrayModule.TIFF_INPUT_TYPE.getFileType()));
-                if (files != null)
+                for (File file : files)
                 {
-                    for (File file : files)
+                    // MageML files are named with <TIFF_FILE_BASE_NAME>_<PROTOCOL_NAME>.mageML (or other file extension)
+                    if (mageMLFile.getName().startsWith(MicroarrayModule.TIFF_INPUT_TYPE.getFileType().getBaseName(file) + "_"))
                     {
-                        // MageML files are named with <TIFF_FILE_BASE_NAME>_<PROTOCOL_NAME>.mageML (or other file extension)
-                        if (mageMLFile.getName().startsWith(MicroarrayModule.TIFF_INPUT_TYPE.getFileType().getBaseName(file) + "_"))
-                        {
-                            // Found a match, add it as an input to this run
-                            ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE, true);
-                            inputDatas.put(tiffData, MicroarrayModule.TIFF_INPUT_TYPE.getRole());
-                        }
+                        // Found a match, add it as an input to this run
+                        ExpData tiffData = createData(context.getContainer(), file, file.getName(), MicroarrayModule.TIFF_INPUT_TYPE, true);
+                        inputDatas.put(tiffData, MicroarrayModule.TIFF_INPUT_TYPE.getRole());
                     }
                 }
             }
         }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
     }
 
-    private File getMageMLFile(AssayRunUploadContext context)
-            throws IOException, ExperimentException
+    private File getMageMLFile(AssayRunUploadContext context) throws ExperimentException
     {
         Map<String, File> files = context.getUploadedData();
         assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
@@ -107,18 +99,11 @@ public class MicroarrayRunCreator extends DefaultAssayRunCreator<MicroarrayAssay
 
     protected void addOutputDatas(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpData, String> inputDatas, Map<ExpData, String> outputDatas, ParticipantVisitResolverType resolverType) throws ExperimentException
     {
-        try
-        {
-            File mageMLFile = getMageMLFile(context);
-            ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
+        File mageMLFile = getMageMLFile(context);
+        ExpData mageData = DefaultAssayRunCreator.createData(context.getContainer(), mageMLFile, mageMLFile.getName(), MicroarrayModule.MAGE_ML_INPUT_TYPE, true);
 
-            outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
-            addRelatedOutputDatas(context, inputDatas, outputDatas, mageMLFile);
-        }
-        catch (IOException e)
-        {
-            throw new ExperimentException(e);
-        }
+        outputDatas.put(mageData, MicroarrayModule.MAGE_ML_INPUT_TYPE.getRole());
+        addRelatedOutputDatas(context, inputDatas, outputDatas, mageMLFile);
     }
 
     @Override

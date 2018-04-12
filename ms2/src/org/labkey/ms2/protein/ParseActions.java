@@ -66,7 +66,7 @@ public abstract class ParseActions
     {
     }
 
-    public void characters(ParseContext context, char ch[], int start, int len) throws SAXException
+    public void characters(ParseContext context, char ch[], int start, int len)
     {
     }
 }

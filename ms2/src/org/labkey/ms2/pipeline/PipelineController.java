@@ -134,7 +134,7 @@ public class PipelineController extends SpringActionController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
-        public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
+        public boolean doAction(PipelinePathForm form, BindException errors)
         {
             for (File file : form.getValidatedFiles(getContainer()))
             {
@@ -193,11 +193,6 @@ public class PipelineController extends SpringActionController
                     }
                 }
                 catch (IOException e)
-                {
-                    errors.reject(ERROR_MSG, e.getMessage());
-                    return false;
-                }
-                catch (SQLException e)
                 {
                     errors.reject(ERROR_MSG, e.getMessage());
                     return false;
@@ -825,7 +820,7 @@ public class PipelineController extends SpringActionController
         {
         }
 
-        public boolean handlePost(SetDefaultsForm form, BindException errors) throws Exception
+        public boolean handlePost(SetDefaultsForm form, BindException errors)
         {
             try
             {

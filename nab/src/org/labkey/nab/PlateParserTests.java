@@ -129,7 +129,7 @@ public class PlateParserTests
     );
 
     @Test
-    public void parseMultiPlate() throws Exception
+    public void parseMultiPlate()
     {
         // TODO:
     }

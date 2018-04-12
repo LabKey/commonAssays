@@ -61,7 +61,7 @@ public class AnalyzeJob extends ScriptJob
         }
     }
 
-    public void doRun() throws Exception
+    public void doRun()
     {
         for (int runId : _runIds)
         {

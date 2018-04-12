@@ -41,7 +41,7 @@ public enum QuantitationAlgorithm
     xpress
     {
         @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException
+        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile)
         {
             return new String[] { "-X" + StringUtils.join(getCommonXpressQ3Params(params, pathMzXml).iterator(), ' ') };
         }
@@ -49,7 +49,7 @@ public enum QuantitationAlgorithm
     q3
     {
         @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException, FileNotFoundException
+        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws FileNotFoundException
         {
             List<String> quantOpts = getCommonXpressQ3Params(params, pathMzXml);
             String paramMinPP = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "min peptide prophet");
@@ -92,7 +92,7 @@ public enum QuantitationAlgorithm
     libra
     {
         @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException, FileNotFoundException
+        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException
         {
             String normalizationChannelString = params.get(ParameterNames.LIBRA_NORMALIZATION_CHANNEL_PARAM);
             if (normalizationChannelString == null)

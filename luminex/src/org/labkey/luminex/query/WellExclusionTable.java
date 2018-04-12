@@ -200,7 +200,7 @@ public class WellExclusionTable extends AbstractExclusionTable
             }
 
             @Override
-            protected @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException, SQLException
+            protected @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException
             {
                 ExpData data = getData(rowMap);
                 ExpProtocolApplication protApp = data.getSourceApplication();

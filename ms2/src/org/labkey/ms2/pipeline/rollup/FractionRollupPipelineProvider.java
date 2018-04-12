@@ -113,7 +113,7 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     }
 
     @Override
-    public void ensureEnabled(Container container) throws PipelineValidationException
+    public void ensureEnabled(Container container)
     {
         // This is always available
     }

@@ -48,7 +48,7 @@ public class KeywordsJob extends ScriptJob
         _targetStudy = targetStudy;
     }
 
-    public void doRun() throws Exception
+    public void doRun()
     {
         go();
     }

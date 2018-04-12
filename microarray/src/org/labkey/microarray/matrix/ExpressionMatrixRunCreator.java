@@ -85,7 +85,7 @@ public class ExpressionMatrixRunCreator extends AbstractMatrixRunCreator<Express
         return ensureFeatureAnnotationSet(context, runPath, featureSet);
     }
 
-    protected Integer ensureFeatureAnnotationSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException, ExperimentException
+    protected Integer ensureFeatureAnnotationSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException
     {
         Integer featureSetId = MicroarrayManager.get().ensureFeatureAnnotationSet(context.getLogger(), context.getContainer(), context.getUser(), runPath, featureSet);
         if (featureSetId == null)

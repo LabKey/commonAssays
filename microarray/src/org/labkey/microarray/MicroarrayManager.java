@@ -379,7 +379,7 @@ public class MicroarrayManager
     }
 
     // Issue 21134: filter by assay container and protocol
-    public List<Map> getDistinctSamples(ExpProtocol protocol) throws SQLException
+    public List<Map> getDistinctSamples(ExpProtocol protocol)
     {
         SQLFragment frag = new SQLFragment("SELECT SampleId, Name FROM ");
         frag.append("(SELECT DISTINCT SampleId FROM ");

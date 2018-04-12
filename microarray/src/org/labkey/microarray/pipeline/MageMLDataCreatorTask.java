@@ -51,7 +51,7 @@ public class MageMLDataCreatorTask extends WorkDirectoryTask<MageMLDataCreatorTa
 
     @NotNull
     @Override
-    public RecordedActionSet run() throws PipelineJobException
+    public RecordedActionSet run()
     {
         File[] mageFiles = getJob().getAnalysisDirectory().listFiles(ArrayPipelineManager.getMageFileFilter());
 

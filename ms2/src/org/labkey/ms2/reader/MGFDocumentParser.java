@@ -30,7 +30,7 @@ import java.io.InputStream;
 public class MGFDocumentParser extends AbstractDocumentParser
 {
     @Override
-    protected void parseContent(InputStream stream, ContentHandler handler) throws IOException, SAXException
+    protected void parseContent(InputStream stream, ContentHandler handler)
     {
         // Intentionally no-op as the content isn't very interesting for full text search
     }
@@ -40,7 +40,7 @@ public class MGFDocumentParser extends AbstractDocumentParser
         return "application/mgf";
     }
 
-    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         return resource.getName().toLowerCase().endsWith(".mgf") || getMediaType().equals(resource.getContentType());
     }

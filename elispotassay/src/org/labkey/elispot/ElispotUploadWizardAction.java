@@ -346,7 +346,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         public static final String NAME = "ANTIGEN";
         private Map<String, Map<DomainProperty, String>> _postedAntigenProperties = null;
 
-        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (!form.isResetDefaultValues() && validatePost(form, errors))
                 return handleSuccessfulPost(form, errors);
@@ -412,7 +412,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         public static final String NAME = "ANALYTE";
         private Map<String, Map<DomainProperty, String>> _postedAnalyteProperties = null;
 
-        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView handleStep(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (!form.isResetDefaultValues() && validatePost(form, errors))
                 return handleSuccessfulPost(form, errors);

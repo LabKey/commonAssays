@@ -61,7 +61,7 @@ public class MassSpecMetadataController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ActionURL getRedirectURL(Object o)
         {
             return getContainer().getStartURL(getUser());
         }

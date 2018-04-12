@@ -175,7 +175,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     }
 
     @NotNull
-    public static ExpSampleSet getFractionSampleSet(AssayRunUploadContext context) throws ExperimentException
+    public static ExpSampleSet getFractionSampleSet(AssayRunUploadContext context)
     {
         String domainURI = getDomainURIForPrefix(context.getProtocol(), FRACTION_DOMAIN_PREFIX);
         ExpSampleSet sampleSet=null;

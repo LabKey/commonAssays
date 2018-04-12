@@ -416,7 +416,7 @@ public class AnalysisScriptController extends BaseFlowController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
 
-        public boolean doAction(Object o, BindException errors) throws Exception
+        public boolean doAction(Object o, BindException errors)
         {
             return true;
         }

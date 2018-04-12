@@ -715,7 +715,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         public static final String NAME = "ANALYTE";
 
         @Override
-        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (!form.isResetDefaultValues())
             {

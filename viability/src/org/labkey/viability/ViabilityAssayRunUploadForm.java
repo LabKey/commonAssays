@@ -202,7 +202,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     /**
      * Returns a Map of PoolId to a Map of property names and values.
      */
-    public Map<String, Map<String, Object>> getReRunResults() throws ExperimentException
+    public Map<String, Map<String, Object>> getReRunResults()
     {
         Map<String, Map<String, Object>> ret = Collections.emptyMap();
 

@@ -124,7 +124,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         new SqlSelector(ExperimentService.get().getSchema(), dataRowSql).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> map) throws SQLException
+            public void exec(Map<String, Object> map)
             {
                 String containerId = (String) map.get("Container");
                 if (null == containerId)
@@ -253,7 +253,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         new SqlSelector(ExperimentService.get().getSchema(), antigenRowSql).forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> map) throws SQLException
+            public void exec(Map<String, Object> map)
             {
                 String containerId = (String) map.get("Container");
                 if (null == containerId)
@@ -605,7 +605,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         new TableSelector(runDataTable).forEach(new Selector.ForEachBlock<RunDataRow>()
         {
             @Override
-            public void exec(RunDataRow row) throws SQLException
+            public void exec(RunDataRow row)
             {
                 ExpRun run = ExperimentService.get().getExpRun(row.getRunId());
                 if (null != row.getAntigenWellgroupName() && null != row.getWellgroupName())
@@ -632,7 +632,7 @@ public class ElispotUpgradeCode implements UpgradeCode
         new TableSelector(OntologyManager.getTinfoPropertyDescriptor(), pdFilter, null).forEach(new Selector.ForEachBlock<PropertyDescriptor>()
         {
             @Override
-            public void exec(PropertyDescriptor pd) throws SQLException
+            public void exec(PropertyDescriptor pd)
             {
                 OntologyManager.deletePropertyDescriptor(pd);
             }

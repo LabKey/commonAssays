@@ -58,7 +58,7 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
             _iter = runs.iterator();
         }
 
-        ResultSet getNextResultSet() throws SQLException
+        ResultSet getNextResultSet()
         {
             SQLFragment sql;
             String joinSql;

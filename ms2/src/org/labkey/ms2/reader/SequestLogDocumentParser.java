@@ -31,7 +31,7 @@ import java.io.InputStream;
 public class SequestLogDocumentParser extends AbstractDocumentParser
 {
     @Override
-    protected void parseContent(InputStream stream, ContentHandler handler) throws IOException, SAXException
+    protected void parseContent(InputStream stream, ContentHandler handler)
     {
         // Intentionally no-op as the content isn't very interesting for full text search
     }
@@ -41,7 +41,7 @@ public class SequestLogDocumentParser extends AbstractDocumentParser
         return "text/plain";
     }
 
-    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         return SequestSearchTask.SEQUEST_LOG_FILE_TYPE.isType(resource.getName());
     }

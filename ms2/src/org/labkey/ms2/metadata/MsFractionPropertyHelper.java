@@ -55,7 +55,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         return _names;
     }
 
-    protected File getObject(int index, Map<DomainProperty, String> sampleProperties) throws DuplicateMaterialException
+    protected File getObject(int index, Map<DomainProperty, String> sampleProperties)
     {
         return _files.get(index);
     }

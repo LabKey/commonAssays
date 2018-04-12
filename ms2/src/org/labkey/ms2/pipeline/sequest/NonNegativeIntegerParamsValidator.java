@@ -55,7 +55,7 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         private SequestParam _property;
 
         @Before
-        public void setUp() throws Exception
+        public void setUp()
         {
             _property = new SequestParam(
                 100,                                                       //sortOrder

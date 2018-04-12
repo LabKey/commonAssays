@@ -178,7 +178,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     @Override
-    public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
+    public Set<String> getTitrationsForAnalyte(String analyteName)
     {
         Set<String> result = _titrationsByAnalyte.get(analyteName);
         if (result == null)
@@ -189,7 +189,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     @Override
-    public List<Titration> getTitrations() throws ExperimentException
+    public List<Titration> getTitrations()
     {
         return _titrations;
     }
@@ -254,7 +254,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     @Override
-    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    public List<SinglePointControl> getSinglePointControls()
     {
         return _singlePointControls;
     }

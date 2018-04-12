@@ -159,7 +159,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         /**
          * Clear out all of the existing analytes for this exclusion in the database
          */
-        private void deleteAnalytes(Map<String, Object> oldRowMap) throws SQLException
+        private void deleteAnalytes(Map<String, Object> oldRowMap)
         {
             Integer rowId = getPKValue(oldRowMap);
             if (rowId != null)

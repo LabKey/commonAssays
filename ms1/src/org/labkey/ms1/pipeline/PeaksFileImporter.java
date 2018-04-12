@@ -51,7 +51,7 @@ public class PeaksFileImporter extends DefaultHandler
         _transaction = transaction;
     }
 
-    public void startDocument() throws SAXException
+    public void startDocument()
     {
         _log.info("Starting to parse and import peaks file " + _expData.getFile().toURI());
         _msStart = System.currentTimeMillis();
@@ -84,30 +84,23 @@ public class PeaksFileImporter extends DefaultHandler
 
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
     {
-        try
-        {
-            if(qName.equalsIgnoreCase("peakdata"))
-                _idFile = onFile(attributes);
-            else if(qName.equalsIgnoreCase("software"))
-                _idSoftware = onSoftware(attributes, _idFile);
-            else if(qName.equalsIgnoreCase("parameter"))
-                onParameter(attributes, _idSoftware);
-            else if(qName.equalsIgnoreCase("scan"))
-                _idScan = onScan(attributes, _idFile);
-            else if(qName.equalsIgnoreCase("calibrationParameters"))
-                onCalibrations(attributes, _idScan);
-            else if(qName.equalsIgnoreCase("peakFamily"))
-                _idPeakFamily = onPeakFamily(attributes, _idScan);
-            else if(qName.equalsIgnoreCase("peak"))
-                onPeak(attributes, _idScan, _idPeakFamily);
-        }
-        catch(SQLException e)
-        {
-            throw new SAXException(MS1Manager.get().getAllErrors(e));
-        }
+        if(qName.equalsIgnoreCase("peakdata"))
+            _idFile = onFile(attributes);
+        else if(qName.equalsIgnoreCase("software"))
+            _idSoftware = onSoftware(attributes, _idFile);
+        else if(qName.equalsIgnoreCase("parameter"))
+            onParameter(attributes, _idSoftware);
+        else if(qName.equalsIgnoreCase("scan"))
+            _idScan = onScan(attributes, _idFile);
+        else if(qName.equalsIgnoreCase("calibrationParameters"))
+            onCalibrations(attributes, _idScan);
+        else if(qName.equalsIgnoreCase("peakFamily"))
+            _idPeakFamily = onPeakFamily(attributes, _idScan);
+        else if(qName.equalsIgnoreCase("peak"))
+            onPeak(attributes, _idScan, _idPeakFamily);
     }
 
-    protected Integer onFile(Attributes attrs) throws SQLException
+    protected Integer onFile(Attributes attrs)
     {
         //build up a map from our initialization parameters
         Map<String,Object> map = newMap("FileId");
@@ -122,7 +115,7 @@ public class PeaksFileImporter extends DefaultHandler
         return (Integer)map.get("FileId");
     }
 
-    protected Integer onSoftware(Attributes attrs, Integer idFile) throws SQLException
+    protected Integer onSoftware(Attributes attrs, Integer idFile)
     {
         Map<String,Object> map = newMap("SoftwareId", "FileId", idFile);
         map.put("Name", attrs.getValue("name"));
@@ -133,7 +126,7 @@ public class PeaksFileImporter extends DefaultHandler
         return (Integer)map.get("SoftwareId");
     }
 
-    protected void onParameter(Attributes attrs, Integer idSoftware) throws SQLException, SAXException
+    protected void onParameter(Attributes attrs, Integer idSoftware) throws SAXException
     {
         HashMap<String,Object> map = newMap("SoftwareId", idSoftware);
         map.put("Name", attrs.getValue("name"));
@@ -142,7 +135,7 @@ public class PeaksFileImporter extends DefaultHandler
         Table.insert(_user, MS1Manager.get().getTable(MS1Manager.TABLE_SOFTWARE_PARAMS), map);
     }
 
-    protected Integer onScan(Attributes attrs, Integer idFile) throws SQLException, SAXException
+    protected Integer onScan(Attributes attrs, Integer idFile) throws SAXException
     {
         Map<String, Object> map = newMap("ScanId", "FileId", idFile);
         map.put("Scan", getAttrAsInteger(attrs, "scanNumber"));
@@ -154,7 +147,7 @@ public class PeaksFileImporter extends DefaultHandler
         return (Integer)map.get("ScanId");
     }
 
-    protected void onCalibrations(Attributes attrs, Integer idScan) throws SQLException, SAXException
+    protected void onCalibrations(Attributes attrs, Integer idScan) throws SAXException
     {
         //each attribute is a spearate calibration parameter for the given scan
         //where the attribute name is the calibration parameter name, and value is value
@@ -168,7 +161,7 @@ public class PeaksFileImporter extends DefaultHandler
         }
     }
 
-    protected Integer onPeakFamily(Attributes attrs, Integer idScan) throws SQLException, SAXException
+    protected Integer onPeakFamily(Attributes attrs, Integer idScan) throws SAXException
     {
         Map<String, Object> map = newMap("PeakFamilyId", "ScanId", idScan);
         map.put("MzMono", getAttrAsDouble(attrs, "mzMonoisotopic"));
@@ -178,7 +171,7 @@ public class PeaksFileImporter extends DefaultHandler
         return (Integer)map.get("PeakFamilyId");
     }
 
-    protected void onPeak(Attributes attrs, Integer idScan, Integer idPeakFamily) throws SQLException, SAXException
+    protected void onPeak(Attributes attrs, Integer idScan, Integer idPeakFamily) throws SAXException
     {
         //since the database is setup for a m:m relationship between peaks
         //and peak families, we need to insert the peak and then also

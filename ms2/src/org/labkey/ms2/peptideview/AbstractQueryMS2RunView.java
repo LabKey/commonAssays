@@ -92,7 +92,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         return ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
     }
 
-    public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run) throws ServletException
+    public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
         NestableQueryView queryView = createGridView(false, null, null, true);
         RenderContext context = queryView.createDataView().getRenderContext();

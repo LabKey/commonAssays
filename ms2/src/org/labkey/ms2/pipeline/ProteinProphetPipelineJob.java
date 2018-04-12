@@ -39,7 +39,7 @@ public class ProteinProphetPipelineJob extends PipelineJob
 {
     private final File _file;
 
-    public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file, PipeRoot root) throws SQLException
+    public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file, PipeRoot root)
     {
         super(ProteinProphetPipelineProvider.NAME, info, root);
         _file = file;

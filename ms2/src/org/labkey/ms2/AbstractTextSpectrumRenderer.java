@@ -53,7 +53,7 @@ public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
     }
 
     @Override
-    public void render(SpectrumIterator iter) throws IOException
+    public void render(SpectrumIterator iter)
     {
         while (iter.hasNext())
         {
@@ -77,7 +77,7 @@ public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         // Flush the writer
         _out.flush();

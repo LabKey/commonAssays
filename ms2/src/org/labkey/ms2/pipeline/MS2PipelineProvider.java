@@ -64,7 +64,7 @@ public class MS2PipelineProvider extends PipelineProvider
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out) throws Exception
+        protected void renderView(Object model, PrintWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))

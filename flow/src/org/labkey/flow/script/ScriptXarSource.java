@@ -63,7 +63,7 @@ public class ScriptXarSource extends XarSource
         }
     }
 
-    public String canonicalizeDataFileURL(String dataFileURL) throws XarFormatException
+    public String canonicalizeDataFileURL(String dataFileURL)
     {
         return FileUtil.getAbsoluteCaseSensitivePathString(getXarContext().getContainer(), FileUtil.createUri(dataFileURL));   //new File(dataFileURL).toURI().toString();
     }
@@ -88,12 +88,12 @@ public class ScriptXarSource extends XarSource
         return false;
     }
 
-    public ExperimentArchiveDocument getDocument() throws XmlException, IOException
+    public ExperimentArchiveDocument getDocument()
     {
         return _doc;
     }
 
-    public File getLogFile() throws IOException
+    public File getLogFile()
     {
         return _logFile;
     }

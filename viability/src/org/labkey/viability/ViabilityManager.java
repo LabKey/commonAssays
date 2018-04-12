@@ -118,7 +118,7 @@ public class ViabilityManager
      * @param resultRowId The row id of the result to get.
      * @return The ViabilityArrayResult for the row.
      */
-    public static ViabilityResult getResult(Container c, int resultRowId) throws SQLException
+    public static ViabilityResult getResult(Container c, int resultRowId)
     {
         ViabilityResult result = new TableSelector(ViabilitySchema.getTableInfoResults()).getObject(resultRowId, ViabilityResult.class);
         if (result == null)
@@ -139,7 +139,7 @@ public class ViabilityManager
                 new Sort("SpecimenIndex")).getArray(String.class);
     }
 
-    static Map<PropertyDescriptor, Object> getProperties(int objectID) throws SQLException
+    static Map<PropertyDescriptor, Object> getProperties(int objectID)
     {
         assert objectID > 0;
         OntologyObject obj = OntologyManager.getOntologyObject(objectID);
@@ -216,7 +216,7 @@ public class ViabilityManager
         }
     }
 
-    private static void insertProperties(Container c, ViabilityResult result) throws SQLException, ValidationException
+    private static void insertProperties(Container c, ViabilityResult result) throws ValidationException
     {
         Map<PropertyDescriptor, Object> properties = result.getProperties();
         if (properties == null || properties.size() == 0)
@@ -460,7 +460,7 @@ public class ViabilityManager
     /**
      * Delete a ViabilityResult row.
      */
-    public static void deleteResult(Container c, ViabilityResult result) throws SQLException
+    public static void deleteResult(Container c, ViabilityResult result)
     {
         assert result.getRowID() > 0;
         assert result.getObjectID() > 0;

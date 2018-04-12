@@ -263,7 +263,7 @@ public class ProtocolFileBuilder
         }
     }
 
-    protected List<String> getDesignIds(Connection connection) throws PipelineJobException, SQLException
+    protected List<String> getDesignIds(Connection connection) throws SQLException
     {
         ResultSet rs = null;
         List<String> list = new ArrayList<>();

@@ -92,7 +92,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public boolean doAction(Object o, BindException errors) throws Exception
+        public boolean doAction(Object o, BindException errors)
         {
             return true;
         }
@@ -102,7 +102,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     public class ManageAction extends SimpleViewAction
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             MicroarrayUserSchema schema = new MicroarrayUserSchema(getUser(), getContainer());
             QueryView view = schema.createView(getViewContext(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, errors);
@@ -122,7 +122,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     public class DeleteAction extends FormViewAction<DeleteFeatureAnnotationSetForm>
     {
         @Override
-        public boolean handlePost(DeleteFeatureAnnotationSetForm form, BindException errors) throws Exception
+        public boolean handlePost(DeleteFeatureAnnotationSetForm form, BindException errors)
         {
             DbSchema schema = MicroarrayUserSchema.getSchema();
             DbScope scope = schema.getScope();
@@ -144,7 +144,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(DeleteFeatureAnnotationSetForm deleteFeatureAnnotationSetForm, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(DeleteFeatureAnnotationSetForm deleteFeatureAnnotationSetForm, boolean reshow, BindException errors)
         {
             throw new UnsupportedOperationException();
         }
@@ -206,7 +206,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(FeatureAnnotationSetForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(FeatureAnnotationSetForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/microarray/view/uploadFeatureAnnotation.jsp", form, errors);
         }
@@ -280,7 +280,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     public class DetailsAction extends SimpleViewAction<FeatureAnnotationSetForm>
     {
         @Override
-        public ModelAndView getView(FeatureAnnotationSetForm form, BindException errors) throws Exception
+        public ModelAndView getView(FeatureAnnotationSetForm form, BindException errors)
         {
             Integer rowId = form.getRowId();
             if (rowId == null)

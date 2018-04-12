@@ -68,7 +68,7 @@ public class MS1Controller extends SpringActionController
 {
     static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS1Controller.class);
 
-    public MS1Controller() throws Exception
+    public MS1Controller()
     {
         super();
         setActionResolver(_actionResolver);
@@ -96,7 +96,7 @@ public class MS1Controller extends SpringActionController
             setViewContext(ctx);
         }
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS1Module.EXP_RUN_TYPE);
         }
@@ -326,7 +326,7 @@ public class MS1Controller extends SpringActionController
             super(PeaksViewForm.class);
         }
 
-        protected PeaksView createQueryView(PeaksViewForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected PeaksView createQueryView(PeaksViewForm form, BindException errors, boolean forExport, String dataRegion)
         {
             Feature feature = form.getFeature();
             return new PeaksView(getViewContext(), new MS1Schema(getUser(), getContainer()),
@@ -417,7 +417,7 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowMS2PeptideAction extends SimpleViewAction<MS2PeptideForm>
     {
-        public ModelAndView getView(MS2PeptideForm form, BindException errors) throws Exception
+        public ModelAndView getView(MS2PeptideForm form, BindException errors)
         {
             if(null == form || form.getFeatureId() < 0)
                 return HttpView.redirect(new ActionURL(MS1Controller.BeginAction.class, getContainer()));
@@ -583,7 +583,7 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class ShowAdminAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             AdminViewContext ctx = new AdminViewContext(MS1Manager.get().getDeletedFileCount());
             if(getProperty("purgeNow", "false").equals("true") && ctx.getNumDeleted() > 0)
@@ -618,7 +618,7 @@ public class MS1Controller extends SpringActionController
             super(PeptideFilterSearchForm.class);
         }
 
-        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion) throws Exception
+        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion)
         {
             if(FeaturesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
                 return getFeaturesView(pepSearchForm, bindErrors, forExport);
@@ -636,7 +636,7 @@ public class MS1Controller extends SpringActionController
             throw new NotFoundException("Unknown data region: " + dataRegion);
         }
 
-        protected FeaturesView getFeaturesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected FeaturesView getFeaturesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport)
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
             baseFilters.add(new ContainerFeaturesFilter(getContainer(), form.isSubfolders(), getUser()));
@@ -652,7 +652,7 @@ public class MS1Controller extends SpringActionController
             return featuresView;
         }
 
-        protected PeptidesView getPeptidesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected PeptidesView getPeptidesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport)
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
@@ -865,7 +865,7 @@ public class MS1Controller extends SpringActionController
             super(SimilarSearchForm.class);
         }
 
-        protected FeaturesView getFeaturesView(SimilarSearchForm form, BindException bindErrors, boolean forExport) throws Exception
+        protected FeaturesView getFeaturesView(SimilarSearchForm form, BindException bindErrors, boolean forExport)
         {
             ArrayList<FeaturesFilter> baseFilters = new ArrayList<>();
             baseFilters.add(new ContainerFeaturesFilter(getContainer(), form.isSubfolders(), getUser()));
@@ -917,7 +917,7 @@ public class MS1Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class CompareRunsSetupAction extends SimpleViewAction<CompareRunsSetupForm>
     {
-        public ModelAndView getView(CompareRunsSetupForm compareRunsSetupForm, BindException errors) throws Exception
+        public ModelAndView getView(CompareRunsSetupForm compareRunsSetupForm, BindException errors)
         {
             Set<String> selectedRuns = DataRegionSelection.getSelected(getViewContext(), true);
             if (selectedRuns.size() < 1)
@@ -976,7 +976,7 @@ public class MS1Controller extends SpringActionController
             super(CompareRunsForm.class);
         }
 
-        protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected CompareRunsView createQueryView(CompareRunsForm form, BindException errors, boolean forExport, String dataRegion)
         {
             return new CompareRunsView(new MS1Schema(getUser(), getContainer()), form.getRunIdArray(), getViewContext().getActionURL());
         }
@@ -1162,14 +1162,14 @@ public class MS1Controller extends SpringActionController
             _scanLast = scanLast;
         }
 
-        public Feature getFeature() throws SQLException
+        public Feature getFeature()
         {
             if(null == _feature && _featureId >= 0)
                 _feature = MS1Manager.get().getFeature(_featureId);
             return _feature;
         }
 
-        public ExpRun getExpRun() throws SQLException
+        public ExpRun getExpRun()
         {
             if(null == _expRun)
             {

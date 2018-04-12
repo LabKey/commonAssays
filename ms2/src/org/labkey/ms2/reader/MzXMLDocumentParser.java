@@ -33,7 +33,7 @@ public class MzXMLDocumentParser extends AbstractXMLDocumentParser
         return "application/mzxml";
     }
 
-    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         if (resource.getName().toLowerCase().endsWith(".mzxml") || getMediaType().equals(resource.getContentType()))
         {

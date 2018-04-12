@@ -347,7 +347,7 @@ public class ProtocolComposite extends SearchFormComposite
     }
 
     @Override
-    public void syncFormToXml(ParamParser params) throws SearchFormException
+    public void syncFormToXml(ParamParser params)
     {
         
     }

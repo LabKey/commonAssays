@@ -37,7 +37,7 @@ public class MageMLDocumentParser extends AbstractXMLDocumentParser
     }
 
     @Override
-    public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
+    public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         if (MicroarrayModule.MAGE_ML_INPUT_TYPE.getFileType().isType(resource.getName()) ||
             getMediaType().equals(resource.getContentType()))

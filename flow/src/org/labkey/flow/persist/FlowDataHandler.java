@@ -55,12 +55,12 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> datas)
     {
         FlowManager.get().deleteData(datas);
     }
 
-    public void exportFile(ExpData data, File dataFile, User user, OutputStream out) throws ExperimentException
+    public void exportFile(ExpData data, File dataFile, User user, OutputStream out)
     {
         try
         {

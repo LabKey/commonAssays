@@ -162,7 +162,7 @@ public class ProteinController extends SpringActionController
         {
         }
 
-        public boolean handlePost(Object o, BindException errors) throws Exception
+        public boolean handlePost(Object o, BindException errors)
         {
             Set<Integer> setIds = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
             for (Integer id : setIds)

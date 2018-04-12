@@ -298,7 +298,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         }
 
         @Test
-        public void testUWSpecificParams() throws SequestParamsException
+        public void testUWSpecificParams()
         {
             Map<String, String> params = new HashMap<>();
             params.put("pipeline, database", "Bovine_mini.fasta");
@@ -309,7 +309,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         }
 
         @Test
-        public void testVariableTermModification() throws SequestParamsException
+        public void testVariableTermModification()
         {
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap("residue, potential modification mass", "50.43@[,90.12@]"), _root);
             spb.initDynamicMods();
@@ -318,7 +318,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         }
 
         @Test
-        public void testStaticTermModification() throws SequestParamsException
+        public void testStaticTermModification()
         {
             UWSequestParamsBuilder spb = new UWSequestParamsBuilder(Collections.singletonMap(ParameterNames.STATIC_MOD, "50.43@[,90.12@]"), _root);
             spb.initStaticMods();
@@ -345,7 +345,7 @@ public class UWSequestParamsBuilder extends SequestParamsBuilder
         }
 
         @Test
-        public void testAlternateXmlInputs() throws SequestParamsException
+        public void testAlternateXmlInputs()
         {
             Map<String, String> paramMap = new HashMap<>();
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);

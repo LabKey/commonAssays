@@ -234,7 +234,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public boolean handlePost(EditAttributeForm form, BindException errors) throws Exception
+        public boolean handlePost(EditAttributeForm form, BindException errors)
         {
             FlowManager.get().updateAttribute(getContainer(),
                     _entry.getType(), _entry.getRowId(), form.getName(),
@@ -307,7 +307,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public boolean handlePost(CreateAliasForm form, BindException errors) throws Exception
+        public boolean handlePost(CreateAliasForm form, BindException errors)
         {
             FlowManager.get().ensureAlias(form.getAttributeType(), form.getRowId(), form.getAlias(), true);
             return true;
@@ -332,13 +332,13 @@ public class AttributeController extends BaseFlowController
     public class DeleteAction extends ConfirmAction<AttributeForm>
     {
         @Override
-        public ModelAndView getConfirmView(AttributeForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(AttributeForm form, BindException errors)
         {
             return null;
         }
 
         @Override
-        public boolean handlePost(AttributeForm form, BindException errors) throws Exception
+        public boolean handlePost(AttributeForm form, BindException errors)
         {
             return false;
         }
@@ -367,7 +367,7 @@ public class AttributeController extends BaseFlowController
     public class DeleteUnusedAction extends ConfirmAction<ReturnUrlForm>
     {
         @Override
-        public ModelAndView getConfirmView(ReturnUrlForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(ReturnUrlForm form, BindException errors)
         {
             DeleteUnusedBean bean = new DeleteUnusedBean();
             bean.unusedKeywords = FlowManager.get().getUnused(getContainer(), AttributeType.keyword);
@@ -385,7 +385,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public boolean handlePost(ReturnUrlForm form, BindException errors) throws Exception
+        public boolean handlePost(ReturnUrlForm form, BindException errors)
         {
             FlowManager.get().deleteUnused(getContainer());
             return true;
@@ -408,13 +408,13 @@ public class AttributeController extends BaseFlowController
     {
 
         @Override
-        public ModelAndView getConfirmView(AttributeForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(AttributeForm form, BindException errors)
         {
             return null;
         }
 
         @Override
-        public boolean handlePost(AttributeForm form, BindException errors) throws Exception
+        public boolean handlePost(AttributeForm form, BindException errors)
         {
             return false;
         }

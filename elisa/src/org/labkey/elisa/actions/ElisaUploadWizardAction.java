@@ -115,7 +115,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         addResetButton(form, insertView, bbar);
     }
 
-    protected InsertView getConcentrationsView(ElisaRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException, ExperimentException
+    protected InsertView getConcentrationsView(ElisaRunUploadForm form, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
                 "lsid", Collections.emptyList(), errorReshow, ConcentrationStepHandler.NAME, form, errors);
@@ -169,7 +169,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             return NAME;
         }
 
-        public ModelAndView handleStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView handleStep(ElisaRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
             {

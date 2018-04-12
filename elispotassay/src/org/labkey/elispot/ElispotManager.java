@@ -159,7 +159,7 @@ public class ElispotManager
                 forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> object) throws SQLException
+            public void exec(Map<String, Object> object)
             {
                 String antigenHeading = (String)object.get("AntigenHeading");
                 if (null != antigenHeading)

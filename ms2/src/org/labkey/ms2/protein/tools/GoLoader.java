@@ -90,13 +90,13 @@ public abstract class GoLoader
     }
 
 
-    public static GoLoader getFtpLoader() throws IOException, ServletException
+    public static GoLoader getFtpLoader()
     {
         return ensureOneLoader(new FtpGoLoader());
     }
 
 
-    public static GoLoader getStreamLoader(InputStream is) throws IOException, ServletException
+    public static GoLoader getStreamLoader(InputStream is)
     {
         return ensureOneLoader(new StreamGoLoader(is));
     }
@@ -174,7 +174,7 @@ public abstract class GoLoader
 
     private static final int GO_BATCH_SIZE = 5000;
 
-    private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException, ServletException
+    private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException
     {
         int orgLineCount = 0;
         String[] cols = bean.cols;
@@ -408,7 +408,7 @@ public abstract class GoLoader
             _is = is;
         }
 
-        protected InputStream getInputStream() throws IOException, ServletException
+        protected InputStream getInputStream()
         {
             return _is;
         }

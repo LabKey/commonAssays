@@ -301,7 +301,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             super(runs, filter, sort);
         }
 
-        public ResultSet getNextResultSet() throws SQLException
+        public ResultSet getNextResultSet()
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
 

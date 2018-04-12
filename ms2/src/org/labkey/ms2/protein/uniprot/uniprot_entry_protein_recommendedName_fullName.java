@@ -26,7 +26,7 @@ import org.xml.sax.Attributes;
 
 public class uniprot_entry_protein_recommendedName_fullName extends CharactersParseActions
 {
-    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
         {

@@ -86,7 +86,7 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out) throws Exception
+        protected void renderView(Object model, PrintWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -121,33 +121,33 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         return XTandemSearchProtocolFactory.get();
     }
 
-    public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException
+    public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
     }
 
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
+    public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
-    public List<String> getTaxonomyList(Container container) throws IOException
+    public List<String> getTaxonomyList(Container container)
     {
         //"X! Tandem does not support Mascot style taxonomy.
         return null;
     }
 
-    public Map<String, List<String>> getEnzymes(Container container) throws IOException
+    public Map<String, List<String>> getEnzymes(Container container)
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }
 
-    public Map<String, String> getResidue0Mods(Container container) throws IOException
+    public Map<String, String> getResidue0Mods(Container container)
     {
         return SearchFormUtil.getDefaultStaticMods();
     }
 
-    public Map<String, String> getResidue1Mods(Container container) throws IOException
+    public Map<String, String> getResidue1Mods(Container container)
     {
         return SearchFormUtil.getDefaultDynamicMods();
     }
@@ -156,7 +156,7 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "pipelineXTandem";
     }
 
-    public void ensureEnabled(Container container) throws PipelineValidationException
+    public void ensureEnabled(Container container)
     {
         // Always enabled.
     }

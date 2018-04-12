@@ -213,7 +213,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description) throws ExperimentException
+    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description)
     {
         // UNDONE: could just call FlowProtocol.ensureForContainer() ?
         throw new UnsupportedOperationException();
@@ -429,7 +429,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void deleteProtocol(ExpProtocol protocol, User user) throws ExperimentException
+    public void deleteProtocol(ExpProtocol protocol, User user)
     {
         // Do nothing. Flow protocol can't be deleted.
     }
@@ -459,7 +459,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts) throws ExperimentException
+    public void setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
     {
         throw new UnsupportedOperationException();
     }
@@ -472,7 +472,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void setSaveScriptFiles(ExpProtocol protocol, boolean save) throws ExperimentException
+    public void setSaveScriptFiles(ExpProtocol protocol, boolean save)
     {
         throw new UnsupportedOperationException();
     }

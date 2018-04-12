@@ -205,7 +205,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     }
 
     @Override
-    public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
+    public Set<String> getTitrationsForAnalyte(String analyteName)
     {
         Set<String> set = new HashSet<>();
        
@@ -222,7 +222,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     }
 
     @Override
-    public List<Titration> getTitrations() throws ExperimentException
+    public List<Titration> getTitrations()
     {
         return _titrations;
     }
@@ -275,13 +275,13 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
 
 
     @Override
-    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    public List<SinglePointControl> getSinglePointControls()
     {
         return _singlePointControls;
     }
 
     @Override
-    public LuminexExcelParser getParser() throws ExperimentException
+    public LuminexExcelParser getParser()
     {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

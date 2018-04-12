@@ -73,7 +73,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderTitle(RenderContext ctx, Writer out) throws IOException
+    public void renderTitle(RenderContext ctx, Writer out)
     {
         // Don't render a title, to keep the column narrow
     }

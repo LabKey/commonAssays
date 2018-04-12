@@ -520,7 +520,7 @@ public class FlowController extends BaseFlowController
             return new JspView<>(FlowController.class, "flowAdmin.jsp", form, errors);
         }
 
-        public boolean handlePost(FlowAdminForm form, BindException errors) throws Exception
+        public boolean handlePost(FlowAdminForm form, BindException errors)
         {
             if (form.getWorkingDirectory() != null)
             {

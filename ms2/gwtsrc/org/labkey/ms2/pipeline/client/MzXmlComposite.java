@@ -130,7 +130,7 @@ public class MzXmlComposite extends SearchFormComposite
     }
 
     @Override
-    public void syncFormToXml(ParamParser params) throws SearchFormException
+    public void syncFormToXml(ParamParser params)
     {
 
     }

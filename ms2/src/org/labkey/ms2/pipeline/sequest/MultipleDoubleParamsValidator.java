@@ -59,7 +59,7 @@ public class MultipleDoubleParamsValidator extends AbstractMultipleValueParamsVa
         private SequestParam _property;
 
         @Before
-        public void setUp() throws Exception
+        public void setUp()
         {
             _property = new SequestParam(
                       91,                                                       //sortOrder

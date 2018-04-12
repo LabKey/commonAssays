@@ -474,7 +474,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     }
 
     @Override
-    public Parameter.ParameterMap deleteStatement(Connection conn) throws SQLException
+    public Parameter.ParameterMap deleteStatement(Connection conn)
     {
         throw new UnsupportedOperationException();
     }

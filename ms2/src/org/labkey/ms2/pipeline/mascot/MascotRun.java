@@ -148,7 +148,7 @@ public class MascotRun extends MS2Run
         {
             return new WebPartView(title) {
                 @Override
-                protected void renderView(Object model, PrintWriter out) throws Exception
+                protected void renderView(Object model, PrintWriter out)
                 {
                     out.write("<div>Use the 'Standard' grouping to view this information.</div>");
                 }

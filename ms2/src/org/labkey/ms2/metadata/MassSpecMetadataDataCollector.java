@@ -42,7 +42,6 @@ import java.util.Map;
  */
 public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpecMetadataAssayForm>
 {
-
     @Override
     protected Map<String, File> getCurrentFilesForDisplay(MassSpecMetadataAssayForm context)
     {

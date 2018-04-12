@@ -75,10 +75,6 @@ public class AttributeSetHelper
         {
             throw UnexpectedException.wrap(use);
         }
-        catch (SQLException e)
-        {
-            throw UnexpectedException.wrap(e);
-        }
     }
 
 
@@ -195,7 +191,7 @@ public class AttributeSetHelper
 
     }
 
-    private static void loadFromDb(final AttributeSet attrs, AttrObject obj, final boolean includeGraphBytes) throws SQLException
+    private static void loadFromDb(final AttributeSet attrs, AttrObject obj, final boolean includeGraphBytes)
     {
         FlowManager mgr = FlowManager.get();
         int rowId = obj.getRowId();

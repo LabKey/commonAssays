@@ -746,7 +746,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private void insertSinglePointControlAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, SinglePointControl> singlePointControls, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
-            throws ExperimentException
     {
         // Insert mappings for all of the controls
         for (SinglePointControl singlePointControl : singlePointControls.values())
@@ -917,84 +916,77 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         // Insert the curve fit values (EC50 and AUC)
-        try
+        // Look up any existing curve fits that might already be in the database
+        SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
+        curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), titration.getRowId());
+        CurveFit[] existingCurveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), filter, null).getArray(CurveFit.class);
+
+        // Keep track of the curve fits that should be part of this run
+        List<CurveFit> newCurveFits = new ArrayList<>();
+
+        // TODO this seems to be dependent on which data file the analyte record was associated with
+        String stdCurve = analyte.getStdCurve();
+        if (stdCurve != null)
         {
-            // Look up any existing curve fits that might already be in the database
-            SimpleFilter curveFitFilter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), analyte.getRowId());
-            curveFitFilter.addCondition(FieldKey.fromParts("TitrationId"), titration.getRowId());
-            CurveFit[] existingCurveFits = new TableSelector(LuminexProtocolSchema.getTableInfoCurveFit(), filter, null).getArray(CurveFit.class);
-
-            // Keep track of the curve fits that should be part of this run
-            List<CurveFit> newCurveFits = new ArrayList<>();
-
-            // TODO this seems to be dependent on which data file the analyte record was associated with
-            String stdCurve = analyte.getStdCurve();
-            if (stdCurve != null)
+            FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
+            if (fitParams != null)
             {
-                FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
-                if (fitParams != null)
+                CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, StatsService.CurveFitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                if (fit != null)
                 {
-                    CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, StatsService.CurveFitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
-                    if (fit != null)
-                    {
-                        newCurveFits.add(fit);
-                    }
-                }
-                else
-                {
-                    LOGGER.warn("Could not parse standard curve: " + stdCurve);
+                    newCurveFits.add(fit);
                 }
             }
-
-            if (!wellGroup.getWellData(false).isEmpty())
+            else
             {
-                LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
-                CurveFit rumi5PLFit = importRumiCurveFit(StatsService.CurveFitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
-                if (rumi5PLFit != null)
-                {
-                    newCurveFits.add(rumi5PLFit);
-                }
-                CurveFit rumi4PLFit = importRumiCurveFit(StatsService.CurveFitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
-                if (rumi4PLFit != null)
-                {
-                    newCurveFits.add(rumi4PLFit);
-                }
-
-                // Do the trapezoidal AUC calculation
-                Double auc = calculateTrapezoidalAUC(wellGroup, curveFitInput);
-
-                // issue 15042
-                if (auc != null && auc.isNaN())
-                    throw new ExperimentException("Error: unable to calculate Trapezoidal AUC for " + titration.getName() + " " + analyte.getName());
-
-                CurveFit fit = new CurveFit();
-                fit.setAUC(auc);
-                fit.setAnalyteId(analyte.getRowId());
-                fit.setTitrationId(titration.getRowId());
-                fit.setCurveType("Trapezoidal");
-
-                fit = insertOrUpdateCurveFit(user, fit, existingCurveFits);
-                newCurveFits.add(fit);
+                LOGGER.warn("Could not parse standard curve: " + stdCurve);
             }
-
-            // Look through the original set of curve fits. If there are any that don't have an updated curve fit,
-            // delete them.
-            for (CurveFit existingCurveFit : existingCurveFits)
-            {
-                CurveFit newFit = findMatch(existingCurveFit, newCurveFits);
-                if (newFit == null)
-                {
-                    Table.delete(LuminexProtocolSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
-                }
-            }
-
-            if (titration.isStandard() || titration.isQcControl())
-                insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
         }
-        catch (FitFailedException e)
+
+        if (!wellGroup.getWellData(false).isEmpty())
         {
-            throw new ExperimentException(e);
+            LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
+            CurveFit rumi5PLFit = importRumiCurveFit(StatsService.CurveFitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+            if (rumi5PLFit != null)
+            {
+                newCurveFits.add(rumi5PLFit);
+            }
+            CurveFit rumi4PLFit = importRumiCurveFit(StatsService.CurveFitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+            if (rumi4PLFit != null)
+            {
+                newCurveFits.add(rumi4PLFit);
+            }
+
+            // Do the trapezoidal AUC calculation
+            Double auc = calculateTrapezoidalAUC(wellGroup, curveFitInput);
+
+            // issue 15042
+            if (auc != null && auc.isNaN())
+                throw new ExperimentException("Error: unable to calculate Trapezoidal AUC for " + titration.getName() + " " + analyte.getName());
+
+            CurveFit fit = new CurveFit();
+            fit.setAUC(auc);
+            fit.setAnalyteId(analyte.getRowId());
+            fit.setTitrationId(titration.getRowId());
+            fit.setCurveType("Trapezoidal");
+
+            fit = insertOrUpdateCurveFit(user, fit, existingCurveFits);
+            newCurveFits.add(fit);
         }
+
+        // Look through the original set of curve fits. If there are any that don't have an updated curve fit,
+        // delete them.
+        for (CurveFit existingCurveFit : existingCurveFits)
+        {
+            CurveFit newFit = findMatch(existingCurveFit, newCurveFits);
+            if (newFit == null)
+            {
+                Table.delete(LuminexProtocolSchema.getTableInfoCurveFit(), existingCurveFit.getRowId());
+            }
+        }
+
+        if (titration.isStandard() || titration.isQcControl())
+            insertOrUpdateAnalyteTitrationQCFlags(user, expRun, protocol, analyteTitration, analyte, titration, isotype, conjugate, newCurveFits);
     }
 
     /** Walks the newCurveFits list to find fit for the same analyte/titration/curve type combination */
@@ -1054,7 +1046,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** @return null if we can't find matching Rumi curve fit data */
     @Nullable
-    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits) throws FitFailedException
+    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits)
     {
         if (fitType != StatsService.CurveFitType.FIVE_PARAMETER && fitType != StatsService.CurveFitType.FOUR_PARAMETER)
         {
@@ -1158,7 +1150,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCSummaryData() throws FitFailedException, ExperimentException
+        public void testAUCSummaryData() throws ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<>();
@@ -1204,7 +1196,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         @Test
-        public void testAUCRawData() throws FitFailedException, ExperimentException
+        public void testAUCRawData() throws ExperimentException
         {
             // test calculation using dilutions for a control
             List<LuminexWell> wells = new ArrayList<>();
@@ -1394,7 +1386,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     @NotNull
     private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
-            throws FitFailedException
     {
         CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
@@ -1424,7 +1415,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     private CurveFit createCurveFit(Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source)
-            throws FitFailedException
     {
         CurveFit fit = new CurveFit();
         fit.setAnalyteId(analyte.getRowId());
@@ -1571,7 +1561,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** @return Name->Titration */
-    private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations) throws ExperimentException
+    private Map<String, Titration> insertTitrations(ExpRun expRun, User user, List<Titration> titrations)
     {
         Map<String, Titration> result = new CaseInsensitiveHashMap<>();
 
@@ -1599,7 +1589,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** @return Name->SinglePointControl */
-        private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls) throws ExperimentException
+        private Map<String, SinglePointControl> insertSinglePointControls(ExpRun expRun, User user, List<SinglePointControl> singlePointControls)
         {
             Map<String, SinglePointControl> result = new CaseInsensitiveHashMap<>();
 
@@ -1645,16 +1635,16 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         excelRunPropsList.add(excelRunPropsByPropertyId);
         OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
         {
-            public String beforeImportObject(Map<String, Object> map) throws SQLException
+            public String beforeImportObject(Map<String, Object> map)
             {
                 return data.getLSID();
             }
 
-            public void afterBatchInsert(int currentRow) throws SQLException
+            public void afterBatchInsert(int currentRow)
             {
             }
 
-            public void updateStatistics(int currentRow) throws SQLException
+            public void updateStatistics(int currentRow)
             {
             }
         }, domain, excelRunPropsList, true);
@@ -1951,7 +1941,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    public void beforeDeleteData(List<ExpData> data) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> data)
     {
         List<Integer> ids = new ArrayList<>();
         data.forEach(d -> ids.add(d.getRowId()));

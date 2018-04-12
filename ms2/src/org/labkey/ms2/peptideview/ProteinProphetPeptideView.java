@@ -472,7 +472,6 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     }
 
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String requestedPeptideColumns)
-            throws SQLException
     {
         String peptideColumns = getPeptideColumnNames(requestedPeptideColumns);
         DataRegion peptideRegion = createPeptideDataRegion(requestedPeptideColumns);

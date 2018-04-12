@@ -49,7 +49,7 @@ public class PeaksView extends QueryView
         this(ctx, schema, run, feature, feature.getScanFirst().intValue(), feature.getScanLast().intValue());
     }
 
-    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, int scanFirst, int scanLast) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, int scanFirst, int scanLast)
     {
         super(schema);
         assert null != schema : "Null schema passed to PeaksView!";

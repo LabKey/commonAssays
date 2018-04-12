@@ -406,7 +406,7 @@ public class PeptideQuantitation
         }
     }
 
-    public boolean resetRanges(int lightFirstScan, int lightLastScan, int heavyFirstScan, int heavyLastScan, int charge) throws SQLException, IOException
+    public boolean resetRanges(int lightFirstScan, int lightLastScan, int heavyFirstScan, int heavyLastScan, int charge) throws IOException
     {
         if (lightFirstScan > lightLastScan || heavyFirstScan > heavyLastScan)
         {

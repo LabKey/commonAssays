@@ -34,7 +34,7 @@ public class uniprot_entry extends ParseActions
 {
     public static final int BATCH_SIZE = 5000;
 
-    public void beginElement(ParseContext context, Attributes attrs) throws SAXException
+    public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
         {

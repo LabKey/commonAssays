@@ -246,7 +246,7 @@ public class ProteinManager
         return protein != null ? protein.getSequence() : null;
     }
 
-    public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds) throws SQLException
+    public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds)
     {
         if ((null == peptide) || ("".equals(peptide.getTrimmedPeptide())) || (peptide.getProteinHits() < 1))
             return Collections.emptyList();

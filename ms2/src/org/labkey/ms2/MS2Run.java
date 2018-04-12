@@ -561,7 +561,7 @@ public abstract class MS2Run implements Serializable
         return null;
     }
 
-    protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping) throws Exception
+    protected ModelAndView getAdditionalPeptideSummaryView(ViewContext viewContext, MS2Peptide peptide, String grouping)
     {
         return null;
     }

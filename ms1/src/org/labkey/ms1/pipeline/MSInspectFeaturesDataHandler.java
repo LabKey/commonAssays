@@ -350,7 +350,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
 
     }
 
-    protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws SQLException, ExperimentException
+    protected int insertFeaturesFile(User user, DbSchema schema, ExpData data) throws ExperimentException
     {
         HashMap<String,Object> map = new HashMap<>();
         map.put("FileId",null);
@@ -366,7 +366,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
         return ((Integer) (outMap.get("FileId"))).intValue();
     } //insertFeaturesFile()
 
-    protected void insertSoftwareInfo(Map<String, String> comments, int idFile, User user, DbSchema schema) throws SQLException
+    protected void insertSoftwareInfo(Map<String, String> comments, int idFile, User user, DbSchema schema)
     {
         HashMap<String,Object> software = new HashMap<>();
         software.put("SoftwareId", null);
@@ -458,7 +458,7 @@ public class MSInspectFeaturesDataHandler extends AbstractExperimentDataHandler
      * @throws ExperimentException Thrown if required value is not present
      * @throws SQLException Thrown if there is a database exception
      */
-    protected void setParam(PreparedStatement pstmt, int paramIndex, int rowNum, ColumnBinding binding, Map row) throws ExperimentException, SQLException
+    protected void setParam(PreparedStatement pstmt, int paramIndex, int rowNum, ColumnBinding binding, Map row) throws ExperimentException
     {
         if(null == binding)
             return;

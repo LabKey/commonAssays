@@ -40,7 +40,7 @@ import java.util.Map;
 public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
 {
     @Override
-    public ApiResponse execute(GraphSelectedForm form, BindException errors) throws Exception
+    public ApiResponse execute(GraphSelectedForm form, BindException errors)
     {
         Map<Pair<Integer, String>, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
 

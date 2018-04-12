@@ -689,7 +689,7 @@ public class PepXmlLoader extends MS2XmlLoader
         }
 
 
-        protected void processEndElement(int index) throws XMLStreamException
+        protected void processEndElement(int index)
         {
             switch (index)
             {

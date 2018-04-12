@@ -128,7 +128,7 @@ public abstract class AbstractRunCompareView extends QueryView
     protected abstract String getGroupingColumnName();
 
     public GWTComparisonResult createCompareResult()
-            throws SQLException, IOException, ServletException
+            throws IOException
     {
         List<FieldKey> cols = new ArrayList<>();
         cols.add(FieldKey.fromParts(getGroupingColumnName()));

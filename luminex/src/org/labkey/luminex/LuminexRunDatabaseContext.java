@@ -113,7 +113,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     }
 
     @Override
-    public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
+    public Set<String> getTitrationsForAnalyte(String analyteName)
     {
         Analyte analyte = getAnalyte(analyteName);
 
@@ -129,7 +129,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     }
 
     @Override
-    public List<Titration> getTitrations() throws ExperimentException
+    public List<Titration> getTitrations()
     {
         SQLFragment sql = new SQLFragment("SELECT t.* FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
@@ -153,7 +153,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     }
 
     @Override
-    public List<SinglePointControl> getSinglePointControls() throws ExperimentException
+    public List<SinglePointControl> getSinglePointControls()
     {
         SQLFragment sql = new SQLFragment("SELECT spc.* FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");

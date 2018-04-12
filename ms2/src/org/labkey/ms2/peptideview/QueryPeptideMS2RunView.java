@@ -104,7 +104,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     }
 
     @Override
-    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException
+    public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         NestableQueryView queryView = createGridView(false, null, null, true);
         FieldKey desiredFK;
@@ -250,7 +250,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
     }
 
-    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException
+    public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);

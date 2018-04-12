@@ -225,7 +225,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             return ret.getHour() * 60 * 60 + ret.getMinute() * 60 + ret.getSecond() + ret.getFraction().doubleValue();
         }
 
-        public float[][] getData() throws IOException
+        public float[][] getData()
         {
             return _data;
         }

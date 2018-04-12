@@ -52,7 +52,7 @@ public class RunListCache
 
     // We store just the list of run IDs, not the runs themselves. Even though we're
     // just storing the list, we do all error & security checks upfront to alert the user early.
-    public static int cacheSelectedRuns(boolean requireSameType, MS2Controller.RunListForm form, ViewContext ctx) throws ServletException, RunListException
+    public static int cacheSelectedRuns(boolean requireSameType, MS2Controller.RunListForm form, ViewContext ctx) throws RunListException
     {
         String selectionKey = ctx.getRequest().getParameter(DataRegionSelection.DATA_REGION_SELECTION_KEY);
         if (selectionKey == null)

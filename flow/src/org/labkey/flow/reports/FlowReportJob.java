@@ -54,7 +54,6 @@ public class FlowReportJob extends RReportJob
     FilterFlowReport _report;
 
     public FlowReportJob(FilterFlowReport report, ViewBackgroundInfo info, PipeRoot root)
-            throws SQLException
     {
         super(FlowPipelineProvider.NAME, info, report.getReportId(), root);
         _report = report;
@@ -222,12 +221,12 @@ public class FlowReportJob extends RReportJob
         _report.deleteSavedResults(getContainer());
     }
 
-    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws IOException, ValidationException, SQLException
+    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws ValidationException, SQLException
     {
         OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
         {
             @Override
-            public String beforeImportObject(Map<String, Object> map) throws SQLException
+            public String beforeImportObject(Map<String, Object> map)
             {
                 Object o = map.get("lsid");
                 if (o == null)
@@ -245,10 +244,12 @@ public class FlowReportJob extends RReportJob
             }
 
             @Override
-            public void afterBatchInsert(int currentRow) throws SQLException { }
+            public void afterBatchInsert(int currentRow)
+            { }
 
             @Override
-            public void updateStatistics(int currentRow) throws SQLException { }
+            public void updateStatistics(int currentRow)
+            { }
         };
 
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());

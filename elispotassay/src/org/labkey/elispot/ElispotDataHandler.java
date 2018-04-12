@@ -206,7 +206,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         }
     }
 
-    public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
     {
         return new ElispotFileParser(data, dataFile, info, log, context);
     }
@@ -263,7 +263,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     /**
      * Adds antigen wellgroup properties to the elispot data table.
      */
-    public static void populateAntigenDataProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap) throws ValidationException, ExperimentException
+    public static void populateAntigenDataProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap) throws ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
@@ -322,7 +322,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
      * Adds antigen wellgroup statistics to the antigen runs table (one row per sample)
      */
     public static void populateAntigenRunProperties(ExpRun run, Plate plate, PlateReader reader, Map<String, Object> propMap,
-                                                    boolean isUpgrade, boolean subtractBackground, boolean updateBackground) throws ValidationException, ExperimentException
+                                                    boolean isUpgrade, boolean subtractBackground, boolean updateBackground) throws ExperimentException
     {
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {

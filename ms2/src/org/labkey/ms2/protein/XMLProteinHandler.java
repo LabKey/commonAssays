@@ -210,7 +210,7 @@ public class XMLProteinHandler extends DefaultHandler
     /* info about parse state, passed to content handlers */
     private ParseContext _parseContext;
 
-    public void endDocument() throws SAXException
+    public void endDocument()
     {
         _loader.handleThreadStateChangeRequests();
     }
@@ -283,7 +283,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Ignorable whitespace.
      */
-    public void ignorableWhitespace(char ch[], int start, int length) throws SAXException
+    public void ignorableWhitespace(char ch[], int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
     }
@@ -291,7 +291,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Processing instruction.
      */
-    public void processingInstruction(String target, String data) throws SAXException
+    public void processingInstruction(String target, String data)
     {
         _loader.handleThreadStateChangeRequests();
         if (skipMe != null) return;
@@ -304,7 +304,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Start document.
      */
-    public void startDocument() throws SAXException
+    public void startDocument()
     {
         _loader.handleThreadStateChangeRequests();
     }

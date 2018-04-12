@@ -28,7 +28,7 @@ import java.util.Map;
 public class LuminexImportHelper implements OntologyManager.UpdateableTableImportHelper
 {
     @Override
-    public void afterImportObject(Map<String, Object> map) throws SQLException
+    public void afterImportObject(Map<String, Object> map)
     {
 
     }
@@ -40,19 +40,19 @@ public class LuminexImportHelper implements OntologyManager.UpdateableTableImpor
     }
 
     @Override
-    public String beforeImportObject(Map<String, Object> map) throws SQLException
+    public String beforeImportObject(Map<String, Object> map)
     {
         return (String)map.get("LSID");
     }
 
     @Override
-    public void afterBatchInsert(int currentRow) throws SQLException
+    public void afterBatchInsert(int currentRow)
     {
 
     }
 
     @Override
-    public void updateStatistics(int currentRow) throws SQLException
+    public void updateStatistics(int currentRow)
     {
         
     }

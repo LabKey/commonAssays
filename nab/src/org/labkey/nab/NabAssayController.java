@@ -212,7 +212,7 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             Module module = ModuleLoader.getInstance().getModule("Nab");
             NabUpgradeCode upgradeCode = new NabUpgradeCode();
@@ -470,7 +470,7 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(DeletePermission.class)
     public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
     {
-        public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors) throws Exception
+        public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors)
         {
             if (deleteRunForm.getRowId() == 0)
             {
@@ -680,7 +680,7 @@ public class NabAssayController extends SpringActionController
     public class SampleSpreadsheetTemplateAction extends ExportAction<SampleSpreadsheetForm>
     {
         @Override
-        public void export(SampleSpreadsheetForm sampleSpreadsheetForm, HttpServletResponse response, BindException errors) throws Exception
+        public void export(SampleSpreadsheetForm sampleSpreadsheetForm, HttpServletResponse response, BindException errors)
         {
             ViewContext context = getViewContext();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(sampleSpreadsheetForm.getProtocol());
@@ -839,7 +839,7 @@ public class NabAssayController extends SpringActionController
         private boolean _editMode;
 
         @Override
-        public ModelAndView getView(NabQCForm form, BindException errors) throws Exception
+        public ModelAndView getView(NabQCForm form, BindException errors)
         {
             _runId = form.getRowId();
             _editMode = form.isEdit();
@@ -1309,7 +1309,7 @@ public class NabAssayController extends SpringActionController
     public class GetExcludedWellsAction extends ApiAction<RenderAssayBean>
     {
         @Override
-        public ApiResponse execute(RenderAssayBean form, BindException errors) throws Exception
+        public ApiResponse execute(RenderAssayBean form, BindException errors)
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());

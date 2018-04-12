@@ -338,14 +338,7 @@ public class ViabilityResult
     {
         if (properties == null)
         {
-            try
-            {
-                properties = ViabilityManager.getProperties(getObjectID());
-            }
-            catch (SQLException e)
-            {
-                throw new RuntimeSQLException(e);
-            }
+            properties = ViabilityManager.getProperties(getObjectID());
         }
         return properties;
     }

@@ -140,7 +140,7 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public ApiResponse execute(FORM form, BindException errors) throws Exception
+        public ApiResponse execute(FORM form, BindException errors)
         {
             initReport(form);
             r.updateProperties(getViewContext(), getPropertyValues(), errors, false);
@@ -242,7 +242,7 @@ public class ReportsController extends BaseFlowController
             return new JspView<>(ReportsController.class, "copyReport.jsp", Pair.of(form, r), errors);
         }
 
-        public boolean handlePost(CopyForm form, BindException errors) throws Exception
+        public boolean handlePost(CopyForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
             r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, null);
@@ -276,7 +276,7 @@ public class ReportsController extends BaseFlowController
         IdForm _form;
         FlowReport r;
 
-        public ModelAndView getConfirmView(IdForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(IdForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
 
@@ -305,7 +305,7 @@ public class ReportsController extends BaseFlowController
             return form.getReturnActionURL(new ActionURL(BeginAction.class, getContainer()));
         }
 
-        public boolean handlePost(IdForm form, BindException errors) throws Exception
+        public boolean handlePost(IdForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
             ReportService.get().deleteReport(getViewContext(), r);

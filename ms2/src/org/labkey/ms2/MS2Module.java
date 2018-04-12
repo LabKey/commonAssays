@@ -445,7 +445,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         }
     }
 
-    public void indexDeleted() throws SQLException
+    public void indexDeleted()
     {
     }
 }

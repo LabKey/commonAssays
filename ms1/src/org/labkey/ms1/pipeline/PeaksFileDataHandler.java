@@ -153,7 +153,7 @@ public class PeaksFileDataHandler extends AbstractExperimentDataHandler
     }
 
 
-    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
+    public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID)
     {
         if(null == newData || null == user) //anything else?
             return;

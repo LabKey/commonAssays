@@ -59,7 +59,7 @@ public class MicroarrayController extends SpringActionController
             MicroarrayBulkPropertiesTemplateAction.class,
             MicroarrayUploadWizardAction.class);
 
-    public MicroarrayController() throws Exception
+    public MicroarrayController()
     {
         super();
         setActionResolver(_actionResolver);
@@ -88,7 +88,7 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunType.INSTANCE);
             result.setShowExportButtons(true);
@@ -105,7 +105,7 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPendingMageMLFilesAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new PendingMageMLFilesView(getViewContext());
         }
@@ -176,7 +176,7 @@ public class MicroarrayController extends SpringActionController
     public class MatrixQueryAction extends SimpleViewAction
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new JspView<>("/org/labkey/microarray/view/ExpressionMatrixQuery.jsp");
         }

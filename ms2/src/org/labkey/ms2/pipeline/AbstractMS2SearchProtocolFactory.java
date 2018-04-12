@@ -84,7 +84,7 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 
     protected class ResourceDefaultsReader extends DefaultsReader
     {
-        public Reader createReader() throws IOException
+        public Reader createReader()
         {
             String resourceStream = getDefaultParametersResource();
             InputStream is = getClass().getClassLoader().getResourceAsStream(resourceStream);

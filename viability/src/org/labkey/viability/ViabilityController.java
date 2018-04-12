@@ -39,7 +39,7 @@ public class ViabilityController extends SpringActionController
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ViabilityController.class, ViabilityAssayUploadWizardAction.class);
 
-    public ViabilityController() throws Exception
+    public ViabilityController()
     {
         setActionResolver(_actionResolver);
     }
@@ -47,7 +47,7 @@ public class ViabilityController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        public ActionURL getRedirectURL(Object o)
         {
             return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
         }
@@ -57,13 +57,13 @@ public class ViabilityController extends SpringActionController
     public class RecalculateSpecimenAggregatesAction extends ConfirmAction<ProtocolIdForm>
     {
         @Override
-        public ModelAndView getConfirmView(ProtocolIdForm protocolIdForm, BindException errors) throws Exception
+        public ModelAndView getConfirmView(ProtocolIdForm protocolIdForm, BindException errors)
         {
             return new HtmlView("Recalculate all specimen aggregates for this assay?");
         }
 
         @Override
-        public boolean handlePost(ProtocolIdForm protocolIdForm, BindException errors) throws Exception
+        public boolean handlePost(ProtocolIdForm protocolIdForm, BindException errors)
         {
             ExpProtocol protocol = protocolIdForm.getProtocol(false);
             ViabilityManager.updateSpecimenAggregates(getUser(), protocol.getContainer(), protocolIdForm.getProvider(), protocol, null);

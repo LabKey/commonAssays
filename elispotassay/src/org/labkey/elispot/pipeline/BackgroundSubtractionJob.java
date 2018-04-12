@@ -67,7 +67,7 @@ public class BackgroundSubtractionJob extends PipelineJob
     public static final String PROCESSING_STATUS = "Processing";
     Set<String> _runs = new HashSet<>();
 
-    public BackgroundSubtractionJob(String provider, ViewBackgroundInfo info, PipeRoot root, Set<String> runs) throws IOException, SQLException
+    public BackgroundSubtractionJob(String provider, ViewBackgroundInfo info, PipeRoot root, Set<String> runs) throws IOException
     {
         super(provider, info, root);
 

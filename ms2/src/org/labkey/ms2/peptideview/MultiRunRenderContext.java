@@ -43,7 +43,7 @@ public class MultiRunRenderContext extends RenderContext
     }
 
     @Override
-    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, Map<String,Object> parameters, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async) throws SQLException
+    protected Results selectForDisplay(TableInfo table, Collection<ColumnInfo> columns, Map<String,Object> parameters, SimpleFilter filter, Sort sort, int maxRows, long offset, boolean async)
     {
         // XXX: we're ignoring offset for now
         ResultSet rs = new MultiRunResultSet(_runs, table, columns, parameters, filter, sort, maxRows, getCache());
@@ -72,7 +72,7 @@ public class MultiRunRenderContext extends RenderContext
         }
 
 
-        ResultSet getNextResultSet() throws SQLException
+        ResultSet getNextResultSet()
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());
             // XXX: we're ignoring offset for now

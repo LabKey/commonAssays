@@ -123,7 +123,7 @@ public class LuminexController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
@@ -140,7 +140,7 @@ public class LuminexController extends SpringActionController
         private ExpProtocol _protocol;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolIdForm form, BindException errors)
         {
             _protocol = form.getProtocol();
             AssayProvider provider = form.getProvider();
@@ -238,7 +238,7 @@ public class LuminexController extends SpringActionController
         private ExpProtocol _protocol;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolIdForm form, BindException errors)
         {
             _protocol = form.getProtocol();
 
@@ -269,7 +269,7 @@ public class LuminexController extends SpringActionController
         private ExpProtocol _protocol;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolIdForm form, BindException errors)
         {
             _protocol = form.getProtocol();
 
@@ -299,7 +299,7 @@ public class LuminexController extends SpringActionController
         private LeveyJenningsForm _form;
 
         @Override
-        public ModelAndView getView(LeveyJenningsForm form, BindException errors) throws Exception
+        public ModelAndView getView(LeveyJenningsForm form, BindException errors)
         {
             _form = form;
 
@@ -331,7 +331,7 @@ public class LuminexController extends SpringActionController
         private ProtocolIdForm _form;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolIdForm form, BindException errors)
         {
             _form = form;
             VBox result = new VBox();
@@ -365,7 +365,7 @@ public class LuminexController extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(DefaultValuesForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(DefaultValuesForm form, boolean reshow, BindException errors)
         {
             ExpProtocol protocol = form.getProtocol();
 
@@ -384,7 +384,7 @@ public class LuminexController extends SpringActionController
         }
 
         @Override
-        public boolean handlePost(DefaultValuesForm form, BindException errors) throws Exception
+        public boolean handlePost(DefaultValuesForm form, BindException errors)
         {
             ExpProtocol protocol = form.getProtocol();
 
@@ -672,7 +672,7 @@ public class LuminexController extends SpringActionController
             return form.getReturnActionURL();
         }
 
-        protected void deleteObjects(DeleteForm form) throws SQLException, ExperimentException, ServletException, InvalidKeyException, BatchValidationException, QueryUpdateServiceException
+        protected void deleteObjects(DeleteForm form) throws SQLException, InvalidKeyException, BatchValidationException, QueryUpdateServiceException
         {
             List<Map<String, Object>> keys = new ArrayList<>();
             Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
@@ -696,7 +696,7 @@ public class LuminexController extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(DeleteForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(DeleteForm form, boolean reshow, BindException errors)
         {
             return new GuideSetConfirmDeleteView(form);
         }
@@ -901,7 +901,7 @@ public class LuminexController extends SpringActionController
         private ExpProtocol _protocol;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolIdForm form, BindException errors)
         {
             _protocol = form.getProtocol();
 

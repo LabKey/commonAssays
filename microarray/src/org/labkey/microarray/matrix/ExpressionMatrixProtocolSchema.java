@@ -64,15 +64,7 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     public List<Map> getDistinctSampleIds()
     {
         List<Map> distinctSampleIds = null;
-        try
-        {
-            distinctSampleIds = MicroarrayManager.get().getDistinctSamples(getProtocol());
-        }
-        catch (SQLException e)
-        {
-            // NEED COMMENT - why doesn't this rethrow?
-            Logger.getLogger(ExpressionMatrixProtocolSchema.class).warn(e);
-        }
+        distinctSampleIds = MicroarrayManager.get().getDistinctSamples(getProtocol());
         return distinctSampleIds;
     }
 
@@ -86,5 +78,4 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     {
         return MicroarrayUserSchema.getSchema().getTable(FEATURE_DATA_TABLE_NAME);
     }
-
 }

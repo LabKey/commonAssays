@@ -134,7 +134,6 @@ public class SimpleXMLEventRewriter
     }
 
     public void handleDiscard(XMLEvent event)
-        throws XMLStreamException
     {
         // Discard; take no action
     }
@@ -290,7 +289,6 @@ public class SimpleXMLEventRewriter
          * Add a string valued attribute
          */
         public void addAttribute(String name, String value)
-            throws XMLStreamException
         {
             if (null == attrs)
                 attrs = new ArrayList<>();

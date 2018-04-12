@@ -93,7 +93,7 @@ public class ElispotController extends SpringActionController
             ElispotUploadWizardAction.class
         );
 
-    public ElispotController() throws Exception
+    public ElispotController()
     {
         super();
         setActionResolver(_actionResolver);
@@ -102,7 +102,7 @@ public class ElispotController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
@@ -120,7 +120,7 @@ public class ElispotController extends SpringActionController
         private ExpRun _run;
         private boolean _hasRunFilter;
 
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors)
         {
             _run = ExperimentService.get().getExpRun(form.getRowId());
             if (_run == null || !_run.getContainer().equals(getContainer()))
@@ -213,7 +213,7 @@ public class ElispotController extends SpringActionController
     }
 
     private List<WellInfo> createWellInfoList(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                              PlateTemplate template, PlateReader reader) throws SQLException, ExperimentException
+                                              PlateTemplate template, PlateReader reader)
     {
         List<WellInfo> wellInfos = new ArrayList<>();
 
@@ -282,7 +282,7 @@ public class ElispotController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class RunDetailRedirectAction extends SimpleRedirectAction<DetailsForm>
     {
-        public ActionURL getRedirectURL(DetailsForm form) throws Exception
+        public ActionURL getRedirectURL(DetailsForm form)
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
             if (run == null)
@@ -302,7 +302,7 @@ public class ElispotController extends SpringActionController
     public class GetPlateSummary extends ApiAction<DetailsForm>
     {
         @Override
-        public ApiResponse execute(DetailsForm form, BindException errors) throws Exception
+        public ApiResponse execute(DetailsForm form, BindException errors)
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
 

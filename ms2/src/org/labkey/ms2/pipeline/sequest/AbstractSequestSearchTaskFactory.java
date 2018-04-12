@@ -104,7 +104,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         }
     }
 
-    public void afterPropertiesSet() throws Exception
+    public void afterPropertiesSet()
     {
         PipelineJobService.RemoteServerProperties props = PipelineJobService.get().getRemoteServerProperties();
 

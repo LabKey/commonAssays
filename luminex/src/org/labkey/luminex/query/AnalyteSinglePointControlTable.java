@@ -226,7 +226,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
             }
 
             @Override
-            protected AnalyteSinglePointControl get(User user, Container container, Pair<Integer, Integer> key) throws QueryUpdateServiceException
+            protected AnalyteSinglePointControl get(User user, Container container, Pair<Integer, Integer> key)
             {
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("AnalyteId"), key.getKey());
                 filter.addCondition(FieldKey.fromParts("SinglePointControlId"), key.getValue());

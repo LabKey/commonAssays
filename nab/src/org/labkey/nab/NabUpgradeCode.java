@@ -95,7 +95,7 @@ public class NabUpgradeCode implements UpgradeCode
     {
         public static final String PROCESSING_STATUS = "Processing";
 
-        public NabCrossPlateDilutionRepairJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException, SQLException
+        public NabCrossPlateDilutionRepairJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException
         {
             super(provider, info, root);
 

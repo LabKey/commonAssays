@@ -191,7 +191,7 @@ public class AffymetrixRunCreator extends DefaultAssayRunCreator<AffymetrixAssay
         }
     }
 
-    private File getExcelFile(AssayRunUploadContext context) throws IOException, ExperimentException
+    private File getExcelFile(AssayRunUploadContext context) throws ExperimentException
     {
         Map<String, File> files = context.getUploadedData();
         assert files.containsKey(AssayDataCollector.PRIMARY_FILE);

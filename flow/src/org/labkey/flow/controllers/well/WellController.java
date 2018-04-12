@@ -697,7 +697,7 @@ public class WellController extends BaseFlowController
             return root;
         }
 
-        public boolean handlePost(UpdateKeywordsForm form, BindException errors) throws Exception
+        public boolean handlePost(UpdateKeywordsForm form, BindException errors)
         {
             SQLFragment update = new SQLFragment();
             update.append("UPDATE flow.keyword SET value = CASE\n");
@@ -809,7 +809,7 @@ public class WellController extends BaseFlowController
                     "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(new ForEachBlock<String>()
             {
                 @Override
-                public void exec(String value) throws SQLException
+                public void exec(String value)
                 {
                     if (value != null)
                         set.add(value);

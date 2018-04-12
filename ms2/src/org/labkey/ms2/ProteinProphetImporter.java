@@ -300,7 +300,7 @@ public class ProteinProphetImporter
         return run;
     }
 
-    private MS2Run findExistingRun(Logger logger, Container c) throws IOException
+    private MS2Run findExistingRun(Logger logger, Container c)
     {
         ProteinProphetFile ppFile = MS2Manager.getProteinProphetFile(_file, c);
         if (ppFile != null)
@@ -320,7 +320,7 @@ public class ProteinProphetImporter
     }
 
     private ProteinProphetFile insertProteinProphetFile(ViewBackgroundInfo info, MS2Run run, SimpleXMLStreamReader parser)
-            throws IOException, SQLException, XMLStreamException
+            throws IOException, XMLStreamException
     {
         ProteinProphetFile file = new ProteinProphetFile(parser);
         file.setFilePath(_file.getCanonicalPath());
@@ -330,8 +330,7 @@ public class ProteinProphetImporter
         return file;
     }
 
-    private MS2Run importRun(ViewBackgroundInfo info, Logger log)
-        throws IOException, XMLStreamException, SQLException, ExperimentException
+    private MS2Run importRun(ViewBackgroundInfo info, Logger log) throws IOException, XMLStreamException
     {
         String pepXMLFileNameOriginal = getPepXMLFileName();
         File pepXMLFile = null;

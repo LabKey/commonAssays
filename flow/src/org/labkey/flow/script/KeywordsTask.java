@@ -46,7 +46,7 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
 
     @NotNull
     @Override
-    public RecordedActionSet run() throws PipelineJobException
+    public RecordedActionSet run()
     {
         PipelineJob job = getJob();
         FileAnalysisJobSupport support = job.getJobSupport(FileAnalysisJobSupport.class);

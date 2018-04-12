@@ -309,7 +309,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
             {

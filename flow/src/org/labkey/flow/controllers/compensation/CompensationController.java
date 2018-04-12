@@ -217,7 +217,7 @@ public class CompensationController extends BaseFlowController
         {
         }
 
-        public ModelAndView getConfirmView(ViewForm form, BindException errors) throws Exception
+        public ModelAndView getConfirmView(ViewForm form, BindException errors)
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (null == comp)
@@ -227,7 +227,7 @@ public class CompensationController extends BaseFlowController
             return FormPage.getView(CompensationController.class, form, "delete.jsp");
         }
 
-        public boolean handlePost(ViewForm viewForm, BindException errors) throws Exception
+        public boolean handlePost(ViewForm viewForm, BindException errors)
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (null == comp)

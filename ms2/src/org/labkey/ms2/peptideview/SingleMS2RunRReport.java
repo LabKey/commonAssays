@@ -44,7 +44,7 @@ public class SingleMS2RunRReport extends CustomRReport
         super(PARAMS, TYPE);
     }
 
-    protected QueryView getQueryView(ViewContext context) throws Exception
+    protected QueryView getQueryView(ViewContext context)
     {
         ActionURL url = context.getActionURL();
         MS2Run run;

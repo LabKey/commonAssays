@@ -81,7 +81,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
     }
 
     @Override
-    protected String getObject(int index, Map<DomainProperty, String> sampleProperties) throws DuplicateMaterialException
+    protected String getObject(int index, Map<DomainProperty, String> sampleProperties)
     {
         String analyteName = _analyteNames.get(index);
         if (analyteName != null)

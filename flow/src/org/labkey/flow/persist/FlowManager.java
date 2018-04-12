@@ -702,7 +702,7 @@ public class FlowManager
         selector.forEachMap(new ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> row) throws SQLException
+            public void exec(Map<String, Object> row)
             {
                 Integer rowId = (Integer)row.get("RowId");
                 String name = (String)row.get("Name");
@@ -742,7 +742,7 @@ public class FlowManager
         selector.forEachMap(new ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> row) throws SQLException
+            public void exec(Map<String, Object> row)
             {
                 Integer rowId = (Integer)row.get("RowId");
                 String name = (String)row.get("Name");
@@ -805,7 +805,7 @@ public class FlowManager
         selector.forEachMap(new ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> row) throws SQLException
+            public void exec(Map<String, Object> row)
             {
                 Integer rowId = (Integer)row.get("RowId");
                 String name = (String)row.get("Name");
@@ -921,7 +921,7 @@ public class FlowManager
         selector.forEachMap(new ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> row) throws SQLException
+            public void exec(Map<String, Object> row)
             {
                 Integer dataId = (Integer)row.get("DataId");
 
@@ -962,7 +962,7 @@ public class FlowManager
         selector.forEachMap(new ForEachBlock<Map<String, Object>>()
         {
             @Override
-            public void exec(Map<String, Object> row) throws SQLException
+            public void exec(Map<String, Object> row)
             {
                 Integer attributeRowId = (Integer)row.get("OriginalAttrId");
                 Integer dataId = (Integer)row.get("DataId");
@@ -1030,7 +1030,7 @@ public class FlowManager
     }
 
     
-    public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri) throws SQLException
+    public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri)
     {
         if (FlowDataHandler.instance.getPriority(ExperimentService.get().getExpData(data.getRowId())) != Handler.Priority.HIGH)
         {

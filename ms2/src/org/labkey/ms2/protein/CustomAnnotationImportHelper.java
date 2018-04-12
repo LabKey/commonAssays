@@ -72,11 +72,11 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
         return lsid;
     }
 
-    public void afterBatchInsert(int currentRow) throws SQLException
+    public void afterBatchInsert(int currentRow)
     {
     }
 
-    public void updateStatistics(int currentRow) throws SQLException
+    public void updateStatistics(int currentRow)
     {
     }
 }

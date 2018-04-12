@@ -117,7 +117,7 @@ public abstract class InputXmlComposite extends SearchFormComposite
     }
 
     @Override
-    public void syncFormToXml(ParamParser params) throws SearchFormException
+    public void syncFormToXml(ParamParser params)
     {
         throw new UnsupportedOperationException();
     }

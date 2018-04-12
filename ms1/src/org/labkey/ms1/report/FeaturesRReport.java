@@ -53,7 +53,7 @@ public class FeaturesRReport extends CustomRReport
         super(PARAMS, TYPE);
     }
 
-    protected FeaturesView getQueryView(ViewContext context) throws Exception
+    protected FeaturesView getQueryView(ViewContext context)
     {
         boolean restrictContainer = true;
         boolean forSearch = false;

@@ -351,7 +351,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         // We handle the closing inside the render() method
     }
