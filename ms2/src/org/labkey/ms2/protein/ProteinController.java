@@ -59,7 +59,7 @@ public class ProteinController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new CustomProteinListView(getViewContext(), true);
         }
@@ -89,7 +89,7 @@ public class ProteinController extends SpringActionController
             _showSequences = showSequences;
         }
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), _showSequences);
             QuerySettings settings = schema.getSettings(getViewContext(), "CustomAnnotation");
@@ -194,7 +194,7 @@ public class ProteinController extends SpringActionController
         {
         }
 
-        public ModelAndView getView(UploadAnnotationsForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(UploadAnnotationsForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form, errors);
         }

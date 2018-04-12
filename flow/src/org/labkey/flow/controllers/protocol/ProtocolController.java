@@ -73,7 +73,7 @@ public class ProtocolController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<ProtocolForm>
     {
-        public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             return HttpView.redirect(urlFor(ProtocolController.ShowProtocolAction.class));
         }
@@ -89,7 +89,7 @@ public class ProtocolController extends BaseFlowController
     {
         FlowProtocol protocol = null;
 
-        public ModelAndView getView(ProtocolForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
             return FormPage.getView(ProtocolController.class, form, errors, "showProtocol.jsp");
@@ -114,7 +114,7 @@ public class ProtocolController extends BaseFlowController
     {
         FlowProtocol protocol;
 
-        public ModelAndView getView(ShowSamplesForm form, BindException errors) throws Exception
+        public ModelAndView getView(ShowSamplesForm form, BindException errors)
         {
             protocol = form.getProtocol();
             return FormPage.getView(ProtocolController.class, form, errors, "showSamples2.jsp");
@@ -133,7 +133,7 @@ public class ProtocolController extends BaseFlowController
         {
         }
 
-        public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView(ProtocolController.class, form, "joinSampleSet.jsp");
@@ -190,7 +190,7 @@ public class ProtocolController extends BaseFlowController
         {
         }
 
-        public ModelAndView getView(EditFCSAnalysisNameForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(EditFCSAnalysisNameForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisName.jsp");
@@ -221,7 +221,7 @@ public class ProtocolController extends BaseFlowController
         {
         }
 
-        public ModelAndView getView(EditFCSAnalysisFilterForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(EditFCSAnalysisFilterForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisFilter.jsp");
@@ -253,7 +253,7 @@ public class ProtocolController extends BaseFlowController
         {
         }
 
-        public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors)
         {
             if (metadata == null)
                 metadata = getProtocol().getICSMetadata();

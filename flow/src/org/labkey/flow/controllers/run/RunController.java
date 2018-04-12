@@ -128,7 +128,7 @@ public class RunController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<RunForm>
     {
-        public ModelAndView getView(RunForm runForm, BindException errors) throws Exception
+        public ModelAndView getView(RunForm runForm, BindException errors)
         {
             return HttpView.redirect(urlFor(RunController.ShowRunAction.class));
         }
@@ -144,7 +144,7 @@ public class RunController extends BaseFlowController
     {
         FlowRun run;
 
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors)
         {
             run = form.getRun();
             if (run == null)
@@ -170,7 +170,7 @@ public class RunController extends BaseFlowController
         FlowExperiment experiment;
 //        FlowScript script;
 
-        public ModelAndView getView(RunsForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunsForm form, BindException errors)
         {
             experiment = form.getExperiment();
 //            script = form.getScript();
@@ -461,7 +461,7 @@ public class RunController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(ExportAnalysisForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ExportAnalysisForm form, boolean reshow, BindException errors)
         {
             if (_success)
             {

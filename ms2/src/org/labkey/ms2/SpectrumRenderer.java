@@ -28,5 +28,5 @@ public interface SpectrumRenderer extends AutoCloseable
 {
     public void render(SpectrumIterator iter) throws IOException;
 
-    void close() throws IOException;
+    void close();
 }

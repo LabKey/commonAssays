@@ -141,7 +141,7 @@ public class FlowController extends BaseFlowController
         FlowExperiment experiment;
         FlowRun run;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             FlowQuerySettings settings = new FlowQuerySettings(getViewContext().getBindPropertyValues(), "query");
             query = settings.getQueryName();
@@ -214,7 +214,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
-        public ModelAndView getView(StatusJobForm form, BindException errors) throws Exception
+        public ModelAndView getView(StatusJobForm form, BindException errors)
         {
             if (errors.hasErrors())
             {
@@ -332,7 +332,7 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class CancelJobAction extends SimpleViewAction<CancelJobForm>
     {
-        public ModelAndView getView(CancelJobForm form, BindException errors) throws Exception
+        public ModelAndView getView(CancelJobForm form, BindException errors)
         {
             if (form.getStatusFile() == null)
             {
@@ -409,7 +409,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
-        public ModelAndView getView(NewFolderForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(NewFolderForm form, boolean reshow, BindException errors)
         {
             checkPerms();
             getPageConfig().setFocusId("folderName");
@@ -514,7 +514,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
-        public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors)
         {
             getPageConfig().setFocusId("workingDirectory");
             return new JspView<>(FlowController.class, "flowAdmin.jsp", form, errors);
@@ -584,7 +584,7 @@ public class FlowController extends BaseFlowController
     public class DownloadAction extends SimpleViewAction<FlowDataObjectForm>
     {
         @Override
-        public ModelAndView getView(FlowDataObjectForm form, BindException errors) throws Exception
+        public ModelAndView getView(FlowDataObjectForm form, BindException errors)
         {
             FlowDataObject fdo = form.getFlowObject();
             if (fdo == null)

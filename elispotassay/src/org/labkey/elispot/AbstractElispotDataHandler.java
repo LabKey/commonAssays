@@ -76,7 +76,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         List<Map<String, Object>> getResults() throws ExperimentException;
     }
 
-    public abstract ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException;
+    public abstract ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context);
 
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {

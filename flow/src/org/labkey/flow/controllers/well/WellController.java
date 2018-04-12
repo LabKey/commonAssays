@@ -109,7 +109,7 @@ public class WellController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
         }
@@ -194,7 +194,7 @@ public class WellController extends BaseFlowController
     {
         FlowWell well;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             Page page = getPage("showWell.jsp");
             well = page.getWell();
@@ -259,7 +259,7 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(EditWellForm form, boolean reshow, BindException errors)
         {
             String returnUrl = getRequest().getParameter("editWellReturnUrl");
             form.editWellReturnUrl = returnUrl;
@@ -364,7 +364,7 @@ public class WellController extends BaseFlowController
     {
         FlowWell well;
 
-        public ModelAndView getView(ChooseGraphForm form, BindException errors) throws Exception
+        public ModelAndView getView(ChooseGraphForm form, BindException errors)
         {
             well = form.getWell();
             if (null == well)
@@ -687,7 +687,7 @@ public class WellController extends BaseFlowController
                 errors.rejectValue("keyword", ERROR_MSG, "keyword not found: " + form.keyword);
         }
 
-        public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors)
         {
             return new JspView<>(WellController.class, "bulkUpdate.jsp", form, errors);
         }

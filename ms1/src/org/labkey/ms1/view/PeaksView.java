@@ -44,7 +44,7 @@ import java.sql.SQLException;
  */
 public class PeaksView extends QueryView
 {
-    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature) throws SQLException
+    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature)
     {
         this(ctx, schema, run, feature, feature.getScanFirst().intValue(), feature.getScanLast().intValue());
     }

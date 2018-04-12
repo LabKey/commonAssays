@@ -68,7 +68,7 @@ public class CompensationController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<QueryForm>
     {
-        public ModelAndView getView(QueryForm form, BindException errors) throws Exception
+        public ModelAndView getView(QueryForm form, BindException errors)
         {
             QuerySettings settings = getFlowSchema().getSettings(getViewContext(), "comp");
             return new CompensationListView(settings);
@@ -91,7 +91,7 @@ public class CompensationController extends BaseFlowController
         {
         }
 
-        public ModelAndView getView(UploadCompensationForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(UploadCompensationForm form, boolean reshow, BindException errors)
         {
             return FormPage.getView(CompensationController.class, form, errors, "upload.jsp");
         }
@@ -189,7 +189,7 @@ public class CompensationController extends BaseFlowController
     {
         FlowCompensationMatrix _comp;
 
-        public ModelAndView getView(ViewForm form, BindException errors) throws Exception
+        public ModelAndView getView(ViewForm form, BindException errors)
         {
             _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             return FormPage.getView(CompensationController.class, form, "showCompensation.jsp");

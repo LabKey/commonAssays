@@ -104,7 +104,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<EditScriptForm>
     {
-        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditScriptForm form, BindException errors)
         {
             FlowScript script = form.getFlowScript();
             if (script == null)
@@ -147,7 +147,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditScriptAction extends FlowAction<EditScriptForm>
     {
-        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditScriptForm form, BindException errors)
         {
             ScriptParser.Error error = null;
             FlowScript script = getScript();
@@ -507,7 +507,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class UploadCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
-        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
         {
             if (isPost())
             {
@@ -526,7 +526,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class ChooseCompensationRunAction extends FlowAction<EditCompensationCalculationForm>
     {
-        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
         {
             if (isPost())
             {
@@ -558,7 +558,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
-        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
         {
             if (isPost())
             {
@@ -851,7 +851,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditSettingsAction extends FlowAction<EditSettingsForm>
     {
-        public ModelAndView getView(EditSettingsForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditSettingsForm form, BindException errors)
         {
             if (isPost() && form.canEdit())
             {
@@ -956,7 +956,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(DeletePermission.class)
     public class DeleteAction extends FlowAction<EditScriptForm>
     {
-        public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
+        public ModelAndView getView(EditScriptForm form, BindException errors)
         {
             if (isPost())
             {

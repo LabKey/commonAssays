@@ -84,7 +84,7 @@ public class ReportsController extends BaseFlowController
             setViewContext(context);
         }
         
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             return new BeginView();
         }
@@ -133,7 +133,7 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(FORM form, BindException errors) throws Exception
+        public ModelAndView getView(FORM form, BindException errors)
         {
             initReport(form);
             return r.getConfigureForm(getViewContext(), form.getReturnActionURL());
@@ -233,7 +233,7 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(CopyForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(CopyForm form, boolean reshow, BindException errors)
         {
             r = getReport(getViewContext(), form);
             if (form.getReportName() == null || form.getReportName().length() == 0)

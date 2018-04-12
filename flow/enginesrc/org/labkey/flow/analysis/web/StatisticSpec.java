@@ -429,7 +429,7 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
     public static class TestCase extends Assert
     {
         @Test
-        public void testParseSave11_1() throws Exception
+        public void testParseSave11_1()
         {
             for (String s : statitics11_1)
             {

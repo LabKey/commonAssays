@@ -120,7 +120,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         FlowScript script;
 
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             script = FlowScript.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             if (script == null)
@@ -196,7 +196,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         FlowScript script;
 
-        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
+        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             script = form.getProtocol();
             return chooseRunsToAnalyze(form, errors);
@@ -393,7 +393,7 @@ public class AnalysisScriptController extends BaseFlowController
     @RequiresPermission(InsertPermission.class)
     public class ConfirmImportRunsAction extends ImportRunsBaseAction
     {
-        public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
+        public ModelAndView getView(ImportRunsForm form, BindException errors)
         {
             return confirmRuns(form, errors);
         }
@@ -517,7 +517,7 @@ public class AnalysisScriptController extends BaseFlowController
     public class ImportAnalysisFromPipelineAction extends SimpleViewAction<PipelinePathForm>
     {
         @Override
-        public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
+        public ModelAndView getView(PipelinePathForm form, BindException errors)
         {
             File f = form.getValidatedSingleFile(getContainer());
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
@@ -553,7 +553,7 @@ public class AnalysisScriptController extends BaseFlowController
                 form.setWizardStep(ImportAnalysisStep.SELECT_ANALYSIS);
         }
 
-        public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors)
         {
             // When entering the wizard from the pipeline browser "Import Workspace" button,
             // we aren't POST'ing and so haven't parsed or validated the workspace yet.

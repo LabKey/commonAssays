@@ -181,7 +181,7 @@ public class MS1Controller extends SpringActionController
             return getFeaturesView((FORM)errors.getTarget(), null, false);
         }
 
-        protected abstract FeaturesView getFeaturesView(FORM form, BindException bindErrors, boolean forExport) throws Exception;
+        protected abstract FeaturesView getFeaturesView(FORM form, BindException bindErrors, boolean forExport);
     }
 
     public abstract class BasicFeaturesViewAction<FORM extends QueryViewAction.QueryExportForm> extends BaseFeaturesViewAction<FORM, FeaturesView>

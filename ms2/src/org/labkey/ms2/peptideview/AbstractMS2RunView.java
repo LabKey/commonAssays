@@ -90,9 +90,9 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public abstract void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries);
 
-    public abstract SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form) throws ServletException;
+    public abstract SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form);
 
-    public abstract Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run) throws ServletException;
+    public abstract Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run);
 
     public Container getContainer()
     {

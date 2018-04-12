@@ -194,19 +194,19 @@ public abstract class Workspace implements IWorkspace, Serializable
             final long[] len = new long[1];
             OutputStream counterStream = new OutputStream()
             {
-                public void write(int i) throws IOException
+                public void write(int i)
                 {
                     len[0] += 4;
                 }
 
                 @Override
-                public void write(byte[] bytes) throws IOException
+                public void write(byte[] bytes)
                 {
                     len[0] += bytes.length;
                 }
 
                 @Override
-                public void write(byte[] bytes, int off, int l) throws IOException
+                public void write(byte[] bytes, int off, int l)
                 {
                     len[0] += l;
                 }

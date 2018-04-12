@@ -87,7 +87,7 @@ public class MassSpecMetadataController extends SpringActionController
     {
         private ExpRun _run;
 
-        public ModelAndView getView(SearchLinkForm form, BindException errors) throws Exception
+        public ModelAndView getView(SearchLinkForm form, BindException errors)
         {
             _run = ExperimentService.get().getExpRun(form.getRunId());
             if (_run == null)

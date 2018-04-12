@@ -34,7 +34,7 @@ public interface MS2PipelineJobSupport extends FileAnalysisJobSupport
     /**
      * Returns a list of FASTA files to be searched.
      */
-    File[] getSequenceFiles() throws IOException;
+    File[] getSequenceFiles();
 
     /**
      * Returns true if the job should perform a combined analysis of
@@ -46,5 +46,5 @@ public interface MS2PipelineJobSupport extends FileAnalysisJobSupport
      * Returns true if the job should be treated as a single sample,
      * with full TPP analysis, and upload to web site.
      */
-    boolean isSamples() throws IOException;
+    boolean isSamples();
 }

@@ -340,7 +340,7 @@ public class WorkspaceParser
 
     static class FJErrorHandler implements ErrorHandler
     {
-        public void warning(SAXParseException exception) throws SAXException
+        public void warning(SAXParseException exception)
         {
             // ignore
         }

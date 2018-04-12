@@ -83,7 +83,7 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     /** @return the list of subdirectories that might contain sequence DBs */
     @Nullable
-    abstract public List<String> getSequenceDbPaths(File sequenceRoot) throws IOException;
+    abstract public List<String> getSequenceDbPaths(File sequenceRoot);
 
     /** @return the list of sequence DBs in a given directory */
     @Nullable
@@ -97,5 +97,5 @@ abstract public class AbstractMS2SearchPipelineProvider
 
     abstract public Map<String, String> getResidue0Mods(Container container) throws IOException;
 
-    abstract public Map<String, String> getResidue1Mods(Container container) throws IOException;
+    abstract public Map<String, String> getResidue1Mods(Container container);
 }

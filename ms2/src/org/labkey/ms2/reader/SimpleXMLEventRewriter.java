@@ -299,7 +299,6 @@ public class SimpleXMLEventRewriter
          * Add a char valued attribute
          */
         public void addAttribute(String name, char value)
-            throws XMLStreamException
         {
             addAttribute(name, "" + value);
         }
@@ -308,7 +307,6 @@ public class SimpleXMLEventRewriter
          * Add a int valued attribute
          */
         public void addAttribute(String name, int value)
-            throws XMLStreamException
         {
             addAttribute(name, "" + value);
         }
@@ -317,7 +315,6 @@ public class SimpleXMLEventRewriter
          * Add a floatvalued attribute
          */
         public void addAttribute(String name, float value)
-            throws XMLStreamException
         {
             addAttribute(name, String.format("%f", value));
         }
@@ -326,7 +323,6 @@ public class SimpleXMLEventRewriter
          * Add a double valued attribute
          */
         public void addAttribute(String name, double value)
-            throws XMLStreamException
         {
             addAttribute(name, String.format("%f", value));
         }
@@ -336,7 +332,6 @@ public class SimpleXMLEventRewriter
          * @throws NullPointerException if <code>value</code> is <code>null</code>.
          */
         public void addAttribute(String name, GregorianCalendar value)
-            throws XMLStreamException
         {
             addAttribute(name, "" + typeFactory.newXMLGregorianCalendar(value).toXMLFormat());
         }

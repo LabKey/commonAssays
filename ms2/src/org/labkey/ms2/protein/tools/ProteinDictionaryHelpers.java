@@ -291,7 +291,7 @@ public class ProteinDictionaryHelpers
     }
 
 
-    public static String getAnnotTypeWhereClause(GoTypes kind) throws SQLException
+    public static String getAnnotTypeWhereClause(GoTypes kind)
     {
         switch (kind)
         {

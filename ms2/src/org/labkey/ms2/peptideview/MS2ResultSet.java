@@ -110,7 +110,7 @@ public abstract class MS2ResultSet extends ResultSetWrapper
         return sql;
     }
 
-    abstract ResultSet getNextResultSet() throws SQLException;
+    abstract ResultSet getNextResultSet();
 
     public boolean next() throws SQLException
     {

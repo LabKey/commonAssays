@@ -257,7 +257,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         }
 
         /** @return the run associated with this exclusion */
-        protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException, SQLException;
+        protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException;
 
         /** Make sure that the analyte is part of the same data/run object that this exclusion is attached to */
         private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException, SQLException

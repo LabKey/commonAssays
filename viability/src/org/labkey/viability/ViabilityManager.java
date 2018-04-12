@@ -163,7 +163,7 @@ public class ViabilityManager
      * @param result
      * @throws SQLException
      */
-    public static void saveResult(User user, Container c, ViabilityResult result, int rowIndex) throws SQLException, ValidationException
+    public static void saveResult(User user, Container c, ViabilityResult result, int rowIndex) throws ValidationException
     {
         assert user != null && c != null : "user or container is null";
         assert result.getDataID() > 0 : "DataID is not set";

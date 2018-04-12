@@ -401,7 +401,7 @@ public class SubsetParser
         }
 
         @Test
-        public void testLexNull() throws Exception
+        public void testLexNull()
         {
             Lexer lexer = new Lexer(null);
             assertToken(EOF, lexer.next());
@@ -409,7 +409,7 @@ public class SubsetParser
         }
 
         @Test
-        public void testLexEmpty() throws Exception
+        public void testLexEmpty()
         {
             Lexer lexer = new Lexer("");
             assertToken(EOF, lexer.next());

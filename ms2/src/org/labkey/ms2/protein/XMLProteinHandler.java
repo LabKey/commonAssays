@@ -267,7 +267,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Characters.
      */
-    public void characters(char ch[], int start, int length) throws SAXException
+    public void characters(char ch[], int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
         if (skipMe != null) return;

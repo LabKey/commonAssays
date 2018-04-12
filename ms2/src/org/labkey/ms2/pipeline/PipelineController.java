@@ -559,7 +559,7 @@ public class PipelineController extends SpringActionController
             return true;      
         }
 
-        public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors)
         {
             if (!reshow || "".equals(form.getProtocol()))
                 form.setSaveProtocol(true);
@@ -660,7 +660,7 @@ public class PipelineController extends SpringActionController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
 
-        public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors)
         {
             ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get(
                     PipelineController.class, form, "ConfigureSequenceDB.jsp");

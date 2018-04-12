@@ -300,7 +300,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowListAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProbabilityProteinSearchForm.createDefault());
 
@@ -399,7 +399,7 @@ public class MS2Controller extends SpringActionController
     {
         private MS2Run _run;
 
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors)
         {
             if (errors.hasErrors())
                 return new SimpleErrorView(errors);
@@ -762,7 +762,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(RenameForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(RenameForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
             _returnURL = form.getReturnURLHelper(getShowRunURL(getUser(), getContainer(), form.getRun()));
@@ -975,7 +975,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new GoView();
         }
@@ -1050,7 +1050,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class GoStatusAction extends SimpleViewAction<GoForm>
     {
-        public ModelAndView getView(GoForm form, BindException errors) throws Exception
+        public ModelAndView getView(GoForm form, BindException errors)
         {
             return GoLoader.getCurrentStatus(form.getMessage());
         }
@@ -1232,7 +1232,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
 
@@ -1603,7 +1603,7 @@ public class MS2Controller extends SpringActionController
     public class ProteinDisambiguationRedirectAction extends SimpleViewAction<ProteinDisambiguationForm>
     {
         @Override
-        public ModelAndView getView(ProteinDisambiguationForm form, BindException errors) throws Exception
+        public ModelAndView getView(ProteinDisambiguationForm form, BindException errors)
         {
             if (form.getTargetURL() == null)
             {
@@ -2651,7 +2651,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
     {
-        public ModelAndView getView(FastaParsingForm form, BindException errors) throws Exception
+        public ModelAndView getView(FastaParsingForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/testFastaParsing.jsp", form);
         }
@@ -2694,7 +2694,7 @@ public class MS2Controller extends SpringActionController
     public class ShowProteinAdminAction extends FormViewAction<BlastForm>
     {
         @Override
-        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors)
         {
             JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
             blastView.setTitle("BLAST Configuration");
@@ -3422,7 +3422,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors)
         {
             MS2Run run = form.validateRun();
 
@@ -3479,7 +3479,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
     {
-        public ModelAndView getView(RunForm form, BindException errors) throws Exception
+        public ModelAndView getView(RunForm form, BindException errors)
         {
             MS2Run run = form.validateRun();
 
@@ -3536,7 +3536,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ShowMS2AdminAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             MS2AdminBean bean = new MS2AdminBean();
 
@@ -3613,7 +3613,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowAllRunsAction extends SimpleViewAction
     {
-        public ModelAndView getView(Object o, BindException errors) throws Exception
+        public ModelAndView getView(Object o, BindException errors)
         {
             DataRegion rgn = new DataRegion();
             rgn.setName(MS2Manager.getDataRegionNameRuns());
@@ -3707,7 +3707,7 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private ActionURL _returnURL;
 
-        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
             _returnURL = form.getReturnActionURL();
@@ -3813,7 +3813,7 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private ActionURL _returnURL;
 
-        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(ColumnForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
 
@@ -3942,7 +3942,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(MS2ViewForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(MS2ViewForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
 
@@ -4153,7 +4153,7 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public ModelAndView getView(MascotSettingsForm mascotSettingsForm, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(MascotSettingsForm mascotSettingsForm, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/mascotConfig.jsp", mascotSettingsForm);
         }
@@ -4210,7 +4210,7 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private Protein _protein;
 
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors)
         {
             int runId;
             int seqId;
@@ -4288,7 +4288,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowAllProteinsAction extends SimpleViewAction<DetailsForm>
     {
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors)
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
@@ -4324,7 +4324,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
     {
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors)
         {
             // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
             // proteinGroupId
@@ -4774,7 +4774,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptidePopupAction extends SimpleViewAction<DetailsForm>
     {
-        public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
+        public ModelAndView getView(DetailsForm form, BindException errors)
         {
             MS2Run ms2Run;
             ms2Run = form.validateRun();
@@ -4824,7 +4824,7 @@ public class MS2Controller extends SpringActionController
     {
         private PieSliceSectionForm _form;
 
-        public ModelAndView getView(PieSliceSectionForm form, BindException errors) throws Exception
+        public ModelAndView getView(PieSliceSectionForm form, BindException errors)
         {
             _form = form;
             VBox vbox = new VBox();
@@ -4977,7 +4977,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(AdminOperationsPermission.class)
     public class MascotTestAction extends SimpleViewAction<TestMascotForm>
     {
-        public ModelAndView getView(TestMascotForm form, BindException errors) throws Exception
+        public ModelAndView getView(TestMascotForm form, BindException errors)
         {
             String originalMascotServer = form.getMascotServer();
             MascotClientImpl mascotClient = new MascotClientImpl(form.getMascotServer(), null,
@@ -5767,7 +5767,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
         }
@@ -5935,7 +5935,7 @@ public class MS2Controller extends SpringActionController
     {
         AnnotationInsertion _insertion;
 
-        public ModelAndView getView(AnnotationInsertionForm form, BindException errors) throws Exception
+        public ModelAndView getView(AnnotationInsertionForm form, BindException errors)
         {
             _insertion = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
 
@@ -6603,7 +6603,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new JspView("/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp");
         }
@@ -6641,7 +6641,7 @@ public class MS2Controller extends SpringActionController
         {
         }
 
-        public ModelAndView getView(Object o, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new JspView("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
         }

@@ -347,7 +347,7 @@ public class FCSHeader
             return "application/fcs";
         }
 
-        public boolean detect(WebdavResource resource, String contentType, byte[] buf) throws IOException
+        public boolean detect(WebdavResource resource, String contentType, byte[] buf)
         {
             if (contentType != null)
             {

@@ -28,13 +28,13 @@ import org.labkey.ms2.pipeline.client.GWTSearchServiceResult;
 public interface SearchService extends RemoteService
 {
     public GWTSearchServiceResult getSearchServiceResult(String searchEngine, 
-                                                  String path, String[] fileNames) throws SerializableException;
+                                                  String path, String[] fileNames);
 
     public GWTSearchServiceResult getSequenceDbs(String defaultDb, String searchEngine, boolean refresh)
-            throws SerializableException;
+            ;
 
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
-            throws SerializableException;
+            ;
 
     public GWTSearchServiceResult getMascotTaxonomy(String searchEngine);
 

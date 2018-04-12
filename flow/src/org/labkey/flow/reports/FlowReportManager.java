@@ -85,7 +85,6 @@ public class FlowReportManager
     }
 
     public static List<FlowReportJob> createReportJobs(ViewBackgroundInfo info, PipeRoot root)
-            throws Exception
     {
         Collection<FilterFlowReport> reports = getPostAnalysisReports(info.getContainer(), info.getUser());
         List<FlowReportJob> jobs = new ArrayList<>(reports.size());

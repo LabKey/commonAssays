@@ -148,7 +148,7 @@ public class AttributeController extends BaseFlowController
     {
         AttributeType _type;
         @Override
-        public ModelAndView getView(AttributeForm form, BindException errors) throws Exception
+        public ModelAndView getView(AttributeForm form, BindException errors)
         {
             _type = form.getAttributeType();
             return new JspView<>("/org/labkey/flow/controllers/attribute/summary.jsp", form, errors);
@@ -167,7 +167,7 @@ public class AttributeController extends BaseFlowController
         AttributeCache.Entry _entry;
 
         @Override
-        public ModelAndView getView(AttributeForm form, BindException errors) throws Exception
+        public ModelAndView getView(AttributeForm form, BindException errors)
         {
             _entry = form.getEntry();
             if (getContainer() != _entry.getContainer())
@@ -228,7 +228,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(EditAttributeForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(EditAttributeForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/flow/controllers/attribute/edit.jsp", form, errors);
         }
@@ -301,7 +301,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public ModelAndView getView(CreateAliasForm form, boolean reshow, BindException errors) throws Exception
+        public ModelAndView getView(CreateAliasForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/flow/controllers/attribute/createAlias.jsp", form, errors);
         }

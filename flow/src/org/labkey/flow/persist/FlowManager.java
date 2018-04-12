@@ -1269,7 +1269,7 @@ public class FlowManager
         return new SqlSelector(getSchema(), sqlSelectScript, data.getRowId()).getObject(String.class);
     }
 
-    public void setScript(User user, ExpData data, String scriptText) throws SQLException
+    public void setScript(User user, ExpData data, String scriptText)
     {
         AttrObject obj = getAttrObject(data);
         if (obj == null)
