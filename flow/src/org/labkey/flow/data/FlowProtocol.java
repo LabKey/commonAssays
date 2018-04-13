@@ -46,7 +46,9 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
@@ -124,6 +126,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new UnauthorizedException();
         }
         return ret;
+    }
+
+    public static FlowProtocol fromURLRedirectIfNull(User user, ActionURL url, HttpServletRequest request)
+    {
+        FlowProtocol protocol = fromURL(user, url, request);
+        if (protocol == null)
+            throw new RedirectException(url.clone().setAction(FlowController.BeginAction.class));
+
+        return protocol;
     }
 
     static public FlowProtocol fromProtocolId(int id)
