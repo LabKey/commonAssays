@@ -94,7 +94,7 @@ public class SubsetParser
             _lookahead = null;
             return ret;
         }
-        throw new FlowException(String.format("Expected '%s', found '%s' at index %d of '%s'", tk, _lookahead, _lexer._lookahead, _lexer._str));
+        throw new FlowException(String.format("Expected '%s', but found '%s' at index %d of '%s'", tk, _lookahead, _lexer._lookahead, _lexer._str));
     }
 
     private boolean test(Tok tk)
@@ -161,7 +161,7 @@ public class SubsetParser
             subset = new SubsetSpec(null, expr);
         }
         else
-            throw new FlowException("Expected subset name or expression");
+            throw new FlowException(String.format("Expected subset name or expression, but found '%s' at index %d of '%s'", _lookahead, _lexer._lookahead, _lexer._str));
         return new SubsetTerm(subset);
     }
 
@@ -639,7 +639,7 @@ public class SubsetParser
             }
             catch (FlowException e)
             {
-                assertEquals("Expected 'eof', found 'tok=opLParen, text=(' at index 4 of 'X/Y(A/B)'", e.getMessage());
+                assertEquals("Expected 'eof', but found 'tok=opLParen, text=(' at index 4 of 'X/Y(A/B)'", e.getMessage());
             }
         }
         */
@@ -655,7 +655,7 @@ public class SubsetParser
             }
             catch (FlowException e)
             {
-                assertEquals("Expected subset name or expression", e.getMessage());
+                assertEquals("Expected subset name or expression, but found 'tok=opNot, text=!' at index 1 of '!A'", e.getMessage());
             }
         }
 

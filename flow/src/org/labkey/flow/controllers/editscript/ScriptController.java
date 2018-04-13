@@ -352,7 +352,6 @@ public class ScriptController extends BaseFlowController
             catch (FlowException e)
             {
                 errors.reject(ERROR_MSG, e.getMessage());
-                ExceptionUtil.logExceptionToMothership(form.getRequest(), e);
                 return null;
             }
         }
