@@ -385,7 +385,7 @@ public class WellController extends BaseFlowController
             //as the old permissions-checking code did not do this. We need to consider
             //whether the pipeline root's parent really is the container, or if we should
             //be checking a different (more specific) permission.
-            SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, false);
+            SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, r.isDefault());
             if (!policy.hasPermission(getUser(), ReadPermission.class))
                 return new HtmlView("<span class='labkey-error'>You don't have permission to the FCS file.</span>");
 

@@ -124,13 +124,15 @@
     }
 
     DiscussionService service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-            getViewContext(),
-            run.getLSID(),
-            run.urlShow(),
-            "Discussion of " + run.getLabel(),
-            false, true);
-    include(discussion, out);
-
+    if (service != null)
+    {
+        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
+                getViewContext(),
+                run.getLSID(),
+                run.urlShow(),
+                "Discussion of " + run.getLabel(),
+                false, true);
+        include(discussion, out);
+    }
 %>
 </p>

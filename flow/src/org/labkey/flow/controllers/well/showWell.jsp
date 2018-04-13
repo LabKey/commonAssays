@@ -589,13 +589,16 @@ if (getRun() != null)
 %></p><%
 
     DiscussionService service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-            getViewContext(),
-            well.getLSID(),
-            well.urlShow(),
-            "Discussion of " + well.getLabel(),
-            false, true);
-    include(discussion, out);
+    if (service != null)
+    {
+        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
+                getViewContext(),
+                well.getLSID(),
+                well.urlShow(),
+                "Discussion of " + well.getLabel(),
+                false, true);
+        include(discussion, out);
+    }
 %>
 
 

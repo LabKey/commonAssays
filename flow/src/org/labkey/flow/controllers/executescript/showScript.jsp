@@ -95,12 +95,15 @@ The analysis section describes which gates in the analysis, as well as the stati
 
 <%
     DiscussionService service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-            context,
-            script.getLSID(),
-            script.urlShow(),
-            "Discussion of " + script.getLabel(),
-            false, true);
-    include(discussion, out);
+    if (service != null)
+    {
+        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
+                context,
+                script.getLSID(),
+                script.urlShow(),
+                "Discussion of " + script.getLabel(),
+                false, true);
+        include(discussion, out);
+    }
 %>
 

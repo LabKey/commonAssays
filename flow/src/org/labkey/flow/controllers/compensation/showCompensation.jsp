@@ -188,11 +188,14 @@
 <labkey:link href="<%=flowComp.urlDownload()%>" text="Download" rel="nofollow"/><br>
 <%
     DiscussionService service = DiscussionService.get();
-    DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-            getViewContext(),
-            flowComp.getLSID(),
-            flowComp.urlShow(),
-            "Discussion of " + flowComp.getLabel(),
-            false, true);
-    include(discussion, out);
+    if (service != null)
+    {
+        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
+                getViewContext(),
+                flowComp.getLSID(),
+                flowComp.urlShow(),
+                "Discussion of " + flowComp.getLabel(),
+                false, true);
+        include(discussion, out);
+    }
 %>
