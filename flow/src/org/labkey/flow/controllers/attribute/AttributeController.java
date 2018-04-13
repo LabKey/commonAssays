@@ -30,6 +30,7 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.AttributeType;
@@ -221,7 +222,7 @@ public class AttributeController extends BaseFlowController
                 // parse the name
                 _entry.getType().createAttribute(name);
             }
-            catch (IllegalArgumentException e)
+            catch (FlowException | IllegalArgumentException e)
             {
                 errors.rejectValue("name", ERROR_MSG, e.getMessage());
             }
@@ -294,7 +295,7 @@ public class AttributeController extends BaseFlowController
                 // parse the name
                 _entry.getType().createAttribute(alias);
             }
-            catch (IllegalArgumentException e)
+            catch (FlowException | IllegalArgumentException e)
             {
                 errors.rejectValue("alias", ERROR_MSG, e.getMessage());
             }
