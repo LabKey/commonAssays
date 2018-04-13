@@ -191,7 +191,7 @@ public class MS1Controller extends SpringActionController
             super(formClass);
         }
 
-        protected FeaturesView createQueryView(FORM form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        protected FeaturesView createQueryView(FORM form, BindException errors, boolean forExport, String dataRegion)
         {
             return getFeaturesView(form, errors, forExport);
         }

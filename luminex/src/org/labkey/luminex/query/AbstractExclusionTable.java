@@ -231,7 +231,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         /** Since we don't have a container column on these tables, check the permission on the data or run object as appropriate */
         protected abstract void checkPermissions(User user, Map<String, Object> rowMap, Class<? extends Permission> permission) throws QueryUpdateServiceException;
 
-        protected void insertAnalytes(Map<String, Object> rowMap) throws SQLException, QueryUpdateServiceException
+        protected void insertAnalytes(Map<String, Object> rowMap) throws QueryUpdateServiceException
         {
             Integer rowId = getPKValue(rowMap);
             assert rowId != null;
@@ -260,7 +260,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         protected abstract @NotNull ExpRun resolveRun(Map<String, Object> rowMap) throws QueryUpdateServiceException;
 
         /** Make sure that the analyte is part of the same data/run object that this exclusion is attached to */
-        private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException, SQLException
+        private void validateAnalyte(Map<String, Object> rowMap, Analyte analyte) throws QueryUpdateServiceException
         {
             for (ExpData data : resolveRun(rowMap).getAllDataUsedByRun())
             {

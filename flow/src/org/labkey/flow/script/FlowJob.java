@@ -208,7 +208,7 @@ public abstract class FlowJob extends PipelineJob
         return ret;
     }
 
-    protected void runPostAnalysisJobs() throws Exception
+    protected void runPostAnalysisJobs()
     {
         // disable post analysis jobs
         if (1==1)

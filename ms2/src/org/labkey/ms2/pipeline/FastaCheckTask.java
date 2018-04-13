@@ -157,14 +157,14 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             return new RecordedActionSet(action);
         }
         // IllegalArgumentException is sometimes thrown by the checker.
-        catch (IOException | IllegalArgumentException e)
+        catch (IllegalArgumentException e)
         {
             throw new PipelineJobException("Failed to check FASTA file(s)", e);
         }
 
     }
 
-    public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job) throws IOException
+    public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job)
     {
         List<File> result = new ArrayList<>();
         if (job.getParameters().get(DECOY_DATABASE_PARAM_NAME) != null)

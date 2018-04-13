@@ -131,7 +131,7 @@ public class FlowScript extends FlowDataObject
         return _document;
     }
 
-    public void setAnalysisScript(User user, String script) throws SQLException
+    public void setAnalysisScript(User user, String script)
     {
         FlowManager.get().setScript(user, getData(), script);
         strScript = script;
@@ -157,7 +157,7 @@ public class FlowScript extends FlowDataObject
         data.setDataFileURI(new File("script." + FlowDataHandler.EXT_SCRIPT).toURI());
     }
 
-    static public FlowScript create(User user, Container container, String name, String analysisScript) throws SQLException
+    static public FlowScript create(User user, Container container, String name, String analysisScript)
     {
         ExpData data = ExperimentService.get().createData(container, FlowDataType.Script, name);
         initScript(data);
@@ -167,7 +167,7 @@ public class FlowScript extends FlowDataObject
         return ret;
     }
 
-    static public FlowWell createScriptForWell(User user, FlowWell well, String name, ScriptDocument analysisScript, ExpData input, InputRole inputRole) throws SQLException
+    static public FlowWell createScriptForWell(User user, FlowWell well, String name, ScriptDocument analysisScript, ExpData input, InputRole inputRole)
     {
         Container container = well.getContainer();
         FlowRun run = well.getRun();

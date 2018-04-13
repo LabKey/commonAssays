@@ -200,7 +200,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return "ANALYSIS";
         }
 
-        public boolean isParticipant(PipelineJob job) throws IOException
+        public boolean isParticipant(PipelineJob job)
         {
             return job.getJobSupport(JobSupport.class).isSamples();
         }
@@ -677,12 +677,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             TPPTask task = new TPPTask(_factory, _job);
             assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "q3")));
             assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3")));
-            assertEquals(null, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3a")));
+            assertNull(task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3a")));
             assertEquals(QuantitationAlgorithm.libra, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "libra")));
             assertEquals(QuantitationAlgorithm.xpress, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "xpress")));
         }
 
-        @Test
+        @Test  @SuppressWarnings("RedundantThrows")  // IntelliJ believes the throws clause is not needed, but javac strongly disagrees
         public void testXpressCommandLine() throws PipelineJobException, FileNotFoundException
         {
             Map<String, String> params1 = new HashMap<>();

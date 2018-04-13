@@ -191,7 +191,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class NewProtocolAction extends SimpleViewAction<NewProtocolForm>
     {
-        public ModelAndView getView(NewProtocolForm form, BindException errors) throws Exception
+        public ModelAndView getView(NewProtocolForm form, BindException errors)
         {
             if (isPost())
             {
@@ -213,7 +213,7 @@ public class ScriptController extends BaseFlowController
             return root;
         }
 
-        protected ActionURL createScript(NewProtocolForm form, BindException errors) throws SQLException
+        protected ActionURL createScript(NewProtocolForm form, BindException errors)
         {
             if (form.ff_name == null || form.ff_name.length() == 0)
             {
@@ -671,16 +671,7 @@ public class ScriptController extends BaseFlowController
             errors.reject(ERROR_MSG, "This analysis script cannot be edited because it has been used in the analysis of " + runCount + " runs.");
             return false;
         }
-        try
-        {
-            script.setAnalysisScript(getUser(), str);
-        }
-        catch (SQLException e)
-        {
-            errors.reject(ERROR_MSG, "An exception occurred: " + e);
-            _log.error("Error", e);
-            return false;
-        }
+        script.setAnalysisScript(getUser(), str);
         return true;
     }
 
