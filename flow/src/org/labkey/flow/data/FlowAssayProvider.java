@@ -501,8 +501,15 @@ public class FlowAssayProvider extends AbstractAssayProvider
         Map<String, Object> properties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
         String targetStudyId = (String) properties.get(FlowProperty.TargetStudy.getPropertyDescriptor().getPropertyURI());
 
+        // Issue 24990: Copy-To-Study dropdown for flow resets when re-accessing feature
+        // If no target study explicitly set for this run, find the most recently used target study.
+        // The publishChooseStudy.jsp will select the study by default but still allow the user to override this selection.
+        if (targetStudyId == null)
+            targetStudyId = FlowRun.findMostRecentTargetStudy(run.getContainer());
+
         if (targetStudyId != null)
             return ContainerManager.getForId(targetStudyId);
+
         return null;
     }
 }
