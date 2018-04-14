@@ -52,7 +52,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private transient Map<String, Map<ColumnInfo, String>> _analyteColumnProperties;
     private transient LuminexExcelParser _parser;
 
-    public LuminexRunAsyncContext(LuminexRunContext originalContext) throws IOException, ExperimentException
+    public LuminexRunAsyncContext(LuminexRunContext originalContext) throws ExperimentException
     {
         super(originalContext);
 
@@ -195,7 +195,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     }
 
     @Override
-    public LuminexExcelParser getParser() throws ExperimentException
+    public LuminexExcelParser getParser()
     {
         if (_parser == null)
         {

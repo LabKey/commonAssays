@@ -174,7 +174,7 @@ public abstract class GoLoader
 
     private static final int GO_BATCH_SIZE = 5000;
 
-    private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException, IOException
+    private void loadSingleGoFile(GoLoadBean bean, String filename, InputStream is) throws SQLException
     {
         int orgLineCount = 0;
         String[] cols = bean.cols;

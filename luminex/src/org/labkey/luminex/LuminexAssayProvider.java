@@ -443,7 +443,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssayRunAsyncContext createRunAsyncContext(AssayRunUploadContext context) throws IOException, ExperimentException
+    public AssayRunAsyncContext createRunAsyncContext(AssayRunUploadContext context) throws ExperimentException
     {
         return new LuminexRunAsyncContext((LuminexRunContext)context);
     }

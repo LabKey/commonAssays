@@ -102,25 +102,18 @@ public abstract class NabDataHandler extends DilutionDataHandler
     @Override
     protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData, User user) throws ExperimentException
     {
-        try
-        {
-            Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
-            Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
+        Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
+        Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
 
-            populateDilutionStats(data, run, protocol, rawData, wellGroupNameToNabSpecimen);
-            populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeException(e);
-        }
+        populateDilutionStats(data, run, protocol, rawData, wellGroupNameToNabSpecimen);
+        populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
     }
 
     /**
      * Populates cutoff and AUC information from the passed in raw data
      */
     public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
-                                      Map<String, Pair<Integer, String>> wellgroupNameToNabSpecimen) throws ExperimentException, SQLException
+                                      Map<String, Pair<Integer, String>> wellgroupNameToNabSpecimen) throws ExperimentException
     {
         _populateDilutionStats(data, run, protocol, rawData, wellgroupNameToNabSpecimen, true, Collections.emptyList(), Collections.emptyList());
     }
@@ -129,7 +122,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * Recalculate cutoff and AUC information from the passed in raw data
      */
     public void recalculateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
-                                         List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException, SQLException
+                                         List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
         _populateDilutionStats(data, run, protocol, rawData, Collections.emptyMap(), false, specimenRows, cutoffRows);
     }
@@ -145,7 +138,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      */
     private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
                                         Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen, boolean commitData,
-                                        List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException, SQLException
+                                        List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
         Container container = run.getContainer();
         OntologyManager.ensureObject(container, data.getLSID());

@@ -168,7 +168,7 @@ public class MS1Controller extends SpringActionController
         }
 
         @SuppressWarnings("unchecked")
-        protected FeaturesView getFeaturesView(ActionURL url) throws Exception
+        protected FeaturesView getFeaturesView(ActionURL url)
         {
             //TODO: implement PropertyValues on ActionURL
             MutablePropertyValues props = new MutablePropertyValues();
@@ -506,7 +506,7 @@ public class MS1Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms1/view/FeatureDetailView.jsp", model);
         }
 
-        private FeaturesView getSourceFeaturesView(ActionURL url) throws Exception
+        private FeaturesView getSourceFeaturesView(ActionURL url)
         {
             if(null == url)
                 return null;

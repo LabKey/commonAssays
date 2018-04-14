@@ -31,13 +31,6 @@ public class NabContainerListener extends ContainerManager.AbstractContainerList
 {
     public void containerDeleted(Container c, User user)
     {
-        try
-        {
-            NabManager.get().deleteContainerData(c);
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+        NabManager.get().deleteContainerData(c);
     }
 }

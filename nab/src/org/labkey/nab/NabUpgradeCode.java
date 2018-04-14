@@ -214,10 +214,6 @@ public class NabUpgradeCode implements UpgradeCode
                 }
                 warn("", job);
             }
-            catch (SQLException e)
-            {
-                throw new RuntimeException(e);
-            }
         }
         return false;
     }

@@ -70,7 +70,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         return super.getAdditionalFileSetCount(context);
     }
 
-    public HttpView getView(MassSpecMetadataAssayForm form) throws ExperimentException
+    public HttpView getView(MassSpecMetadataAssayForm form)
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
 
