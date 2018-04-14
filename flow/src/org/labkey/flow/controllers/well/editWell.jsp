@@ -29,7 +29,7 @@
     FlowWell well = form.getWells().get(0);
     List<FlowWell> wells = form.getWells();%>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>">
+<labkey:form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>" onsubmit="return this.reportValidity();">
     <input name="editWellReturnUrl" type="hidden" value="<%=h(form.editWellReturnUrl)%>"/>
     <input name="ff_isBulkEdit" type="hidden" value="<%=h(form.ff_isBulkEdit)%>"/>
     <input name="isUpdate" type="hidden" value="true" />
@@ -50,7 +50,7 @@
                         <li>Adding a new keyword or editing the name will apply only to FCS files that have been
                             selected.
                         </li>
-                        <li>If a field is left blank, there are no changes.</li>
+                        <li>If a field is left blank, no changes will be made.</li>
                     </ul>
                 </h4>
             </td>
@@ -121,9 +121,12 @@
         <%
             }
         %>
-        <tr><td colspan="2"><i class="fa fa-plus-circle add-new-keyword" style="color: #116596"> Create a new keyword:</i></td></tr>
+        <tr><td colspan="2">
+            <a class="add-new-keyword" onclick="return false;"><i class="fa fa-plus-circle"></i> Create a new keyword</a>
+        </td></tr>
         <% } %>
     </table>
+    <br/>
 
     <labkey:button text="update"/>
     <%
@@ -142,8 +145,7 @@
             var labelCell = newRow.insertCell(-1);
             labelCell.innerHTML = '<input type="text" name="ff_keywordName" value="">';
             var valueCell = newRow.insertCell(-1);
-            valueCell.innerHTML = '<input type="text" name="ff_keywordValue"><input type=hidden name="ff_keywordError" value="">';
-
+            valueCell.innerHTML = '<input type="text" name="ff_keywordValue" required><input type=hidden name="ff_keywordError" value="">';
         });
     })(jQuery);
 </script>
