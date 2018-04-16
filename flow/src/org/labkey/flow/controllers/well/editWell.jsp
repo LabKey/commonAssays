@@ -29,7 +29,8 @@
     FlowWell well = form.getWells().get(0);
     List<FlowWell> wells = form.getWells();%>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>" onsubmit="return this.reportValidity();">
+<!-- NOTE: form.reportValiditiy not supported on all browsers (cough, IE and old Firefox): https://caniuse.com/#search=reportValidity -->
+<labkey:form method="POST" action="<%=h(well.urlFor(WellController.EditWellAction.class))%>" onsubmit="return (this.reportValidity ? this.reportValidity() : true);">
     <input name="editWellReturnUrl" type="hidden" value="<%=h(form.editWellReturnUrl)%>"/>
     <input name="ff_isBulkEdit" type="hidden" value="<%=h(form.ff_isBulkEdit)%>"/>
     <input name="isUpdate" type="hidden" value="true" />
