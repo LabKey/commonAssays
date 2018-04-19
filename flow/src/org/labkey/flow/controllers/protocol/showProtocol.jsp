@@ -36,7 +36,7 @@
         <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
     <% } else { %>
         <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show sample set"/><br>
-        <labkey:link href="<%=protocol.urlShowSamples(false)%>" text="Show samples joined to FCS Files" /><br>
+        <labkey:link href="<%=protocol.urlShowSamples()%>" text="Show samples joined to FCS Files" /><br>
         <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
             <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>

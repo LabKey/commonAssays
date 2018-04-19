@@ -30,13 +30,16 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.util.URLHelper" %>
+<%@ page import="static org.labkey.api.data.CompareType.IN" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ProtocolController.ShowSamplesForm form = (ProtocolController.ShowSamplesForm) __form;
+    ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
     ExpSampleSet ss = protocol.getSampleSet();
-    boolean unlinkedOnly = form.isUnlinkedOnly();
 
     ExperimentUrls expUrls = PageFlowUtil.urlProvider(ExperimentUrls.class);
 
@@ -44,6 +47,7 @@
     Map<Pair<Integer, String>, List<Pair<Integer,String>>> linkedSamples = new LinkedHashMap<>();
     List<Pair<Integer,String>> unlinkedSamples = new ArrayList<>();
     List<Pair<Integer,String>> unlinkedFCSFiles = new ArrayList<>();
+    List<Integer> unlinkedSampleIds = new ArrayList<>();
 
     int linkedFCSFileCount = 0;
     for (Pair<Integer, String> sample : fcsFilesBySample.keySet())
@@ -65,6 +69,7 @@
         if (fcsFileCount == 0)
         {
             unlinkedSamples.add(sample);
+            unlinkedSampleIds.add(sample.getKey());
             continue;
         }
 
@@ -79,11 +84,18 @@
 
     ActionURL urlFcsFilesWithoutSamples = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
             .addParameter("query.Sample/Name~isblank", "");
+
+    URLHelper urlUnlinkedSamples = null;
+    if (ss != null)
+    {
+        urlUnlinkedSamples = ss.detailsURL();
+        urlUnlinkedSamples.addFilter("Material", FieldKey.fromParts("RowId"), IN, unlinkedSampleIds);
+    }
 %>
 
 <% if (ss == null) { %>
     No samples have been imported in this folder.<br>
-    <labkey:link href="<%=protocol.urlUploadSamples(ss != null)%>" text="Import samples" /><br>
+    <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Import samples" /><br>
 <% } else { %>
 <p>
 There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
@@ -95,12 +107,12 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
 <% } else { %>
 
     <% if (unlinkedSamples.size() > 0) { %>
-    <a href="<%=h(protocol.urlShowSamples(true))%>"><%=unlinkedSamples.size()%> <%=text(unlinkedSamples.size() == 1 ? "sample is" : "samples are")%> not joined</a> to any FCS Files. <br>
+    <a href="<%=h(urlUnlinkedSamples)%>"><%=unlinkedSamples.size()%> <%=text(unlinkedSamples.size() == 1 ? "sample is" : "samples are")%> not joined</a> to any FCS Files. <br>
     <% } %>
     <a href="<%=h(urlFcsFilesWithSamples)%>"><%=linkedFCSFileCount%> FCS Files</a> have been joined with a sample.<br>
     <a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=unlinkedFCSFiles.size()%> FCS Files</a> are not joined with any samples.<br>
 
-    <table cellpadding="10">
+    <table style="border-collapse: separate; border-spacing: 15px;">
         <tr>
             <td valign="top">
                 <h3>Linked Samples</h3>

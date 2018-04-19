@@ -448,7 +448,7 @@
         <%
         if (_sampleSet != null)
         {
-            %><div><%=textLink("Show Samples", _protocol.urlShowSamples(false))%></div><%
+            %><div><%=textLink("Show Samples", _protocol.urlShowSamples())%></div><%
         }
         %><div><%=textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
         if (_fcsAnalysisCount > 0)

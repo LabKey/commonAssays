@@ -397,7 +397,6 @@ flow/src/org/labkey/flow/controllers/protocol/editFCSAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/editICSMetadata.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/joinSampleSet.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showProtocol.jsp -text
-flow/src/org/labkey/flow/controllers/protocol/showSamples.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showSamples2.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/updateSamples.jsp -text
 flow/src/org/labkey/flow/controllers/reports.jsp -text

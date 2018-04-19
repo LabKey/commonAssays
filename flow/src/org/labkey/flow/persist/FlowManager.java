@@ -1026,6 +1026,7 @@ public class FlowManager
 
     public void flowObjectModified()
     {
+        Logger.getLogger(FlowManager.class).info("flow object modification bump");
         flowObjectModificationCount.incrementAndGet();
     }
 

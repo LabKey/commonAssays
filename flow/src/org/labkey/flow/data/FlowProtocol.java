@@ -32,6 +32,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -63,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,12 +260,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public ActionURL urlShowSamples(boolean unlinkedOnly)
+    public ActionURL urlShowSamples()
     {
-        ActionURL ret = urlFor(ProtocolController.ShowSamplesAction.class);
-        if (unlinkedOnly)
-            ret.addParameter("unlinkedOnly", true);
-        return ret;
+        return urlFor(ProtocolController.ShowSamplesAction.class);
     }
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user) throws SQLException
@@ -332,6 +331,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         try (ResultSet rs = new TableSelector(fcsFilesTable, new ArrayList<>(columns.values()), null, null).getResultSet();
              DbScope.Transaction transaction = svc.ensureTransaction())
         {
+            transaction.addCommitTask(() -> FlowManager.get().flowObjectModified(), DbScope.CommitTaskOption.POSTCOMMIT);
+
+            Set<ExpRun> fcsFileRuns = new HashSet<>();
             while (rs.next())
             {
                 int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
@@ -361,6 +363,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     continue;
                 }
 
+                boolean changed = false;
                 boolean found = false;
                 for (ExpMaterial material : app.getInputMaterials())
                 {
@@ -376,13 +379,25 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                         }
                     }
                     app.removeMaterialInput(user, material);
+                    changed = true;
                 }
                 if (!found && sample != null)
                 {
                     app.addMaterialInput(user, sample, null);
                     ret ++;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    ExpRun fcsFileRun = app.getRun();
+                    fcsFileRuns.add(fcsFileRun);
                 }
             }
+
+            if (!fcsFileRuns.isEmpty())
+                ExperimentService.get().syncRunEdges(fcsFileRuns);
+
             transaction.commit();
         }
         return ret;

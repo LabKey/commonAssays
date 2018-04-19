@@ -101,20 +101,12 @@ public class ProtocolController extends BaseFlowController
         }
     }
 
-    public static class ShowSamplesForm extends ProtocolForm
-    {
-        private boolean unlinkedOnly = false;
-
-        public boolean isUnlinkedOnly() { return unlinkedOnly; }
-        public void setUnlinkedOnly(boolean b) { unlinkedOnly = b; }
-    }
-
     @RequiresPermission(ReadPermission.class)
-    public class ShowSamplesAction extends SimpleViewAction<ShowSamplesForm>
+    public class ShowSamplesAction extends SimpleViewAction<ProtocolForm>
     {
         FlowProtocol protocol;
 
-        public ModelAndView getView(ShowSamplesForm form, BindException errors)
+        public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
             return FormPage.getView(ProtocolController.class, form, errors, "showSamples2.jsp");
