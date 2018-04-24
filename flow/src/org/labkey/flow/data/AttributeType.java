@@ -19,6 +19,7 @@ package org.labkey.flow.data;
 import org.labkey.api.data.TableInfo;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
 
 public enum AttributeType
@@ -54,6 +55,12 @@ public enum AttributeType
                 {
                     return "originalkeywordid";
                 }
+
+                @Override
+                public AttributeCache.KeywordCache getCache()
+                {
+                    return AttributeCache.KEYWORDS;
+                }
             },
 
     statistic
@@ -87,6 +94,12 @@ public enum AttributeType
                 {
                     return "originalstatisticid";
                 }
+
+                @Override
+                public AttributeCache.StatisticCache getCache()
+                {
+                    return AttributeCache.STATS;
+                }
             },
     graph
             {
@@ -119,6 +132,12 @@ public enum AttributeType
                 {
                     return "originalgraphid";
                 }
+
+                @Override
+                public AttributeCache.GraphCache getCache()
+                {
+                    return AttributeCache.GRAPHS;
+                }
             };
 
     /** Created a parsed representation of the attribute. */
@@ -135,6 +154,8 @@ public enum AttributeType
 
     /** The column name of original attribute id column on the value table. */
     public abstract String getValueTableOriginalAttributeIdColumn();
+
+    public abstract AttributeCache getCache();
 
     public static AttributeType fromClass(Class c)
     {

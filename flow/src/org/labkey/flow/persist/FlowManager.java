@@ -499,7 +499,7 @@ public class FlowManager
         finally
         {
             if (uncache)
-                AttributeCache.uncacheAllAfterCommit(c);
+                AttributeCache.forType(type).uncacheNow(c);
         }
     }
 
@@ -514,6 +514,10 @@ public class FlowManager
 
             if (entry.isAlias())
                 throw new IllegalArgumentException("Can't create alias of an alias");
+
+            Container c = ContainerManager.getForId(entry._containerId);
+            if (c == null)
+                throw new IllegalArgumentException("Container not found: " + entry._containerId);
 
             // Find existing attribute for the provided alias name
             FlowEntry existing = getAttributeEntry(entry._containerId, type, aliasName);
@@ -533,30 +537,18 @@ public class FlowManager
                 updateAttributeValuesPreferredId(existing._containerId, type, existing._rowId, entry._rowId);
 
                 // parent the existing entry to the other attribute
-                Container c = ContainerManager.getForId(existing._containerId);
                 updateAttribute(c, type, existing._rowId, existing._name, rowId, uncache);
             }
             else
             {
-                int newEntryId = 0;
                 try
                 {
-                    newEntryId = ensureAttributeName(entry._containerId, type, aliasName, entry._rowId);
+                    ensureAttributeName(entry._containerId, type, aliasName, entry._rowId);
                 }
                 finally
                 {
                     if (uncache)
-                    {
-                        // uncache parent
-                        AttributeCache.uncache(entry);
-
-                        if (newEntryId > 0)
-                        {
-                            // uncache new alias
-                            FlowEntry newEntry = getAttributeEntry(type, newEntryId);
-                            AttributeCache.uncache(newEntry);
-                        }
-                    }
+                        AttributeCache.forType(type).uncacheNow(c);
                 }
             }
 
@@ -590,26 +582,7 @@ public class FlowManager
         finally
         {
             if (uncache)
-            {
-                AttributeCache cache = AttributeCache.forType(type);
-
-                // old name
-                cache.uncache(container, entry._rowId, entry._name);
-
-                // new name
-                cache.uncache(container, entry._rowId, name);
-
-                if (rowId != entry._aliasId || rowId != aliasId)
-                {
-                    // old alias id
-                    FlowEntry aliasedEntry = getAttributeEntry(type, entry._aliasId);
-                    cache.uncache(aliasedEntry);
-
-                    // new alias id
-                    aliasedEntry = getAttributeEntry(type, aliasId);
-                    cache.uncache(aliasedEntry);
-                }
-            }
+                AttributeCache.forType(type).uncacheNow(container);
         }
     }
 
@@ -1026,7 +999,7 @@ public class FlowManager
 
     public void flowObjectModified()
     {
-        Logger.getLogger(FlowManager.class).info("flow object modification bump");
+        _log.debug("flow object modification bump");
         flowObjectModificationCount.incrementAndGet();
     }
 
@@ -1207,10 +1180,10 @@ public class FlowManager
             throw new IllegalArgumentException("Object not found.");
         }
 
-        ensureKeywordName(c, keyword, false);
+        ensureKeywordName(c, keyword, true);
 
         AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
-        assert a != null;
+        assert a != null : "Expected to find keyword entry for '" + keyword + "'";
         int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
         int originalId = a.getRowId();
 
@@ -1224,10 +1197,6 @@ public class FlowManager
             }
             addKeywordAuditEvent(c, user, keyword, value, oldValue, data.getName(), data.getLSID());
             transaction.commit();
-        }
-        finally
-        {
-            AttributeCache.uncacheAllAfterCommit(data.getContainer());
         }
 
     }

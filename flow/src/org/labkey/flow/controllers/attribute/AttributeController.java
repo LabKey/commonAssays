@@ -67,7 +67,7 @@ public class AttributeController extends BaseFlowController
         name
     }
 
-    public static class AttributeForm extends ReturnUrlForm
+    public class AttributeForm extends ReturnUrlForm
     {
         private int _rowId;
         private String _type;
@@ -119,7 +119,7 @@ public class AttributeController extends BaseFlowController
             if (_entry == null && _rowId != 0)
             {
                 AttributeType type = getAttributeType();
-                _entry = AttributeCache.forType(type).byRowId(_rowId);
+                _entry = AttributeCache.forType(type).byRowId(getContainer(), _rowId);
                 if (_entry == null)
                     throw new NotFoundException();
             }
@@ -186,7 +186,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    public static class EditAttributeForm extends AttributeForm
+    public class EditAttributeForm extends AttributeForm
     {
         private String _name;
 
@@ -259,7 +259,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    public static class CreateAliasForm extends AttributeForm
+    public class CreateAliasForm extends AttributeForm
     {
         private String _alias;
 
