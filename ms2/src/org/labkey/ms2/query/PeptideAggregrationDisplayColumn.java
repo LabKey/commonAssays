@@ -18,6 +18,7 @@ package org.labkey.ms2.query;
 
 import org.apache.log4j.Logger;
 import org.labkey.api.data.*;
+import org.labkey.api.util.ResultSetUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -126,13 +127,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         {
             if (closeRS)
             {
-                try
-                {
-                    rs.close();
-                }
-                catch (SQLException e)
-                {
-                }
+                ResultSetUtil.close(rs);
             }
         }
     }

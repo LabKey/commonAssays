@@ -476,21 +476,15 @@ public class ProteinProphetImporter
             groupStmt.setFloat(groupIndex++, errorRate);
         }
 
-        ResultSet rs = _dialect.executeWithResults(groupStmt);
-
         int groupId;
 
-        try
+        try (ResultSet rs = _dialect.executeWithResults(groupStmt))
         {
             if (!rs.next())
             {
                 throw new SQLException("Expected a result set with the new group's rowId");
             }
             groupId = rs.getInt(1);
-        }
-        finally
-        {
-            try { rs.close(); } catch (SQLException ignored) {}
         }
 
         if (icatRatio != null)

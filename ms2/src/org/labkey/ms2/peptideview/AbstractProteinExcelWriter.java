@@ -22,6 +22,7 @@ import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.GroupedResultSet;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.Results;
+import org.labkey.api.util.ResultSetUtil;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -40,9 +41,7 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     public void renderGrid(RenderContext ctx, Sheet sheet, List<ExcelColumn> columns, Results rs) throws SQLException, MaxRowsExceededException
     {
         super.renderGrid(ctx, sheet, columns, rs);
-
-        if (null != _groupedRS)
-            _groupedRS.close();
+        ResultSetUtil.close(_groupedRS);
     }
 
     public void setExpanded(boolean expanded)
@@ -64,9 +63,6 @@ public abstract class AbstractProteinExcelWriter extends ExcelWriter
     public void close()
     {
         super.close();
-        if (_groupedRS != null)
-        {
-            try { _groupedRS.close(); } catch (SQLException ignored) {}
-        }
+        ResultSetUtil.close(_groupedRS);
     }
 }

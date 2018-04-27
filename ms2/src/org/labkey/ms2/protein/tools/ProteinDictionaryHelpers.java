@@ -61,21 +61,17 @@ public class ProteinDictionaryHelpers
             long start = System.currentTimeMillis();
             _log.info("Reloading ProtSprotOrgMap");
             int orgLineCount = 0;
-            PreparedStatement ps = null;
-            Connection conn = null;
+
+            new SqlExecutor(ProteinManager.getSchema()).execute("DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
+
             DbScope scope = ProteinManager.getSchema().getScope();
 
-            try
+            try (Connection conn = scope.getConnection(); PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
+                            " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
+                            " VALUES (?,?,?,?,?,?,?,?)");)
             {
-                new SqlExecutor(ProteinManager.getSchema()).execute("DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
-
                 TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
-                conn = scope.getConnection();
-                ps = conn.prepareStatement(
-                        "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
-                                " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
-                                " VALUES (?,?,?,?,?,?,?,?)");
-
                 Set<String> sprotSuffixes = new HashSet<>();
 
                 for (Map<String, Object> curRec : t)
@@ -146,11 +142,6 @@ public class ProteinDictionaryHelpers
             catch (IOException e)
             {
                 throw new UnexpectedException(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
-            }
-            finally
-            {
-                if (ps != null) { try { ps.close(); } catch (SQLException ignored) {} }
-                if (null != conn) scope.releaseConnection(conn);
             }
 
             _log.info("Finished reloading ProtSprotOrgMap in " + (System.currentTimeMillis() - start)/1000.0 + " seconds");

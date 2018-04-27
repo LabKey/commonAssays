@@ -392,47 +392,49 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     protected int insertIdentifiers(Connection c) throws SQLException
     {
         handleThreadStateChangeRequests("Entering insertIdentifiers, before collecting unparsed identifiers from temp table");
-        ResultSet rs = fdbu._getIdentsStmt.executeQuery();
-        c.setAutoCommit(false);
-        fdbu._addIdentStmt.setTimestamp(4, new java.sql.Timestamp(new java.util.Date().getTime()));
-        int transactionCount = 0;
-        while (rs.next())
+
+        try (ResultSet rs = fdbu._getIdentsStmt.executeQuery())
         {
-            String rawIdentString = rs.getString(1);
-            int seqid = rs.getInt(2);
-            String desc = rs.getString(3);
-            String wholeHeader=rawIdentString;
-            if (null != desc )
+            c.setAutoCommit(false);
+            fdbu._addIdentStmt.setTimestamp(4, new java.sql.Timestamp(new java.util.Date().getTime()));
+            int transactionCount = 0;
+            while (rs.next())
+            {
+                String rawIdentString = rs.getString(1);
+                int seqid = rs.getInt(2);
+                String desc = rs.getString(3);
+                String wholeHeader = rawIdentString;
+                if (null != desc)
                     wholeHeader += " " + desc;
 
-            Map<String, Set<String>> identifiers = Protein.getIdentifierMap(rawIdentString, wholeHeader);
+                Map<String, Set<String>> identifiers = Protein.getIdentifierMap(rawIdentString, wholeHeader);
 
-            for (String key : identifiers.keySet())
-            {
-                Set<String> idvals = identifiers.get(key);
-                for (String val : idvals)
+                for (String key : identifiers.keySet())
                 {
-                    // catch blanks before they get into the db
-                    if (val.equals(""))
-                        continue;
-                    transactionCount++;
-                    fdbu._addIdentStmt.setString(1, val);
-                    fdbu._addIdentStmt.setString(2, key);
-                    fdbu._addIdentStmt.setInt(3, seqid);
-                    // We have already set the timestamp, at index 4, once for all insertions in this batch
-                    fdbu._addIdentStmt.addBatch();
-
-                    if (transactionCount == 100)
+                    Set<String> idvals = identifiers.get(key);
+                    for (String val : idvals)
                     {
-                        transactionCount = 0;
-                        fdbu._addIdentStmt.executeBatch();
-                        c.commit();
-                        fdbu._addIdentStmt.clearBatch();
+                        // catch blanks before they get into the db
+                        if (val.equals(""))
+                            continue;
+                        transactionCount++;
+                        fdbu._addIdentStmt.setString(1, val);
+                        fdbu._addIdentStmt.setString(2, key);
+                        fdbu._addIdentStmt.setInt(3, seqid);
+                        // We have already set the timestamp, at index 4, once for all insertions in this batch
+                        fdbu._addIdentStmt.addBatch();
+
+                        if (transactionCount == 100)
+                        {
+                            transactionCount = 0;
+                            fdbu._addIdentStmt.executeBatch();
+                            c.commit();
+                            fdbu._addIdentStmt.clearBatch();
+                        }
                     }
                 }
             }
         }
-        rs.close();
 
         fdbu._addIdentStmt.executeBatch();
         c.commit();
@@ -521,7 +523,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 identsAdded + " identifiers; " +
                 annotsAdded + " annotations");
         fdbu._getCurrentInsertStatsStmt.setInt(1, currentInsertId);
-        ResultSet r = null;
 
         int priorseqs;
         int priorannots;
@@ -529,26 +530,22 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         int priororgs;
         int mouthsful;
         int records;
-        try
+
+        try (ResultSet rs = fdbu._getCurrentInsertStatsStmt.executeQuery())
         {
-            r = fdbu._getCurrentInsertStatsStmt.executeQuery();
-            if (r.next())
+            if (rs.next())
             {
-                priorseqs = r.getInt("SequencesAdded");
-                priorannots = r.getInt("AnnotationsAdded");
-                prioridents = r.getInt("IdentifiersAdded");
-                priororgs = r.getInt("OrganismsAdded");
-                mouthsful = r.getInt("Mouthsful");
-                records = r.getInt("RecordsProcessed");
+                priorseqs = rs.getInt("SequencesAdded");
+                priorannots = rs.getInt("AnnotationsAdded");
+                prioridents = rs.getInt("IdentifiersAdded");
+                priororgs = rs.getInt("OrganismsAdded");
+                mouthsful = rs.getInt("Mouthsful");
+                records = rs.getInt("RecordsProcessed");
             }
             else
             {
                 throw new SQLException("ResultSet came back empty");
             }
-        }
-        finally
-        {
-            if (r != null) { try { r.close(); } catch (SQLException ignored) {} }
         }
 
         int curNRecords = mouthful.size();

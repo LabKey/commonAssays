@@ -47,6 +47,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -125,7 +126,7 @@ public class PersistTests
 
             // verify FlowEntry equality
             FlowManager.FlowEntry aliased = FlowManager.get().getAliased(alias);
-            assertTrue(entry != aliased);
+            assertNotSame(entry, aliased);
             assertEquals(entry, aliased);
 
             // verify cached keyword
@@ -149,22 +150,24 @@ public class PersistTests
 
             // verify query
             FlowSchema schema = new FlowSchema(user, c);
-            ResultSet results = QueryService.get().select(schema, "SELECT " +
+
+            try (ResultSet results = QueryService.get().select(schema, "SELECT " +
                     "A.Name, " +
                     "A.Keyword.keyword1 AS k1, " +
                     "A.Keyword.\"keyword1-alias\" AS k1_alias, " +
                     "A.Keyword('keyword1') AS k1_method, " +
                     "A.Keyword('keyword1-alias') AS k1_alias_method " +
-                    "FROM flow.FCSFiles AS A");
-            assertTrue(results.next());
-            assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
-            assertEquals("value1", results.getString("k1"));
-            assertEquals("value1", results.getString("k1_alias"));
-            assertEquals("value1", results.getString("k1_method"));
-            assertEquals("value1", results.getString("k1_alias_method"));
+                    "FROM flow.FCSFiles AS A"))
+            {
+                assertTrue(results.next());
+                assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
+                assertEquals("value1", results.getString("k1"));
+                assertEquals("value1", results.getString("k1_alias"));
+                assertEquals("value1", results.getString("k1_method"));
+                assertEquals("value1", results.getString("k1_alias_method"));
 
-            assertFalse(results.next());
-            results.close();
+                assertFalse(results.next());
+            }
         }
 
         // verify keyword2
@@ -214,22 +217,24 @@ public class PersistTests
 
             // verify query
             FlowSchema schema = new FlowSchema(user, c);
-            ResultSet results = QueryService.get().select(schema, "SELECT " +
+
+            try (ResultSet results = QueryService.get().select(schema, "SELECT " +
                     "A.Name, " +
                     "A.Keyword.keyword2 AS k2, " +
                     "A.Keyword.\"keyword2-alias\" AS k2_alias, " +
                     "A.Keyword('keyword2') AS k2_method, " +
                     "A.Keyword('keyword2-alias') AS k2_alias_method " +
-                    "FROM flow.FCSFiles AS A");
-            assertTrue(results.next());
-            assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
-            assertEquals("value2", results.getString("k2"));
-            assertEquals("value2", results.getString("k2_alias"));
-            assertEquals("value2", results.getString("k2_method"));
-            assertEquals("value2", results.getString("k2_alias_method"));
+                    "FROM flow.FCSFiles AS A"))
+            {
+                assertTrue(results.next());
+                assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
+                assertEquals("value2", results.getString("k2"));
+                assertEquals("value2", results.getString("k2_alias"));
+                assertEquals("value2", results.getString("k2_method"));
+                assertEquals("value2", results.getString("k2_alias_method"));
 
-            assertFalse(results.next());
-            results.close();
+                assertFalse(results.next());
+            }
         }
 
         // verify updating keyword value
@@ -285,33 +290,35 @@ public class PersistTests
 
         // verify stat values
         FlowSchema schema = new FlowSchema(user, c);
-        TableResultSet rs = (TableResultSet)QueryService.get().select(schema, "SELECT " +
+
+        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, "SELECT " +
                 "A.Name, " +
                 "A.Statistic.\"X:Count\" AS stat, " +
                 "A.Statistic.\"X-alias:Count\" AS stat_alias, " +
                 "A.Statistic('X:Count') AS stat_method, " +
                 "A.Statistic('X-alias:Count') AS stat_alias_method " +
-                "FROM flow.FCSAnalyses AS A ORDER BY Name");
-        assertEquals(2, rs.getSize());
+                "FROM flow.FCSAnalyses AS A ORDER BY Name"))
+        {
+            assertEquals(2, rs.getSize());
 
-        assertTrue(rs.next());
-        Map<String, Object> rowMap = rs.getRowMap();
-        assertEquals("well1", rowMap.get("name"));
-        assertEquals(1.0, rowMap.get("stat"));
-        assertEquals(1.0, rowMap.get("stat_alias"));
-        assertEquals(1.0, rowMap.get("stat_method"));
-        assertEquals(1.0, rowMap.get("stat_alias_method"));
+            assertTrue(rs.next());
+            Map<String, Object> rowMap = rs.getRowMap();
+            assertEquals("well1", rowMap.get("name"));
+            assertEquals(1.0, rowMap.get("stat"));
+            assertEquals(1.0, rowMap.get("stat_alias"));
+            assertEquals(1.0, rowMap.get("stat_method"));
+            assertEquals(1.0, rowMap.get("stat_alias_method"));
 
-        assertTrue(rs.next());
-        rowMap = rs.getRowMap();
-        assertEquals("well2", rowMap.get("name"));
-        assertEquals(2.0, rowMap.get("stat"));
-        assertEquals(2.0, rowMap.get("stat_alias"));
-        assertEquals(2.0, rowMap.get("stat_method"));
-        assertEquals(2.0, rowMap.get("stat_alias_method"));
+            assertTrue(rs.next());
+            rowMap = rs.getRowMap();
+            assertEquals("well2", rowMap.get("name"));
+            assertEquals(2.0, rowMap.get("stat"));
+            assertEquals(2.0, rowMap.get("stat_alias"));
+            assertEquals(2.0, rowMap.get("stat_method"));
+            assertEquals(2.0, rowMap.get("stat_alias_method"));
 
-        assertFalse(rs.next());
-        rs.close();
+            assertFalse(rs.next());
+        }
     }
 
     @Test

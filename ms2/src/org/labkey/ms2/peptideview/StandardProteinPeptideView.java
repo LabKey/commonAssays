@@ -201,14 +201,9 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
 
-        ResultSet proteinRS = null;
-        GroupedResultSet peptideRS = null;
-
-        try
+        try (ResultSet proteinRS = ProteinManager.getProteinRS(_url, run, where, Table.ALL_ROWS, getUser());
+             GroupedResultSet peptideRS = ProteinManager.getPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser()))
         {
-            proteinRS = ProteinManager.getProteinRS(_url, run, where, Table.ALL_ROWS, getUser());
-            peptideRS = ProteinManager.getPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser());
-
             TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
             {
                 @Override
@@ -228,10 +223,8 @@ public class StandardProteinPeptideView extends AbstractLegacyProteinMS2RunView
             tw.setTSVGridWriter(twPeptide);
             tw.writeResultSet(new ResultsImpl(proteinRS));
         }
-        finally
+        catch (SQLException ignored)
         {
-            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException ignored) {}
-            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException ignored) {}
         }
     }
 

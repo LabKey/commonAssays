@@ -185,8 +185,8 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
 
             for (MS2Run run : _runs)
                 exportTSVProteinGrid(tw, form.getColumns(), run, where);
-
         }
+
         return null;
     }
 
@@ -330,10 +330,9 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             throw new NotFoundException("No protein group specified");
         }
-        ResultSet rs = null;
-        try
+
+        try (ResultSet rs = createPeptideResultSet("RowId", _maxPeptideRows, extraWhere))
         {
-            rs = createPeptideResultSet("RowId", _maxPeptideRows, extraWhere);
             int columnIndex = rs.findColumn("RowId");
             ArrayList<Long> rowIdsLong = new ArrayList<>(100);
             while(rs.next())
@@ -344,10 +343,6 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            if (rs != null) { try { rs.close(); } catch (SQLException ignored) {} }
         }
     }
 
@@ -413,34 +408,34 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
     {
         String peptideColumnNames = getPeptideColumnNames(requestedPeptideColumns);
         String peptideSqlColumnNames = getPeptideSQLColumnNames(peptideColumnNames, run);
-        GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser()), "ProteinGroupId");
-        tw.setGroupedResultSet(peptideRS);
-        if (tw.getExpanded())
+
+        try (GroupedResultSet peptideRS = new GroupedResultSet(ProteinManager.getProteinProphetPeptideRS(_url, run, where, Table.ALL_ROWS, peptideSqlColumnNames, getUser()), "ProteinGroupId"))
         {
-            TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
+            tw.setGroupedResultSet(peptideRS);
+
+            if (tw.getExpanded())
             {
-                @Override
-                protected Iterable<String> getValues(RenderContext ctx, Iterable<DisplayColumn> displayColumns)
+                TSVGridWriter twPeptide = new TSVGridWriter(new ResultsImpl(peptideRS), getPeptideDisplayColumns(peptideColumnNames))
                 {
-                    Iterable<String> proteinRow = (Iterable<String>)ctx.get("ProteinRow");
-                    return Iterables.concat(proteinRow, super.getValues(ctx, displayColumns));
-                }
-            };
+                    @Override
+                    protected Iterable<String> getValues(RenderContext ctx, Iterable<DisplayColumn> displayColumns)
+                    {
+                        Iterable<String> proteinRow = (Iterable<String>) ctx.get("ProteinRow");
+                        return Iterables.concat(proteinRow, super.getValues(ctx, displayColumns));
+                    }
+                };
 
-            twPeptide.setPrintWriter(tw.getPrintWriter());
-            tw.setTSVGridWriter(twPeptide);
-        }
+                twPeptide.setPrintWriter(tw.getPrintWriter());
+                tw.setTSVGridWriter(twPeptide);
+            }
 
-        ResultSet proteinRS = null;
-        try
-        {
-            proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, Table.ALL_ROWS, getUser());
-            tw.writeResultSet(new ResultsImpl(proteinRS));
+            try (ResultSet proteinRS = ProteinManager.getProteinProphetRS(_url, run, where, Table.ALL_ROWS, getUser()))
+            {
+                tw.writeResultSet(new ResultsImpl(proteinRS));
+            }
         }
-        finally
+        catch (SQLException ignored)
         {
-            if (proteinRS != null) try { proteinRS.close(); } catch (SQLException ignored) {}
-            if (peptideRS != null) try { peptideRS.close(); } catch (SQLException ignored) {}
         }
     }
 

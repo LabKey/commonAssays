@@ -272,12 +272,16 @@ public class uniprot extends ParseActions
                         "      WHERE " + _oTableName + ".genus=" + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
                         _oTableName + ".species=" + ProteinManager.getTableInfoOrganisms() + ".species AND " + ProteinManager.getTableInfoOrganisms() + ".IdentId IS NOT NULL" +
                         " )";
-        ResultSet rs = c.createStatement().executeQuery(
-                "SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'"
-        );
-        rs.next();
-        int taxonomyTypeIndex = rs.getInt(1);
-        rs.close();
+
+        final int taxonomyTypeIndex;
+
+        // TODO: Just use a TableSelector
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'"))
+        {
+            rs.next();
+            taxonomyTypeIndex = rs.getInt(1);
+        }
+
         _insertOrgIDCommand =
                 "INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " (identifier,IdentTypeId,EntryDate) " +
                         "SELECT DISTINCT identID," + taxonomyTypeIndex + ",entry_date " +
@@ -470,15 +474,25 @@ public class uniprot extends ParseActions
                 identsAdded + " identifiers; " +
                 annotsAdded + " annotations");
         _getCurrentInsertStats.setInt(1, getCurrentInsertId());
-        ResultSet r = _getCurrentInsertStats.executeQuery();
-        r.next();
-        int priorseqs = r.getInt("SequencesAdded");
-        int priorannots = r.getInt("AnnotationsAdded");
-        int prioridents = r.getInt("IdentifiersAdded");
-        int priororgs = r.getInt("OrganismsAdded");
-        int mouthsful = r.getInt("Mouthsful");
-        int records = r.getInt("RecordsProcessed");
-        r.close();
+
+        int priorseqs;
+        int priorannots;
+        int prioridents;
+        int priororgs;
+        int mouthsful;
+        int records;
+
+        // TODO: Just use TableSelector.getMap()
+        try (ResultSet r = _getCurrentInsertStats.executeQuery())
+        {
+            r.next();
+            priorseqs = r.getInt("SequencesAdded");
+            priorannots = r.getInt("AnnotationsAdded");
+            prioridents = r.getInt("IdentifiersAdded");
+            priororgs = r.getInt("OrganismsAdded");
+            mouthsful = r.getInt("Mouthsful");
+            records = r.getInt("RecordsProcessed");
+        }
 
         int curNRecords = context.getSequences().size();
 
@@ -760,20 +774,15 @@ public class uniprot extends ParseActions
     private int executeUpdate(String sql, Connection conn) throws SQLException
     {
         handleThreadStateChangeRequests();
-        PreparedStatement stmt = null;
-        try
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql))
         {
-            stmt = conn.prepareStatement(sql);
             int result = stmt.executeUpdate();
             if (!conn.getAutoCommit())
             {
                 conn.commit();
             }
             return result;
-        }
-        finally
-        {
-            if (stmt != null) { try { stmt.close(); } catch (SQLException e) {} }
         }
     }
 

@@ -200,15 +200,20 @@ public class FastaDbHelper
                     " AND (PO.genus<>'Unknown' OR PO.species<>'unknown')  )");
 
 
-        ResultSet rs =
-                c.createStatement().executeQuery("SELECT AnnotTypeId FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='FullOrganismName'");
-        rs.next();
-        _fullOrganismNameIdent = rs.getInt(1);
-        rs =
-                c.createStatement().executeQuery("SELECT AnnotTypeID FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='LookupString'");
-        rs.next();
-        _lookupStringIdent = rs.getInt(1);
-        rs.close();
+        // TODO: Switch to SqlSelector or TableSelector
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeId FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='FullOrganismName'"))
+        {
+            rs.next();
+            _fullOrganismNameIdent = rs.getInt(1);
+        }
+
+        // TODO: Switch to SqlSelector or TableSelector
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeID FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='LookupString'"))
+        {
+            rs.next();
+            _lookupStringIdent = rs.getInt(1);
+        }
+
         _insertOrgsIntoAnnotationsStmt = c.prepareStatement(
                 "INSERT INTO " + ProteinManager.getTableInfoAnnotations() + " (annotval,annotTypeId,seqid,InsertDate) " +
                         "  SELECT DISTINCT s.fullorg," + _fullOrganismNameIdent + ",s.seqid,max(s.entry_date) " +

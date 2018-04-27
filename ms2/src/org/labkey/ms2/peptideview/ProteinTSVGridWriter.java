@@ -90,14 +90,9 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
         {
             if (_expanded)
             {
-                ResultSet rs = _groupedRS.getNextResultSet();
-                try
+                try (ResultSet rs = _groupedRS.getNextResultSet())
                 {
                     writeExpandedRow(ctx, displayColumns, rs);
-                }
-                finally
-                {
-                    if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
                 }
             }
             else
@@ -126,9 +121,10 @@ public abstract class ProteinTSVGridWriter extends TSVGridWriter
 
     protected void writeCollapsedRow(RenderContext ctx, List<DisplayColumn> displayColumns) throws SQLException
     {
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
-        addCalculatedValues(ctx, nestedRS);
-        nestedRS.close();
+        try (ResultSet nestedRS = _groupedRS.getNextResultSet())
+        {
+            addCalculatedValues(ctx, nestedRS);
+        }
 
         super.writeRow(ctx, displayColumns);
     }

@@ -134,15 +134,10 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                                  Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {
         assert MS2Manager.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
-        PreparedStatement statement = null;
 
-        try
+        try (Connection connection = MS2Manager.getSchema().getScope().getConnection();
+             PreparedStatement statement = connection.prepareStatement("INSERT INTO ms2." + MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, Value) VALUES (?, ?, ?, ?)");)
         {
-            Connection connection = MS2Manager.getSchema().getScope().getConnection();
-
-            statement = connection.prepareStatement("INSERT INTO ms2." +
-                    MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, Value) " +
-                    "VALUES (?, ?, ?, ?)");
             int rowCount = 0;
 
             //Grab the protein name and rowId mapping for this run's annotation set
@@ -240,19 +235,6 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
         catch(SQLException e)
         {
             throw new RuntimeSQLException(e);
-        }
-        finally
-        {
-            if (statement != null)
-            {
-                try
-                {
-                    statement.close();
-                }
-                catch (SQLException ignored)
-                {
-                }
-            }
         }
     }
 

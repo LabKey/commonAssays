@@ -45,9 +45,8 @@ public class ProteinProphetDataRegion extends AbstractNestableDataRegion
     protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
         _groupedRS.previous();
-        ResultSet nestedRS = _groupedRS.getNextResultSet();
 
-        try
+        try (ResultSet nestedRS = _groupedRS.getNextResultSet())
         {
             int totalFilteredPeptides = 0;
             Set<String> uniqueFilteredPeptides = new HashSet<>();
@@ -68,13 +67,6 @@ public class ProteinProphetDataRegion extends AbstractNestableDataRegion
             super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
 
             renderNestedGrid(out, ctx, nestedRS, rowIndex);
-        }
-        finally
-        {
-            if (nestedRS != null)
-            {
-                try { nestedRS.close(); } catch (SQLException e) {}
-            }
         }
     }
 }

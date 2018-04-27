@@ -48,11 +48,9 @@ public class StandardProteinDataRegion extends AbstractNestableDataRegion
 
         protein.setSequence((String) ctx.get("Sequence"));
         Integer outerSeqId = (Integer)ctx.getRow().get("SeqId");
-        ResultSet nestedRS = null;
-        try
-        {
-            nestedRS = _groupedRS.getNextResultSet();
 
+        try (ResultSet nestedRS = _groupedRS.getNextResultSet())
+        {
             if (outerSeqId != null)
             {
                 List<String> peptides = new ArrayList<>();
@@ -78,13 +76,6 @@ public class StandardProteinDataRegion extends AbstractNestableDataRegion
             super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
 
             renderNestedGrid(out, ctx, nestedRS, rowIndex);
-        }
-        finally
-        {
-            if (nestedRS != null)
-            {
-                try { nestedRS.close(); } catch (SQLException e) {}
-            }
         }
     }
 

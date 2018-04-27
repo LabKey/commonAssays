@@ -152,11 +152,9 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
 
         QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
         DataView dataView = queryView.createDataView();
-        ResultSet rs = null;
         List<Integer> rowIds = new ArrayList<>();
-        try
+        try (ResultSet rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext()))
         {
-            rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext());
             while (rs.next())
                 rowIds.add(rs.getInt("RowId"));
         }
@@ -167,11 +165,6 @@ public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
         catch (IOException e)
         {
             throw new RuntimeException(e);
-        }
-        finally
-        {
-            if (rs != null)
-                try { rs.close(); } catch (SQLException e) {}
         }
         List<ExpRun> runs = new ArrayList<>();
         for (Integer rowId : rowIds)

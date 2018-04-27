@@ -19,6 +19,7 @@ import com.sun.media.imageio.plugins.tiff.TIFFDirectory;
 import com.sun.media.imageio.plugins.tiff.TIFFField;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.util.ResultSetUtil;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -174,7 +175,6 @@ public class ProtocolFileBuilder
 
     protected String getProtocolName(String gridName, File image, Connection connection) throws IOException, SQLException, PipelineJobException
     {
-        ResultSet rs = null;
         String queryName;
         String description = getTiffMetaTagValue(sidTag, image);
         String bitsPerSample = getTiffMetaTagValue(bitsPerSampleTag, image);
@@ -196,12 +196,11 @@ public class ProtocolFileBuilder
             throw new PipelineJobException("The scan channel information could not be determined from the tiff meta info: " + sidTag + " = " + description + ", " + bitsPerSampleTag + " = " + bitsPerSample);
         }
 
-        try
-        {
-            PreparedStatement stat = connection.prepareStatement(queryName);
-            stat.setString(1, gridName);
-            rs = stat.executeQuery();
+        PreparedStatement stat = connection.prepareStatement(queryName);
+        stat.setString(1, gridName);
 
+        try (ResultSet rs = stat.executeQuery())
+        {
             // this assumes there is only one row in the result set
             if (!rs.next())
             {
@@ -209,47 +208,31 @@ public class ProtocolFileBuilder
             }
             return rs.getString(1);
         }
-        finally
-        {
-            if (rs != null)
-            {
-                try
-                {
-                    rs.close();
-                }
-                catch (SQLException e)
-                {
-                }
-            }
-        }
     }
 
     protected String getGridName(File image, Connection connection) throws PipelineJobException, SQLException
     {
-        ResultSet rs = null;
+        List<String> designIds = getDesignIds(connection);
+        String designId = null;
 
-        try
+        for (String id : designIds)
         {
-            List<String> designIds = getDesignIds(connection);
-            String designId = null;
-
-            for (String id : designIds)
+            if (image.getName().matches("^US[0-9]+_[0-9]{2}" + id.substring(1) + ".+$"))
             {
-                if (image.getName().matches("^US[0-9]+_[0-9]{2}" + id.substring(1) + ".+$"))
-                {
-                    designId = id;
-                }
+                designId = id;
             }
+        }
 
-            if (designId == null)
-            {
-                throw new PipelineJobException("No matching designs for image " + image.getName());
-            }
+        if (designId == null)
+        {
+            throw new PipelineJobException("No matching designs for image " + image.getName());
+        }
 
-            PreparedStatement stat = connection.prepareStatement(sqlGridName);
-            stat.setString(1, designId);
-            rs = stat.executeQuery();
+        PreparedStatement stat = connection.prepareStatement(sqlGridName);
+        stat.setString(1, designId);
 
+        try (ResultSet rs = stat.executeQuery())
+        {
             // this assumes there is only one row in the result set
             if (!rs.next())
             {
@@ -257,31 +240,20 @@ public class ProtocolFileBuilder
             }
             return rs.getString(1);
         }
-        finally
-        {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
-        }
     }
 
     protected List<String> getDesignIds(Connection connection) throws SQLException
     {
-        ResultSet rs = null;
         List<String> list = new ArrayList<>();
+        PreparedStatement stat = connection.prepareStatement(sqlDesignId);
 
-        try
+        try (ResultSet rs = stat.executeQuery())
         {
-            PreparedStatement stat = connection.prepareStatement(sqlDesignId);
-            rs = stat.executeQuery();
-
             while (rs.next())
             {
                 list.add(rs.getString(1));
             }
             return list;
-        }
-        finally
-        {
-            if (rs != null) { try { rs.close(); } catch (SQLException e) {} }
         }
     }
 

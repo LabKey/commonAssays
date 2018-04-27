@@ -22,6 +22,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.Spectrum;
@@ -93,15 +94,8 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
 
     public void close()
     {
-        if (_rs != null)
-        {
-            try
-            {
-                _rs.close();
-                _rs = null;
-            }
-            catch (SQLException ignored) {}
-        }
+        ResultSetUtil.close(_rs);
+        _rs = null;
     }
 
     protected class ResultSetSpectrum implements Spectrum
