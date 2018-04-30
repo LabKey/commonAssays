@@ -135,102 +135,107 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
     {
         assert MS2Manager.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
 
-        try (Connection connection = MS2Manager.getSchema().getScope().getConnection();
-             PreparedStatement statement = connection.prepareStatement("INSERT INTO ms2." + MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, Value) VALUES (?, ?, ?, ?)");)
+        try
         {
-            int rowCount = 0;
+            // We don't close this connection
+            Connection connection = MS2Manager.getSchema().getScope().getConnection();
 
-            //Grab the protein name and rowId mapping for this run's annotation set
-            String proteinSetString = runProps.get(ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME);
-
-            if (proteinSetString == null)
+            try (PreparedStatement statement = connection.prepareStatement("INSERT INTO ms2." + MS2Manager.getTableInfoExpressionData().getName() + " (DataId, SampleId, SeqId, Value) VALUES (?, ?, ?, ?)"))
             {
-                throw new ExperimentException("Could not find " + ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME + " property value");
-            }
+                int rowCount = 0;
 
-            int proteinSet;
-            try
-            {
-                proteinSet = Integer.parseInt(proteinSetString);
-            }
-            catch (NumberFormatException e)
-            {
-                throw new ExperimentException("Illegal " + ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME + " value:" + proteinSetString);
-            }
+                //Grab the protein name and rowId mapping for this run's annotation set
+                String proteinSetString = runProps.get(ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME);
 
-            Map<String, Integer> seqIds = MS2Manager.getFastaFileSeqIds(proteinSet);
-            Map<String, List<String>> partialSeqIds = new HashMap<>(); //map of {"partial Ids", list of "full ids" }
-            storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(seqIds, partialSeqIds);
-
-            Set<String> unresolvedProteins = new TreeSet<>();
-            Set<String> ambiguousProteins = new TreeSet<>();
-
-            for (Map<String, Object> row : loader)
-            {
-                Object seqIdObject = row.get(PROTEIN_SEQ_ID_COLUMN_NAME);
-                String seqIdName = seqIdObject == null ? null : seqIdObject.toString();
-
-                if (StringUtils.isEmpty(StringUtils.trimToNull(seqIdName)))
+                if (proteinSetString == null)
                 {
-                    throw new ExperimentException("Sequence ID (Molecular Identifier) must be present and cannot be blank");
+                    throw new ExperimentException("Could not find " + ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME + " property value");
                 }
 
-                Integer seqId = seqIds.get(seqIdName); //get a matching seqId from stored sequences/content of fasta file
-
-                //if fasta file does not have the matching seq Id as the experiment expression file
-                if (seqId == null)
+                int proteinSet;
+                try
                 {
-                    List<String> seqIdsList = partialSeqIds.get(seqIdName); //get list of "partial ids"
-
-                    if(seqIdsList == null)
-                    {
-                        unresolvedProteins.add(seqIdName);
-                        continue;
-                    }
-
-                    //if there are more than one "full ids" containing a partial id in fasta file
-                    if (seqIdsList.size() > 1)
-                    {
-                        ambiguousProteins.add(seqIdName);
-                        continue;
-                    }
-
-                    String seqIdString = seqIdsList.get(0); // get a "full id"
-                    seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
+                    proteinSet = Integer.parseInt(proteinSetString);
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new ExperimentException("Illegal " + ProteinExpressionMatrixAssayProvider.PROTEIN_SEQUENCE_SET_PROPERTY_NAME + " value:" + proteinSetString);
                 }
 
-                // Don't bother inserting any more if we've already found errors
-                if (unresolvedProteins.isEmpty() && ambiguousProteins.isEmpty())
+                Map<String, Integer> seqIds = MS2Manager.getFastaFileSeqIds(proteinSet);
+                Map<String, List<String>> partialSeqIds = new HashMap<>(); //map of {"partial Ids", list of "full ids" }
+                storeFastaSeqIdsToMatchExprMatrixSeqIdFormat(seqIds, partialSeqIds);
+
+                Set<String> unresolvedProteins = new TreeSet<>();
+                Set<String> ambiguousProteins = new TreeSet<>();
+
+                for (Map<String, Object> row : loader)
                 {
-                    //All the col names are condition names (Condition A, Condition B, etc.) except for the Molecular Identifier
-                    for (String sampleName : row.keySet())
+                    Object seqIdObject = row.get(PROTEIN_SEQ_ID_COLUMN_NAME);
+                    String seqIdName = seqIdObject == null ? null : seqIdObject.toString();
+
+                    if (StringUtils.isEmpty(StringUtils.trimToNull(seqIdName)))
                     {
-                        if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
+                        throw new ExperimentException("Sequence ID (Molecular Identifier) must be present and cannot be blank");
+                    }
+
+                    Integer seqId = seqIds.get(seqIdName); //get a matching seqId from stored sequences/content of fasta file
+
+                    //if fasta file does not have the matching seq Id as the experiment expression file
+                    if (seqId == null)
+                    {
+                        List<String> seqIdsList = partialSeqIds.get(seqIdName); //get list of "partial ids"
+
+                        if (seqIdsList == null)
+                        {
+                            unresolvedProteins.add(seqIdName);
                             continue;
+                        }
 
-                        statement.setInt(1, dataRowId);
-                        statement.setInt(2, samplesMap.get(sampleName));
-                        statement.setInt(3, seqId);
-                        statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
-                        statement.executeUpdate();
+                        //if there are more than one "full ids" containing a partial id in fasta file
+                        if (seqIdsList.size() > 1)
+                        {
+                            ambiguousProteins.add(seqIdName);
+                            continue;
+                        }
+
+                        String seqIdString = seqIdsList.get(0); // get a "full id"
+                        seqId = seqIds.get(seqIdString); //get a matching seqId from stored sequences/content of fasta file
                     }
 
-                    if (++rowCount % 5000 == 0)
+                    // Don't bother inserting any more if we've already found errors
+                    if (unresolvedProteins.isEmpty() && ambiguousProteins.isEmpty())
                     {
-                        LOG.info("Imported " + rowCount + " rows ...");
+                        //All the col names are condition names (Condition A, Condition B, etc.) except for the Molecular Identifier
+                        for (String sampleName : row.keySet())
+                        {
+                            if (sampleName.equals(PROTEIN_SEQ_ID_COLUMN_NAME) || row.get(sampleName) == null)
+                                continue;
+
+                            statement.setInt(1, dataRowId);
+                            statement.setInt(2, samplesMap.get(sampleName));
+                            statement.setInt(3, seqId);
+                            statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
+                            statement.executeUpdate();
+                        }
+
+                        if (++rowCount % 5000 == 0)
+                        {
+                            LOG.info("Imported " + rowCount + " rows ...");
+                        }
                     }
                 }
-            }
 
-            if (!unresolvedProteins.isEmpty())
-            {
-                throw new ExperimentException("Unable to find protein" + (unresolvedProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(unresolvedProteins, "', '") + "' in the selected FASTA file.");
+                if (!unresolvedProteins.isEmpty())
+                {
+                    throw new ExperimentException("Unable to find protein" + (unresolvedProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(unresolvedProteins, "', '") + "' in the selected FASTA file.");
+                }
+                if (!ambiguousProteins.isEmpty())
+                {
+                    throw new ExperimentException("More than one protein matches for name" + (ambiguousProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(ambiguousProteins, "', '") + "' found in the selected FASTA file. Unable to choose the correct protein.");
+                }
+                LOG.info("Imported " + rowCount + " rows.");
             }
-            if (!ambiguousProteins.isEmpty())
-            {
-                throw new ExperimentException("More than one protein matches for name" + (ambiguousProteins.size() > 1 ? "s" : "") + " '" + StringUtils.join(ambiguousProteins, "', '") + "' found in the selected FASTA file. Unable to choose the correct protein.");
-            }
-            LOG.info("Imported " + rowCount + " rows.");
         }
         catch(SQLException e)
         {
