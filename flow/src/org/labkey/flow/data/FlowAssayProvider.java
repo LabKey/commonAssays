@@ -455,7 +455,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public List<NavTree> getHeaderLinks(ViewContext viewContext, ExpProtocol protocol, ContainerFilter containerFilter)
     {
-        return super.getHeaderLinks(viewContext, protocol, containerFilter);
+        return Collections.emptyList();
     }
 
     @Override
