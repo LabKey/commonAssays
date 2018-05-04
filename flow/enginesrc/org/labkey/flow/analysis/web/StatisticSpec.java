@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.flow.analysis.model.DataFrame;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowException;

@@ -27,7 +27,6 @@ import org.labkey.api.files.FileContentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.reader.ExcelLoader;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;

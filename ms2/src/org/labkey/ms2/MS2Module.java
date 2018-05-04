@@ -99,7 +99,6 @@ import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.beans.PropertyChangeEvent;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -222,7 +221,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         ProteinUserSchema.register(this);
         CustomAnnotationSchema.register(this);
 
-        MS2Service.register(new MS2ServiceImpl());
+        MS2Service.setInstance(new MS2ServiceImpl());
 
         ProteinService.setInstance(new ProteinServiceImpl());
     }

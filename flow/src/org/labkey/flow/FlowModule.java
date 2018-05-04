@@ -36,7 +36,6 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;

@@ -34,7 +34,6 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryException;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;

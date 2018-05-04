@@ -17,13 +17,13 @@
 package org.labkey.api.ms2;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.services.ServiceRegistry;
 
 /**
@@ -32,7 +32,7 @@ import org.labkey.api.services.ServiceRegistry;
  */
 public interface MS2Service
 {
-    static void register(MS2Service serviceImpl)
+    static void setInstance(MS2Service serviceImpl)
     {
         ServiceRegistry.get().registerService(MS2Service.class, serviceImpl);
     }

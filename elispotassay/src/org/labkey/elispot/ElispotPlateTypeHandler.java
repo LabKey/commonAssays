@@ -21,7 +21,6 @@ import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.AbstractPlateTypeHandler;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
@@ -33,7 +32,6 @@ import org.labkey.api.study.WellGroupTemplate;
 import org.labkey.api.study.assay.plate.PlateReader;
 import org.labkey.api.util.Pair;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

@@ -16,8 +16,8 @@
 
 package org.labkey.api.ms1;
 
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 

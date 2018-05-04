@@ -36,8 +36,6 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
-import org.labkey.api.query.ValidationException;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.PlateTemplate;
