@@ -103,7 +103,8 @@ The analysis section describes which gates in the analysis, as well as the stati
                 script.urlShow(),
                 "Discussion of " + script.getLabel(),
                 false, true);
-        include(discussion, out);
+        if (discussion != null)
+            include(discussion, out);
     }
 %>
 

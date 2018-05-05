@@ -597,7 +597,8 @@ if (getRun() != null)
                 well.urlShow(),
                 "Discussion of " + well.getLabel(),
                 false, true);
-        include(discussion, out);
+        if (discussion != null)
+            include(discussion, out);
     }
 %>
 

@@ -132,7 +132,8 @@
                 run.urlShow(),
                 "Discussion of " + run.getLabel(),
                 false, true);
-        include(discussion, out);
+        if (discussion != null)
+            include(discussion, out);
     }
 %>
 </p>

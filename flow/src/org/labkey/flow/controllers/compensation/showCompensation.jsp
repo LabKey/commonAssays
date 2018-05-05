@@ -196,6 +196,7 @@
                 flowComp.urlShow(),
                 "Discussion of " + flowComp.getLabel(),
                 false, true);
-        include(discussion, out);
+        if (discussion != null)
+            include(discussion, out);
     }
 %>
