@@ -18,6 +18,7 @@ package org.labkey.test.tests.luminex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
@@ -35,6 +36,7 @@ import java.util.Set;
 import static org.junit.Assert.assertTrue;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 9)
 public final class LuminexMultipleCurvesTest extends LuminexTest
 {
     /**

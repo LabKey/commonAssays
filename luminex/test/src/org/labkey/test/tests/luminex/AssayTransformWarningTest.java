@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Category({Assays.class, DailyA.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 4)
 public final class AssayTransformWarningTest extends BaseWebDriverTest
 {
     public static final File JAVA_TRANSFORM_SCRIPT = TestFileUtils.getSampleData("qc/transformWarning.jar");

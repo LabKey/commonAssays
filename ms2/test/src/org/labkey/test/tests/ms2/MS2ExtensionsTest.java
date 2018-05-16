@@ -16,6 +16,7 @@
 package org.labkey.test.tests.ms2;
 
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.MS2;
@@ -29,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Category({MS2.class, DailyA.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 6)
 public class MS2ExtensionsTest extends AbstractMS2ImportTest
 {
     protected static final String MS2EXTENSIONS_WEBPART = "MS2 Runs With Peptide Counts";

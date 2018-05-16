@@ -18,6 +18,7 @@ package org.labkey.test.tests.ms2;
 
 import org.junit.experimental.categories.Category;
 import org.labkey.api.data.ColumnHeaderType;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.WebTestHelper;
@@ -42,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.labkey.test.Locator.NBSP;
 
 @Category({MS2.class, DailyA.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 19)
 public class MS2Test extends AbstractMS2ImportTest
 {
     protected static final String RUN_GROUP1_NAME1 = "Test Run Group 1";

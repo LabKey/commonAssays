@@ -17,12 +17,14 @@ package org.labkey.test.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.DailyA;
 
 import java.io.File;
 
 @Category({DailyA.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 4)
 public class QuantitationTest extends AbstractXTandemTest
 {
     protected static final String LIBRA_PROTOCOL_NAME = "BasicLibra";

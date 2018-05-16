@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
@@ -32,6 +33,7 @@ import org.labkey.test.util.DataRegionTable;
 import java.io.File;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 25)
 public final class LuminexExclusionRetentionTest extends LuminexTest
 {
     private static final File BASE_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");

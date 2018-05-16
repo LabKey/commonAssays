@@ -17,6 +17,7 @@ package org.labkey.test.tests.luminex;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
@@ -26,6 +27,7 @@ import org.labkey.test.util.DataRegionTable;
 import static org.junit.Assert.assertEquals;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 35)
 public final class LuminexUploadAndCopyTest extends LuminexTest
 {
     private static final String THAW_LIST_NAME = "LuminexThawList";

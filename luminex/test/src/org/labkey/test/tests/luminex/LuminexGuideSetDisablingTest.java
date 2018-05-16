@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
@@ -46,6 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 13)
 public final class LuminexGuideSetDisablingTest extends LuminexTest
 {
     private LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);

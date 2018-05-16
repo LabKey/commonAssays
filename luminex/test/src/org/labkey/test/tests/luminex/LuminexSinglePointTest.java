@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
@@ -37,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 8)
 public class LuminexSinglePointTest extends LuminexTest
 {
     private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);

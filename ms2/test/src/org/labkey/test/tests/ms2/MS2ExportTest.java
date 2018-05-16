@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.categories.MS2;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Category({MS2.class, DailyA.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 5)
 public class MS2ExportTest extends AbstractMS2ImportTest
 {
     @Override

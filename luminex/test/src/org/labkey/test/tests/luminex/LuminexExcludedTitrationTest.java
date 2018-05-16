@@ -17,6 +17,7 @@ package org.labkey.test.tests.luminex;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
@@ -27,6 +28,7 @@ import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 8)
 public final class LuminexExcludedTitrationTest extends LuminexTest
 {
     /**

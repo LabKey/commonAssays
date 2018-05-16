@@ -18,6 +18,7 @@ package org.labkey.test.tests.luminex;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
@@ -29,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @Category({DailyA.class, Assays.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 12)
 public final class LuminexRTransformTest extends LuminexTest
 {
     private static final String TEST_ANALYTE_LOT_NUMBER = "ABC 123";
