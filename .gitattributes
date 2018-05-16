@@ -1427,6 +1427,7 @@ ms2/test/src/org/labkey/test/tests/ms2/MS2GZTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MS2Test.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MascotTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/PipelineTest.java -text
+ms2/test/src/org/labkey/test/tests/ms2/ProteinExpressionMatrixAssayTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/SequestImportTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemShortTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemTest.java -text
