@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 @Category({DailyB.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class ProteinExpressionMatrixAssayTest extends BaseWebDriverTest
 {
     private static final String ASSAY_NAME = "Test Protein Expression Matrix";

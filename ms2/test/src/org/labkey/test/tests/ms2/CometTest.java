@@ -18,6 +18,7 @@ package org.labkey.test.tests.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
@@ -31,6 +32,7 @@ import java.io.File;
 import static org.junit.Assert.fail;
 
 @Category({MS2.class, DailyB.class, FileBrowser.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class CometTest extends AbstractMS2SearchEngineTest
 {
     protected static final String SEARCH_BUTTON = "Comet";

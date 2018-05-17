@@ -18,6 +18,7 @@ package org.labkey.test.tests.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.WebTestHelper;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @Category({DailyB.class, MS2.class, XTandem.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 9)
 public class XTandemTest extends AbstractXTandemTest
 {
     protected static final String SEARCH_FASTA1 = "gi|4689022";

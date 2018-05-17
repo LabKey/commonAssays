@@ -18,6 +18,7 @@ package org.labkey.test.tests.ms2;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
@@ -38,6 +39,7 @@ import static org.labkey.test.components.WebPartPanel.WebPart;
 import static org.labkey.test.util.DataRegionTable.DataRegion;
 
 @Category({DailyB.class, MS2.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 5)
 public class LibraTest extends MS2TestBase
 {
     private static final String standardView = "Standard View";

@@ -20,6 +20,7 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.TestCredentials;
@@ -66,6 +67,7 @@ import static org.junit.Assert.assertTrue;
  *
  */
 @Category({MS2.class, Mascot.class, DailyB.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class MascotTest extends AbstractMS2SearchEngineTest
 {
     protected static final String PEPTIDE = "R.RLPVGADR.G";

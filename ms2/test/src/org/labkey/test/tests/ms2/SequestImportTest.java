@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Category({DailyB.class, MS2.class, FileBrowser.class})
+@BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class SequestImportTest extends BaseWebDriverTest
 {
     private static final String PROJECT_NAME = "SequestImport" + TRICKY_CHARACTERS_FOR_PROJECT_NAMES;
