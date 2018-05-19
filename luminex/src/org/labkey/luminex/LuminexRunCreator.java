@@ -27,6 +27,7 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.AssayRunUploadContext;
@@ -87,11 +88,18 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
             }
         }
 
-        handleReRun(uploadContext, run);
+        try
+        {
+            handleReRun(uploadContext, run);
+        }
+        catch (BatchValidationException e)
+        {
+            throw new ExperimentException(e);
+        }
         return batch;
     }
 
-    private void handleReRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, ExpRun run) throws ValidationException
+    private void handleReRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, ExpRun run) throws ValidationException, BatchValidationException
     {
         if (uploadContext.getReRunId() != null)
         {

@@ -25,6 +25,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayRunUploadContext;
@@ -127,7 +128,7 @@ public class MassSpecRunCreator extends DefaultAssayRunCreator<MassSpecMetadataA
 
             return run;
         }
-        catch (ValidationException e)
+        catch (ValidationException | BatchValidationException e)
         {
             throw new ExperimentException(e);
         }
