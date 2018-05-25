@@ -81,14 +81,18 @@ public class PlateParserTests
     // Create a plate template that has enough information to parse the data file
     public PlateTemplate template(String name, final int rows, final int columns)
     {
-        final PlateTemplate template = _context.mock(PlateTemplate.class, name);
-        _context.checking(new Expectations() {{
-            allowing(template).getRows();
-            will(returnValue(rows));
-            allowing(template).getColumns();
-            will(returnValue(columns));
-        }});
-        return template;
+        synchronized (_context)
+        {
+            final PlateTemplate template = _context.mock(PlateTemplate.class, name);
+            _context.checking(new Expectations()
+            {{
+                allowing(template).getRows();
+                will(returnValue(rows));
+                allowing(template).getColumns();
+                will(returnValue(columns));
+            }});
+            return template;
+        }
     }
 
     private static List<Pair<String, String>> singlePlateTests = Arrays.asList(
