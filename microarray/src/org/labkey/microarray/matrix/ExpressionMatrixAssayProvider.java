@@ -16,6 +16,9 @@
 
 package org.labkey.microarray.matrix;
 
+import org.apache.commons.lang3.StringUtils;
+import org.fhcrc.cpas.exp.xml.ExperimentRunType;
+import org.fhcrc.cpas.exp.xml.SimpleValueType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -23,13 +26,17 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.assay.AbstractAssayProvider;
@@ -206,4 +213,76 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
         return domainMap;
     }
 
+
+    @Override
+    public XarCallbacks getXarCallbacks(final User user, final Container container)
+    {
+        return new XarCallbacks()
+        {
+            Map<Integer,String> mapRowIdName = null;
+            Map<String,Integer> mapNameRowId = null;
+
+            @Override
+            public void beforeXarExportRun(ExpRun run, ExperimentRunType xrun)
+            {
+                if (null == mapRowIdName)
+                {
+                    // get map featureset.rowid->featureset.name
+                    QuerySchema microarray = DefaultSchema.get(user, container).getSchema("Microarray");
+                    if (null == microarray)
+                        return;
+                    Map map = QueryService.get().selector(microarray, "SELECT RowId, Name FROM FeatureAnnotationSet")
+                            .getValueMap();
+                    mapRowIdName = (Map<Integer,String>)map;
+                    // Make sure this is really <Integer,String>?
+                    if (!mapRowIdName.isEmpty())
+                    {
+                        Map.Entry<Integer,String> e = mapRowIdName.entrySet().iterator().next();
+                        assert e.getKey() instanceof Integer;
+                        assert e.getValue() instanceof String;
+                    }
+                }
+                for (SimpleValueType sv : xrun.getProperties().getSimpleValArray())
+                {
+                    if (StringUtils.equals("featureSet",sv.getName()))
+                    {
+                        int featureAnnotationSetRowId = (int)Float.parseFloat(sv.getStringValue());
+                        String featureAnnotationSetName = mapRowIdName.get(featureAnnotationSetRowId);
+                        sv.setStringValue(featureAnnotationSetName);
+                    }
+                }
+            }
+
+            @Override
+            public void beforeXarImportRun(ExperimentRunType xrun)
+            {
+                if (null == mapNameRowId)
+                {
+                    // get map featureset.rowid->featureset.name
+                    QuerySchema microarray = DefaultSchema.get(user, container).getSchema("Microarray");
+                    if (null == microarray)
+                        return;
+                    Map map = QueryService.get().selector(microarray, "SELECT Name, RowId FROM FeatureAnnotationSet")
+                            .getValueMap();
+                    mapNameRowId = (Map<String,Integer>)map;
+                    // Make sure this is really <Integer,String>?
+                    if (!mapNameRowId.isEmpty())
+                    {
+                        Map.Entry<String,Integer> e = mapNameRowId.entrySet().iterator().next();
+                        assert e.getKey() instanceof String;
+                        assert e.getValue() instanceof Integer;
+                    }
+                }
+                for (SimpleValueType sv : xrun.getProperties().getSimpleValArray())
+                {
+                    if (StringUtils.equals(FEATURE_SET_PROPERTY_NAME,sv.getName()))
+                    {
+                        String featureAnnotationSetName = sv.getStringValue();
+                        Integer featureAnnotationRowId = mapNameRowId.get(featureAnnotationSetName);
+                        sv.setStringValue(featureAnnotationRowId==null ? null : String.valueOf(featureAnnotationRowId));
+                    }
+                }
+            }
+        };
+    }
 }
