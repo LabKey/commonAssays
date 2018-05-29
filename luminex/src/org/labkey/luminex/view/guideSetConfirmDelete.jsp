@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.luminex.LuminexController" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -37,12 +38,16 @@
     JspView<LuminexController.GuideSetsDeleteBean> me = (JspView<LuminexController.GuideSetsDeleteBean>) HttpView.currentView();
     LuminexController.GuideSetsDeleteBean bean = me.getModelBean();
     List<LuminexController.GuideSetsDeleteBean.GuideSet> guideSets = bean.getGuideSets();
+
+    ActionURL successUrl = bean.getSuccessActionURL(
+            new ActionURL(LuminexController.ManageGuideSetAction.class, getContainer()));
+    ActionURL cancelUrl = bean.getCancelActionURL(successUrl);
 %>
 
 <% if (bean.getGuideSets() == null || bean.getGuideSets().isEmpty()) { %>
 
     <p>There are no selected guide sets to delete.</p>
-    <%= text(bean.getReturnUrl() == null || bean.getReturnUrl().isEmpty() ? button("OK").href(buildURL(LuminexController.ManageGuideSetAction.class)).toString() : button("OK").href(bean.getReturnUrl()).toString())%>
+    <%= text(button("OK").href(successUrl).toString())%>
 
 <% } else { %>
     <%--NOTE: here is where we need to display all the information about what is being deleted--%>
@@ -106,13 +111,13 @@
         <% }
             if (bean.getDataRegionSelectionKey() != null) { %>
         <input type="hidden" name="<%= h(DataRegionSelection.DATA_REGION_SELECTION_KEY) %>" value="<%= h(bean.getDataRegionSelectionKey()) %>" />
-        <% } if (bean.getReturnUrl() != null) { %>
-            <input type="hidden" name="returnURL" value="<%= h(bean.getReturnUrl()) %>"/>
+        <% } if (successUrl != null) { %>
+            <input type="hidden" name="<%=ActionURL.Param.successUrl%>" value="<%= h(successUrl) %>"/>
         <% } if (bean.getProtocol() != null) { %>
             <input type="hidden" name="rowId" value="<%= h(bean.getProtocol().getRowId()) %>"/>
         <% } %>
         <input type="hidden" name="forceDelete" value="true"/>
         <%= button("Confirm Delete").submit(true) %>
-        <%= text(bean.getReturnUrl() == null || bean.getReturnUrl().isEmpty() ? button("Cancel").href(buildURL(LuminexController.ManageGuideSetAction.class)).toString() : button("Cancel").href(bean.getReturnUrl()).toString())%>
+        <%= text(button("Cancel").href(cancelUrl).toString())%>
     </labkey:form>
 <% } %>
