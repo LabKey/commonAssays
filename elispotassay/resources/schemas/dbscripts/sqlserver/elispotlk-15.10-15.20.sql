@@ -79,8 +79,6 @@ FROM (
 	FROM exp.Object o WHERE ObjectURI LIKE '%ElispotAssayDataRow%') x
 	WHERE specimenlsid IS NOT NULL AND RunID IS NOT NULL;
 
-EXEC core.executeJavaUpgradeCode 'migrateToElispotTables';
-
 /* elispotlk-15.12-15.13.sql */
 
 ALTER TABLE elispotlk.rundata ADD Cytokine NVARCHAR(4000);

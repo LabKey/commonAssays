@@ -81,10 +81,4 @@ public class ElispotModule extends DefaultModule
 
         PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
     }
-
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new ElispotUpgradeCode();
-    }
 }
