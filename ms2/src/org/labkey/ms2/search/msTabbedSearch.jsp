@@ -83,7 +83,7 @@
                         scope: this,
                         afterrender : function(cmp) {
                             var wp = new LABKEY.WebPart({
-                                partName: 'Peptide Search',
+                                partName: <%=q(targetedMSModuleActive ? "Targeted MS Peptide Search" : "Peptide Search")%>,
                                 frame: 'none',
                                 renderTo: cmp.getId(),
                                 success: function() { cmp.up('panel').doLayout(); }

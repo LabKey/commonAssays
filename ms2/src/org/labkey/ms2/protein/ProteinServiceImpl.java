@@ -44,6 +44,7 @@ public class ProteinServiceImpl implements ProteinService
     private List<OrganismGuessStrategy> _strategies;
     private List<QueryViewProvider<ProteinSearchForm>> _proteinSearchViewProviders = new CopyOnWriteArrayList<>();
     private List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
+    private List<FormViewProvider<ProteinSearchForm>> _proteinSearchFormViewProviders = new CopyOnWriteArrayList<>();
 
     public ProteinServiceImpl()
     {
@@ -124,6 +125,11 @@ public class ProteinServiceImpl implements ProteinService
         _peptideSearchViewProviders.add(provider);
     }
 
+    public void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider)
+    {
+        _proteinSearchFormViewProviders.add(provider);
+    }
+
     public List<QueryViewProvider<PeptideSearchForm>> getPeptideSearchViews()
     {
         return Collections.unmodifiableList(_peptideSearchViewProviders);
@@ -169,6 +175,11 @@ public class ProteinServiceImpl implements ProteinService
     public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
     {
         return Collections.unmodifiableList(_proteinSearchViewProviders);
+    }
+
+    public List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders()
+    {
+        return Collections.unmodifiableList(_proteinSearchFormViewProviders);
     }
 
     public static ProteinServiceImpl getInstance()

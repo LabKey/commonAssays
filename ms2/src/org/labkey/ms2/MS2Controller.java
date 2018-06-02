@@ -3062,7 +3062,6 @@ public class MS2Controller extends SpringActionController
 
             QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
 
-            ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, form);
             if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
             {
                 try
@@ -3081,9 +3080,24 @@ public class MS2Controller extends SpringActionController
             }
             proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
 
-
-            VBox result = new VBox(searchView, proteinsView);
-            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)))
+            WebPartView searchFormView = null;
+            for (ProteinService.FormViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchFormViewProviders())
+            {
+                WebPartView formView = provider.createView(getViewContext(), form);
+                if (formView != null)
+                {
+                    searchFormView = formView;
+                }
+            }
+            if(searchFormView == null)
+            {
+                // If no protein search form view providers are registered, add the default form search view.
+                searchFormView = new ProteinSearchWebPart(true, form);
+            }
+            VBox result = new VBox(searchFormView, proteinsView);
+            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
+                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
+                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
             {
                 QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
                 groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
