@@ -152,7 +152,7 @@ public class Protein
     }
 
     public void setOrigHeader(String h) {
-       this._origHeader = h;
+       _origHeader = h;
     }
 
     public String getName()

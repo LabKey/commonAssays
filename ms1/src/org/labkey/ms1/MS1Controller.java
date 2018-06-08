@@ -989,7 +989,7 @@ public class MS1Controller extends SpringActionController
 
         public void setRunIds(String runIds)
         {
-            this._runIds = runIds;
+            _runIds = runIds;
         }
 
         public int[] getRunIdArray()

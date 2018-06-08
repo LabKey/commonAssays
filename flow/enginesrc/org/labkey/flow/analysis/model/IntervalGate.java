@@ -103,9 +103,9 @@ public class IntervalGate extends RegionGate
         if (!super.equals(other))
             return false;
         IntervalGate gate = (IntervalGate) other;
-        if (!this._axis.equals(gate._axis))
+        if (!_axis.equals(gate._axis))
             return false;
-        return this._max == gate._max && this._min == gate._min;
+        return _max == gate._max && _min == gate._min;
     }
 
 

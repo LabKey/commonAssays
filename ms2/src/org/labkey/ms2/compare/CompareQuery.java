@@ -338,7 +338,7 @@ public abstract class CompareQuery extends SQLFragment
         rgn.addColumn(comparisonColumn);
         rgn.getDisplayColumn(comparisonColumn.getName()).setLinkTarget(getComparisonColumnLinkTarget());
 
-        ActionURL originalLinkURL = this._currentUrl.clone();
+        ActionURL originalLinkURL = _currentUrl.clone();
         originalLinkURL.deleteFilterParameters(DataRegion.SELECT_CHECKBOX_NAME);
         originalLinkURL.deleteParameter("column");
         originalLinkURL.deleteParameter("total");

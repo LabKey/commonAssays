@@ -95,7 +95,7 @@ public class SubsetRef extends Gate implements SubsetExpressionGate
     @Override
     public int hashCode()
     {
-        return super.hashCode() ^ this._ref.hashCode();
+        return super.hashCode() ^ _ref.hashCode();
     }
 
     @Override

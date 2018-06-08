@@ -127,7 +127,7 @@ public abstract class MS2Loader
 
         public void setSpectrumPath(String spectrumPath)
         {
-            this._spectrumPath = spectrumPath;
+            _spectrumPath = spectrumPath;
         }
 
         public boolean shouldLoadSpectra()
@@ -303,7 +303,7 @@ public abstract class MS2Loader
 
         public void setHitRank(Integer hitRank)
         {
-            this._hitRank = hitRank;
+            _hitRank = hitRank;
         }
 
         public Integer getMatchedIons()

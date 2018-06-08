@@ -63,12 +63,12 @@ public class ProtXmlReader
             {
                 _fIn.close();
             }
-            catch (IOException e) {}
+            catch (IOException ignored) {}
             try
             {
                 _parser.close();
             }
-            catch (XMLStreamException e) {}
+            catch (XMLStreamException ignored) {}
         }
 
         public boolean hasNext()
@@ -356,7 +356,7 @@ public class ProtXmlReader
 
         public void setProteinName(String proteinName)
         {
-            this._proteinName = proteinName;
+            _proteinName = proteinName;
         }
 
         public String getProteinDescription()
@@ -377,7 +377,7 @@ public class ProtXmlReader
 
         public void setPctSpectrumIds(Float pctSpectrumIds)
         {
-            this._pctSpectrumIds = pctSpectrumIds;
+            _pctSpectrumIds = pctSpectrumIds;
         }
 
 
@@ -389,7 +389,7 @@ public class ProtXmlReader
 
         public void setPercentCoverage(Float percentCoverage)
         {
-            this._percentCoverage = percentCoverage;
+            _percentCoverage = percentCoverage;
         }
 
 
@@ -401,7 +401,7 @@ public class ProtXmlReader
 
         public void setProbability(float probability)
         {
-            this._probability = probability;
+            _probability = probability;
         }
 
 
@@ -413,7 +413,7 @@ public class ProtXmlReader
 
         public void setTotalNumberPeptides(int totalNumberPeptides)
         {
-            this._totalNumberPeptides = totalNumberPeptides;
+            _totalNumberPeptides = totalNumberPeptides;
         }
 
         public List<Peptide> getPeptides()
@@ -508,7 +508,7 @@ public class ProtXmlReader
 
         public void setCalcNeutralPepMass(float calcNeutralPepMass)
         {
-            this._calcNeutralPepMass = calcNeutralPepMass;
+            _calcNeutralPepMass = calcNeutralPepMass;
         }
 
 
@@ -520,7 +520,7 @@ public class ProtXmlReader
 
         public void setCharge(int charge)
         {
-            this._charge = charge;
+            _charge = charge;
         }
 
 
@@ -549,7 +549,7 @@ public class ProtXmlReader
 
         public void setEnzymaticTermini(int enzymaticTermini)
         {
-            this._enzymaticTermini = enzymaticTermini;
+            _enzymaticTermini = enzymaticTermini;
         }
 
 
@@ -561,7 +561,7 @@ public class ProtXmlReader
 
         public void setInstances(int instances)
         {
-            this._instances = instances;
+            _instances = instances;
         }
 
 
@@ -573,7 +573,7 @@ public class ProtXmlReader
 
         public void setSiblingPeptides(float nSiblingPeptides)
         {
-            this._siblingPeptides = nSiblingPeptides;
+            _siblingPeptides = nSiblingPeptides;
         }
 
 
@@ -585,7 +585,7 @@ public class ProtXmlReader
 
         public void setSiblingPeptidesBin(int siblingPeptidesBin)
         {
-            this._siblingPeptidesBin = siblingPeptidesBin;
+            _siblingPeptidesBin = siblingPeptidesBin;
         }
 
 
@@ -597,7 +597,7 @@ public class ProtXmlReader
 
         public void setNspAdjustedProbability(float nspAdjustedProbability)
         {
-            this._nspAdjustedProbability = nspAdjustedProbability;
+            _nspAdjustedProbability = nspAdjustedProbability;
         }
 
 
@@ -609,7 +609,7 @@ public class ProtXmlReader
 
         public void setPeptideSequence(String peptideSequence)
         {
-            this._peptideSequence = peptideSequence;
+            _peptideSequence = peptideSequence;
         }
 
 
@@ -621,7 +621,7 @@ public class ProtXmlReader
 
         public void setWeight(float weight)
         {
-            this._weight = weight;
+            _weight = weight;
         }
 
 
@@ -635,5 +635,4 @@ public class ProtXmlReader
             return _contributingEvidence;
         }
     }
-
 }

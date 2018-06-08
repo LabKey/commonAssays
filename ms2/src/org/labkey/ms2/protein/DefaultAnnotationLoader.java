@@ -98,7 +98,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
 
     public void setComment(String c)
     {
-        this._comment = c;
+        _comment = c;
     }
 
     public String getComment()

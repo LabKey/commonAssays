@@ -310,7 +310,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         if (entry == null)
             return null;
 
-        assert entry._type == this._type;
+        assert entry._type == _type;
 
         Integer aliasId = entry.isAlias() ? entry._aliasId : null;
 

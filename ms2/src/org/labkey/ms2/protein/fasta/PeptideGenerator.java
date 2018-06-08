@@ -609,7 +609,7 @@ public class PeptideGenerator implements Runnable
 
     public void setInputFileName(String inputFileName)
     {
-        this._inputFileName = inputFileName;
+        _inputFileName = inputFileName;
     }
 
     public String getOutputFileName()
@@ -619,7 +619,7 @@ public class PeptideGenerator implements Runnable
 
     public void setOutputFileName(String outputFileName)
     {
-        this._outputFileName = outputFileName;
+        _outputFileName = outputFileName;
     }
 
     public boolean isComputePI()
@@ -629,7 +629,7 @@ public class PeptideGenerator implements Runnable
 
     public void setComputePI(boolean computePI)
     {
-        this._computePI = computePI;
+        _computePI = computePI;
     }
 
     public boolean isComputeHp()
@@ -639,7 +639,7 @@ public class PeptideGenerator implements Runnable
 
     public void setComputeHp(boolean computeHp)
     {
-        this._computeHp = computeHp;
+        _computeHp = computeHp;
     }
 
     public int getHpWindowSize()
@@ -649,7 +649,7 @@ public class PeptideGenerator implements Runnable
 
     public void setHpWindowSize(int hpWindowSize)
     {
-        this._hpWindowSize = hpWindowSize;
+        _hpWindowSize = hpWindowSize;
     }
 
     public boolean isComputeAverageMass()
@@ -659,7 +659,7 @@ public class PeptideGenerator implements Runnable
 
     public void setComputeAverageMass(boolean computeAverageMass)
     {
-        this._computeAverageMass = computeAverageMass;
+        _computeAverageMass = computeAverageMass;
     }
 
     public boolean isComputeMonoisotopicMass()
@@ -669,7 +669,7 @@ public class PeptideGenerator implements Runnable
 
     public void setComputeMonoisotopicMass(boolean computeMonoisotopicMass)
     {
-        this._computeMonoisotopicMass = computeMonoisotopicMass;
+        _computeMonoisotopicMass = computeMonoisotopicMass;
     }
 
     public int getDigest()
@@ -679,7 +679,7 @@ public class PeptideGenerator implements Runnable
 
     public void setDigest(int digest)
     {
-        this._digest = digest;
+        _digest = digest;
     }
 
     public boolean isCountOnly()
@@ -689,7 +689,7 @@ public class PeptideGenerator implements Runnable
 
     public void setCountOnly(boolean countOnly)
     {
-        this._countOnly = countOnly;
+        _countOnly = countOnly;
     }
 
     public int getMaxMissedCleavages()

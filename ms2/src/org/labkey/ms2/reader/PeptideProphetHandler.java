@@ -142,9 +142,9 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             return _ntt;
         }
 
-        public void setProphetNumTrypticTerm(int _ntt)
+        public void setProphetNumTrypticTerm(int ntt)
         {
-            this._ntt = _ntt;
+            _ntt = ntt;
         }
 
         public int getProphetNumMissedCleav()
@@ -152,9 +152,9 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             return _nmc;
         }
 
-        public void setProphetNumMissedCleav(int _nmc)
+        public void setProphetNumMissedCleav(int nmc)
         {
-            this._nmc = _nmc;
+            _nmc = nmc;
         }
 
         public long getPeptideId()
@@ -164,7 +164,7 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
 
         public void setPeptideId(long peptideId)
         {
-            this._peptideId = peptideId;
+            _peptideId = peptideId;
         }
 
         public boolean isSummaryLoaded()
@@ -178,9 +178,9 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             return _allNttProb;
         }
 
-        public void setAllNttProb(String _allNttProb)
+        public void setAllNttProb(String allNttProb)
         {
-            this._allNttProb = _allNttProb;
+            _allNttProb = allNttProb;
         }
     }
 }

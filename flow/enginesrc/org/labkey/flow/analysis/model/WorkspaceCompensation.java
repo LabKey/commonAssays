@@ -30,7 +30,7 @@ public class WorkspaceCompensation implements Serializable
 
     public WorkspaceCompensation(Workspace workspace)
     {
-        this._workspace = workspace;
+        _workspace = workspace;
     }
 
     private boolean isUniversalNegative(Map<String, Workspace.CompensationChannelData> channelDataMap)

@@ -89,7 +89,7 @@ public class WorkspaceData implements Serializable
 
     public void setObject(String object) throws Exception
     {
-        this._object = (IWorkspace) PageFlowUtil.decodeObject(object);
+        _object = (IWorkspace) PageFlowUtil.decodeObject(object);
     }
 
     public IWorkspace getWorkspaceObject()
