@@ -79,10 +79,8 @@ public abstract class Workspace implements IWorkspace, Serializable
 
     static public Workspace readWorkspace(File file)
     {
-        InputStream is = null;
-        try
+        try (InputStream is = new FileInputStream(file))
         {
-            is = new FileInputStream(file);
             return readWorkspace(file.getName(), file.getPath(), is);
         }
         catch (FlowException e)
@@ -92,10 +90,6 @@ public abstract class Workspace implements IWorkspace, Serializable
         catch (Exception e)
         {
             throw new RuntimeException(e);
-        }
-        finally
-        {
-            if (is != null) try { is.close(); } catch (IOException ioe) { }
         }
     }
 
