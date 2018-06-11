@@ -37,7 +37,9 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.UsageReportingLevel;
 import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -82,7 +84,9 @@ import org.labkey.flow.webparts.OverviewWebPart;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class FlowModule extends SpringModule
@@ -271,6 +275,19 @@ public class FlowModule extends SpringModule
         if (null != AuditLogService.get() && AuditLogService.get().getClass() != DefaultAuditProvider.class)
         {
             AuditLogService.get().registerAuditType(new FlowKeywordAuditProvider());
+        }
+        UsageMetricsService svc = UsageMetricsService.get();
+        if (null != svc)
+        {
+            FlowService fs = FlowService.get();
+            if (null != fs)
+            {
+                svc.registerUsageMetrics(UsageReportingLevel.LOW, NAME, () -> {
+                    Map<String, Object> metric = new HashMap<>();
+                    metric.put("flowTempTableCount", fs.getTempTableCount());
+                    return metric;
+                });
+            }
         }
     }
 
