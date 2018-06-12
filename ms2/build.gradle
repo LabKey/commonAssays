@@ -11,3 +11,14 @@ dependencies
    })
 }
 
+// TODO move resources files into resources directory to avoid this overlap
+sourceSets {
+   main {
+      resources {
+         srcDirs = ['src'] // src is included because it contains some xml files
+         exclude '**/*.java'
+         exclude '**/*.jsp'
+      }
+   }
+}
+
