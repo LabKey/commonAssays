@@ -18,6 +18,7 @@ package org.labkey.microarray.matrix;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
+import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.fhcrc.cpas.exp.xml.SimpleValueType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -248,6 +249,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     {
                         int featureAnnotationSetRowId = (int)Float.parseFloat(sv.getStringValue());
                         String featureAnnotationSetName = mapRowIdName.get(featureAnnotationSetRowId);
+                        sv.setValueType(SimpleTypeNames.STRING);
                         sv.setStringValue(featureAnnotationSetName);
                     }
                 }
