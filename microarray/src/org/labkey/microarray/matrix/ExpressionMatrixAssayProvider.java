@@ -281,6 +281,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     {
                         String featureAnnotationSetName = sv.getStringValue();
                         Integer featureAnnotationRowId = mapNameRowId.get(featureAnnotationSetName);
+                        sv.setValueType(SimpleTypeNames.INTEGER);
                         sv.setStringValue(featureAnnotationRowId==null ? null : String.valueOf(featureAnnotationRowId));
                     }
                 }
