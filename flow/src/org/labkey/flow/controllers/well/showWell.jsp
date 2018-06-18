@@ -604,12 +604,16 @@ if (getRun() != null)
 
 
 <%!
-// UNDONE: move to pipeline service
 boolean canReadPipelineFiles(User user, PipeRoot root)
 {
-    // If this is a default pipeline root, then inherit permissions from parent container
-    SecurityPolicy policy = SecurityPolicyManager.getPolicy(root, root.isDefault());
-    return user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class);
+    // see issue 30001
+    // I think container read permission is sufficient for this usage
+    return root.getContainer().hasPermission(user, ReadPermission.class);
+
+// UNDONE: move to pipeline service
+//    // If this is a default pipeline root, then inherit permissions from parent container
+//    SecurityPolicy policy = SecurityPolicyManager.getPolicy(root, root.isDefault());
+//    return user != null && !user.isGuest() && policy.hasPermission(user, ReadPermission.class);
 }
 %>
 

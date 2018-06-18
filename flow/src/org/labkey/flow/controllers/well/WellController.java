@@ -380,14 +380,8 @@ public class WellController extends BaseFlowController
             if (r == null)
                 return new HtmlView("<span class='labkey-error'>Pipeline not configured</span>");
 
-            // UNDONE: PipeRoot should have wrapper for this
-            //NOTE: we are specifically not inheriting policies from the parent container
-            //as the old permissions-checking code did not do this. We need to consider
-            //whether the pipeline root's parent really is the container, or if we should
-            //be checking a different (more specific) permission.
-            SecurityPolicy policy = SecurityPolicyManager.getPolicy(r, r.isDefault());
-            if (!policy.hasPermission(getUser(), ReadPermission.class))
-                return new HtmlView("<span class='labkey-error'>You don't have permission to the FCS file.</span>");
+            // NOTE: see 30001, we are not checking the pipeline permissions which control access via webdav
+            // I don't think it necessary or what is intended by those permissions
 
             boolean canRead = false;
             URI rel = URIUtil.relativize(r.getUri(), fileURI);
