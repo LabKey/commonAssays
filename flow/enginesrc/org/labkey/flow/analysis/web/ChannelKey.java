@@ -30,7 +30,7 @@ class ChannelKey
         if (o == null || o.getClass() != getClass())
             return false;
         ChannelKey that = (ChannelKey) o;
-        return that._sign == this._sign && that._channel.equals(this._channel);
+        return that._sign == _sign && that._channel.equals(_channel);
     }
     public int hashCode()
     {

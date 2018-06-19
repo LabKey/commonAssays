@@ -64,12 +64,12 @@ class ChannelData
 
     public ChannelData(CompHandler handler, CompSign sign, int index)
     {
-        this._handler = handler;
-        this._key = new ChannelKey(sign, _handler._calc.getChannels().get(index).getName());
+        _handler = handler;
+        _key = new ChannelKey(sign, _handler._calc.getChannels().get(index).getName());
         CompensationCalculation.ChannelInfo ci = _handler._calc.getChannels().get(index);
-        this._channelSubset = _key._sign == CompSign.positive ? ci.getPositive() : ci.getNegative();
+        _channelSubset = _key._sign == CompSign.positive ? ci.getPositive() : ci.getNegative();
         results = new ArrayList();
-        this._populationSet = _handler._analyzer.findSubGroup(_handler._calc, this._channelSubset.getSubset());
+        _populationSet = _handler._analyzer.findSubGroup(_handler._calc, _channelSubset.getSubset());
     }
 
     public void setFile(CompHandler.FileData file)
@@ -177,7 +177,7 @@ class ChannelData
 
     public void setSubset(Subset subset)
     {
-        this._subset = subset;
+        _subset = subset;
         _subsetParent = subset.getParent();
         if (_subsetParent == null)
         {
