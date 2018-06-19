@@ -156,7 +156,7 @@ public class OtherParametersComposite extends SearchFormComposite
         label.setStyleName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup("Other parameters", "The names and values of other <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=pipelineParams\" target=\"_blank\">analysis parameters</a> that are not controlled by the above inputs."));
+        panel.add(new HelpPopup("Other parameters", "The names and values of other <a href=\"https://www.labkey.org/Documentation/wiki-page.view?name=pipelineParams\" target=\"_blank\">analysis parameters</a> that are not controlled by the above inputs."));
         return panel;
     }
 

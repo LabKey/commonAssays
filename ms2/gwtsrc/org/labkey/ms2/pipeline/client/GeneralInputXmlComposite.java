@@ -50,7 +50,7 @@ public class GeneralInputXmlComposite extends InputXmlComposite
         label.setStyleName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup(_description, "The <a href=\"https://www.labkey.org/wiki/home/Documentation/page.view?name=" + _helpTopic + "\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
+        panel.add(new HelpPopup(_description, "The <a href=\"https://www.labkey.org/Documentation/wiki-page.view?name=" + _helpTopic + "\" target=\"_blank\">full set of analysis parameters</a>, represented in XML."));
         return panel;
     }
 }
