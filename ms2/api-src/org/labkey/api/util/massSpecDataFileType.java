@@ -97,7 +97,7 @@ public class massSpecDataFileType extends FileType
                     msg += mzMLLibName;
                     msg += "for mzML input support: ";
                     msg += why;
-                    msg += " Please refer to https://www.labkey.org/Documentation/wiki-page.view?name=WorkingWithmzML for more information.";
+                    msg += " Please refer to " + new HelpTopic("WorkingWithmzML").getHelpTopicHref() + " for more information.";
                     Logger.getLogger(massSpecDataFileType.class).warn(msg);
                 }
             }
