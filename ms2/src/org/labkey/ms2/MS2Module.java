@@ -335,7 +335,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     @NotNull
     @Override
-    public Collection<String> getSummary(Container c)
+    public Collection<String> getSummary(Container c, User user)
     {
         Collection<String> list = new LinkedList<>();
         long count = MS2Manager.getRunCount(c);

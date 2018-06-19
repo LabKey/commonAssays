@@ -33,6 +33,7 @@ import org.labkey.api.ms1.MS1Urls;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
+import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SystemMaintenance;
@@ -145,7 +146,7 @@ public class MS1Module extends SpringModule implements ProteomicsModule
 
     @NotNull
     @Override
-    public Collection<String> getSummary(Container c)
+    public Collection<String> getSummary(Container c, User user)
     {
         return MS1Manager.get().getContainerSummary(c);
     }

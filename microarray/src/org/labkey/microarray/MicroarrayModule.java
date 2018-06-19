@@ -26,6 +26,7 @@ import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.search.SearchService;
+import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.FileType;
@@ -153,7 +154,7 @@ public class MicroarrayModule extends SpringModule
     }
 
     @NotNull
-    public Collection<String> getSummary(Container c)
+    public Collection<String> getSummary(Container c, User user)
     {
         long count = MicroarrayManager.get().featureAnnotationSetCount(c);
         if (count > 0)
