@@ -124,7 +124,7 @@
                 var name = row.Name.value;
                 var url = row.Name.url;
                 var comment = row["Flag/Comment"].value ? " title='" + row["Flag/Comment"].value + "'" : "";
-                var src = row["Flag/Comment"].value ? urlFlagged : "<%=getContextPath()%>/_.gif";
+                var src = row["Flag/Comment"].value ? urlFlagged : "<%=getWebappURL("_.gif")%>";
 
                 html += "<tr>" +
                         "<td><a" + comment + " href='" + url + "'><img src='" + src + "'></a></td>" +

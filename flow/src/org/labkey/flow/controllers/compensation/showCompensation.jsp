@@ -53,7 +53,7 @@
                "</span><wbr>";
     }
 %>
-<script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
+<script type="text/javascript" src="<%=getWebappURL("Flow/util.js")%>"></script>
 <%
     final FlowCompensationMatrix flowComp = FlowCompensationMatrix.fromURL(getActionURL(), request, getContainer(), getUser());
     if (null == flowComp)

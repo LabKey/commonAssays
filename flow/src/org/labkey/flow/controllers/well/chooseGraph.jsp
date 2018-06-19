@@ -218,7 +218,7 @@
         urlGenerateGraph.addParameter("graph", graphspec.toString());
 
 %>
-<script type="text/javascript" src="<%=getContextPath()%>/Flow/util.js"></script>
+<script type="text/javascript" src="<%=getWebappURL("Flow/util.js")%>"></script>
 <br/>
 <p><img src="<%=h(urlGenerateGraph)%>" onerror="flowImgError(this);"></p>
 <% } %>
