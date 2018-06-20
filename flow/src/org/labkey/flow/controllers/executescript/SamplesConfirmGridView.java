@@ -54,9 +54,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: kevink
@@ -88,20 +90,30 @@ public class SamplesConfirmGridView extends GridView
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
-        List<String> columns = new ArrayList<>();
+        Map<FieldKey, ColumnInfo> columns = new LinkedHashMap<>();
         if (resolving)
         {
-            columns.add(MATCHED_FLAG_FIELD_KEY.getName());
-            columns.add(MATCHED_FILE_FIELD_KEY.getName());
-            columns.add(CANDIDATE_FILES_FIELD_KEY.getName());
+            columns.put(MATCHED_FLAG_FIELD_KEY, new ColumnInfo(MATCHED_FLAG_FIELD_KEY, JdbcType.BOOLEAN));
+            columns.put(MATCHED_FILE_FIELD_KEY, new ColumnInfo(MATCHED_FILE_FIELD_KEY, JdbcType.INTEGER));
+            columns.put(CANDIDATE_FILES_FIELD_KEY, new ColumnInfo(CANDIDATE_FILES_FIELD_KEY, JdbcType.OTHER)); // List
         }
-        columns.add(SAMPLE_ID_FIELD_KEY.getName());
-        columns.add(SAMPLE_NAME_FIELD_KEY.getName());
+        columns.put(SAMPLE_ID_FIELD_KEY, new ColumnInfo(SAMPLE_ID_FIELD_KEY, JdbcType.VARCHAR));
+        columns.put(SAMPLE_NAME_FIELD_KEY, new ColumnInfo(SAMPLE_NAME_FIELD_KEY, JdbcType.VARCHAR));
         if (hasGroupInfo)
-            columns.add(GROUP_NAMES_FIELD_KEY.getName());
-        columns.addAll(keywords);
+            columns.put(GROUP_NAMES_FIELD_KEY, new ColumnInfo(GROUP_NAMES_FIELD_KEY, JdbcType.VARCHAR));
+
+        for (String keyword : keywords)
+        {
+            FieldKey fieldKey = new FieldKey(null, keyword);
+            ColumnInfo col = new ColumnInfo(fieldKey, JdbcType.VARCHAR);
+            col.setAlias(fieldKey.getName());
+            columns.put(fieldKey, col);
+        }
+
         int columnCount = columns.size();
-        RowMapFactory factory = new RowMapFactory(columns);
+
+        List<String> columnNames = columns.keySet().stream().map(FieldKey::getName).collect(Collectors.toList());
+        RowMapFactory<Object> factory = new RowMapFactory<>(columnNames);
 
         // Create the data maps, one for each sample in the workspace
         List<Map<String, Object>> unmatchedList = new ArrayList<>(samples.size());
@@ -159,7 +171,7 @@ public class SamplesConfirmGridView extends GridView
 
         // Initialize the ResultSet and DataRegion
         ResultSet rs = CachedResultSets.create(maps);
-        Results results = new ResultsImpl(rs);
+        Results results = new ResultsImpl(rs, columns);
         setResults(results);
 
         SamplesConfirmDataRegion dr = (SamplesConfirmDataRegion)getDataRegion();
