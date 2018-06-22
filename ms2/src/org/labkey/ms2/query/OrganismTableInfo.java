@@ -48,7 +48,5 @@ public class OrganismTableInfo extends FilteredTable<UserSchema>
         ExprColumn descriptionColumn = new ExprColumn(this, "Description", sql, JdbcType.VARCHAR);
         addColumn(descriptionColumn);
         setTitleColumn("Description");
-
-        removeColumn(getColumn("IdentId"));
     }
 }
