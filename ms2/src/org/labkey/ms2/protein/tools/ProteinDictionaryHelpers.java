@@ -284,6 +284,10 @@ public class ProteinDictionaryHelpers
 
     public static String getAnnotTypeWhereClause(GoTypes kind)
     {
+        if (kind == null)
+        {
+            kind = GoTypes.ALL;
+        }
         switch (kind)
         {
             case CELL_LOCATION:
