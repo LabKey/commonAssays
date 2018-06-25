@@ -56,7 +56,7 @@
                     your data, select all the cells, and copy it. You can then paste into the textbox below.
                 </p>
                 <p>
-                    You can download a <a href="http://www.labkey.org/download/ProteinAnnotationSet.tsv">sample file</a>
+                    You can download a <a href="https://www.labkey.org/download/@files/ProteinAnnotationSet.tsv">sample file</a>
                     from the labkey.org server for an example of what a file should look like.<br/>
                 </p>
             </td>
