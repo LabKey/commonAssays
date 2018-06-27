@@ -4,6 +4,7 @@ dataintegration/module.properties -text
 dataintegration/resources/schemas/dataintegration.xml -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-0.00-15.30.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-18.10-18.11.sql -text
+dataintegration/resources/schemas/dbscripts/postgresql/dataintegration-18.10-18.20.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.00-13.10.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.00-13.20.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-0.00-13.30.sql -text
@@ -15,7 +16,7 @@ dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-15.20-15.30.sql -text
 dataintegration/resources/schemas/dbscripts/postgresql/obsolete/dataintegration-15.21-15.22.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-0.00-15.30.sql -text
-dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-18.10-18.11.sql -text
+dataintegration/resources/schemas/dbscripts/sqlserver/dataintegration-18.10-18.20.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.00-13.10.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.00-13.20.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-0.00-13.30.sql -text
@@ -26,6 +27,7 @@ dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-1
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-15.20-15.21.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-15.20-15.30.sql -text
 dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-15.21-15.22.sql -text
+dataintegration/resources/schemas/dbscripts/sqlserver/obsolete/dataintegration-18.10-18.11.sql -text
 dataintegration/schemas/etl.xsd -text
 dataintegration/src/org/labkey/di/DataIntegrationModule.java -text
 dataintegration/src/org/labkey/di/DataIntegrationQuerySchema.java -text
@@ -556,7 +558,6 @@ luminex/resources/schemas/dbscripts/postgresql/obsolete/luminex-16.31-16.32.sql 
 luminex/resources/schemas/dbscripts/sqlserver/luminex-0.00-15.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-16.20-16.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-16.30-17.10.sql -text
-luminex/resources/schemas/dbscripts/sqlserver/luminex-17.30-17.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/luminex-17.30-18.10.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-11.30.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-0.00-12.10.sql -text
@@ -581,6 +582,7 @@ luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-16.20-16.21.sql -
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-16.21-16.22.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-16.30-16.31.sql -text
 luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-16.31-16.32.sql -text
+luminex/resources/schemas/dbscripts/sqlserver/obsolete/luminex-17.30-17.31.sql -text
 luminex/resources/schemas/luminex.xml -text
 luminex/resources/transformscripts/description_parsing_example.pl -text
 luminex/resources/transformscripts/labkey_luminex_transform.R -text
