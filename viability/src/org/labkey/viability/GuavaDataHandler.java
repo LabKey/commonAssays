@@ -156,7 +156,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                             continue;
 
                         // skip line containing disclaimer
-                        if (parts.length > 2 && parts[1].contains("For Research Use Only."))
+                        if (line.contains("For Research Use Only."))
                             continue;
 
                         if (groupHeaders == null)
