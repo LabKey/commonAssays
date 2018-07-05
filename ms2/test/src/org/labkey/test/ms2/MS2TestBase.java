@@ -85,9 +85,6 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         _containerHelper.createProject(getProjectName(), null);
         _containerHelper.createSubfolder(getProjectName(), FOLDER_NAME, "MS2");
 
-        log("Setup pipeline.");
-        clickButton("Setup");
-
         log("Set bad pipeline root.");
         setPipelineRoot("/bogus");
         assertTextPresent("does not exist");
