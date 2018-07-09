@@ -286,7 +286,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 attrs.setURI(uri);
 
             attrs.setKeywords(sample.getKeywords());
-            AttributeSetHelper.prepareForSave(attrs, container, false);
+            AttributeSetHelper.prepareForSave(sample.getLabel(), attrs, container, false);
             keywordsMap.put(sampleID, sample.getLabel(), attrs);
 
             CompensationMatrix comp = sample.getCompensationMatrix();
@@ -349,7 +349,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 else if (results.getStatistics().size() == 1)
                     warn("Analysis results only contains '" + results.getStatistics().keySet().iterator().next() + "' statistic for '" + sample + "'.");
 
-                AttributeSetHelper.prepareForSave(results, container, false);
+                AttributeSetHelper.prepareForSave(sample.getLabel(), results, container, false);
                 resultsMap.put(sampleID, sample.getLabel(), results);
             }
             else

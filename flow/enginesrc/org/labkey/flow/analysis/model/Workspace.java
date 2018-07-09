@@ -505,6 +505,7 @@ public abstract class Workspace implements IWorkspace, Serializable
         return _warnings;
     }
 
+    // NOTE: case-insensitive
     public Set<String> getKeywords()
     {
         return Collections.unmodifiableSet(_keywords);

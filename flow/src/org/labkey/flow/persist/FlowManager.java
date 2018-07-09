@@ -38,6 +38,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -45,6 +46,7 @@ import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
@@ -69,6 +71,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static org.labkey.flow.data.AttributeType.keyword;
 
@@ -207,16 +210,34 @@ public class FlowManager
      */
     public FlowEntry getAttributeEntry(String containerId, AttributeType type, String attr)
     {
-        //_log.info("getAttributeEntry(" + containerId + ", " + type + ", " + attr + ")");
-        try (ResultSet rs = new SqlSelector(getSchema(), "SELECT RowId, Id FROM " + attributeTable(type) + " WHERE Container = ? AND Name = ?", containerId, attr).getResultSet())
+        return getAttributeEntryCaseSensitive(containerId, type, attr);
+    }
+
+    private FlowEntry getAttributeEntryCaseSensitive(String containerId, AttributeType type, String attr)
+    {
+        //_log.info("getAttributeEntryCaseSensitive(" + containerId + ", " + type + ", " + attr + ")");
+        SQLFragment sql = new SQLFragment("SELECT Name, RowId, Id FROM ")
+                .append(attributeTable(type))
+                .append(" WHERE Container = ?").add(containerId);
+        if (FlowManager.get().getSchema().getSqlDialect().isSqlServer())
+        {
+            sql.append(" AND cast(Name AS VARBINARY(512)) = cast(? AS VARBINARY(512))").add(attr);
+        }
+        else
+        {
+            sql.append(" AND Name = ?").add(attr);
+        }
+
+        try (ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet())
         {
             // we're not caching misses because this is an unlimited cachemap
             if (!rs.next())
                 return null;
 
+            String name = rs.getString("Name");
             Integer rowId = rs.getInt("RowId");
             Integer aliasId = rs.getInt("Id");
-            FlowEntry a = new FlowEntry(type, rowId, containerId, attr, aliasId);
+            FlowEntry a = new FlowEntry(type, rowId, containerId, name, aliasId);
             return a;
         }
         catch (SQLException e)
@@ -225,37 +246,22 @@ public class FlowManager
         }
     }
 
-    /*
-    private FlowEntry[] getAttributeEntry(AttributeType type, Integer[] rowIds)
+    private List<FlowEntry> getAttributeEntryCaseInsensitive(String containerId, AttributeType type, String attr)
     {
-        FlowEntry[] ret = new FlowEntry[rowIds.length];
-        boolean hasNulls = false;
-        for (int i = 0; i < rowIds.length; i ++)
-        {
-            Integer rowId = rowIds[i];
-            if (rowId != null)
-            {
-                ret[i] = getAttributeEntry(type, rowIds[i]);
-            }
-            if (ret[i] == null)
-            {
-                _log.error("Request for attribute " + rowId + " returned null.", new Exception());
-                hasNulls = true;
-            }
-        }
-        if (!hasNulls)
-            return ret;
-        ArrayList<FlowEntry> lstRet = new ArrayList<>();
-        for (FlowEntry entry : ret)
-        {
-            if (entry != null)
-            {
-                lstRet.add(entry);
-            }
-        }
-        return lstRet.toArray(new FlowEntry[lstRet.size()]);
+        //_log.info("getAttributeEntryCaseInsensitive(" + containerId + ", " + type + ", " + attr + ")");
+        SQLFragment sql = new SQLFragment("SELECT Name, RowId, Id FROM ")
+                .append(attributeTable(type))
+                .append(" WHERE Container = ?").add(containerId)
+                .append(" AND lower(Name) = lower(?)").add(attr);
+
+        return new SqlSelector(getSchema(), sql).mapStream().map(map -> {
+            String name = (String)map.get("Name");
+            Integer rowId = (Integer)map.get("RowId");
+            Integer aliasId = (Integer)map.get("Id");
+            FlowEntry a = new FlowEntry(type, rowId, containerId, name, aliasId);
+            return a;
+        }).collect(Collectors.toList());
     }
-    */
 
 
     /**
@@ -367,41 +373,73 @@ public class FlowManager
         }
     }
 
-    private int ensureAttributeName(Container container, AttributeType type, String attr, int aliasId)
+    private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String attr, int aliasId)
     {
-        return ensureAttributeName(container.getId(), type, attr, aliasId);
+        return ensureAttributeName(container.getId(), sampleLabel, type, attr, aliasId);
     }
 
     /**
      * Ensure the attribute exists.  If the aliasId >= 0, the aliasId points at the RowId of the preferred name for the attribute.
+     * If an existing alias with different casing is found, an exception is thrown.
      * DOES NOT CACHE.  CALLERS SHOULD CLEAR CACHE APPROPRIATELY.
      *
      * @param containerId Container
+     * @param sampleLabel Sample name associated with this attribute -- for error message reporting only
      * @param type attribute type
      * @param attr attribute name
      * @param aliasId RowId of aliased attribute or -1 to set alias to itself.
-     * @return The RowId of the rewly inserted or existing attribute.
-     * @throws SQLException
+     * @return The RowId of the newly inserted or existing attribute.
      */
-    private int ensureAttributeName(String containerId, AttributeType type, String attr, int aliasId)
+    private int ensureAttributeName(@NotNull String containerId, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId)
     {
         //_log.info("ensureAttributeName(" + containerId + ", " + type + ", " + attr + ", " + aliasId + ")");
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
         {
-            throw new IllegalStateException("ensureAttributeId cannot be called within a transaction");
+            throw new IllegalStateException("ensureAttributeName cannot be called within a transaction");
         }
-
-        int ret = getAttributeRowId(containerId, type, attr);
-        if (ret != 0)
-            return ret;
 
         // Validate the name
         if (attr == null || attr.length() == 0)
             throw new IllegalArgumentException("Name must not be null");
 
-        // Parse the name before storing
+        // Validate that name can be parsed as the given attribute type
         Object attribute = type.createAttribute(attr);
+
+        // Get existing attribute entry using exact casing
+        FlowEntry existing = getAttributeEntryCaseSensitive(containerId, type, attr);
+        if (existing != null)
+            return existing._rowId;
+
+
+        // If exact casing is not found, check if there are any existing attributes with different casing
+        // If a collision is found, an exception is thrown to prevent inserting a duplicate
+        List<FlowEntry> others = getAttributeEntryCaseInsensitive(containerId, type, attr);
+        if (!others.isEmpty())
+        {
+            StringBuilder msg = new StringBuilder();
+            if (sampleLabel != null)
+                msg.append("Sample ").append(sampleLabel).append(": ");
+
+            msg.append("Found existing ");
+            if (others.size() > 1)
+                msg.append(type.name()).append("s");
+            else
+                msg.append(type.name());
+
+            msg.append(" with different casing from the requested name '").append(attr).append("'");
+            msg.append(": ");
+
+            String sep = "";
+            for (FlowEntry other : others)
+            {
+                msg.append(sep).append(other._name).append(" (id=").append(other._rowId).append(")");
+                sep = ", ";
+            }
+
+            throw new FlowException(msg.toString());
+        }
+
 
         Map<String, Object> map = new HashMap<>();
         map.put("Container", containerId);
@@ -412,58 +450,60 @@ public class FlowManager
         map = Table.insert(null, table, map);
 
         // Set Id to RowId if we aren't inserting an alias
+        Integer rowId = (Integer)map.get("RowId");
+        assert rowId != null;
         if (aliasId <= 0)
         {
             map.put("Id", map.get("RowId"));
-            Table.update(null, table, map, map.get("RowId"));
+            Table.update(null, table, map, rowId);
         }
 
-        return getAttributeRowId(containerId, type, attr);
+        return rowId;
     }
 
-    private int ensureAttributeName(Container container, AttributeType type, String name)
+    private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String name)
     {
-        return ensureAttributeName(container, type, name, -1);
+        return ensureAttributeName(container, sampleLabel, type, name, -1);
     }
 
 
-    public int ensureStatisticName(Container c, String name, boolean uncache)
+    public int ensureStatisticName(Container c, String sampleLabel, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, Collections.emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.statistic, name, Collections.emptyList(), uncache);
     }
 
 
-    public int ensureKeywordName(Container c, String name, boolean uncache)
+    public int ensureKeywordName(Container c, String sampleLabel, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, keyword, name, Collections.emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, Collections.emptyList(), uncache);
     }
 
 
-    public int ensureGraphName(Container c, String name, boolean uncache)
+    public int ensureGraphName(Container c, String sampleLabel, String name, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.graph, name, Collections.emptyList(), uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.graph, name, Collections.emptyList(), uncache);
     }
 
 
-    public int ensureStatisticNameAndAliases(Container c, String name, Iterable<? extends Object> aliases, boolean uncache)
+    public int ensureStatisticNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.statistic, name, aliases, uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.statistic, name, aliases, uncache);
     }
 
 
-    public int ensureKeywordNameAndAliases(Container c, String name, Iterable<? extends Object> aliases, boolean uncache)
+    public int ensureKeywordNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, keyword, name, aliases, uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, aliases, uncache);
     }
 
 
-    public int ensureGraphNameAndAliases(Container c, String name, Iterable<? extends Object> aliases, boolean uncache)
+    public int ensureGraphNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
     {
-        return ensureAttributeNameAndAliases(c, AttributeType.graph, name, aliases, uncache);
+        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.graph, name, aliases, uncache);
     }
 
 
-    private int ensureAttributeNameAndAliases(Container c, AttributeType type, String name, Iterable<? extends Object> aliases, boolean uncache)
+    private int ensureAttributeNameAndAliases(Container c, String sampleLabel, AttributeType type, String name, Collection<? extends Object> aliases, boolean uncache)
     {
         //_log.info("ensureAlias(" + c + ", " + type + ", " + name + ", aliases)");
         try
@@ -477,7 +517,7 @@ public class FlowManager
             Integer aliasId = null;
             for (String s : names)
             {
-                FlowEntry entry = getAttributeEntry(c.getId(), type, s);
+                FlowEntry entry = getAttributeEntryCaseSensitive(c.getId(), type, s);
                 if (entry != null)
                 {
                     aliasId = entry._aliasId;
@@ -485,14 +525,19 @@ public class FlowManager
                 }
             }
 
-            // If no existing primary attribute was found, insert attr as the preferred attribute name.
+            // If no existing primary attribute was found, insert the provided name as the preferred attribute name
+            // otherwise, add the name as an alias of the preferred attribute name.
             if (aliasId == null)
-                aliasId = ensureAttributeName(c, type, name);
+                aliasId = ensureAttributeName(c, sampleLabel, type, name);
             else
-                ensureAttributeName(c, type, name, aliasId);
+                ensureAttributeName(c, sampleLabel, type, name, aliasId);
 
-            for (Object alias : aliases)
-                ensureAttributeName(c, type, alias.toString(), aliasId);
+            if (!aliases.isEmpty())
+            {
+                FlowEntry entry = getAttributeEntryForAliasing(type, aliasId);
+                for (Object alias : aliases)
+                    ensureAlias(entry, alias.toString(), false, false);
+            }
 
             return aliasId;
         }
@@ -503,27 +548,44 @@ public class FlowManager
         }
     }
 
-    public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean uncache)
+    @NotNull
+    private FlowEntry getAttributeEntryForAliasing(@NotNull AttributeType type, int rowId)
     {
-        //_log.info("ensureAlias(" + type + ", " + rowId + ", " + aliasName + ")");
-        try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
+        FlowEntry entry = getAttributeEntry(type, rowId);
+        if (entry == null)
+            throw new IllegalArgumentException("Attribute not found");
+
+        if (entry.isAlias())
+            throw new IllegalArgumentException("Can't create alias of an alias");
+
+        return entry;
+    }
+
+    public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean transact, boolean uncache)
+    {
+        ensureAlias(getAttributeEntryForAliasing(type, rowId), aliasName, transact, uncache);
+    }
+
+    private void ensureAlias(@NotNull FlowEntry entry, @NotNull String aliasName, boolean transact, boolean uncache)
+    {
+        final AttributeType type = entry._type;
+        final int rowId = entry._rowId;
+
+        Container c = ContainerManager.getForId(entry._containerId);
+        if (c == null)
+            throw new IllegalArgumentException("Container not found: " + entry._containerId);
+
+        // Find existing attribute for the provided alias name
+        FlowEntry existing = getAttributeEntryCaseSensitive(entry._containerId, type, aliasName);
+        if (existing != null)
         {
-            FlowEntry entry = getAttributeEntry(type, rowId);
-            if (entry == null)
-                throw new IllegalArgumentException("Attribute not found");
-
-            if (entry.isAlias())
-                throw new IllegalArgumentException("Can't create alias of an alias");
-
-            Container c = ContainerManager.getForId(entry._containerId);
-            if (c == null)
-                throw new IllegalArgumentException("Container not found: " + entry._containerId);
-
-            // Find existing attribute for the provided alias name
-            FlowEntry existing = getAttributeEntry(entry._containerId, type, aliasName);
-            if (existing != null)
+            try (DbScope.Transaction tx = transact ? getSchema().getScope().ensureTransaction() : DbScope.NO_OP_TRANSACTION)
             {
                 if (entry.equals(existing))
+                    return;
+
+                // If this existing entry is already an alias of entry, do nothing
+                if (existing._aliasId.equals(entry._rowId))
                     return;
 
                 // If this existing entry doesn't have any aliases, we can make this existing entry an alias of the entry.
@@ -537,22 +599,28 @@ public class FlowManager
                 updateAttributeValuesPreferredId(existing._containerId, type, existing._rowId, entry._rowId);
 
                 // parent the existing entry to the other attribute
-                updateAttribute(c, type, existing._rowId, existing._name, rowId, uncache);
+                updateAttribute(c, existing, existing._name, rowId, uncache);
+                tx.commit();
             }
-            else
+            finally
             {
-                try
-                {
-                    ensureAttributeName(entry._containerId, type, aliasName, entry._rowId);
-                }
-                finally
-                {
-                    if (uncache)
-                        AttributeCache.forType(type).uncacheNow(c);
-                }
+                if (uncache)
+                    AttributeCache.forType(type).uncacheNow(c);
             }
-
-            tx.commit();
+        }
+        else
+        {
+            // attribute wasn't found for the aliasName, so insert a new one
+            // NOTE: Alias will fail to insert if an there is an existing attribute with different casing
+            try
+            {
+                ensureAttributeName(entry._containerId, null, type, aliasName, entry._rowId);
+            }
+            finally
+            {
+                if (uncache)
+                    AttributeCache.forType(type).uncacheNow(c);
+            }
         }
     }
 
@@ -561,6 +629,14 @@ public class FlowManager
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
             throw new IllegalArgumentException("Attribute not found");
+
+        updateAttribute(container, entry, name, aliasId, uncache);
+    }
+
+    private void updateAttribute(@NotNull Container container, @NotNull FlowEntry entry, @NotNull String name, int aliasId, boolean uncache)
+    {
+        final AttributeType type = entry._type;
+        final int rowId = entry._rowId;
 
         // Validate the name
         if (name == null || name.length() == 0)
@@ -1180,7 +1256,8 @@ public class FlowManager
             throw new IllegalArgumentException("Object not found.");
         }
 
-        ensureKeywordName(c, keyword, true);
+        String sampleLabel = data.getName();
+        ensureKeywordName(c, sampleLabel, keyword, true);
 
         AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
         assert a != null : "Expected to find keyword entry for '" + keyword + "'";

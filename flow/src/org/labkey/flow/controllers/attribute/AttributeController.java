@@ -21,6 +21,7 @@ import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.Container;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.util.URLHelper;
@@ -67,7 +68,7 @@ public class AttributeController extends BaseFlowController
         name
     }
 
-    public class AttributeForm extends ReturnUrlForm
+    public static class AttributeForm extends ReturnUrlForm
     {
         private int _rowId;
         private String _type;
@@ -75,7 +76,7 @@ public class AttributeController extends BaseFlowController
         private AttributeType _attributeType;
         private AttributeCache.Entry _entry;
 
-        protected AttributeForm()
+        public AttributeForm()
         {
         }
 
@@ -114,12 +115,12 @@ public class AttributeController extends BaseFlowController
         }
 
         // Requires type and rowid
-        public AttributeCache.Entry getEntry()
+        public AttributeCache.Entry getEntry(Container c)
         {
             if (_entry == null && _rowId != 0)
             {
                 AttributeType type = getAttributeType();
-                _entry = AttributeCache.forType(type).byRowId(getContainer(), _rowId);
+                _entry = AttributeCache.forType(type).byRowId(c, _rowId);
                 if (_entry == null)
                     throw new NotFoundException();
             }
@@ -170,7 +171,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public ModelAndView getView(AttributeForm form, BindException errors)
         {
-            _entry = form.getEntry();
+            _entry = form.getEntry(getContainer());
             if (getContainer() != _entry.getContainer())
                 throw new NotFoundException();
 
@@ -186,7 +187,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    public class EditAttributeForm extends AttributeForm
+    public static class EditAttributeForm extends AttributeForm
     {
         private String _name;
 
@@ -209,7 +210,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public void validateCommand(EditAttributeForm form, Errors errors)
         {
-            _entry = form.getEntry();
+            _entry = form.getEntry(getContainer());
             if (getContainer() != _entry.getContainer())
                 throw new NotFoundException();
 
@@ -259,7 +260,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    public class CreateAliasForm extends AttributeForm
+    public static class CreateAliasForm extends AttributeForm
     {
         private String _alias;
 
@@ -282,7 +283,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public void validateCommand(CreateAliasForm form, Errors errors)
         {
-            _entry = form.getEntry();
+            _entry = form.getEntry(getContainer());
             if (getContainer() != _entry.getContainer())
                 throw new NotFoundException();
 
@@ -310,7 +311,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public boolean handlePost(CreateAliasForm form, BindException errors)
         {
-            FlowManager.get().ensureAlias(form.getAttributeType(), form.getRowId(), form.getAlias(), true);
+            FlowManager.get().ensureAlias(form.getAttributeType(), form.getRowId(), form.getAlias(), true, true);
             return true;
         }
 

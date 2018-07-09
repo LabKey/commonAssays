@@ -67,6 +67,7 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
         return ret;
     }
 
+    // NOTE: case-insensitive
     @Override
     public Map<String, String> getKeywords()
     {

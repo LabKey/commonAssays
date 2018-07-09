@@ -42,7 +42,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 
 /**
  * Cache of attribute names and aliases within a container.
@@ -81,7 +80,6 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         private final Collection<Z> _entries;
         private final Map<String, Z> _byName;
         private final Map<Integer, Z> _byRowId;
-        private final Map<Q, Z> _byAttribute;
         private final MultiValuedMap<Integer, Integer> _aliases;
 
         private Attributes(String containerId, Collection<Z> all)
@@ -89,22 +87,22 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
             _containerId = containerId;
             _entries = all;
 
-            CaseInsensitiveHashMap<Z> byName = new CaseInsensitiveHashMap<>();
+            Map<String, Z> byName = new CaseInsensitiveHashMap<>();
             Map<Integer, Z> byRowId = new HashMap<>();
-            // CONSIDER: just toString and use a CaseInsensitiveHashMap for attributes
-            Map<Q, Z> byAttribute = new TreeMap<>();
             MultiValuedMap<Integer, Integer> aliases = new ArrayListValuedHashMap<>();
             for (Z entry : all)
             {
-                byName.put(entry.getName(), entry);
                 byRowId.put(entry.getRowId(), entry);
-                byAttribute.put(entry.getAttribute(), entry);
+
+                Z existing = byName.putIfAbsent(entry.getName(), entry);
+                if (existing != null)
+                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ")");
+
                 if (entry.getAliasedId() != null)
                     aliases.put(entry.getAliasedId(), entry.getRowId());
             }
             _byName = Collections.unmodifiableMap(byName);
             _byRowId = Collections.unmodifiableMap(byRowId);
-            _byAttribute = Collections.unmodifiableMap(byAttribute);
             _aliases = aliases;
         }
     }
@@ -427,7 +425,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
      * Get all AttributeEntries of the type in the Container.
      */
     @NotNull
-    public Collection<E> byContainer(Container c)
+    public Collection<E> byContainer(@NotNull Container c)
     {
         Attributes<A, E> attributes = _cache.get(c.getId());
         if (attributes == null)
@@ -440,7 +438,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
      * Get an AttributeEntry by name.
      */
     @Nullable
-    public E byName(Container c, String name)
+    public E byName(@NotNull Container c, @NotNull String name)
     {
         Attributes<A, E> attributes = _cache.get(c.getId());
         if (attributes == null)
@@ -453,20 +451,16 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
      * Get an AttributeEntry by attribute.
      */
     @Nullable
-    public E byAttribute(Container c, A attr)
+    public E byAttribute(@NotNull Container c, @NotNull A attr)
     {
-        Attributes<A, E> attributes = _cache.get(c.getId());
-        if (attributes == null)
-            return null;
-
-        return attributes._byAttribute.get(attr);
+        return byName(c, attr.toString());
     }
 
     /**
      * Get the preferred AttributeEntry by attribute.
      */
     @Nullable
-    public E preferred(Container c, A attr)
+    public E preferred(@NotNull Container c, @NotNull A attr)
     {
         E e = byAttribute(c, attr);
         if (e == null)
@@ -481,12 +475,12 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
      * Get an AttributeEntry by rowid.
      */
     @Nullable
-    public E byRowId(Container container, int rowId)
+    public E byRowId(@NotNull Container container, int rowId)
     {
         return byRowId(container.getId(), rowId);
     }
 
-    private E byRowId(String containerId, int rowId)
+    private E byRowId(@NotNull String containerId, int rowId)
     {
         Attributes<A, E> attributes = _cache.get(containerId);
         if (attributes == null)

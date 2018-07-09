@@ -105,15 +105,16 @@ public class CompensationController extends BaseFlowController
 
             if (compensationMatrixFile.isEmpty() || compensationMatrixFile.getSize() == 0)
                 hasErrors = addError(errors, "No file was uploaded");
-            if (StringUtils.trimToNull(form.ff_compensationMatrixName) == null)
+            String name = StringUtils.trimToNull(form.ff_compensationMatrixName);
+            if (name == null)
                 hasErrors = addError(errors, "You must give the compensation matrix a name.");
             if (hasErrors)
                 return false;
 
-            String lsid = svc.generateLSID(getContainer(), FlowDataType.CompensationMatrix, form.ff_compensationMatrixName);
+            String lsid = svc.generateLSID(getContainer(), FlowDataType.CompensationMatrix, name);
             if (svc.getExpData(lsid) != null)
             {
-                addError(errors, "The name '" + form.ff_compensationMatrixName + "' is already being used.");
+                addError(errors, "The name '" + name + "' is already being used.");
                 return false;
             }
             CompensationMatrix comp;
@@ -127,7 +128,7 @@ public class CompensationController extends BaseFlowController
                 return false;
             }
             AttributeSet attrs = new AttributeSet(comp);
-            AttributeSetHelper.prepareForSave(attrs, getContainer(), true);
+            AttributeSetHelper.prepareForSave(name, attrs, getContainer(), true);
             try (DbScope.Transaction transaction = svc.ensureTransaction())
             {
                 _flowComp = FlowCompensationMatrix.create(getUser(), getContainer(), form.ff_compensationMatrixName, attrs);

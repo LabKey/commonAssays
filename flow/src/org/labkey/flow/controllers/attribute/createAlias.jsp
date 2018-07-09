@@ -23,7 +23,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     AttributeController.CreateAliasForm form = (AttributeController.CreateAliasForm)getModelBean();
-    AttributeCache.Entry entry = form.getEntry();
+    AttributeCache.Entry entry = form.getEntry(getContainer());
 
     ActionURL editURL = getActionURL();
     ActionURL returnURL = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));

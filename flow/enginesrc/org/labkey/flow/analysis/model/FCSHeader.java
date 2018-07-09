@@ -17,6 +17,8 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.util.DateUtil;
@@ -37,8 +39,10 @@ import java.util.*;
 public class FCSHeader
 {
     public static final String CONTENT_TYPE = "application/vnd.isac.fcs";
+
+    private static final Logger LOG = Logger.getLogger(FCSHeader.class);
     
-    private Map<String, String> keywords = new TreeMap<>();
+    private Map<String, String> keywords = new CaseInsensitiveHashMap<>();
     int dataLast;
     int dataOffset;
     int textOffset;
@@ -213,6 +217,8 @@ public class FCSHeader
                 strValue = strValue.trim();
                 if (strValue.length() == 0)
                     strValue = null;
+                if (keywords.containsKey(strKey))
+                    LOG.warn("Duplicate key '" + strKey + "'");
                 keywords.put(strKey, strValue);
                 ichStart = ichEnd;
             }

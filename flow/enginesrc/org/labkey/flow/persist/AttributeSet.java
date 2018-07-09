@@ -17,9 +17,11 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.CaseInsensitiveTreeMap;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -38,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -48,16 +51,26 @@ import java.util.TreeSet;
 
 public class AttributeSet implements Serializable
 {
+    private static final Logger LOG = Logger.getLogger(AttributeSet.class);
+
     ObjectType _type;
     URI _uri;
 
     SortedMap<String, String> _keywords;
-    SortedMap<StatisticSpec, Double> _statistics;
-    SortedMap<GraphSpec, byte[]> _graphs;
-
     SortedMap<String, Set<String>> _keywordAliases;
+    // mapping from case-insensitive keyword name to canonical casing (the first added)
+    CaseInsensitiveTreeMap<String> _keywordNames;
+
+    SortedMap<StatisticSpec, Double> _statistics;
     SortedMap<StatisticSpec, Set<StatisticSpec>> _statisticAliases;
+    // mapping from case-insensitive statistic name to canonical casing (the first added)
+    CaseInsensitiveTreeMap<StatisticSpec> _statisticNames;
+
+    SortedMap<GraphSpec, byte[]> _graphs;
     SortedMap<GraphSpec, Set<GraphSpec>> _graphAliases;
+    // mapping from case-insensitive graph name to canonical casing (the first added)
+    CaseInsensitiveTreeMap<GraphSpec> _graphNames;
+
 
     public AttributeSet(ObjectType type, URI uri)
     {
@@ -71,12 +84,12 @@ public class AttributeSet implements Serializable
         FlowData.Keywords keywords = data.getKeywords();
         if (keywords != null)
         {
-            _keywords = new TreeMap<>();
-            _keywordAliases = new TreeMap<>();
+            initKeywordMaps();
+            _keywordAliases = new CaseInsensitiveTreeMap<>();
             for (Keyword keyword : keywords.getKeywordArray())
             {
                 String name = keyword.getName();
-                _keywords.put(name, keyword.getValue());
+                setKeyword(name, keyword.getValue());
                 if (keyword.isSetAliases())
                 {
                     Set<String> aliases = new LinkedHashSet<>();
@@ -90,12 +103,12 @@ public class AttributeSet implements Serializable
         FlowData.Statistics statistics = data.getStatistics();
         if (statistics != null)
         {
-            _statistics = new TreeMap<>();
-            _statisticAliases = new TreeMap<>();
+            initStatisticMaps();
+            _statisticAliases = new TreeMap<>(StatisticSpec.CASE_INSENSITIVE_ORDER);
             for (Statistic statistic : statistics.getStatisticArray())
             {
                 StatisticSpec spec = new StatisticSpec(statistic.getName());
-                _statistics.put(spec, statistic.getValue());
+                setStatistic(spec, statistic.getValue());
                 if (statistic.isSetAliases())
                 {
                     Set<StatisticSpec> aliases = new LinkedHashSet<>();
@@ -109,8 +122,8 @@ public class AttributeSet implements Serializable
         FlowData.Graphs graphs = data.getGraphs();
         if (graphs != null)
         {
-            _graphs = new TreeMap<>();
-            _graphAliases = new TreeMap<>();
+            initGraphMaps();
+            _graphAliases = new TreeMap<>(GraphSpec.CASE_INSENSITIVE_ORDER);
             for (Graph graph : graphs.getGraphArray())
             {
                 GraphSpec spec = new GraphSpec(graph.getName());
@@ -145,7 +158,6 @@ public class AttributeSet implements Serializable
     public AttributeSet(FCSKeywordData data)
     {
         this(ObjectType.fcsKeywords, data.getURI());
-        _keywords = new TreeMap<>();
         for (String keyword : data.getKeywordNames())
         {
             setKeyword(keyword, data.getKeyword(keyword));
@@ -221,51 +233,44 @@ public class AttributeSet implements Serializable
             aliasesXb.addAlias(alias.toString());
     }
 
+    private void initKeywordMaps()
+    {
+        _keywords = new CaseInsensitiveTreeMap<>();
+        _keywordNames = new CaseInsensitiveTreeMap<>();
+    }
+
     public void setKeyword(@NotNull String keyword, @Nullable String value)
     {
         if (_keywords == null)
-            _keywords = new TreeMap<>();
+            initKeywordMaps();
+
         if (StringUtils.isBlank(value))
             value = null;
-        _keywords.put(keyword, value);
-    }
 
-    public String removeKeyword(@NotNull String keyword)
-    {
-        if (_keywords == null)
-            return null;
-        return _keywords.remove(keyword);
+        String existing = _keywordNames.put(keyword, keyword);
+        if (existing != null && !existing.equals(keyword))
+            LOG.warn("Duplicate keyword '" + existing + "' and '" + keyword + "'");
+
+        _keywords.put(keyword, value);
     }
 
     public void setKeywords(Map<String, String> keywords)
     {
-        _keywords = new TreeMap<>();
-        _keywords.putAll(keywords);
+        initKeywordMaps();
+        for (Map.Entry<String, String> entry : keywords.entrySet())
+            setKeyword(entry.getKey(), entry.getValue());
     }
 
     public void addKeywordAlias(String spec, String alias)
     {
         if (_keywordAliases == null)
-            _keywordAliases = new TreeMap<>();
+            _keywordAliases = new CaseInsensitiveTreeMap<>();
 
-        Set<String> aliases = _keywordAliases.get(spec);
-        if (aliases == null)
-            _keywordAliases.put(spec, aliases = new LinkedHashSet<>());
+        Set<String> aliases = _keywordAliases.computeIfAbsent(spec, k -> new LinkedHashSet<>());
         aliases.add(alias);
     }
 
-    public void setKeywordAliases(Map<String, Set<String>> keywordAliases)
-    {
-        _keywordAliases = new TreeMap<>();
-
-        for (String keyword : keywordAliases.keySet())
-        {
-            Set<String> aliases = keywordAliases.get(keyword);
-            _keywordAliases.put(keyword, new LinkedHashSet<>(aliases));
-        }
-    }
-
-    public Iterable<String> getKeywordAliases(String spec)
+    public Collection<String> getKeywordAliases(String spec)
     {
         if (_keywordAliases == null)
             return Collections.emptyList();
@@ -277,49 +282,41 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableCollection(aliases);
     }
 
+    private void initStatisticMaps()
+    {
+        _statistics = new TreeMap<>(StatisticSpec.CASE_INSENSITIVE_ORDER);
+        _statisticNames = new CaseInsensitiveTreeMap<>();
+    }
+
     public void setStatistic(StatisticSpec stat, double value)
     {
         if (_statistics == null)
-            _statistics = new TreeMap<>();
+            initStatisticMaps();
+
         if (Double.isNaN(value) || Double.isInfinite(value))
         {
             _statistics.remove(stat);
+            _statisticNames.remove(stat.toString());
         }
         else
         {
+            StatisticSpec existing = _statisticNames.put(stat.toString(), stat);
+            if (existing != null && !existing.toString().equals(stat.toString()))
+                LOG.warn("Duplicate statistic '" + existing + "' and '" + stat.toString() + "'");
             _statistics.put(stat, value);
         }
-    }
-
-    public void setStatistics(Map<StatisticSpec, Double> statistics)
-    {
-        _statistics = new TreeMap<>();
-        _statistics.putAll(statistics);
     }
 
     public void addStatisticAlias(StatisticSpec spec, StatisticSpec alias)
     {
         if (_statisticAliases == null)
-            _statisticAliases = new TreeMap<>();
+            _statisticAliases = new TreeMap<>(StatisticSpec.CASE_INSENSITIVE_ORDER);
 
-        Set<StatisticSpec> aliases = _statisticAliases.get(spec);
-        if (aliases == null)
-            _statisticAliases.put(spec, aliases = new LinkedHashSet<>());
+        Set<StatisticSpec> aliases = _statisticAliases.computeIfAbsent(spec, k -> new LinkedHashSet<>());
         aliases.add(alias);
     }
 
-    public void setStatisticAliases(Map<StatisticSpec, Set<StatisticSpec>> statisticAliases)
-    {
-        _statisticAliases = new TreeMap<>();
-
-        for (StatisticSpec statisticSpec : statisticAliases.keySet())
-        {
-            Set<StatisticSpec> aliases = statisticAliases.get(statisticSpec);
-            _statisticAliases.put(statisticSpec, new LinkedHashSet<>(aliases));
-        }
-    }
-
-    public Iterable<StatisticSpec> getStatisticAliases(StatisticSpec spec)
+    public Collection<StatisticSpec> getStatisticAliases(StatisticSpec spec)
     {
         if (_statisticAliases == null)
             return Collections.emptyList();
@@ -334,42 +331,41 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableCollection(aliases);
     }
 
+    private void initGraphMaps()
+    {
+        _graphs = new TreeMap<>(GraphSpec.CASE_INSENSITIVE_ORDER);
+        _graphNames = new CaseInsensitiveTreeMap<>();
+    }
+
     public void setGraph(GraphSpec graph, byte[] data)
     {
         if (_graphs == null)
-            _graphs = new TreeMap<>();
+            initGraphMaps();
+
+        GraphSpec existing = _graphNames.put(graph.toString(), graph);
+        if (existing != null && !existing.toString().equals(graph.toString()))
+            LOG.warn("Duplicate graph '" + existing + "' and '" + graph.toString() + "'");
+
         _graphs.put(graph, data);
     }
 
     public void setGraphs(Map<GraphSpec, byte[]> graphs)
     {
-        _graphs = new TreeMap<>();
-        _graphs.putAll(graphs);
+        initGraphMaps();
+        for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
+            setGraph(entry.getKey(), entry.getValue());
     }
 
     public void addGraphAlias(GraphSpec spec, GraphSpec alias)
     {
         if (_graphAliases == null)
-            _graphAliases = new TreeMap<>();
+            _graphAliases = new TreeMap<>(GraphSpec.CASE_INSENSITIVE_ORDER);
 
-        Set<GraphSpec> aliases = _graphAliases.get(spec);
-        if (aliases == null)
-            _graphAliases.put(spec, aliases = new LinkedHashSet<>());
+        Set<GraphSpec> aliases = _graphAliases.computeIfAbsent(spec, k -> new LinkedHashSet<>());
         aliases.add(alias);
     }
 
-    public void setGraphAliases(Map<GraphSpec, Set<GraphSpec>> graphAliases)
-    {
-        _graphAliases = new TreeMap<>();
-
-        for (GraphSpec graphSpec : graphAliases.keySet())
-        {
-            Set<GraphSpec> aliases = graphAliases.get(graphSpec);
-            _graphAliases.put(graphSpec, new LinkedHashSet<>(aliases));
-        }
-    }
-
-    public Iterable<GraphSpec> getGraphAliases(GraphSpec spec)
+    public Collection<GraphSpec> getGraphAliases(GraphSpec spec)
     {
         if (_graphAliases == null)
             return Collections.emptyList();
@@ -409,16 +405,31 @@ public class AttributeSet implements Serializable
     /** Get set of keyword names including any keyword names that have been aliased, but not explicitly added with a value. */
     public Set<String> getKeywordNames()
     {
+        Set<String> names = _getKeywordNames();
+        if (names.isEmpty())
+            return Collections.emptySet();
+
+        return Collections.unmodifiableSet(names);
+    }
+
+    private Set<String> _getKeywordNames()
+    {
         if (_keywords == null && _keywordAliases == null)
             return Collections.emptySet();
 
-        TreeSet<String> keywordNames = new TreeSet<>();
+        Set<String> keywordNames = new TreeSet<>();
         if (_keywords != null)
             keywordNames.addAll(_keywords.keySet());
         if (_keywordAliases != null)
             keywordNames.addAll(_keywordAliases.keySet());
 
-        return Collections.unmodifiableSet(keywordNames);
+        return keywordNames;
+    }
+
+    /** Get the set of primary names that are not aliases. */
+    public Set<String> getKeywordNamesWithoutAliases()
+    {
+        return getNamesWithoutAliases(_getKeywordNames(), _keywordAliases);
     }
 
     public Map<String, Set<String>> getKeywordAliases()
@@ -439,16 +450,31 @@ public class AttributeSet implements Serializable
     /** Get set of stat names including any stat names that have been aliased, but not explicitly added with a value. */
     public Set<StatisticSpec> getStatisticNames()
     {
+        Set<StatisticSpec> names = _getStatisticNames();
+        if (names.isEmpty())
+            return Collections.emptySet();
+
+        return Collections.unmodifiableSet(names);
+    }
+
+    public Set<StatisticSpec> _getStatisticNames()
+    {
         if (_statistics == null && _statisticAliases == null)
             return Collections.emptySet();
 
-        TreeSet<StatisticSpec> statisticNames = new TreeSet<>();
+        Set<StatisticSpec> statisticNames = new TreeSet<>(StatisticSpec.CASE_INSENSITIVE_ORDER);
         if (_statistics != null)
             statisticNames.addAll(_statistics.keySet());
         if (_statisticAliases != null)
             statisticNames.addAll(_statisticAliases.keySet());
 
-        return Collections.unmodifiableSet(statisticNames);
+        return statisticNames;
+    }
+
+    /** Get the set of primary names that are not aliases. */
+    public Set<StatisticSpec> getStatisticNamesWithoutAliases()
+    {
+        return getNamesWithoutAliases(_getStatisticNames(), _statisticAliases);
     }
 
     public Map<StatisticSpec, Set<StatisticSpec>> getStatisticAliases()
@@ -469,16 +495,31 @@ public class AttributeSet implements Serializable
     /** Get set of graph names including any graph names that have been aliased, but not explicitly added with a value. */
     public Set<GraphSpec> getGraphNames()
     {
+        Set<GraphSpec> names = _getGraphNames();
+        if (names.isEmpty())
+            return Collections.emptySet();
+
+        return Collections.unmodifiableSet(names);
+    }
+
+    private Set<GraphSpec> _getGraphNames()
+    {
         if (_graphs == null && _graphAliases == null)
             return Collections.emptySet();
 
-        TreeSet<GraphSpec> graphNames = new TreeSet<>();
+        Set<GraphSpec> graphNames = new TreeSet<>(GraphSpec.CASE_INSENSITIVE_ORDER);
         if (_graphs != null)
             graphNames.addAll(_graphs.keySet());
         if (_graphAliases != null)
             graphNames.addAll(_graphAliases.keySet());
 
-        return Collections.unmodifiableSet(graphNames);
+        return graphNames;
+    }
+
+    /** Get the set of primary names that are not aliases. */
+    public Set<GraphSpec> getGraphNamesWithoutAliases()
+    {
+        return getNamesWithoutAliases(_getGraphNames(), _graphAliases);
     }
 
     public Map<GraphSpec, Set<GraphSpec>> getGraphAliases()
@@ -509,4 +550,20 @@ public class AttributeSet implements Serializable
             return;
         _uri = URIUtil.relativize(uriPipelineRoot, _uri);
     }
+
+    private <T> Set<T> getNamesWithoutAliases(Set<T> allNamesIncludingAliases, Map<T, Set<T>> aliases)
+    {
+        if (allNamesIncludingAliases == null || allNamesIncludingAliases.isEmpty())
+            return Collections.emptySet();
+
+        if (aliases != null && !aliases.isEmpty())
+        {
+            for (Set<T> set : aliases.values())
+                allNamesIncludingAliases.removeAll(set);
+        }
+
+        return Collections.unmodifiableSet(allNamesIncludingAliases);
+    }
+
+
 }

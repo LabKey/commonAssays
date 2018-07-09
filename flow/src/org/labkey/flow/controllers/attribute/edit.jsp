@@ -24,7 +24,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     AttributeController.EditAttributeForm form = (AttributeController.EditAttributeForm)getModelBean();
-    AttributeCache.Entry entry = form.getEntry();
+    AttributeCache.Entry entry = form.getEntry(getContainer());
     String name = form.getName();
     if (StringUtils.isEmpty(name))
         name = entry.getName();

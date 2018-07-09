@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.labkey.flow.analysis.web.FCSRef;
+import org.labkey.remoteapi.collections.CaseInsensitiveHashMap;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -54,9 +55,10 @@ public class FCSKeywordData
         return _header.getKeywords().keySet().toArray(new String[0]);
     }
 
+    // NOTE: case-insensitive
     public Map<String,String> getAllKeywords()
     {
-        HashMap<String,String> ret = new HashMap();
+        HashMap<String,String> ret = new CaseInsensitiveHashMap<>();
         for (String override : _ref.getKeywordNames())
         {
             ret.put(override, _ref.getKeyword(override));

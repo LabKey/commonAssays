@@ -29,9 +29,11 @@ import org.labkey.flow.analysis.model.Subset;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -424,6 +426,18 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
     }
 
 
+    public static class CaseInsensitiveComparator implements Comparator<StatisticSpec>, Serializable
+    {
+        public int compare(StatisticSpec o1, StatisticSpec o2)
+        {
+            return Objects.compare(
+                    o1 == null ? null : o1.toString(),
+                    o2 == null ? null : o2.toString(),
+                    String.CASE_INSENSITIVE_ORDER);
+        }
+    }
+
+    public static final Comparator<StatisticSpec> CASE_INSENSITIVE_ORDER = new CaseInsensitiveComparator();
 
     public static class TestCase extends Assert
     {

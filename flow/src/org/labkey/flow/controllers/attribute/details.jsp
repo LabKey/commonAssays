@@ -25,11 +25,11 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     AttributeController.AttributeForm form = (AttributeController.AttributeForm)getModelBean();
-    org.labkey.flow.persist.AttributeCache.Entry entry = form.getEntry();
+    org.labkey.flow.persist.AttributeCache.Entry entry = form.getEntry(getContainer());
 
     AttributeCache.Entry aliased = entry.getAliasedEntry();
     Collection<AttributeCache.Entry> aliases = entry.getAliases();
-    Collection<FlowDataObject> usages = entry.getUsages();;
+    Collection<FlowDataObject> usages = entry.getUsages();
 
     ActionURL detailsURL = getActionURL();
 %>

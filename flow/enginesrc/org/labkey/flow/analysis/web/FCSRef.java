@@ -16,14 +16,17 @@
 
 package org.labkey.flow.analysis.web;
 
-import java.util.Map;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+
 import java.net.URI;
 
 public class FCSRef
 {
     URI _uri;
-    Map<String,String> _keywordOverrides;
-    public FCSRef(URI uri, Map<String, String> keywordOverrides)
+
+    CaseInsensitiveHashMap<String> _keywordOverrides;
+
+    public FCSRef(URI uri, CaseInsensitiveHashMap<String> keywordOverrides)
     {
         _uri = uri;
         _keywordOverrides = keywordOverrides;
@@ -34,12 +37,14 @@ public class FCSRef
         return _uri;
     }
 
+    // NOTE: case-insensitive
     public String getKeyword(String key)
     {
         if (_keywordOverrides == null)
             return null;
         return _keywordOverrides.get(key);
     }
+
     public String[] getKeywordNames()
     {
         return _keywordOverrides.keySet().toArray(new String[0]);

@@ -171,7 +171,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             if (file != null && file.exists())
                 keywordAttrs.setURI(uri);
 
-            AttributeSetHelper.prepareForSave(keywordAttrs, getContainer(), false);
+            AttributeSetHelper.prepareForSave(sampleLabel, keywordAttrs, getContainer(), false);
         }
 
         if (resultsMap.size() > 0)
@@ -189,7 +189,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                 sampleIdToNameMap.put(id, sampleLabel);
 
             AttributeSet resultsAttrs = resultsMap.getById(id);
-            AttributeSetHelper.prepareForSave(resultsAttrs, getContainer(), false);
+            AttributeSetHelper.prepareForSave(sampleLabel, resultsAttrs, getContainer(), false);
 
             // UNDONE: comp matrix
         }

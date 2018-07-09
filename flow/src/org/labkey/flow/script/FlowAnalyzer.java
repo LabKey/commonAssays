@@ -17,6 +17,7 @@
 package org.labkey.flow.script;
 
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.*;
@@ -52,7 +53,7 @@ public class FlowAnalyzer
 
     static public FCSRef getFCSRef(FlowWell well)
     {
-        Map<String, String> overrides = new HashMap();
+        CaseInsensitiveHashMap<String> overrides = new CaseInsensitiveHashMap<>();
         overrides.putAll(well.getKeywords());
         return new FCSRef(well.getFCSURI(), overrides);
     }

@@ -286,7 +286,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         for (CompensationMatrix comp : comps)
         {
             AttributeSet compAttrs = new AttributeSet(comp);
-            AttributeSetHelper.prepareForSave(compAttrs, container, false);
+            AttributeSetHelper.prepareForSave(comp.getName(), compAttrs, container, false);
             compMatrixMap.put(comp, compAttrs);
         }
 

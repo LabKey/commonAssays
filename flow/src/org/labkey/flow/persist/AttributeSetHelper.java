@@ -84,46 +84,46 @@ public class AttributeSetHelper
      * names from the cache, or two threads each trying to insert the same attribute name.
      * @throws SQLException
      */
-    public static void prepareForSave(AttributeSet attrs, Container c, boolean clearCache)
+    public static void prepareForSave(String sampleLabel, AttributeSet attrs, Container c, boolean clearCache)
     {
         //LOG.info("+prepareForSave");
-        ensureKeywordNames(attrs, c, attrs.getKeywordNames());
-        ensureStatisticNames(attrs, c, attrs.getStatisticNames());
-        ensureGraphNames(attrs, c, attrs.getGraphNames());
+        ensureKeywordNames(sampleLabel, attrs, c, attrs.getKeywordNamesWithoutAliases());
+        ensureStatisticNames(sampleLabel, attrs, c, attrs.getStatisticNamesWithoutAliases());
+        ensureGraphNames(sampleLabel, attrs, c, attrs.getGraphNamesWithoutAliases());
         if (clearCache)
             AttributeCache.uncacheAllAfterCommit(c);
         //LOG.info("-prepareForSave");
     }
 
-    private static void ensureKeywordNames(AttributeSet attrs, Container c, Collection<String> specs)
+    private static void ensureKeywordNames(String sampleLabel, AttributeSet attrs, Container c, Collection<String> specs)
     {
         for (String spec : specs)
         {
-            FlowManager.get().ensureKeywordNameAndAliases(c, spec, attrs.getKeywordAliases(spec), false);
+            FlowManager.get().ensureKeywordNameAndAliases(c, sampleLabel, spec, attrs.getKeywordAliases(spec), false);
         }
     }
 
-    private static void ensureStatisticNames(AttributeSet attrs, Container c, Collection<StatisticSpec> specs)
+    private static void ensureStatisticNames(String sampleLabel, AttributeSet attrs, Container c, Collection<StatisticSpec> specs)
     {
         for (StatisticSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureStatisticNameAndAliases(c, s, attrs.getStatisticAliases(spec), false);
+            FlowManager.get().ensureStatisticNameAndAliases(c, sampleLabel, s, attrs.getStatisticAliases(spec), false);
         }
     }
 
-    private static void ensureGraphNames(AttributeSet attrs, Container c, Collection<GraphSpec> specs)
+    private static void ensureGraphNames(String sampleLabel, AttributeSet attrs, Container c, Collection<GraphSpec> specs)
     {
         for (GraphSpec spec : specs)
         {
             String s = spec.toString();
-            FlowManager.get().ensureGraphNameAndAliases(c, s, attrs.getGraphAliases(spec), false);
+            FlowManager.get().ensureGraphNameAndAliases(c, sampleLabel, s, attrs.getGraphAliases(spec), false);
         }
     }
 
     public static void save(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
-        prepareForSave(attrs, data.getContainer(), true); // TODO: is clearing the cache here correct?
+        prepareForSave(data.getName(), attrs, data.getContainer(), true); // TODO: is clearing the cache here correct?
         doSave(attrs, user, data);
     }
 
@@ -145,6 +145,7 @@ public class AttributeSetHelper
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
+                    assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
                     paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
@@ -160,6 +161,7 @@ public class AttributeSetHelper
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.STATS.byAttribute(c, entry.getKey());
+                    assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
                     paramsList.add(Arrays.<Object>asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
@@ -175,6 +177,7 @@ public class AttributeSetHelper
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
                     AttributeCache.Entry a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
+                    assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
                     paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));

@@ -15,11 +15,15 @@
  */
 package org.labkey.flow.persist;
 
+import org.intellij.lang.annotations.Flow;
 import org.junit.Before;
 import org.junit.Test;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
@@ -28,7 +32,9 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.util.JunitUtil;
+import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.TestContext;
+import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
@@ -44,11 +50,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -288,12 +296,20 @@ public class PersistTests
             AttributeSetHelper.save(set, user, data);
         }
 
+        // verify attribute is aliased
+        AttributeCache.StatisticEntry entry = AttributeCache.STATS.byName(c, "X:Count");
+        assertEquals("X:Count", entry.getName());
+        assertNull(entry.getAliasedEntry());
+        assertEquals(1, entry.getAliases().size());
+        assertEquals("X-alias:Count", entry.getAliases().stream().findFirst().map(AttributeCache.Entry::getName).get());
+
         // verify stat values
         FlowSchema schema = new FlowSchema(user, c);
 
         try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, "SELECT " +
                 "A.Name, " +
                 "A.Statistic.\"X:Count\" AS stat, " +
+                "A.Statistic.\"x:count\" AS stat_lowercase, " +
                 "A.Statistic.\"X-alias:Count\" AS stat_alias, " +
                 "A.Statistic('X:Count') AS stat_method, " +
                 "A.Statistic('X-alias:Count') AS stat_alias_method " +
@@ -305,6 +321,7 @@ public class PersistTests
             Map<String, Object> rowMap = rs.getRowMap();
             assertEquals("well1", rowMap.get("name"));
             assertEquals(1.0, rowMap.get("stat"));
+            assertEquals(1.0, rowMap.get("stat_lowercase"));
             assertEquals(1.0, rowMap.get("stat_alias"));
             assertEquals(1.0, rowMap.get("stat_method"));
             assertEquals(1.0, rowMap.get("stat_alias_method"));
@@ -313,6 +330,7 @@ public class PersistTests
             rowMap = rs.getRowMap();
             assertEquals("well2", rowMap.get("name"));
             assertEquals(2.0, rowMap.get("stat"));
+            assertEquals(2.0, rowMap.get("stat_lowercase"));
             assertEquals(2.0, rowMap.get("stat_alias"));
             assertEquals(2.0, rowMap.get("stat_method"));
             assertEquals(2.0, rowMap.get("stat_alias_method"));
@@ -444,13 +462,13 @@ public class PersistTests
         assertNotNull(obj);
 
         // create 'keyword4' and 'keyword5' that are not used by the data
-        FlowManager.get().ensureKeywordName(c, "keyword4", true);
-        FlowManager.get().ensureKeywordName(c, "keyword5", true);
+        FlowManager.get().ensureKeywordName(c, data.getName(), "keyword4", true);
+        FlowManager.get().ensureKeywordName(c, data.getName(), "keyword5", true);
 
         // attempt to create alias for nonexistent keyword
         try
         {
-            FlowManager.get().ensureAlias(AttributeType.keyword, -1, "keyword2", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, -1, "keyword2", true, true);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
@@ -465,7 +483,7 @@ public class PersistTests
         try
         {
             assertTrue(keyword1_alias.isAlias());
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1_alias._rowId, "keyword2", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1_alias._rowId, "keyword2", true, true);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
@@ -476,7 +494,7 @@ public class PersistTests
         // attempt to create alias of an existing keyword that is an alias
         try
         {
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2-alias", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2-alias", true, true);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
@@ -487,7 +505,7 @@ public class PersistTests
         // attempt to create alias of an existing keyword that is has aliases
         try
         {
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword2", true, true);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
@@ -498,7 +516,7 @@ public class PersistTests
         // attempt to create alias of existing keyword; both the alias and the aliased have a value on the same data object
         try
         {
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword3", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword3", true, true);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e)
@@ -508,7 +526,7 @@ public class PersistTests
 
         // verify we can create an alias from an existing, unused keyword
         {
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword4", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword1._rowId, "keyword4", true, true);
             FlowManager.FlowEntry keyword1mod = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword1");
             Collection<FlowManager.FlowEntry> aliases = FlowManager.get().getAliases(keyword1mod);
             assertEquals(2, aliases.size());
@@ -526,7 +544,7 @@ public class PersistTests
             assertFalse(keyword3.isAlias());
             assertTrue(FlowManager.get().getAliases(keyword3).isEmpty());
 
-            FlowManager.get().ensureAlias(AttributeType.keyword, keyword5._rowId, "keyword3", true);
+            FlowManager.get().ensureAlias(AttributeType.keyword, keyword5._rowId, "keyword3", true, true);
 
             FlowManager.FlowEntry keyword5mod = FlowManager.get().getAttributeEntry(c.getId(), AttributeType.keyword, "keyword5");
             assertFalse(keyword5mod.isAlias());
@@ -540,4 +558,83 @@ public class PersistTests
         }
   }
 
+    @Test
+    public void caseInsensitiveNames() throws Exception
+    {
+        final boolean sqlserver = FlowManager.get().getSchema().getSqlDialect().isSqlServer();
+        final String UPPER_NAME = "CASE-TEST";
+        final String lower_name = "case-test";
+
+        // setup -- legacy databases may have existing attribute names which differ in casing
+        int upperId;
+        int lowerId = -1;
+        {
+            Map<String, Object> map = Table.insert(user, FlowManager.get().getTinfoKeywordAttr(),
+                     CaseInsensitiveHashMap.of(
+                            "Container", c.getId(),
+                            "Name", UPPER_NAME,
+                            "Id", -1));
+            upperId = (Integer)map.get("RowId");
+
+            // Insert a duplicate name that only differs by case (NOTE: SQLServer default collation won't allow this)
+            if (!sqlserver)
+            {
+                map = Table.insert( user, FlowManager.get().getTinfoKeywordAttr(),
+                        CaseInsensitiveHashMap.of(
+                                "Container", c.getId(),
+                                "Name", lower_name,
+                                "Id", -1));
+                lowerId = (Integer)map.get("RowId");
+            }
+        }
+
+        // verify -- attribute cache is case-insensitive
+        AttributeCache.KEYWORDS.uncacheNow(c);
+        {
+            AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byName(c, "case-TEST");
+            assertNotNull(ke1);
+            // upper-case name sorts before the lower-case name so it is chosen as the winner
+            assertEquals(UPPER_NAME, ke1.getAttribute());
+            assertEquals(upperId, ke1.getRowId());
+
+            AttributeCache.KeywordEntry ke2 = AttributeCache.KEYWORDS.byAttribute(c, "CASE-test");
+            assertNotNull(ke2);
+            // upper-case name sorts before the lower-case name so it is chosen as the winner
+            assertEquals(UPPER_NAME, ke2.getAttribute());
+            assertEquals(upperId, ke2.getRowId());
+        }
+
+        // verify -- attribute cache still can access case-collapsed entries by rowId
+        {
+            AttributeCache.KeywordEntry ke2 = AttributeCache.KEYWORDS.byRowId(c, upperId);
+            assertNotNull(ke2);
+            assertEquals(UPPER_NAME, ke2.getAttribute());
+            assertEquals(upperId, ke2.getRowId());
+
+            if (!sqlserver)
+            {
+                AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byRowId(c, lowerId);
+                assertNotNull(ke1);
+                assertEquals(lower_name, ke1.getAttribute());
+                assertEquals(lowerId, ke1.getRowId());
+            }
+        }
+
+        // verify -- can't insert new attribute names that differ by case
+        try
+        {
+            FlowManager.get().ensureKeywordName(c, "TEST", "CaSe-TeSt", true);
+            fail("Expected exception when inserting keyword with different casing from an existing keyword");
+        }
+        catch (FlowException ex)
+        {
+            assertThat(ex.getMessage(), containsString("Sample TEST: Found existing keyword"));
+            assertThat(ex.getMessage(), containsString("with different casing from the requested name 'CaSe-TeSt':"));
+            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId + ")"));
+            if (!sqlserver)
+            {
+                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId + ")"));
+            }
+        }
+    }
 }
