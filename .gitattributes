@@ -175,6 +175,7 @@ flow/enginesrc/org/labkey/flow/analysis/data/SubsetNumberArray.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Analysis.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/AndGate.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/AutoCompensationScript.java -text
+flow/enginesrc/org/labkey/flow/analysis/model/BaseWorkspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CalibrationTable.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CleanNameExpressionTransform.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/CompensationCalculation.java -text

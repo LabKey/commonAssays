@@ -45,28 +45,22 @@ import java.util.Set;
  * User: kevink
  * Date: 2/8/12
  */
-public abstract class Workspace implements IWorkspace, Serializable
+public abstract class Workspace extends BaseWorkspace implements Serializable
 {
     public static final String ALL_SAMPLES = "All Samples";
     
-    protected String _name = null;
-    protected String _path = null;
-    
+
     // group name -> analysis
     protected Map<PopulationName, Analysis> _groupAnalyses = new LinkedHashMap<>();
     // sample id -> analysis
     protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<>();
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<>();
     protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<>();
     protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
     protected Map<String, SampleInfo> _deletedInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
-    protected Map<String, ParameterInfo> _parameters = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, ParameterInfo>());
     protected List<CalibrationTable> _calibrationTables = new ArrayList<>();
     protected ScriptSettings _settings = new ScriptSettings();
-    protected List<String> _warnings = new LinkedList<>();
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList<>();
     protected List<AutoCompensationScript> _autoCompensationScripts = new ArrayList<>();
-    protected Set<String> _keywords = new CaseInsensitiveTreeSet();
 
     protected Workspace()
     {
@@ -216,26 +210,18 @@ public abstract class Workspace implements IWorkspace, Serializable
         }
     }
 
-    public String getName()
-    {
-        return _name;
-    }
-
-    public String getPath()
-    {
-        return _path;
-    }
-
     public ScriptSettings getSettings()
     {
         return _settings;
     }
 
+    @Override
     public CompensationMatrix getSampleCompensationMatrix(ISampleInfo sample)
     {
         return sample.getCompensationMatrix();
     }
 
+    @Override
     public List<CompensationMatrix> getCompensationMatrices()
     {
         return _compensationMatrices;
@@ -431,29 +417,16 @@ public abstract class Workspace implements IWorkspace, Serializable
         return null;
     }
 
+    @Override
     public boolean hasAnalysis()
     {
         return true;
     }
 
+    @Override
     public Analysis getSampleAnalysis(ISampleInfo sample)
     {
         return _sampleAnalyses.get(sample.getSampleId());
-    }
-
-    public AttributeSet getSampleAnalysisResults(ISampleInfo sample)
-    {
-        return _sampleAnalysisResults.get(sample.getSampleId());
-    }
-
-    public List<String> getParameterNames()
-    {
-        return new ArrayList<>(_parameters.keySet());
-    }
-
-    public List<ParameterInfo> getParameters()
-    {
-        return new ArrayList<>(_parameters.values());
     }
 
     public SampleInfo findSampleWithKeywordValue(String keyword, String value)
@@ -498,17 +471,6 @@ public abstract class Workspace implements IWorkspace, Serializable
                 assert false;
         }
         return (Population) cur;
-    }
-
-    public List<String> getWarnings()
-    {
-        return _warnings;
-    }
-
-    // NOTE: case-insensitive
-    public Set<String> getKeywords()
-    {
-        return Collections.unmodifiableSet(_keywords);
     }
 
     static public class CompensationChannelData

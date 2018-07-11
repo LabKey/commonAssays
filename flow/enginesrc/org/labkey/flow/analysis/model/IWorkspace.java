@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.labkey.api.data.Container;
 import org.labkey.flow.persist.AttributeSet;
 
 import java.util.List;
@@ -28,65 +29,65 @@ import java.util.Set;
  */
 public interface IWorkspace
 {
-    public String getPath();
+    String getPath();
 
-    public String getName();
+    String getName();
 
     /** Get a display string that indicates the workspace type, e.g. "FlowJo Mac workspace" or "Analysis Archive".) */
-    public String getKindName();
+    String getKindName();
 
     /**
      * Warnings generated during loading of the workspace.
      * @return
      */
-    public List<String> getWarnings();
+    List<String> getWarnings();
 
     /**
      * Get union of all keywords found in all samples.
      * @return
      */
-    public Set<String> getKeywords();
+    Set<String> getKeywords();
 
     /**
      * Get a list of all parameter names.
      * @return
      */
-    public List<String> getParameterNames();
+    List<String> getParameterNames();
 
-    public List<ParameterInfo> getParameters();
+    List<ParameterInfo> getParameters();
 
     /**
      * Get all internal sample ids.
      * @return
      */
-    public List<String> getSampleIds();
+    List<String> getSampleIds();
 
     /**
      * Get all sample labels.
      * @return
      */
-    public List<String> getSampleLabels();
+    List<String> getSampleLabels();
 
-    public List<? extends ISampleInfo> getSamples();
+    List<? extends ISampleInfo> getSamples();
 
     /**
      * Get sample by either sample id or label.
      * @param sampleIdOrLabel
      * @return
      */
-    public ISampleInfo getSample(String sampleIdOrLabel);
+    ISampleInfo getSample(String sampleIdOrLabel);
 
     /**
      * @return true if the workspace has an analysis definition (
      */
-    public boolean hasAnalysis();
+    boolean hasAnalysis();
 
-    public Analysis getSampleAnalysis(ISampleInfo sample);
+    Analysis getSampleAnalysis(ISampleInfo sample);
 
-    public AttributeSet getSampleAnalysisResults(ISampleInfo sample);
+    AttributeSet getSampleAnalysisResults(ISampleInfo sample);
 
-    public CompensationMatrix getSampleCompensationMatrix(ISampleInfo sample);
+    CompensationMatrix getSampleCompensationMatrix(ISampleInfo sample);
 
-    public List<CompensationMatrix> getCompensationMatrices();
+    List<CompensationMatrix> getCompensationMatrices();
 
 }
