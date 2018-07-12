@@ -4,6 +4,7 @@ import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.collections.CaseInsensitiveTreeSet;
 import org.labkey.flow.persist.AttributeSet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class BaseWorkspace implements IWorkspace
+public abstract class BaseWorkspace implements IWorkspace, Serializable
 {
     protected String _name = null;
     protected String _path = null;

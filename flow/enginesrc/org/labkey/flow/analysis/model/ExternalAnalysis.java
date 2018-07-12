@@ -44,7 +44,6 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
 {
     public static final Logger LOG = Logger.getLogger(ExternalAnalysis.class);
 
-    protected Map<String, AttributeSet> _sampleAnalysisResults = new LinkedHashMap<>();
     protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
     protected Set<CompensationMatrix> _compensationMatrices = new LinkedHashSet<>();
     protected Map<String, CompensationMatrix> _sampleCompensationMatrices = new HashMap<>();

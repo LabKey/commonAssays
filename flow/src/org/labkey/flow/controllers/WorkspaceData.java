@@ -207,7 +207,6 @@ public class WorkspaceData implements Serializable
         Set<StatisticSpec> seenStat = new HashSet<>();
         Set<GraphSpec> seenGraph = new HashSet<>();
 
-        Map<String, Integer> keywordMismatches = new HashMap<>();
         Map<SubsetSpec, Integer> subsetMismatches = new HashMap<>();
         Map<String, Integer> parameterMismatches = new HashMap<>();
 
@@ -232,6 +231,9 @@ public class WorkspaceData implements Serializable
             }
 
             Analysis analysis = _object.getSampleAnalysis(sample);
+            if (analysis == null)
+                continue;
+
             for (StatisticSpec spec : analysis.getStatistics())
             {
                 if (seenStat.contains(spec))

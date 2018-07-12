@@ -55,8 +55,8 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     // sample id -> analysis
     protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<>();
     protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<>();
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
-    protected Map<String, SampleInfo> _deletedInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<String, SampleInfo>());
+    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
+    protected Map<String, SampleInfo> _deletedInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
     protected List<CalibrationTable> _calibrationTables = new ArrayList<>();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList<>();
