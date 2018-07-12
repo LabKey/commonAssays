@@ -132,7 +132,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
             List<Pair<Integer, String>> fcsFiles = fcsFilesBySample.get(sample);
             int fcsFileCount = fcsFiles.size();
             %>
-        <tr class="<%=getShadeRowClass(i%2 == 0)%>">
+        <tr class="<%=getShadeRowClass(i)%>">
             <td valign="top">
                 <a href="<%=expUrls.getMaterialDetailsURL(getContainer(), sample.first)%>"><%=h(sample.second)%></a>
                 (<%=fcsFileCount%>)
@@ -174,7 +174,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
                         {
                             sampleIdx++;
                     %>
-                    <tr class="<%=getShadeRowClass(sampleIdx%2 == 0)%>">
+                    <tr class="<%=getShadeRowClass(sampleIdx)%>">
                         <td valign="top">
                             <a href="<%=expUrls.getMaterialDetailsURL(getContainer(), sample.first)%>"><%=h(sample.second)%></a>
                         </td>
@@ -200,7 +200,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
                         {
                             fcsFileIdx++;
                     %>
-                    <tr class="<%=getShadeRowClass(fcsFileIdx%2 == 0)%>">
+                    <tr class="<%=getShadeRowClass(fcsFileIdx)%>">
                         <td valign="top">
                             <a href="<%=new ActionURL(WellController.ShowWellAction.class, getContainer()).addParameter("wellId", fcsFile.first)%>"><%=h(fcsFile.second)%></a>
                         </td>

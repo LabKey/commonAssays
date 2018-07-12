@@ -44,7 +44,7 @@
             if (channel == null)
                 continue;
     %>
-    <tr class="<%=getShadeRowClass(i % 2 == 0)%>">
+    <tr class="<%=getShadeRowClass(i)%>">
         <td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>

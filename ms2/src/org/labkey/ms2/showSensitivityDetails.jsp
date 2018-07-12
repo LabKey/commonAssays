@@ -43,7 +43,7 @@
 <%
     for (int i = 0; i < sensitivity.length; i++)
     {
-        out.print("<tr class=\"" + (getShadeRowClass(i % 2 == 0)) + "\">");
+        out.print("<tr class=\"" + (getShadeRowClass(i)) + "\">");
         out.print("<td align=\"right\">" + df2.format(minProb[i]) + "</td>");
         out.print("<td align=\"right\">" + df4.format(sensitivity[i]) + "</td>");
         out.print("<td align=\"right\">" + df4.format(error[i]) + "</td>");

@@ -477,7 +477,7 @@ if (relatedFiles.size() > 0)
         FlowRun run = related.getRun();
         FlowExperiment experiment = run.getExperiment();
 
-        %><tr class="<%=getShadeRowClass(count % 2 == 0)%>">
+        %><tr class="<%=getShadeRowClass(count)%>">
             <td style="white-space:nowrap"><a href="<%=h(related.urlShow())%>"><%=h(related.getLabel())%></a></td>
             <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
         <% if (experiment == null) { %>
@@ -491,7 +491,7 @@ if (relatedFiles.size() > 0)
         for (FlowFCSAnalysis analysis : analyses)
         {
             count++;
-            %><tr class="<%=getShadeRowClass(count % 2 == 0)%>">
+            %><tr class="<%=getShadeRowClass(count)%>">
                 <td style="white-space:nowrap; padding-left:2em;"><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
                 <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
                 <% if (experiment == null) { %>
@@ -533,7 +533,7 @@ if (allAnalyses.size() > 0)
         FlowRun run = analysis.getRun();
         FlowExperiment experiment = run.getExperiment();
 
-        %><tr class="<%=getShadeRowClass(count % 2 == 0)%>">
+        %><tr class="<%=getShadeRowClass(count)%>">
             <td style="white-space:nowrap"><a href="<%=h(analysis.urlShow())%>"><%=h(analysis.getLabel())%></a></td>
             <td style="white-space:nowrap"><a href="<%=h(run.urlShow())%>"><%=h(run.getLabel())%></a></td>
         <% if (experiment == null) { %>

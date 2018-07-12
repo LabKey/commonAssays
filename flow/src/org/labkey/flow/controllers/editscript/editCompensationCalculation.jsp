@@ -190,7 +190,7 @@ var keywordValueSubsetListMap = KV;
                     {
                         String parameter = form.parameters[i];
                 %>
-                <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i % 2 == 0)%>">
+                <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i)%>">
                     <td><%=h(parameter)%></td>
                     <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
                     <td><%=text(selectKeywordValues(Sign.positive, i))%></td>

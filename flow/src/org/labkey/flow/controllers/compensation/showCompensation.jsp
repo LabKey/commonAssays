@@ -97,9 +97,9 @@
         <td class="labkey-column-header"><%=h(channelNames[iChannelValue])%></td>
         <% } %>
     </tr>
-    <% for (int iChannel = 0; iChannel < channelCount; iChannel ++)
+    <% for (int iChannel = 0; iChannel < channelCount; iChannel++)
     {
-        _HtmlString className = getShadeRowClass(0==(iChannel%2));
+        _HtmlString className = getShadeRowClass(iChannel);
     %>
     <tr class="labkey-row">
         <td class="labkey-column-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></td>
