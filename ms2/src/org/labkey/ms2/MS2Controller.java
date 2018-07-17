@@ -1105,6 +1105,10 @@ public class MS2Controller extends SpringActionController
             _run = form.validateRun();
 
             _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
+            if (_goChartType == null)
+            {
+                throw new NotFoundException("Unsupported GO chart type: " + form.getChartType());
+            }
 
             AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), _run);
 
