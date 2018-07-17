@@ -105,9 +105,9 @@ public class PipelineTest extends PipelineWebTestBase
 
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
+        super.doCleanup(afterTest);
         _testSetMS2.clean();
         _testSetMS1.clean();
-        super.doCleanup(afterTest);
     }
 
     @Before
