@@ -60,7 +60,7 @@ public class SequestImportTest extends BaseWebDriverTest
     @LogMethod
     private void verifyRunGrid()
     {
-        clickFolder(PROJECT_NAME);
+        clickProject(PROJECT_NAME);
 
         // Customize the view to show the distinct and total peptide counts based on the criteria established
         // by the custom query
@@ -86,7 +86,7 @@ public class SequestImportTest extends BaseWebDriverTest
         assertTextNotPresent("A.ADSNPAP.S", "A.VPSGQDNIHR.F");
 
         // Make sure that our target protein is remembered across page views
-        clickFolder(PROJECT_NAME);
+        clickProject(PROJECT_NAME);
         assertTextPresent("IPI00176617");
     }
 
@@ -115,12 +115,12 @@ public class SequestImportTest extends BaseWebDriverTest
     @LogMethod
     private void importSequestRun()
     {
-        clickFolder(PROJECT_NAME);  // go to MS2 Dashboard
+        clickProject(PROJECT_NAME);  // go to MS2 Dashboard
         // Import a Sequest run
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("raftflow10.pep.xml", "Import Search Results");
 
-        clickFolder(PROJECT_NAME);
+        clickProject(PROJECT_NAME);
         waitAndClick(Locator.linkWithText("Data Pipeline"));
         waitForPipelineJobsToComplete(1, "Experiment Import", false);
     }
