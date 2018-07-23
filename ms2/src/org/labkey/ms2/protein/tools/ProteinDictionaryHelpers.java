@@ -16,6 +16,7 @@
 package org.labkey.ms2.protein.tools;
 
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlExecutor;
@@ -214,6 +215,7 @@ public class ProteinDictionaryHelpers
         }
     }
 
+    @Nullable
     public static GoTypes GTypeStringToEnum(String label)
     {
         for (GoTypes g : GoTypes.values())
