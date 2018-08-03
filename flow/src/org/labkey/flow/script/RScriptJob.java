@@ -21,6 +21,7 @@ import org.labkey.api.module.Module;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.reports.ExternalScriptEngine;
+import org.labkey.api.reports.LabkeyScriptEngineManager;
 import org.labkey.api.resource.Resource;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.PageFlowUtil;
@@ -42,7 +43,6 @@ import org.labkey.flow.persist.AnalysisSerializer;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -158,7 +158,7 @@ public class RScriptJob extends FlowExperimentJob
 
     private void runScript(File rAnalysisDir, File normalizedDir) throws IOException
     {
-        ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
+        ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension("r");
         if (engine == null)
         {
             error("The R script engine is not available.  Please configure the R script engine in the admin console.");

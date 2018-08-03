@@ -33,6 +33,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.reports.LabkeyScriptEngineManager;
 import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
@@ -75,7 +76,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.File;
 import java.net.URI;
@@ -495,7 +495,7 @@ public class FlowController extends BaseFlowController
             // If we are enabling flow normalization, check that flowWorkspace R library has been installed.
             if (form.isNormalizationEnabled() && !FlowSettings.isNormalizationEnabled())
             {
-                ScriptEngine engine = ServiceRegistry.get().getService(ScriptEngineManager.class).getEngineByExtension("r");
+                ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension("r");
                 if (engine == null)
                 {
                     errors.reject(ERROR_MSG, "The R script engine is not available.  Please configure the R script engine in the admin console.");
