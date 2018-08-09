@@ -158,7 +158,7 @@ public class RScriptJob extends FlowExperimentJob
 
     private void runScript(File rAnalysisDir, File normalizedDir) throws IOException
     {
-        ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension("r");
+        ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension(getContainer(), "r");
         if (engine == null)
         {
             error("The R script engine is not available.  Please configure the R script engine in the admin console.");

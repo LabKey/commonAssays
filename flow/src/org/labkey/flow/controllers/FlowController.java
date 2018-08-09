@@ -495,7 +495,7 @@ public class FlowController extends BaseFlowController
             // If we are enabling flow normalization, check that flowWorkspace R library has been installed.
             if (form.isNormalizationEnabled() && !FlowSettings.isNormalizationEnabled())
             {
-                ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension("r");
+                ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension(getContainer(), "r");
                 if (engine == null)
                 {
                     errors.reject(ERROR_MSG, "The R script engine is not available.  Please configure the R script engine in the admin console.");
