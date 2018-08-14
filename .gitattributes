@@ -98,6 +98,7 @@ dataintegration/src/org/labkey/di/view/etlDefinition.jsp -text
 dataintegration/src/org/labkey/di/view/transformConfiguration.jsp -text
 dataintegration/src/org/labkey/di/view/transformDetails.jsp -text
 dataintegration/src/org/labkey/di/view/transformHistory.jsp -text
+dataintegration/webapp/dataintegration/etlAutocomplete.js -text
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
 elisa/src/org/labkey/elisa/ElisaController.java -text
