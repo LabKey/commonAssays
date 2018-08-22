@@ -17,6 +17,7 @@ package org.labkey.microarray.matrix;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
@@ -50,6 +51,7 @@ import java.util.Map;
 public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 {
     public static final String FEATURE_ID_COLUMN_NAME = "ID_REF";
+    public static final String FEATURE_ID_COLUMN_IMPORT_ALIAS = "feature_id";
 
     private static final Logger LOG = Logger.getLogger(ExpressionMatrixDataHandler.class);
 
@@ -104,7 +106,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            try (TabLoader loader = createTabLoader(dataFile, FEATURE_ID_COLUMN_NAME))
+            try (TabLoader loader = createTabLoader(dataFile, FEATURE_ID_COLUMN_NAME, new CaseInsensitiveHashSet(FEATURE_ID_COLUMN_IMPORT_ALIAS)))
             {
                 ColumnDescriptor[] cols = loader.getColumns();
                 List<String> columnNames = new ArrayList<>(cols.length);
