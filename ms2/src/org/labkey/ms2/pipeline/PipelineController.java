@@ -38,7 +38,6 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.security.CSRF;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -81,7 +80,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -107,7 +105,7 @@ public class PipelineController extends SpringActionController
 
     public PageConfig defaultPageConfig()
     {
-        PageConfig p = super.defaultPageConfig();    //To change body of overridden methods use File | Settings | File Templates.
+        PageConfig p = super.defaultPageConfig();
         p.setHelpTopic(getHelpTopic("ms2"));
         return p;
     }

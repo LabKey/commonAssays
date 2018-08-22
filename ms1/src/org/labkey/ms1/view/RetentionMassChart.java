@@ -168,7 +168,7 @@ public class RetentionMassChart extends FeatureChart
 
         public Paint getItemOutlinePaint(int row, int column)
         {
-            return super.getItemOutlinePaint(row, column);    //To change body of overridden methods use File | Settings | File Templates.
+            return super.getItemOutlinePaint(row, column);
         }
     }
 
