@@ -118,7 +118,7 @@ public class PositivityFlowReport extends FilterFlowReport
     {
         ICSMetadata metadata = getMetadata(context.getContainer());
         if (metadata == null || !metadata.isComplete())
-            throw new NotFoundException("ICS metadata required");
+            throw new NotFoundException("metadata required");
 
         for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
@@ -143,7 +143,7 @@ public class PositivityFlowReport extends FilterFlowReport
     {
         ICSMetadata metadata = getMetadata(getDescriptor().getResourceContainer());
         if (metadata == null || !metadata.isComplete())
-            throw new NotFoundException("ICS metadata required");
+            throw new NotFoundException("metadata required");
 
         // Filter out any wells with no background statistic
         List<Filter> filters = super.getFilters();

@@ -686,7 +686,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         if (getICSMetadataString() != null)
         {
-            parts.add("ICS Metadata");
+            parts.add("Metadata");
         }
         if (parts.size() == 0)
             return null;

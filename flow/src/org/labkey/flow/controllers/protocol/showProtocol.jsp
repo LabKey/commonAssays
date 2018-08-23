@@ -56,7 +56,7 @@
 <p><b>Metadata</b><br>
     Identify participant visit/date columns and
     columns used to subtract background from stimulated wells.<br>
-    <labkey:link href="<%=protocol.urlFor(ProtocolController.EditICSMetadataAction.class)%>" text="Edit ICS Metadata" />
+    <labkey:link href="<%=protocol.urlFor(ProtocolController.EditICSMetadataAction.class)%>" text="Edit Metadata" />
 </p>
 <p><b>Manage Names and Aliases</b><br>
     Create and remove names and aliases for Keywords, Statistics, and Graphs.<br>

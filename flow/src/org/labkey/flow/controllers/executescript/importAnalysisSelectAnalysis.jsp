@@ -36,8 +36,8 @@
                                     && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
 <p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline
-    for an analysis archive or FlowJo workspace available to the server.
-    Mac FlowJo workspaces must be saved as XML for <%=h(FlowModule.getLongProductName())%> to be able to read it.
+    for an analysis archive or FlowJo workspace available to the server.<br>
+    FlowJo .wsp files and Mac FlowJo .jo workspaces exported as xml are supported (more on <%=helpLink("flowJoVersions", "FlowJo versions")%>.)
 </p>
 <hr/>
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />

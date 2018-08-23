@@ -100,10 +100,10 @@ if (length(labkey.data$stat) == 0 || length(labkey.data$stat_bg) == 0 || length(
     stop("labkey.data$stat, labkey.data$stat_bg, labkey.data$parent, labkey.data$parent_bg are required");
 
 if (!exists("flow.metadata.study.participantColumn"))
-    stop("ICS study metadata must include participant column")
+    stop("study metadata must include participant column")
 
 if (!exists("flow.metadata.study.visitColumn") && !exists("flow.metadata.study.dateColumn"))
-    stop("ICS study metadata must include either visit or date column")
+    stop("study metadata must include either visit or date column")
 
 if (exists("flow.metadata.study.visitColumn")) {
     grouping_cols = c(flow.metadata.study.participantColumn, flow.metadata.study.visitColumn)

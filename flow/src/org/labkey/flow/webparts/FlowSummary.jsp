@@ -453,7 +453,7 @@
         %><div><%=textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
         if (_fcsAnalysisCount > 0)
         {
-            %><div><%=textLink("Identify Background", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
+            %><div><%=textLink("Edit Metadata", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
         }
 
         int jobCount = PipelineService.get().getQueuedStatusFiles(c).size();

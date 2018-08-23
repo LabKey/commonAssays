@@ -140,5 +140,5 @@
                 %>
             </table>
         </labkey:panel>
-    <labkey:button text="Set ICS Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
+    <labkey:button text="Set Metadata" /> <labkey:button text="Cancel" href="<%=form.getProtocol().urlShow()%>"/>
 </labkey:form>
