@@ -19,13 +19,13 @@ import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.AliasManager;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Random;
 
 /**
  * User: tholzman
@@ -58,8 +58,9 @@ public class FastaDbHelper
             "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed" +
                     " FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
 
-    public final String _seqTableName = _dialect.getTempTablePrefix() +  "sequences" + (new Random().nextInt(1000000000));
-    public final String _identTableName = _dialect.getTempTablePrefix() +  "identifiers" + (new Random().nextInt(1000000000));
+    private final String _tableSuffix = StringUtilsLabKey.getPaddedUniquifier(9);
+    public final String _seqTableName = _dialect.getTempTablePrefix() +  "sequences" + _tableSuffix;
+    public final String _identTableName = _dialect.getTempTablePrefix() +  "identifiers" + _tableSuffix;
 
     public final PreparedStatement _initialInsertionStmt;
     public final PreparedStatement _updateInsertionStmt;

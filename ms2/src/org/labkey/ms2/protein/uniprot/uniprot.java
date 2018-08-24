@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ParseContext;
 import org.labkey.ms2.protein.ProteinManager;
@@ -33,7 +34,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
-import java.util.Random;
 
 // Repository for routines specific to org.fhcrc.edi.protein.uniprot.uniprot parsing
 // And initial stuff to do with the root element
@@ -182,7 +182,7 @@ public class uniprot extends ParseActions
 
     private void setupNames(Connection c) throws SQLException
     {
-        int randomTableSuffix = (new Random().nextInt(1000000000));
+        String randomTableSuffix = StringUtilsLabKey.getUniquifier(9);
         _oTableName = _dialect.getTempTablePrefix() + "organism" + randomTableSuffix;
         String createOTableCommand = "CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _oTableName + " ( " +
                 "common_name varchar(100) NULL, " +

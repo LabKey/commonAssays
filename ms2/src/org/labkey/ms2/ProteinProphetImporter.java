@@ -21,12 +21,16 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.Pair;
+import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.protein.ProteinManager;
@@ -34,15 +38,22 @@ import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
-import org.labkey.api.util.*;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
-import java.sql.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -96,9 +107,9 @@ public class ProteinProphetImporter
             throw new ExperimentException("MS2 run already has ProteinProphet data loaded from file " + proteinProphetFile.getFilePath());
         }
 
-        int suffix = new Random().nextInt(1000000000);
-        String peptidesTempTableName = _dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
-        String proteinsTempTableName = _dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
+        final String suffix = StringUtilsLabKey.getPaddedUniquifier(9);
+        final String peptidesTempTableName = _dialect.getTempTablePrefix() +  "PeptideMembershipsTemp" + suffix;
+        final String proteinsTempTableName = _dialect.getTempTablePrefix() +  "ProteinGroupMembershipsTemp" + suffix;
 
         Statement stmt = null;
         PreparedStatement mergePeptideStmt = null;
