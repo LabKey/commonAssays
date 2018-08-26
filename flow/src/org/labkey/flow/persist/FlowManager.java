@@ -30,7 +30,6 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlExecutor;
@@ -38,7 +37,6 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -748,19 +746,14 @@ public class FlowManager
         TableSelector selector = new TableSelector(table, filter, null);
 
         final List<FlowEntry> aliases = new ArrayList<>();
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row)
-            {
-                Integer rowId = (Integer)row.get("RowId");
-                String name = (String)row.get("Name");
-                String containerId = (String)row.get("Container");
-                Integer aliasId = (Integer)row.get("Id");
-                FlowEntry alias = new FlowEntry(entry._type, rowId, containerId, name, aliasId);
+        selector.forEachMap(row -> {
+            Integer rowId = (Integer)row.get("RowId");
+            String name = (String)row.get("Name");
+            String containerId = (String)row.get("Container");
+            Integer aliasId = (Integer)row.get("Id");
+            FlowEntry alias = new FlowEntry(entry._type, rowId, containerId, name, aliasId);
 
-                aliases.add(alias);
-            }
+            aliases.add(alias);
         });
 
         return aliases;
@@ -788,30 +781,25 @@ public class FlowManager
         TableSelector selector = new TableSelector(table, filter, sort);
 
         final Map<FlowEntry, Collection<FlowEntry>> aliasMap = new LinkedHashMap<>();
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row)
-            {
-                Integer rowId = (Integer)row.get("RowId");
-                String name = (String)row.get("Name");
-                String containerId = (String)row.get("Container");
-                Integer aliasId = (Integer)row.get("Id");
-                FlowEntry entry = new FlowEntry(type, rowId, containerId, name, aliasId);
+        selector.forEachMap(row -> {
+            Integer rowId = (Integer)row.get("RowId");
+            String name = (String)row.get("Name");
+            String containerId = (String)row.get("Container");
+            Integer aliasId = (Integer)row.get("Id");
+            FlowEntry entry = new FlowEntry(type, rowId, containerId, name, aliasId);
 
-                FlowEntry preferredEntry;
-                if (entry.isAlias())
-                    preferredEntry = getAttributeEntry(type, entry._aliasId);
-                else
-                    preferredEntry = entry;
+            FlowEntry preferredEntry;
+            if (entry.isAlias())
+                preferredEntry = getAttributeEntry(type, entry._aliasId);
+            else
+                preferredEntry = entry;
 
-                Collection<FlowEntry> aliases = aliasMap.get(preferredEntry);
-                if (aliases == null)
-                    aliasMap.put(preferredEntry, aliases = new ArrayList<>());
+            Collection<FlowEntry> aliases = aliasMap.get(preferredEntry);
+            if (aliases == null)
+                aliasMap.put(preferredEntry, aliases = new ArrayList<>());
 
-                if (entry.isAlias())
-                    aliases.add(entry);
-            }
+            if (entry.isAlias())
+                aliases.add(entry);
         });
 
         return Collections.unmodifiableMap(aliasMap);
@@ -851,19 +839,14 @@ public class FlowManager
         SqlSelector selector = new SqlSelector(getSchema(), sql);
 
         final List<FlowEntry> unused = new ArrayList<>();
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row)
-            {
-                Integer rowId = (Integer)row.get("RowId");
-                String name = (String)row.get("Name");
-                String containerId = (String)row.get("Container");
-                Integer aliasId = (Integer)row.get("Id");
-                FlowEntry alias = new FlowEntry(type, rowId, containerId, name, aliasId);
+        selector.forEachMap(row -> {
+            Integer rowId = (Integer)row.get("RowId");
+            String name = (String)row.get("Name");
+            String containerId = (String)row.get("Container");
+            Integer aliasId = (Integer)row.get("Id");
+            FlowEntry alias = new FlowEntry(type, rowId, containerId, name, aliasId);
 
-                unused.add(alias);
-            }
+            unused.add(alias);
         });
 
         return Collections.unmodifiableList(unused);
@@ -967,16 +950,11 @@ public class FlowManager
 
         final List<FlowDataObject> usages = new ArrayList<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row)
-            {
-                Integer dataId = (Integer)row.get("DataId");
+        selector.forEachMap(row -> {
+            Integer dataId = (Integer)row.get("DataId");
 
-                FlowDataObject fdo = FlowDataObject.fromRowId(dataId);
-                usages.add(fdo);
-            }
+            FlowDataObject fdo = FlowDataObject.fromRowId(dataId);
+            usages.add(fdo);
         });
 
         return Collections.unmodifiableList(usages);
@@ -1008,21 +986,16 @@ public class FlowManager
 
         final Map<Integer, Collection<FlowDataObject>> usages = new HashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
-        selector.forEachMap(new ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> row)
-            {
-                Integer attributeRowId = (Integer)row.get("OriginalAttrId");
-                Integer dataId = (Integer)row.get("DataId");
+        selector.forEachMap(row -> {
+            Integer attributeRowId = (Integer)row.get("OriginalAttrId");
+            Integer dataId = (Integer)row.get("DataId");
 
-                Collection<FlowDataObject> datas = usages.get(attributeRowId);
-                if (datas == null)
-                    usages.put(attributeRowId, datas = new ArrayList<>());
+            Collection<FlowDataObject> datas = usages.get(attributeRowId);
+            if (datas == null)
+                usages.put(attributeRowId, datas = new ArrayList<>());
 
-                FlowDataObject fdo = FlowDataObject.fromRowId(dataId);
-                datas.add(fdo);
-            }
+            FlowDataObject fdo = FlowDataObject.fromRowId(dataId);
+            datas.add(fdo);
         });
 
         return Collections.unmodifiableMap(usages);

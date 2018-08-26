@@ -1439,18 +1439,13 @@ public class ProteinManager
                 "SELECT T.name AS name, I.identifier\n" +
                 "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
                 "WHERE seqId = ?",
-                seqid).forEach(new Selector.ForEachBlock<ResultSet>()
-        {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
-            {
-                String name = rs.getString(1).toLowerCase();
-                String id = rs.getString(2);
-                if (name.startsWith("go_"))
-                    name = "go";
-                map.put(name, id);
-            }
-        });
+                seqid).forEach(rs -> {
+                    String name = rs.getString(1).toLowerCase();
+                    String id = rs.getString(2);
+                    if (name.startsWith("go_"))
+                        name = "go";
+                    map.put(name, id);
+                });
 
         return map;
     }

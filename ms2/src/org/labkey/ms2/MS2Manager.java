@@ -18,7 +18,6 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.XmlException;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -40,7 +39,6 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
@@ -715,15 +713,10 @@ public class MS2Manager
 
         // Check for DELETE permission on all containers holding the requested runs
         // UI only allows moving from containers with DELETE permissions, but one could hack the request
-        new SqlSelector(getSchema(), selectSQL).forEach(new Selector.ForEachBlock<String>()
-        {
-            @Override
-            public void exec(String containerId)
-            {
-                Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
-                if (!c.hasPermission(user, DeletePermission.class))
-                    throw new UnauthorizedException();
-            }
+        new SqlSelector(getSchema(), selectSQL).forEach(containerId -> {
+            Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
+            if (!c.hasPermission(user, DeletePermission.class))
+                throw new UnauthorizedException();
         }, String.class);
 
         SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());

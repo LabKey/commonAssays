@@ -23,7 +23,6 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableResultSet;
@@ -45,7 +44,6 @@ import org.labkey.api.util.Pair;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabRunDataTable;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -159,14 +157,7 @@ public class NabManager extends AbstractNabManager
             TableInfo dataTable = entry.getKey();
             final ExpProtocol protocol = entry.getValue();
             TableSelector selector = new TableSelector(dataTable, PageFlowUtil.set("RowId", "Lsid"), filter, null);
-            selector.forEach(new Selector.ForEachBlock<ResultSet>()
-            {
-                @Override
-                public void exec(ResultSet rs) throws SQLException
-                {
-                    readableObjectIds.put(new Pair<Integer, String>(rs.getInt("RowId"), rs.getString("Lsid")), protocol);
-                }
-            });
+            selector.forEach(rs -> readableObjectIds.put(new Pair<Integer, String>(rs.getInt("RowId"), rs.getString("Lsid")), protocol));
         }
         return readableObjectIds;
     }

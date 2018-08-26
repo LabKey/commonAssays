@@ -18,7 +18,6 @@ package org.labkey.ms2.protein.tools;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.reader.TabLoader;
@@ -35,7 +34,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
@@ -258,25 +256,20 @@ public class ProteinDictionaryHelpers
         {
             if (gTypeC == 0 || gTypeF == 0 || gTypeP == 0)
             {
-                new SqlSelector(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(new Selector.ForEachBlock<ResultSet>()
-                {
-                    @Override
-                    public void exec(ResultSet rs) throws SQLException
+                new SqlSelector(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(rs -> {
+                    int antypeid = rs.getInt(1);
+                    String gt = rs.getString(2);
+                    if (gt.equals("GO_C"))
                     {
-                        int antypeid = rs.getInt(1);
-                        String gt = rs.getString(2);
-                        if (gt.equals("GO_C"))
-                        {
-                            gTypeC = antypeid;
-                        }
-                        if (gt.equals("GO_F"))
-                        {
-                            gTypeF = antypeid;
-                        }
-                        if (gt.equals("GO_P"))
-                        {
-                            gTypeP = antypeid;
-                        }
+                        gTypeC = antypeid;
+                    }
+                    if (gt.equals("GO_F"))
+                    {
+                        gTypeF = antypeid;
+                    }
+                    if (gt.equals("GO_P"))
+                    {
+                        gTypeP = antypeid;
                     }
                 });
             }

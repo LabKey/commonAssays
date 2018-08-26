@@ -24,7 +24,6 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.Filter;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -39,7 +38,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AbstractAssayProvider;
 
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -156,11 +154,7 @@ public class ElispotManager
         columns.add("AntigenHeading");
         columns.add("RunId");
         new TableSelector(antigenRunTable, columns, makeRunDataContainerClause(container), null).
-                forEachMap(new Selector.ForEachBlock<Map<String, Object>>()
-        {
-            @Override
-            public void exec(Map<String, Object> object)
-            {
+            forEachMap(object -> {
                 String antigenHeading = (String)object.get("AntigenHeading");
                 if (null != antigenHeading)
                 {
@@ -168,8 +162,7 @@ public class ElispotManager
                         antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
                     antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
                 }
-            }
-        });
+            });
         return antigenHeadingMap;
     }
 

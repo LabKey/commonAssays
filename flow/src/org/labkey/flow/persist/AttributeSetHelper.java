@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
@@ -30,7 +29,6 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -207,19 +205,13 @@ public class AttributeSetHelper
         final List<Integer> keywordIDs = new ArrayList<>();
         final Map<String, String> keywords = new TreeMap<>();
 
-        new SqlSelector(mgr.getSchema(), sqlKeywords, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
-        {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
-            {
-                String name = rs.getString(1);
-                int preferredId = rs.getInt(2);
-                int originalId = rs.getInt(3);
-                String value = rs.getString(4);
+        new SqlSelector(mgr.getSchema(), sqlKeywords, rowId).forEach(rs -> {
+            String name = rs.getString(1);
+            int preferredId = rs.getInt(2);
+            String value = rs.getString(4);
 
-                keywordIDs.add(preferredId);
-                keywords.put(name, value);
-            }
+            keywordIDs.add(preferredId);
+            keywords.put(name, value);
         });
 
         attrs.setKeywords(keywords);
@@ -233,14 +225,7 @@ public class AttributeSetHelper
                     "AND B.RowId != B.Id\n" +
                     "AND A.RowId IN (" + StringUtils.join(keywordIDs, ", ") + ")";
 
-            new SqlSelector(mgr.getSchema(), sqlKeywordAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
-            {
-                @Override
-                public void exec(ResultSet rs) throws SQLException
-                {
-                    attrs.addKeywordAlias(rs.getString(1), rs.getString(2));
-                }
-            });
+            new SqlSelector(mgr.getSchema(), sqlKeywordAliaes).forEach(rs -> attrs.addKeywordAlias(rs.getString(1), rs.getString(2)));
         }
 
         String sqlStatistics = "SELECT flow.StatisticAttr.name, flow.statistic.StatisticId, flow.statistic.OriginalStatisticId, flow.statistic.value " +
@@ -250,19 +235,13 @@ public class AttributeSetHelper
 
         final List<Integer> statisticIDs = new ArrayList<>();
 
-        new SqlSelector(mgr.getSchema(), sqlStatistics, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
-        {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
-            {
-                String name = rs.getString(1);
-                int preferredId = rs.getInt(2);
-                int originalId = rs.getInt(3);
-                Double value = rs.getDouble(4);
+        new SqlSelector(mgr.getSchema(), sqlStatistics, rowId).forEach(rs -> {
+            String name = rs.getString(1);
+            int preferredId = rs.getInt(2);
+            Double value = rs.getDouble(4);
 
-                statisticIDs.add(preferredId);
-                attrs.setStatistic(new StatisticSpec(name), value);
-            }
+            statisticIDs.add(preferredId);
+            attrs.setStatistic(new StatisticSpec(name), value);
         });
 
         if (statisticIDs.size() > 0)
@@ -274,14 +253,7 @@ public class AttributeSetHelper
                     "AND B.RowId != B.Id\n" +
                     "AND A.RowId IN (" + StringUtils.join(statisticIDs, ", ") + ")";
 
-            new SqlSelector(mgr.getSchema(), sqlStatisticAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
-            {
-                @Override
-                public void exec(ResultSet rs) throws SQLException
-                {
-                    attrs.addStatisticAlias(new StatisticSpec(rs.getString(1)), new StatisticSpec(rs.getString(2)));
-                }
-            });
+            new SqlSelector(mgr.getSchema(), sqlStatisticAliaes).forEach(rs -> attrs.addStatisticAlias(new StatisticSpec(rs.getString(1)), new StatisticSpec(rs.getString(2))));
         }
 
         String sqlGraphs;
@@ -303,27 +275,21 @@ public class AttributeSetHelper
 
         final List<Integer> graphIDs = new ArrayList<>();
 
-        new SqlSelector(mgr.getSchema(), sqlGraphs, rowId).forEach(new Selector.ForEachBlock<ResultSet>()
-        {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
+        new SqlSelector(mgr.getSchema(), sqlGraphs, rowId).forEach(rs -> {
+            String name = rs.getString(1);
+            int preferredId = rs.getInt(2);
+
+            graphIDs.add(preferredId);
+            if (!includeGraphBytes)
             {
-                String name = rs.getString(1);
-                int preferredId = rs.getInt(2);
-                int originalId = rs.getInt(3);
-
-                graphIDs.add(preferredId);
-                if (!includeGraphBytes)
-                {
-                    attrs.setGraph(new GraphSpec(name), null);
-                }
-                else
-                {
-                    byte[] value = rs.getBytes(4);
-                    attrs.setGraph(new GraphSpec(name), value);
-                }
-
+                attrs.setGraph(new GraphSpec(name), null);
             }
+            else
+            {
+                byte[] value = rs.getBytes(4);
+                attrs.setGraph(new GraphSpec(name), value);
+            }
+
         });
 
         if (graphIDs.size() > 0)
@@ -335,14 +301,7 @@ public class AttributeSetHelper
                     "AND B.RowId != B.Id\n" +
                     "AND A.RowId IN (" + StringUtils.join(graphIDs, ", ") + ")";
 
-            new SqlSelector(mgr.getSchema(), sqlGraphAliaes).forEach(new Selector.ForEachBlock<ResultSet>()
-            {
-                @Override
-                public void exec(ResultSet rs) throws SQLException
-                {
-                    attrs.addGraphAlias(new GraphSpec(rs.getString(1)), new GraphSpec(rs.getString(2)));
-                }
-            });
+            new SqlSelector(mgr.getSchema(), sqlGraphAliaes).forEach(rs -> attrs.addGraphAlias(new GraphSpec(rs.getString(1)), new GraphSpec(rs.getString(2))));
         }
     }
 }

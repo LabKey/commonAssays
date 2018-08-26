@@ -20,14 +20,11 @@ import org.apache.log4j.Logger;
 import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.Selector;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.util.MatrixUtil;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,14 +118,9 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 
         float ppLimit = 0.99f;
 
-        new SqlSelector(MS2Manager.getSchema(), "SELECT MIN(Scan) AS Scan, Peptide FROM " + MS2Manager.getTableInfoPeptides() + " WHERE (Fraction = ?) AND (PeptideProphet > .6) GROUP BY Peptide HAVING (MAX(PeptideProphet) > ?)", fraction.getFraction(), ppLimit).forEach(new Selector.ForEachBlock<ResultSet>()
-        {
-            @Override
-            public void exec(ResultSet rs) throws SQLException
-            {
-                xArray.add(MS2Peptide.hydrophobicity(rs.getString("Peptide")));
-                yArray.add(rs.getInt("Scan"));
-            }
+        new SqlSelector(MS2Manager.getSchema(), "SELECT MIN(Scan) AS Scan, Peptide FROM " + MS2Manager.getTableInfoPeptides() + " WHERE (Fraction = ?) AND (PeptideProphet > .6) GROUP BY Peptide HAVING (MAX(PeptideProphet) > ?)", fraction.getFraction(), ppLimit).forEach(rs -> {
+            xArray.add(MS2Peptide.hydrophobicity(rs.getString("Peptide")));
+            yArray.add(rs.getInt("Scan"));
         });
 
         Map<String, Float> map = new HashMap<>();

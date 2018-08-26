@@ -27,7 +27,6 @@ import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.Selector.ForEachBlock;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.jsp.FormPage;
@@ -37,8 +36,6 @@ import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.SecurityPolicy;
-import org.labkey.api.security.SecurityPolicyManager;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -84,7 +81,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -800,15 +796,10 @@ public class WellController extends BaseFlowController
             final TreeSet<String> set = new TreeSet<>();
 
             new SqlSelector(FlowManager.get().getSchema(),
-                    "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(new ForEachBlock<String>()
-            {
-                @Override
-                public void exec(String value)
-                {
+                "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(value -> {
                     if (value != null)
                         set.add(value);
-                }
-            }, String.class);
+                }, String.class);
 
             return set;
         }
