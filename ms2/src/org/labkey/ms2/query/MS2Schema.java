@@ -942,12 +942,10 @@ public class MS2Schema extends UserSchema
     {
         VirtualTable rawTable;
 
-        ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId");
-        normalizedIdCol.setSqlTypeName("INT");
+        ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", JdbcType.INTEGER);
         normalizedIdCol.setHidden(true);
 
-        ColumnInfo proteinGroupIdCol = new ColumnInfo("ProteinGroupId");
-        proteinGroupIdCol.setSqlTypeName("INT");
+        ColumnInfo proteinGroupIdCol = new ColumnInfo("ProteinGroupId", JdbcType.INTEGER);
         proteinGroupIdCol.setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
@@ -1030,11 +1028,9 @@ public class MS2Schema extends UserSchema
                         return new SQLFragment("SELECT DISTINCT NormalizedId, SeqId FROM " + name + " n, " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId");
                     }
                 };
-                ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", result);
-                normalizedIdCol.setSqlTypeName("INT");
+                ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", result, JdbcType.INTEGER);
                 result.addColumn(normalizedIdCol);
-                ColumnInfo seqIdCol = new ColumnInfo("SeqId", result);
-                seqIdCol.setSqlTypeName("INT");
+                ColumnInfo seqIdCol = new ColumnInfo("SeqId", result, JdbcType.INTEGER);
                 LookupForeignKey seqFK = new LookupForeignKey("SeqId")
                 {
                     public TableInfo getLookupTableInfo()

@@ -42,7 +42,7 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
-        ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this);
+        ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this, JdbcType.INTEGER);
         guideSetIdColumn.setLabel("Guide Set");
         guideSetIdColumn.setFk(new LookupForeignKey("RowId")
         {
@@ -52,43 +52,36 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
                 return _userSchema.createGuideSetTable(false);
             }
         });
-        guideSetIdColumn.setJdbcType(JdbcType.INTEGER);
         addColumn(guideSetIdColumn);
 
-        ColumnInfo runCountColumn = new ColumnInfo("RunCount", this);
-        runCountColumn.setJdbcType(JdbcType.INTEGER);
+        ColumnInfo runCountColumn = new ColumnInfo("RunCount", this, JdbcType.INTEGER);
         addColumn(runCountColumn);
 
-        ColumnInfo aucAverageColumn = new ColumnInfo("AUCAverage", this);
-        aucAverageColumn.setJdbcType(JdbcType.REAL);
+        ColumnInfo aucAverageColumn = new ColumnInfo("AUCAverage", this, JdbcType.REAL);
         aucAverageColumn.setFormat("0.00");
         aucAverageColumn.setLabel("AUC Average");
         aucAverageColumn.setDescription("Average of area under the curve values");
         addColumn(aucAverageColumn);
 
-        ColumnInfo aucStdDevColumn = new ColumnInfo("AUCStdDev", this);
-        aucStdDevColumn.setJdbcType(JdbcType.REAL);
+        ColumnInfo aucStdDevColumn = new ColumnInfo("AUCStdDev", this, JdbcType.REAL);
         aucStdDevColumn.setFormat("0.00");
         aucStdDevColumn.setLabel("AUC Std Dev");
         aucStdDevColumn.setDescription("Standard deviation of area under the curve values");
         addColumn(aucStdDevColumn);
 
-        ColumnInfo ec50AverageColumn = new ColumnInfo("EC50Average", this);
-        ec50AverageColumn.setJdbcType(JdbcType.REAL);
+        ColumnInfo ec50AverageColumn = new ColumnInfo("EC50Average", this, JdbcType.REAL);
         ec50AverageColumn.setFormat("0.00");
         ec50AverageColumn.setLabel("EC50 Average");
         ec50AverageColumn.setDescription("Average of EC50 values");
         addColumn(ec50AverageColumn);
 
-        ColumnInfo ec50StdDevColumn = new ColumnInfo("EC50StdDev", this);
-        ec50StdDevColumn.setJdbcType(JdbcType.REAL);
+        ColumnInfo ec50StdDevColumn = new ColumnInfo("EC50StdDev", this, JdbcType.REAL);
         ec50StdDevColumn.setFormat("0.00");
         ec50StdDevColumn.setLabel("EC50 Std Dev");
         ec50StdDevColumn.setDescription("Standard deviation of EC50 values");
         addColumn(ec50StdDevColumn);
 
-        ColumnInfo curveTypeColumn = new ColumnInfo("CurveType", this);
-        curveTypeColumn.setJdbcType(JdbcType.VARCHAR);
+        ColumnInfo curveTypeColumn = new ColumnInfo("CurveType", this, JdbcType.VARCHAR);
         addColumn(curveTypeColumn);
     }
 

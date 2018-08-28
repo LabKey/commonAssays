@@ -151,26 +151,21 @@ public class ProteinProphetCompareQuery extends CompareQuery
     protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
-        if (column.getLabel().equals("CollectionId"))
+        switch (column.getLabel())
         {
-            return null;
+            case "CollectionId":
+                return null;
+            case "GroupNumber":
+                ColumnInfo ci = new ColumnInfo(columnName);
+                ci.setParentTable(ti);
+                ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
+                ci.setLabel(column.getLabel());
+                return new GroupNumberDisplayColumn(ci, linkURL, runPrefix + "GroupNumber", runPrefix + "CollectionId");
+            default:
+                DisplayColumn result = super.createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
+                result.setURL(null);
+                return result;
         }
-        else if (column.getLabel().equals("GroupNumber"))
-        {
-            ColumnInfo ci = new ColumnInfo(columnName);
-            ci.setParentTable(ti);
-            ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
-            ci.setLabel(column.getLabel());
-            return new GroupNumberDisplayColumn(ci, linkURL, runPrefix + "GroupNumber", runPrefix + "CollectionId");
-        }
-        else
-        {
-            DisplayColumn result = super.createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
-            result.setURL(null);
-            return result;
-        }
-
-
     }
 
     protected String getComparisonColumnLinkTarget()
