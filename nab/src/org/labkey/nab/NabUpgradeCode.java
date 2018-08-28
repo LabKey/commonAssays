@@ -95,12 +95,21 @@ public class NabUpgradeCode implements UpgradeCode
     {
         public static final String PROCESSING_STATUS = "Processing";
 
+        // For serialization
+        private NabCrossPlateDilutionRepairJob() {}
+
         public NabCrossPlateDilutionRepairJob(String provider, ViewBackgroundInfo info, PipeRoot root) throws IOException
         {
             super(provider, info, root);
 
             File logFile = File.createTempFile("nabCrossPlateDilutionRepair", ".log", root.getRootPath());
             setLogFile(logFile);
+        }
+
+        @Override
+        public boolean hasJacksonSerialization()
+        {
+            return true;
         }
 
         @Override

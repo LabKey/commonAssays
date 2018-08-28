@@ -488,21 +488,24 @@ public class PipelineController extends SpringActionController
                 PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
                 if (existingJobStatusFile != null && existingJobStatusFile.getJobStore() != null)
                 {
-                    PipelineJob existingJob = PipelineJobService.get().getJobStore().fromXML(existingJobStatusFile.getJobStore());
-                    if (existingJob instanceof AbstractMS2SearchPipelineJob)
+                    PipelineJob existingJob = PipelineJob.deserializeJob(existingJobStatusFile.getJobStore());
+                    if (null != existingJob)
                     {
-                        job = (AbstractMS2SearchPipelineJob)existingJob;
-                        // Add any new files
-                        List<File> inputFiles = job.getInputFiles();
-                        for (File mzXMLFile : mzXMLFiles)
+                        if (existingJob instanceof AbstractMS2SearchPipelineJob)
                         {
-                            if (!inputFiles.contains(mzXMLFile))
+                            job = (AbstractMS2SearchPipelineJob) existingJob;
+                            // Add any new files
+                            List<File> inputFiles = job.getInputFiles();
+                            for (File mzXMLFile : mzXMLFiles)
                             {
-                                inputFiles.add(mzXMLFile);
+                                if (!inputFiles.contains(mzXMLFile))
+                                {
+                                    inputFiles.add(mzXMLFile);
+                                }
                             }
                         }
+                        existingJob.setActiveTaskId(existingJob.getTaskPipeline().getTaskProgression()[0]);
                     }
-                    existingJob.setActiveTaskId(existingJob.getTaskPipeline().getTaskProgression()[0]);
                 }
 
                 boolean allFilesReady = true;
