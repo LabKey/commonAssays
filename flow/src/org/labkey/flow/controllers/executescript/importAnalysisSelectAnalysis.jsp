@@ -35,7 +35,7 @@
     boolean canSetPipelineRoot = container.hasPermission(getUser(), AdminOperationsPermission.class)
                                     && (pipeRoot == null || container.equals(pipeRoot.getContainer()));
 %>
-<p>You may either upload an analysis archive or FlowJo workspace from your local computer or browse the pipeline
+<p>You may either upload an <%=helpLink("flowAnalysisArchiveFormat", "analysis archive")%> or FlowJo workspace from your local computer or browse the pipeline
     for an analysis archive or FlowJo workspace available to the server.<br>
     FlowJo .wsp files and Mac FlowJo .jo workspaces exported as xml are supported (more on <%=helpLink("flowJoVersions", "FlowJo versions")%>.)
 </p>
@@ -57,7 +57,7 @@ Browse the pipeline
     <% if (hasPipelineRoot) {
         String inputId = "workspace.path";
     %>
-    You can browse the pipeline directories and find the analysis archive or <b>FlowJo workspace XML</b> to import.<br/><br/>
+    You can browse the pipeline directories and find the analysis archive or FlowJo workspace to import.<br/><br/>
     <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
