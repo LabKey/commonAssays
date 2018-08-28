@@ -244,7 +244,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
         _customizeViewsHelper.applyCustomView();
 
         // show all rows (> 100 in full data file)
-        addUrlParameter("Data.showRows=all", defaultWaitForPage * 2);
+        addUrlParameter("Data.showRows=all", defaultWaitForPage * 3);
 
         // check that both the raw and summary data were uploaded together
         DataRegionTable table = new DataRegionTable("Data", this);
