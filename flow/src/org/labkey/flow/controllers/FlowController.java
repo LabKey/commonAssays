@@ -187,12 +187,9 @@ public class FlowController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             if (experiment == null)
-                root.addChild("All Analysis Folders", new ActionURL(QueryAction.class, getContainer()));
+                root.addChild("All Analysis Folders", getActionURL());
             else
-                root.addChild(experiment.getLabel(), experiment.urlShow());
-
-//            if (script != null)
-//                root.addChild(script.getLabel(), script.urlShow());
+                root.addChild(experiment.getLabel(), getActionURL());
 
             if (run != null)
                 root.addChild(run.getLabel(), run.urlShow());
