@@ -259,7 +259,6 @@ flow/enginesrc/org/labkey/flow/util/KeywordUtil.java -text
 flow/module.properties -text
 flow/resources/flowReports/positivity.R -text
 flow/resources/flowReports/qc.R -text
-flow/resources/flowReports/ranalysis.r -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-14.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.30.sql -text
@@ -382,8 +381,6 @@ flow/src/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysis.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.jsp -text
-flow/src/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp -text
 flow/src/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp -text
@@ -501,7 +498,6 @@ flow/src/org/labkey/flow/script/KeywordsHandler.java -text
 flow/src/org/labkey/flow/script/KeywordsJob.java -text
 flow/src/org/labkey/flow/script/KeywordsTask.java -text
 flow/src/org/labkey/flow/script/MoveRunFromWorkspaceJob.java -text
-flow/src/org/labkey/flow/script/RScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptJob.java -text
 flow/src/org/labkey/flow/script/ScriptXarSource.java -text
 flow/src/org/labkey/flow/script/WorkspaceJob.java -text

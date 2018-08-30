@@ -78,7 +78,7 @@ public interface IWorkspace
     ISampleInfo getSample(String sampleIdOrLabel);
 
     /**
-     * @return true if the workspace has an analysis definition (
+     * @return true if the workspace has an analysis definition
      */
     boolean hasAnalysis();
 

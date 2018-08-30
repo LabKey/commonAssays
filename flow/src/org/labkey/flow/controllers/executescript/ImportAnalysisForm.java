@@ -18,10 +18,12 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
+import org.labkey.flow.data.FlowRun;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: kevink
@@ -34,9 +36,6 @@ public class ImportAnalysisForm
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMETER_SEPARATOR = "\ufe50";
 
-    // unicode fullwidth comma
-    //public static final String NORMALIZATION_PARAMETER_SEPARATOR = "\uff0c";
-
     public enum SelectFCSFileOption
     {
         None, Included, Previous, Browse
@@ -45,6 +44,7 @@ public class ImportAnalysisForm
     private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
     private WorkspaceData workspace = new WorkspaceData();
     private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.None;
+    private Map<FlowRun, String> existingKeywordRuns = null;
     private int existingKeywordRunId;
 
     private String importGroupNames = Workspace.ALL_SAMPLES;
@@ -52,12 +52,6 @@ public class ImportAnalysisForm
     private SelectedSamples selectedSamples = new SelectedSamples();
 
     private AnalysisEngine selectAnalysisEngine = null;
-
-    // general analysis options and R normalization configuration
-    private Boolean rEngineNormalization = true;
-    private String rEngineNormalizationReference = null;
-    private String rEngineNormalizationParameters = null;
-    private String rEngineNormalizationSubsets = null;
 
     private boolean createAnalysis;
     private String newAnalysisName;
@@ -119,6 +113,18 @@ public class ImportAnalysisForm
         this.selectFCSFilesOption = selectFCSFilesOption;
     }
 
+    // not a POSTed parameter - For rending the SELECT_FCSFILES step
+    public void setExistingKeywordRuns(Map<FlowRun, String> keywordRuns)
+    {
+        this.existingKeywordRuns = keywordRuns;
+    }
+
+    // not a POSTed parameter
+    public Map<FlowRun, String> getExistingKeywordRuns()
+    {
+        return existingKeywordRuns;
+    }
+
     public int getExistingKeywordRunId()
     {
         return existingKeywordRunId;
@@ -147,56 +153,6 @@ public class ImportAnalysisForm
     public void setImportGroupNames(String importGroupNames)
     {
         this.importGroupNames = importGroupNames;
-    }
-
-    public Boolean isrEngineNormalization()
-    {
-        return rEngineNormalization;
-    }
-
-    public void setrEngineNormalization(Boolean rEngineNormalization)
-    {
-        this.rEngineNormalization = rEngineNormalization;
-    }
-
-    public String getrEngineNormalizationReference()
-    {
-        return rEngineNormalizationReference;
-    }
-
-    public void setrEngineNormalizationReference(String rEngineNormalizationReference)
-    {
-        this.rEngineNormalizationReference = StringUtils.join(split(rEngineNormalizationReference), PARAMETER_SEPARATOR);
-    }
-
-    public List<String> getrEngineNormalizationParameterList()
-    {
-        return split(rEngineNormalizationParameters);
-    }
-
-    public String getrEngineNormalizationParameters()
-    {
-        return rEngineNormalizationParameters;
-    }
-
-    public void setrEngineNormalizationParameters(String rEngineNormalizationParameters)
-    {
-        this.rEngineNormalizationParameters = StringUtils.join(split(rEngineNormalizationParameters), PARAMETER_SEPARATOR);
-    }
-
-    public List<String> getrEngineNormalizationSubsetList()
-    {
-        return split(rEngineNormalizationSubsets);
-    }
-
-    public String getrEngineNormalizationSubsets()
-    {
-        return rEngineNormalizationSubsets;
-    }
-
-    public void setrEngineNormalizationSubsets(String rEngineNormalizationParameters)
-    {
-        this.rEngineNormalizationSubsets = StringUtils.join(split(rEngineNormalizationParameters), PARAMETER_SEPARATOR);
     }
 
     public void setExistingKeywordRunId(int existingKeywordRunId)

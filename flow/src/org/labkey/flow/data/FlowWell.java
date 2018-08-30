@@ -143,7 +143,7 @@ public class FlowWell extends FlowDataObject
     }
 
     /**
-     * If this FlowFCSFile was created by an external analysis import (FlowJo workspace keywords, R normalization keywords),
+     * If this FlowFCSFile was created by an external analysis import (FlowJo workspace keywords),
      * try to get the original FCSFile well if possible.  The original FCSFile may be null if it doesn't exist or
      * wasn't associated with the external analysis during import.
      *

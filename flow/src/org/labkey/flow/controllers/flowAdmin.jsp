@@ -35,11 +35,6 @@
         <labkey:checkbox name="deleteFiles" id="deleteFiles" value="true" checked="<%=form.isDeleteFiles()%>"/>
         <label for="deleteFiles">Delete temporary analysis files after jobs are successfully completed?</label><br>
     </p>
-    <p>
-        <labkey:checkbox name="normalizationEnabled" id="normalizationEnabled" value="true" checked="<%=form.isNormalizationEnabled()%>"/>
-        <label for="normalizationEnabled">Enable experimental R normalization in FlowJo import wizard?</label><br>
-        R will need to be configured and the flowWorkspace library installed to use normalization.
-    </p>
     <labkey:button text="update" />
     <labkey:button text="cancel" href="<%=urlProvider(AdminUrls.class).getAdminConsoleURL()%>" />
 </labkey:form>

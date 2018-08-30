@@ -90,10 +90,6 @@
 --%>
 
 <input type="hidden" name="importGroupNames" value="<%=h(form.getImportGroupNames())%>"/>
-<input type="hidden" name="rEngineNormalization" value="<%=h(form.isrEngineNormalization())%>"/>
-<input type="hidden" name="rEngineNormalizationReference" value="<%=h(form.getrEngineNormalizationReference())%>"/>
-<input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
-<input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
 <% if (form.isCreateAnalysis()) { %>
 <input type="hidden" name="newAnalysisName" id="newAnalysisName" value="<%=h(form.getNewAnalysisName())%>">
@@ -185,52 +181,6 @@
     <%
         }
     %>
-
-    <li style="padding-bottom:0.5em;">
-        <b>Analysis Engine:</b>
-        <% if (form.getSelectAnalysisEngine() == null || AnalysisEngine.FlowJoWorkspace == form.getSelectAnalysisEngine()) { %>
-            No analysis engine selected
-        <% } else if (AnalysisEngine.R == form.getSelectAnalysisEngine()) { %>
-            External R analysis engine <%=text(form.isrEngineNormalization() ? "with normalization" : "without normalization")%>
-        <% } %>
-    </li>
-
-    <% if (AnalysisEngine.R == form.getSelectAnalysisEngine() && form.isrEngineNormalization()) { %>
-    <li style="padding-bottom:0.5em;">
-        <b>Normalization Options:</b>
-        <table border="0" style="margin-left:1em;">
-            <tr>
-                <td><b>Reference Sample:</b></td>
-                <td>
-                    <% if (form.getrEngineNormalizationReference() != null) {
-                        ISampleInfo sample = workspace.getSample(form.getrEngineNormalizationReference());
-                        %><%=h(sample == null ? "None selected" : sample.getLabel())%>
-                    <% } %>
-                </td>
-            </tr>
-            <tr>
-                <td><b>Normalize Subsets:</b></td>
-                <td>
-                    <% if (form.getrEngineNormalizationSubsets() != null) { %>
-                    <%=h(StringUtils.join(form.getrEngineNormalizationSubsetList(), ", "))%>
-                    <% } else { %>
-                    <em>All parameters</em>
-                    <% } %>
-                </td>
-            </tr>
-            <tr>
-                <td><b>Normalize Parameters:</b></td>
-                <td>
-                <% if (form.getrEngineNormalizationParameters() != null) { %>
-                    <%=h(StringUtils.join(form.getrEngineNormalizationParameterList(), ", "))%>
-                <% } else { %>
-                    <em>All parameters</em>
-                <% } %>
-                </td>
-            </tr>
-        </table>
-    </li>
-    <% } %>
 
     <li style="padding-bottom:0.5em;">
         <% if (form.isCreateAnalysis()) { %>

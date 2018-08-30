@@ -32,9 +32,11 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.flow.analysis.model.ExternalAnalysis" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
+    Map<FlowRun, String> keywordRuns = form.getExistingKeywordRuns();
     Container container = getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
@@ -85,8 +87,10 @@
 </script>
 
 <p><em>Optionally</em>, you can browse the pipeline for the FCS files used in the <%=h(workspace.getKindName())%>.
+    <% if (workspace.hasAnalysis()) { %>
     Once the workspace and FCS files are associated, you will be able to use <%=h(FlowModule.getLongProductName())%>
     to see additional graphs, or calculate additional statistics.
+    <% } %>
     The FCS files themselves will not be modified, and will remain in the file system.
 </p>
 <hr/>
@@ -97,8 +101,11 @@
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with the <%=h(workspace.getKindName())%>.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
+    <% if (workspace.hasAnalysis()) { %>
     Statistics from the <%=h(workspace.getKindName())%> will be imported but no graphs will be generated.<br>
-    <em>NOTE:</em> Choosing this option will advance past the analysis engine step.
+    <% } else if (workspace instanceof ExternalAnalysis) { %>
+    Keywords, statistics, graphs, and compensation matrices will be imported from the analysis archive.
+    <% } %>
 </div>
 
 <%
@@ -114,35 +121,16 @@
 <%
     }
 
-    List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(container, FlowProtocolStep.keywords);
-    Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.size());
-    for (FlowRun keywordRun : allKeywordRuns)
-    {
-        if (keywordRun.getPath() == null)
-            continue;
-
-        FlowExperiment experiment = keywordRun.getExperiment();
-        if (experiment != null && (experiment.isWorkspace() || experiment.isAnalysis()))
-            continue;
-
-        File keywordRunFile = new File(keywordRun.getPath());
-        if (keywordRunFile.exists())
-        {
-            String keywordRunPath = pipeRoot.relativePath(keywordRunFile);
-            if (keywordRunPath != null && keywordRun.hasRealWells())
-                keywordRuns.put(keywordRun, keywordRunPath);
-        }
-    }
 %>
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
         <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous)%>
-        <%=disabled(keywordRuns.isEmpty())%>
+        <%=disabled(keywordRuns == null || keywordRuns.isEmpty())%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
     <div style="display:inline-block; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 </label>
-<div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">
+<div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns == null || keywordRuns.isEmpty() ? "color:silver;" : "")%>">
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
 

@@ -62,10 +62,6 @@
 --%>
 
 <input type="hidden" name="importGroupNames" value="<%=h(form.getImportGroupNames())%>"/>
-<input type="hidden" name="rEngineNormalization" value="<%=h(form.isrEngineNormalization())%>"/>
-<input type="hidden" name="rEngineNormalizationReference" value="<%=h(form.getrEngineNormalizationReference())%>"/>
-<input type="hidden" name="rEngineNormalizationSubsets" value="<%=h(form.getrEngineNormalizationSubsets())%>"/>
-<input type="hidden" name="rEngineNormalizationParameters" value="<%=h(form.getrEngineNormalizationParameters())%>"/>
 
 <p>
 <hr/>

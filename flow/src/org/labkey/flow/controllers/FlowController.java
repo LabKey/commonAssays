@@ -492,26 +492,6 @@ public class FlowController extends BaseFlowController
     {
         public void validateCommand(FlowAdminForm form, Errors errors)
         {
-            // If we are enabling flow normalization, check that flowWorkspace R library has been installed.
-            if (form.isNormalizationEnabled() && !FlowSettings.isNormalizationEnabled())
-            {
-                ScriptEngine engine = ServiceRegistry.get().getService(LabkeyScriptEngineManager.class).getEngineByExtension(getContainer(), "r");
-                if (engine == null)
-                {
-                    errors.reject(ERROR_MSG, "The R script engine is not available.  Please configure the R script engine in the admin console.");
-                    return;
-                }
-
-                try
-                {
-                    engine.eval("library(flowWorkspace)\n");
-                }
-                catch (ScriptException e)
-                {
-                    errors.reject(ERROR_MSG, "Please install the flowWorkspace R library to enable normalization.\n" + e.getMessage());
-                    return;
-                }
-            }
         }
 
         public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors)
@@ -540,7 +520,6 @@ public class FlowController extends BaseFlowController
             {
                 FlowSettings.setWorkingDirectoryPath(form.getWorkingDirectory());
                 FlowSettings.setDeleteFiles(form.isDeleteFiles());
-                FlowSettings.setNormalizationEnabled(form.isNormalizationEnabled());
             }
             catch (Exception e)
             {

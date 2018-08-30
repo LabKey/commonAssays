@@ -129,14 +129,6 @@
                 view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp", form);
                 break;
 
-            case ANALYSIS_ENGINE:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisEngine.jsp", form);
-                break;
-
-            case ANALYSIS_OPTIONS:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisAnalysisOptions.jsp", form);
-                break;
-
             case CHOOSE_ANALYSIS:
                 view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp", form);
                 break;

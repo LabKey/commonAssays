@@ -22,13 +22,11 @@ public class FlowAdminForm
 {
     private String _workingDirectory;
     private boolean _deleteFiles;
-    private boolean _normalizationEnabled;
 
     public FlowAdminForm()
     {
         _workingDirectory = FlowSettings.getWorkingDirectoryPath();
         _deleteFiles = FlowSettings.isDeleteFiles();
-        _normalizationEnabled = FlowSettings.isNormalizationEnabled();
     }
 
     public void setWorkingDirectory(String path)
@@ -51,13 +49,4 @@ public class FlowAdminForm
         _deleteFiles = deleteFiles;
     }
 
-    public boolean isNormalizationEnabled()
-    {
-        return _normalizationEnabled;
-    }
-
-    public void setNormalizationEnabled(boolean normalizationEnabled)
-    {
-        _normalizationEnabled = normalizationEnabled;
-    }
 }

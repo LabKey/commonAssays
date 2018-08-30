@@ -27,12 +27,6 @@ public enum AnalysisEngine
     // Analysis results read by LabKey's FlowJo workspace parser
     FlowJoWorkspace(false),
 
-    // Execute external FlowJo process
-    FlowJo(true),
-
-    // Execute external R process
-    R(true),
-
     // Generic external analysis archive
     Archive(false);
 
