@@ -16,9 +16,10 @@
 #  - 1.2.20140612 : Issue 20548: Display multiple duplicate baseline positivity errors at once instead of just the first
 #  - 2.0.20140718 : Changes for LabKey 14.3: FI-Bkgd-Neg instead of FI-Bkgd-Blank
 #  - 3.0.20160729 : Validate that analyte bead numbers are non-null
+#  - 3.1.20180903 : Use transform script helper functions from Rlabkey package
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "3.0.20160729";
+labTransformVersion = "3.1.20180903";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -31,22 +32,6 @@ suppressMessages(library(Rlabkey));
 fiConversion <- function(val)
 {
     1 + max(val,0);
-}
-
-getRunPropertyValue <- function(colName)
-{
-    value = NA;
-    if (any(run.props$name == colName))
-    {
-        value = run.props$val1[run.props$name == colName];
-
-        # return NA for an empty string
-        if (nchar(value) == 0)
-        {
-            value = NA;
-        }
-    }
-    value;
 }
 
 # for Issue 15279 - use just the min dilution per visit for positivity calculation
@@ -67,40 +52,6 @@ compareNumbersForEquality <- function(val1, val2, epsilon)
 	val2 = as.numeric(val2);
 	equal = val1 > (val2 - epsilon) & val1 < val2 + epsilon;
 	equal
-}
-
-readRunPropertiesFile <- function()
-{
-    # set up a data frame to store the run properties
-    properties = data.frame(NA, NA, NA, NA);
-    colnames(properties) = c("name", "val1", "val2", "val3");
-
-    #read in the run properties from the TSV
-    lines = readLines("${runInfo}");
-
-    # each line has a run property with the name, val1, val2, etc.
-    for (i in 1:length(lines))
-    {
-        # split the line into the various parts (tab separated)
-        parts = strsplit(lines[i], split="\t")[[1]];
-
-        # if the line does not have 4 parts, add NA's as needed
-        if (length(parts) < 4)
-        {
-            for (j in 1:4)
-            {
-                if (is.na(parts[j]))
-                {
-                    parts[j] = NA;
-                }
-            }
-        }
-
-        # add the parts for the given run property to the properties data frame
-        properties[i,] = parts;
-    }
-
-    properties
 }
 
 populateTitrationData <- function(rundata, titrationdata)
@@ -305,9 +256,9 @@ queryPreviousBaselineVisitData <- function(analytedata, ptids, basevisit)
 
     if (!is.na(basevisit) & nchar(analyteList) > 0 & length(ptids) > 0)
     {
-        baseUrl = getRunPropertyValue("baseUrl");
-        folderPath = getRunPropertyValue("containerPath");
-        schemaName = paste("assay.Luminex.",getRunPropertyValue("assayName"), sep="");
+        baseUrl = labkey.transform.getRunPropertyValue(run.props, "baseUrl");
+        folderPath = labkey.transform.getRunPropertyValue(run.props, "containerPath");
+        schemaName = paste("assay.Luminex.",labkey.transform.getRunPropertyValue(run.props, "assayName"), sep="");
 
         whereClause = paste("FlaggedAsExcluded = false AND Dilution IS NOT NULL ",
                             "AND VisitID=", basevisit,
@@ -340,9 +291,9 @@ populatePositivity <- function(rundata, analytedata)
     rundata$Positivity = NA;
 
     # get the run property that are used for the positivity calculation
-    calc.positivity = getRunPropertyValue("CalculatePositivity");
-    base.visit = getRunPropertyValue("BaseVisit");
-    fold.change = getRunPropertyValue("PositivityFoldChange");
+    calc.positivity = labkey.transform.getRunPropertyValue(run.props, "CalculatePositivity");
+    base.visit = labkey.transform.getRunPropertyValue(run.props, "BaseVisit");
+    fold.change = labkey.transform.getRunPropertyValue(run.props, "PositivityFoldChange");
 
     # if calc positivity is true, continue
     if (!is.na(calc.positivity) & calc.positivity == "1")
@@ -397,12 +348,12 @@ verifyBeadNumbers <- function(runData)
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
-run.props = readRunPropertiesFile();
+run.props = labkey.transform.readRunPropertiesFile("${runInfo}");
 
 # save the important run.props as separate variables
-run.data.file = getRunPropertyValue("runDataFile");
+run.data.file = labkey.transform.getRunPropertyValue(run.props, "runDataFile");
 run.output.file = run.props$val3[run.props$name == "runDataFile"];
-error.file = getRunPropertyValue("errorsFile");
+error.file = labkey.transform.getRunPropertyValue(run.props, "errorsFile");
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
@@ -411,11 +362,11 @@ run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 verifyBeadNumbers(run.data)
 
 # read in the analyte information (to get the mapping from analyte to standard/titration)
-analyte.data.file = getRunPropertyValue("analyteData");
+analyte.data.file = labkey.transform.getRunPropertyValue(run.props, "analyteData");
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # read in the titration information
-titration.data.file = getRunPropertyValue("titrationData");
+titration.data.file = labkey.transform.getRunPropertyValue(run.props, "titrationData");
 titration.data = data.frame();
 if (file.exists(titration.data.file)) {
     titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
@@ -428,7 +379,7 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 
 ######################## STEP 1: SET THE VERSION NUMBERS ################################
 
-runprop.output.file = getRunPropertyValue("transformedRunPropertiesFile");
+runprop.output.file = labkey.transform.getRunPropertyValue(run.props, "transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(paste("LabTransformVersion",labTransformVersion,sep="\t"), fileConn);
 close(fileConn);

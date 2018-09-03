@@ -36,9 +36,10 @@
 #  - 9.1.20140718 : Allow use of alternate negative control bead on per-analyte basis (FI-Bkgd-Neg instead of FI-Bkgd-Blank)
 #  - 9.2.20141103 : Issue 21268: Add OtherControl titrations to PDF output of curves from transform script
 #  - 10.0.20150910 : Changes for LabKey server 15.2. Issue 23230: Luminex transform script error when standard or QC control name has a slash in it
+#  - 10.1.20180903 : Use transform script helper functions from Rlabkey package
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "10.0.20150910";
+transformVersion = "10.1.20180903";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
@@ -47,6 +48,8 @@ source("${srcDirectory}/youtil.R");
 # Ruminex package available from https://www.labkey.org/Documentation/wiki-page.view?name=configureLuminexScript
 suppressMessages(library(Ruminex));
 ruminexVersion = installed.packages()["Ruminex","Version"];
+
+suppressMessages(library(Rlabkey));
 
 rVersion = paste(R.version$major, R.version$minor, R.version$arch, R.version$os, sep=".");
 
@@ -89,56 +92,6 @@ fiConversion <- function(val)
 maxValueConversion <- function(val)
 {
     min(val, 10e37);
-}
-
-getRunPropertyValue <- function(colName)
-{
-    value = NA;
-    if (any(run.props$name == colName))
-    {
-        value = run.props$val1[run.props$name == colName];
-
-        # return NA for an empty string
-        if (nchar(value) == 0)
-        {
-            value = NA;
-        }
-    }
-    value;
-}
-
-readRunPropertiesFile <- function()
-{
-    # set up a data frame to store the run properties
-    properties = data.frame(NA, NA, NA, NA);
-    colnames(properties) = c("name", "val1", "val2", "val3");
-
-    #read in the run properties from the TSV
-    lines = readLines("${runInfo}");
-
-    # each line has a run property with the name, val1, val2, etc.
-    for (i in 1:length(lines))
-    {
-        # split the line into the various parts (tab separated)
-        parts = strsplit(lines[i], split="\t")[[1]];
-
-        # if the line does not have 4 parts, add NA's as needed
-        if (length(parts) < 4)
-        {
-            for (j in 1:4)
-            {
-                if (is.na(parts[j]))
-                {
-                    parts[j] = NA;
-                }
-            }
-        }
-
-        # add the parts for the given run property to the properties data frame
-        properties[i,] = parts;
-    }
-
-    properties
 }
 
 populateTitrationData <- function(rundata, titrationdata)
@@ -191,7 +144,7 @@ populateNegativeBeadSubtraction <- function(rundata, analytedata)
     unksOnly = TRUE;
     if (any(run.props$name == "SubtNegativeFromAll"))
     {
-        if (getRunPropertyValue("SubtNegativeFromAll") == "1")
+        if (labkey.transform.getRunPropertyValue(run.props, "SubtNegativeFromAll") == "1")
         {
             unksOnly = FALSE;
         }
@@ -262,22 +215,22 @@ convertToFileName <- function(name)
 
 ######################## STEP 0: READ IN THE RUN PROPERTIES AND RUN DATA #######################
 
-run.props = readRunPropertiesFile();
+run.props = labkey.transform.readRunPropertiesFile("${runInfo}");
 
 # save the important run.props as separate variables
-run.data.file = getRunPropertyValue("runDataFile");
+run.data.file = labkey.transform.getRunPropertyValue(run.props, "runDataFile");
 run.output.file = run.props$val3[run.props$name == "runDataFile"];
-error.file = getRunPropertyValue("errorsFile");
+error.file = labkey.transform.getRunPropertyValue(run.props, "errorsFile");
 
 # read in the run data file content
 run.data = read.delim(run.data.file, header=TRUE, sep="\t");
 
 # read in the analyte information (to get the mapping from analyte to standard/titration)
-analyte.data.file = getRunPropertyValue("analyteData");
+analyte.data.file = labkey.transform.getRunPropertyValue(run.props, "analyteData");
 analyte.data = read.delim(analyte.data.file, header=TRUE, sep="\t");
 
 # read in the titration information
-titration.data.file = getRunPropertyValue("titrationData");
+titration.data.file = labkey.transform.getRunPropertyValue(run.props, "titrationData");
 titration.data = data.frame();
 if (file.exists(titration.data.file)) {
     titration.data = read.delim(titration.data.file, header=TRUE, sep="\t");
@@ -290,7 +243,7 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 
 ######################## STEP 1: SET THE VERSION NUMBERS ################################
 
-runprop.output.file = getRunPropertyValue("transformedRunPropertiesFile");
+runprop.output.file = labkey.transform.getRunPropertyValue(run.props, "transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
     paste("RuminexVersion",ruminexVersion,sep="\t"),
@@ -324,14 +277,14 @@ analytes = unique(run.data$name);
 # determine if the curve fits should be done with or without log transform
 curveFitLogTransform = TRUE;
 if (any(run.props$name == "CurveFitLogTransform")) {
-    propVal = getRunPropertyValue("CurveFitLogTransform");
+    propVal = labkey.transform.getRunPropertyValue(run.props, "CurveFitLogTransform");
     if (!is.na(propVal) & propVal != "1") curveFitLogTransform = FALSE;
 }
 
 # set the weighting variance variable for use in the non-log tranform curve fits
 drm.weights.var.power = -1.8;
 if (any(run.props$name == "WeightingPower")) {
-    propVal = getRunPropertyValue("WeightingPower");
+    propVal = labkey.transform.getRunPropertyValue(run.props, "WeightingPower");
     if (!is.na(propVal) & propVal != "") drm.weights.var.power = as.numeric(propVal);
 }
 
@@ -559,7 +512,7 @@ run.data$well_role = ""; # initialize to empty string and set to Standard accord
 # determine if the Ruminex curve fits should be run
 runRumiCalculation = TRUE;
 if (any(run.props$name == "SkipRumiCalculation")) {
-    propVal = getRunPropertyValue("SkipRumiCalculation");
+    propVal = labkey.transform.getRunPropertyValue(run.props, "SkipRumiCalculation");
     if (!is.na(propVal) & propVal == "1") runRumiCalculation = FALSE;
 }
 
