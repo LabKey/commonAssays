@@ -68,7 +68,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     private String _fileHash;
     public static final String UNKNOWN_ORGANISM = "Unknown unknown";
 
-    private transient Connection conn = null;
     private transient FastaDbHelper fdbu = null;
 
     public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root, String hash) throws IOException
@@ -173,9 +172,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
             finally
             {
-                if (null != conn)
-                    ProteinManager.getSchema().getScope().releaseConnection(conn);
-
                 // Release all resources used by the guessing strategies (e.g., caches)
                 parsingStrategy.close();
                 sharedIdentsStrategy.close();
@@ -595,99 +591,88 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     {
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_file);
 
-        conn = ProteinManager.getSchema().getScope().getConnection();
-        //conn.setAutoCommit(false);
-        //Determine whether this file has ever been
-        //inserted before.  Warn or abort if it has.
-
-        fdbu = new FastaDbHelper(conn);
-        int loadCounter = 0;
-        List<ProteinPlus> mouth = new ArrayList<>();
-        List<Integer> seqIds = new ArrayList<>();
-
-        if (currentInsertId == 0)
+        try (Connection conn = ProteinManager.getSchema().getScope().getConnection())
         {
-            currentInsertId = initAnnotLoad(_comment);
-        }
-        else
-        {
-            try (ResultSet rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId))
+            //conn.setAutoCommit(false);
+            //Determine whether this file has ever been
+            //inserted before.  Warn or abort if it has.
+
+            fdbu = new FastaDbHelper(conn);
+            int loadCounter = 0;
+            List<ProteinPlus> mouth = new ArrayList<>();
+            List<Integer> seqIds = new ArrayList<>();
+
+            if (currentInsertId == 0)
             {
-                if (rs.next())
+                currentInsertId = initAnnotLoad(_comment);
+            }
+            else
+            {
+                try (ResultSet rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId))
                 {
-                    setDefaultOrganism(rs.getString(1));
-                    setOrganismIsToGuessed(rs.getInt(2) == 1);
+                    if (rs.next())
+                    {
+                        setDefaultOrganism(rs.getString(1));
+                        setOrganismIsToGuessed(rs.getInt(2) == 1);
+                    }
+                    else
+                        logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
                 }
-                else
-                    logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
+
+                skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
+                        ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
             }
 
-            skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
-                    ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
-        }
+            int protCount = 0;
+            int negCount = 0;
+            // TODO: Need a container to make this configurable.
+            String negPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
 
-        int protCount = 0;
-        int negCount = 0;
-        // TODO: Need a container to make this configurable.
-        String negPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
-
-        //Main loop
-        for (ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
-        {
-            ProteinPlus p = new ProteinPlus(proteinIterator.next());
-
-            if (skipEntries > 0)
+            //Main loop
+            for (ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext(); )
             {
-                skipEntries--;
-                continue;
+                ProteinPlus p = new ProteinPlus(proteinIterator.next());
+
+                if (skipEntries > 0)
+                {
+                    skipEntries--;
+                    continue;
+                }
+                loadCounter++;
+                handleThreadStateChangeRequests();
+                mouth.add(p);
+
+                protCount++;
+                if (p.getProtein().getName().startsWith(negPrefix))
+                    negCount++;
+
+                if (!proteinIterator.hasNext() || (loadCounter % mouthfulSize) == 0)
+                {
+                    processMouthful(conn, mouth, logger, parsingStrategy, sharedIdentsStrategy);
+                    mouth.clear();
+                }
+
+                Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
+
+                if (null != percentComplete)
+                    logger.info("Importing FASTA file sequences: " + percentComplete + "% complete");
             }
-            loadCounter++;
-            handleThreadStateChangeRequests();
-            mouth.add(p);
 
-            protCount++;
-            if (p.getProtein().getName().startsWith(negPrefix))
-                negCount++;
-
-            if (!proteinIterator.hasNext() || (loadCounter % mouthfulSize) == 0)
+            if (protCount / 3 < negCount)
             {
-                processMouthful(conn, mouth, logger, parsingStrategy, sharedIdentsStrategy);
-                mouth.clear();
+                new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() +
+                        " SET ScoringAnalysis = ?" +
+                        " WHERE FastaId = ?", true, associatedFastaId);
             }
 
-            Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
-
-            if (null != percentComplete)
-                logger.info("Importing FASTA file sequences: " + percentComplete + "% complete");
-        }
-
-        if (protCount / 3 < negCount)
-        {
-            new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() +
-                    " SET ScoringAnalysis = ?" +
-                    " WHERE FastaId = ?", true, associatedFastaId);
-        }
-
-        finalizeAnnotLoad();
-        if (_fileHash == null)
-        {
-            _fileHash = HashHelpers.hashFileContents(_file);
-        }
-        genProtFastaRecord(seqIds, _fileHash);
-        fdbu._dropIdentTempStmt.executeUpdate();
-        fdbu._dropSeqTempStmt.executeUpdate();
-        cleanUp();
-    }
-
-    public void cleanUp()
-    {
-        try
-        {
-            ProteinManager.getSchema().getScope().releaseConnection(conn);
-        }
-        catch (Exception e)
-        {
-            //FastaDbLoader.parseWarning("Problem closing database: "+e);
+            finalizeAnnotLoad();
+            if (_fileHash == null)
+            {
+                _fileHash = HashHelpers.hashFileContents(_file);
+            }
+            genProtFastaRecord(seqIds, _fileHash);
+            fdbu._dropIdentTempStmt.executeUpdate();
+            fdbu._dropSeqTempStmt.executeUpdate();
         }
     }
 
@@ -706,7 +691,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         if (null == drive)
             return newFileName;   // No drive, just return
         else
-            return drive + newFileName.substring(2, newFileName.length());      // Replace drive with canonical form
+            return drive + newFileName.substring(2);      // Replace drive with canonical form
     }
 
     public static synchronized int loadAnnotations(String path, String fileName, String defaultOrganism, boolean shouldGuess, Logger log, XarContext context) throws SQLException, IOException

@@ -1158,15 +1158,13 @@ public class MS2Schema extends UserSchema
             }
 
             DbScope scope = MS2Manager.getSchema().getScope();
-            Connection connection = scope.getConnection();
 
-            String shortName = "RunList" + runListId;
-            String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
-
-            NormalizedProteinGroupsTracker tracker = new NormalizedProteinGroupsTracker(tempTableName);
-            TempTableTracker.track(shortName, tracker);
-            try
+            try (Connection connection = scope.getConnection())
             {
+                String shortName = "RunList" + runListId;
+                String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
+                NormalizedProteinGroupsTracker tracker = new NormalizedProteinGroupsTracker(tempTableName);
+                TempTableTracker.track(shortName, tracker);
                 // Working with a temp table, so use the same connection for all inserts/updates
                 SqlExecutor executor = new SqlExecutor(scope, connection);
 
@@ -1209,13 +1207,11 @@ public class MS2Schema extends UserSchema
                 // Keep going while any value changed. When we're done, we've found the transitive closure and any
                 // groups that share proteins (including transitively) are lumped into the same normalized group
                 while (rowsUpdated > 0);
+
                 NORMALIZED_PROTEIN_GROUP_CACHE.put(runListId, tracker);
+
+                return tempTableName;
             }
-            finally
-            {
-                if (connection != null) { try { connection.close(); } catch (SQLException ignored) {} }
-            }
-            return tempTableName;
         }
     }
 
