@@ -274,10 +274,13 @@ public class FlatPeptideView extends AbstractMS2RunView<WebPartView>
             }
         }
 
-        TSVGridWriter tw = new TSVGridWriter(ctx, tableInfo, displayColumns, MS2Manager.getDataRegionNamePeptides());
-        tw.setFilenamePrefix("MS2Runs");
-        tw.setFileHeader(headers);   // Used for AMT file export
-        tw.write(response);
+        try (TSVGridWriter tw = new TSVGridWriter(ctx, tableInfo, displayColumns, MS2Manager.getDataRegionNamePeptides()))
+        {
+            tw.setFilenamePrefix("MS2Runs");
+            tw.setFileHeader(headers);   // Used for AMT file export
+            tw.write(response);
+        }
+
         return null;
     }
 

@@ -48,7 +48,6 @@ import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -218,10 +217,14 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         {
             createRowIdFragment(selectedRows);
             getSettings().setMaxRows(Table.ALL_ROWS);
-            TSVGridWriter tsvWriter = getTsvWriter();
-            tsvWriter.setColumnHeaderType(ColumnHeaderType.Caption);
-            tsvWriter.setFileHeader(headers);
-            tsvWriter.write(response);
+
+            try (TSVGridWriter tsvWriter = getTsvWriter())
+            {
+                tsvWriter.setColumnHeaderType(ColumnHeaderType.Caption);
+                tsvWriter.setFileHeader(headers);
+                tsvWriter.write(response);
+            }
+
             return null;
         }
 
@@ -240,7 +243,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
                 _selectedRows = new ArrayList<>();
                 for (String selectedRow : selectedRows)
                 {
-                    Integer row = new Integer(selectedRow);
+                    Integer row = Integer.valueOf(selectedRow);
                     _selectedRows.add(row);
                 }
             }

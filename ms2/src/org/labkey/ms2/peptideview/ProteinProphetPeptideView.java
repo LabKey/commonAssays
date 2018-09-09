@@ -218,7 +218,7 @@ public class ProteinProphetPeptideView extends AbstractLegacyProteinMS2RunView
         {
             sb.append(separator);
             separator = ", ";
-            sb.append(new Long(protein));
+            sb.append(Long.valueOf(protein));
         }
         sb.append(")");
         return sb.toString();
