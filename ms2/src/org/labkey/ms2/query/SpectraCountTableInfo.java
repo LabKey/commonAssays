@@ -44,10 +44,8 @@ import java.util.List;
  * User: jeckels
  * Date: Jan 16, 2008
  */
-public class SpectraCountTableInfo extends VirtualTable
+public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
 {
-    private final MS2Schema _ms2Schema;
-
     private final SpectraCountConfiguration _config;
     private final ViewContext _context;
 
@@ -89,7 +87,7 @@ public class SpectraCountTableInfo extends VirtualTable
             if (_max) { addSelect(sql, "MAX", "Max"); }
             if (_min) { addSelect(sql, "MIN", "Min"); }
             if (_avg) { addSelect(sql, "AVG", "Avg"); }
-            if (_stdDev) { addSelect(sql, _ms2Schema.getDbSchema().getSqlDialect().getStdDevFunction(), "StdDev"); }
+            if (_stdDev) { addSelect(sql, getSchema().getSqlDialect().getStdDevFunction(), "StdDev"); }
             if (_sum) { addSelect(sql, "SUM", "Sum"); }
             sql.append("\n");
         }
@@ -121,8 +119,7 @@ public class SpectraCountTableInfo extends VirtualTable
 
     public SpectraCountTableInfo(MS2Schema ms2Schema, SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)
     {
-        super(MS2Manager.getSchema(), config.getTableName());
-        _ms2Schema = ms2Schema;
+        super(MS2Manager.getSchema(), config.getTableName(), ms2Schema);
         _config = config;
 
         _context = context;
@@ -139,11 +136,11 @@ public class SpectraCountTableInfo extends VirtualTable
         List<FieldKey> defaultCols = new ArrayList<>();
 
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
-        runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_ms2Schema.getUser(), _ms2Schema.getContainer()), "run", "MS2Details", "Name")
+        runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_ms2Schema);
+                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema);
                 result.setContainerFilter(ContainerFilter.EVERYTHING);
                 return result;
             }
@@ -196,7 +193,7 @@ public class SpectraCountTableInfo extends VirtualTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return _ms2Schema.createSequencesTable();
+                return _userSchema.createSequencesTable();
             }
         });
 
@@ -318,7 +315,7 @@ public class SpectraCountTableInfo extends VirtualTable
         SQLFragment peptidesSQL;
         if (_form != null && _form.isCustomViewPeptideFilter())
         {
-            peptidesSQL = _ms2Schema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys, _form.getTargetSeqIds());
+            peptidesSQL = _userSchema.getPeptideSelectSQL(_context.getRequest(), _form.getPeptideCustomViewName(_context), peptideFieldKeys, _form.getTargetSeqIds());
         }
         else
         {
@@ -331,7 +328,7 @@ public class SpectraCountTableInfo extends VirtualTable
             {
                 filter.addClause(ProteinManager.getSequencesFilter(_form.getTargetSeqIds()));
             }
-            peptidesSQL = _ms2Schema.getPeptideSelectSQL(filter, peptideFieldKeys);
+            peptidesSQL = _userSchema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
 
         sql.append(peptidesSQL);
@@ -375,10 +372,10 @@ public class SpectraCountTableInfo extends VirtualTable
             sql.append(")\n");
         }
 
-        if (_ms2Schema.getRuns() != null)
+        if (_userSchema.getRuns() != null)
         {
             sql.append("AND r.Run IN ");
-            _ms2Schema.appendRunInClause(sql);
+            _userSchema.appendRunInClause(sql);
             sql.append("\n");
         }
         sql.append("GROUP BY f.Run");

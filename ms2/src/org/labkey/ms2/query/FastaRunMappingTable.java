@@ -27,7 +27,7 @@ import org.labkey.ms2.protein.query.ProteinUserSchema;
  * Created by: jeckels
  * Date: 2/21/16
  */
-public class FastaRunMappingTable extends FilteredTable
+public class FastaRunMappingTable extends FilteredTable<MS2Schema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");
 

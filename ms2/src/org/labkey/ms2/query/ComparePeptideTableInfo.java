@@ -37,18 +37,17 @@ import java.util.List;
  * User: jeckels
  * Date: Jun 21, 2007
  */
-public class ComparePeptideTableInfo extends VirtualTable
+public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
 {
-    private final MS2Schema _schema;
+   // private final MS2Schema _schema;
     private final List<MS2Run> _runs;
     private final HttpServletRequest _request;
     private final String _peptideViewName;
 
     public ComparePeptideTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
-        super(MS2Manager.getSchema(), "PeptideComparision");
+        super(MS2Manager.getSchema(), "PeptideComparision", schema);
 
-        _schema = schema;
         _runs = runs;
         _request = request;
         _peptideViewName = peptideViewName;
@@ -74,7 +73,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new PeptidesTableInfo(_schema);
+                        return new PeptidesTableInfo(_userSchema);
                     }
                 };
                 if (!forExport)
@@ -95,7 +94,7 @@ public class ComparePeptideTableInfo extends VirtualTable
         {
             public TableInfo getLookupTableInfo()
             {
-                return new PeptidesTableInfo(_schema);
+                return new PeptidesTableInfo(_userSchema);
             }
         });
         addColumn(peptideIdColumn);
@@ -170,7 +169,7 @@ public class ComparePeptideTableInfo extends VirtualTable
                 FieldKey.fromParts("Peptide"),
                 FieldKey.fromParts("RowId")
         );
-        result.append(_schema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys, null));
+        result.append(_userSchema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys, null));
         result.append(") ");
         result.append(" p WHERE f.Run IN(");
         String separator = "";
