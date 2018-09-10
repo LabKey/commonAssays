@@ -447,6 +447,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     createNumberField : function(name) {
         return new Ext.form.NumberField({
             height: 25,
+            width: 160,
             cls: 'guideset-numberfield',
             itemId: name,
             name: name,
