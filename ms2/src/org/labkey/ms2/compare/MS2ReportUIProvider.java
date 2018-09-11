@@ -50,7 +50,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
 
-        boolean canCreateScript = ReportUtil.canCreateScript(context);
+        boolean canCreateScript = ReportUtil.canCreateScript(context, "r");
         if (canCreateScript && RReport.isEnabled())
         {
             addDesignerURL(context, settings, reportDesigners, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
