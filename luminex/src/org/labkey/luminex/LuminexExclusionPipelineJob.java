@@ -35,8 +35,12 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     private LuminexManager.ExclusionType _exclusionType;
     private Integer _runId;
 
-    private transient AssayProvider _provider;
+    private transient AssayProvider _assayProvider;
     private transient ExpRun _run;
+
+    // For serialization
+    protected LuminexExclusionPipelineJob()
+    {}
 
     public LuminexExclusionPipelineJob(ViewBackgroundInfo info, PipeRoot root, LuminexSaveExclusionsForm form)
     {
@@ -54,6 +58,12 @@ public class LuminexExclusionPipelineJob extends PipelineJob
         {
             logProperties(command);
         }
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     @Override
@@ -127,11 +137,11 @@ public class LuminexExclusionPipelineJob extends PipelineJob
 
     private AssayProvider getAssayProvider()
     {
-        if (_provider == null)
+        if (_assayProvider == null)
         {
-            _provider = AssayService.get().getProvider(_form.getProtocol(getContainer()));
+            _assayProvider = AssayService.get().getProvider(_form.getProtocol(getContainer()));
         }
-        return _provider;
+        return _assayProvider;
     }
 
     private ExpRun getRun()

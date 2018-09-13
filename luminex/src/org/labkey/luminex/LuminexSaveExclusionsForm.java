@@ -43,6 +43,10 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
 
     private transient ExpProtocol _protocol;
 
+    // For serialization
+    protected LuminexSaveExclusionsForm()
+    {}
+
     @Override
     public void bindProperties(Map<String, Object> properties)
     {

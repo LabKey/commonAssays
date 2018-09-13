@@ -52,6 +52,10 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     private transient Map<String, Map<ColumnInfo, String>> _analyteColumnProperties;
     private transient LuminexExcelParser _parser;
 
+    // For serialization
+    protected LuminexRunAsyncContext()
+    {}
+
     public LuminexRunAsyncContext(LuminexRunContext originalContext) throws ExperimentException
     {
         super(originalContext);

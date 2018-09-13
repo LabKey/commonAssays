@@ -67,6 +67,9 @@ public class BackgroundSubtractionJob extends PipelineJob
     public static final String PROCESSING_STATUS = "Processing";
     Set<String> _runs = new HashSet<>();
 
+    // For serialization
+    protected BackgroundSubtractionJob() {}
+    
     public BackgroundSubtractionJob(String provider, ViewBackgroundInfo info, PipeRoot root, Set<String> runs) throws IOException
     {
         super(provider, info, root);
@@ -75,6 +78,12 @@ public class BackgroundSubtractionJob extends PipelineJob
         setLogFile(logFile);
 
         _runs = runs;
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     @Override
