@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
@@ -40,9 +42,21 @@ import java.io.IOException;
  */
 public class MS2ImportPipelineJob extends PipelineJob
 {
-    private final File _file;
+    protected final File _file;
     private final String _description;
     private MS2Importer.RunInfo _runInfo;
+
+    @JsonCreator
+    protected MS2ImportPipelineJob(
+            @JsonProperty("_file") File file,
+            @JsonProperty("_description") String description,
+            @JsonProperty("_runInfo") MS2Importer.RunInfo runInfo)
+    {
+        super();
+        _file = file;
+        _description = description;
+        _runInfo = runInfo;
+    }
 
     public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo, PipeRoot root)
     {
@@ -67,6 +81,12 @@ public class MS2ImportPipelineJob extends PipelineJob
         PipelineStatusFile sf = PipelineService.get().getStatusFile(getLogFile());
         if (sf != null)
             setProvider(sf.getProvider());
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     public ActionURL getStatusHref()

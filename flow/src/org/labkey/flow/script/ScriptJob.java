@@ -16,6 +16,10 @@
 
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveType;
@@ -30,6 +34,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.ObjectKeySerialization;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -56,8 +61,11 @@ import java.util.TreeMap;
 
 abstract public class ScriptJob extends FlowExperimentJob
 {
-    private final List<String> _pendingRunLSIDs = new ArrayList<>();
-    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs = new HashMap<>();
+    private final List<String> _pendingRunLSIDs;
+    
+    @JsonSerialize(keyUsing = ObjectKeySerialization.Serializer.class)
+    @JsonDeserialize(keyUsing = ObjectKeySerialization.Deserializer.class)
+    private final Map<FlowProtocolStep, List<String>> _processedRunLSIDs;
 
     final FlowScript _runAnalysisScript;
 
@@ -120,9 +128,23 @@ abstract public class ScriptJob extends FlowExperimentJob
         }
     }
 
+    @JsonCreator
+    protected ScriptJob(
+            @JsonProperty("_pendingRunLSIDs") List<String> pendingRunLSIDs,
+            @JsonProperty("_processedRunLSIDs") Map<FlowProtocolStep, List<String>> processedRunLSIDs,
+            @JsonProperty("_runAnalysisScript") FlowScript runAnalysisScript)
+    {
+        super();
+        _pendingRunLSIDs = pendingRunLSIDs;
+        _processedRunLSIDs = processedRunLSIDs;
+        _runAnalysisScript = runAnalysisScript;
+    }
+    
     public ScriptJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript script, FlowProtocolStep step, PipeRoot root) throws IOException
     {
         super(info, root, experimentLSID, protocol, experimentName, step);
+        _pendingRunLSIDs = new ArrayList<>();
+        _processedRunLSIDs = new HashMap<>();
         _runAnalysisScript = script;
     }
 

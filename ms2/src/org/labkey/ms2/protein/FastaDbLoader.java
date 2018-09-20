@@ -70,6 +70,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
     private transient FastaDbHelper fdbu = null;
 
+    // For serialization
+    protected FastaDbLoader() {}
+
     public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root, String hash) throws IOException
     {
         super(file, info, root);

@@ -16,6 +16,8 @@
 
 package org.labkey.flow.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolAction;
@@ -43,10 +45,16 @@ public class FlowProtocolStep implements Serializable
     final int actionSequence;
     final FlowProtocolStep[] predecessors;
 
-    public FlowProtocolStep(String lsidName, String protocolDescription, ExpProtocol.ApplicationType applicationType, int actionSequence, FlowProtocolStep ... predecessors)
+    @JsonCreator
+    protected FlowProtocolStep(
+            @JsonProperty("lsidName") String lsidName,
+            @JsonProperty("description") String description,
+            @JsonProperty("applicationType") ExpProtocol.ApplicationType applicationType,
+            @JsonProperty("actionSequence") int actionSequence,
+            @JsonProperty("predecessors") FlowProtocolStep ... predecessors)
     {
         this.lsidName = lsidName;
-        this.description = protocolDescription;
+        this.description = description;
         this.applicationType = applicationType;
         this.actionSequence = actionSequence;
         this.predecessors = predecessors;

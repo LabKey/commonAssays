@@ -48,6 +48,9 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public String FlowWorkspaceExperimentName = "Flow Workspace";
     static public String DEFAULT_ANALYSIS_NAME = "Analysis";
 
+    // For serialization
+    protected FlowExperiment() {}
+
     public FlowExperiment(ExpExperiment experiment)
     {
         super(experiment);

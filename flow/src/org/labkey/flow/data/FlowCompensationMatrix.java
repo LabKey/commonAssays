@@ -43,6 +43,9 @@ import java.util.TreeSet;
 
 public class FlowCompensationMatrix extends FlowDataObject implements Serializable
 {
+    // For serialization
+    protected FlowCompensationMatrix() {}
+
     public FlowCompensationMatrix(ExpData data)
     {
         super(data);

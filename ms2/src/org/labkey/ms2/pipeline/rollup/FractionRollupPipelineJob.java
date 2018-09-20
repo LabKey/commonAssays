@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline.rollup;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.TaskId;
@@ -42,6 +44,12 @@ public class FractionRollupPipelineJob extends AbstractMS2SearchPipelineJob
     public Logger getClassLogger()
     {
         return LOG;
+    }
+
+    @JsonCreator
+    protected FractionRollupPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super(dirSequenceRoot);
     }
 
     public FractionRollupPipelineJob(FractionRollupProtocol protocol,

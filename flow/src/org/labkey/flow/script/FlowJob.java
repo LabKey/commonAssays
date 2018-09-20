@@ -55,12 +55,21 @@ public abstract class FlowJob extends PipelineJob
     private transient Map<SampleKey, ExpMaterial> _sampleMap;
     FlowProtocol _protocol;
 
+    // For serialization
+    protected FlowJob() {}
+
     public FlowJob(String provider, ViewBackgroundInfo info, PipeRoot root)
     {
         super(provider, info, root);
     }
 
     abstract protected void doRun() throws Throwable;
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
+    }
 
     public void run()
     {

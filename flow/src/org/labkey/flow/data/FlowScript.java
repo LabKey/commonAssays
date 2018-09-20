@@ -108,6 +108,9 @@ public class FlowScript extends FlowDataObject
         return getScripts(container);
     }
 
+    // For serialization
+    protected FlowScript() {}
+
     public FlowScript(ExpData data)
     {
         super(data);

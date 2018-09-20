@@ -16,6 +16,8 @@
 
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
@@ -74,6 +76,23 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 {
     private final File _workspaceFile;
     private final String _workspaceName;
+
+    @JsonCreator
+    protected WorkspaceJob(
+            @JsonProperty("_analysisEngine") AnalysisEngine analysisEngine,
+            @JsonProperty("_experiment") FlowExperiment experiment,
+            @JsonProperty("_originalImportedFile") File originalImportedFile,
+            @JsonProperty("_runFilePathRoot") File runFilePathRoot,
+            @JsonProperty("_keywordDirs") List<File> keywordDirs,
+            @JsonProperty("_targetStudy") Container targetStudy,
+            @JsonProperty("_failOnError") boolean failOnError,
+            @JsonProperty("_workspaceFile") File workspaceFile,
+            @JsonProperty("_workspaceName") String workspaceName)
+    {
+        super(analysisEngine, experiment, originalImportedFile, runFilePathRoot, keywordDirs, targetStudy, failOnError);
+        _workspaceFile = workspaceFile;
+        _workspaceName = workspaceName;
+    }
 
     public WorkspaceJob(ViewBackgroundInfo info,
                         PipeRoot root,

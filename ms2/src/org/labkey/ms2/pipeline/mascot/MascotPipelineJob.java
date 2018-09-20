@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
@@ -40,6 +42,12 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     private String _mascotHTTPProxy;
     private String _mascotUserAccount;
     private String _mascotUserPassword;
+
+    @JsonCreator
+    protected MascotPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super(dirSequenceRoot);
+    }
 
     public MascotPipelineJob(MascotSearchProtocol protocol,
                              ViewBackgroundInfo info,

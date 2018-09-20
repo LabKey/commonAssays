@@ -34,11 +34,20 @@ public class FastaReloaderJob extends PipelineJob
 {
     private int[] _fastaIds;
 
+    // For serialization
+    protected FastaReloaderJob() {}
+
     public FastaReloaderJob(int[] fastaIds, ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
         super(ProteinAnnotationPipelineProvider.NAME, info, root);
         _fastaIds = fastaIds;
         setLogFile(File.createTempFile("FastaReload", ".log", AppProps.getInstance().getFileSystemRoot()));
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     @Override

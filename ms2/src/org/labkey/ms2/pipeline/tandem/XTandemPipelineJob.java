@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
@@ -40,6 +42,12 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     public Logger getClassLogger()
     {
         return LOG;
+    }
+
+    @JsonCreator
+    protected XTandemPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super(dirSequenceRoot);
     }
 
     public XTandemPipelineJob(XTandemSearchProtocol protocol,

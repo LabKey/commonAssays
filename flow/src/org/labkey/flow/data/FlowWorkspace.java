@@ -85,6 +85,10 @@ public class FlowWorkspace extends FlowDataObject
         ret.checkContainer(actionContainer, user, url);
         return ret;
     }
+
+    // For serialization
+    protected FlowWorkspace() {}
+
     public FlowWorkspace(ExpData data)
     {
         super(data);

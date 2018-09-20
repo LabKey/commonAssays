@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
@@ -68,6 +70,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     protected final File _dirSequenceRoot;
     protected boolean _fractions;
 
+    @JsonCreator
+    protected AbstractMS2SearchPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super();
+        _dirSequenceRoot = dirSequenceRoot;
+    }
+
     public AbstractMS2SearchPipelineJob(AbstractFileAnalysisProtocol protocol,
                                         String providerName,
                                         ViewBackgroundInfo info,
@@ -105,6 +114,12 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         // Copy some parameters from the parent job.
         _dirSequenceRoot = job._dirSequenceRoot;
         _fractions = job._fractions;
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     protected void writeInputFilesToLog()

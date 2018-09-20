@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.protein;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -39,6 +41,12 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
     public String getDescription()
     {
         return "Uniprot XML import - " + _file;
+    }
+
+    @JsonCreator
+    protected XMLProteinLoader(@JsonProperty("_clearExisting") boolean clearExisting)
+    {
+        _clearExisting = clearExisting;
     }
 
     public XMLProteinLoader(File file, ViewBackgroundInfo info, PipeRoot root, boolean clearExisting) throws IOException

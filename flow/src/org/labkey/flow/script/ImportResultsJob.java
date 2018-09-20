@@ -15,6 +15,8 @@
  */
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.labkey.api.attachments.AttachmentParent;
 import org.labkey.api.attachments.AttachmentService;
@@ -67,6 +69,19 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 {
     private File _analysisPathRoot = null;
     private String _analysisRunName = null;
+
+    @JsonCreator
+    protected ImportResultsJob(
+            @JsonProperty("_analysisEngine") AnalysisEngine analysisEngine,
+            @JsonProperty("_experiment") FlowExperiment experiment,
+            @JsonProperty("_originalImportedFile") File originalImportedFile,
+            @JsonProperty("_runFilePathRoot") File runFilePathRoot,
+            @JsonProperty("_keywordDirs") List<File> keywordDirs,
+            @JsonProperty("_targetStudy") Container targetStudy,
+            @JsonProperty("_failOnError") boolean failOnError)
+    {
+        super(analysisEngine, experiment, originalImportedFile, runFilePathRoot, keywordDirs, targetStudy, failOnError);
+    }
 
     public ImportResultsJob(ViewBackgroundInfo info,
                             PipeRoot root,

@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -34,6 +36,12 @@ import java.util.List;
 public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
+
+    @JsonCreator
+    protected SequestPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super(dirSequenceRoot);
+    }
 
     public SequestPipelineJob(SequestSearchProtocol protocol,
                               ViewBackgroundInfo info,

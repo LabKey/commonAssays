@@ -53,6 +53,9 @@ public class FlowWell extends FlowDataObject
 {
     static private final Logger _log = Logger.getLogger(FlowWell.class);
 
+    // For serialization
+    protected FlowWell() {}
+
     static public FlowWell fromWellId(int id)
     {
         FlowDataObject flowobj = fromRowId(id);

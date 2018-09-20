@@ -20,6 +20,9 @@ import org.labkey.api.exp.api.ExpData;
 
 public class FlowCompensationControl extends FlowWell
 {
+    // For serialization
+    protected FlowCompensationControl() {}
+
     public FlowCompensationControl(ExpData data)
     {
         super(data);

@@ -155,6 +155,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return null;
     }
 
+    // For serialzation
+    protected FlowProtocol() {}
+
     public FlowProtocol(ExpProtocol protocol)
     {
         super(protocol);

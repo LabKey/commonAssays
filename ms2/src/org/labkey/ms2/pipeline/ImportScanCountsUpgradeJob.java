@@ -45,12 +45,21 @@ public class ImportScanCountsUpgradeJob extends PipelineJob implements Serializa
     private static final String UPGRADE_EXCEPTION = "An unexpected error occurred attempting to import scan counts for the MS2 fraction: %s, skipping.";
     private static final String UPGRADE_STATS = "Upgrade job complete. Number of fractions checked: %s. Number of records update: %s.";
 
+    // For serialization
+    protected ImportScanCountsUpgradeJob() {}
+
     public ImportScanCountsUpgradeJob(ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
         super(null, info, root);
 
         File logFile = File.createTempFile("importScanCounts", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     @Override

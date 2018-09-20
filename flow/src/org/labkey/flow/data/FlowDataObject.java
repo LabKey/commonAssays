@@ -156,6 +156,9 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return fromDatas(ExperimentService.get().getExpDatas(container, type, name));
     }
 
+    // For serialization
+    protected FlowDataObject() {}
+
     public FlowDataObject(ExpData data)
     {
         super(data);

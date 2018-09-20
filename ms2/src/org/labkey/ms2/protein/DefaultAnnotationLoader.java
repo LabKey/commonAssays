@@ -46,6 +46,9 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
     private static final String FORMAT_STRING = "yyyy-MM-dd-HH-mm-ss";
 
 
+    // For serialization
+    protected DefaultAnnotationLoader() {}
+
     public DefaultAnnotationLoader(File file, ViewBackgroundInfo info, PipeRoot pipeRoot) throws IOException
     {
         super(ProteinAnnotationPipelineProvider.NAME, info, pipeRoot);
@@ -62,6 +65,12 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
             throw new IOException("Could not create directory for log file: " + logDir);
         }
         setLogFile(new File(logDir, file.getName() + "." + DateUtil.formatDateTime(new Date(), FORMAT_STRING) + ".log"));
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     @Override

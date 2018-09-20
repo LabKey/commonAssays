@@ -16,16 +16,32 @@
 
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
+
+import java.util.List;
+import java.util.Map;
 
 public class MoveRunFromWorkspaceJob extends ScriptJob
 {
     FlowRun _run;
+
+    @JsonCreator
+    protected MoveRunFromWorkspaceJob(
+            @JsonProperty("_pendingRunLSIDs") List<String> pendingRunLSIDs,
+            @JsonProperty("_processedRunLSIDs") Map<FlowProtocolStep, List<String>> processedRunLSIDs,
+            @JsonProperty("_runAnalysisScript") FlowScript runAnalysisScript)
+    {
+        super(pendingRunLSIDs, processedRunLSIDs, runAnalysisScript);
+    }
+
     public MoveRunFromWorkspaceJob(ViewBackgroundInfo info, FlowExperiment experiment, FlowRun run, PipeRoot root) throws Exception
     {
         super(info, experiment.getName(), experiment.getLSID(), new FlowProtocol(run.getExperimentRun().getProtocol()), run.getScript(), FlowProtocolStep.analysis, root);

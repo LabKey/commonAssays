@@ -50,6 +50,9 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     protected T _expObject;
     protected String _entityId;
 
+    // For serialization
+    protected FlowObject() {}
+    
     public FlowObject(T expObject)
     {
         _expObject = expObject;

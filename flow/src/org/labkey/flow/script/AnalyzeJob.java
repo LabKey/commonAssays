@@ -16,6 +16,8 @@
 
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Logger;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -25,12 +27,23 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 public class AnalyzeJob extends ScriptJob
 {
     private static Logger _log = Logger.getLogger(AnalyzeJob.class);
 
     int[] _runIds;
+
+    @JsonCreator
+    protected AnalyzeJob(
+            @JsonProperty("_pendingRunLSIDs") List<String> pendingRunLSIDs,
+            @JsonProperty("_processedRunLSIDs") Map<FlowProtocolStep, List<String>> processedRunLSIDs,
+            @JsonProperty("_runAnalysisScript") FlowScript runAnalysisScript)
+    {
+        super(pendingRunLSIDs, processedRunLSIDs, runAnalysisScript);
+    }
 
     public AnalyzeJob(ViewBackgroundInfo info, String experimentName, String experimentLSID, FlowProtocol protocol, FlowScript analysis, FlowProtocolStep step, int[] runIds, PipeRoot root) throws Exception
     {

@@ -25,6 +25,9 @@ import java.util.ListIterator;
 
 public class FlowFCSFile extends FlowWell
 {
+    // For serialization
+    protected FlowFCSFile() {}
+
     public FlowFCSFile(ExpData data)
     {
         super(data);

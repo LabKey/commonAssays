@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
@@ -34,6 +36,12 @@ import java.util.List;
 public class CometPipelineJob extends AbstractMS2SearchPipelineJob
 {
     private static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
+
+    @JsonCreator
+    protected CometPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    {
+        super(dirSequenceRoot);
+    }
 
     public CometPipelineJob(CometSearchProtocol protocol,
                               ViewBackgroundInfo info,

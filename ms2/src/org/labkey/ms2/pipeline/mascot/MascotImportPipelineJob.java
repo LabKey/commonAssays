@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline.mascot;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.io.FileUtils;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.FileUtil;
@@ -32,13 +34,19 @@ import java.io.IOException;
  */
 public class MascotImportPipelineJob extends MS2ImportPipelineJob
 {
-    private final File _file;
+    @JsonCreator
+    protected MascotImportPipelineJob(
+            @JsonProperty("_file") File file,
+            @JsonProperty("_description") String description,
+            @JsonProperty("_runInfo") MS2Importer.RunInfo runInfo)
+    {
+        super(file, description, runInfo);
+    }
 
     public MascotImportPipelineJob(ViewBackgroundInfo info, File file, String description,
                                    MS2Importer.RunInfo runInfo, PipeRoot root)
     {
         super(info, file, description, runInfo, root);
-        _file = file;
     }
 
     public void run()

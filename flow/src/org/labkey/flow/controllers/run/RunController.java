@@ -16,6 +16,8 @@
 
 package org.labkey.flow.controllers.run;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -719,6 +721,29 @@ public class RunController extends BaseFlowController
         private final Integer _timeout;
         private final boolean _deleteOnComplete;
 
+        @JsonCreator
+        protected ExportToScriptJob(
+                @JsonProperty("_guid") String guid,
+                @JsonProperty("_exportToScriptPath") String exportToScriptPath,
+                @JsonProperty("_exportToScriptCommandLine") String exportToScriptCommandLine,
+                @JsonProperty("_exportToScriptFormat") String exportToScriptFormat,
+                @JsonProperty("_label") String label,
+                @JsonProperty("_location") File location,
+                @JsonProperty("_timeout") Integer timeout,
+                @JsonProperty("_deleteOnComplete") boolean deleteOnComplete
+        )
+        {
+            super();
+            _guid = guid;
+            _exportToScriptPath = exportToScriptPath;
+            _exportToScriptCommandLine = exportToScriptCommandLine;
+            _exportToScriptFormat = exportToScriptFormat;
+            _label = label;
+            _location = location;
+            _timeout = timeout;
+            _deleteOnComplete = deleteOnComplete;
+        }
+        
         public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, File location, Integer timeout, boolean deleteOnComplete, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
@@ -755,6 +780,12 @@ public class RunController extends BaseFlowController
                 urlHelper = null;
             }
             return urlHelper;
+        }
+
+        @Override
+        public boolean hasJacksonSerialization()
+        {
+            return true;
         }
 
         @Override

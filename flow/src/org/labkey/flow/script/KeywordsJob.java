@@ -16,6 +16,8 @@
 
 package org.labkey.flow.script;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
@@ -24,11 +26,13 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.data.FlowScript;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Create a Keyword run for directory containing FCS files not previously imported.
@@ -39,6 +43,20 @@ public class KeywordsJob extends ScriptJob
 
     private final List<File> _paths;
     private final Container _targetStudy;
+
+    @JsonCreator
+    protected KeywordsJob(
+            @JsonProperty("_pendingRunLSIDs") List<String> pendingRunLSIDs,
+            @JsonProperty("_processedRunLSIDs") Map<FlowProtocolStep, List<String>> processedRunLSIDs,
+            @JsonProperty("_runAnalysisScript") FlowScript runAnalysisScript,
+            @JsonProperty("_paths") List<File> paths,
+            @JsonProperty("_targetStudy") Container targetStudy
+    )
+    {
+        super(pendingRunLSIDs, processedRunLSIDs, runAnalysisScript);
+        _paths = paths;
+        _targetStudy = targetStudy;
+    }
 
     public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, Container targetStudy, PipeRoot root) throws IOException
     {

@@ -55,12 +55,21 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
 
     private static final DataType DATA_TYPE = new DataType("msPictureOutput");
 
+    // For serialization
+    protected MSPictureUpgradeJob() {}
+
     public MSPictureUpgradeJob(ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
         super(null, info, root);
 
         File logFile = File.createTempFile("attachMSPicture", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     public ActionURL getStatusHref()

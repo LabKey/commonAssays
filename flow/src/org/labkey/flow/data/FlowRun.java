@@ -77,6 +77,9 @@ public class FlowRun extends FlowObject<ExpRun>
         return ret;
     }
 
+    // For serialization
+    protected FlowRun() {}
+
     public FlowRun(ExpRun run)
     {
         super(run);

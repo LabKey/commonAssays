@@ -16,6 +16,8 @@
 
 package org.labkey.ms2.pipeline;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.view.ActionURL;
@@ -39,12 +41,24 @@ public class ProteinProphetPipelineJob extends PipelineJob
 {
     private final File _file;
 
+    @JsonCreator
+    protected ProteinProphetPipelineJob(@JsonProperty("_file") File file)
+    {
+        _file = file;
+    }
+
     public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file, PipeRoot root)
     {
         super(ProteinProphetPipelineProvider.NAME, info, root);
         _file = file;
 
         setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));
+    }
+
+    @Override
+    public boolean hasJacksonSerialization()
+    {
+        return true;
     }
 
     public ActionURL getStatusHref()

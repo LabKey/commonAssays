@@ -52,6 +52,9 @@ public abstract class FlowExperimentJob extends FlowJob
     String _experimentName;
     RunData _runData;
 
+    // For serialization
+    protected FlowExperimentJob() {}
+
     public FlowExperimentJob(ViewBackgroundInfo info, PipeRoot root, String experimentLSID, FlowProtocol protocol, String experimentName, FlowProtocolStep step) throws IOException
     {
         super(FlowPipelineProvider.NAME, info, root);
@@ -201,17 +204,26 @@ public abstract class FlowExperimentJob extends FlowJob
         }
     }
 
-    class RunData
+    static class RunData
     {
+        // For serialization
+        protected RunData() {}
+
         public RunData(ExperimentRunType run)
         {
             _run = run;
+            _errors = new ArrayList<>();
+            _runOutputs = new LinkedHashMap<>();
+            _startingDataInputs = new HashMap<>();
+            _startingMaterialInputs = new HashMap<>();
         }
+
         ExperimentRunType _run;
-        List<String> _errors = new ArrayList<>();
-        Map<String, ScriptJob.StartingInput> _runOutputs = new LinkedHashMap<>();
-        Map<String, ScriptJob.StartingInput> _startingDataInputs = new HashMap<>();
-        Map<String, ScriptJob.StartingInput> _startingMaterialInputs = new HashMap<>();
+        List<String> _errors;
+        Map<String, ScriptJob.StartingInput> _runOutputs;
+        Map<String, ScriptJob.StartingInput> _startingDataInputs;
+        Map<String, ScriptJob.StartingInput> _startingMaterialInputs;
+
         public void logError(String message)
         {
             _errors.add(message);
@@ -222,8 +234,11 @@ public abstract class FlowExperimentJob extends FlowJob
         }
     }
 
-    class StartingInput
+    static class StartingInput
     {
+        // For serialization
+        protected StartingInput() {}
+        
         public StartingInput(String lsid, String name, File file, InputRole role)
         {
             this.lsid = lsid;

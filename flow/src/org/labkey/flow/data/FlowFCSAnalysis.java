@@ -20,6 +20,9 @@ import org.labkey.api.exp.api.ExpData;
 
 public class FlowFCSAnalysis extends FlowWell
 {
+    // For serialization
+    protected FlowFCSAnalysis() {}
+
     public FlowFCSAnalysis(ExpData data)
     {
         super(data);
