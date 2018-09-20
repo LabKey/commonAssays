@@ -91,7 +91,7 @@
             renderType      : <%=q(form.getRenderType())%>,
             baseUrl         : <%=q(baseUrl.getLocalURIString())%>,
             allowShare      : <%=c.hasPermission(user, ShareReportPermission.class)%>,
-            isDeveloper     : <%=user.isDeveloper()%>,
+            isDeveloper     : <%=user.isBrowserDev()%>,
             hideSave        : <%=user.isGuest()%>,
             hideViewData    : true,
             autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
