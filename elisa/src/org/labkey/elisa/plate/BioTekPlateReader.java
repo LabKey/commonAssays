@@ -17,6 +17,7 @@ package org.labkey.elisa.plate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.labkey.api.study.assay.plate.ExcelPlateReader;
@@ -42,9 +43,9 @@ public class BioTekPlateReader extends ExcelPlateReader
             {
                 for (Cell cell : sheetRow)
                 {
-                    if (cell.getCellType() == Cell.CELL_TYPE_STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
+                    if (cell.getCellTypeEnum() == CellType.STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
                         continue;
-                    else if (cell.getCellType() != Cell.CELL_TYPE_NUMERIC)
+                    else if (cell.getCellTypeEnum() != CellType.NUMERIC)
                         return false;
                 }
             }
