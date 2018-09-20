@@ -1,5 +1,4 @@
 {table}
 Filename|Component|Version|Source|License|LabKey Dev|Purpose
 commons-httpclient-3.1.jar|Commons HTTP Client|3.1|{link:Apache|http://jakarta.apache.org/commons/httpclient/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|HTTP client for requests of remote servers (old version)
-commons-compress-1.14.jar|Commons Compress|1.14|{link:Apache|http://jakarta.apache.org/commons/httpclient/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|HTTP client for requests of remote servers (old version)
 {table}
