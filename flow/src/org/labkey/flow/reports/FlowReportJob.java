@@ -53,6 +53,9 @@ public class FlowReportJob extends RReportJob
 {
     FilterFlowReport _report;
 
+    // For serialization
+    protected FlowReportJob() {}
+    
     public FlowReportJob(FilterFlowReport report, ViewBackgroundInfo info, PipeRoot root)
     {
         super(FlowPipelineProvider.NAME, info, report.getReportId(), root);
