@@ -15,6 +15,8 @@
  */
 package org.labkey.flow.reports;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +75,8 @@ import java.util.Set;
 
 public abstract class FilterFlowReport extends FlowReport
 {
-    public RReport _inner = null;
+    @JsonManagedReference
+    public FilterFlowInnerReport _inner = null;
     public String _query = null;
 
     abstract String getScriptResource() throws IOException;
@@ -547,6 +550,7 @@ public abstract class FilterFlowReport extends FlowReport
     // Move from annonymous class to static inner class that takes a filterFlowReport to allow de-serialization in Java 7
     private static class FilterFlowInnerReport extends RReport
     {
+        @JsonBackReference
         private final FilterFlowReport _report;
 
         // No-args constructor to support de-serialization in Java 7
