@@ -248,6 +248,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         // check that both the raw and summary data were uploaded together
         DataRegionTable table = new DataRegionTable("Data", this);
+        table.setUpdateTimeout(defaultWaitForPage * 3);
         assertEquals("Unexpected number of data rows for both raw and summary data", 108, table.getDataRowCount());
         // check the number of rows of summary data
         table.setFilter("Summary", "Equals", "true");

@@ -345,6 +345,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
      */
     protected void clickExclusionMenuIconForWell(String wellName, boolean selectReplicateGroups)
     {
+        new DataRegionTable.DataRegionFinder(getDriver()).withName("Data").timeout(3 * getDefaultWaitForPage()).waitFor();
         waitAndClick(Locator.id("__changeExclusions__" + wellName));
         _extHelper.waitForExtDialog("Exclude Well or Replicate Group from Analysis");
         waitForElement(Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]"), WAIT_FOR_JAVASCRIPT);
