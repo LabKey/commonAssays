@@ -85,4 +85,10 @@ public class ControlsQCReport extends FilterFlowReport
     {
         return hasContentModified(context, STATISTIC_PROP);
     }
+
+    @Override
+    public boolean isSandboxed()
+    {
+        return true;
+    }
 }

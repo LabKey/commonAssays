@@ -224,4 +224,10 @@ public class PositivityFlowReport extends FilterFlowReport
     {
         return hasContentModified(context, SUBSET_PROP);
     }
+
+    @Override
+    public boolean isSandboxed()
+    {
+        return true;
+    }
 }
