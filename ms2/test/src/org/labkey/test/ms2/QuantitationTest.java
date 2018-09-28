@@ -19,11 +19,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.categories.DailyA;
+import org.labkey.test.categories.DailyB;
 
 import java.io.File;
 
-@Category({DailyA.class})
+@Category({DailyB.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 4)
 public class QuantitationTest extends AbstractXTandemTest
 {
