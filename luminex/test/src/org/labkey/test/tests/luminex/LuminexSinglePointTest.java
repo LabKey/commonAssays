@@ -70,8 +70,7 @@ public class LuminexSinglePointTest extends LuminexTest
         importRun(file1, 1);
         importRun(file2, 2);
         assertTextPresent(TEST_ASSAY_LUM + " Upload Jobs");
-        waitForPipelineJobsToFinish(3);
-        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        waitForPipelineJobsToComplete(3, false);
         goToTestAssayHome();
         waitForElement(Locator.tagWithText("a", "view qc report"));
         BootstrapMenu.find(getDriver(), "view qc report").clickSubMenu(true,"view single point control qc report");
@@ -107,13 +106,13 @@ public class LuminexSinglePointTest extends LuminexTest
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1", "allRunsRow_0"}, "Single Point Control Guide Set 1", true);
 
         importRun(file3, 3);
-        waitForPipelineJobsToFinish(4);
+        waitForPipelineJobsToComplete(4, false);
 
         goToLeviJennings();
         waitForElement(Locator.tagWithText("a", "CTRL"));
 
         importRun(file4, 4);
-        waitForPipelineJobsToFinish(5);
+        waitForPipelineJobsToComplete(5, false);
 
         goToLeviJennings();
         waitForElement(Locator.linkWithText(file3));

@@ -62,8 +62,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         // First file to be import which will subsequently be re-imported
         importRunForTestLuminexConfig(TEST_ASSAY_LUM_FILE5, Calendar.getInstance(), 0);
         assertTextPresent(TEST_ASSAY_LUM + " Upload Jobs");
-        waitForPipelineJobsToFinish(2);
-        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        waitForPipelineJobsToComplete(2, TEST_ASSAY_LUM + " Upload Jobs", false);
         clickAndWait(Locator.linkWithText("COMPLETE").index(0));
         assertLuminexLogInfoPresent();
         assertElementNotPresent(Locator.linkWithText("ERROR")); //Issue 14082
@@ -76,7 +75,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
     {
         uploadPositivityFile(TEST_ASSAY_LUM, "No Fold Change", TEST_ASSAY_LUM_FILE11, "1", "", true, false);
         assertTextPresent(TEST_ASSAY_LUM + " Upload Jobs");
-        waitForPipelineJobsToFinish(5);
+        waitForPipelineJobsToComplete(5, true);
         clickAndWait(Locator.linkWithText("ERROR"));
         assertTextPresent("Error: No value provided for 'Positivity Fold Change'.", 3);
         checkExpectedErrors(2);
@@ -111,8 +110,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         checkCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
         clickButton("Save and Finish");
-        waitForPipelineJobsToFinish(3);
-        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        waitForPipelineJobsToComplete(3, false);
     }
 
     private void reimportFirstRun(int index, Calendar testDate, File file)
@@ -130,8 +128,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         checkCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
         clickButton("Save and Finish");
-        waitForPipelineJobsToFinish(4);
-        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        waitForPipelineJobsToComplete(4, false);
     }
 
     private void reimportLuminexRunPageTwo(String runId, String isotype, String conjugate, String stndCurveFitInput,

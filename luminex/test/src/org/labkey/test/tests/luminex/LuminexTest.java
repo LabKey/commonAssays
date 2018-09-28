@@ -385,8 +385,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         _extHelper.waitForExtDialog("Success", WAIT_FOR_JAVASCRIPT);
         clickButtonContainingText("Yes");
-        waitForPipelineJobsToFinish(jobCount);
-        assertElementNotPresent(Locator.linkWithText("ERROR"));
+        waitForPipelineJobsToComplete(jobCount, false);
         DataRegionTable table = new DataRegionTable("StatusFiles", this);
         table.setFilter("Info", "Starts With", expectedInfo);
         assertElementPresent(Locator.linkWithText("COMPLETE"), numMatchingJobs);
