@@ -20,6 +20,7 @@ import org.labkey.flow.analysis.web.FCSRef;
 import org.labkey.remoteapi.collections.CaseInsensitiveHashMap;
 
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,11 @@ public class FCSKeywordData
     {
         _ref = ref;
         _header = header;
+    }
+
+    public Date getDateTime()
+    {
+        return _header.getDateTime();
     }
 
     public String getKeyword(String key)

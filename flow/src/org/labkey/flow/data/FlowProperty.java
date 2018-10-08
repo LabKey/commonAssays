@@ -43,6 +43,9 @@ abstract public class FlowProperty
     // Property on FlowFCSFile ExpData object: original source path and file name of file being processed (OriginalSourceFile)
     static public final SystemProperty OriginalSourceFile = new SystemProperty(PROPERTY_BASE + "OriginalSourceFile", PropertyType.STRING);
 
+    // Property on FlowFCSFile ExpData object: date and time the file was acquired as recorded by the $DATE and $BTIM keywords
+    public static final SystemProperty FileDate = new SystemProperty(PROPERTY_BASE + "FileDate", PropertyType.DATE_TIME);
+
     static public void register()
     {
     }

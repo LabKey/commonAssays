@@ -1608,6 +1608,10 @@ public class FlowSchema extends UserSchema
         osf.setHidden(true);
         ret.addColumn(osf);
 
+        // FileDate
+        PropertyColumn colFileDate = new PropertyColumn(FlowProperty.FileDate.getPropertyDescriptor(), ret.getColumn(ExpDataTable.Column.LSID), getContainer(), getUser(), true);
+        ret.addColumn(colFileDate);
+
         ret.setDefaultVisibleColumns(new DeferredFCSFileVisibleColumns(ret, colKeyword));
         return ret;
     }

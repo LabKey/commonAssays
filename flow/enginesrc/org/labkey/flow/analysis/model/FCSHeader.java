@@ -18,6 +18,7 @@ package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.search.SearchService;
@@ -94,6 +95,48 @@ public class FCSHeader
     public String getParameterDescription(int i)
     {
         return getParameterStain(keywords, i);
+    }
+
+    @Nullable
+    public Date getDate()
+    {
+        String dateStr = getKeyword("$DATE");
+        if (dateStr != null)
+        {
+            long date = DateUtil.parseDate(dateStr);
+            return new Date(date);
+        }
+
+        String exportTime = getKeyword("EXPORT TIME");
+        if (exportTime != null)
+        {
+            long date = DateUtil.parseDateTime(exportTime);
+//            return Date.from(Instant.ofEpochMilli(date).truncatedTo(ChronoUnit.DAYS));
+            return new Date(date);
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public Date getDateTime()
+    {
+        String dateStr = getKeyword("$DATE");
+        if (dateStr != null)
+        {
+            long date = DateUtil.parseDate(dateStr);
+            long btim = getBeginTime();
+            return new Date(date + btim);
+        }
+
+        String exportTime = getKeyword("EXPORT TIME");
+        if (exportTime != null)
+        {
+            long date = DateUtil.parseDateTime(exportTime);
+            return new Date(date);
+        }
+
+        return null;
     }
 
     public long getBeginTime()

@@ -22,11 +22,13 @@ import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveType;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.fhcrc.cpas.exp.xml.InputOutputRefsType;
+import org.fhcrc.cpas.exp.xml.PropertyCollectionType;
 import org.fhcrc.cpas.exp.xml.ProtocolApplicationBaseType;
+import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
+import org.fhcrc.cpas.exp.xml.SimpleValueType;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
-import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URIUtil;
 import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FCSKeywordData;
@@ -43,6 +45,7 @@ import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -133,6 +136,19 @@ public class KeywordsHandler extends BaseHandler
             well.setName(filename);
             well.setAbout(FlowDataObject.generateDataLSID(_job.getContainer(), FlowDataType.FCSFile));
             well.setCpasType(ExpData.DEFAULT_CPAS_TYPE);
+
+            // Add the FileDate property parsed from the keywords
+            Date fileDate = fileData.getDateTime();
+            if (fileDate != null)
+            {
+                PropertyCollectionType wellProps = well.addNewProperties();
+                SimpleValueType fileDateProp = wellProps.addNewSimpleVal();
+                fileDateProp.setName(FlowProperty.FileDate.getPropertyDescriptor().getName());
+                fileDateProp.setOntologyEntryURI(FlowProperty.FileDate.getPropertyDescriptor().getPropertyURI());
+                fileDateProp.setValueType(SimpleTypeNames.DATE_TIME);
+                fileDateProp.setStringValue(fileDate.toString());
+            }
+
             AttributeSet attrSet = new AttributeSet(fileData);
             attrSet.save(_job.decideFileName(runDirectory, filename, FlowDataHandler.EXT_DATA), well);
             SampleKey sampleKey = _job.getProtocol().makeSampleKey(runName, well.getName(), attrSet);

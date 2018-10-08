@@ -18,8 +18,10 @@ package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.security.User;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -84,6 +86,16 @@ public class FlowFCSFile extends FlowWell
     public String getOriginalSourceFile()
     {
         return (String)getProperty(FlowProperty.OriginalSourceFile);
+    }
+
+    public Date getFileDate()
+    {
+        return (Date)getProperty(FlowProperty.FileDate);
+    }
+
+    public void setFileDate(User user, Date date) throws Exception
+    {
+        setProperty(user, FlowProperty.FileDate.getPropertyDescriptor(), date);
     }
 
 }
