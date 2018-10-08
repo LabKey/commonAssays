@@ -48,14 +48,14 @@ import java.util.Map;
  *
  * @author bmaclean
  */
-public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<MascotSearchTask.Factory>
 {
     public static String name = "Mascot";
     private static final String ACTION_LABEL = "Mascot Peptide Search";
 
     public MascotCPipelineProvider(Module owningModule)
     {
-        super(name, owningModule);
+        super(name, owningModule, MascotSearchTask.Factory.class);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -66,14 +66,10 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
+    public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!MascotConfig.findMascotConfig(context.getContainer()).hasMascotServer())
             return;
-        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-        {
-            return;
-        }
 
         String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchMascotAction.class, ACTION_LABEL,
@@ -83,7 +79,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
-        if (MascotConfig.findMascotConfig(container).hasMascotServer())
+        if (isEnabled() && MascotConfig.findMascotConfig(container).hasMascotServer())
         {
             String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
@@ -91,7 +87,8 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
-    public HttpView getSetupWebPart(Container container)
+    @NotNull
+    public HttpView createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }

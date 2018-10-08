@@ -20,15 +20,16 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.AbstractMS2PipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
 import java.io.File;
 import java.util.Collections;
@@ -59,6 +60,12 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     @Override
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
+        XTandemSearchTask.Factory factory = AbstractMS2SearchTaskFactory.findFactory(XTandemSearchTask.Factory.class);
+        if (factory != null && !factory.isEnabled())
+        {
+            return;
+        }
+
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
         {
             return;
@@ -72,6 +79,12 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
+        XTandemSearchTask.Factory factory = AbstractMS2SearchTaskFactory.findFactory(XTandemSearchTask.Factory.class);
+        if (factory != null && !factory.isEnabled())
+        {
+            return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
+        }
+
         String actionId = createActionId(PipelineController.FractionRollupAction.class, ACTION_LABEL);
         return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
     }

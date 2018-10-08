@@ -16,12 +16,12 @@
 
 package org.labkey.ms2.pipeline.comet;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -34,7 +34,6 @@ import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.SearchFormUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +44,7 @@ import java.util.Map;
  * User: jeckels
  * Date: September 17, 2013
  */
-public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<CometSearchTask.Factory>
 {
     private static final String ACTION_LABEL = "Comet Peptide Search";
 
@@ -53,7 +52,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public CometPipelineProvider(Module owningModule)
     {
-        super(NAME, owningModule);
+        super(NAME, owningModule, CometSearchTask.Factory.class);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -61,13 +60,9 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "comet.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
+    @Override
+    public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-        {
-            return;
-        }
-
         String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchCometAction.class, ACTION_LABEL,
             directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
@@ -76,11 +71,16 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
-        String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
-        return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        if (isEnabled())
+        {
+            String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
+            return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        }
+        return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
-    public HttpView getSetupWebPart(Container container)
+    @NotNull
+    public HttpView createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }

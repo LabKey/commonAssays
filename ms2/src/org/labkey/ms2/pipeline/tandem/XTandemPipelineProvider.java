@@ -15,18 +15,24 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.pipeline.*;
+import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineActionConfig;
+import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.labkey.api.module.Module;
-import org.labkey.ms2.pipeline.*;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.SearchFormUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,14 +44,14 @@ import java.util.Map;
  *
  * @author bmaclean
  */
-public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<XTandemSearchTask.Factory>
 {
     public static String name = "X! Tandem";
     private static final String ACTION_LABEL = "X!Tandem Peptide Search";
 
     public XTandemPipelineProvider(Module owningModule)
     {
-        super(name, owningModule);
+        super(name, owningModule, XTandemSearchTask.Factory.class);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -54,13 +60,8 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
         return nameParameters.equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
+    public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-        {
-            return;
-        }
-
         String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchXTandemAction.class, ACTION_LABEL,
                 directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
@@ -69,11 +70,16 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
-        String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
-        return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        if (isEnabled())
+        {
+            String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
+            return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
+        }
+        return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
-    public HttpView getSetupWebPart(Container container)
+    @NotNull
+    public HttpView createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }

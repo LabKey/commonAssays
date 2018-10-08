@@ -16,29 +16,37 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import org.labkey.api.pipeline.PipelineActionConfig;
-import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.TaskFactory;
-import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.view.*;
-import org.labkey.api.pipeline.PipeRoot;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
-import org.labkey.ms2.pipeline.*;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineActionConfig;
+import org.labkey.api.pipeline.PipelineDirectory;
+import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
+import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.PipelineController;
+import org.labkey.ms2.pipeline.SearchFormUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: billnelson@uky.edu
  * Date: Aug 24, 2006
  * Time: 12:45:45 PM
  */
-public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
+public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<AbstractSequestSearchTaskFactory>
 {
     private static final String ACTION_LABEL = "Sequest Peptide Search";
 
@@ -46,7 +54,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public SequestPipelineProvider(Module owningModule)
     {
-        super(name, owningModule);
+        super(name, owningModule, AbstractSequestSearchTaskFactory.class);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)
@@ -54,32 +62,18 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
         return "sequest.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
-    private boolean hasSequest()
+    @Override
+    protected boolean isEnabled()
     {
-        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories(null))
-        {
-            if (taskFactory instanceof AbstractSequestSearchTaskFactory)
-            {
-                AbstractSequestSearchTaskFactory sequestFactory = (AbstractSequestSearchTaskFactory)taskFactory;
-                if (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null)
-                {
-                    return true;
-                }
-            }
-        }
+        if (!super.isEnabled())
+            return false;
 
-        return false;
+        AbstractSequestSearchTaskFactory sequestFactory = findFactory();
+        return sequestFactory != null && (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null);
     }
 
-    public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
+    public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        if (!hasSequest())
-            return;
-        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-        {
-            return;
-        }
-
         String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchSequestAction.class, ACTION_LABEL,
             directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
@@ -88,7 +82,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
     @Override
     public List<PipelineActionConfig> getDefaultActionConfigSkipModuleEnabledCheck(Container container)
     {
-        if (hasSequest())
+        if (isEnabled())
         {
             String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
@@ -96,10 +90,9 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
-    public HttpView getSetupWebPart(Container container)
+    @NotNull
+    public HttpView createSetupWebPart(Container container)
     {
-        if (!hasSequest())
-            return null;
         return new SetupWebPart();
     }
 
@@ -169,8 +162,8 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider
 
     public void ensureEnabled(Container container) throws PipelineValidationException
     {
-        if (!hasSequest())
-            throw new PipelineValidationException("Sequest server has not been specified in site customization.");
+        if (!isEnabled())
+            throw new PipelineValidationException("Sequest server has not been specified in ms2Config.xml file.");
     }
 
     public boolean supportsDirectories()

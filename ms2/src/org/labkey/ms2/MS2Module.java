@@ -62,7 +62,6 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.comet.Comet2014ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.Comet2015ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
-import org.labkey.ms2.pipeline.comet.LegacyCometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
@@ -243,7 +242,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new XTandemPipelineProvider(this), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestPipelineProvider(this));
-        service.registerPipelineProvider(new LegacyCometPipelineProvider(this), "Comet (Cluster)");
         service.registerPipelineProvider(new CometPipelineProvider(this), "Comet");
         service.registerPipelineProvider(new FractionRollupPipelineProvider(this));
 

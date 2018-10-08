@@ -1082,7 +1082,6 @@ ms2/src/org/labkey/ms2/pipeline/comet/CometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometSearchProtocol.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometSearchTask.java -text
-ms2/src/org/labkey/ms2/pipeline/comet/LegacyCometPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/LegacyCometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/setCometDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/importMSScanCounts.jsp -text

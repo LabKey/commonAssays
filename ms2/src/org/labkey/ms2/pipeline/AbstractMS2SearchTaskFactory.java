@@ -18,6 +18,8 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJobException;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
 
@@ -31,10 +33,23 @@ import java.util.List;
 abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractMS2SearchTaskFactory<FactoryType>> extends AbstractTaskFactory<AbstractTaskFactorySettings, FactoryType>
 {
     private List<FileType> _inputTypes;
+    private boolean _enabled = true;
 
     protected AbstractMS2SearchTaskFactory(Class namespaceClass)
     {
         super(namespaceClass);
+    }
+
+    public static <FactoryType extends AbstractMS2SearchTaskFactory> FactoryType findFactory(Class<FactoryType> factoryClass)
+    {
+        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories(null))
+        {
+            if (factoryClass.isAssignableFrom(taskFactory.getClass()))
+            {
+                return (FactoryType)taskFactory;
+            }
+        }
+        return null;
     }
 
     public FactoryType cloneAndConfigure(AbstractTaskFactorySettings settings) throws CloneNotSupportedException
@@ -47,6 +62,16 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         }
         
         return result;
+    }
+
+    public boolean isEnabled()
+    {
+        return _enabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        _enabled = enabled;
     }
 
     public void setInputTypes(List<FileType> inputTypes)
