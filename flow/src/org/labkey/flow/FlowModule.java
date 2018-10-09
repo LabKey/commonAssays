@@ -22,6 +22,7 @@ import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.audit.DefaultAuditProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -107,7 +108,13 @@ public class FlowModule extends SpringModule
 
     public double getVersion()
     {
-        return 18.20;
+        return 18.21;
+    }
+
+    @Override
+    public @Nullable UpgradeCode getUpgradeCode()
+    {
+        return new FlowUpgradeCode();
     }
 
     protected void init()

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
@@ -848,4 +849,25 @@ public class WellController extends BaseFlowController
             return _graphs;
         }
     }
+
+
+    @RequiresPermission(AdminPermission.class)
+    public class SetFileDateAction extends MutatingApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            if (getContainer().isRoot())
+            {
+                FlowManager.get().setFileDateForAllFCSFiles(getUser());
+            }
+            else
+            {
+                FlowManager.get().setFileDateForAllFCSFiles(getContainer(), getUser());
+            }
+
+            return null;
+        }
+    }
+
 }

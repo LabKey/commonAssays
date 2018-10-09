@@ -157,10 +157,12 @@ flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text
 flow/enginesrc/org/labkey/flow/persist/ObjectType.java -text
 flow/enginesrc/org/labkey/flow/util/KeywordUtil.java -text
+flow/gwtsrc/org/labkey/flow/FlowUpgradeCode.java -text
 flow/module.properties -text
 flow/resources/flowReports/positivity.R -text
 flow/resources/flowReports/qc.R -text
 flow/resources/schemas/dbscripts/postgresql/flow-0.00-14.20.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-18.20-18.21.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-13.10.sql -text
@@ -170,6 +172,7 @@ flow/resources/schemas/dbscripts/postgresql/obsolete/flow-13.10-13.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-14.10-14.11.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-14.10-14.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-0.00-14.20.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-18.20-18.21.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-13.10.sql -text

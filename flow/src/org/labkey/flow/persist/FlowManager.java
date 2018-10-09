@@ -38,17 +38,22 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Handler;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
+import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
@@ -59,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1421,6 +1427,147 @@ public class FlowManager
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoKeywordAttr() + " WHERE container=?", container);
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoStatisticAttr() + " WHERE container=?", container);
         new SqlExecutor(getSchema()).execute("DELETE FROM " + getTinfoGraphAttr() + " WHERE container=?", container);
+    }
+
+    public void setFileDateForAllFCSFiles(@NotNull User user)
+    {
+        try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
+        {
+            for (String containerId : new SqlSelector(getSchema(), "SELECT DISTINCT container FROM flow.object").getCollection(String.class))
+            {
+                Container c = ContainerManager.getForId(containerId);
+                setFileDateForAllFCSFiles(c, user);
+            }
+            tx.commit();
+        }
+    }
+
+    public void setFileDateForAllFCSFiles(@NotNull Container c, @NotNull User user)
+    {
+        final PropertyDescriptor fileDatePd = FlowProperty.FileDate.getPropertyDescriptor();
+        if (fileDatePd == null)
+            throw new IllegalStateException("FileDate property descriptor required");
+
+        final List<PropertyDescriptor> descriptors = Collections.singletonList(fileDatePd);
+        final OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
+        {
+            @Override
+            public String beforeImportObject(Map<String, Object> map) throws SQLException
+            {
+                String lsid = (String)map.get("lsid");
+                assert lsid != null;
+                return lsid;
+            }
+
+            @Override
+            public void afterBatchInsert(int currentRow) throws SQLException { }
+
+            @Override
+            public void updateStatistics(int currentRow) throws SQLException { }
+        };
+
+        String sqlSelectDateTime = "" +
+                "SELECT\n" +
+                "       x.container,\n" +
+                "       x.rowid,\n" +
+                "       x.dataid,\n" +
+                "       x.lsid,\n" +
+                "       x.name,\n" +
+                "       x.currentvalue,\n" +
+                "       CASE\n" +
+                "         WHEN x.\"$DATE\" IS NOT NULL AND x.\"$BTIM\" IS NOT NULL\n" +
+                "                 THEN CONCAT(x.\"$DATE\", ' ', x.\"$BTIM\")\n" +
+                "         ELSE x.\"EXPORT TIME\"\n" +
+                "           END AS datetime\n" +
+                "FROM\n" +
+                "     (\n" +
+                "     SELECT\n" +
+                "            fo.container,\n" +
+                "            fo.rowid,\n" +
+                "            fo.dataid,\n" +
+                "            d.name,\n" +
+                "            d.lsid,\n" +
+                "\n" +
+                "            (SELECT k.value\n" +
+                "             FROM flow.keyword k\n" +
+                "                    INNER JOIN flow.keywordattr ka ON k.keywordid = ka.rowid\n" +
+                "             WHERE k.objectid = fo.rowid AND ka.name = 'EXPORT TIME'\n" +
+                "            ) AS \"EXPORT TIME\",\n" +
+                "\n" +
+                "            (SELECT k.value\n" +
+                "             FROM flow.keyword k\n" +
+                "                    INNER JOIN flow.keywordattr ka ON k.keywordid = ka.rowid\n" +
+                "             WHERE k.objectid = fo.rowid AND ka.name = '$DATE'\n" +
+                "            ) AS \"$DATE\",\n" +
+                "\n" +
+                "            (SELECT k.value\n" +
+                "             FROM flow.keyword k\n" +
+                "                    INNER JOIN flow.keywordattr ka ON k.keywordid = ka.rowid\n" +
+                "             WHERE k.objectid = fo.rowid AND ka.name = '$BTIM'\n" +
+                "            ) AS \"$BTIM\",\n" +
+                "\n" +
+                "            (SELECt op.datetimevalue\n" +
+                "             FROM exp.objectproperty op\n" +
+                "                    INNER JOIN exp.propertydescriptor pd ON op.propertyid = pd.propertyid\n" +
+                "                    INNER JOIN exp.object o ON op.objectid = o.objectid\n" +
+                "             WHERE o.objecturi = d.lsid\n" +
+                "               AND pd.propertyuri = '" + fileDatePd.getPropertyURI() + "'\n" +
+                "            ) AS currentvalue\n" +
+                "\n" +
+                "     FROM flow.object fo\n" +
+                "            INNER JOIN exp.data d ON fo.dataid = d.rowid\n" +
+                "     WHERE fo.typeid = " + ObjectType.fcsKeywords._typeId + "\n" +
+                "        AND fo.container = '" + c.getId() + "'" +
+                "     ) x";
+
+        try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
+        {
+            List<Map<String, Object>> propMaps = new ArrayList<>(1000);
+
+            SqlSelector ss = new SqlSelector(getSchema(), sqlSelectDateTime);
+            ss.mapStream().forEach(row -> {
+
+                // parse the date
+                String dateStr = (String) row.get("datetime");
+                if (dateStr == null)
+                {
+                    _log.info("Skipping update for row; no datetime keywords for row: " + row);
+                    return;
+                }
+
+                long date = DateUtil.parseDateTime(dateStr);
+                Date d = new Date(date);
+
+                // get the existing property if any
+                Date currentDate = (Date) row.get("currentvalue");
+                if (currentDate != null)
+                {
+                    if (!d.equals(currentDate))
+                    {
+                        _log.warn("Current date value '" + currentDate + "' does not match parsed date '" + d + "' for row: " + row);
+                    }
+                    else
+                    {
+                        _log.debug("Skipping update for row; current date value matches the parsed date '" + d + "' for row: " + row);
+                    }
+                }
+                else
+                {
+                    Map<String, Object> propMap = new HashMap<>();
+                    propMap.put("lsid", row.get("lsid"));
+                    propMap.put(fileDatePd.getPropertyURI(), d);
+                    propMaps.add(propMap);
+                }
+            });
+
+            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, propMaps, true);
+
+            tx.commit();
+        }
+        catch (ValidationException | SQLException ex)
+        {
+            throw new UnexpectedException(ex);
+        }
     }
 
 

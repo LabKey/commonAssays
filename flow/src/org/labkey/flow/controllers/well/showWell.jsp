@@ -61,6 +61,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -386,6 +387,13 @@ if (fcsFile != null && fcsFile != well)
 else if (originalFile != null && originalFile != well && originalFile != fcsFile)
 {
     %><tr><td>Original FCS File:</td><td><a href="<%=h(originalFile.urlShow())%>"><%=h(originalFile.getName())%></a></td></tr><%
+}
+
+if (well instanceof FlowFCSFile)
+{
+    %><tr><td>File Date:</td>
+        <td><%=h(DateUtil.formatDateTime(getContainer(), ((FlowFCSFile)well).getFileDate()))%></td>
+    </tr><%
 }
     %><tr><td>Well Comment:</td>
         <td><%include(new SetCommentView(well), out);%></td>
