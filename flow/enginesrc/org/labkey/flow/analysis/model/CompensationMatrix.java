@@ -20,6 +20,7 @@ import Jama.Matrix;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.flow.analysis.data.NumberArray;
@@ -44,6 +45,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -701,6 +703,9 @@ public class CompensationMatrix implements Serializable
         {
             File fcsFile = JunitUtil.getSampleData(null, "flow/FCS/version3_1_spillover.fcs");
             FCS fcs = new FCS(fcsFile);
+            Date d = fcs.getDateTime();
+            // verify the date is correct
+            assertEquals("2016-07-06 16:50:22", DateUtil.formatDateTime(d, "YYYY-MM-dd HH:mm:ss"));
             CompensationMatrix compensationMatrix = fromSpillKeyword(fcs.getKeywords());
             Assert.assertEquals(compensationMatrix,compensationMatrix);
             String[] expectedNames = {"FITC-A","PE-A","Alexa Fluor 700-A","PerCP-Cy5-5-A","APC-Cy7-A","BV 421-A","BV 510-A"};
