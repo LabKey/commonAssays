@@ -65,12 +65,6 @@ public abstract class FlowJob extends PipelineJob
 
     abstract protected void doRun() throws Throwable;
 
-    @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
     public void run()
     {
         _start = new Date();

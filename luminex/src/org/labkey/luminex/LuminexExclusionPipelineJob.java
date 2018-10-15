@@ -61,12 +61,6 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     }
 
     @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
-    @Override
     public URLHelper getStatusHref()
     {
         if (getRun() != null)

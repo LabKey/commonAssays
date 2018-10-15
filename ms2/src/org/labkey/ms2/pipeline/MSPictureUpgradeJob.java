@@ -66,12 +66,6 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         setLogFile(logFile);
     }
 
-    @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
     public ActionURL getStatusHref()
     {
         return null;

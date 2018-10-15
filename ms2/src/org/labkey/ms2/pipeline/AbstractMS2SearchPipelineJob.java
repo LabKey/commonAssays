@@ -116,12 +116,6 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         _fractions = job._fractions;
     }
 
-    @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
     protected void writeInputFilesToLog()
     {
         for (File file : getInputFiles())

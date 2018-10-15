@@ -54,7 +54,6 @@ import org.labkey.nab.multiplate.CrossPlateDilutionNabAssayProvider;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,12 +103,6 @@ public class NabUpgradeCode implements UpgradeCode
 
             File logFile = File.createTempFile("nabCrossPlateDilutionRepair", ".log", root.getRootPath());
             setLogFile(logFile);
-        }
-
-        @Override
-        public boolean hasJacksonSerialization()
-        {
-            return true;
         }
 
         @Override

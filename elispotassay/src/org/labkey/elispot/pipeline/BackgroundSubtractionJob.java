@@ -20,8 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
@@ -51,7 +49,6 @@ import org.labkey.elispot.plate.PlateInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,12 +75,6 @@ public class BackgroundSubtractionJob extends PipelineJob
         setLogFile(logFile);
 
         _runs = runs;
-    }
-
-    @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
     }
 
     @Override

@@ -783,12 +783,6 @@ public class RunController extends BaseFlowController
         }
 
         @Override
-        public boolean hasJacksonSerialization()
-        {
-            return true;
-        }
-
-        @Override
         public String getDescription()
         {
             return "Export to script";

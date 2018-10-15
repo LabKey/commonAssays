@@ -55,12 +55,6 @@ public class ProteinProphetPipelineJob extends PipelineJob
         setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));
     }
 
-    @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
     public ActionURL getStatusHref()
     {
         return null;

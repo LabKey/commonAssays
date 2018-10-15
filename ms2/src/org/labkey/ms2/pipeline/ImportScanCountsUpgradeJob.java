@@ -57,12 +57,6 @@ public class ImportScanCountsUpgradeJob extends PipelineJob implements Serializa
     }
 
     @Override
-    public boolean hasJacksonSerialization()
-    {
-        return true;
-    }
-
-    @Override
     public URLHelper getStatusHref()
     {
         return null;
