@@ -90,7 +90,7 @@ public class KeywordsJob extends ScriptJob
             catch (Throwable t)
             {
                 _log.error("Exception", t);
-                addStatus("Exception:" + t.toString());
+                error("Failed to import keywords from '" + path + "': " + t.getMessage(), t);
             }
         }
 

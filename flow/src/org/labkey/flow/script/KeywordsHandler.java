@@ -16,6 +16,7 @@
 
 package org.labkey.flow.script;
 
+import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
@@ -108,6 +109,16 @@ public class KeywordsHandler extends BaseHandler
         _job.warn(status);
     }
 
+    protected void error(String msg)
+    {
+        error(msg, null);
+    }
+
+    protected void error(String msg, Throwable t)
+    {
+        _job.error(msg, t);
+    }
+
     protected FlowRun addRun(File directory, List<FCSKeywordData> data) throws Exception
     {
         ExperimentArchiveDocument xarDoc = _job.createExperimentArchive();
@@ -138,7 +149,18 @@ public class KeywordsHandler extends BaseHandler
             well.setCpasType(ExpData.DEFAULT_CPAS_TYPE);
 
             // Add the FileDate property parsed from the keywords
-            Date fileDate = fileData.getDateTime();
+            Date fileDate;
+            try
+            {
+                fileDate = fileData.getDateTime();
+            }
+            catch (ConversionException ex)
+            {
+                // Fail the job if we can't parse the file date.  If it proves too strict, we can change this to a warning
+                error("Failed to parse file date from '" + fileData.getURI() + "': " + ex.getMessage(), ex);
+                return null;
+            }
+
             if (fileDate != null)
             {
                 PropertyCollectionType wellProps = well.addNewProperties();
@@ -192,11 +214,14 @@ public class KeywordsHandler extends BaseHandler
         }
         if (lstFileData.size() == 0)
         {
-            addStatus("No FCS files found");
+            warn("No FCS files found");
             return null;
         }
 
         FlowRun run = addRun(directory, lstFileData);
+        if (run == null || _job.hasErrors())
+            return null;
+
         if (targetStudy != null)
         {
             addStatus("Setting target study on keyword run: " + targetStudy);
