@@ -15,13 +15,16 @@
  */
 package org.labkey.flow.reports;
 
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.reports.report.ReportDescriptor;
-import org.labkey.api.util.Pair;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.writer.ContainerUser;
+import org.labkey.flow.controllers.ReportsController;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 
@@ -35,7 +38,18 @@ import java.io.IOException;
 public class ControlsQCReport extends FilterFlowReport
 {
     public static String TYPE = "Flow.QCControlReport";
+    public static String DESC = "Flow Controls Statistics over Time";
     public static final String STATISTIC_PROP = "statistic";
+
+    public static ActionURL createURL(Container c, @Nullable ActionURL returnURL, @Nullable ActionURL cancelURL)
+    {
+        ActionURL url = new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, TYPE);
+        if (returnURL != null)
+            url.addReturnURL(returnURL);
+        if (cancelURL != null)
+            url.addCancelURL(cancelURL);
+        return url;
+    }
 
     public String getType()
     {
@@ -45,7 +59,7 @@ public class ControlsQCReport extends FilterFlowReport
     @Override
     public String getTypeDescription()
     {
-        return "Flow Controls Statistics over Time";
+        return DESC;
     }
 
     @Override
@@ -55,9 +69,9 @@ public class ControlsQCReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
+    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
     {
-        return new JspView<>(ControlsQCReport.class, "editQCReport.jsp", Pair.of(this, returnURL));
+        return new JspView<>(ControlsQCReport.class, "editQCReport.jsp", Tuple3.of(this, returnURL, cancelURL));
     }
 
     @Override

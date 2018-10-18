@@ -16,6 +16,7 @@
 package org.labkey.flow.reports;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -26,7 +27,7 @@ import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
+import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
@@ -35,6 +36,7 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.writer.ContainerUser;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
@@ -54,7 +56,19 @@ import java.util.List;
 public class PositivityFlowReport extends FilterFlowReport
 {
     public static final String TYPE = "Flow.PositivityReport";
+    public static final String DESC = "Flow Positivity Call";
     public static final String SUBSET_PROP = "subset";
+
+    public static ActionURL createURL(Container c, @Nullable ActionURL returnURL, @Nullable ActionURL cancelURL)
+    {
+        ActionURL url = new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, TYPE);
+        if (returnURL != null)
+            url.addReturnURL(returnURL);
+        if (cancelURL != null)
+            url.addCancelURL(cancelURL);
+        return url;
+    }
+
     private SubsetSpec _subset;
     private SubsetSpec _parentSubset;
 
@@ -67,7 +81,7 @@ public class PositivityFlowReport extends FilterFlowReport
     @Override
     public String getTypeDescription()
     {
-        return "Flow Positivity Call";
+        return DESC;
     }
 
     @Override
@@ -77,9 +91,9 @@ public class PositivityFlowReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL)
+    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
     {
-        return new JspView<>(PositivityFlowReport.class, "editPositivityReport.jsp", Pair.of(this, returnURL));
+        return new JspView<>(PositivityFlowReport.class, "editPositivityReport.jsp", Tuple3.of(this, returnURL, cancelURL));
     }
 
     SubsetSpec getSubset()

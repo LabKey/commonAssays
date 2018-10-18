@@ -16,7 +16,14 @@
 package org.labkey.flow.controllers;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.action.*;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.ConfirmAction;
+import org.labkey.api.action.FormApiAction;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.HasViewContext;
+import org.labkey.api.action.ReturnUrlForm;
+import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusUrls;
@@ -33,7 +40,15 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
@@ -136,7 +151,7 @@ public class ReportsController extends BaseFlowController
         public ModelAndView getView(FORM form, BindException errors)
         {
             initReport(form);
-            return r.getConfigureForm(getViewContext(), form.getReturnActionURL());
+            return r.getConfigureForm(getViewContext(), form.getReturnActionURL(), form.getCancelActionURL());
         }
 
         @Override

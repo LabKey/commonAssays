@@ -15,30 +15,24 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.collections.CaseInsensitiveTreeMap" %>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.reports.Report" %>
-<%@ page import="org.labkey.api.reports.ReportService" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.NavTree" %>
 <%@ page import="org.labkey.api.view.PopupMenu" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="org.labkey.flow.reports.ControlsQCReport" %>
-<%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
-<%@ page import="java.util.Collection" %>
-<%@ page import="java.util.TreeMap" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.List" %>
+<%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ViewContext context = getViewContext();
@@ -115,6 +109,6 @@ table.reports td {
     </table>
     <p>
     <% if (canEdit) { %>
-        <%= button("create qc report").href(new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, ControlsQCReport.TYPE)) %>
-        <%= button("create positivity report").href(new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, PositivityFlowReport.TYPE)) %>
+        <%= button("create qc report").href(ControlsQCReport.createURL(c, getActionURL(), null)) %>
+        <%= button("create positivity report").href(PositivityFlowReport.createURL(c, getActionURL(), null)) %>
     <% } %>

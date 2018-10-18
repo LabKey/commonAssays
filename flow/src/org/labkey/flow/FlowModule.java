@@ -73,7 +73,9 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.PersistTests;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
+import org.labkey.flow.reports.ControlsQCReportUIProvider;
 import org.labkey.flow.reports.PositivityFlowReport;
+import org.labkey.flow.reports.PositivityFlowReportUIProvider;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.ExportAnalysisManifest;
 import org.labkey.flow.webparts.AnalysesWebPart;
@@ -157,6 +159,8 @@ public class FlowModule extends SpringModule
 
         ReportService.get().registerReport(new ControlsQCReport());
         ReportService.get().registerReport(new PositivityFlowReport());
+        ReportService.get().addUIProvider(new ControlsQCReportUIProvider());
+        ReportService.get().addUIProvider(new PositivityFlowReportUIProvider());
 
         FlowService.setInstance(new FlowServiceImpl());
 

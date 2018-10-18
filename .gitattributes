@@ -377,11 +377,13 @@ flow/src/org/labkey/flow/query/KeywordMethod.java -text
 flow/src/org/labkey/flow/query/StatisticForeignKey.java -text
 flow/src/org/labkey/flow/query/StatisticMethod.java -text
 flow/src/org/labkey/flow/reports/ControlsQCReport.java -text
+flow/src/org/labkey/flow/reports/ControlsQCReportUIProvider.java -text
 flow/src/org/labkey/flow/reports/FilterFlowReport.java -text
 flow/src/org/labkey/flow/reports/FlowReport.java -text
 flow/src/org/labkey/flow/reports/FlowReportJob.java -text
 flow/src/org/labkey/flow/reports/FlowReportManager.java -text
 flow/src/org/labkey/flow/reports/PositivityFlowReport.java -text
+flow/src/org/labkey/flow/reports/PositivityFlowReportUIProvider.java -text
 flow/src/org/labkey/flow/reports/editPositivityReport.jsp -text
 flow/src/org/labkey/flow/reports/editQCReport.jsp -text
 flow/src/org/labkey/flow/reports/statPicker.jsp -text

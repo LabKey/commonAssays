@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -38,13 +38,15 @@
 <%
     Container c = getContainer();
 
-    Pair<FilterFlowReport, ActionURL> bean = (Pair<FilterFlowReport, ActionURL>) HttpView.currentModel();
+    Tuple3<FilterFlowReport, ActionURL, ActionURL> bean = (Tuple3<FilterFlowReport, ActionURL, ActionURL>) HttpView.currentModel();
     FilterFlowReport report = bean.first;
     ActionURL returnURL = bean.second;
+    ActionURL cancelURL = bean.third;
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
     String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
+    String canURL = cancelURL == null ? retURL : cancelURL.getLocalURIString();
 %>
 <style type="text/css">
     .x-form-item {
@@ -103,7 +105,7 @@ function Form_onSave()
 
 function Form_onCancel()
 {
-    window.location = <%=q(retURL)%>;
+    window.location = <%=q(canURL)%>;
 }
 
 
