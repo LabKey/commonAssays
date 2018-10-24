@@ -23,6 +23,7 @@ import org.labkey.api.action.FormApiAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.ReturnUrlForm;
+import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -150,6 +151,10 @@ public class ReportsController extends BaseFlowController
         @Override
         public ModelAndView getView(FORM form, BindException errors)
         {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            if (protocol == null)
+                return new SimpleErrorView(errors);
+
             initReport(form);
             return r.getConfigureForm(getViewContext(), form.getReturnActionURL(), form.getCancelActionURL());
         }
@@ -186,7 +191,8 @@ public class ReportsController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
-            root.addChild("Create new report: " + r.getTypeDescription());
+            if (r != null)
+                root.addChild("Create new report: " + r.getTypeDescription());
             return root;
         }
     }
@@ -203,7 +209,8 @@ public class ReportsController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
-            root.addChild("Edit report: " + r.getDescriptor().getReportName());
+            if (r != null)
+                root.addChild("Edit report: " + r.getDescriptor().getReportName());
             return root;
         }
     }
@@ -230,6 +237,13 @@ public class ReportsController extends BaseFlowController
 
         public void validateCommand(CopyForm form, Errors errors)
         {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            if (protocol == null)
+            {
+                errors.reject(ERROR_MSG, "No flow protocol in this container.  Please upload FCS files to create a flow protocol.");
+                return;
+            }
+
             if (form.getReportName() == null || form.getReportName().length() == 0)
             {
                 errors.rejectValue("reportName", ERROR_MSG, "Report name must not be empty");
@@ -250,6 +264,10 @@ public class ReportsController extends BaseFlowController
         @Override
         public ModelAndView getView(CopyForm form, boolean reshow, BindException errors)
         {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            if (protocol == null)
+                return new SimpleErrorView(errors);
+
             r = getReport(getViewContext(), form);
             if (form.getReportName() == null || form.getReportName().length() == 0)
                 form.setReportName("Copy of " + r.getDescriptor().getReportName());
@@ -279,6 +297,7 @@ public class ReportsController extends BaseFlowController
         public NavTree appendNavTrail(NavTree root)
         {
             new BeginAction(getViewContext()).appendNavTrail(root);
+            if (r != null)
             root.addChild("Copy report: " + r.getDescriptor().getReportName());
             return root;
         }

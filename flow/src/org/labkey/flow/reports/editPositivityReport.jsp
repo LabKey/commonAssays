@@ -54,11 +54,15 @@
     String canURL = cancelURL == null ? retURL : cancelURL.getLocalURIString();
 
     FlowProtocol protocol = FlowProtocol.getForContainer(c);
-    ICSMetadata metadata = protocol.getICSMetadata();
+    ICSMetadata metadata = protocol == null ? null : protocol.getICSMetadata();
 
     ActionURL currentURL = getActionURL();
-    ActionURL editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
-    editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+    ActionURL editICSMetadataURL = null;
+    if (protocol != null)
+    {
+        editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
+        editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+    }
 %>
 
 <% if (metadata == null || !metadata.isComplete()) { %>
