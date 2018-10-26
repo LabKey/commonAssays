@@ -110,7 +110,7 @@ public class FlowModule extends SpringModule
 
     public double getVersion()
     {
-        return 18.21;
+        return 18.30;
     }
 
     @Override
