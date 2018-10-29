@@ -15,7 +15,6 @@
  */
 package org.labkey.test.tests.luminex;
 
-import com.google.common.collect.ImmutableSet;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -134,7 +133,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     @Test
     public void verifyGuideSetsPresent()
     {
-        Set<String> expectedComments = ImmutableSet.of(RUN_BASED_COMMENT, VALUE_BASED_COMMENT);
+        Set<String> expectedComments = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(RUN_BASED_COMMENT, VALUE_BASED_COMMENT)));
 
         _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
         DataRegionTable drt = new DataRegionTable("GuideSet", this);
