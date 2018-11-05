@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
+import org.apache.log4j.Logger;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
 import org.labkey.api.collections.NamedObjectList;
@@ -66,6 +67,8 @@ import java.util.stream.Collectors;
  */
 public class SamplesConfirmGridView extends GridView
 {
+    public static final Logger LOG = Logger.getLogger(SamplesConfirmGridView.class);
+
     /*package*/ public static String DATAREGION_NAME = "SamplesConfirm";
 
     static FieldKey MATCHED_FLAG_FIELD_KEY = new FieldKey(null, "MatchedFlag");
@@ -107,7 +110,10 @@ public class SamplesConfirmGridView extends GridView
             FieldKey fieldKey = new FieldKey(null, keyword);
             ColumnInfo col = new ColumnInfo(fieldKey, JdbcType.VARCHAR);
             col.setAlias(fieldKey.getName());
-            columns.put(fieldKey, col);
+            if (!columns.containsKey(fieldKey))
+                columns.put(fieldKey, col);
+            else
+                LOG.warn("Duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
         }
 
         int columnCount = columns.size();
