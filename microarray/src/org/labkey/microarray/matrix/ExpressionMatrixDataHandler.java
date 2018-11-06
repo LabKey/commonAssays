@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.labkey.microarray.matrix.ExpressionMatrixProtocolSchema.FEATURE_DATA_TABLE_NAME;
+
 public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 {
     public static final String FEATURE_ID_COLUMN_NAME = "ID_REF";
@@ -60,7 +62,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
     public ExpressionMatrixDataHandler()
     {
-        super(FEATURE_ID_COLUMN_NAME, MicroarrayUserSchema.SCHEMA_NAME, ExpressionMatrixProtocolSchema.FEATURE_DATA_TABLE_NAME);
+        super(FEATURE_ID_COLUMN_NAME, MicroarrayUserSchema.SCHEMA_NAME, FEATURE_DATA_TABLE_NAME);
     }
 
     @Override
@@ -147,33 +149,36 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                                             Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {
         assert MicroarrayUserSchema.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
+
+        // Grab the probe name to rowId mapping for this run's annotation set
+        String featureSetString = runProps.get(ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME);
+        if (featureSetString == null)
+        {
+            throw new ExperimentException("Could not find " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " property value");
+        }
+
+        int featureSet;
+        try
+        {
+            featureSet = Integer.parseInt(featureSetString);
+        }
+        catch (NumberFormatException e)
+        {
+            throw new ExperimentException("Illegal " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " value:" + featureSetString);
+        }
+
+        Map<String, Integer> featureIds = MicroarrayManager.get().getFeatureAnnotationSetFeatureIds(featureSet);
+
         PreparedStatement statement = null;
         try
         {
             Connection connection = MicroarrayUserSchema.getSchema().getScope().getConnection();
-            statement = connection.prepareStatement("INSERT INTO microarray." +
-                    ExpressionMatrixProtocolSchema.FEATURE_DATA_TABLE_NAME + " (DataId, SampleId, FeatureId, \"Value\") " +
-                    "VALUES (?, ?, ?, ?)");
+            int paramCount = 0;
+                statement = connection.prepareStatement("INSERT INTO microarray." +
+                        FEATURE_DATA_TABLE_NAME + " (DataId, SampleId, FeatureId, \"Value\") " +
+                        "VALUES (?, ?, ?, ?)");
+
             int rowCount = 0;
-
-            // Grab the probe name to rowId mapping for this run's annotation set
-            String featureSetString = runProps.get(ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME);
-            if (featureSetString == null)
-            {
-                throw new ExperimentException("Could not find " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " property value");
-            }
-
-            int featureSet;
-            try
-            {
-                featureSet = Integer.parseInt(featureSetString);
-            }
-            catch (NumberFormatException e)
-            {
-                throw new ExperimentException("Illegal " + ExpressionMatrixAssayProvider.FEATURE_SET_PROPERTY_NAME + " value:" + featureSetString);
-            }
-            Map<String, Integer> featureIds = MicroarrayManager.get().getFeatureAnnotationSetFeatureIds(featureSet);
-
             for (Map<String, Object> row : loader)
             {
                 Object featureObject = row.get(FEATURE_ID_COLUMN_NAME);
@@ -200,14 +205,23 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                     statement.setInt(2, samplesMap.get(sampleName));
                     statement.setInt(3, featureId);
                     statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
-                    statement.executeUpdate();
+                    statement.addBatch();
+
+                    paramCount += 4;
+                    if (paramCount > 1000)
+                    {
+                        paramCount = 0;
+                        statement.executeBatch();
+                    }
                 }
 
-                if (++rowCount % 5000 == 0)
+                if (++rowCount % 1000 == 0)
                 {
                     LOG.info("Imported " + rowCount + " rows...");
                 }
             }
+
+            statement.executeBatch();
             LOG.info("Imported " + rowCount + " rows.");
         }
         catch (SQLException e)
