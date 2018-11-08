@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,7 +37,6 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.JunitUtil;
-import org.labkey.api.util.NumberUtilsLabKey;
 import org.labkey.api.util.Pair;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.LuminexDataRow;
@@ -439,7 +439,7 @@ public class LuminexExcelParser
                 if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex)
                 {
                     String fitProbValue = cellContents.substring(startIndex + 1, endIndex).trim();
-                    if (fitProbValue != null && !NumberUtilsLabKey.isNumber(fitProbValue))
+                    if (fitProbValue != null && !NumberUtils.isCreatable(fitProbValue))
                         throw new ExperimentException("FitProb. value is not numeric: " + fitProbValue);
 
                     analyte.setFitProb(parseDouble(fitProbValue));
@@ -448,7 +448,7 @@ public class LuminexExcelParser
                 if (startIndex >= 0)
                 {
                     String resVarValue = cellContents.substring(startIndex + 1).trim();
-                    if (resVarValue != null && !NumberUtilsLabKey.isNumber(resVarValue))
+                    if (resVarValue != null && !NumberUtils.isCreatable(resVarValue))
                         throw new ExperimentException("ResVar. value is not numeric: " + resVarValue);
 
                     analyte.setResVar(parseDouble(resVarValue));
@@ -644,7 +644,7 @@ public class LuminexExcelParser
 
     private Double parseDouble(String value)
     {
-        if (value == null || "".equals(value) || !NumberUtilsLabKey.isNumber(value))
+        if (value == null || "".equals(value) || !NumberUtils.isCreatable(value))
         {
             return null;
         }
