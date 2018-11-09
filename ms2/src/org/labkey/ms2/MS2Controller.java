@@ -3063,8 +3063,6 @@ public class MS2Controller extends SpringActionController
                 throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
             }
 
-            QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
-
             if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
             {
                 try
@@ -3081,7 +3079,6 @@ public class MS2Controller extends SpringActionController
                 }
                 catch (NumberFormatException ignored) {}
             }
-            proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
 
             WebPartView searchFormView = null;
             for (ProteinService.FormViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchFormViewProviders())
@@ -3097,22 +3094,33 @@ public class MS2Controller extends SpringActionController
                 // If no protein search form view providers are registered, add the default form search view.
                 searchFormView = new ProteinSearchWebPart(true, form);
             }
-            VBox result = new VBox(searchFormView, proteinsView);
-            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
+
+            VBox result = new VBox(searchFormView);
+
+            if (form.isShowMatchingProteins())
+            {
+                QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
+                proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
+
+                result.addView(proteinsView);
+            }
+
+            if (form.isShowProteinGroups() &&
                     // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
-                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
+                    (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
+                            !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms"))))
             {
                 QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
                 groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
                 result.addView(groupsView);
             }
+
             for (ProteinService.QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
             {
                 QueryView queryView = provider.createView(getViewContext(), form, errors);
                 if (queryView != null)
                     result.addView(queryView);
             }
-
             return result;
         }
 
