@@ -5380,9 +5380,9 @@ public class MS2Controller extends SpringActionController
             // deleted from the button URL and get posted instead).  Don't bother adding "0" since it's the default.
 
             // Verify that charge filter scores are valid floats and, if so, add as URL params
-            float charge1 = parseChargeScore((String)ctx.get("charge1"));
-            float charge2 = parseChargeScore((String)ctx.get("charge2"));
-            float charge3 = parseChargeScore((String)ctx.get("charge3"));
+            float charge1 = parseChargeScore(String.valueOf(ctx.get("charge1")));
+            float charge2 = parseChargeScore(String.valueOf(ctx.get("charge2")));
+            float charge3 = parseChargeScore(String.valueOf(ctx.get("charge3")));
 
             if (charge1 != 0.0)
                 url.addParameter(paramName + "1", Formats.chargeFilter.format(charge1));
@@ -5391,10 +5391,16 @@ public class MS2Controller extends SpringActionController
             if (charge3 != 0.0)
                 url.addParameter(paramName + "3", Formats.chargeFilter.format(charge3));
 
-            String tryptic = (String) ctx.get("tryptic");
-
-            if (!"0".equals(tryptic))
-                url.addParameter("tryptic", tryptic);
+            try
+            {
+                int tryptic = Integer.parseInt(String.valueOf(ctx.get("tryptic")));
+                if (0 != tryptic)
+                    url.addParameter("tryptic", tryptic);
+            }
+            catch (NumberFormatException x)
+            {
+                //pass
+            }
 
             if (request.getParameter("grouping") != null)
             {
