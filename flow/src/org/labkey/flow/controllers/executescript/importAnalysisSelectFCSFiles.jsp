@@ -23,16 +23,12 @@
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
+<%@ page import="org.labkey.flow.analysis.model.ExternalAnalysis" %>
 <%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.data.FlowExperiment" %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
-<%@ page import="java.io.File" %>
-<%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.analysis.model.ExternalAnalysis" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -128,7 +124,7 @@
         <%=disabled(keywordRuns == null || keywordRuns.isEmpty())%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
-    <div style="display:inline-block; <%=text(keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</div>
+    <div style="display:inline-block; <%=text(keywordRuns == null || keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 </label>
 <div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns == null || keywordRuns.isEmpty() ? "color:silver;" : "")%>">
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
