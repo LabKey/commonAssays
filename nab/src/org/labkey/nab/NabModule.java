@@ -17,7 +17,6 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
@@ -101,12 +100,6 @@ public class NabModule extends DefaultModule
         ContainerManager.addContainerListener(new NabContainerListener());
 
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
-    }
-
-    @Override
-    public UpgradeCode getUpgradeCode()
-    {
-        return new NabUpgradeCode();
     }
 
     @NotNull

@@ -54,7 +54,6 @@ import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.ExcelWriter;
@@ -75,10 +74,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.module.Module;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.nab.NabUrls;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -90,7 +86,6 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.security.roles.Role;
@@ -199,61 +194,6 @@ public class NabAssayController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    @RequiresPermission(AdminPermission.class)
-    public class RepairCrossPlateDilutionAction extends SimpleViewAction
-    {
-        @Override
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return null;
-        }
-
-        @Override
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            Module module = ModuleLoader.getInstance().getModule("Nab");
-            NabUpgradeCode upgradeCode = new NabUpgradeCode();
-            upgradeCode.repairCrossPlateDilutionData(ModuleLoader.getInstance().getModuleContext(module));
-
-            ActionURL url = PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getSharedContainer());
-            throw new RedirectException(url);
-        }
-    }
-
-    public static class HeaderBean
-    {
-        private ActionURL _printURL;
-        private ActionURL _datafileURL;
-        private boolean _writer;
-
-        public HeaderBean(ViewContext context, ActionURL printLink, ActionURL dataFileLink)
-        {
-            _printURL = printLink;
-            _datafileURL = dataFileLink;
-            _writer = context.getContainer().hasPermission(context.getUser(), InsertPermission.class);
-        }
-
-        public boolean showPrintView()
-        {
-            return _printURL != null;
-        }
-
-        public ActionURL getPrintURL()
-        {
-            return _printURL;
-        }
-
-        public ActionURL getDatafileURL()
-        {
-            return _datafileURL;
-        }
-
-        public boolean showNewRunLink()
-        {
-            return _writer;
         }
     }
 
@@ -413,7 +353,7 @@ public class NabAssayController extends SpringActionController
                         filter.addAllClauses(existingFilter);
                     List<Integer> objectIds = new ArrayList<>(_dataObjectIds.length);
                     for (int dataObjectId : _dataObjectIds)
-                        objectIds.add(new Integer(dataObjectId));
+                        objectIds.add(Integer.valueOf(dataObjectId));
 
                     filter.addInClause(FieldKey.fromString("RowId"), objectIds);
                     view.getDataRegion().setRecordSelectorValueColumns("RowId");
