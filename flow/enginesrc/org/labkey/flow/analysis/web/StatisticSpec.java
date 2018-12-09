@@ -280,7 +280,7 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
             case Percentile:
                 param = stat.getParameter();
                 int ichColon = param.indexOf(":");
-                percentile = new Double(param.substring(ichColon + 1));
+                percentile = Double.valueOf(param.substring(ichColon + 1));
                 param = param.substring(0, ichColon);
                 break;
             default:

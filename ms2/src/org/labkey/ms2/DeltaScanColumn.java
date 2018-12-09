@@ -139,10 +139,10 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
             }
 
             double[] b = MatrixUtil.linearRegression(x, y);
-            Float b0 = new Float(b[0]);
-            Float b1 = new Float(b[1]);
-            Float r2 = new Float(MatrixUtil.r2(x, y));
-            Float sigma = new Float(MatrixUtil.sigma(x, y, b));
+            Float b0 = Float.valueOf((float)b[0]);
+            Float b1 = Float.valueOf((float)b[1]);
+            Float r2 = Float.valueOf((float)MatrixUtil.r2(x, y));
+            Float sigma = Float.valueOf((float)MatrixUtil.sigma(x, y, b));
 
             if (allLegalValues(b0, b1, r2, sigma))
             {

@@ -56,12 +56,12 @@ public class DataFrameXYDataset extends AbstractXYDataset
     public Number getX(int series, int x)
     {
         assert series == 0;
-        return new Double(_data.getColumn(_xAxis).getDouble(x));
+        return Double.valueOf(_data.getColumn(_xAxis).getDouble(x));
     }
 
     public Number getY(int series, int y)
     {
         assert series == 0;
-        return new Double(_data.getColumn(_yAxis).getDouble(y));
+        return Double.valueOf(_data.getColumn(_yAxis).getDouble(y));
     }
 }

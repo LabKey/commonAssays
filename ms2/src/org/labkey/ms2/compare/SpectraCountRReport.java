@@ -74,13 +74,13 @@ public class SpectraCountRReport extends RReport
         }
 
         MS2Controller.SpectraCountForm form = new MS2Controller.SpectraCountForm();
-        form.setRunList(new Integer(getRunList(context)));
+        form.setRunList(Integer.valueOf(getRunList(context)));
         form.setPeptideFilterType(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
         try
         {
             if (context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability) != null)
             {
-                form.setPeptideProphetProbability(new Float(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability)));
+                form.setPeptideProphetProbability(Float.valueOf(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability)));
             }
         }
         catch (NumberFormatException e) {}

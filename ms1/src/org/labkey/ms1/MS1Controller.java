@@ -817,7 +817,7 @@ public class MS1Controller extends SpringActionController
             {
                 Feature feature = getFeature();
                 if(null != feature)
-                    _timeSource = (_timeUnits == TimeOffsetUnits.rt ? feature.getTime() : new Double(feature.getScan().doubleValue()));
+                    _timeSource = (_timeUnits == TimeOffsetUnits.rt ? feature.getTime() : Double.valueOf(feature.getScan().doubleValue()));
             }
             return _timeSource;
         }

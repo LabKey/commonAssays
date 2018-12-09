@@ -84,7 +84,7 @@ public class EditElutionGraphContext
         {
             if (scanInfo.getScan() == scan)
             {
-                return new Float(scanInfo.getIntensity());
+                return Float.valueOf(scanInfo.getIntensity());
             }
         }
         return null;

@@ -289,11 +289,11 @@ public class PeptideGenerator implements Runnable
         {
             byte b = bytes[i];
             if ((i + 1 == bytes.length || bytes[i + 1] != 'P') && (b == 'R' || b == 'K'))
-                    rkSites.add(new Integer(i));
+                    rkSites.add(Integer.valueOf(i));
         }
         byte b = bytes[bytes.length -1];
         if (b != 'K' && b != 'R')
-            rkSites.add(new Integer(bytes.length - 1));
+            rkSites.add(Integer.valueOf(bytes.length - 1));
 
         Integer[] rk = (Integer[]) rkSites.toArray(new Integer[rkSites.size()]);
         int prevSite = -1;

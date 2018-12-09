@@ -24,7 +24,6 @@ import org.labkey.api.util.DateUtil;
 
 public class uniprot_entry_sequence extends CharactersParseActions
 {
-
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())
@@ -46,12 +45,12 @@ public class uniprot_entry_sequence extends CharactersParseActions
         String curMass = attrs.getValue("mass");
         if (curMass != null)
         {
-            curSeq.setMass(new Float(curMass));
+            curSeq.setMass(Float.valueOf(curMass));
         }
         String curLength = attrs.getValue("length");
         if (curLength != null)
         {
-            curSeq.setLength(new Integer(curLength));
+            curSeq.setLength(Integer.valueOf(curLength));
         }
     }
 

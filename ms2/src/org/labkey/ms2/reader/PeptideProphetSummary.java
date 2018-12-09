@@ -423,7 +423,7 @@ public class PeptideProphetSummary extends SensitivitySummary
             String versionString = matcher.group(1);
             try
             {
-                return new Double(versionString);
+                return Double.valueOf(versionString);
             }
             catch (NumberFormatException ignored) {}
         }

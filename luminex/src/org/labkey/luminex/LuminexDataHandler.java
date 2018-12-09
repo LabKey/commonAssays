@@ -1910,7 +1910,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             {
                 visitString = visitString.substring("visit".length()).trim();
             }
-            visitId = new Double(visitString);
+            visitId = Double.valueOf(visitString);
         }
         catch (NumberFormatException e)
         {

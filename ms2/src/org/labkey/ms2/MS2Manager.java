@@ -2144,7 +2144,7 @@ public class MS2Manager
 
         result.fdrOptions.add(defaultPvalueResult.getFdr());
         Collections.sort(result.fdrOptions);
-        boolean useDefaultFdr = (null == desiredFdr) || (Float.compare(desiredFdr, new Float(defaultPvalueResult.getFdr())) == 0);  // no selection, or default FDR
+        boolean useDefaultFdr = (null == desiredFdr) || (Float.compare(desiredFdr, Float.valueOf(defaultPvalueResult.getFdr())) == 0);  // no selection, or default FDR
 
         if (useDefaultFdr)
         {
@@ -2182,7 +2182,7 @@ public class MS2Manager
 
             // done processing, so add threshold to hash map and (possibly) values to returned result
 
-            if (Float.compare(fdrOption, new Float(defaultPvalueResult.getFdr())) == 0)
+            if (Float.compare(fdrOption, Float.valueOf(defaultPvalueResult.getFdr())) == 0)
                 result.getFdrOptionToThresholdMap().put(fdrOption, DEFAULT_SCORE_THRESHOLD);
             else
                 result.getFdrOptionToThresholdMap().put(fdrOption, tempResult.getScoreThreshold());

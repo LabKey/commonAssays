@@ -1474,7 +1474,7 @@ public class MS2Controller extends SpringActionController
             {
                 try
                 {
-                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                    form.setPeptideProphetProbability(Float.valueOf(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
                 catch (NumberFormatException ignored) {}
             }
@@ -1482,7 +1482,7 @@ public class MS2Controller extends SpringActionController
             {
                 try
                 {
-                    form.setProteinProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name())));
+                    form.setProteinProphetProbability(Float.valueOf(prefs.get(PeptideFilteringFormElements.proteinProphetProbability.name())));
                 }
                 catch (NumberFormatException ignored) {}
             }
@@ -1522,7 +1522,7 @@ public class MS2Controller extends SpringActionController
             {
                 try
                 {
-                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                    form.setPeptideProphetProbability(Float.valueOf(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
                 catch (NumberFormatException ignored) {}
             }
@@ -2322,7 +2322,7 @@ public class MS2Controller extends SpringActionController
             {
                 try
                 {
-                    form.setPeptideProphetProbability(new Float(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
+                    form.setPeptideProphetProbability(Float.valueOf(prefs.get(PeptideFilteringFormElements.peptideProphetProbability.name())));
                 }
                 catch (NumberFormatException ignored) {}
             }

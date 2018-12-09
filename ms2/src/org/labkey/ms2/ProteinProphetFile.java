@@ -16,14 +16,13 @@
 
 package org.labkey.ms2;
 
-import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.List;
 import java.util.ArrayList;
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -55,11 +54,11 @@ public class ProteinProphetFile extends SensitivitySummary
 
             if (parser.isStartElement() && "protein_summary_data_filter".equals(parser.getLocalName()))
             {
-                minimumProbabilities.add(new Float(parser.getAttributeValue(null, "min_probability")));
-                sensitivities.add(new Float(parser.getAttributeValue(null, "sensitivity")));
-                falsePositiveErrorRate.add(new Float(parser.getAttributeValue(null, "false_positive_error_rate")));
-                predictedNumberCorrect.add(new Float(parser.getAttributeValue(null, "predicted_num_correct")));
-                predictedNumberIncorrect.add(new Float(parser.getAttributeValue(null, "predicted_num_incorrect")));
+                minimumProbabilities.add(Float.valueOf(parser.getAttributeValue(null, "min_probability")));
+                sensitivities.add(Float.valueOf(parser.getAttributeValue(null, "sensitivity")));
+                falsePositiveErrorRate.add(Float.valueOf(parser.getAttributeValue(null, "false_positive_error_rate")));
+                predictedNumberCorrect.add(Float.valueOf(parser.getAttributeValue(null, "predicted_num_correct")));
+                predictedNumberIncorrect.add(Float.valueOf(parser.getAttributeValue(null, "predicted_num_incorrect")));
             }
         }
         _minProb = toFloatArray(minimumProbabilities);

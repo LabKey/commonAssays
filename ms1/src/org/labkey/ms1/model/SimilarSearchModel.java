@@ -182,6 +182,6 @@ public class SimilarSearchModel
 
     public Integer getFeatureId()
     {
-        return null == _feature ? null : new Integer(_feature.getFeatureId());
+        return null == _feature ? null : Integer.valueOf(_feature.getFeatureId());
     }
 }

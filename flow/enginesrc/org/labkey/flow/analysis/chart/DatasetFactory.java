@@ -58,12 +58,12 @@ public class DatasetFactory
 
         public Number getX(int series, int item)
         {
-            return new Double(_xValues.getDouble(item));
+            return Double.valueOf(_xValues.getDouble(item));
         }
 
         public Number getY(int series, int item)
         {
-            return new Double(_yValues.getDouble(item));
+            return Double.valueOf(_yValues.getDouble(item));
         }
     }
 }

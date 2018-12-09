@@ -184,7 +184,7 @@ public class CompensationMatrix implements Serializable
                 // FlowJo v9.7 uses 'spillValue' attribute name
                 String spillValue = FlowJoWorkspace.getAttribute(elChannelValue, "value", "spillValue");
 
-                mapValues.put(fluorName, new Double(spillValue));
+                mapValues.put(fluorName, Double.valueOf(spillValue));
             }
             setChannel(elChannel.getAttribute("name"), mapValues);
         }

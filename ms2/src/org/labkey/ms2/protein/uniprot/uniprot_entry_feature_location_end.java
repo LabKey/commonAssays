@@ -15,9 +15,9 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-/**
- * User: tholzman
- * Date: Mar 3, 2005
+/*
+  User: tholzman
+  Date: Mar 3, 2005
  */
 
 import org.xml.sax.*;
@@ -25,7 +25,6 @@ import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_feature_location_end extends ParseActions
 {
-
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -36,6 +35,6 @@ public class uniprot_entry_feature_location_end extends ParseActions
         UniprotAnnotation surroundingFeature = context.getAnnotations().get(context.getAnnotations().size() - 1);
         String position = attrs.getValue("position");
         if (position != null)
-            surroundingFeature.setEndPos(new Integer(position));
+            surroundingFeature.setEndPos(Integer.valueOf(position));
     }
 }

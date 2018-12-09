@@ -65,17 +65,13 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
             DocumentBuilder builder = dbfact.newDocumentBuilder();
             return builder.parse(new InputSource(new FileInputStream(f)));
         }
-        catch (IOException e)
+        catch (IOException | ParserConfigurationException e)
         {
             throw new ExperimentException(e);
         }
         catch (SAXException e)
         {
             throw new ExperimentException("Error parsing " + f.getName(), e);
-        }
-        catch (ParserConfigurationException e)
-        {
-            throw new ExperimentException(e);
         }
     }
 
@@ -282,7 +278,7 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
                 {
                     try
                     {
-                        return new Integer(channelCountString);
+                        return Integer.valueOf(channelCountString);
                     }
                     catch (NumberFormatException e)
                     {
