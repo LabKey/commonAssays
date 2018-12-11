@@ -19,7 +19,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.components.luminex.exclusionreport.ExcludedSinglepointUnknownsWebpart;
 import org.labkey.test.pages.LabKeyPage;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.internal.WrapsDriver;
+import org.openqa.selenium.WrapsDriver;
 
 import static org.labkey.test.components.luminex.exclusionreport.ExcludedSinglepointUnknownsWebpart.ExcludedSinglepointUnknownsWebpart;
 

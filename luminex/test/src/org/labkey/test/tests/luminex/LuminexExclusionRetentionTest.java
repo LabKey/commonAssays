@@ -59,7 +59,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         cleanupPipelineJobs();
         cleanupRuns();
         addInitialAssayRun();
-        clickAndWait(Locator.linkContainingText(RUN_NAME));
+        waitAndClickAndWait(Locator.linkContainingText(RUN_NAME));
     }
 
     private void addInitialAssayRun()
@@ -321,6 +321,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         else
             assertElementNotPresent(Locator.tagWithClass("span", "labkey-error"));
 
+        scrollIntoView(findButton("Save and Finish"));
         clickButton("Save and Finish");
     }
 }

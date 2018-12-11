@@ -50,12 +50,21 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
         SinglepointExclusionDialog dialog = new SinglepointExclusionDialog(driver);
         dialog.openDialog();
         dialog.waitForText("Exclusions", "Analyte Name");
+
+        // Wait until there are rows in the singlepoint grid...
+        dialog.waitForElements(Locator.xpath("//div[not(contains(@class, 'x-masked-relative'))][contains(@class, 'x-grid-panel')]/descendant::div[contains(@class, 'x-grid3-row')]"));
+        // and the analyte grid...
+        dialog.waitForElements(Locator.xpath("//div[contains(@class, 'x-masked-relative')][contains(@class, 'x-grid-panel')]/descendant::div[contains(@class, 'x-grid3-row')]"));
+
         return dialog;
     }
 
     public void selectDilution(String description, String dilution)
     {
-        click(Locator.xpath("//div[contains(@class, 'x-grid3-row')]").withDescendant(Locator.tagWithText("td", description).followingSibling("td").withText(dilution)));
+        Locator element = Locator.xpath("//div[contains(@class, 'x-grid3-row')]").withDescendant(Locator.tagWithText("td", description).followingSibling("td").withText(dilution));
+        waitForElement(element);
+        scrollIntoView(element);
+        click(element);
     }
 
     public void checkAnalyte(String analyte)

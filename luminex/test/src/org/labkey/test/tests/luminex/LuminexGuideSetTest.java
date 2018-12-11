@@ -530,8 +530,8 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void assertExpectedAnalyte1QCFlagsPresent()
     {
-        assertElementPresent(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
-        assertElementPresent(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
+        waitForElements(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
     }
 
     private void assertQCFlagsNotPresent()

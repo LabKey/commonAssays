@@ -24,7 +24,9 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.LabKeyExpectedConditions;
 import org.labkey.test.util.LogMethod;
+import org.openqa.selenium.WebElement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -180,7 +182,10 @@ public final class LuminexRTransformTest extends LuminexTest
 
     private void verifyPDFsGenerated(boolean hasStandardPDFs)
     {
-        click(Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png"));
+        WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
+        shortWait().until(LabKeyExpectedConditions.animationIsDone(curvePng));
+        mouseOver(curvePng);
+        curvePng.click();
         assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_4PL.pdf"));
         assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_5PL.pdf"));
         if (hasStandardPDFs)

@@ -168,7 +168,10 @@ public class LuminexGuideSetHelper
     {
         _test._ext4Helper.waitForMaskToDisappear();
         _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
+        _test.waitForElementToDisappear(Locator.xpath("//div[contains(@class, 'x-window')][contains(@class, 'leveljenningsreport')]"));
         waitForLeveyJenningsTrendPlot();
+        // Wait for the grid to populate as well.
+        _test.waitForElements(Locator.xpath("//div[contains(@class, 'x-grid3-row-checker')]"));
     }
 
     public void goToLeveyJenningsGraphPage(String assayName, String titrationName)
@@ -198,11 +201,13 @@ public class LuminexGuideSetHelper
         for (String network : networks)
             _test.click(ExtHelper.locateGridRowCheckbox(network));
 
+        _test.scrollIntoView(_test.findButton("Apply Guide Set"));
         _test.doAndWaitForPageSignal(() -> _test.clickButton("Apply Guide Set", 0), "guideSetSelectionChange");
 
         if(!useCurrent)
             _test.doAndWaitForPageSignal(() -> _test.click(ExtHelper.locateGridRowCheckbox(comment)), "guideSetSelectionChange");
 
+        _test.scrollIntoView(_test.findButton("Apply Thresholds"));
         _test.clickButton("Apply Thresholds", 0);
         _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
         // verify that the plot is reloaded

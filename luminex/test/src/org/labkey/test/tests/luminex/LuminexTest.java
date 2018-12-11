@@ -319,7 +319,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         assertElementPresent(Locator.tagWithText("div", "Analytes excluded for a well, replicate group, singlepoint unknown, "
                 + "or at the assay level will not be re-included by changes in titration exclusions."));
 
-        waitAndClick(Locator.tagWithClass("div", "x-grid3-cell-inner").withText(titration));
+        waitAndClick(Locator.tagWithClass("td", "x-grid3-cell-first").withText(titration));
         if (analytes == null || analytes.length == 0)
         {
             waitAndClick(AVAILABLE_ANALYTES_CHECKBOX);
@@ -327,7 +327,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         else
         {
             for (String analyte : analytes)
-                waitAndClick(Locator.xpath("//td/div[@class='x-grid3-cell-inner x-grid3-col-1 x-unselectable']").containing(analyte));
+                waitAndClick(Locator.tagWithClass("td", "x-grid3-td-1").containing(analyte));
         }
         setFormElement(COMMENT_LOCATOR, exclusionMessage);
         sleep(1000);

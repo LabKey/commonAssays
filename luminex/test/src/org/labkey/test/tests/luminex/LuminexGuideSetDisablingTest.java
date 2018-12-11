@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -139,8 +140,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         DataRegionTable drt = new DataRegionTable("GuideSet", this);
         Set<String> actualComments = new HashSet<>(drt.getColumnDataAsText("Comment"));
 
-        if (!actualComments.containsAll(expectedComments))
-            Assert.fail("It appear that there are missing guide sets.");
+        Assert.assertEquals("It appear that there are missing guide sets.", expectedComments, actualComments.stream()
+                .filter(expectedComments::contains).collect(Collectors.toCollection(HashSet::new)));
         // note consider failing on extras too?
 
         // check guide sets are set in LJ reports

@@ -73,6 +73,9 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
     {
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
 
+        // Use a TreeMap to have a predictable order to the keys.
+        // This is needed because if there is no value in the Average txt box,
+        // the StdDev txt box is disabled (and trying to set it's value would fail).
         Map<String, Double> metricInputs = new TreeMap<>();
 
         // equivalent to Run-based guide set with Guide Set plate 1 and Guide Set plate 2 runs selected
@@ -117,16 +120,23 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
 
     private void updateGuideSets()
     {
+        // Use a TreeMap to have a predictable order to the keys.
+        // This is needed because if there is no value in the Average txt box,
+        // the StdDev txt box is disabled (and trying to set it's value would fail).
         Map<String, Double> metricInputs = new TreeMap<>();
 
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
 
+        // If the Avg. txt box is cleared it will clear the StdDev txt box.
+        // The automation library clears a txt box before entering a new value, so we need to update both the Avg and the StdDev.
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0]);
         clickButtonContainingText("Edit", 0);
         metricInputs.put("EC505PLAverage", 325.0);
-        metricInputs.put("EC505PLStdDev", 40.0);
+        metricInputs.put("EC505PLStdDev", 100.0);
         metricInputs.put("AUCAverage", 7800.0);
+        metricInputs.put("AUCStdDev", 466.82);
         metricInputs.put("MaxFIAverage", 10200.0);
+        metricInputs.put("MaxFIStdDev", 549.21);
         _guideSetHelper.editValueBasedGuideSet(metricInputs, "Analyte 1", false);
 
         // equivalent to Run-based guide set with Guide Set plate 2, Guide Set plate 3, and Guide Set plate 4 runs selected
