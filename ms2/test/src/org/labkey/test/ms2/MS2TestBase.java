@@ -26,6 +26,8 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
+
 abstract public class MS2TestBase extends BaseWebDriverTest
 {
     protected static final String FOLDER_NAME = "ms2folder";
@@ -86,8 +88,8 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         _containerHelper.createSubfolder(getProjectName(), FOLDER_NAME, "MS2");
 
         log("Set bad pipeline root.");
-        setPipelineRoot("/bogus");
-        assertTextPresent("does not exist");
+        String errorMessage = setPipelineRootExpectingError("/bogus");
+        assertTrue(errorMessage.contains("does not exist"));
 
         log("Set good pipeline root.");
         setPipelineRoot(PIPELINE_PATH);
