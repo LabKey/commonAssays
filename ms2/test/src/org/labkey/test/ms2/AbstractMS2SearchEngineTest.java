@@ -21,7 +21,8 @@ import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.util.ListHelper;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 {
@@ -177,7 +178,8 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         clickAndWait(Locator.imageMapLinkByTitle("graphmap", "bov_sample/" + SAMPLE_BASE_NAME + " (test2)"));
 
         log("Verify experiment run view.");
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: CAexample_mini.mzXML"));
+        String dataHref = Locator.imageMapLinkByTitle("graphmap", "Data: CAexample_mini.mzXML").findElement(getDriver()).getAttribute("href");
+        beginAt(dataHref); // Clicking this is unreliable. Possibly because the image is so large. Just navigate.
         assertTextPresent(
                 "bov_sample/" + SAMPLE_BASE_NAME,
                 "Data CAexample_mini.mzXML",
