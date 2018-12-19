@@ -29,8 +29,10 @@ public class FlowSummaryWebPart extends JspView<FlowSummaryWebPart>
             new SimpleWebPartFactory("Flow Summary", WebPartFactory.LOCATION_RIGHT, FlowSummaryWebPart.class, null)
             {
                 @Override
-                public boolean isAvailable(Container c, String location)
+                public boolean isAvailable(Container c, String scope, String location)
                 {
+                    if (!Portal.FOLDER_PORTAL_PAGE.equals(scope))
+                        return false;
                     if (location.equals(getDefaultLocation()) || location.equals(WebPartFactory.LOCATION_MENUBAR))
                     {
                         return c.getFolderType() instanceof FlowFolderType ||
