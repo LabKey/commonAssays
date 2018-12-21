@@ -106,7 +106,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             {
                 public boolean isOuter(FieldKey fieldKey)
                 {
-                    return fieldKey.getParts().size() == 1;
+                    return fieldKey.size() == 1;
                 }
             });
         }
