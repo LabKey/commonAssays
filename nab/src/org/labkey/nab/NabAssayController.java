@@ -150,7 +150,6 @@ public class NabAssayController extends SpringActionController
 
     public NabAssayController()
     {
-        super();
         setActionResolver(_resolver);
     }
 

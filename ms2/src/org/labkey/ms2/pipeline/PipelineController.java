@@ -99,7 +99,6 @@ public class PipelineController extends SpringActionController
 
     public PipelineController()
     {
-        super();
         setActionResolver(_resolver);
     }
 

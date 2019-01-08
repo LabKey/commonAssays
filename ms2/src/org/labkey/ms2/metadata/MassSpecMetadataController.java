@@ -47,14 +47,14 @@ import org.springframework.web.servlet.ModelAndView;
 public class MassSpecMetadataController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(
-            MassSpecMetadataController.class,
-            MassSpecMetadataUploadAction.class,
-            MassSpecBulkPropertiesTemplateAction.class);
+        MassSpecMetadataController.class,
+        MassSpecMetadataUploadAction.class,
+        MassSpecBulkPropertiesTemplateAction.class
+    );
 
 
     public MassSpecMetadataController()
     {
-        super();
         setActionResolver(_resolver);
     }
 

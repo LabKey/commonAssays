@@ -89,13 +89,10 @@ import java.util.TreeMap;
 
 public class ElispotController extends SpringActionController
 {
-    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ElispotController.class,
-            ElispotUploadWizardAction.class
-        );
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ElispotController.class, ElispotUploadWizardAction.class);
 
     public ElispotController()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 

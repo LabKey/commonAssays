@@ -96,11 +96,10 @@ import java.util.Set;
  */
 public class MS1Controller extends SpringActionController
 {
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(MS1Controller.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS1Controller.class);
 
     public MS1Controller()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 

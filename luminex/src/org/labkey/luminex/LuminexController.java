@@ -23,8 +23,8 @@ import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -37,7 +37,6 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -66,29 +65,29 @@ import org.labkey.api.study.actions.AssayHeaderView;
 import org.labkey.api.study.actions.BaseAssayAction;
 import org.labkey.api.study.actions.ProtocolIdForm;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayUrls;
+import org.labkey.api.study.assay.AssayView;
 import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.FileStream;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.WebPartView;
+import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
 import org.labkey.luminex.model.GuideSet;
 import org.labkey.luminex.query.LuminexProtocolSchema;
-import org.labkey.luminex.AnalyteDefaultValueService.AnalyteDefaultTransformer;
+import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.validation.BindException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -110,13 +109,10 @@ public class LuminexController extends SpringActionController
 {
     private static final Logger _log = Logger.getLogger(LuminexController.class);
 
-    private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class,
-            LuminexUploadWizardAction.class
-    );
+    private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class, LuminexUploadWizardAction.class);
 
     public LuminexController()
     {
-        super();
         setActionResolver(_resolver);
     }
 
@@ -509,7 +505,7 @@ public class LuminexController extends SpringActionController
             // NOTE: consider being smarter here and intersecting the list of desired columns with dl.getColumns()
             // NOTE: consider making case-insentive
             ColumnDescriptor[] columns = dl.getColumns();
-            Boolean err = true;
+            boolean err = true;
 
             List<String> analytes = new ArrayList<>();
             List<String> positivityThresholds = new ArrayList<>();
@@ -770,7 +766,7 @@ public class LuminexController extends SpringActionController
                 {
                     while (rs.next())
                     {
-                        if (rs.getBoolean("includeInGuideSetCalculation") == true)
+                        if (rs.getBoolean("includeInGuideSetCalculation"))
                             memberRuns.add(rs.getString("name"));
                         else
                             userRuns.add(rs.getString("name"));

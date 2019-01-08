@@ -54,14 +54,14 @@ import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
-    static DefaultActionResolver _actionResolver = new DefaultActionResolver(
-            MicroarrayController.class,
-            MicroarrayBulkPropertiesTemplateAction.class,
-            MicroarrayUploadWizardAction.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(
+        MicroarrayController.class,
+        MicroarrayBulkPropertiesTemplateAction.class,
+        MicroarrayUploadWizardAction.class
+    );
 
     public MicroarrayController()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 

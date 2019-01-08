@@ -48,11 +48,10 @@ import java.util.*;
  */
 public class ProteinController extends SpringActionController
 {
-    private static DefaultActionResolver _actionResolver = new DefaultActionResolver(ProteinController.class);
+    private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ProteinController.class);
     
     public ProteinController()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
