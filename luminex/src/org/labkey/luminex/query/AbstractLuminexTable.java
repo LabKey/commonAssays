@@ -26,7 +26,6 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.luminex.LuminexDataHandler;
-import org.labkey.luminex.query.LuminexProtocolSchema;
 
 /**
  * User: jeckels
@@ -57,12 +56,6 @@ public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocol
     }
 
     protected abstract SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container);
-
-    @Override
-    public String getPublicSchemaName()
-    {
-        return _userSchema.getSchemaName();
-    }
 
     // param: titrationSinglePointControlSwitch - TitrationId for AnalyteTitration, SinglePointControlId for AnalyteSinglePointControl
     public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType, String titrationSinglePointControlSwitch)
