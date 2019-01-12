@@ -822,7 +822,6 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemInputXmlComposite.java -
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemSequenceDbComposite.java -text
 ms2/module.properties -text
-ms2/resources/credits/installer.txt -text
 ms2/resources/credits/jars.txt -text
 ms2/resources/credits/scripts.txt -text
 ms2/resources/queries/ms2/CometPeptides/ProteinProphet.qview.xml -text
