@@ -46,7 +46,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 @Category({DailyA.class, Assays.class})
-@BaseWebDriverTest.ClassTimeout(minutes = 13)
+@BaseWebDriverTest.ClassTimeout(minutes = 15)
 public final class LuminexPositivityTest extends LuminexTest
 {
     private static List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
