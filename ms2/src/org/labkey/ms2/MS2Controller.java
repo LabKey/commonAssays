@@ -6394,9 +6394,6 @@ public class MS2Controller extends SpringActionController
 
             return true;
         }
-
-        @Override
-        public void validateCommand(DetailsForm target, Errors errors) {}
     }
 
     @RequiresPermission(UpdatePermission.class)

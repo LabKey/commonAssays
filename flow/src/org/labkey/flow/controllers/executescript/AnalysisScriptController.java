@@ -412,11 +412,6 @@ public class AnalysisScriptController extends BaseFlowController
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
-
-        public boolean doAction(Object o, BindException errors)
-        {
-            return true;
-        }
     }
 
     abstract static public class Page extends FlowPage

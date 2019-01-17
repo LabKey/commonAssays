@@ -90,12 +90,6 @@ public class FeatureAnnotationSetController extends SpringActionController
         {
             return new ActionURL(ManageAction.class, getContainer());
         }
-
-        @Override
-        public boolean doAction(Object o, BindException errors)
-        {
-            return true;
-        }
     }
 
     @RequiresPermission(ReadPermission.class)
