@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.LabKeyError;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.OldRedirectAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -124,7 +124,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class UploadAction extends RedirectAction<PipelinePathForm>
+    public class UploadAction extends OldRedirectAction<PipelinePathForm>
     {
         public ActionURL getSuccessURL(PipelinePathForm form)
         {

@@ -16,7 +16,7 @@
 
 package org.labkey.microarray.controllers;
 
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.OldRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -44,7 +44,6 @@ import org.labkey.microarray.PendingMageMLFilesView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
@@ -124,7 +123,7 @@ public class MicroarrayController extends SpringActionController
      * 4. The Analyst plugin takes over from here.
      */
     @RequiresPermission(ReadPermission.class)
-    public class GeneDataAnalysisAction extends RedirectAction<PipelinePathForm>
+    public class GeneDataAnalysisAction extends OldRedirectAction<PipelinePathForm>
     {
         private URLHelper _successURL;
 

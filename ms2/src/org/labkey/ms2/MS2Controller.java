@@ -32,8 +32,8 @@ import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.OldRedirectAction;
 import org.labkey.api.action.QueryViewAction;
-import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleForwardAction;
@@ -44,8 +44,8 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.*;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -126,8 +126,6 @@ import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.AbstractQueryMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
-import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
 import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
@@ -135,7 +133,6 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
-import org.labkey.ms2.pipeline.mascot.MascotSearchProtocolFactory;
 import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
@@ -3527,7 +3524,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class PurgeRunsAction extends RedirectAction
+    public class PurgeRunsAction extends OldRedirectAction
     {
         private int _days;
 
@@ -6355,7 +6352,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class ToggleValidQuantitationAction extends RedirectAction<DetailsForm>
+    public class ToggleValidQuantitationAction extends OldRedirectAction<DetailsForm>
     {
         @Override
         public URLHelper getSuccessURL(DetailsForm detailsForm)
