@@ -68,7 +68,6 @@ import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowWell;
-import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.script.AnalyzeJob;
 import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.script.ImportResultsJob;
@@ -408,7 +407,7 @@ public class AnalysisScriptController extends BaseFlowController
     @RequiresPermission(InsertPermission.class)
     public class ShowUploadRunsAction extends RedirectAction
     {
-        public ActionURL getSuccessURL(Object o)
+        public ActionURL getURL(Object o, Errors errors)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }

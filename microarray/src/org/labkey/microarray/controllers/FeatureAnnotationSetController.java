@@ -86,7 +86,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     public class BeginAction extends RedirectAction
     {
         @Override
-        public URLHelper getSuccessURL(Object o)
+        public URLHelper getURL(Object o, Errors errors)
         {
             return new ActionURL(ManageAction.class, getContainer());
         }
