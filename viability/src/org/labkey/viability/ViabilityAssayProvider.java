@@ -169,7 +169,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             new ResultDomainProperty(VIABILITY_PROPERTY_NAME, VIABILITY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent viable cell count"),
             new ResultDomainProperty(RECOVERY_PROPERTY_NAME, RECOVERY_PROPERTY_NAME, PropertyType.DOUBLE, "Percent recovered cell count (viable cells / (sum of specimen vials original cell count)"),
 
-            // NOTE: TargetStudy is a column on the viability.results table, but we don't create a property descriptor for it by deafult.
+            // NOTE: TargetStudy is a column on the viability.results table, but we don't create a property descriptor for it by default.
         };
 
         LinkedHashMap<String, ResultDomainProperty> map = new LinkedHashMap<>();
