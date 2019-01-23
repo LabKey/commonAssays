@@ -1453,7 +1453,7 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilteringComparisonForm.class, false);
         }
 
-        protected PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
+        protected @NotNull PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
         {
             PeptideFilteringComparisonForm form = super.getCommand(request);
             Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
@@ -1509,7 +1509,7 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilteringComparisonForm.class, false);
         }
 
-        protected PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
+        protected @NotNull PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
         {
             PeptideFilteringComparisonForm form = super.getCommand(request);
             Map<String, String> prefs = getPreferences(ComparePeptideQuerySetupAction.class);
@@ -2307,7 +2307,7 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class, false);
         }
 
-        protected SpectraCountForm getCommand(HttpServletRequest request) throws Exception
+        protected @NotNull SpectraCountForm getCommand(HttpServletRequest request) throws Exception
         {
             SpectraCountForm form = super.getCommand(request);
             Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
