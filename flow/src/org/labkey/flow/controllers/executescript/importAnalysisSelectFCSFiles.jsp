@@ -29,6 +29,7 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.Objects" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -60,7 +61,7 @@
     function clearExistingRunIdCombo()
     {
         var combo = document.forms.importAnalysis.existingKeywordRunId;
-        if (combo && combo.tagName.toLowerCase() == "select")
+        if (combo && combo.tagName.toLowerCase() === "select")
             combo.selectedIndex = 0;
     }
 
@@ -70,7 +71,7 @@
         {
             fileBrowser.getGrid().getSelectionModel().clearSelections();
             selectRecord(null);
-            fileBrowser.setDisabled(selectedValue != "<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>");
+            fileBrowser.setDisabled(selectedValue !== "<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>");
         }
     }
 
@@ -93,7 +94,7 @@
 
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
-       <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.None)%>
+       <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.None))%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with the <%=h(workspace.getKindName())%>.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
@@ -111,7 +112,7 @@
 %>
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
-       <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Included)%>
+       <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Included))%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
 <%
@@ -120,7 +121,7 @@
 %>
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
-        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Previous)%>
+        <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Previous))%>
         <%=disabled(keywordRuns == null || keywordRuns.isEmpty())%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
@@ -132,7 +133,7 @@
 
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
-        <%=checked(form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse)%>
+        <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Browse))%>
        onclick="clearSelections(this.value); renderFileBrowser();" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"> Browse the pipeline for a directory of FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
@@ -218,7 +219,7 @@
                 fileBrowser.on("selectionchange", function(){
                     var path = null;
                     var record = fileBrowser.getGrid().getSelectionModel().getSelection();
-                    if (record && record.length == 1)
+                    if (record && record.length === 1)
                     {
                         path = record[0].data.id.replace(fileBrowser.getBaseURL(), '/');
                         if (!record[0].data.collection)
@@ -236,7 +237,7 @@
 
         Ext4.onReady(function()
         {
-            <% if (form.getSelectFCSFilesOption() == ImportAnalysisForm.SelectFCSFileOption.Browse) { %>
+            <% if (Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Browse)) { %>
             renderFileBrowser();
             <% } %>
         });
