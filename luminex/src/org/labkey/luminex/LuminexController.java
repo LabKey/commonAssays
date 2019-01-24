@@ -482,12 +482,7 @@ public class LuminexController extends SpringActionController
     @RequiresPermission(DesignAssayPermission.class)
     public class ImportDefaultValuesAction extends AbstractQueryImportAction<ProtocolIdForm>
     {
-        ExpProtocol _protocol;
-
-        public ImportDefaultValuesAction()
-        {
-            super(ProtocolIdForm.class);
-        }
+        private ExpProtocol _protocol;
 
         @Override
         protected void initRequest(ProtocolIdForm form) throws ServletException
