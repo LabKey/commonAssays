@@ -15,7 +15,6 @@
  */
 package org.labkey.test.tests.ms2;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
@@ -73,7 +72,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             Sheet sheet = wb.getSheetAt(0);
             return sheet.getLastRowNum() - 1; // +1 for zero-based, -2 for header rows
         }
-        catch (IOException | InvalidFormatException fail)
+        catch (IOException fail)
         {
             throw new RuntimeException("Error reading exported grid file", fail);
         }
@@ -88,7 +87,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             Sheet sheet = wb.getSheetAt(0);
             return sheet.getLastRowNum(); // +1 for zero-based, -1 for header row
         }
-        catch (IOException | InvalidFormatException fail)
+        catch (IOException fail)
         {
             throw new RuntimeException("Error reading exported grid file", fail);
         }
