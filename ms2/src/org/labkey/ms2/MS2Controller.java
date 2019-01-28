@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -5124,7 +5123,7 @@ public class MS2Controller extends SpringActionController
 
     @SuppressWarnings({"UnusedDeclaration"})
     @RequiresPermission(ReadPermission.class)
-    public class MS2SearchOptionsAction extends ApiAction<MS2SearchOptions>
+    public class MS2SearchOptionsAction extends MutatingApiAction<MS2SearchOptions>
     {
         private static final String CATEGORY = "MS2SearchOptions";
 

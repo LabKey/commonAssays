@@ -19,10 +19,10 @@ package org.labkey.luminex;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
@@ -611,7 +611,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class SaveExclusionAction extends ApiAction<LuminexSaveExclusionsForm>
+    public class SaveExclusionAction extends MutatingApiAction<LuminexSaveExclusionsForm>
     {
         @Override
         public void validateForm(LuminexSaveExclusionsForm form, Errors errors)

@@ -15,10 +15,10 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -57,7 +57,7 @@ import java.util.Map;
 
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(9.1)
-public class GetNabRunsAction extends ApiAction<GetNabRunsAction.GetNabRunsForm>
+public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabRunsForm>
 {
     public static class GetNabRunsForm extends GetNabRunsBaseForm
     {

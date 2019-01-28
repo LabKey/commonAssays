@@ -57,6 +57,7 @@ function init()
 
     LABKEY.Ajax.request({
         url: LABKEY.ActionURL.buildURL('ms2', 'mS2SearchOptions.api'),
+        method: 'POST',
         scope: this,
         success: LABKEY.Utils.getCallbackWrapper(function(response)
         {
@@ -385,6 +386,7 @@ function setQueryOptions()
             haveSearchOptionsChanged = false;
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL('ms2', 'mS2SearchOptions.api'),
+                method: 'POST',
                 params: { saveValues: true, searchEngine: Ext.getCmp('filter-engine').getValue()}
             });
         }

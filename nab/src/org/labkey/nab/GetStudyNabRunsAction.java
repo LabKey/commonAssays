@@ -15,10 +15,10 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -45,7 +45,7 @@ import java.util.Set;
 
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(10.1)
-public class GetStudyNabRunsAction extends ApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>
+public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>
 {
     Map<Integer, Map<String, Object>> _extraObjectIdProps = new HashMap<>();
 

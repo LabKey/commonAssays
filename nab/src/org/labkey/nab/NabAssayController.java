@@ -25,13 +25,14 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
+import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -816,7 +817,7 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class GetQCControlInfoAction extends ApiAction<NabQCForm>
+    public class GetQCControlInfoAction extends ReadOnlyApiAction<NabQCForm>
     {
         public ApiResponse execute(NabQCForm form, BindException errors) throws Exception
         {
@@ -1015,9 +1016,9 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SaveQCControlInfoAction extends ApiAction<QCControlInfo>
+    public class SaveQCControlInfoAction extends MutatingApiAction<QCControlInfo>
     {
-        ExpRun _run;
+        private ExpRun _run;
 
         @Override
         public void validateForm(QCControlInfo form, Errors errors)
@@ -1245,7 +1246,7 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermission(ReadPermission.class)
     @Marshal(Marshaller.Jackson)
-    public class GetExcludedWellsAction extends ApiAction<RenderAssayBean>
+    public class GetExcludedWellsAction extends ReadOnlyApiAction<RenderAssayBean>
     {
         @Override
         public ApiResponse execute(RenderAssayBean form, BindException errors)

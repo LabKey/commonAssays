@@ -15,10 +15,10 @@
  */
 package org.labkey.nab;
 
-import org.labkey.api.action.ApiAction;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermission;
@@ -37,7 +37,7 @@ import java.util.Map;
 
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(10.2)
-public class GetStudyNabGraphURLAction extends ApiAction<GraphSelectedForm>
+public class GetStudyNabGraphURLAction extends ReadOnlyApiAction<GraphSelectedForm>
 {
     @Override
     public ApiResponse execute(GraphSelectedForm form, BindException errors)
