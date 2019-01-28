@@ -3523,22 +3523,29 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class PurgeRunsAction extends OldRedirectAction
+    public class PurgeRunsAction extends FormHandlerAction
     {
         private int _days;
 
-        public ActionURL getSuccessURL(Object o)
+        @Override
+        public void validateCommand(Object target, Errors errors)
         {
-            return getShowMS2AdminURL(_days);
         }
 
-        public boolean doAction(Object o, BindException errors)
+        @Override
+        public boolean handlePost(Object o, BindException errors)
         {
             _days = getDays();
 
             MS2Manager.purgeDeleted(_days);
 
             return true;
+        }
+
+        @Override
+        public ActionURL getSuccessURL(Object o)
+        {
+            return getShowMS2AdminURL(_days);
         }
     }
 
