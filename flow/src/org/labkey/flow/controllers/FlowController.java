@@ -585,7 +585,7 @@ public class FlowController extends BaseFlowController
         public void testActionPermissions()
         {
             User user = TestContext.get().getUser();
-            assertTrue(user.isInSiteAdminGroup());
+            assertTrue(user.hasSiteAdminPermission());
 
             FlowController controller = new FlowController();
 

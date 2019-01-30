@@ -6741,7 +6741,7 @@ public class MS2Controller extends SpringActionController
         public void testActionPermissions()
         {
             User user = TestContext.get().getUser();
-            assertTrue(user.isInSiteAdminGroup());
+            assertTrue(user.hasSiteAdminPermission());
 
             MS2Controller controller = new MS2Controller();
 
