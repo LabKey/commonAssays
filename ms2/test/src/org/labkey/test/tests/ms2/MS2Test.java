@@ -16,6 +16,7 @@
 
 package org.labkey.test.tests.ms2;
 
+import org.junit.Assert;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
@@ -458,9 +459,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore(PEPTIDE3, PEPTIDE4);
         assertTextNotPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T",
-                "Orig Score",
-                "Expect",
-                "SeqHits");
+                "Orig Score");
+
+        DataRegionTable drt = new DataRegionTable("MS2Peptides", getDriver());
+        List<String> columnHeaders = drt.getColumnNames();
+        Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
+        Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
         log("Test Ignore View Filter");
         peptidesTable.clickApplyGridFilter();
@@ -476,9 +480,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
         assertTextNotPresent("K.LLASMLAK.A",
-                "R.GGNEESTK.T",
-                "Expect",
-                "SeqHits");
+                "R.GGNEESTK.T");
+
+        drt = new DataRegionTable("MS2Peptides", getDriver());
+        columnHeaders = drt.getColumnNames();
+        Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
+        Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
         log("Test exporting Query - Peptides grouping");
         log("Test exporting in TSV");
@@ -493,9 +500,12 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE1, PEPTIDE2);
         assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE3, PEPTIDE4);
         assertTextNotPresent(allPeptidesSearch, "K.LLASMLAK.A",
-                "R.GGNEESTK.T",
-                "Expect",
-                "SeqHits");
+                "R.GGNEESTK.T");
+
+        drt = new DataRegionTable("MS2Peptides", getDriver());
+        columnHeaders = drt.getColumnNames();
+        Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
+        Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
         log("Test exporting in AMT");
         File allAMTFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "AMT"));
@@ -536,9 +546,13 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test default view");
         peptidesTable.goToView("default");
         assertTextPresent("K.LLASMLAK.A",
-                "R.GGNEESTK.T",
-                "Expect",
-                "SeqHits");
+                "R.GGNEESTK.T");
+
+        drt = new DataRegionTable("MS2Peptides", getDriver());
+        columnHeaders = drt.getColumnNames();
+        Assert.assertTrue("Column 'Expect' is not present it should be.", columnHeaders.contains("Expect"));
+        Assert.assertTrue("Column 'SeqHits' is not present it should be.", columnHeaders.contains("SeqHits"));
+
         assertTextBefore(PEPTIDE2, PEPTIDE1);
         assertTextBefore(PEPTIDE4, PEPTIDE3);
         assertTextNotPresent("Next AA");
@@ -547,9 +561,12 @@ public class MS2Test extends AbstractMS2ImportTest
         peptidesTable.goToView(VIEW4);
         assertTextBefore(PEPTIDE1, PEPTIDE2);
         assertTextBefore(PEPTIDE3, PEPTIDE4);
-        assertTextNotPresent("R.GGNEESTK.T",
-                "Expect",
-                "SeqHits");
+        assertTextNotPresent("R.GGNEESTK.T");
+
+        drt = new DataRegionTable("MS2Peptides", getDriver());
+        columnHeaders = drt.getColumnNames();
+        Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
+        Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
         log("Test changing default view");
         _customizeViewsHelper.openCustomizeViewPanel();
@@ -579,9 +596,13 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.deleteView();
         assertTextPresent("K.LLASMLAK.A",
-                "R.GGNEESTK.T",
-                "Expect",
-                "SeqHits");
+                "R.GGNEESTK.T");
+
+        drt = new DataRegionTable("MS2Peptides", getDriver());
+        columnHeaders = drt.getColumnNames();
+        Assert.assertTrue("Column 'Expect' is not present it should be.", columnHeaders.contains("Expect"));
+        Assert.assertTrue("Column 'SeqHits' is not present it should be.", columnHeaders.contains("SeqHits"));
+
         assertTextBefore(PEPTIDE2, PEPTIDE1);
         assertTextBefore(PEPTIDE4, PEPTIDE3);
         assertTextNotPresent("Next AA");
