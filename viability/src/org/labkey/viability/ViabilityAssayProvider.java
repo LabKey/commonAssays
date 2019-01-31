@@ -421,7 +421,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             }
 
             // Force recalc of all specimen aggregates (mostly for testing)
-            if (user.isSiteAdmin())
+            if (user.hasSiteAdminPermission())
             {
                 ActionURL url = new ActionURL(ViabilityController.RecalculateSpecimenAggregatesAction.class, c);
                 url.addParameter("rowId", protocol.getRowId());
