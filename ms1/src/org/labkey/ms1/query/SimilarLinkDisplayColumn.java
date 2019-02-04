@@ -55,7 +55,7 @@ public class SimilarLinkDisplayColumn extends DataColumn
         assert val instanceof Integer : "Value for SimilarLinkDisplayColumn was not an Integer!";
         int featureId = ((Integer)val).intValue();
         _similarUrl.replaceParameter(MS1Controller.SimilarSearchForm.ParamNames.featureId.name(), String.valueOf(featureId));
-        out.write(PageFlowUtil.textLink("similar", _similarUrl.getLocalURIString()));
+        out.write(PageFlowUtil.textLink("similar", _similarUrl));
     }
 
     public void renderTitle(RenderContext ctx, Writer out) throws IOException

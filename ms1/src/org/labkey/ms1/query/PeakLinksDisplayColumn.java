@@ -68,12 +68,12 @@ public class PeakLinksDisplayColumn extends DataColumn
         ActionURL detailsUrl = _baseDetailsUrl.clone();
         detailsUrl.addParameter("featureId", featureId.intValue());
 
-        out.write(PageFlowUtil.textLink("details", detailsUrl.getLocalURIString()));
+        out.write(PageFlowUtil.textLink("details", detailsUrl));
 
         ActionURL peaksUrl = _basePeaksUrl.clone();
         peaksUrl.addParameter("featureId", featureId.intValue());
 
-        out.write("&nbsp;" + PageFlowUtil.textLink("peaks", peaksUrl.getLocalURIString()));
+        out.write("&nbsp;" + PageFlowUtil.textLink("peaks", peaksUrl));
     }
 
     public void renderTitle(RenderContext ctx, Writer out) throws IOException
