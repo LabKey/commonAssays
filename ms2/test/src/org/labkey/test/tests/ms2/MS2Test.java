@@ -462,7 +462,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "Orig Score");
 
         DataRegionTable drt = new DataRegionTable("MS2Peptides", getDriver());
-        List<String> columnHeaders = drt.getColumnNames();
+        List<String> columnHeaders = drt.getColumnLabels();
         Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
         Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
@@ -483,7 +483,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.GGNEESTK.T");
 
         drt = new DataRegionTable("MS2Peptides", getDriver());
-        columnHeaders = drt.getColumnNames();
+        columnHeaders = drt.getColumnLabels();
         Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
         Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
@@ -503,7 +503,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.GGNEESTK.T");
 
         drt = new DataRegionTable("MS2Peptides", getDriver());
-        columnHeaders = drt.getColumnNames();
+        columnHeaders = drt.getColumnLabels();
         Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
         Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
@@ -549,7 +549,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.GGNEESTK.T");
 
         drt = new DataRegionTable("MS2Peptides", getDriver());
-        columnHeaders = drt.getColumnNames();
+        columnHeaders = drt.getColumnLabels();
         Assert.assertTrue("Column 'Expect' is not present it should be.", columnHeaders.contains("Expect"));
         Assert.assertTrue("Column 'SeqHits' is not present it should be.", columnHeaders.contains("SeqHits"));
 
@@ -564,7 +564,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("R.GGNEESTK.T");
 
         drt = new DataRegionTable("MS2Peptides", getDriver());
-        columnHeaders = drt.getColumnNames();
+        columnHeaders = drt.getColumnLabels();
         Assert.assertFalse("Column 'Expect' is present it should not be.", columnHeaders.contains("Expect"));
         Assert.assertFalse("Column 'SeqHits' is present it should not be.", columnHeaders.contains("SeqHits"));
 
@@ -599,7 +599,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "R.GGNEESTK.T");
 
         drt = new DataRegionTable("MS2Peptides", getDriver());
-        columnHeaders = drt.getColumnNames();
+        columnHeaders = drt.getColumnLabels();
         Assert.assertTrue("Column 'Expect' is not present it should be.", columnHeaders.contains("Expect"));
         Assert.assertTrue("Column 'SeqHits' is not present it should be.", columnHeaders.contains("SeqHits"));
 
