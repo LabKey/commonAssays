@@ -30,6 +30,7 @@ import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.LoggedParam;
 import org.labkey.test.util.PerlHelper;
 import org.labkey.test.util.PortalHelper;
 import org.openqa.selenium.By;
@@ -46,7 +47,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 
 @Category({DailyA.class, Assays.class})
-@BaseWebDriverTest.ClassTimeout(minutes = 15)
+@BaseWebDriverTest.ClassTimeout(minutes = 20) // Positivity uploads can take a while
 public final class LuminexPositivityTest extends LuminexTest
 {
     private static List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
@@ -74,7 +75,7 @@ public final class LuminexPositivityTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
-    @Test
+    @Test (timeout = 14) // Preferable to have the individual test time out rather than the class
     public void testPositivity()
     {
         Assume.assumeTrue("Skipping test on SQL Server: TODO 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
@@ -353,7 +354,8 @@ public final class LuminexPositivityTest extends LuminexTest
         return l;
     }
 
-    private void checkDescriptionParsing(String description, String specimenID, String participantID, String visitID, String date)
+    @LogMethod (quiet = true)
+    private void checkDescriptionParsing(@LoggedParam String description, String specimenID, String participantID, String visitID, String date)
     {
         DataRegionTable drt = new DataRegionTable("Data", this);
         drt.ensureColumnsPresent("Description", "Specimen ID", "Participant ID", "Visit ID", "Date");
@@ -364,7 +366,8 @@ public final class LuminexPositivityTest extends LuminexTest
         assertEquals(date, drt.getDataAsText(rowID, "Date"));
     }
 
-    private void checkPositivityValues(String type, int numExpected, String[] positivityWells)
+    @LogMethod (quiet = true)
+    private void checkPositivityValues(@LoggedParam String type, int numExpected, String[] positivityWells)
     {
         // verify that we are already on the Data results view
         assertElementPresent(Locator.tagWithText("span", "Exclusions"));
