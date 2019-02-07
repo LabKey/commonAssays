@@ -22,7 +22,6 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -59,10 +58,9 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
-        // Allow for multiple sample sets, but assume we're displaying data from whichever is currently active.
-        String activeSampleSet = ExperimentService.get().ensureActiveSampleSet(schema.getContainer()).getName();
-        sampleIdColumn.setFk(new QueryForeignKey(SamplesSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
-                activeSampleSet,"RowId","Name"));
+        // Lookup to exp.materials since we don't know the sample set
+        sampleIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
+               "materials","RowId","Name"));
 
         SQLFragment runSQL = new SQLFragment("(SELECT d.RunId FROM ");
         runSQL.append(ExperimentService.get().getTinfoData(), "d");

@@ -124,9 +124,6 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
             }
         }
 
-        ActionURL showSamplesURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleSetURL(ExperimentService.get().ensureActiveSampleSet(c));
-        sb.append(PageFlowUtil.textLink("edit samples", showSamplesURL));
-
         return new HtmlView(sb.toString());
     }
 
