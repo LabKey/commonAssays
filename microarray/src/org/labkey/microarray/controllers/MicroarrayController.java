@@ -16,7 +16,8 @@
 
 package org.labkey.microarray.controllers;
 
-import org.labkey.api.action.OldRedirectAction;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.action.RedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -44,9 +45,12 @@ import org.labkey.microarray.PendingMageMLFilesView;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -123,18 +127,10 @@ public class MicroarrayController extends SpringActionController
      * 4. The Analyst plugin takes over from here.
      */
     @RequiresPermission(ReadPermission.class)
-    public class GeneDataAnalysisAction extends OldRedirectAction<PipelinePathForm>
+    public class GeneDataAnalysisAction extends RedirectAction<PipelinePathForm>
     {
-        private URLHelper _successURL;
-
         @Override
-        public URLHelper getSuccessURL(PipelinePathForm pipelinePathForm)
-        {
-            return _successURL;
-        }
-
-        @Override
-        public boolean doAction(PipelinePathForm form, BindException errors) throws Exception
+        public @Nullable URLHelper getURL(PipelinePathForm form, Errors errors) throws URISyntaxException, IOException
         {
             String baseURL = GeneDataPipelineProvider.getGeneDataBaseURL();
             File root = GeneDataPipelineProvider.getGeneDataFileRoot();
@@ -165,8 +161,7 @@ public class MicroarrayController extends SpringActionController
                 FileUtil.copyFile(selectedFile, new File(analysisDir, selectedFile.getName()));
             }
 
-            _successURL = new URLHelper(baseURL + analysisDir.getAbsolutePath());
-            return true;
+            return new URLHelper(baseURL + analysisDir.getAbsolutePath());
         }
     }
 
