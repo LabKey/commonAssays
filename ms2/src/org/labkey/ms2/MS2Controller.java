@@ -5717,7 +5717,12 @@ public class MS2Controller extends SpringActionController
 
         public Float desiredFdrToFloat()
         {
-            return StringUtils.trimToNull(this.desiredFdr) == null ? null : Float.valueOf(desiredFdr);
+            try
+            {
+                return StringUtils.trimToNull(this.desiredFdr) == null ? null : Float.valueOf(desiredFdr);
+            }
+            catch (NumberFormatException ignored) {}
+            return null;
         }
     }
 
