@@ -562,29 +562,7 @@ public class MS2Schema extends UserSchema
         });
 
         result.getColumn("SeqId").setLabel("Protein");
-        result.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                SequencesTableInfo result = createSequencesTable();
-                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
-                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
-                // this condition because it causes the query plan to flip to something that does a much more efficient
-                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
-                // small (though not tiny) Postgres dev database
-                if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
-                {
-                    SQLFragment sql = new SQLFragment();
-                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                    sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
-                    appendRunInClause(sql);
-                    sql.append(")))");
-
-                    result.addCondition(sql, FieldKey.fromParts("SeqId"));
-                }
-                return result;
-            }
-        });
+        result.getColumn("SeqId").setFk(createSequencesLookup());
 
         if (_runs != null && filterByRuns)
         {
@@ -1484,35 +1462,37 @@ public class MS2Schema extends UserSchema
             filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
-        else
-        {
-            baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
-            baseTable.getColumn("SeqId").setFk(new LookupForeignKey("SeqId")
-            {
-                public TableInfo getLookupTableInfo()
-                {
-                    SequencesTableInfo result = createSequencesTable();
-                    // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
-                    // Performance on a SQLServer installation with a large number of runs and sequences is much better with
-                    // this condition because it causes the query plan to flip to something that does a much more efficient
-                    // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
-                    // small (though not tiny) Postgres dev database
-                    if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
-                    {
-                        SQLFragment sql = new SQLFragment();
-                        sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                        sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
-                        appendRunInClause(sql);
-                        sql.append(")))");
-
-                        result.addCondition(sql, FieldKey.fromParts("SeqId"));
-                    }
-                    return result;
-                }
-            });
-        }
+        baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
+        baseTable.getColumn("SeqId").setFk(createSequencesLookup());
 
         return baseTable;
+    }
+
+    private ForeignKey createSequencesLookup()
+    {
+        return new LookupForeignKey("SeqId")
+        {
+            public TableInfo getLookupTableInfo()
+            {
+                SequencesTableInfo result = createSequencesTable();
+                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
+                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
+                // this condition because it causes the query plan to flip to something that does a much more efficient
+                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
+                // small (though not tiny) Postgres dev database
+                if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
+                {
+                    SQLFragment sql = new SQLFragment();
+                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                    sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
+                    appendRunInClause(sql);
+                    sql.append(")))");
+
+                    result.addCondition(sql, FieldKey.fromParts("SeqId"));
+                }
+                return result;
+            }
+        };
     }
 
 }
