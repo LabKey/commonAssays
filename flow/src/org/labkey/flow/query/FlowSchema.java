@@ -334,7 +334,7 @@ public class FlowSchema extends UserSchema
         return ret;
     }
 
-    public ActionURL urlFor(QueryAction action, QueryDefinition queryDef)
+    public ActionURL urlFor(QueryAction action, @NotNull QueryDefinition queryDef)
     {
         ActionURL ret = super.urlFor(action, queryDef);
         addParams(ret);
