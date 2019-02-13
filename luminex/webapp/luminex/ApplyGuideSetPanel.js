@@ -207,7 +207,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         // column model for the list of guide sets that can be "applied" to the runs
         var guideSetColumnModelColumns = [
             guideSetsSelModel,
-            {header: 'Created By', dataIndex: 'CreatedBy/DisplayName', width: 100},
+            {header: 'Created By', dataIndex: 'CreatedBy/DisplayName', renderer: this.encodingRenderer, width: 100},
             {header: 'Created', dataIndex: 'Created', renderer: this.dateRenderer},
             {header: 'Type', dataIndex: 'ValueBased', renderer: this.typeRenderer, width: 75},
             {header: 'Current', dataIndex: 'CurrentGuideSet', width: 50},
