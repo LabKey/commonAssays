@@ -423,7 +423,7 @@ public class FlowOverview extends Overview
 
                 if (_canUpdate)
                 {
-                    Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples(true));
+                    Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples());
                     ret.addAction(uploadAction);
                     
                     if (protocol.getSampleSetJoinFields().size() != 0)
@@ -442,7 +442,7 @@ public class FlowOverview extends Overview
             }
             else if (_canUpdate)
             {
-                Action action = new Action("Upload Sample Descriptions", protocol.urlUploadSamples(false));
+                Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleSet());
                 action.setDescriptionHTML("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>");
                 ret.addAction(action);
             }

@@ -448,12 +448,22 @@
         <%
         if (_sampleSet != null)
         {
-            %><div><%=textLink("Show Samples", _protocol.urlShowSamples())%></div><%
+        %>
+            <div><%=textLink("Show Samples", _protocol.urlShowSamples())%></div>
+            <div><%=textLink("Upload Samples", _protocol.urlUploadSamples())%></div>
+        <%
         }
-        %><div><%=textLink("Upload Samples", _protocol.urlUploadSamples(_sampleSet != null))%></div><%
+        else
+        {
+        %>
+            <div><%=textLink("Upload Samples", _protocol.urlCreateSampleSet())%></div>
+        <%
+        }
         if (_fcsAnalysisCount > 0)
         {
-            %><div><%=textLink("Edit Metadata", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div><%
+        %>
+            <div><%=textLink("Edit Metadata", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div>
+        <%
         }
 
         int jobCount = PipelineService.get().getQueuedStatusFiles(c).size();

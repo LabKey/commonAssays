@@ -28,7 +28,7 @@
     {
         %>
         <p>You must first upload a sample set before specifying how to match samples to FCS files.</p>
-        <%=textLink("Upload Sample Descriptions", form.getProtocol().urlUploadSamples(false))%>
+        <%=textLink("Upload Sample Descriptions", form.getProtocol().urlCreateSampleSet())%>
         <%
     }
     else

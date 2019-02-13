@@ -251,16 +251,17 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         FlowManager.get().flowObjectModified();
     }
 
-    public ActionURL urlUploadSamples(boolean importMoreSamples)
+    public ActionURL urlCreateSampleSet()
     {
-        ActionURL ret = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowUploadMaterialsURL(getContainer());
-        ret.addParameter("name", SAMPLESET_NAME);
-        ret.addParameter("nameReadOnly", "true");
-        if (importMoreSamples)
-        {
-            ret.addParameter("importMoreSamples", "true");
-        }
-        return ret;
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleSetURL(getContainer());
+        url.addParameter("name", SAMPLESET_NAME);
+        url.addParameter("nameReadOnly", true);
+        return url;
+    }
+
+    public ActionURL urlUploadSamples()
+    {
+        return PageFlowUtil.urlProvider(ExperimentUrls.class).getImportSamplesURL(getContainer(), SAMPLESET_NAME);
     }
 
     public ActionURL urlShowSamples()

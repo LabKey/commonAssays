@@ -33,11 +33,11 @@
     Upload sample information and match samples with FCSFiles.<br>
     <% if (protocol.getSampleSet() == null) { %>
         No samples have been uploaded in this folder.<br>
-        <labkey:link href="<%=protocol.urlUploadSamples(false)%>" text="Upload samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create new sample set" /><br>
     <% } else { %>
         <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show sample set"/><br>
         <labkey:link href="<%=protocol.urlShowSamples()%>" text="Show samples joined to FCS Files" /><br>
-        <labkey:link href="<%=protocol.urlUploadSamples(true)%>" text="Upload more samples from a spreadsheet" /><br>
+        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
             <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
