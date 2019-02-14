@@ -131,6 +131,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
             autoScroll:true,
             width:1075,
             height:150,
+            ctCls:'selectedRunsGrid',
             loadMask:{msg:"Loading selected runs..."},
             store: selectedRunsStore,
             colModel: selectedRunsColModel,
@@ -234,6 +235,7 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.guideSetsGrid = new Ext.grid.GridPanel({
             autoHeight:true,
             width:1075,
+            ctCls:'guideSetsGrid',
             loadMask:{msg:"Loading guide sets..."},
             store: guideSetsStore,
             colModel: guideSetsColModel,

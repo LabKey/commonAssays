@@ -18,10 +18,14 @@ package org.labkey.test.util.luminex;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.Locators;
+import org.labkey.test.WebDriverWrapper;
 import org.labkey.test.tests.luminex.LuminexTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
+import org.labkey.test.util.LoggedParam;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 import java.util.Calendar;
@@ -31,6 +35,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.WebDriverWrapper.WAIT_FOR_JAVASCRIPT;
 
 public class LuminexGuideSetHelper
 {
@@ -113,7 +118,7 @@ public class LuminexGuideSetHelper
     }
 
     @LogMethod
-    public void editValueBasedGuideSet(Map<String, Double> metricInputs, String comment, boolean creating)
+    public void editValueBasedGuideSet(Map<String, Double> metricInputs, @LoggedParam String comment, boolean creating)
     {
         checkManageGuideSetHeader(creating);
 
@@ -155,7 +160,8 @@ public class LuminexGuideSetHelper
         _test.assertElementPresent(Locator.css(".guideset-tbl td").withText(guideSetType));
     }
 
-    private void setValueBasedMetricForm(Map<String, Double> metricInputs)
+    @LogMethod
+    private void setValueBasedMetricForm(@LoggedParam Map<String, Double> metricInputs)
     {
         for (Map.Entry<String, Double> metricEntry : metricInputs.entrySet())
         {
@@ -167,7 +173,7 @@ public class LuminexGuideSetHelper
     public void waitForGuideSetExtMaskToDisappear()
     {
         _test._ext4Helper.waitForMaskToDisappear();
-        _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
+        _test._extHelper.waitForExt3MaskToDisappear(WebDriverWrapper.WAIT_FOR_JAVASCRIPT);
         _test.waitForElementToDisappear(Locator.xpath("//div[contains(@class, 'x-window')][contains(@class, 'leveljenningsreport')]"));
         waitForLeveyJenningsTrendPlot();
         // Wait for the grid to populate as well.
@@ -189,27 +195,44 @@ public class LuminexGuideSetHelper
         _test.waitForElement(Locator.pageHeader("Manage Guide Sets"));
     }
 
-    @LogMethod
     public void applyGuideSetToRun(String network, String comment, boolean useCurrent)
     {
         applyGuideSetToRun(new String[]{network}, comment, useCurrent);
     }
 
     @LogMethod
-    public void applyGuideSetToRun(String[] networks, String comment, boolean useCurrent)
+    public void applyGuideSetToRun(@LoggedParam String[] networks, @LoggedParam String comment, boolean useCurrent)
     {
         for (String network : networks)
             _test.click(ExtHelper.locateGridRowCheckbox(network));
 
-        _test.scrollIntoView(_test.findButton("Apply Guide Set"));
-        _test.doAndWaitForPageSignal(() -> _test.clickButton("Apply Guide Set", 0), "guideSetSelectionChange");
+        WebElement applyGuideSetButton = _test.scrollIntoView(Locator.button("Apply Guide Set"));
+        _test.doAndWaitForPageSignal(applyGuideSetButton::click, "guideSetSelectionChange");
 
+        WebElement applyGuideSetWindow = ExtHelper.Locators.window("Apply Guide Set...").waitForElement(_test.getDriver(), WAIT_FOR_JAVASCRIPT);
+        WebElement selectedRunsGrid = Locator.byClass("selectedRunsGrid").waitForElement(applyGuideSetWindow, WAIT_FOR_JAVASCRIPT);
+        for (String network : networks)
+        {
+            Locator.byClass("x-grid3-cell").withText(network).waitForElement(selectedRunsGrid, WAIT_FOR_JAVASCRIPT);
+        }
+
+        WebElement guideSetsGrid = Locator.byClass("guideSetsGrid").waitForElement(applyGuideSetWindow, WAIT_FOR_JAVASCRIPT);
         if(!useCurrent)
-            _test.doAndWaitForPageSignal(() -> _test.click(ExtHelper.locateGridRowCheckbox(comment)), "guideSetSelectionChange");
+        {
+            WebElement guideSetCheckbox = ExtHelper.locateGridRowCheckbox(comment).findElement(guideSetsGrid);
+            _test.doAndWaitForPageSignal(guideSetCheckbox::click, "guideSetSelectionChange");
+            Locator.byClass("x-grid3-row-selected").descendant(Locator.tagWithText("td", comment)).waitForElement(guideSetsGrid, WAIT_FOR_JAVASCRIPT);
+        }
+        else
+        {
+            Locator.byClass("x-grid3-row-selected").waitForElement(guideSetsGrid, WAIT_FOR_JAVASCRIPT);
+        }
 
-        _test.scrollIntoView(_test.findButton("Apply Thresholds"));
-        _test.clickButton("Apply Thresholds", 0);
-        _test._extHelper.waitForExt3MaskToDisappear(BaseWebDriverTest.WAIT_FOR_JAVASCRIPT);
+        WebElement applyThresholdsButton = Locator.button("Apply Thresholds").findElement(applyGuideSetWindow);
+        _test.scrollIntoView(applyThresholdsButton);
+        applyThresholdsButton.click();
+        _test.shortWait().until(ExpectedConditions.invisibilityOf(applyGuideSetWindow));
+        _test._extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
         // verify that the plot is reloaded
         waitForLeveyJenningsTrendPlot();
     }
