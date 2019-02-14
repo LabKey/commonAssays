@@ -101,8 +101,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     public void ensureGuideSetsCreated()
     {
         _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
-        boolean needsRunBased = isTextPresent(RUN_BASED_COMMENT);
-        boolean needsValueBased = isTextPresent(VALUE_BASED_COMMENT);
+        boolean needsRunBased = !isTextPresent(RUN_BASED_COMMENT);
+        boolean needsValueBased = !isTextPresent(VALUE_BASED_COMMENT);
 
         if (needsRunBased)
             createRunBasedGuideSet();
