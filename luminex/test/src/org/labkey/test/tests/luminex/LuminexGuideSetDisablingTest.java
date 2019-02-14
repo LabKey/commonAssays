@@ -16,6 +16,7 @@
 package org.labkey.test.tests.luminex;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -28,6 +29,7 @@ import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ListHelper;
+import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 import org.openqa.selenium.WebElement;
 
@@ -93,11 +95,22 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
         for (int i = 0; i < GUIDE_SET_FILES.length; i++)
             _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, GUIDE_SET_FILES[i]);
-
-        createRunBasedGuideSet();
-        createValueBasedGuideSet();
     }
 
+    @Before
+    public void ensureGuideSetsCreated()
+    {
+        _guideSetHelper.goToManageGuideSetsPage(TEST_ASSAY_LUM);
+        boolean needsRunBased = isTextPresent(RUN_BASED_COMMENT);
+        boolean needsValueBased = isTextPresent(VALUE_BASED_COMMENT);
+
+        if (needsRunBased)
+            createRunBasedGuideSet();
+        if (needsValueBased)
+            createValueBasedGuideSet();
+    }
+
+    @LogMethod
     private void createRunBasedGuideSet()
     {
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, CONTROL_NAME);
@@ -110,6 +123,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         _guideSetHelper.applyGuideSetToRun(NETWORKS, RUN_BASED_COMMENT, true);
     }
 
+    @LogMethod
     // borrowing from LuminexValueBasedGuideSetTest
     private void createValueBasedGuideSet()
     {
@@ -364,10 +378,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
                 "Guide Set plate 1", "Guide Set plate 2", "Guide Set plate 3", "Guide Set plate 4");
 
         clickButton("Confirm Delete");
-
-        // clean up by recreating the guide sets (this is a multi-test so could fire before other tests)
-        createRunBasedGuideSet();
-        createValueBasedGuideSet();
     }
 
     private void clickDeleteOnGuideSetWithComment(String comment)
