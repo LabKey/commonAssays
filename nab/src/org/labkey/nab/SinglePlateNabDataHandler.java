@@ -30,6 +30,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -261,8 +262,9 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         if (groups.size() != 1)
             throw new IllegalStateException("Expected exactly 1 well group per material for single-plate NAb runs.  Found " + groups.size());
         WellGroup group = groups.get(0);
+        Map<PropertyDescriptor,Object> sampleProperties = sampleInput.getPropertyValues();
         for (DomainProperty property : properties.values())
-            group.setProperty(property.getName(), sampleInput.getProperty(property));
+            group.setProperty(property.getName(), sampleProperties.get(property.getPropertyDescriptor()));
 
         List<? extends WellData> wells = group.getWellData(true);
         boolean reverseDirection = Boolean.parseBoolean((String) group.getProperty(SampleProperty.ReverseDilutionDirection.name()));

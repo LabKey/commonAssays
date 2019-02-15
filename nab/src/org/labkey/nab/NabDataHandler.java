@@ -167,7 +167,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             if (material == null)
                 throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
 
-            String dataRowLsid = getDataRowLSID(data, groupName, material.getPropertyValues()).toString();
+            String dataRowLsid = getDataRowLSID(data, groupName).toString();
 
             OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
             int objectId = 0;

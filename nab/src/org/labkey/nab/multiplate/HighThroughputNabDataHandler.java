@@ -21,6 +21,7 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -179,8 +180,9 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(SampleProperty.ReverseDilutionDirection.name()));
         for (WellGroup group : groups)
         {
+            Map<PropertyDescriptor,Object> map = sampleInput.getPropertyValues();
             for (DomainProperty property : properties.values())
-                group.setProperty(property.getName(), sampleInput.getProperty(property));
+                group.setProperty(property.getName(), map.get(property.getPropertyDescriptor()));
 
             boolean hasExplicitOrder = true;
             List<? extends WellData> wellData = group.getWellData(true);
