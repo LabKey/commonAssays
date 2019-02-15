@@ -16,10 +16,10 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.LabKeyError;
-import org.labkey.api.action.OldRedirectAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -124,14 +124,15 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class UploadAction extends OldRedirectAction<PipelinePathForm>
+    public class UploadAction extends FormHandlerAction<PipelinePathForm>
     {
-        public ActionURL getSuccessURL(PipelinePathForm form)
+        @Override
+        public void validateCommand(PipelinePathForm target, Errors errors)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
-        public boolean doAction(PipelinePathForm form, BindException errors)
+        @Override
+        public boolean handlePost(PipelinePathForm form, BindException errors)
         {
             for (File file : form.getValidatedFiles(getContainer()))
             {
@@ -197,6 +198,11 @@ public class PipelineController extends SpringActionController
             }
 
             return true;
+        }
+
+        public ActionURL getSuccessURL(PipelinePathForm form)
+        {
+            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
     }
 

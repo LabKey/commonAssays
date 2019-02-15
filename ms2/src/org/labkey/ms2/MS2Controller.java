@@ -31,7 +31,6 @@ import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.OldRedirectAction;
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
@@ -917,7 +916,7 @@ public class MS2Controller extends SpringActionController
                     {
                         navTree.addChild("Edit Elution Profile", editUrl);
                     }
-                    navTree.addChild((quant.includeInProteinCalc() ? "Invalidate" : "Revalidate") + " Quantitation Results", toggleUrl);
+                    navTree.addChild((quant.includeInProteinCalc() ? "Invalidate" : "Revalidate") + " Quantitation Results").setScript(PageFlowUtil.postOnClickJavaScript(toggleUrl));
                     quantView.setNavMenu(navTree);
                     quantView.setIsWebPart(false);
                 }
@@ -6363,18 +6362,15 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class ToggleValidQuantitationAction extends OldRedirectAction<DetailsForm>
+    public class ToggleValidQuantitationAction extends FormHandlerAction<DetailsForm>
     {
         @Override
-        public URLHelper getSuccessURL(DetailsForm detailsForm)
+        public void validateCommand(DetailsForm target, Errors errors)
         {
-            ActionURL result = getViewContext().getActionURL().clone();
-            result.setAction(ShowPeptideAction.class);
-            return result;
         }
 
         @Override
-        public boolean doAction(DetailsForm form, BindException errors)
+        public boolean handlePost(DetailsForm form, BindException errors)
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
 
@@ -6401,6 +6397,14 @@ public class MS2Controller extends SpringActionController
             }
 
             return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(DetailsForm detailsForm)
+        {
+            ActionURL result = getViewContext().getActionURL().clone();
+            result.setAction(ShowPeptideAction.class);
+            return result;
         }
     }
 
