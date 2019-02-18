@@ -16,13 +16,12 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.labkey.ms2.MS2Run;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.MS2Run;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * User: jeckels
@@ -52,62 +51,6 @@ public enum MS2RunViewType
         public boolean supportsExtraFilters()
         {
             return false;
-        }
-    },
-    NONE("Peptides (Legacy)", "none")
-    {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
-        {
-            return new FlatPeptideView(viewContext, runs);
-        }
-
-        public boolean supportsExpansion()
-        {
-            return false;
-        }
-
-        public boolean supportsPeptideColumnPicker()
-        {
-            return true;
-        }
-    },
-    PROTEIN("Protein (Legacy)", "protein")
-    {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
-        {
-            return new StandardProteinPeptideView(viewContext, runs);
-        }
-
-        public boolean supportsPeptideColumnPicker()
-        {
-            return true;
-        }
-
-        public boolean supportsProteinColumnPicker()
-        {
-            return true;
-        }
-    },
-    PROTEIN_PROPHET("ProteinProphet (Legacy)", "proteinprophet")
-    {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
-        {
-            return new ProteinProphetPeptideView(viewContext, runs);
-        }
-
-        public boolean supportsRun(MS2Run run)
-        {
-            return run.hasProteinProphet();
-        }
-
-        public boolean supportsPeptideColumnPicker()
-        {
-            return true;
-        }
-
-        public boolean supportsProteinColumnPicker()
-        {
-            return true;
         }
     };
 
@@ -141,16 +84,6 @@ public enum MS2RunViewType
         return true;
     }
 
-    public boolean supportsPeptideColumnPicker()
-    {
-        return false;
-    }
-
-    public boolean supportsProteinColumnPicker()
-    {
-        return false;
-    }
-
     public boolean supportsExtraFilters()
     {
         return true;
@@ -171,7 +104,7 @@ public enum MS2RunViewType
                 return type;
             }
         }
-        return NONE;
+        return QUERY_PEPTIDES;
     }
 
     public static List<MS2RunViewType> getTypesForRun(MS2Run run)

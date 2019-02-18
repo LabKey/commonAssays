@@ -32,7 +32,6 @@ import static org.junit.Assert.*;
 public abstract class AbstractMS2ImportTest extends MS2TestBase
 {
     public static final String DEFAULT_EXPERIMENT = "Default Experiment";
-    public static final String LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME = "legacyPeptidesScan6_100";
     public static final String QUERY_PEPTIDES_VIEW_NAME = "queryPeptidesView";
     public static final String QUERY_PROTEIN_GROUP_VIEW_NAME = "queryProteinGroupViewView";
     public static final String QUERY_PROTEINPROPHET_VIEW_NAME = "queryProteinProphetView";
@@ -45,8 +44,6 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         verifyMS2();
     }
 
-    protected static final String LEGACY_PROTEIN_VIEW_NAME = "legacyProteinView";
-    protected static final String LEGACY_PROTEIN_PROPHET_VIEW_NAME = "legacyProteinProphetView";
     protected static final String VIEW4 = "queryView1";
     protected static final String VIEW5 = "queryView2";
     protected static final String VIEW6 = "queryView3";
@@ -100,40 +97,9 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         // Create some saved MS2 views
         selectOptionByText(Locator.name("viewParams"), "<Standard View>"); // Make sure we're not using a custom default view for the current user
         clickButton("Go");
-        selectOptionByText(Locator.name("grouping"), "Peptides (Legacy)");
-        clickAndWait(Locator.id("viewTypeSubmitButton"));
         DataRegionTable peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
         peptidesTable.setFilter("Scan", "Is Greater Than", "6", "Is Less Than or Equal To", "100");
         peptidesTable.setSort("Scan", SortDirection.DESC);
-        clickButton("Save View");
-        setFormElement(Locator.name("name"), LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME);
-        clickButton("Save View");
-
-        log("Make saved view for Protein for Comparison");
-        selectOptionByText(Locator.name("viewParams"), "<Standard View>"); // Make sure we're not using a custom default view for the current user
-        peptidesTable.setFilter("DeltaMass", "Is Greater Than", "0");
-        selectOptionByText(Locator.name("grouping"), "Protein (Legacy)");
-        clickAndWait(Locator.id("viewTypeSubmitButton"));
-        DataRegionTable proteinsTable = new DataRegionTable(REGION_NAME_PROTEINS, this);
-        proteinsTable.setFilter("SequenceMass", "Is Greater Than", "20000");
-        clickButton("Save View");
-        setFormElement(Locator.name("name"), LEGACY_PROTEIN_VIEW_NAME);
-        clickButton("Save View");
-
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME);
-        clickButton("Go");
-        selectOptionByText(Locator.name("grouping"), "ProteinProphet (Legacy)");
-        clickAndWait(Locator.id("viewTypeSubmitButton"));
-        DataRegionTable quantitationTable = new DataRegionTable(REGION_NAME_QUANTITATION, this);
-        quantitationTable.setFilter("GroupProbability", "Is Greater Than", "0.7");
-        clickButton("Save View");
-        setFormElement(Locator.name("name"), LEGACY_PROTEIN_PROPHET_VIEW_NAME);
-        clickButton("Save View");
-
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME);
-        clickButton("Go");
-        selectOptionByText(Locator.name("grouping"), "Standard");
-        clickAndWait(Locator.id("viewTypeSubmitButton"));
         clickButton("Save View");
         setFormElement(Locator.name("name"), QUERY_PEPTIDES_VIEW_NAME);
         clickButton("Save View");
@@ -148,7 +114,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
         setFormElement(Locator.name("name"), QUERY_PROTEIN_GROUP_VIEW_NAME);
         clickButton("Save View");
 
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME);
+        selectOptionByText(Locator.name("viewParams"), QUERY_PEPTIDES_VIEW_NAME);
         clickButton("Go");
         selectOptionByText(Locator.name("grouping"), "Standard");
         clickAndWait(Locator.id("viewTypeSubmitButton"));

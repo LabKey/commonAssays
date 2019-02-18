@@ -43,8 +43,6 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.springframework.validation.BindException;
 
-import javax.servlet.ServletException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,7 +56,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
     public QueryProteinGroupMS2RunView(ViewContext viewContext, MS2Run[] runs)
     {
-        super(viewContext, "Peptides", runs);
+        super(viewContext, runs);
     }
 
     protected QuerySettings createQuerySettings(UserSchema schema) throws RedirectException
@@ -70,7 +68,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public ProteinGroupQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting)
+    public ProteinGroupQueryView createGridView(boolean expanded, boolean allowNesting)
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
@@ -85,7 +83,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     @Override
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
-        NestableQueryView queryView = createGridView(false, null, null, true);
+        NestableQueryView queryView = createGridView(false, true);
         FieldKey desiredFK = FieldKey.fromParts("Proteins", "Protein", "SeqId");
 
         Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);

@@ -43,18 +43,7 @@
             <td valign=bottom><% if (!user.isGuest()) { %>
                 <%= button("Save View").href(bean.saveViewURL) %><% } %></td>
             <td valign=bottom><% if (!user.isGuest()) { %>
-                <%= button("Manage Views").href(bean.manageViewsURL) %><% } %></td><%
-            if (bean.currentViewType.supportsPeptideColumnPicker())
-            { %>
-            <td valign=bottom>
-                <%= PageFlowUtil.button("Pick Peptide Columns").href(bean.pickPeptideColumnsURL).id("pickPeptideColumns") %><% } %>
-            </td>
-            <%
-            if (bean.currentViewType.supportsProteinColumnPicker())
-            { %>
-            <td valign=bottom>
-                <%= PageFlowUtil.button("Pick Protein Columns").href(bean.pickProteinColumnsURL).id("pickProteinColumns") %></td><%
-            } %>
+                <%= button("Manage Views").href(bean.manageViewsURL) %><% } %></td>
         </tr>
     </table>
 </labkey:form>
@@ -131,9 +120,9 @@
             }
             else
             { %>
-                <input id="Charge1" type="hidden" name=charge1 value="<%=bean.charge1%>">
-                <input id="Charge2" type="hidden" name=charge2 value="<%=bean.charge2%>">
-                <input id="Charge3" type="hidden" name=charge3 value="<%=bean.charge3%>">
+                <input id="Charge1" type="hidden" name=charge1 value="<%=h(bean.charge1)%>">
+                <input id="Charge2" type="hidden" name=charge2 value="<%=h(bean.charge2)%>">
+                <input id="Charge3" type="hidden" name=charge3 value="<%=h(bean.charge3)%>">
                 <input type="hidden" name="tryptic" value="<%=bean.tryptic%>"><%
             } %>
         </tr>

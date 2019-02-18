@@ -20,8 +20,10 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.util.ListHelper;
+import org.openqa.selenium.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
@@ -152,7 +154,17 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
             assertTextPresent("running");
 
         log("Verify no work for protocol.");
-        assertButtonNotPresent("Search");
+        boolean result;
+        try
+        {
+            findButton("Search");
+            result = true;
+        }
+        catch (NoSuchElementException notPresent)
+        {
+            result = false;
+        }
+        assertFalse("Button '" + "Search" + "' was present", result);
 
         log("View full status.");
         clickFolder(FOLDER_NAME);
@@ -196,13 +208,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         // Make sure we're not using a custom default view for the current user
         selectOptionByText(Locator.name("viewParams"), "<Standard View>");
         clickButton("Go");
-        selectOptionByText(Locator.name("grouping"), "Peptides (Legacy)");
-        clickAndWait(Locator.id("viewTypeSubmitButton"));
 
-        log("Test adding columns");
-        clickButton("Pick Peptide Columns");
-        clickButton("Pick", 0);
-        clickButton("Pick Columns");
         assertTextPresent("Run Description", "Next AA");
 
         basicChecks();

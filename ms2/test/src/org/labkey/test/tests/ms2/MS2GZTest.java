@@ -43,66 +43,23 @@ public class MS2GZTest extends AbstractMS2ImportTest
     @LogMethod
     protected void verifyMS2()
     {
-        log("Test Protein Prophet Compare");
-        navigateToFolder(FOLDER_NAME);
-
         DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
-        searchRunsTable.checkAllOnPage();
-        searchRunsTable.clickHeaderMenu("Compare", "ProteinProphet (Legacy)");
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_PROPHET_VIEW_NAME);
-        clickButton("Compare");
-        assertTextPresent("(GroupProbability > 0.7)", "GroupNumber", "0.78");
-        assertTextNotPresent("gi|30089158|emb|CAD89505.1|");
-
-        DataRegionTable compareTable = new DataRegionTable("MS2Compare", this);
-        compareTable.setSort("Protein", SortDirection.ASC);
-        assertTextBefore("gi|13442951|dbj|BAB39767.1|", "gi|13470573|ref|NP_102142.1|");
-        compareTable.setSort("Run0GroupProbability", SortDirection.DESC);
-        if (!isTextBefore("gi|13470573|ref|NP_102142.1|", "gi|13442951|dbj|BAB39767.1|"))
-            compareTable.setSort("Run0GroupProbability", SortDirection.ASC);
-        assertTextBefore("gi|13470573|ref|NP_102142.1|", "gi|13442951|dbj|BAB39767.1|");
-
-        log("Test adding columns");
-        navigateToFolder(FOLDER_NAME);
-
-        searchRunsTable.checkAllOnPage();
-        searchRunsTable.clickHeaderMenu("Compare", "ProteinProphet (Legacy)");
-        checkCheckbox(Locator.checkboxByName("light2HeavyRatioMean"));
-        uncheckCheckbox(Locator.checkboxByName("groupProbability"));
-        clickButton("Compare");
-        assertTextPresent("ratiomean");
-        assertTextNotPresent("GroupProbability");
 
         log("Test Compare Search Engine Proteins");
         navigateToFolder(FOLDER_NAME);
 
         searchRunsTable.checkAllOnPage();
         searchRunsTable.clickHeaderMenu("Compare", "Search Engine Protein");
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_VIEW_NAME);
+        selectOptionByText(Locator.name("viewParams"), QUERY_PROTEINPROPHET_VIEW_NAME);
         checkCheckbox(Locator.checkboxByName("total"));
         clickButton("Compare");
-        assertTextPresent(
-                "(SequenceMass > 20000)",
-                "(DeltaMass > 0.0)",
-                "Total",
+        assertTextPresent("Total",
                 "gi|33241155|ref|NP_876097.1|",
                 "Pattern");
         assertTextNotPresent("gi|32307556|ribosomal_protein", "gi|136348|TRPF_YEAST_N-(5'-ph");
+        DataRegionTable compareTable = new DataRegionTable("MS2Compare",getDriver());
         compareTable.setSort("Protein", SortDirection.ASC);
         assertTextBefore("gi|11499506|ref|NP_070747.1|", "gi|13507919|");
 
-        log("Test Compare Peptides (Legacy)");
-        navigateToFolder(FOLDER_NAME);
-
-        searchRunsTable.checkAllOnPage();
-        searchRunsTable.clickHeaderMenu("Compare", "Peptide (Legacy)");
-        selectOptionByText(Locator.name("viewParams"), LEGACY_PROTEIN_VIEW_NAME);
-        clickButton("Compare");
-        assertTextPresent("(DeltaMass > 0.0)", "K.VYLADPVVFTVKHIK.Q", "Pattern");
-        assertTextNotPresent("R.TIDPVIAR.K", "K.KLYNEELK.A", "K.EIRQRQGDDLDGLSFAELR.G");
-        compareTable.setSort("Peptide", SortDirection.DESC);
-        if (!isTextBefore("-.MELFSNELLYK.T", "K.VYLADPVVFTVKHIK.Q"))
-            compareTable.setSort("Peptide", SortDirection.ASC);
-        assertTextBefore("-.MELFSNELLYK.T", "K.VYLADPVVFTVKHIK.Q");
     }
 }

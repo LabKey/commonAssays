@@ -125,7 +125,6 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
             assertTextPresent(exportFileSearcher, "\n", 86);
         };
-        validateExport("TSV", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, tsvPeptideValidator);
         validateExport("TSV", QUERY_PEPTIDES_VIEW_NAME, tsvPeptideValidator);
 
         Runnable amtPeptideValidator = () ->
@@ -137,7 +136,6 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             assertTextPresentInThisOrder(exportFileSearcher, "R.EADKVLVQMPSGK.Q", "K.E^TSSKNFDASVDVAIRLGVDPR.K");
             assertTextPresent(exportFileSearcher, "\n", 89);
         };
-        validateExport("AMT", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, amtPeptideValidator);
         validateExport("AMT", QUERY_PEPTIDES_VIEW_NAME, amtPeptideValidator);
 
         Runnable pklPeptideValidator = () ->
@@ -148,7 +146,6 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             assertTextNotPresent(exportFileSearcher, "717.4 4043.0");
             assertTextPresent(exportFileSearcher, "\n", 4271);
         };
-        validateExport("PKL", LEGACY_PEPTIDES_SCAN_6_100_VIEW_NAME, pklPeptideValidator);
         validateExport("PKL", QUERY_PEPTIDES_VIEW_NAME, pklPeptideValidator);
 
         Runnable tsvProteinProphetValidator = () ->
@@ -159,7 +156,6 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             assertTextPresent(exportFileSearcher, "\n", 7);
         };
         validateExport("TSV", QUERY_PROTEINPROPHET_VIEW_NAME, tsvProteinProphetValidator);
-        validateExport("TSV", LEGACY_PROTEIN_PROPHET_VIEW_NAME, tsvProteinProphetValidator);
 
         Runnable pklProteinProphetValidator = () ->
         {
@@ -169,7 +165,6 @@ public class MS2ExportTest extends AbstractMS2ImportTest
             assertTextPresent(exportFileSearcher,"\n", 245);
         };
         validateExport("PKL", QUERY_PROTEINPROPHET_VIEW_NAME, pklProteinProphetValidator);
-        validateExport("PKL", LEGACY_PROTEIN_PROPHET_VIEW_NAME, pklProteinProphetValidator);
     }
 
     private void validateExport(String exportType, String viewName, Runnable validator)

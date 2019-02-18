@@ -17,11 +17,9 @@
 package org.labkey.ms2;
 
 import org.apache.log4j.Logger;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.MemTracker;
 import org.labkey.api.view.ViewContext;
@@ -30,7 +28,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,67 +148,6 @@ public abstract class MS2Run implements Serializable
 
         return false;
     }
-
-    public String getCommonPeptideColumnNames()
-    {
-        return "Scan, EndScan, RetentionTime, Run, RunDescription, Fraction, FractionName, Charge, " + getRunType().getScoreColumnNames() + ", IonPercent, Mass, DeltaMass, DeltaMassPPM, FractionalDeltaMass, FractionalDeltaMassPPM, PrecursorMass, MZ, PeptideProphet, PeptideProphetErrorRate, Peptide, StrippedPeptide, PrevAA, TrimmedPeptide, NextAA, ProteinHits, SequencePosition, H, DeltaScan, Protein, Description, GeneName, SeqId";
-    }
-
-    public String getProteinProphetPeptideColumnNames()
-    {
-        return "NSPAdjustedProbability, Weight, NonDegenerateEvidence, EnzymaticTermini, SiblingPeptides, SiblingPeptidesBin, Instances, ContributingEvidence, CalcNeutralPepMass";
-    }
-
-    public String getQuantitationPeptideColumnNames()
-    {
-        return "LightFirstScan, LightLastScan, LightMass, HeavyFirstScan, HeavyLastScan, HeavyMass, Ratio, Heavy2LightRatio, LightArea, HeavyArea, DecimalRatio, Invalidated";
-    }
-
-    public static String getCommonProteinColumnNames()
-    {
-        return "Protein, SequenceMass, Peptides, UniquePeptides, AACoverage, BestName, BestGeneName, Description";
-    }
-
-    public static String getDefaultProteinProphetProteinColumnNames()
-    {
-        return "GroupNumber, GroupProbability, PctSpectrumIds";
-    }
-
-    public static String getProteinProphetProteinColumnNames()
-    {
-        return getDefaultProteinProphetProteinColumnNames() + ", ErrorRate, FirstProtein, FirstDescription, FirstGeneName, FirstBestName, " + TotalFilteredPeptidesColumn.NAME + ", " + UniqueFilteredPeptidesColumn.NAME;
-    }
-
-    public String getQuantitationProteinColumnNames()
-    {
-        return "RatioMean, RatioStandardDev, RatioNumberPeptides, Heavy2LightRatioMean, Heavy2LightRatioStandardDev";
-    }
-
-    // Get the list of SELECT column names by iterating through the MS2Peptides columns and
-    // taking all requested columns plus primary keys
-    public String getSQLPeptideColumnNames(String columnNames, boolean includeSeqId, TableInfo... tableInfos)
-    {
-        ColumnNameList columnNameList = new ColumnNameList(columnNames);
-        ColumnNameList pkList = new ColumnNameList("RowId");
-        if (includeSeqId)
-        {
-            pkList.add("SeqId");
-        }
-        ColumnNameList sqlColumns = new ColumnNameList();
-
-        for (TableInfo tableInfo : tableInfos)
-        {
-            for (ColumnInfo column : tableInfo.getColumns())
-            {
-                String columnName = column.getName();
-                if (columnNameList.contains(columnName) || pkList.contains(columnName) && !sqlColumns.contains(columnName))
-                    sqlColumns.add(column.getValueSql(tableInfo.toString()).getSQL());
-            }
-        }
-
-        return sqlColumns.toCSVString();
-    }
-
 
     public abstract MS2RunType getRunType();
 

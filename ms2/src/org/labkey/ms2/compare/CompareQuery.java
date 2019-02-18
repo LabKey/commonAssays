@@ -25,6 +25,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
@@ -68,12 +69,8 @@ public abstract class CompareQuery extends SQLFragment
 
     public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs, User user)
     {
-        if ("Peptide".equalsIgnoreCase(compareColumn))
-            return new PeptideCompareQuery(currentUrl, runs, user);
-        else if ("Protein".equalsIgnoreCase(compareColumn))
+        if ("Protein".equalsIgnoreCase(compareColumn))
             return new ProteinCompareQuery(currentUrl, runs, user);
-        else if ("ProteinProphet".equalsIgnoreCase(compareColumn))
-            return new ProteinProphetCompareQuery(currentUrl, runs, user);
         else
             return null;
     }
@@ -326,7 +323,7 @@ public abstract class CompareQuery extends SQLFragment
     }
 
     // CONSIDER: Split into getCompareGrid (for Excel export) and getCompareGridForDisplay?
-    public CompareDataRegion getCompareGrid(boolean export) throws SQLException
+    public CompareDataRegion getCompareGrid(boolean export)
     {
         // Limit Excel export to 65,535 rows. Should change this now that we support .xlsx export, which doesn't have the
         // same row count limits
@@ -348,31 +345,37 @@ public abstract class CompareQuery extends SQLFragment
             if (param.getKey().startsWith(MS2Manager.getDataRegionNameCompare()))
                 originalLinkURL.deleteParameter(param.getKey());
 
-        ResultSetMetaData md = rgn.getResultSet().getMetaData();
-
-        for (int i = 0; i < _runs.size(); i++)
+        try
         {
-            ActionURL linkURL = originalLinkURL.clone();
-            linkURL.setContainer(_runs.get(i).getContainer());
-            linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
-
-            _columnsPerRun = 0;
-            for (RunColumn column : _gridColumns)
+            ResultSetMetaData md = rgn.getResultSet().getMetaData();
+            for (int i = 0; i < _runs.size(); i++)
             {
-                String runPrefix = "Run" + i;
-                String columnName = runPrefix + column.getLabel();
+                ActionURL linkURL = originalLinkURL.clone();
+                linkURL.setContainer(_runs.get(i).getContainer());
+                linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
 
-                DisplayColumn displayColumn = createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
-                if (column.getFormatString() != null)
+                _columnsPerRun = 0;
+                for (RunColumn column : _gridColumns)
                 {
-                    displayColumn.setFormatString(column.getFormatString());
-                }
-                if (displayColumn != null)
-                {
-                    _columnsPerRun++;
-                    rgn.addDisplayColumn(displayColumn);
+                    String runPrefix = "Run" + i;
+                    String columnName = runPrefix + column.getLabel();
+
+                    DisplayColumn displayColumn = createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
+                    if (column.getFormatString() != null)
+                    {
+                        displayColumn.setFormatString(column.getFormatString());
+                    }
+                    if (displayColumn != null)
+                    {
+                        _columnsPerRun++;
+                        rgn.addDisplayColumn(displayColumn);
+                    }
                 }
             }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
         }
 
         rgn.addColumns(ti.getColumns("RunCount, Pattern"));
@@ -410,7 +413,7 @@ public abstract class CompareQuery extends SQLFragment
 
     public abstract List<Pair<String, String>> getSQLSummaries(User user);
 
-    public void checkForErrors(BindException errors) throws SQLException
+    public void checkForErrors(BindException errors)
     {
         if (_runs.isEmpty())
         {

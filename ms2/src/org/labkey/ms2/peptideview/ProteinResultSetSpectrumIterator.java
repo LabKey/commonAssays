@@ -20,13 +20,12 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Manager;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -60,22 +59,11 @@ public class ProteinResultSetSpectrumIterator extends ResultSetSpectrumIterator
 
         ResultSet getNextResultSet()
         {
-            SQLFragment sql;
-            String joinSql;
-
             // Peptide columns are coming from ms2.SimplePeptides, so translate the search-engine specific scoring
             // column aliases back to Score1, etc. Along with addition of RetentionTime, fixes issue 24836
             String columnNames = "Peptide, TrimmedPeptide, RetentionTime, RawScore AS Score1, DeltaCN AS Score2, ZScore AS Score3, SPRank AS Score4, Expect AS Score5, NextAA, PrevAA, Scan, Charge, Fraction, PrecursorMass, MZ, Spectrum";
-            if (_peptideView instanceof StandardProteinPeptideView)
-            {
-                sql = ProteinManager.getPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", Run", _user);
-                joinSql = sql.getSQL().replaceFirst("RIGHT OUTER JOIN", "LEFT OUTER JOIN (SELECT Run AS fRun, Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + ") spec ON Run=fRun AND Scan = fScan\nRIGHT OUTER JOIN");
-            }
-            else
-            {
-                sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", ms2.SimplePeptides.Run", _user);
-                joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
-            }
+            SQLFragment sql = ProteinManager.getProteinProphetPeptideSql(_currentUrl, _iter.next(), _extraWhere, Table.ALL_ROWS, columnNames + ", ms2.SimplePeptides.Run", _user);
+            String joinSql = sql.getSQL().replaceFirst("WHERE", "LEFT OUTER JOIN (SELECT s.Run AS fRun, s.Scan AS fScan, Spectrum FROM " + MS2Manager.getTableInfoSpectra() + " s) spec ON " + MS2Manager.getTableInfoSimplePeptides() + ".Run=fRun AND Scan = fScan WHERE ");
 
             return new SqlSelector(ProteinManager.getSchema(), joinSql, sql.getParams()).getResultSet(false);
         }

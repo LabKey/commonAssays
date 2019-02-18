@@ -16,36 +16,49 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.*;
-import org.labkey.api.query.FilteredTable;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.query.DetailsURL;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Formats;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.HydrophobicityColumn;
+import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2ExportType;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Modification;
-import org.labkey.api.util.Pair;
-import org.labkey.api.query.DetailsURL;
-import org.labkey.ms2.*;
+import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.MassType;
+import org.labkey.ms2.RunListException;
+import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
-import org.labkey.ms2.query.MS2Schema;
-import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -55,24 +68,16 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 {
     private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
 
-    protected static final String AMT_PEPTIDE_COLUMN_NAMES = "Run,Fraction,Mass,Scan,RetentionTime,H,PeptideProphet,Peptide";
-
     private final Container _container;
     private final User _user;
     protected final ActionURL _url;
     protected final ViewContext _viewContext;
     protected final MS2Run[] _runs;
-    protected int _maxPeptideRows = 1000; // Limit peptides returned to 1,000 rows
-    protected int _maxGroupingRows = 250; // Limit proteins returned to 250 rows
-    protected long _offset = 0;
 
-    private String _columnPropertyName;
-
-    public AbstractMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
+    public AbstractMS2RunView(ViewContext viewContext, MS2Run... runs)
     {
         _container = viewContext.getContainer();
         _user = viewContext.getUser();
-        _columnPropertyName = columnPropertyName;
         _url = viewContext.getActionURL();
         _viewContext = viewContext;
         _runs = runs;
@@ -80,11 +85,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public WebPartType createGridView(MS2Controller.RunForm form)
     {
-        String peptideColumnNames = getPeptideColumnNames(form.getColumns());
-        return createGridView(form.getExpanded(), peptideColumnNames, form.getProteinColumns(), true);
+        return createGridView(form.getExpanded(), true);
     }
 
-    public abstract WebPartType createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting);
+    public abstract WebPartType createGridView(boolean expanded, boolean allowNesting);
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 
@@ -165,64 +169,9 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     protected abstract List<MS2ExportType> getExportTypes();
 
-    public void changePeptideCaptionsForTsv(List<DisplayColumn> displayColumns)
-    {
-        // Get rid of % and + in these captions if the columns are being used; they cause problem for some statistical tools
-        replaceCaption(displayColumns, "IonPercent", "IonPercent");
-        replaceCaption(displayColumns, "Mass", "CalcMHPlus");
-        replaceCaption(displayColumns, "PrecursorMass", "ObsMHPlus");
-    }
-
-
-    private void replaceCaption(List<DisplayColumn> displayColumns, String columnName, String caption)
-    {
-        for (DisplayColumn dc : displayColumns)
-            if (dc.getName().equalsIgnoreCase(columnName))
-                dc.setCaption(caption);
-    }
-
-
     protected User getUser()
     {
         return _user;
-    }
-
-    public void savePeptideColumnNames(String type, String columnNames)
-    {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ColumnNames", true);
-        defaultColumnLists.put(type + _columnPropertyName, columnNames);
-        defaultColumnLists.save();
-    }
-
-    public void saveProteinColumnNames(String type, String columnNames)
-    {
-        PropertyManager.PropertyMap defaultColumnLists = PropertyManager.getWritableProperties(_user, ContainerManager.getRoot(), "ProteinColumnNames", true);
-        defaultColumnLists.put(type + "Protein", columnNames);
-        defaultColumnLists.save();
-    }
-
-    private @Nullable String getSavedPeptideColumnNames()
-    {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), "ColumnNames");
-        return defaultColumnLists.get(_runs[0].getType() + "Peptides");
-    }
-
-    public String getStandardPeptideColumnNames()
-    {
-        StringBuilder result = new StringBuilder();
-        result.append("Scan, Charge, ");
-        result.append(_runs[0].getRunType().getScoreColumnNames());
-        result.append(", IonPercent, Mass, DeltaMass, PeptideProphet, Peptide, ProteinHits, Protein");
-        return result.toString();
-    }
-
-    public String getStandardProteinColumnNames()
-    {
-        StringBuilder result = new StringBuilder();
-        result.append(MS2Run.getDefaultProteinProphetProteinColumnNames());
-        result.append(",");
-        result.append(MS2Run.getCommonProteinColumnNames());
-        return result.toString();
     }
 
     // Pull the URL associated with gene name from the database and cache it for use with the Gene Name column
@@ -301,39 +250,6 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
         }
     }
 
-    public DataRegion getPeptideGrid(String peptideColumnNames, int maxRows, long offset)
-    {
-        DataRegion rgn = new DataRegion();
-
-        rgn.setName(MS2Manager.getDataRegionNamePeptides());
-        rgn.setDisplayColumns(getPeptideDisplayColumns(peptideColumnNames));
-        rgn.setShowPagination(false);
-        rgn.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
-        rgn.setMaxRows(maxRows);
-        rgn.setOffset(offset);
-
-        return rgn;
-    }
-
-    public List<DisplayColumn> getPeptideDisplayColumns(String peptideColumnNames)
-    {
-        FilteredTable table = createLegacyWrappedPeptidesTable();
-        return getColumns(new PeptideColumnNameList(peptideColumnNames), table);
-    }
-
-    /** Creates a version of the Peptides table for use in non-query based views. Includes calculated columns like DeltaScan and Hydrophobicity */
-    protected FilteredTable createLegacyWrappedPeptidesTable()
-    {
-        FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoPeptides(), new MS2Schema(getUser(), getContainer()));
-        table.wrapAllColumns(true);
-        table.getColumn("RowId").setKeyField(true);
-        // Different renderer to ensure that SeqId is always selected when Protein column is displayed
-        table.getColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(getContainer()));
-
-        PeptidesTableInfo.addCalculatedColumns(table);
-        return table;
-    }
-
     protected void addColumn(String columnName, List<DisplayColumn> columns, TableInfo... tinfos)
     {
         ColumnInfo ci = null;
@@ -355,27 +271,6 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
             columns.add(dc);
         }
     }
-
-    protected List<DisplayColumn> getColumns(List<String> columnNames, TableInfo... tinfos)
-    {
-        List<DisplayColumn> result = new ArrayList<>();
-
-        for (String columnName : columnNames)
-        {
-            addColumn(columnName, result, tinfos);
-        }
-
-        if (result.isEmpty())
-        {
-            for (String columnName : new PeptideColumnNameList(getStandardPeptideColumnNames()))
-            {
-                addColumn(columnName, result, tinfos);
-            }
-        }
-
-        return result;
-    }
-
 
     public long[] getPeptideIndex(ActionURL url)
     {
@@ -444,137 +339,6 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
     public abstract ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException;
 
     public abstract void exportSpectra(MS2Controller.ExportForm form, ActionURL currentURL, SpectrumRenderer spectrumRenderer, List<String> exportRows) throws IOException, RunListException;
-
-    protected class PeptideColumnNameList extends MS2Run.ColumnNameList
-    {
-        PeptideColumnNameList(String columnNames)
-        {
-            super(getPeptideColumnNames(columnNames));
-        }
-    }
-
-    protected  class ProteinColumnNameList extends MS2Run.ColumnNameList
-    {
-        ProteinColumnNameList(String columnNames)
-        {
-            super(getProteinColumnNames(columnNames));
-        }
-        
-        public ProteinColumnNameList(Collection<String> columnNames)
-        {
-            super(columnNames);
-        }
-    }
-
-    public String getPeptideColumnNames(String columnNames)
-    {
-        if (null == columnNames)
-        {
-            columnNames = getSavedPeptideColumnNames();
-
-            if (null == columnNames)
-                columnNames = getStandardPeptideColumnNames();
-        }
-
-        return columnNames;
-    }
-
-    public String getProteinColumnNames(String proteinColumnNames)
-    {
-        if (null == proteinColumnNames)
-        {
-            proteinColumnNames = getSavedProteinColumnNames();
-
-            if (null == proteinColumnNames)
-                proteinColumnNames = getStandardProteinColumnNames();
-        }
-
-        return proteinColumnNames;
-    }
-
-    private @Nullable String getSavedProteinColumnNames()
-    {
-        Map<String, String> defaultColumnLists = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), "ProteinColumnNames");
-        return defaultColumnLists.get(_runs[0].getType() + "Protein");
-    }
-
-    protected void addPeptideFilterText(List<String> headers, MS2Run run, ActionURL currentUrl)
-    {
-        headers.add("");
-        headers.add("Peptide Filter: " + ProteinManager.getPeptideFilter(currentUrl, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, getUser(), run).getFilterText());
-        headers.add("Peptide Sort: " + new Sort(currentUrl, MS2Manager.getDataRegionNamePeptides()).getSortText());
-    }
-
-    private String naForNull(String s)
-    {
-        return s == null ? "n/a" : s;
-    }
-
-    protected List<String> getRunSummaryHeaders(MS2Run run)
-    {
-        Map<String, String> fixedMods = new TreeMap<>();
-        Map<String, String> variableMods = new TreeMap<>();
-
-        for (MS2Modification mod : run.getModifications(MassType.Average))
-        {
-            if (mod.getVariable())
-                variableMods.put(mod.getAminoAcid() + mod.getSymbol(), Formats.f3.format(mod.getMassDiff()));
-            else
-                fixedMods.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
-        }
-
-        List<String> modHeaders = new ArrayList<>(10);
-
-        formatModifications("Fixed", fixedMods, modHeaders);
-        formatModifications("Variable", variableMods, modHeaders);
-
-        List<String> runHeaders = new ArrayList<>(3);
-        runHeaders.add("Search Enzyme: " + naForNull(run.getSearchEnzyme()) + "\tFile Name: " + naForNull(run.getFileName()));
-        runHeaders.add("Search Engine: " + naForNull(run.getSearchEngine()) + "\tPath: " + naForNull(run.getPath()));
-        List<String> fastas = new ArrayList<>();
-        for (int fastaId : run.getFastaIds())
-        {
-            FastaFile fastaFile = ProteinManager.getFastaFile(fastaId);
-            if (fastaFile == null)
-            {
-                throw new IllegalStateException("Could not find FastaId " + fastaId + " referenced by run " + run.getFileName() + " - " + run.getRun());
-            }
-            fastas.add(fastaFile.getFilename());
-        }
-        runHeaders.add("Mass Spec Type: " + naForNull(run.getMassSpecType()) + "\tFasta File: " + naForNull(StringUtils.join(fastas, ", ")));
-
-        List<String> headers = new ArrayList<>();
-        headers.add("Run: " + naForNull(run.getDescription()));
-        headers.add("");
-
-        if (modHeaders.isEmpty())
-        {
-            headers.addAll(runHeaders);
-        }
-        else
-        {
-            // Merge modifications list and standard run headers into a single list
-            for (int i = 0; i < Math.max(modHeaders.size(), runHeaders.size()); i++)
-                headers.add((i < modHeaders.size() ? modHeaders.get(i) : "") + "\t" + (i < runHeaders.size() ? runHeaders.get(i) : ""));
-        }
-
-        headers.add("");
-
-        return headers;
-    }
-
-    private void formatModifications(String label, Map<String, String> mods, List<String> modHeaders)
-    {
-        if (!mods.isEmpty())
-        {
-            modHeaders.add(label + " Modifications");
-
-            for (Map.Entry<String, String> mod : mods.entrySet())
-            {
-                modHeaders.add(mod.getKey() + " @ " + mod.getValue());
-            }
-        }
-    }
 
     protected List<String> getAMTFileHeader()
     {

@@ -29,7 +29,6 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryDefinition;
-import org.labkey.api.query.QueryException;
 import org.labkey.api.query.QueryNestingOption;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
@@ -49,8 +48,6 @@ import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
 
-import javax.servlet.ServletException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,7 +65,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
 
     public QueryPeptideMS2RunView(ViewContext viewContext, MS2Run... runs)
     {
-        super(viewContext, "Peptides", runs);
+        super(viewContext, runs);
     }
 
     protected QuerySettings createQuerySettings(MS2Schema schema)
@@ -106,7 +103,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     @Override
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
-        NestableQueryView queryView = createGridView(false, null, null, true);
+        NestableQueryView queryView = createGridView(false, true);
         FieldKey desiredFK;
         if (queryView.getSelectedNestingOption() != null)
         {
@@ -137,7 +134,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
     }
 
-    public PeptideQueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting)
+    public PeptideQueryView createGridView(boolean expanded, boolean allowNesting)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);
@@ -239,9 +236,9 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             {
                 highestScoreFlag = true;
             }
-            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), true, ContainerFilter.CURRENT, runTypes.toArray(new MS2RunType[runTypes.size()]), highestScoreFlag);
+            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), true, ContainerFilter.CURRENT, runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
             // Manually apply the metadata
-            _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<QueryException>());
+            _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<>());
         }
         return _peptidesTable;
     }
@@ -275,25 +272,21 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         DataRegion nestedRegion = rgn.getNestedRegion();
         GridView result = new GridView(nestedRegion, (BindException)null);
 
-        Integer groupId = null;
+        int groupId;
 
         try
         {
             groupId = Integer.parseInt(proteinGroupingId);
         }
-        catch (NumberFormatException e)
+        catch (NumberFormatException ignored)
         {
-        }
-
-        if (null == groupId)
-        {
-            throw new NotFoundException("Invalid proteinGroupingId parameter");
+            throw new NotFoundException("Invalid proteinGroupingId parameter: " + proteinGroupingId);
         }
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
         filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
-        filter.addCondition(view.getSelectedNestingOption().getRowIdFieldKey(), groupId.intValue());
+        filter.addCondition(view.getSelectedNestingOption().getRowIdFieldKey(), groupId);
         result.getRenderContext().setBaseFilter(filter);
 
         return result;

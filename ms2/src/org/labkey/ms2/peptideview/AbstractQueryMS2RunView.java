@@ -62,20 +62,19 @@ import java.util.Map;
  */
 public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<NestableQueryView>
 {
-    public AbstractQueryMS2RunView(ViewContext viewContext, String columnPropertyName, MS2Run... runs)
+    public AbstractQueryMS2RunView(ViewContext viewContext, MS2Run... runs)
     {
-        super(viewContext, columnPropertyName, runs);
+        super(viewContext, runs);
     }
 
     public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
-        createGridView(form.getExpanded(), "", "", false).exportToTSV(form, response, selectedRows, headers);
-        return null;
+        return createGridView(form.getExpanded(), false).exportToTSV(response, selectedRows, headers);
     }
 
     public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
-        AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), "", "", false);
+        AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), false);
 
         List<FieldKey> keys = new ArrayList<>();
         keys.add(FieldKey.fromParts("Fraction", "Run", "Run"));
@@ -88,12 +87,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         keys.add(FieldKey.fromParts("Peptide"));
         ms2QueryView.setOverrideColumns(keys);
 
-        return ms2QueryView.exportToTSV(form, response, selectedRows, getAMTFileHeader());
+        return ms2QueryView.exportToTSV(response, selectedRows, getAMTFileHeader());
     }
 
     public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
-        NestableQueryView queryView = createGridView(false, null, null, true);
+        NestableQueryView queryView = createGridView(false, true);
         RenderContext context = queryView.createDataView().getRenderContext();
         TableInfo tinfo = queryView.createTable();
 
@@ -103,7 +102,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
 
     public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
-        createGridView(form.getExpanded(), "", "", false).exportToExcel(response, selectedRows);
+        createGridView(form.getExpanded(), false).exportToExcel(response, selectedRows);
         return null;
     }
 
@@ -190,7 +189,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         return rowIds;
     }
 
-    public abstract AbstractMS2QueryView createGridView(boolean expanded, String requestedPeptideColumnNames, String requestedProteinColumnNames, boolean allowNesting);
+    public abstract AbstractMS2QueryView createGridView(boolean expanded, boolean allowNesting);
 
     public abstract class AbstractMS2QueryView extends NestableQueryView
     {
@@ -213,7 +212,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             }
         }
 
-        public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
+        public ModelAndView exportToTSV(HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
         {
             createRowIdFragment(selectedRows);
             getSettings().setMaxRows(Table.ALL_ROWS);
@@ -228,12 +227,11 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
             return null;
         }
 
-        public ModelAndView exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
+        public void exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
         {
             createRowIdFragment(selectedRows);
             getSettings().setMaxRows(ExcelWriter.MAX_ROWS_EXCEL_97);
             exportToExcel(response);
-            return null;
         }
 
         protected void createRowIdFragment(List<String> selectedRows)
