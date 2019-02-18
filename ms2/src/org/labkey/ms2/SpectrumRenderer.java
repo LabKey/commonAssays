@@ -26,7 +26,7 @@ import java.io.IOException;
  */
 public interface SpectrumRenderer extends AutoCloseable
 {
-    public void render(SpectrumIterator iter) throws IOException;
+    void render(SpectrumIterator iter) throws IOException;
 
     void close();
 }

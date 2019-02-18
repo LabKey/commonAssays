@@ -570,15 +570,6 @@ public class ProteinManager
         return protein;
     }
 
-    public static int ensureProteinAndIdentifier(String sequence, String organismName, String identifier, String description, String identifierType)
-    {
-        Protein protein = ensureProteinInDatabase(sequence, organismName, identifier, description);
-
-        Map<String, Set<String>> typeAndIdentifiers = Collections.singletonMap(identifierType, Collections.singleton(identifier));
-        ensureIdentifiers(protein, typeAndIdentifiers);
-        return protein.getSeqId();
-    }
-
     public static void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
         Protein protein = getProtein(seqId);
@@ -782,11 +773,11 @@ public class ProteinManager
                     break;
 
                 case(1):
-                    sql.append(nTerm(dialect) + " OR " + cTerm(dialect));
+                    sql.append(nTerm(dialect)).append(" OR ").append(cTerm(dialect));
                     break;
 
                 case(2):
-                    sql.append(nTerm(dialect) + " AND " + cTerm(dialect));
+                    sql.append(nTerm(dialect)).append(" AND ").append(cTerm(dialect));
                     break;
 
                 default:
@@ -926,16 +917,6 @@ public class ProteinManager
     public static SimpleFilter getPeptideFilter(ActionURL currentUrl, int mask, String runTableName, User user, MS2Run... runs)
     {
         return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNamePeptides(), user, runs);
-    }
-
-    public static SimpleFilter getProteinFilter(ActionURL currentUrl, int mask, String runTableName, User user, MS2Run... runs)
-    {
-        return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteins(), user, runs);
-    }
-
-    public static SimpleFilter getProteinGroupFilter(ActionURL currentUrl, int mask, String runTableName, User user, MS2Run... runs)
-    {
-        return getTableFilter(currentUrl, mask, runTableName, MS2Manager.getDataRegionNameProteinGroups(), user, runs);
     }
 
     public static SimpleFilter getTableFilter(ActionURL currentUrl, int mask, String runTableName, String dataRegionName, User user, MS2Run... runs)
@@ -1148,289 +1129,6 @@ public class ProteinManager
     }
 
 
-    public static void addProteinQuery(SQLFragment sql, MS2Run run, ActionURL currentUrl, String extraPeptideWhere, int maxRows, boolean peptideQuery, User user)
-    {
-        // SELECT (TOP n) Protein, SequenceMass, etc.
-        SQLFragment proteinSql = new SQLFragment("SELECT Protein");
-
-        // If this query is a subselect of proteins to which we join the peptide table, we need to:
-        // 1. Alias Protein to prevent SELECT and ORDER BY ambiguity after joining to the peptides table (easier to do this than to disambiguate outside the subselect)
-        // 2. Include SequenceMass since we're not joining again to the ProteinSequence table (we do this in the protein version to get Sequence, but don't need it here)
-        if (peptideQuery)
-            proteinSql.append(" AS PProtein, prot.BestName, prot.BestGeneName");
-
-        proteinSql.append(", prot.Mass AS SequenceMass, COUNT(Peptide) AS Peptides, COUNT(DISTINCT Peptide) AS UniquePeptides, pep.SeqId AS sSeqId\n");
-        proteinSql.append("FROM (SELECT * FROM ");
-        proteinSql.append(MS2Manager.getTableInfoPeptides());
-        proteinSql.append(' ');
-
-        // Construct Peptide WHERE clause (no need to sort by peptide)
-        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, user, run);
-        peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
-        if (null != extraPeptideWhere)
-            peptideFilter.addWhereClause(extraPeptideWhere, new Object[]{});
-        proteinSql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
-        sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-
-        proteinSql.append(") pep LEFT OUTER JOIN ");
-        proteinSql.append(getTableInfoSequences(), "prot");
-        proteinSql.append(" ON prot.SeqId = pep.SeqId\n");
-        proteinSql.append("GROUP BY Protein, prot.Mass, pep.SeqId, prot.BestGeneName, prot.BestName, prot.Description, prot.SeqId\n");
-
-        // Construct Protein HAVING clause
-        SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteins());
-        proteinFilter = ProteinManager.reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteins());
-        String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteins()).replaceFirst("WHERE", "HAVING");
-
-        // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions & disambiguate Mass
-        proteinHaving = proteinHaving.replaceAll("UniquePeptides", "COUNT(DISTINCT Peptide)");
-        proteinHaving = proteinHaving.replaceAll("Peptides", "COUNT(Peptide)");
-        proteinHaving = proteinHaving.replaceAll("SeqId", "prot.SeqId");
-        proteinHaving = proteinHaving.replaceAll("SequenceMass", "prot.Mass");
-        proteinHaving = proteinHaving.replaceAll("Description", "prot.Description");
-        sql.addAll(proteinFilter.getWhereParams(MS2Manager.getTableInfoProteins()));
-        proteinSql.append(proteinHaving);
-
-        if (!"".equals(proteinHaving))
-            proteinSql.append('\n');
-
-        // If we're limiting the number of proteins (e.g., no more than 250) we need to add the protein ORDER BY clause so we get the right rows.
-        if (maxRows > 0)
-        {
-            Sort proteinSort = new Sort("Protein");
-            proteinSort.addURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
-            String proteinOrderBy = proteinSort.getOrderByClause(getSqlDialect());
-            proteinOrderBy = proteinOrderBy.replaceAll("Description", "prot.Description");
-            proteinSql.append(proteinOrderBy);
-
-            getSqlDialect().limitRows(proteinSql, maxRows + 1);
-        }
-
-        sql.append(proteinSql);
-    }
-
-    public static ResultSet getProteinRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
-    {
-        SQLFragment sql = getProteinSql(currentUrl, run, extraPeptideWhere, maxRows, user);
-
-        return new SqlSelector(getSchema(), sql).setMaxRows(maxRows).getResultSet();
-    }
-
-    public static SQLFragment getProteinSql(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
-    {
-        SQLFragment sql = new SQLFragment();
-
-        // Join the selected proteins to ProteinSequences to get the actual Sequence for computing AA coverage
-        // We need to do a second join to ProteinSequences because we can't GROUP BY Sequence, a text data type
-        sql.append("SELECT Protein, SequenceMass, Peptides, UniquePeptides, SeqId, ProtSequence AS Sequence, Description, BestName, BestGeneName FROM\n(");
-        addProteinQuery(sql, run, currentUrl, extraPeptideWhere, maxRows, false, user);
-        sql.append("\n) X LEFT OUTER JOIN ");
-        sql.append(getTableInfoSequences(), "seq");
-        sql.append(" ON seq.SeqId = sSeqId\n");
-
-        // Have to sort again to ensure correct order after the join
-        Sort proteinSort = new Sort("Protein");
-        proteinSort.addURLSort(currentUrl, MS2Manager.getDataRegionNameProteins());
-        sql.append(proteinSort.getOrderByClause(getSqlDialect()));
-
-        return sql;
-    }
-
-    public static ResultSet getProteinProphetRS(ActionURL currentUrl, MS2Run run, String extraPeptideWhere, int maxRows, User user)
-    {
-        return new ResultSetCollapser(getProteinProphetPeptideRS(currentUrl, run, extraPeptideWhere, maxRows, "Scan", user), "ProteinGroupId", maxRows);
-    }
-
-    // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
-    // grouping of peptides is in sync with protein query.  We add the columns in least to most significant order (peptide sort
-    // + protein column + protein sort) and the Sort class ensures that only the most significant "Protein" column remains.
-    public static String getCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
-    {
-        Sort peptideSort = ProteinManager.getPeptideBaseSort();
-        peptideSort.addURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
-        Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteins());
-        Sort combinedSort = new Sort();
-        combinedSort.insertSort(peptideSort);
-        combinedSort.insertSortColumn(orderByColumnName, false);
-        combinedSort.insertSort(proteinSort);
-        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoPeptides(), MS2Manager.getTableInfoProteins());
-        return combinedSort.getOrderByClause(ProteinManager.getSqlDialect());
-    }
-
-    // Combine protein sort and peptide sort into a single ORDER BY.  Must sort by "Protein" before sorting peptides to ensure
-    // grouping of peptides is in sync with protein query.  We add the columns in least to most significant order (peptide sort
-    // + protein column + protein sort) and the Sort class ensures that only the most significant "Protein" column remains.
-    public static String getProteinGroupCombinedOrderBy(ActionURL currentUrl, String orderByColumnName)
-    {
-        Sort peptideSort = ProteinManager.getPeptideBaseSort();
-        peptideSort.addURLSort(currentUrl, MS2Manager.getDataRegionNamePeptides());
-        Sort proteinSort = new Sort(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
-        Sort combinedSort = new Sort();
-        combinedSort.insertSort(peptideSort);
-        combinedSort.insertSortColumn(orderByColumnName, false);
-        combinedSort.insertSort(proteinSort);
-        combinedSort = reduceToValidColumns(combinedSort, MS2Manager.getTableInfoSimplePeptides(), MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        return combinedSort.getOrderByClause(ProteinManager.getSqlDialect());
-    }
-
-
-    // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static GroupedResultSet getPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
-    {
-        SQLFragment sql = getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
-
-        ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet(false, true);
-        return new GroupedResultSet(rs, "Protein");
-    }
-
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
-    {
-        return getPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true, user);
-    }
-
-    // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy, User user)
-    {
-        SQLFragment sql = new SQLFragment();
-
-        // SELECT TOP n m AS Run, Protein, etc.
-        sql.append("SELECT ");
-        sql.append(columnNames);
-        sql.append(", Fraction AS Fraction$Fraction FROM ");
-        sql.append(MS2Manager.getTableInfoPeptides());
-        sql.append(" RIGHT OUTER JOIN\n(");
-
-        ProteinManager.addProteinQuery(sql, run, currentUrl, extraWhere, maxProteinRows, true, user);
-        sql.append(") s ON ");
-        sql.append(MS2Manager.getTableInfoPeptides());
-        sql.append(".SeqId = sSeqId\n");
-
-        // Have to apply the peptide filter again, otherwise we'll just get all peptides mapping to each protein
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(currentUrl, ProteinManager.RUN_FILTER + ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, user, run);
-        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
-        sql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
-        sql.append('\n');
-        sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-        if (addOrderBy)
-            sql.append(getCombinedOrderBy(currentUrl, "Protein"));
-
-        return sql;
-    }
-
-    // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static TableResultSet getProteinProphetPeptideRS(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
-    {
-        SQLFragment sql = getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, user);
-
-        return new SqlSelector(getSchema(), sql).getResultSet(false, true);
-    }
-
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, User user)
-    {
-        return getProteinProphetPeptideSql(currentUrl, run, extraWhere, maxProteinRows, columnNames, true, user);
-    }
-
-    // extraWhere is used to insert an IN clause when exporting selected proteins
-    public static SQLFragment getProteinProphetPeptideSql(ActionURL currentUrl, MS2Run run, String extraWhere, int maxProteinRows, String columnNames, boolean addOrderBy, User user)
-    {
-        SQLFragment sql = new SQLFragment("SELECT ");
-        sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(".ProteinGroupId, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".IndistinguishableCollectionId, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupNumber, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".GroupProbability, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".ErrorRate, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".ProteinProbability, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".UniquePeptidesCount, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".TotalNumberPeptides, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".PctSpectrumIds, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".PercentCoverage, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RatioMean, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RatioStandardDev, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".RatioNumberPeptides, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioMean, ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation() + ".Heavy2LightRatioStandardDev, ");
-        sql.append(MS2Manager.getTableInfoSimplePeptides() + ".Fraction AS Fraction$Fraction, ");
-        sql.append(columnNames);
-
-        sql.append(" FROM ");
-        sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(" INNER JOIN\n");
-        sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(" ON ");
-        sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(".RowId = ");
-        sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(".PeptideId INNER JOIN\n");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        sql.append(" ON ");
-        sql.append(MS2Manager.getTableInfoPeptideMemberships());
-        sql.append(".ProteinGroupId = ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        sql.append(".RowId INNER JOIN\n");
-        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-        sql.append(" ON ");
-        sql.append(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        sql.append(".ProteinProphetFileId = ");
-        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-        sql.append(".RowId");
-        sql.append(" AND ");
-        sql.append(MS2Manager.getTableInfoProteinProphetFiles());
-        sql.append(".Run = ");
-        sql.append(MS2Manager.getTableInfoSimplePeptides());
-        sql.append(".Run\n");
-
-        // Construct Peptide WHERE clause (no need to sort by peptide)
-        SimpleFilter peptideFilter = getPeptideFilter(currentUrl, RUN_FILTER + URL_FILTER + EXTRA_FILTER, MS2Manager.getTableInfoSimplePeptides().toString(), user, run);
-        peptideFilter = reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoSimplePeptides());
-        if (null != extraWhere)
-            peptideFilter.addWhereClause(extraWhere, new Object[]{});
-        sql.append(peptideFilter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
-        sql.addAll(peptideFilter.getWhereParams(MS2Manager.getTableInfoPeptides()));
-
-        sql.append("\n");
-
-        SimpleFilter proteinFilter = new SimpleFilter(currentUrl, MS2Manager.getDataRegionNameProteinGroups());
-        // Translate filters from query-style nested ProteinProphet params to direct filters on the protein group table
-        for (SimpleFilter.FilterClause clause : new SimpleFilter(currentUrl, MS2Manager.getDataRegionNamePeptides()).getClauses())
-        {
-            if (clause instanceof CompareType.CompareClause && !clause.getFieldKeys().isEmpty())
-            {
-                CompareType.CompareClause compareClause = (CompareType.CompareClause) clause;
-                List<String> fieldKeyParts = clause.getFieldKeys().get(0).getParts();
-                // Strip off the ProteinProphetData/ProteinGroupId FieldKey prefix
-                if (fieldKeyParts.size() > 2 && "ProteinProphetData".equalsIgnoreCase(fieldKeyParts.get(0)) && "ProteinGroupId".equalsIgnoreCase(fieldKeyParts.get(1)))
-                {
-                    Object value = compareClause.getParamVals().length > 0 ? compareClause.getParamVals()[0] : null;
-                    proteinFilter.addClause(new CompareType.CompareClause(FieldKey.fromParts(fieldKeyParts.subList(2, fieldKeyParts.size())), compareClause.getCompareType(), value));
-                }
-            }
-        }
-        proteinFilter = reduceToValidColumns(proteinFilter, MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        String proteinWhere = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteinGroupsWithQuantitation());
-        if (proteinWhere != null && !"".equals(proteinWhere))
-        {
-            proteinWhere = proteinWhere.replaceFirst("WHERE", "AND");
-            sql.addAll(proteinFilter.getWhereParams(MS2Manager.getTableInfoProteinGroupsWithQuantitation()));
-            sql.append(proteinWhere);
-            sql.append('\n');
-        }
-        if (addOrderBy)
-        {
-            // Work around ambiguous column problem on SQL Server 2000.  Need this string replacement hack since Sort
-            // doesn't handle schema/table-qualified names correctly and a simple aliasing of the column name breaks
-            // expectations in other code.  See #10460.
-            String orderBy = getProteinGroupCombinedOrderBy(currentUrl, "ProteinGroupId");
-            sql.append(orderBy.replace("ProteinGroupId", MS2Manager.getTableInfoPeptideMemberships() + ".ProteinGroupId"));
-        }
-        if (maxProteinRows > 0)
-        {
-            getSqlDialect().limitRows(sql, maxProteinRows + 1);
-        }
-
-        return sql;
-    }
-
     public static MultiValuedMap<String, String> getIdentifiersFromId(int seqid)
     {
         final MultiValuedMap<String, String> map = new ArrayListValuedHashMap<>();
@@ -1544,7 +1242,7 @@ public class ProteinManager
         int i=0;
         for (String go : goStrings)
         {
-            String sub = go.indexOf(" ") == -1 ? go : go.substring(0, go.indexOf(" "));
+            String sub = !go.contains(" ") ? go : go.substring(0, go.indexOf(" "));
             retVal[i++] = makeFullAnchorString(
                     makeIdentURLStringWithType(sub, "GO"),
                     target,

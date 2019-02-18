@@ -2378,7 +2378,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors) throws SQLException
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors)
     {
 
         ActionURL currentURL = getViewContext().getActionURL();
@@ -4654,12 +4654,7 @@ public class MS2Controller extends SpringActionController
     private void renderErrorImage(String errorMessage, HttpServletResponse response, int width, int height)
             throws IOException
     {
-        Graph g = new Graph(new float[0], new float[0], width, height)
-        {
-            protected void initializeDataPoints(Graphics2D g) {}
-            protected void renderDataPoint(Graphics2D g, double x, double y) {}
-        };
-        g.setNoDataErrorMessage(errorMessage);
+        ErrorImageRenderer g = new ErrorImageRenderer(errorMessage, width, height);
         g.render(response);
     }
 

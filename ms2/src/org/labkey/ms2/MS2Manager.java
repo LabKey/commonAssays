@@ -20,12 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
-import org.jfree.chart.annotations.XYAnnotation;
-import org.jfree.chart.annotations.XYPointerAnnotation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.TextAnchor;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -90,7 +84,6 @@ import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.SimpleScan;
 
 import javax.xml.stream.XMLStreamException;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -162,16 +155,6 @@ public class MS2Manager
     public static String getDataRegionNameRuns()
     {
         return "MS2Runs";
-    }
-
-    public static String getDataRegionNameExperimentRuns()
-    {
-        return "MS2ExperimentRuns";
-    }
-
-    public static String getDataRegionNameProteinGroups()
-    {
-        return "ProteinGroupsWithQuantitation";
     }
 
     public static TableInfo getTableInfoCompare()
@@ -568,7 +551,7 @@ public class MS2Manager
             throw new RuntimeSQLException(e);
         }
 
-        return runs.toArray(new MS2Run[runs.size()]);
+        return runs.toArray(new MS2Run[0]);
     }
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
@@ -1121,11 +1104,8 @@ public class MS2Manager
         if (!NetworkDrive.exists(f))
             throw new SpectrumException("Spectrum file not found.\n" + f.getAbsolutePath());
 
-        RandomAccessMzxmlIterator iter = null;
-
-        try
+        try (RandomAccessMzxmlIterator iter = RandomAccessMzxmlIteratorFactory.newIterator(f, 2, scan))
         {
-            iter = RandomAccessMzxmlIteratorFactory.newIterator(f, 2, scan);
             if (iter.hasNext())
             {
                 SimpleScan sscan = iter.next();
@@ -1147,13 +1127,6 @@ public class MS2Manager
         catch (IOException e)
         {
             throw new SpectrumException("Error reading mzXML file " + f.getName(), e);
-        }
-        finally
-        {
-            if (iter != null)
-            {
-                iter.close();
-            }
         }
     }
 
@@ -1394,430 +1367,6 @@ public class MS2Manager
 
     public static final String NEGATIVE_HIT_PREFIX = "rev_";
 
-    public static class XYSeriesROC extends XYSeries
-    {
-        private List<XYAnnotation> annotations = new ArrayList<>();
-
-        public XYSeriesROC(Comparable key)
-        {
-            super(key);
-        }
-
-        public void addAnnotation(XYAnnotation annotation)
-        {
-            annotations.add(annotation);
-        }
-
-        public void addFirstFalseAnnotation(String text, double x, double y)
-        {
-            if (text == null)
-                return;
-            
-            XYPointerAnnotation pointer = new XYPointerAnnotation(
-                text, x, y, 9.0 * Math.PI / 4.0
-            );
-            pointer.setBaseRadius(35.0);
-            pointer.setTipRadius(2.0);
-            pointer.setFont(new Font("SansSerif", Font.PLAIN, 9));
-            pointer.setTextAnchor(TextAnchor.HALF_ASCENT_LEFT);
-            addAnnotation(pointer);
-            add(x, y);
-        }
-
-        public List<XYAnnotation> getAnnotations()
-        {
-            return annotations;
-        }
-
-        public void plotAnnotations(XYPlot plot, Paint paint)
-        {
-            for (XYAnnotation annotation : getAnnotations())
-            {
-                if (!(annotation instanceof XYPointerAnnotation))
-                    continue;
-
-                final XYPointerAnnotation pointer = (XYPointerAnnotation) annotation;
-
-//                pointer.setPaint(paint);
-                pointer.setArrowPaint(paint);
-
-                plot.addAnnotation(annotation);
-            }
-        }
-    }
-
-    public static XYSeriesCollection getROCData(int[] runIds, boolean[][] discriminateFlags,
-                                                double increment, double percentAACorrect, int limitFalsePs,
-                                                double[] marks, boolean markFdr)
-    {
-        String negHitPrefix = NEGATIVE_HIT_PREFIX;
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        for (int i = 0; i < runIds.length; i++)
-        {
-            MS2Run run = getRun(runIds[i]);
-            if (run == null)
-                continue;
-
-            long runRows = run.getPeptideCount();
-
-            String[] discriminates = run.getDiscriminateExpressions().split("\\s*,\\s*");
-            for (int j = 0; j < discriminates.length; j++)
-            {
-                if (discriminateFlags[i] == null ||
-                        discriminateFlags[i].length <= j ||
-                        !discriminateFlags[i][j])
-                    continue;
-                final String discriminate = discriminates[j];
-                String key = run.getDescription();
-                if (discriminates.length > 1)
-                    key += " - " + discriminate;
-                XYSeriesROC series = new XYSeriesROC(key);
-
-                if (run.statusId == 0)
-                    series.setKey(series.getKey() + " (Loading)");
-                else
-                {
-                    // TODO: Use getMap() instead of getResultSet()
-                    try (ResultSet rs = new SqlSelector(getSchema(),
-                                                    "SELECT Protein, " + discriminate + " as Expression, " +
-                                                            " CASE substring(Protein, 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
-                                                    "FROM " + getTableInfoPeptides().getSelectName() + " " +
-                                                    "WHERE Run = ? " +
-                                                    "ORDER BY Expression, FP",
-                                                    run.getRun()).getResultSet())
-                    {
-
-                        int rows = 0;
-                        int falsePositives = 0;
-                        int iMark = 0;
-
-                        series.add(0.0, 0.0);
-
-                        points_loop:
-                        for (int k = 1; falsePositives < limitFalsePs; k++)
-                        {
-                            double cutoff = k * increment / 100.0;
-                            while ((((double) rows) / (double) runRows) < cutoff &&
-                                    falsePositives < limitFalsePs)
-                            {
-                                if (!rs.next())
-                                    break points_loop;
-                                if (rs.getString("Protein").startsWith(negHitPrefix))
-                                {
-                                    // If this is the first false positive, create a point
-                                    // with an annotation for it.
-                                    if (iMark < marks.length &&
-                                        ((!markFdr && falsePositives == marks[iMark]) ||
-                                         (markFdr && falsePositives > (marks[iMark] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows)))
-                                    {
-                                        series.addFirstFalseAnnotation(rs.getString("Expression"),
-                                                falsePositives, rows - falsePositives);
-
-                                        iMark++;
-                                    }
-                                    // If FDR dips below mark, back-up and mark again.
-                                    else if (iMark > 0 && (markFdr && falsePositives <= (marks[iMark-1] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows))
-                                    {
-                                        iMark--;
-                                    }
-                                    falsePositives++;
-                                }
-                                rows++;
-                            }
-                            series.add(falsePositives, rows - falsePositives);
-                        }
-                    }
-                    catch (SQLException e)
-                    {
-                        series.setKey(series.getKey() + " (Error)");
-                        series.clear();
-                        _log.error("Error getting ROC data.", e);
-                    }
-                }
-
-                collection.addSeries(series);
-            }
-        }
-
-        return collection;
-    }
-
-    public static XYSeriesCollection getROCDataProt(int[] runIds, double increment,
-                                                    boolean[][] discriminateFlags,
-                                                    double percentAACorrect, int limitFalsePs,
-                                                    double[] marks, boolean markFdr)
-    {
-        String negHitPrefix = NEGATIVE_HIT_PREFIX;
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        for (int i = 0; i < runIds.length; i++)
-        {
-            MS2Run run = getRun(runIds[i]);
-            if (run == null)
-                continue;
-
-            // Only show runs for which at least one discriminate flag is showing.
-            boolean showRun = false;
-            for (boolean discriminateFlag : discriminateFlags[i])
-                showRun = showRun || discriminateFlag;
-            if (!showRun)
-                continue;
-
-            long runRows = new SqlSelector(getSchema(),
-                "SELECT COUNT(*) " +
-                    "FROM " + getTableInfoRuns().getSelectName() + " r " +
-                        "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
-                        "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
-                    "WHERE r.Run = ? ",
-                    run.getRun()).getObject(Integer.class).longValue();
-
-            String key = run.getDescription();
-            XYSeriesROC series = new XYSeriesROC(key);
-
-            if (run.statusId == 0)
-                series.setKey(series.getKey() + " (Loading)");
-            else
-            {
-                // TODO: Use getMap() instead of getResultSet()
-                try (ResultSet rs = new SqlSelector(getSchema(),
-                                "SELECT GroupNumber, -max(GroupProbability) as Expression, min(BestName) as Protein, " +
-                                        " CASE substring(min(BestName), 1, 4) WHEN 'rev_' THEN 1 ELSE 0 END as FP " +
-                                "FROM " + getTableInfoRuns().getSelectName() + " r " +
-                                    "inner join " + getTableInfoProteinProphetFiles().getSelectName() + " f on r.Run = f.Run " +
-                                    "inner join " + getTableInfoProteinGroups().getSelectName() + " g on f.RowId = g.ProteinProphetFileId " +
-                                    "inner join " + getTableInfoProteinGroupMemberships().getSelectName() + " m on g.RowId = m.ProteinGroupId " +
-                                    "inner join " + ProteinManager.getTableInfoSequences().getSelectName() + " s on m.SeqId = s.SeqId " +
-                                "WHERE r.Run = ? " +
-                                "GROUP BY GroupNumber " +
-                                "ORDER BY Expression, FP",
-                                run.getRun()).getResultSet())
-                {
-                    int rows = 0;
-                    int falsePositives = 0;
-                    int iMark = 0;
-
-                    series.add(0.0, 0.0);
-
-                    points_loop:
-                    for (int k = 1; falsePositives < limitFalsePs; k++)
-                    {
-                        double cutoff = k * increment / 100.0;
-                        while ((((double) rows) / (double) runRows) < cutoff &&
-                                falsePositives < limitFalsePs)
-                        {
-                            if (!rs.next())
-                                break points_loop;
-                            if (rs.getString("Protein").startsWith(negHitPrefix))
-                            {
-                                // If this is the first false positive, create a point
-                                // with an annotation for it.
-                                if (iMark < marks.length &&
-                                    ((!markFdr && falsePositives == marks[iMark]) ||
-                                     (markFdr && falsePositives > (marks[iMark] / 100.0) * ((100.0 - percentAACorrect) / 100.00) * rows)))
-                                {
-                                    series.addFirstFalseAnnotation(rs.getString("Expression"),
-                                            falsePositives, rows - falsePositives);
-
-                                    iMark++;
-                                }
-                                falsePositives++;
-                            }
-                            rows++;
-                        }
-                        series.add(falsePositives, rows - falsePositives);
-                    }
-                }
-                catch (SQLException e)
-                {
-                    series.setKey(series.getKey() + " (Error)");
-                    series.clear();
-                    _log.error("Error getting ROC data.", e);
-                }
-            }
-
-            collection.addSeries(series);
-        }
-
-        return collection;
-    }
-
-    public static XYSeriesCollection getDiscriminateROCData(int runId,
-                                                            String[] expressions,
-                                                            double increment,
-                                                            int limitFalsePs,
-                                                            int[] marks
-    )
-    {
-        String negHitPrefix = NEGATIVE_HIT_PREFIX;
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        MS2Run run = getRun(runId);
-        if (run != null && run.statusId != 0)
-        {
-            long runRows = run.getPeptideCount();
-
-            String key = run.getDescription();
-            XYSeriesROC series = new XYSeriesROC(key);
-
-            try (ResultSet rs = new SqlSelector(getSchema(),
-                                            "SELECT Protein, " +
-                                                " case" +
-                                                    " when Charge = 1 then " + expressions[0] +
-                                                    " when Charge = 2 then " + expressions[1] +
-                                                    " else " + expressions[2] +
-                                                " end as Expression " +
-                                            "FROM " + getTableInfoPeptides().getSelectName() + " " +
-                                            "WHERE Run = ? " +
-                                            "ORDER BY Expression DESC",
-                                            runId).getResultSet())
-            {
-                if (!rs.next())
-                    return collection;
-
-                int rows = 0;
-                int falsePositives = 0;
-                int iMark = 0;
-
-                series.add(0.0, 0.0);
-
-                points_loop:
-                for (int k = 1; falsePositives < limitFalsePs; k++)
-                {
-                    double cutoff = k * increment / 100.0;
-                    while ((((double) rows) / (double) runRows) < cutoff &&
-                            falsePositives < limitFalsePs)
-                    {
-                        if (!rs.next())
-                            break points_loop;
-                        if (rs.getString("Protein").startsWith(negHitPrefix))
-                        {
-                            if (iMark < marks.length && falsePositives == marks[iMark])
-                            {
-                                series.addFirstFalseAnnotation(rs.getString("Expression"),
-                                        falsePositives, rows - falsePositives);
-
-                                iMark++;
-                            }
-                            falsePositives++;
-                        }
-                        rows++;
-                    }
-                    series.add(falsePositives, rows - falsePositives);
-                }
-            }
-            catch (SQLException e)
-            {
-                series.setKey(series.getKey() + " (Error)");
-                series.clear();
-                _log.error("Error getting ROC data.", e);
-            }
-
-            collection.addSeries(series);
-        }
-
-        return collection;
-    }
-
-    public static XYSeriesCollection getDiscriminateData(int runId,
-                                                         int charge,
-                                                         double percentAACorrect,
-                                                         final String expression,
-                                                         double bucket,
-                                                         int scaleFactor
-    )
-    {
-        String negHitPrefix = NEGATIVE_HIT_PREFIX;
-
-        XYSeriesCollection collection = new XYSeriesCollection();
-        MS2Run run = getRun(runId);
-        if (run != null && run.statusId != 0)
-        {
-            String keyCorrect = "Correct";
-            if (scaleFactor != 1)
-                keyCorrect += " - " + scaleFactor + "x";
-            XYSeries seriesCorrect = new XYSeries(keyCorrect);
-            XYSeries seriesFP = new XYSeries("False-Positives");
-            //Set<SpectrumId> seen = new HashSet<SpectrumId>();
-
-            // TODO: Use getMap() instead of getResultSet()
-            try (ResultSet rs = new SqlSelector(getSchema(),
-                        "SELECT Fraction, Scan, Charge, Protein, " + expression + " as Expression " +
-                        "FROM " + getTableInfoPeptides().getSelectName() + " " +
-                        "WHERE Run = ? " +
-                        "ORDER BY Expression",
-                        runId).getResultSet())
-            {
-                if (!rs.next())
-                    return collection;
-
-                double startChart = rs.getDouble(5);
-
-                double cutoffLast = startChart;
-                int falsePositivesLast = 0;
-                int correctIdsLast = 0;
-                int k = 1;
-
-                points_loop:
-                for (;; k++)
-                {
-                    int falsePositives = 0;
-                    int correctIds = 0;
-
-                    double cutoff = startChart + (k * bucket);
-                    while (rs.getDouble(5) < cutoff)
-                    {
-                        if (!rs.next())
-                            break points_loop;
-
-                        if (rs.getInt(3) != charge)
-                            continue;
-
-                        if (rs.getString(4).startsWith(negHitPrefix))
-                            falsePositives++;
-                        else
-                            correctIds++;
-                    }
-                    if (falsePositives > 0 || falsePositivesLast > 0)
-                    {
-                        if (falsePositivesLast <= 0)
-                            seriesFP.add(cutoffLast, 0);
-                        seriesFP.add(cutoff, falsePositives);
-                    }
-                    correctIds = (int) Math.max(0.0, correctIds - (falsePositives * percentAACorrect / 100.0));
-                    if (correctIds > 0 || correctIdsLast > 0)
-                    {
-                        if (correctIdsLast <= 0)
-                            seriesCorrect.add(cutoffLast, 0);
-                        seriesCorrect.add(cutoff, correctIds * scaleFactor);
-                    }
-
-                    cutoffLast = cutoff;
-                    falsePositivesLast = falsePositives;
-                    correctIdsLast = correctIds;
-                }
-
-                if (falsePositivesLast > 0)
-                    seriesFP.add(startChart + (k * bucket), 0);
-                if (correctIdsLast > 0)
-                    seriesCorrect.add(startChart + (k * bucket), 0);
-            }
-            catch (SQLException e)
-            {
-                seriesFP.setKey(seriesFP.getKey() + " (Error)");
-                seriesFP.clear();
-                seriesCorrect.setKey(seriesCorrect.getKey() + " (Error)");
-                seriesCorrect.clear();
-                _log.error("Error getting descriminate data.", e);
-            }
-
-            collection.addSeries(seriesFP);
-            collection.addSeries(seriesCorrect);
-        }
-
-        return collection;
-    }
-
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
     {
         String type = null;
@@ -1927,8 +1476,8 @@ public class MS2Manager
         private Float desiredFdr;
         private float fdrAtDefaultPvalue;
         private float pValue;
-        private final List<Float> fdrOptions = new ArrayList(Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f));
-        private final Map<Float, Float> fdrOptionToThresholdMap = new HashMap<Float, Float>(fdrOptions.size() + 1);  // may add one option during processing
+        private final List<Float> fdrOptions = new ArrayList<>(Arrays.asList(.001f, .002f, .01f, .02f, .025f, .05f, .1f));
+        private final Map<Float, Float> fdrOptionToThresholdMap = new HashMap<>(fdrOptions.size() + 1);  // may add one option during processing
 
         public int getTargetCount()
         {

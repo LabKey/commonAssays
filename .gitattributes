@@ -915,7 +915,6 @@ ms2/resources/views/runsOverview.html -text
 ms2/resources/views/runsOverview.view.xml -text
 ms2/schemas/pepXML.xsd -text
 ms2/schemas/pepXML_v117.xsd -text
-ms2/src/org/labkey/ms2/AACoverageColumn.java -text
 ms2/src/org/labkey/ms2/AbstractPeptideDisplayColumn.java -text
 ms2/src/org/labkey/ms2/AbstractProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/AbstractTextSpectrumRenderer.java -text
@@ -927,7 +926,6 @@ ms2/src/org/labkey/ms2/DeltaScanColumn.java -text
 ms2/src/org/labkey/ms2/DtaSpectrumRenderer.java -text
 ms2/src/org/labkey/ms2/EditElutionGraphContext.java -text
 ms2/src/org/labkey/ms2/ElutionGraph.java -text
-ms2/src/org/labkey/ms2/FirstProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/FloatParser.java -text
 ms2/src/org/labkey/ms2/GZFileRenderer.java -text
 ms2/src/org/labkey/ms2/GroupNumberDisplayColumn.java -text
@@ -961,7 +959,6 @@ ms2/src/org/labkey/ms2/ProteinDisplayColumn.java -text
 ms2/src/org/labkey/ms2/ProteinGroupProteins.java -text
 ms2/src/org/labkey/ms2/ProteinGroupWithQuantitation.java -text
 ms2/src/org/labkey/ms2/ProteinListDisplayColumn.java -text
-ms2/src/org/labkey/ms2/ProteinName.java -text
 ms2/src/org/labkey/ms2/ProteinProphetExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/ProteinProphetFile.java -text
 ms2/src/org/labkey/ms2/ProteinProphetImporter.java -text
@@ -974,8 +971,6 @@ ms2/src/org/labkey/ms2/SpectrumException.java -text
 ms2/src/org/labkey/ms2/SpectrumImporter.java -text
 ms2/src/org/labkey/ms2/SpectrumIterator.java -text
 ms2/src/org/labkey/ms2/SpectrumRenderer.java -text
-ms2/src/org/labkey/ms2/TotalFilteredPeptidesColumn.java -text
-ms2/src/org/labkey/ms2/UniqueFilteredPeptidesColumn.java -text
 ms2/src/org/labkey/ms2/annotLoadDetails.jsp -text
 ms2/src/org/labkey/ms2/blastAdmin.jsp -text
 ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
@@ -1022,9 +1017,7 @@ ms2/src/org/labkey/ms2/peptideview/AbstractMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/AbstractQueryMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2ResultSet.java -text
 ms2/src/org/labkey/ms2/peptideview/MS2RunViewType.java -text
-ms2/src/org/labkey/ms2/peptideview/MultiRunRenderContext.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinDisplayColumnFactory.java -text
-ms2/src/org/labkey/ms2/peptideview/ProteinResultSetSpectrumIterator.java -text
 ms2/src/org/labkey/ms2/peptideview/ProteinStringExpression.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryPeptideMS2RunView.java -text
 ms2/src/org/labkey/ms2/peptideview/QueryProteinGroupMS2RunView.java -text
