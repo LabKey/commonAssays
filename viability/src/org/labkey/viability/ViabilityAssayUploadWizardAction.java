@@ -41,15 +41,17 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.study.actions.StudyPickerColumn;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.viability.data.MultiValueInputColumn;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -87,28 +89,36 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         return new RunStepHandler()
         {
             @Override
-            protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
+            public void validateStep(ViabilityAssayRunUploadForm form, Errors errors)
             {
-                if (!super.validatePost(form, errors))
-                    return false;
+                super.validateStep(form, errors);
 
-                try
+                if (!errors.hasErrors())
                 {
-                    form.getParsedResultData();
+                    try
+                    {
+                        form.getParsedResultData();
+                    }
+                    catch (ExperimentException e)
+                    {
+                        errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                    }
                 }
-                catch (ExperimentException e)
-                {
-                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                    return false;
-                }
-
-                return true;
             }
 
             @Override
-            protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
+            public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
             {
-                return getResultsView(form, false, errors);
+                return false;
+            }
+
+            @Override
+            public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            {
+                if (errors.hasErrors())
+                    return getRunPropertiesView(form, true, false, errors);
+                else
+                    return getResultsView(form, false, errors);
             }
         };
     }
@@ -269,7 +279,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
 
-        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
+        ActionButton cancelButton = new ActionButton("Cancel", PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
         bbar.add(cancelButton);
 
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
@@ -308,39 +318,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             return NAME;
         }
 
-        @Override
-        public ModelAndView handleStep(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
-        {
-            if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
-            {
-                throw new RedirectException(getViewContext().getActionURL());
-            }
-
-            if (!form.isResetDefaultValues() && validatePost(form, errors))
-                return handleSuccessfulPost(form, errors);
-            else
-                return getResultsView(form, !form.isResetDefaultValues(), errors);
-        }
-
-        @Override
-        protected boolean validatePost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
-        {
-            boolean valid = super.validatePost(form, errors);
-            try
-            {
-                List<Map<String, Object>> rows = form.getResultProperties(errors);
-                if (errors.hasErrors())
-                    return false;
-                ViabilityAssayDataHandler.validateData(rows, false);
-            }
-            catch (ExperimentException e)
-            {
-                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                valid = false;
-            }
-            return valid;
-        }
-
         private ExpExperiment createExperiment(ViabilityAssayRunUploadForm form)
         {
             ExpProtocol protocol = form.getProtocol();
@@ -368,7 +345,24 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        protected ModelAndView handleSuccessfulPost(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
+        public void validateStep(ViabilityAssayRunUploadForm form, Errors errors)
+        {
+            super.validateStep(form, errors);
+            try
+            {
+                List<Map<String, Object>> rows = form.getResultProperties(errors);
+                if (errors.hasErrors())
+                    return;
+                ViabilityAssayDataHandler.validateData(rows, false);
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
+        }
+
+        @Override
+        public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
             {
@@ -399,8 +393,6 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 experiment.addRuns(form.getUser(), run);
 
                 transaction.commit();
-
-                return afterRunCreation(form, run, errors);
             }
             catch (ValidationException e)
             {
@@ -412,15 +404,23 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                     else
                         errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
                 }
-                return getResultsView(form, true, errors);
             }
             catch (ExperimentException e)
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                return getResultsView(form, true, errors);
             }
+
+            return !errors.hasErrors();
         }
 
+        @Override
+        public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            if (form.isResetDefaultValues() || errors.hasErrors())
+                return getResultsView(form, !form.isResetDefaultValues(), errors);
+            else
+                return null;
+        }
     }
 
     @Override

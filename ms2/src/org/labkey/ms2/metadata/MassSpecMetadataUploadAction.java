@@ -16,27 +16,31 @@
 
 package org.labkey.ms2.metadata;
 
-import org.labkey.api.action.LabKeyError;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.*;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
-import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.study.assay.PipelineDataCollector;
-import org.labkey.api.view.InsertView;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.RedirectException;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.permissions.*;
+import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.pipeline.PipelineUrls;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.InsertView;
+import org.labkey.api.view.RedirectException;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
 import java.io.File;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +66,12 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
         public static final String NAME = "DELETEASSAYS";
 
         @Override
-        public ModelAndView handleStep(MassSpecMetadataAssayForm form, BindException errors)
+        public void validateStep(MassSpecMetadataAssayForm form, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean executeStep(MassSpecMetadataAssayForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             Container c = form.getContainer();
 
@@ -79,7 +88,18 @@ public class MassSpecMetadataUploadAction extends BulkPropertiesUploadWizardActi
                     }
                 }
             }
+            return true;
+        }
 
+        @Override
+        public ModelAndView getNextStep(MassSpecMetadataAssayForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            return null;
+        }
+
+        @Override
+        public ActionURL getSuccessUrl(MassSpecMetadataAssayForm form)
+        {
             return null;
         }
 

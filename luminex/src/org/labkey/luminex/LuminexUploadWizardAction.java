@@ -51,7 +51,6 @@ import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
-import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.luminex.model.Analyte;
@@ -63,6 +62,7 @@ import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnGroup;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletException;
@@ -460,7 +460,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         ButtonBar bbar = new ButtonBar();
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
-        bbar.add(new ActionButton("Cancel", getSummaryLink(_protocol)));
+        bbar.add(new ActionButton("Cancel", PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol)));
         bbar.setStyle(ButtonBar.Style.separateButtons);
         view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
 
@@ -692,20 +692,38 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     protected class LuminexRunStepHandler extends RunStepHandler
     {
         @Override
-        protected ModelAndView handleSuccessfulPost(LuminexRunUploadForm form, BindException errors) throws ExperimentException
+        public boolean executeStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
-            try {
+            try
+            {
                 String[] analyteNames = getAnalyteNames(form);
 
                 if (analyteNames.length == 0)
-                    return super.handleSuccessfulPost(form, errors);
+                    return super.executeStep(form, errors);
                 else
-                    return getAnalytesView(analyteNames, form, false, errors);
+                    return false;
             }
             catch (ExperimentException e)
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                return getRunPropertiesView(form, true, false, errors);
+            }
+
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            if (form.isResetDefaultValues() || errors.hasErrors())
+                return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
+            else
+            {
+                String[] analyteNames = getAnalyteNames(form);
+
+                if (analyteNames.length == 0)
+                    return null;
+                else
+                    return getAnalytesView(analyteNames, form, false, errors);
             }
         }
     }
@@ -715,132 +733,132 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         public static final String NAME = "ANALYTE";
 
         @Override
-        public ModelAndView handleStep(LuminexRunUploadForm form, BindException errors) throws ExperimentException
+        public void validateStep(LuminexRunUploadForm form, Errors errors)
         {
-            if (!form.isResetDefaultValues())
+            for (String analyte : form.getAnalyteNames())
             {
-                for (String analyte : form.getAnalyteNames())
-                {
-                    // validate analyte domain properties
-                    Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
-                    validatePostedProperties(getViewContext(), properties, errors);
+                // validate analyte domain properties
+                Map<DomainProperty, String> properties = form.getAnalyteProperties(analyte);
+                validatePostedProperties(getViewContext(), properties, errors);
 
-                    // validate analyte column properties
-                    Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
-                    validateColumnProperties(getViewContext(), colProperties, errors);
+                // validate analyte column properties
+                Map<ColumnInfo, String> colProperties = form.getAnalyteColumnProperties(analyte);
+                validateColumnProperties(getViewContext(), colProperties, errors);
+            }
+        }
+
+        @Override
+        public boolean executeStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
+            {
+                saveExperimentRun(form);
+
+                // Save user last entered default values for analytes
+                PropertyManager.PropertyMap defaultAnalyteColumnValues = AnalyteDefaultValueService.getWritableUserDefaultValues(getUser(), getContainer(), form.getProtocol());
+                for (String analyteName : form.getAnalyteNames())
+                {
+                    // for analyte domain properties use the standard assay default value persistance
+                    Map<DomainProperty, String> properties = form.getAnalyteProperties(analyteName);
+                    form.saveDefaultValues(properties, analyteName);
+
+                    // for analyte column properties use the PropertyManager (similar to how well role and titration defaults values are persisted)
+                    for (Map.Entry<ColumnInfo, String> colPropEntry : form.getAnalyteColumnProperties(analyteName).entrySet())
+                    {
+                        // issue 20549: default values reset incorrectly when PositivityThreshold column is hidden
+                        boolean includeDefaultAnalyteColumnValue = hasAnalytePropertyInRequestParams(form, analyteName, colPropEntry.getKey());
+
+                        // These need to be repopulated just like the rest of the analyte domain properties,
+                        // but they aren't actually part of the domain- they're hard columns on the luminex.Analyte table
+                        String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
+                        if (includeDefaultAnalyteColumnValue)
+                            defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
+                    }
                 }
-            }
+                defaultAnalyteColumnValues.save();
 
-            if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
-            {
-                throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(getContainer(), _protocol, LuminexUploadWizardAction.class));
-            }
+                // save the default values for the analyte standards/titrations information in 2 categories: well roles and titrations
+                PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
+                        getUser(), getContainer(), form.getProtocol().getName() + ": Well Role", true);
 
-            boolean errorReshow = errors.getErrorCount() > 0;
-            if (!form.isResetDefaultValues() && !errorReshow)
-            {
-                try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
+                for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
                 {
-                    ExpRun run = saveExperimentRun(form);
+                    String propertyName;
+                    Boolean value;
 
-                    // Save user last entered default values for analytes
-                    PropertyManager.PropertyMap defaultAnalyteColumnValues = AnalyteDefaultValueService.getWritableUserDefaultValues(getUser(), getContainer(), _protocol);
-                    for (String analyteName : form.getAnalyteNames())
+                    // add the name/value pairs for the titration well role definition section
+                    if (!titrationEntry.getValue().isUnknown())
                     {
-                        // for analyte domain properties use the standard assay default value persistance
-                        Map<DomainProperty, String> properties = form.getAnalyteProperties(analyteName);
-                        form.saveDefaultValues(properties, analyteName);
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        defaultWellRoleValues.put(propertyName, Boolean.toString(value));
 
-                        // for analyte column properties use the PropertyManager (similar to how well role and titration defaults values are persisted)
-                        for (Map.Entry<ColumnInfo, String> colPropEntry : form.getAnalyteColumnProperties(analyteName).entrySet())
-                        {
-                            // issue 20549: default values reset incorrectly when PositivityThreshold column is hidden
-                            boolean includeDefaultAnalyteColumnValue = hasAnalytePropertyInRequestParams(form, analyteName, colPropEntry.getKey());
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        defaultWellRoleValues.put(propertyName, Boolean.toString(value));
 
-                            // These need to be repopulated just like the rest of the analyte domain properties,
-                            // but they aren't actually part of the domain- they're hard columns on the luminex.Analyte table
-                            String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyteName, colPropEntry.getKey().getName());
-                            if (includeDefaultAnalyteColumnValue)
-                                defaultAnalyteColumnValues.put(inputName, colPropEntry.getValue());
-                        }
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
-                    defaultAnalyteColumnValues.save();
-
-                    // save the default values for the analyte standards/titrations information in 2 categories: well roles and titrations
-                    PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
-                            getUser(), getContainer(), _protocol.getName() + ": Well Role", true);
-
-                    for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
+                    else
                     {
-                        String propertyName;
-                        Boolean value;
-
-                        // add the name/value pairs for the titration well role definition section
-                        if (!titrationEntry.getValue().isUnknown())
-                        {
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-                        }
-                        else
-                        {
-                            propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
-                            value = getViewContext().getRequest().getParameter(propertyName).equals("true");
-                            defaultWellRoleValues.put(propertyName, Boolean.toString(value));
-                        }
-
-                        // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
-                        propertyName = getShowStandardCheckboxColumnName(titrationEntry.getValue());
-                        if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
-                        {
-                            PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
-                                    getUser(), getContainer(),
-                                    _protocol.getName() + ": " + titrationEntry.getValue().getName(), true);
-                            for (String analyteName : form.getAnalyteNames())
-                            {
-                                propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyteName);
-                                value = getViewContext().getRequest().getParameter(propertyName) != null;
-                                defaultTitrationValues.put(propertyName, Boolean.toString(value));
-                            }
-                            defaultTitrationValues.save();
-                        }
-                    }
-                    // save default values for SinglePointControls
-                    for (String singlePointControl : form.getParser().getSinglePointControls())
-                    {
-                        // add the name/value pairs for the singlePointControl well role definition section
-                        String propertyName = getSinglePointControlCheckboxName(singlePointControl);
-                        Boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                        propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                        value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
 
-                    defaultWellRoleValues.save();
+                    // add the name/value pairs for each of the analyte standards if the columns was shown in the UI
+                    propertyName = getShowStandardCheckboxColumnName(titrationEntry.getValue());
+                    if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
+                    {
+                        PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
+                                getUser(), getContainer(),
+                                form.getProtocol().getName() + ": " + titrationEntry.getValue().getName(), true);
+                        for (String analyteName : form.getAnalyteNames())
+                        {
+                            propertyName = getTitrationCheckboxName(titrationEntry.getValue().getName(), analyteName);
+                            value = getViewContext().getRequest().getParameter(propertyName) != null;
+                            defaultTitrationValues.put(propertyName, Boolean.toString(value));
+                        }
+                        defaultTitrationValues.save();
+                    }
+                }
+                // save default values for SinglePointControls
+                for (String singlePointControl : form.getParser().getSinglePointControls())
+                {
+                    // add the name/value pairs for the singlePointControl well role definition section
+                    String propertyName = getSinglePointControlCheckboxName(singlePointControl);
+                    Boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                    defaultWellRoleValues.put(propertyName, Boolean.toString(value));
+                }
 
-                    transaction.commit();
-                    getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
-                    form.resetUploadAttemptID();
-                    return afterRunCreation(form, run, errors);
-                }
-                catch (ValidationException ve)
-                {
-                    for (ValidationError error : ve.getErrors())
-                        errors.addError(new LabKeyError(error.getMessage()));
-                }
-                catch (ExperimentException e)
-                {
-                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                }
+                defaultWellRoleValues.save();
+
+                transaction.commit();
+                getCompletedUploadAttemptIDs().add(form.getUploadAttemptID());
+                form.resetUploadAttemptID();
+            }
+            catch (ValidationException ve)
+            {
+                for (ValidationError error : ve.getErrors())
+                    errors.addError(new LabKeyError(error.getMessage()));
+            }
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
             }
 
-            return getAnalytesView(form.getAnalyteNames(), form, errorReshow, errors);
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            if (form.isResetDefaultValues() || errors.hasErrors())
+                return getAnalytesView(form.getAnalyteNames(), form, true, errors);
+            else
+                return null;
         }
 
         public String getName()

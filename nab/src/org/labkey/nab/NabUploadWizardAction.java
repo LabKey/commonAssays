@@ -16,12 +16,9 @@
 
 package org.labkey.nab;
 
-import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.LimitedUser;
@@ -32,16 +29,17 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.roles.EditorRole;
 import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
-import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -93,14 +91,11 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         private Map<String, Map<DomainProperty, String>> _postedVirusProperties = null;
 
         @Override
-        protected boolean validatePost(NabRunUploadForm form, BindException errors) throws ExperimentException
+        public void validateStep(NabRunUploadForm form, Errors errors)
         {
-            boolean runPropsValid = super.validatePost(form, errors);
-
+            super.validateStep(form, errors);
             NabAssayProvider provider = form.getProvider();
 
-            boolean samplePropsValid = true;
-            boolean virusPropsValid = true;
             try
             {
                 PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
@@ -109,7 +104,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                 {
                     // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
                     // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
-                    samplePropsValid = validatePostedProperties(getViewContext(), entry.getValue(), errors) && samplePropsValid;
+                    validatePostedProperties(getViewContext(), entry.getValue(), errors);
                 }
 
                 PlateSamplePropertyHelper virusHelper = provider.getVirusPropertyHelper(form, false);
@@ -118,7 +113,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                     _postedVirusProperties = virusHelper.getPostedPropertyValues(form.getRequest());
                     for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedVirusProperties.entrySet())
                     {
-                        virusPropsValid = validatePostedProperties(getViewContext(), entry.getValue(), errors) && virusPropsValid;
+                        validatePostedProperties(getViewContext(), entry.getValue(), errors);
                     }
                 }
             }
@@ -126,10 +121,10 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
             }
-            return runPropsValid && samplePropsValid && virusPropsValid && !errors.hasErrors();
         }
 
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws ExperimentException
+        @Override
+        public boolean executeStep(NabRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             if (_postedVirusProperties != null)
             {
@@ -161,24 +156,24 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                     }
                 }
             }
-            return super.handleSuccessfulPost(form, errors);
-        }
-    }
+            boolean success = !errors.hasErrors() && super.executeStep(form, errors);
 
-    protected ModelAndView afterRunCreation(NabRunUploadForm form, ExpRun run, BindException errors) throws ExperimentException
-    {
-        User elevatedUser = getUser();
-        if (run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
-        {
-            User currentUser = getUser();
-            Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
-            contextualRoles.add(RoleManager.getRole(EditorRole.class));
-            elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
-        }
+            if (success && _run != null)
+            {
+                User elevatedUser = getUser();
+                if (_run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
+                {
+                    User currentUser = getUser();
+                    Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
+                    contextualRoles.add(RoleManager.getRole(EditorRole.class));
+                    elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
+                }
 
-        if (form.getReRun() != null)
-            form.getReRun().delete(elevatedUser);
-        return super.afterRunCreation(form, run, errors);
+                if (form.getReRun() != null)
+                    form.getReRun().delete(elevatedUser);
+            }
+            return success;
+        }
     }
 
     @Override
@@ -193,119 +188,4 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
     {
         return true;
     }
-
-/*    public class SampleStepHandler extends RunStepHandler
-    {
-        public static final String NAME = "SAMPLES";
-        private Map<String, Map<DomainProperty, String>> _postedSampleProperties = null;
-
-        public ModelAndView handleStep(NabRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
-        {
-            if (!form.isResetDefaultValues() && validatePost(form, errors))
-                return handleSuccessfulPost(form, errors);
-            else
-                return getSamplesView(form, true, errors);
-
-            //return getPlateSummary(form, false);
-        }
-
-        protected boolean validatePost(NabRunUploadForm form, BindException errors) throws ExperimentException
-        {
-            return validatePostedSampleProperties(form, errors);
-        }
-
-        protected ModelAndView handleSuccessfulPost(NabRunUploadForm form, BindException errors) throws ExperimentException
-        {
-            DilutionAssayProvider provider = form.getProvider();
-            PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
-            _postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            if (_postedSampleProperties != null)
-            {
-                form.setSampleProperties(_postedSampleProperties);
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                {
-                    try
-                    {
-                        form.saveDefaultValues(entry.getValue(), entry.getKey());
-                    }
-                    catch (org.labkey.api.exp.ExperimentException e)
-                    {
-                        errors.addError(new ObjectError("main", null, null, e.toString()));
-                    }
-                }
-            }
-            return super.handleSuccessfulPost(form, errors);
-        }
-
-        public String getName()
-        {
-            return NAME;
-        }
-    }
-
-    protected InsertView getSamplesView(NabRunUploadForm form, boolean errorReshow, BindException errors) throws ServletException, ExperimentException
-    {
-        InsertView view = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
-                "lsid", Collections.<DomainProperty>emptyList(), errorReshow, SampleStepHandler.NAME, form, errors);
-
-        ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
-        PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form, resolverType);
-        helper.addSampleColumns(view, form.getUser(), form, errorReshow);
-
-        // add existing page properties
-        addHiddenBatchProperties(form, view);
-        addHiddenRunProperties(form, view);
-
-/*
-        ElisaAssayProvider provider = form.getProvider();
-        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
-        for (Map.Entry<String, Map<DomainProperty, String>> sampleEntry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
-            addHiddenProperties(sampleEntry.getValue(), view, sampleEntry.getKey());
-
-        PreviouslyUploadedDataCollector<ElisaRunUploadForm> collector = new PreviouslyUploadedDataCollector<>(form.getUploadedData(), PreviouslyUploadedDataCollector.Type.PassThrough);
-        collector.addHiddenFormFields(view, form);
-*/     /*
-
-//        ParticipantVisitResolverType resolverType = getSelectedParticipantVisitResolverType(form.getProvider(), form);
-        resolverType.addHiddenFormFields(form, view);
-
-        ButtonBar bbar = new ButtonBar();
-        addFinishButtons(form, view, bbar);
-        addResetButton(form, view, bbar);
-
-        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
-        bbar.add(cancelButton);
-
-        _stepDescription = "Concentrations for Standard Wells";
-
-        view.getDataRegion().setHorizontalGroups(false);
-        view.getDataRegion().setButtonBar(bbar, DataRegion.MODE_INSERT);
-
-        return view;
-    }
-
-    private boolean validatePostedSampleProperties(NabRunUploadForm form, BindException errors)
-    {
-        DilutionAssayProvider provider = form.getProvider();
-        PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
-
-        boolean samplePropsValid = true;
-        try
-        {
-            Map<String, Map<DomainProperty, String>> postedSampleProperties = helper.getPostedPropertyValues(form.getRequest());
-            for (Map.Entry<String, Map<DomainProperty, String>> entry : postedSampleProperties.entrySet())
-            {
-                // if samplePropsValid flips to false, we want to leave it false (via the "&&" below).  We don't
-                // short-circuit the loop because we want to run through all samples every time, so all errors can be reported.
-                samplePropsValid = validatePostedProperties(entry.getValue(), errors) && samplePropsValid;
-            }
-        }
-        catch (ExperimentException e)
-        {
-            errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-        }
-        return samplePropsValid;
-    }
-
-*/
 }

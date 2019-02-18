@@ -31,9 +31,7 @@ import org.labkey.api.study.actions.AssayRunUploadForm;
 import org.labkey.api.study.actions.UploadWizardAction;
 import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayFileWriter;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
-import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -100,7 +98,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     }
 
     /** Get the form posted values and attempt to convert them. */
-    public List<Map<String, Object>> getResultProperties(BindException errors) throws ExperimentException
+    public List<Map<String, Object>> getResultProperties(Errors errors) throws ExperimentException
     {
         if (_resultProperties == null)
         {
@@ -124,7 +122,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _resultProperties;
     }
 
-    private Map<String, Object> getPropertyMapFromRequest(List<? extends DomainProperty> columns, int rowIndex, String poolID, BindException errors) throws ExperimentException
+    private Map<String, Object> getPropertyMapFromRequest(List<? extends DomainProperty> columns, int rowIndex, String poolID, Errors errors) throws ExperimentException
     {
         String inputPrefix = INPUT_PREFIX + poolID + "_" + rowIndex;
         Map<String, Object> properties = new LinkedHashMap<>();

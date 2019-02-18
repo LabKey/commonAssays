@@ -34,17 +34,21 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.PlateTemplate;
 import org.labkey.api.study.actions.PlateBasedUploadWizardAction;
+import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
-import org.labkey.api.view.RedirectException;
 import org.labkey.elisa.ElisaAssayProvider;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -75,7 +79,25 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     {
         return new PlateBasedRunStepHandler() {
             @Override
-            protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws ExperimentException
+            public void validateStep(ElisaRunUploadForm form, Errors errors)
+            {
+                super.validateStep(form, errors);
+
+                if (!errors.hasErrors())
+                {
+                    try
+                    {
+                        form.getUploadedData();
+                    }
+                    catch (ExperimentException e)
+                    {
+                        errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                    }
+                }
+            }
+
+            @Override
+            public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
             {
                 form.setSampleProperties(_postedSampleProperties);
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -89,19 +111,16 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                         errors.addError(new ObjectError("main", null, null, e.toString()));
                     }
                 }
+                return false;
+            }
 
-                try
-                {
-                    if (errors.hasErrors())
-                        return getRunPropertiesView(form, true, false, errors);
-                    else
-                        return getConcentrationsView(form, false, errors);
-                }
-                catch (Throwable e)
-                {
-                    errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                    return getRunPropertiesView(form, true, false, errors);
-                }
+            @Override
+            public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            {
+                if (form.isResetDefaultValues() || errors.hasErrors())
+                    return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
+                else
+                    return getConcentrationsView(form, false, errors);
             }
         };
     }
@@ -140,7 +159,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
 
-        ActionButton cancelButton = new ActionButton("Cancel", getSummaryLink(_protocol));
+        ActionButton cancelButton = new ActionButton("Cancel", PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
         bbar.add(cancelButton);
 
         _stepDescription = "Concentrations for Standard Wells";
@@ -167,48 +186,40 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             return NAME;
         }
 
-        public ModelAndView handleStep(ElisaRunUploadForm form, BindException errors) throws ExperimentException
-        {
-            if (getCompletedUploadAttemptIDs().contains(form.getUploadAttemptID()))
-            {
-                throw new RedirectException(getViewContext().getActionURL());
-            }
-
-            if (!form.isResetDefaultValues() && validatePost(form, errors))
-                return handleSuccessfulPost(form, errors);
-            else
-                return getConcentrationsView(form, !form.isResetDefaultValues(), errors);
-        }
-
         @Override
-        protected boolean validatePost(ElisaRunUploadForm form, BindException errors) throws ExperimentException
+        public void validateStep(ElisaRunUploadForm form, Errors errors)
         {
-            PlateConcentrationPropertyHelper helper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
-
-            for (Map.Entry<String, Map<DomainProperty, String>> entry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
+            super.validateStep(form, errors);
+            try
             {
-                // validate that there are no blank values and that all values are numeric
-                for (String prop : entry.getValue().values())
+                PlateConcentrationPropertyHelper helper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
+
+                for (Map.Entry<String, Map<DomainProperty, String>> entry : helper.getPostedPropertyValues(form.getRequest()).entrySet())
                 {
-                    if (StringUtils.isBlank(prop))
+                    // validate that there are no blank values and that all values are numeric
+                    for (String prop : entry.getValue().values())
                     {
-                        errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " cannot be blank.");
-                        break;
-                    }
-                    if (!NumberUtils.isCreatable(prop))
-                    {
-                        errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " must be a number.");
-                        break;
+                        if (StringUtils.isBlank(prop))
+                        {
+                            errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " cannot be blank.");
+                            break;
+                        }
+                        if (!NumberUtils.isCreatable(prop))
+                        {
+                            errors.reject(SpringActionController.ERROR_MSG, "Value for well group: " + entry.getKey() + " must be a number.");
+                            break;
+                        }
                     }
                 }
             }
-            if (errors.hasErrors())
-                return false;
-
-            return super.validatePost(form, errors);
+            catch (ExperimentException e)
+            {
+                errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+            }
         }
 
-        protected ModelAndView handleSuccessfulPost(ElisaRunUploadForm form, BindException errors) throws ExperimentException
+        @Override
+        public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
             ExpRun run;
             try
@@ -233,14 +244,22 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                     else
                         errors.reject(SpringActionController.ERROR_MSG, error.getMessage() == null ? error.toString() : error.getMessage());
                 }
-                return getRunPropertiesView(form, true, false, errors);
             }
             catch (ExperimentException e)
             {
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
-                return getRunPropertiesView(form, true, false, errors);
             }
-            return afterRunCreation(form, run, errors);
+
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        {
+            if (form.isResetDefaultValues() || errors.hasErrors())
+                return getConcentrationsView(form, !form.isResetDefaultValues(), errors);
+            else
+                return null;
         }
     }
 }
