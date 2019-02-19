@@ -222,7 +222,6 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("R.APPSTQESESPR.Q");
         assertTextPresent("R.TIDPVIAR.K");
         peptidesTable.setFilter("Hyper", "Is Greater Than or Equal To", "14.6");
-        assertTextNotPresent("K.RLLRSMVK.F");
         assertTextPresent("R.AEIDYANK.T");
         peptidesTable.setFilter("Next", "Does Not Equal", "9.5");
         assertTextNotPresent("R.AEIDYANK.T");
