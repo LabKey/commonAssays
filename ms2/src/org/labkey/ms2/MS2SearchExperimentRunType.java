@@ -57,7 +57,7 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         compareMenu.setRequiresSelection(true);
         bar.add(compareMenu);
 
-        ActionURL url = new ActionURL(MS2Controller.PickExportRunsView.class, context.getContainer());
+        ActionURL url = new ActionURL(MS2Controller.PickExportRunsViewAction.class, context.getContainer());
         url.addParameter("experimentRunIds", "true");
         ActionButton exportRuns = new ActionButton(url, "MS2 Export");
         exportRuns.setActionType(ActionButton.Action.POST);

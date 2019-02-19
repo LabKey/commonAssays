@@ -171,7 +171,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1364,14 +1363,16 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class CompareSearchEngineProteinSetupAction extends AbstractRunListCreationAction<RunListForm>
+    public class CompareSearchEngineProteinSetupAction extends AbstractRunListSetupAction<RunListForm>
     {
-        public CompareSearchEngineProteinSetupAction()
+        @Override
+        protected boolean getRequiresSameType()
         {
-            super(RunListForm.class, true);
+            return true;
         }
 
-        protected ModelAndView getView(RunListForm form, BindException errors, int runListId)
+        @Override
+        public ModelAndView getSetupView(RunListForm form, BindException errors, int runListId)
         {
             JspView<CompareOptionsBean> extraCompareOptions = new JspView<>("/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp");
 
@@ -1387,13 +1388,15 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class CompareProteinProphetQuerySetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
+    public class CompareProteinProphetQuerySetupAction extends AbstractRunListSetupAction<PeptideFilteringComparisonForm>
     {
-        public CompareProteinProphetQuerySetupAction()
+        @Override
+        protected boolean getRequiresSameType()
         {
-            super(PeptideFilteringComparisonForm.class, false);
+            return false;
         }
 
+        @Override
         protected @NotNull PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
         {
             PeptideFilteringComparisonForm form = super.getCommand(request);
@@ -1428,7 +1431,7 @@ public class MS2Controller extends SpringActionController
             return form;
         }
 
-        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
+        public ModelAndView getSetupView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
@@ -1443,13 +1446,15 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ComparePeptideQuerySetupAction extends AbstractRunListCreationAction<PeptideFilteringComparisonForm>
+    public class ComparePeptideQuerySetupAction extends AbstractRunListSetupAction<PeptideFilteringComparisonForm>
     {
-        public ComparePeptideQuerySetupAction()
+        @Override
+        protected boolean getRequiresSameType()
         {
-            super(PeptideFilteringComparisonForm.class, false);
+            return false;
         }
 
+        @Override
         protected @NotNull PeptideFilteringComparisonForm getCommand(HttpServletRequest request) throws Exception
         {
             PeptideFilteringComparisonForm form = super.getCommand(request);
@@ -1468,7 +1473,7 @@ public class MS2Controller extends SpringActionController
             return form;
         }
 
-        public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
+        public ModelAndView getSetupView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
 
@@ -1496,7 +1501,7 @@ public class MS2Controller extends SpringActionController
         targetSeqIds,
         targetProteinMsg,
         targetURL
-      }
+    }
 
     public enum PivotType
     {
@@ -1944,7 +1949,7 @@ public class MS2Controller extends SpringActionController
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
                 setupURL.addParameter(NORMALIZE_PROTEIN_GROUPS_NAME, _form.isNormalizeProteinGroups());
                 setupURL.addParameter(PIVOT_TYPE_NAME, _form.getPivotTypeEnum().toString());
-                root.addChild("Setup Compare ProteinProphet", setupURL);
+                root.addChild("Setup Compare ProteinProphet", setupURL); // GET the setup view -- no use going through POST, since we don't have a run list
             }
             setHelpTopic("compareProteinProphet");
             return root.addChild("Compare ProteinProphet");
@@ -2013,7 +2018,7 @@ public class MS2Controller extends SpringActionController
 
                 setupURL.addParameter(PeptideFilteringFormElements.runList, _form.getRunList() == null ? -1 : _form.getRunList());
                 setupURL.addParameter(PEPTIDES_FILTER_VIEW_NAME, _form.getPeptideCustomViewName(getViewContext()));
-                root.addChild("Setup Compare Peptides", setupURL);
+                root.addChild("Setup Compare Peptides", setupURL); // GET the setup view -- no use going through POST, since we don't have a run list
                 StringBuilder title = new StringBuilder("Compare Peptides: ");
                 _form.appendPeptideFilterDescription(title, getViewContext());
                 return root.addChild(title.toString());
@@ -2045,19 +2050,22 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class PickExportRunsView extends AbstractRunListCreationAction<RunListForm>
+    public class PickExportRunsViewAction extends AbstractRunListSetupAction<RunListForm>
     {
-        public PickExportRunsView()
+        @Override
+        protected boolean getRequiresSameType()
         {
-            super(RunListForm.class, true);
+            return true;
         }
 
-        public ModelAndView getView(RunListForm form, BindException errors, int runListId)
+        @Override
+        public ModelAndView getSetupView(RunListForm form, BindException errors, int runListId)
         {
             JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
             return pickView(getViewContext().cloneActionURL().setAction(ApplyExportRunsViewAction.class), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId, "Export");
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return appendRootNavTrail(root, "Export Runs", getPageConfig(), "exportRuns");
@@ -2170,46 +2178,69 @@ public class MS2Controller extends SpringActionController
     public static final String NORMALIZE_PROTEIN_GROUPS_NAME = "normalizeProteinGroups";
     public static final String PIVOT_TYPE_NAME = "pivotType";
 
+    // Most callers invoke this action with POST initially, to set up the run list (which likely mutates the database). On
+    // success, the post handler redirect back to the action with the run list ID as a parameter. This is a GET, so getView()
+    // is then invoked to verify the cached run list and display the action-specific setup view.
     @RequiresPermission(ReadPermission.class)
-    public abstract class AbstractRunListCreationAction<FormType extends RunListForm> extends SimpleViewAction<FormType>
+    public abstract class AbstractRunListSetupAction<FormType extends RunListForm> extends FormViewAction<FormType>
     {
-        private final boolean _requiresSameType;
+        private ActionURL _successUrl;
 
-        protected AbstractRunListCreationAction(Class<FormType> formClass, boolean requiresSameType)
+        @Override
+        protected String getCommandClassMethodName()
         {
-            super(formClass);
-            _requiresSameType = requiresSameType;
+            return "getSetupView";
         }
 
-        public final ModelAndView getView(FormType form, BindException errors)
+        @Override
+        public void validateCommand(FormType target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(FormType form, BindException errors) throws RunListException
         {
             ActionURL currentURL = getViewContext().getActionURL();
-            int runListId;
-            try
-            {
-                if (form.getRunList() == null)
-                {
-                    runListId = RunListCache.cacheSelectedRuns(_requiresSameType, form, getViewContext());
-                    ActionURL redirectURL = currentURL.clone();
-                    redirectURL.addParameter("runList", Integer.toString(runListId));
-                    throw new RedirectException(redirectURL);
-                }
-                else
-                {
-                    runListId = form.getRunList().intValue();
-                    RunListCache.getCachedRuns(runListId, false, getViewContext());
-                }
+            int runListId = RunListCache.cacheSelectedRuns(getRequiresSameType(), form, getViewContext());
+            _successUrl = currentURL.clone();
+            _successUrl.addParameter("runList", Integer.toString(runListId));
 
-                return getView(form, errors, runListId);
-            }
-            catch (RunListException e)
-            {
-                e.addErrors(errors);
-                return new SimpleErrorView(errors);
-            }
+            return true;
         }
 
-        protected abstract ModelAndView getView(FormType form, BindException errors, int runListId);
+        @Override
+        public URLHelper getSuccessURL(FormType form)
+        {
+            return _successUrl;
+        }
+
+        @Override
+        public ModelAndView getView(FormType form, boolean reshow, BindException errors)
+        {
+            if (null == form.getRunList())
+            {
+                errors.reject(ERROR_MSG, "RunList parameter not found");
+            }
+            else
+            {
+                try
+                {
+                    int runListId = form.getRunList().intValue();
+                    RunListCache.getCachedRuns(runListId, false, getViewContext());
+
+                    return getSetupView(form, errors, runListId);
+                }
+                catch (RunListException e)
+                {
+                    e.addErrors(errors);
+                }
+            }
+
+            return new SimpleErrorView(errors);
+        }
+
+        protected abstract boolean getRequiresSameType();
+        public abstract ModelAndView getSetupView(FormType form, BindException errors, int runListId);
     }
 
     private void savePreferences(Map<String, String> prefs)
@@ -2221,7 +2252,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private Map<String, String> getPreferences(Class<? extends AbstractRunListCreationAction> setupActionClass)
+    private Map<String, String> getPreferences(Class<? extends AbstractRunListSetupAction> setupActionClass)
     {
         if (getUser().isGuest())
         {
@@ -2241,13 +2272,15 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SpectraCountSetupAction extends AbstractRunListCreationAction<SpectraCountForm>
+    public class SpectraCountSetupAction extends AbstractRunListSetupAction<SpectraCountForm>
     {
-        public SpectraCountSetupAction()
+        @Override
+        protected boolean getRequiresSameType()
         {
-            super(SpectraCountForm.class, false);
+            return false;
         }
 
+        @Override
         protected @NotNull SpectraCountForm getCommand(HttpServletRequest request) throws Exception
         {
             SpectraCountForm form = super.getCommand(request);
@@ -2267,13 +2300,15 @@ public class MS2Controller extends SpringActionController
             return form;
         }
 
-        public ModelAndView getView(SpectraCountForm form, BindException errors, int runListId)
+        @Override
+        public ModelAndView getSetupView(SpectraCountForm form, BindException errors, int runListId)
         {
             CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<>(new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Spectra Count Options");
@@ -2289,6 +2324,7 @@ public class MS2Controller extends SpringActionController
             super(formClass);
         }
 
+        @Override
         public ModelAndView getView(FormType form, BindException errors) throws Exception
         {
             if (form.getRunList() == null)
@@ -2380,7 +2416,6 @@ public class MS2Controller extends SpringActionController
 
     private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors)
     {
-
         ActionURL currentURL = getViewContext().getActionURL();
 
         List<MS2Run> runs;
