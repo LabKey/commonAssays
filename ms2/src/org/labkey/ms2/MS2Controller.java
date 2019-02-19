@@ -171,6 +171,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2105,7 +2106,7 @@ public class MS2Controller extends SpringActionController
     {
         private StringBuilder _title = new StringBuilder();
 
-        public ModelAndView getView(ExportForm form, BindException errors) throws Exception
+        public ModelAndView getView(ExportForm form, BindException errors)
         {
             return compareRuns(form.getRunList(), false, _title, form.getColumn(), errors);
         }
@@ -2731,7 +2732,7 @@ public class MS2Controller extends SpringActionController
 
             ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
             delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: The protein annotations themselves will not be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: The protein annotations themselves will not be deleted.)");
-            delete.setActionType(ActionButton.Action.GET);
+            delete.setActionType(ActionButton.Action.POST);
             bb.add(delete);
 
             ActionButton insertAnnots = new ActionButton(new ActionURL(InsertAnnotsAction.class, getContainer()), "Import Data");
@@ -2742,6 +2743,7 @@ public class MS2Controller extends SpringActionController
             testFastaHeader.setActionType(ActionButton.Action.LINK);
             bb.add(testFastaHeader);
 
+            // Note: This button POSTSs (default type)
             bb.add(new ActionButton(ReloadSPOMAction.class, "Reload SWP Org Map"));
 
             ActionButton reloadGO = new ActionButton(LoadGoAction.class, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " Gene Ontology Data");
@@ -4308,7 +4310,6 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportProteinCoverageMapAction extends SimpleViewAction<DetailsForm>
     {
-
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
@@ -4541,12 +4542,12 @@ public class MS2Controller extends SpringActionController
             return vBox;
         }
 
-
-    public NavTree appendNavTrail(NavTree root)
+        public NavTree appendNavTrail(NavTree root)
     {
         return null;
     }
-}
+    }
+
     public static class PieSliceSectionForm
     {
         private String _sliceTitle;
@@ -4953,12 +4954,24 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class ReloadSPOMAction extends SimpleRedirectAction
+    public class ReloadSPOMAction extends FormHandlerAction
     {
-        public ActionURL getRedirectURL(Object o) throws Exception
+        @Override
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(Object o, BindException errors) throws SQLException
         {
             ProteinDictionaryHelpers.loadProtSprotOrgMap();
 
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(Object o)
+        {
             return MS2UrlsImpl.get().getShowProteinAdminUrl("SWP organism map reload successful");
         }
     }
@@ -5216,9 +5229,15 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(InsertPermission.class)
-    public class ImportProteinProphetAction extends SimpleRedirectAction<PipelinePathForm>
+    public class ImportProteinProphetAction extends FormHandlerAction<PipelinePathForm>
     {
-        public ActionURL getRedirectURL(PipelinePathForm form) throws Exception
+        @Override
+        public void validateCommand(PipelinePathForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(PipelinePathForm form, BindException errors) throws Exception
         {
             for (File f : form.getValidatedFiles(getContainer()))
             {
@@ -5233,6 +5252,12 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(PipelinePathForm pipelinePathForm)
+        {
             return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
         }
     }
@@ -5589,15 +5614,27 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class DeleteAnnotInsertEntriesAction extends SimpleRedirectAction
+    public class DeleteAnnotInsertEntriesAction extends FormHandlerAction
     {
-        public ActionURL getRedirectURL(Object o)
+        @Override
+        public void validateCommand(Object target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(Object o, BindException errors)
         {
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
             for (int id : ids)
                 ProteinManager.deleteAnnotationInsertion(id);
 
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(Object o)
+        {
             return MS2UrlsImpl.get().getShowProteinAdminUrl();
         }
     }
@@ -5612,6 +5649,7 @@ public class MS2Controller extends SpringActionController
             return _insertId;
         }
 
+        @SuppressWarnings("unused")
         public void setInsertId(int insertId)
         {
             _insertId = insertId;
@@ -5621,7 +5659,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ShowAnnotInsertDetailsAction extends SimpleViewAction<AnnotationInsertionForm>
     {
-        AnnotationInsertion _insertion;
+        private AnnotationInsertion _insertion;
 
         public ModelAndView getView(AnnotationInsertionForm form, BindException errors)
         {
