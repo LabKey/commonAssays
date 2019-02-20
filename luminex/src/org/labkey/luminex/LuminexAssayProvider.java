@@ -93,7 +93,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public LuminexAssayProvider()
     {
         super("LuminexAssayProtocol", "LuminexAssayRun", (AssayDataType) ExperimentService.get().getDataType(LuminexDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(LuminexModule.class));
-        setMaxFileInputs(10);
+        setMaxFileInputs(100);  // no specific requirement for this, can be changed easily
     }
 
     public String getName()
