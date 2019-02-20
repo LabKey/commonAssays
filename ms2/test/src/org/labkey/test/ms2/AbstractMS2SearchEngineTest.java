@@ -209,8 +209,6 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         selectOptionByText(Locator.name("viewParams"), "<Standard View>");
         clickButton("Go");
 
-        assertTextPresent("Run Description", "Next AA");
-
         basicChecks();
     }
 
