@@ -19,6 +19,7 @@ package org.labkey.flow.data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -95,11 +96,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             FlowProtocolStep.initProtocol(user, ret);
             return ret;
         }
-        ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, ExpProtocol.ApplicationType.ExperimentRun, DEFAULT_PROTOCOL_NAME);
-        protocol.save(user);
-        ret = new FlowProtocol(protocol);
-        FlowProtocolStep.initProtocol(user, ret);
-        return ret;
+
+        try (var ignore = SpringActionController.ignoreSqlUpdates())
+        {
+            ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, ExpProtocol.ApplicationType.ExperimentRun, DEFAULT_PROTOCOL_NAME);
+            protocol.save(user);
+            ret = new FlowProtocol(protocol);
+            FlowProtocolStep.initProtocol(user, ret);
+            return ret;
+        }
     }
 
     static public FlowProtocol getForContainer(Container container)

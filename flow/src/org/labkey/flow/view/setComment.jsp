@@ -72,6 +72,7 @@ LABKEY.requiresExt3(function() {
                 this.statusMessage('loading', "Updating...");
                 Ext.Ajax.request({
                     url: "<%=setFlagUrl%>&comment=" + encodeURIComponent(textField.getValue()),
+                    method : 'POST',
                     success: function (response) {
                         this.statusMessage('success', "Comment updated");
                         this._originalValue = newValue;

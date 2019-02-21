@@ -16,6 +16,7 @@
 
 package org.labkey.flow.controllers;
 
+import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
@@ -83,13 +84,16 @@ public abstract class BaseFlowController extends SpringActionController
 
     protected ActionURL executeScript(FlowJob job) throws Exception, PipelineValidationException
     {
-        FlowProtocol.ensureForContainer(getUser(), job.getContainer());
-        PipelineService service = PipelineService.get();
-        service.queueJob(job);
+        try (var ignore = SpringActionController.ignoreSqlUpdates())
+        {
+            FlowProtocol.ensureForContainer(getUser(), job.getContainer());
+            PipelineService service = PipelineService.get();
+            service.queueJob(job);
 
-        ActionURL forward = job.getStatusHref().clone();
-        putParam(forward, FlowParam.redirect, 1);
-        return forward;
+            ActionURL forward = job.getStatusHref().clone();
+            putParam(forward, FlowParam.redirect, 1);
+            return forward;
+        }
     }
 
     public HelpTopic getHelpTopic()
@@ -145,6 +149,24 @@ public abstract class BaseFlowController extends SpringActionController
             project = new NavTree(FlowModule.getShortProductName(), url.clone());
         }
         return project;
+    }
+
+    abstract public class FlowMutatingAction<FORM extends FlowObjectForm> extends FormViewAction<FORM>
+    {
+        FORM _form;
+
+        public void setForm(FORM form)
+        {
+            _form = form;
+        }
+
+        protected abstract String getPageTitle();
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+        }
     }
 
     abstract public class FlowAction<FORM extends FlowObjectForm> extends SimpleViewAction<FORM>

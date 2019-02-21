@@ -25,6 +25,7 @@ import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusUrls;
@@ -382,12 +383,15 @@ public class ReportsController extends BaseFlowController
             {
                 if (form.isConfirm())
                 {
-                    // Run report in background, redirect to pipeline status page
-                    ViewBackgroundInfo info = getViewBackgroundInfo();
-                    PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
-                    FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
-                    PipelineService.get().queueJob(job);
-                    throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+                    try (var ignore = SpringActionController.ignoreSqlUpdates())
+                    {
+                        // Run report in background, redirect to pipeline status page
+                        ViewBackgroundInfo info = getViewBackgroundInfo();
+                        PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
+                        FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
+                        PipelineService.get().queueJob(job);
+                        throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+                    }
                 }
                 else
                 {

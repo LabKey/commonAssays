@@ -34,6 +34,7 @@
         return ret.toString();
     }
 %>
+<labkey:errors/>
 <labkey:form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form._workspaceObject != null)
     { %>

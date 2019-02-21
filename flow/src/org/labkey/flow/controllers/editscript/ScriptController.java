@@ -31,7 +31,9 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.fhcrc.cpas.flow.script.xml.StatisticDef;
 import org.fhcrc.cpas.flow.script.xml.SubsetDef;
+import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -44,6 +46,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -70,12 +73,12 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowRunWorkspace;
 import org.labkey.flow.data.FlowScript;
 import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -145,31 +148,46 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditScriptAction extends FlowAction<EditScriptForm>
+    public class EditScriptAction extends FlowMutatingAction<EditScriptForm>
     {
-        public ModelAndView getView(EditScriptForm form, BindException errors)
+        private ScriptParser.Error _error;
+
+        @Override
+        public void validateCommand(EditScriptForm target, Errors errors)
         {
-            ScriptParser.Error error = null;
+        }
+
+        @Override
+        public boolean handlePost(EditScriptForm form, BindException errors) throws Exception
+        {
+            _error = null;
             FlowScript script = getScript();
-            if (isPost())
+
+            if (safeSetAnalysisScript(script, getRequest().getParameter("script"), errors))
+                _error = validateScript(script);
+
+            return !errors.hasErrors() && (_error == null);
+        }
+
+        @Override
+        public URLHelper getSuccessURL(EditScriptForm form)
+        {
+            return form.urlFor(ScriptController.EditScriptAction.class);
+        }
+
+        @Override
+        public ModelAndView getView(EditScriptForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
+            FlowScript script = getScript();
+
+            if (getRequest().getParameter("checkSyntax") != null)
             {
-                if (safeSetAnalysisScript(script, getRequest().getParameter("script"), errors))
-                {
-                    error = validateScript(script);
-                    if (error == null)
-                    {
-                        ActionURL forward = form.urlFor(ScriptController.EditScriptAction.class);
-                        return HttpView.redirect(forward);
-                    }
-                }
-            }
-            else if (getRequest().getParameter("checkSyntax") != null)
-            {
-                error = validateScript(script);
+                _error = validateScript(script);
             }
 
             EditPage page = (EditPage)getPage("editScript.jsp", form);
-            page.scriptParseError = error;
+            page.scriptParseError = _error;
             return new JspView<>(page, form, errors);
         }
 
@@ -178,7 +196,7 @@ public class ScriptController extends BaseFlowController
             return "Source Editor";
         }
 
-        ScriptParser.Error validateScript(FlowScript script)
+        private ScriptParser.Error validateScript(FlowScript script)
         {
             ScriptParser parser = new ScriptParser();
             parser.parse(script.getAnalysisScript());
@@ -189,17 +207,31 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class NewProtocolAction extends SimpleViewAction<NewProtocolForm>
+    public class NewProtocolAction extends FormViewAction<NewProtocolForm>
     {
-        public ModelAndView getView(NewProtocolForm form, BindException errors)
-        {
-            if (isPost())
-            {
-                ActionURL forward = createScript(form, errors);
-                if (forward != null)
-                    return HttpView.redirect(forward);
-            }
+        private ActionURL _successURL;
 
+        @Override
+        public void validateCommand(NewProtocolForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(NewProtocolForm form, BindException errors) throws Exception
+        {
+            _successURL = createScript(form, errors);
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public URLHelper getSuccessURL(NewProtocolForm newProtocolForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public ModelAndView getView(NewProtocolForm form, boolean reshow, BindException errors) throws Exception
+        {
             // TODO: Ensure this works and figure out a new strategy for setting focus element
             JspView<NewProtocolForm> page = FormPage.getView(ScriptController.class, form, errors, "newProtocol.jsp");
 //            HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
@@ -253,17 +285,32 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditAnalysisAction extends FlowAction<AnalysisForm>
+    public class EditAnalysisAction extends FlowMutatingAction<AnalysisForm>
     {
-        public ModelAndView getView(AnalysisForm form, BindException errors) throws Exception
-        {
-            if (isPost())
-            {
-                ActionURL forward = updateAnalysis(form, errors);
-                if (forward != null)
-                    return HttpView.redirect(forward);
-            }
+        private ActionURL _successURL;
 
+        @Override
+        public void validateCommand(AnalysisForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(AnalysisForm form, BindException errors) throws Exception
+        {
+            _successURL = updateAnalysis(form, errors);
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public URLHelper getSuccessURL(AnalysisForm analysisForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public ModelAndView getView(AnalysisForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             return new JspView<>(getPage("editAnalysis.jsp", form), form, errors);
         }
 
@@ -424,21 +471,38 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class UploadAnalysisAction extends FlowAction<UploadAnalysisForm>
+    public class UploadAnalysisAction extends FlowMutatingAction<UploadAnalysisForm>
     {
-        public ModelAndView getView(UploadAnalysisForm form, BindException errors) throws Exception
-        {
-            if (isPost())
-            {
-                Map<String, MultipartFile> files = getFileMap();
-                MultipartFile file = files.get("workspaceFile");
-                ActionURL forward = doUploadAnalysis(form, file, errors);
-                if (forward != null)
-                    return HttpView.redirect(forward);
-            }
+        private ActionURL _successURL;
 
+        @Override
+        public void validateCommand(UploadAnalysisForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(UploadAnalysisForm form, BindException errors) throws Exception
+        {
+            Map<String, MultipartFile> files = getFileMap();
+            MultipartFile file = files.get("workspaceFile");
+            _successURL = doUploadAnalysis(form, file, errors);
+
+            return _successURL != null;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(UploadAnalysisForm uploadAnalysisForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public ModelAndView getView(UploadAnalysisForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
             page.form = form;
+
             return new JspView<>(page, form, errors);
         }
 
@@ -555,19 +619,35 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
+    public class EditCompensationCalculationAction extends FlowMutatingAction<EditCompensationCalculationForm>
     {
-        public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
-        {
-            if (isPost())
-            {
-                ActionURL forward = doEditCompensationCalculation(form, errors);
-                if (forward != null)
-                    return HttpView.redirect(forward);
-            }
+        private ActionURL _successURL;
 
+        @Override
+        public void validateCommand(EditCompensationCalculationForm target, Errors errors)
+        {
+        }
+
+        @Override
+        public boolean handlePost(EditCompensationCalculationForm form, BindException errors) throws Exception
+        {
+            _successURL = doEditCompensationCalculation(form, errors);
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public URLHelper getSuccessURL(EditCompensationCalculationForm editCompensationCalculationForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public ModelAndView getView(EditCompensationCalculationForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             String pageName = form.workspace == null ? "showCompensationCalculation.jsp" : "editCompensationCalculation.jsp";
             CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
+
             return new JspView<>(page, form, errors);
         }
 
@@ -675,38 +755,49 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditGateTreeAction extends FlowAction<EditGateTreeForm>
+    public class EditGateTreeAction extends FlowMutatingAction<EditGateTreeForm>
     {
-        public ModelAndView getView(EditGateTreeForm form, BindException errors) throws Exception
+        @Override
+        public void validateCommand(EditGateTreeForm target, Errors errors)
         {
-            if (isPost())
-            {
-                Map<SubsetSpec, String> newNames = new HashMap();
-                for (int i = 0; i < form.populationNames.length; i ++)
-                {
-                    newNames.put(form.subsets[i], form.populationNames[i]);
-                }
-                ScriptComponent oldAnalysis = form.getAnalysis();
-                ScriptComponent newAnalysis = form.getAnalysis();
-                // form.getAnalysis should create a new copy each time it's called.
-                assert oldAnalysis != newAnalysis;
-                newAnalysis.getPopulations().clear();
-                boolean fSuccess = true;
-                for (Population pop : oldAnalysis.getPopulations())
-                {
-                    fSuccess = renamePopulations(pop, newAnalysis, null, newNames, errors);
-                }
-                if (fSuccess)
-                {
-                    ScriptDocument doc = form.getFlowScript().getAnalysisScriptDocument();
-                    fSuccess = saveAnalysisOrComp(form.getFlowScript(), doc, newAnalysis, errors);
-                }
-                if (fSuccess)
-                {
-                    return HttpView.redirect(form.urlFor(EditGateTreeAction.class));
-                }
-            }
+        }
 
+        @Override
+        public boolean handlePost(EditGateTreeForm form, BindException errors) throws Exception
+        {
+            Map<SubsetSpec, String> newNames = new HashMap();
+            for (int i = 0; i < form.populationNames.length; i ++)
+            {
+                newNames.put(form.subsets[i], form.populationNames[i]);
+            }
+            ScriptComponent oldAnalysis = form.getAnalysis();
+            ScriptComponent newAnalysis = form.getAnalysis();
+            // form.getAnalysis should create a new copy each time it's called.
+            assert oldAnalysis != newAnalysis;
+            newAnalysis.getPopulations().clear();
+            boolean fSuccess = true;
+            for (Population pop : oldAnalysis.getPopulations())
+            {
+                fSuccess = renamePopulations(pop, newAnalysis, null, newNames, errors);
+            }
+            if (fSuccess)
+            {
+                ScriptDocument doc = form.getFlowScript().getAnalysisScriptDocument();
+                fSuccess = saveAnalysisOrComp(form.getFlowScript(), doc, newAnalysis, errors);
+            }
+            return fSuccess;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(EditGateTreeForm form)
+        {
+            return form.urlFor(EditGateTreeAction.class);
+        }
+
+        @Override
+        public ModelAndView getView(EditGateTreeForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             return new JspView<>(getPage("editGateTree.jsp", form), form, errors);
         }
 
@@ -760,20 +851,35 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class CopyAction extends FlowAction<CopyProtocolForm>
+    public class CopyAction extends FlowMutatingAction<CopyProtocolForm>
     {
-        String scriptName;
+        private String scriptName;
+        private ActionURL _successURL;
 
-        public ModelAndView getView(CopyProtocolForm form, BindException errors) throws Exception
+        @Override
+        public void validateCommand(CopyProtocolForm target, Errors errors)
         {
-            if (isPost())
-            {
-                ActionURL forward = doCopy(form, errors);
-                if (forward != null)
-                    return HttpView.redirect(forward);
-            }
+        }
 
+        @Override
+        public boolean handlePost(CopyProtocolForm form, BindException errors) throws Exception
+        {
+            _successURL = doCopy(form, errors);
+            return !errors.hasErrors();
+        }
+
+        @Override
+        public URLHelper getSuccessURL(CopyProtocolForm copyProtocolForm)
+        {
+            return _successURL;
+        }
+
+        @Override
+        public ModelAndView getView(CopyProtocolForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             scriptName = form.getFlowScript().getName();
+
             return new JspView<>(getPage("copy.jsp", form), form, errors);
         }
 
@@ -819,16 +925,32 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditPropertiesAction extends FlowAction<EditPropertiesForm>
+    public class EditPropertiesAction extends FlowMutatingAction<EditPropertiesForm>
     {
-        public ModelAndView getView(EditPropertiesForm form, BindException errors) throws Exception
+        @Override
+        public void validateCommand(EditPropertiesForm target, Errors errors)
         {
-            if (isPost())
-            {
-                ExpData protocol = form.getFlowScript().getExpObject();
-                protocol.setComment(getUser(), form.ff_description);
-                return HttpView.redirect(form.urlFor(BeginAction.class));
-            }
+        }
+
+        @Override
+        public boolean handlePost(EditPropertiesForm form, BindException errors) throws Exception
+        {
+            ExpData protocol = form.getFlowScript().getExpObject();
+            protocol.setComment(getUser(), form.ff_description);
+
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(EditPropertiesForm form)
+        {
+            return form.urlFor(BeginAction.class);
+        }
+
+        @Override
+        public ModelAndView getView(EditPropertiesForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             return new JspView<>(getPage("editProperties.jsp", form), form, errors);
         }
 
@@ -839,21 +961,38 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class EditSettingsAction extends FlowAction<EditSettingsForm>
+    public class EditSettingsAction extends FlowMutatingAction<EditSettingsForm>
     {
-        public ModelAndView getView(EditSettingsForm form, BindException errors)
+        @Override
+        public void validateCommand(EditSettingsForm form, Errors errors)
         {
-            if (isPost() && form.canEdit())
-            {
-                ScriptDocument doc = form.analysisDocument;
-                if (updateSettingsMinValues(form, doc, errors) &&
+            if (!form.canEdit())
+                errors.reject(SpringActionController.ERROR_MSG, "You do not have permission to edit this script.");
+        }
+
+        @Override
+        public boolean handlePost(EditSettingsForm form, BindException errors) throws Exception
+        {
+            ScriptDocument doc = form.analysisDocument;
+            if (updateSettingsMinValues(form, doc, errors) &&
                     updateSettingsFilter(form, doc) &&
                     safeSetAnalysisScript(form.getFlowScript(), doc.toString(), errors))
-                {
-                    return HttpView.redirect(form.urlFor(BeginAction.class));
-                }
+            {
+                return true;
             }
+            return false;
+        }
 
+        @Override
+        public URLHelper getSuccessURL(EditSettingsForm form)
+        {
+            return form.urlFor(BeginAction.class);
+        }
+
+        @Override
+        public ModelAndView getView(EditSettingsForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             return new JspView<>(getPage("editSettings.jsp", form), form, errors);
         }
 
@@ -897,7 +1036,6 @@ public class ScriptController extends BaseFlowController
 
             return success;
         }
-
     }
 
     protected boolean updateSettingsFilter(EditSettingsForm form, ScriptDocument doc)
@@ -944,16 +1082,35 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(DeletePermission.class)
-    public class DeleteAction extends FlowAction<EditScriptForm>
+    public class DeleteAction extends FlowMutatingAction<EditScriptForm>
     {
-        public ModelAndView getView(EditScriptForm form, BindException errors)
+        @Override
+        public void validateCommand(EditScriptForm target, Errors errors)
         {
-            if (isPost())
+        }
+
+        @Override
+        public boolean handlePost(EditScriptForm form, BindException errors) throws Exception
+        {
+            ExpData protocol = form.getFlowScript().getExpObject();
+            if (protocol != null)
             {
-                ExpData protocol = form.getFlowScript().getExpObject();
                 protocol.delete(getUser());
-                return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
+                return true;
             }
+            return false;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(EditScriptForm editScriptForm)
+        {
+            return new ActionURL(FlowController.BeginAction.class, getContainer());
+        }
+
+        @Override
+        public ModelAndView getView(EditScriptForm form, boolean reshow, BindException errors) throws Exception
+        {
+            setForm(form);
             return new JspView<>(getPage("delete.jsp", form), form, errors);
         }
 
