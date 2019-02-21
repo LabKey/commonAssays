@@ -69,7 +69,7 @@ public class SingleMS2RunRReport extends CustomRReport
         {
             String expandedString = url.getParameter(MS2Controller.RunForm.PARAMS.expanded);
             boolean expanded = "1".equals(expandedString);
-            return ((AbstractQueryMS2RunView)view).createGridView(expanded, false);
+            return ((AbstractQueryMS2RunView)view).createGridView(expanded, true);
         }
 
         throw new NotFoundException("Unsupported grouping type: " + groupingString);

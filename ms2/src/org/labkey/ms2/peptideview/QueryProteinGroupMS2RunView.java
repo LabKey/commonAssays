@@ -68,13 +68,13 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
-    public ProteinGroupQueryView createGridView(boolean expanded, boolean allowNesting)
+    public ProteinGroupQueryView createGridView(boolean expanded, boolean forExport)
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
         QuerySettings settings = createQuerySettings(schema);
 
-        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, expanded, allowNesting);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, expanded, forExport);
 
         peptideView.setTitle("Protein Groups");
         return peptideView;
@@ -83,7 +83,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
     @Override
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
-        NestableQueryView queryView = createGridView(false, true);
+        NestableQueryView queryView = createGridView(false, false);
         FieldKey desiredFK = FieldKey.fromParts("Proteins", "Protein", "SeqId");
 
         Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
@@ -98,9 +98,9 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
 
     public class ProteinGroupQueryView extends AbstractMS2QueryView
     {
-        public ProteinGroupQueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public ProteinGroupQueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean forExport)
         {
-            super(schema, settings, expanded, allowNesting, new QueryNestingOption(FieldKey.fromParts("RowId"), FieldKey.fromParts("RowId"), getAJAXNestedGridURL())
+            super(schema, settings, expanded, forExport, new QueryNestingOption(FieldKey.fromParts("RowId"), FieldKey.fromParts("RowId"), getAJAXNestedGridURL())
             {
                 public boolean isOuter(FieldKey fieldKey)
                 {

@@ -85,10 +85,10 @@ public abstract class AbstractMS2RunView<WebPartType extends WebPartView>
 
     public WebPartType createGridView(MS2Controller.RunForm form)
     {
-        return createGridView(form.getExpanded(), true);
+        return createGridView(form.getExpanded(), false);
     }
 
-    public abstract WebPartType createGridView(boolean expanded, boolean allowNesting);
+    public abstract WebPartType createGridView(boolean expanded, boolean forExport);
 
     public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
 

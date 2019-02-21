@@ -69,12 +69,12 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
 
     public ModelAndView exportToTSV(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows, List<String> headers) throws IOException
     {
-        return createGridView(form.getExpanded(), false).exportToTSV(response, selectedRows, headers);
+        return createGridView(form.getExpanded(), true).exportToTSV(response, selectedRows, headers);
     }
 
     public ModelAndView exportToAMT(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
-        AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), false);
+        AbstractMS2QueryView ms2QueryView = createGridView(form.getExpanded(), true);
 
         List<FieldKey> keys = new ArrayList<>();
         keys.add(FieldKey.fromParts("Fraction", "Run", "Run"));
@@ -92,7 +92,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
 
     public Map<String, SimpleFilter> getFilter(ActionURL queryUrl, MS2Run run)
     {
-        NestableQueryView queryView = createGridView(false, true);
+        NestableQueryView queryView = createGridView(false, false);
         RenderContext context = queryView.createDataView().getRenderContext();
         TableInfo tinfo = queryView.createTable();
 
@@ -102,7 +102,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
 
     public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
     {
-        createGridView(form.getExpanded(), false).exportToExcel(response, selectedRows);
+        createGridView(form.getExpanded(), true).exportToExcel(response, selectedRows);
         return null;
     }
 
@@ -189,15 +189,15 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         return rowIds;
     }
 
-    public abstract AbstractMS2QueryView createGridView(boolean expanded, boolean allowNesting);
+    public abstract AbstractMS2QueryView createGridView(boolean expanded, boolean forExport);
 
     public abstract class AbstractMS2QueryView extends NestableQueryView
     {
         protected List<Integer> _selectedRows;
 
-        public AbstractMS2QueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean allowNesting, QueryNestingOption... queryNestingOptions)
+        public AbstractMS2QueryView(UserSchema schema, QuerySettings settings, boolean expanded, boolean forExport, QueryNestingOption... queryNestingOptions)
         {
-            super(schema, settings, expanded, allowNesting, queryNestingOptions);
+            super(schema, settings, expanded, forExport, queryNestingOptions);
 
             setViewItemFilter((type, label) -> SingleMS2RunRReport.TYPE.equals(type));
         }

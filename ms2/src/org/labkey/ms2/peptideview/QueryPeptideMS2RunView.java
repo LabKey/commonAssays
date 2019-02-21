@@ -103,7 +103,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     @Override
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
-        NestableQueryView queryView = createGridView(false, true);
+        NestableQueryView queryView = createGridView(false, false);
         FieldKey desiredFK;
         if (queryView.getSelectedNestingOption() != null)
         {
@@ -134,14 +134,14 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
     }
 
-    public PeptideQueryView createGridView(boolean expanded, boolean allowNesting)
+    public PeptideQueryView createGridView(boolean expanded, boolean forExport)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
         schema.setRuns(_runs);
 
         QuerySettings settings = createQuerySettings(schema);
 
-        PeptideQueryView peptideView = new PeptideQueryView(schema, settings, expanded, allowNesting);
+        PeptideQueryView peptideView = new PeptideQueryView(schema, settings, expanded, forExport);
 
         peptideView.setTitle("Peptides and Proteins");
         return peptideView;
@@ -166,9 +166,9 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
     {
         private List<DisplayColumn> _additionalDisplayColumns = new ArrayList<>();
 
-        public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean allowNesting)
+        public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean forExport)
         {
-            super(schema, settings, expanded, allowNesting,
+            super(schema, settings, expanded, forExport,
                     new QueryNestingOption(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId"), FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), getAJAXNestedGridURL()),
                     new QueryNestingOption(FieldKey.fromParts("SeqId"), FieldKey.fromParts("SeqId", "SeqId"), getAJAXNestedGridURL()));
             setShowDetailsColumn(false);

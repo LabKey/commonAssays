@@ -419,7 +419,6 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addSort("Charge", "Z", SortDirection.DESC);
         _customizeViewsHelper.addSort("Mass", "CalcMH+", SortDirection.DESC);
         _customizeViewsHelper.addFilter("DeltaMass", "dMass", "Is Less Than", "0");
-        _customizeViewsHelper.addFilter("RowId", "Row Id", "Is Greater Than", "3");
         _customizeViewsHelper.addColumn("NextAA", "Next AA");
         _customizeViewsHelper.removeColumn("Expect");
         _customizeViewsHelper.removeColumn("ProteinHits");
