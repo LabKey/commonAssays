@@ -1564,13 +1564,10 @@ public class MS2Controller extends SpringActionController
 
             if (form.getTargetProtein() == null)
             {
-                HttpServletRequest request = getViewContext().getRequest();
                 ActionURL targetURL = new ActionURL(form.getTargetURL());
                 targetURL.addParameters(params);
-                // Need to pass along the token, since our AuthenticatedRequest hides this parameter from the MockRequest used to forward
-                targetURL.addParameter(CSRFUtil.csrfName, request.getParameter(CSRFUtil.csrfName));
-                ViewServlet.forwardActionURL(request, getViewContext().getResponse(), targetURL);
-                return null;
+
+                return forward(targetURL);
             }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -1595,7 +1592,8 @@ public class MS2Controller extends SpringActionController
             {
                 ActionURL proteinUrl = targetURL.clone();
                 proteinUrl.addParameter(PeptideFilteringFormElements.targetSeqIds, proteins.get(0).getSeqId());
-                throw new RedirectException(proteinUrl);
+
+                return forward(proteinUrl);
             }
 
             return new JspView<>("/org/labkey/ms2/proteinDisambiguation.jsp", actionWithProteins);
@@ -1606,6 +1604,17 @@ public class MS2Controller extends SpringActionController
         {
             root.addChild("Disambiguate Protein");
             return root;
+        }
+
+        private ModelAndView forward(ActionURL forwardUrl) throws IOException, ServletException
+        {
+            HttpServletRequest request = getViewContext().getRequest();
+
+            // Need to pass along the token on the URL, since our AuthenticatedRequest hides this parameter from the MockRequest used to forward
+            forwardUrl.addParameter(CSRFUtil.csrfName, request.getParameter(CSRFUtil.csrfName));
+            ViewServlet.forwardActionURL(request, getViewContext().getResponse(), forwardUrl);
+
+            return null;
         }
     }
 
@@ -2371,6 +2380,9 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(FormType form, boolean reshow, BindException errors) throws Exception
         {
+            if (!isPost())
+                errors.reject(ERROR_MSG, "This action does not support HTTP GET");
+
             return errors.hasErrors() ? new SimpleErrorView(errors) : getHtmlView(form, errors);
         }
 
