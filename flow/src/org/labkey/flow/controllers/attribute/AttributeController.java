@@ -56,7 +56,6 @@ public class AttributeController extends BaseFlowController
 
     public AttributeController()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 

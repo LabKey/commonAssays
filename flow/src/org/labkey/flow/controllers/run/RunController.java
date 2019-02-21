@@ -733,7 +733,6 @@ public class RunController extends BaseFlowController
                 @JsonProperty("_deleteOnComplete") boolean deleteOnComplete
         )
         {
-            super();
             _guid = guid;
             _exportToScriptPath = exportToScriptPath;
             _exportToScriptCommandLine = exportToScriptCommandLine;

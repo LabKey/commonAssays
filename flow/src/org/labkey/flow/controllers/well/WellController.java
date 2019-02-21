@@ -99,7 +99,6 @@ public class WellController extends BaseFlowController
 
     public WellController()
     {
-        super();
         setActionResolver(_actionResolver);
     }
 
