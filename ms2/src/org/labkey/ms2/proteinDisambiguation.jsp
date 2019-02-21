@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.util.GUID" %>
+<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.Protein" %>
-<%@ page import="org.labkey.api.util.GUID" %>
-<%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
@@ -86,7 +86,7 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<form action="<%=formUrl%>" method="get" onsubmit="return validate();">
+<labkey:form action="<%=formUrl%>" method="POST" onsubmit="return validate();">
     <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
     <% } %>
@@ -126,7 +126,7 @@
 %>
 <br>
 <%= button("Continue").submit(true) %>&nbsp;<%=generateBackButton("Cancel")%>
-</form>
+</labkey:form>
 <%
     }
 %>

@@ -85,6 +85,7 @@ import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
+import org.labkey.api.util.CSRFUtil;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
@@ -112,6 +113,7 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.ViewServlet;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.compare.CompareDataRegion;
@@ -161,6 +163,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
@@ -1549,7 +1552,7 @@ public class MS2Controller extends SpringActionController
     public class ProteinDisambiguationRedirectAction extends SimpleViewAction<ProteinDisambiguationForm>
     {
         @Override
-        public ModelAndView getView(ProteinDisambiguationForm form, BindException errors)
+        public ModelAndView getView(ProteinDisambiguationForm form, BindException errors) throws IOException, ServletException
         {
             if (form.getTargetURL() == null)
             {
@@ -1561,9 +1564,13 @@ public class MS2Controller extends SpringActionController
 
             if (form.getTargetProtein() == null)
             {
+                HttpServletRequest request = getViewContext().getRequest();
                 ActionURL targetURL = new ActionURL(form.getTargetURL());
                 targetURL.addParameters(params);
-                throw new RedirectException(targetURL);
+                // Need to pass along the token, since our AuthenticatedRequest hides this parameter from the MockRequest used to forward
+                targetURL.addParameter(CSRFUtil.csrfName, request.getParameter(CSRFUtil.csrfName));
+                ViewServlet.forwardActionURL(request, getViewContext().getResponse(), targetURL);
+                return null;
             }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -1877,15 +1884,9 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class CompareProteinProphetQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
     {
-        public CompareProteinProphetQueryAction()
+        @Override
+        protected Map<String, String> getPreferencesToSave(PeptideFilteringComparisonForm form)
         {
-            super(PeptideFilteringComparisonForm.class);
-        }
-
-        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
-        {
-            ComparisonCrosstabView gridView = createInitializedQueryView(form, errors, false, null);
-
             Map<String, String> prefs = getPreferences(CompareProteinProphetQuerySetupAction.class);
             prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
             prefs.put(PeptideFilteringFormElements.proteinGroupFilterType.name(), form.getProteinGroupFilterType());
@@ -1896,7 +1897,14 @@ public class MS2Controller extends SpringActionController
             prefs.put(NORMALIZE_PROTEIN_GROUPS_NAME, Boolean.toString(form.isNormalizeProteinGroups()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.proteinProphetProbability.name(), form.getProteinProphetProbability() == null ? null : form.getProteinProphetProbability().toString());
-            savePreferences(prefs);
+
+            return prefs;
+        }
+
+        @Override
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            ComparisonCrosstabView gridView = createInitializedQueryView(form, errors);
 
             Map<String, String> props = new HashMap<>();
             props.put("originalURL", getViewContext().getActionURL().toString());
@@ -1914,7 +1922,8 @@ public class MS2Controller extends SpringActionController
             return new VBox(gwtView, gridView);
         }
 
-        protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        @Override
+        public ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
@@ -1929,6 +1938,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             if (_form != null)
@@ -1959,22 +1969,22 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ComparePeptideQueryAction extends RunListHandlerAction<PeptideFilteringComparisonForm, ComparisonCrosstabView>
     {
-        public ComparePeptideQueryAction()
+        @Override
+        protected Map<String, String> getPreferencesToSave(PeptideFilteringComparisonForm form)
         {
-            super(PeptideFilteringComparisonForm.class);
-        }
-
-        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
-        {
-            ComparisonCrosstabView view = createInitializedQueryView(form, errors, false, null);
-
             Map<String, String> prefs = getPreferences(ComparePeptideQuerySetupAction.class);
             prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein());
 
-            savePreferences(prefs);
+            return prefs;
+        }
+
+        @Override
+        protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
+        {
+            ComparisonCrosstabView view = createInitializedQueryView(form, errors);
 
             Map<String, String> props = new HashMap<>();
             VBox result = new VBox();
@@ -1997,7 +2007,8 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
+        @Override
+        public ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             List<MS2Run> runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
@@ -2005,6 +2016,7 @@ public class MS2Controller extends SpringActionController
             return new PeptideCrosstabView(schema, form, getViewContext(), true);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             if (_form != null)
@@ -2315,33 +2327,83 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public abstract class RunListHandlerAction<FormType extends RunListForm, ViewType extends QueryView> extends QueryViewAction<FormType, ViewType>
+    public abstract class RunListHandlerAction<FormType extends RunListForm, ViewType extends QueryView> extends FormViewAction<FormType> //QueryViewAction<FormType, ViewType>
     {
         protected List<MS2Run> _runs;
+        protected FormType _form;
 
-        protected RunListHandlerAction(Class<FormType> formClass)
+        @Override
+        protected String getCommandClassMethodName()
         {
-            super(formClass);
+            return "createQueryView";
         }
 
         @Override
-        public ModelAndView getView(FormType form, BindException errors) throws Exception
+        public void validateCommand(FormType form, Errors errors)
         {
             if (form.getRunList() == null)
             {
-                errors.addError(new LabKeyError("Could not find the list of selected runs for comparison. Please reselect the runs."));
-                return new SimpleErrorView(errors);
+                errors.reject(ERROR_MSG, "Could not find the list of selected runs for comparison. Please reselect the runs.");
             }
+
             try
             {
                 _runs = RunListCache.getCachedRuns(form.getRunList(), false, getViewContext());
             }
             catch (RunListException e)
             {
-                e.addErrors(errors);
-                return new SimpleErrorView(errors);
+                for (String message : e.getMessages())
+                {
+                    errors.reject(ERROR_MSG, message);
+                }
             }
-            return super.getView(form, errors);
+        }
+
+        @Override
+        public boolean handlePost(FormType form, BindException errors)
+        {
+            _form = form;
+            savePreferences(getPreferencesToSave(form));
+
+            return false;
+        }
+
+        @Override
+        public ModelAndView getView(FormType form, boolean reshow, BindException errors) throws Exception
+        {
+            return errors.hasErrors() ? new SimpleErrorView(errors) : getHtmlView(form, errors);
+        }
+
+        /** Build up the HTML page. */
+        protected ModelAndView getHtmlView(FormType form, BindException errors) throws Exception
+        {
+            return createInitializedQueryView(form, errors);
+        }
+
+        /**
+         * Correctly configures the QueryView to use the QueryViewAction for export purposes
+         */
+        protected final ViewType createInitializedQueryView(FormType form, BindException errors) throws Exception
+        {
+            ViewType result = createQueryView(form, errors);
+            if (null == result)
+                throw new NotFoundException("Could not create the view");
+
+            result.setUseQueryViewActionExportURLs(true);
+            return result;
+        }
+
+        /**
+         * Create the specially configured query view.
+         */
+        public abstract ViewType createQueryView(FormType form, BindException errors) throws Exception;
+
+        protected abstract Map<String, String> getPreferencesToSave(FormType form);
+
+        @Override
+        public URLHelper getSuccessURL(FormType formType)
+        {
+            return null;
         }
     }
 
@@ -2349,40 +2411,40 @@ public class MS2Controller extends SpringActionController
     public class SpectraCountAction extends RunListHandlerAction<SpectraCountForm, QueryView>
     {
         private SpectraCountConfiguration _config;
-        private SpectraCountForm _form;
 
-        public SpectraCountAction()
+        @Override
+        protected Map<String, String> getPreferencesToSave(SpectraCountForm form)
         {
-            super(SpectraCountForm.class);
-        }
-
-        protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion)
-        {
-            _form = form;
-            _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
-            if (_config == null)
-            {
-                throw new NotFoundException("Could not find spectra count config: " + form.getSpectraConfig());
-            }
-
             Map<String, String> prefs = getPreferences(SpectraCountSetupAction.class);
             prefs.put(PeptideFilteringFormElements.peptideFilterType.name(), form.getPeptideFilterType());
             prefs.put(PeptideFilteringFormElements.spectraConfig.name(), form.getSpectraConfig());
             prefs.put(PEPTIDES_FILTER_VIEW_NAME, form.getPeptideCustomViewName(getViewContext()));
             prefs.put(PeptideFilteringFormElements.peptideProphetProbability.name(), form.getPeptideProphetProbability() == null ? null : form.getPeptideProphetProbability().toString());
             prefs.put(PeptideFilteringFormElements.targetProtein.name(), form.getTargetProtein());
-            savePreferences(prefs);
+
+            return prefs;
+        }
+
+        @Override
+        public QueryView createQueryView(SpectraCountForm form, BindException errors)
+        {
+            _config = SpectraCountConfiguration.findByTableName(form.getSpectraConfig());
+            if (_config == null)
+            {
+                throw new NotFoundException("Could not find spectra count config: " + form.getSpectraConfig());
+            }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             schema.setRuns(_runs);
 
             QuerySettings settings = schema.getSettings(getViewContext(), "SpectraCount", _config.getTableName());
-            QueryView view = new SpectraCountQueryView(schema, settings, errors, _config, _form);
+            QueryView view = new SpectraCountQueryView(schema, settings, errors, _config, form);
             // ExcelWebQueries won't be part of the same HTTP session so we won't have access to the run list anymore
             view.setAllowExportExternalQuery(false);
             return view;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root = appendRootNavTrail(root, null, getPageConfig(), "spectraCount");
