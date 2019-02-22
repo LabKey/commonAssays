@@ -19,7 +19,8 @@ package org.labkey.test.ms2;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.util.ListHelper;
+import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.params.FieldDefinition;
 import org.openqa.selenium.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
@@ -53,16 +54,14 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Create New Mass Spec Metadata Assay Design");
 
         log("Create a new MS2 sample prep assay definition.");
-        waitForElement(Locator.xpath("//input[@id='AssayDesignerName']"), WAIT_FOR_JAVASCRIPT);
-        setFormElement(Locator.xpath("//input[@id='AssayDesignerName']"), TEST_ASSAY_NAME);
+        AssayDesignerPage assayDesigner = new AssayDesignerPage(getDriver());
+        assayDesigner.setName(TEST_ASSAY_NAME);
 
-        _listHelper.addField("Run Fields", "IntegerField", "IntegerField", ListHelper.ListColumnType.Integer);
-        _listHelper.addField("Run Fields", "TextField", "TextField", ListHelper.ListColumnType.String);
-        _listHelper.addField("Run Fields", "BooleanField", "BooleanField", ListHelper.ListColumnType.Boolean);
+        assayDesigner.runFields().addField(new FieldDefinition("IntegerField").setType(FieldDefinition.ColumnType.Integer));
+        assayDesigner.runFields().addField(new FieldDefinition("TextField").setType(FieldDefinition.ColumnType.String));
+        assayDesigner.runFields().addField(new FieldDefinition("BooleanField").setType(FieldDefinition.ColumnType.Boolean));
 
-        sleep(1000);
-        clickButton("Save", 0);
-        waitForText(20000, "Save successful.");
+        assayDesigner.save();
 
         navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");
