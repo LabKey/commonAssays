@@ -22,6 +22,7 @@ import org.labkey.api.data.ColumnHeaderType;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.NestedRenderContext;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -97,7 +98,7 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         TableInfo tinfo = queryView.createTable();
 
         Sort sort = new Sort();
-        return Collections.singletonMap("Filter", context.buildFilter(tinfo, queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort));
+        return Collections.singletonMap("Filter", context.buildFilter(tinfo, Collections.emptyList(), queryUrl, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort));
     }
 
     public ModelAndView exportToExcel(MS2Controller.ExportForm form, HttpServletResponse response, List<String> selectedRows) throws IOException
@@ -128,7 +129,15 @@ public abstract class AbstractQueryMS2RunView extends AbstractMS2RunView<Nestabl
         TableInfo tinfo = queryView.createTable();
 
         Sort sort = new Sort();
-        SimpleFilter filter = context.buildFilter(tinfo, currentURL, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort);
+        SimpleFilter filter;
+        if (context instanceof NestedRenderContext)
+        {
+            filter = ((NestedRenderContext)context).buildFilter(tinfo, Collections.emptyList(), currentURL, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort, true);
+        }
+        else
+        {
+            filter = context.buildFilter(tinfo, Collections.emptyList(), currentURL, queryView.getDataRegionName(), Table.ALL_ROWS, Table.NO_OFFSET, sort);
+        }
         addSelectionFilter(selectedIds, queryView, filter);
 
         ColumnInfo desiredCol = QueryService.get().getColumns(tinfo, Collections.singletonList(desiredFK)).get(desiredFK);
