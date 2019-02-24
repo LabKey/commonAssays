@@ -4488,7 +4488,7 @@ public class MS2Controller extends SpringActionController
                 SQLFragment sql = new SQLFragment();
                 sql.append("SELECT x.SeqId, x.Run FROM ");
                 sql.append(MS2Manager.getTableInfoPeptides(), "x");
-                sql.append(" WHERE x.Run IN (");
+                sql.append(" WHERE x.SeqId IS NOT NULL AND x.Run IN (");
                 String sep = "";
                 for (MS2Run run : runs)
                 {
