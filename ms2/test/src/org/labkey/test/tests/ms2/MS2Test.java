@@ -449,12 +449,13 @@ public class MS2Test extends AbstractMS2ImportTest
                 "dMass",
                 "Next AA",
                 "Protein",
-                "gi|27805893|guanine_nucleotid");
+                "gi|30089158|low_density_lipop");
         assertTextPresent(allPeptidesSearch, "\n", 24);
         assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE2, PEPTIDE1);
         assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE3, PEPTIDE4);
         assertTextNotPresent(allPeptidesSearch, "K.LLASMLAK.A",
-                "R.GGNEESTK.T");
+                "R.GGNEESTK.T",
+                "gi|27805893|guanine_nucleotid");
 
         drt = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
         columnHeaders = drt.getColumnLabels();
