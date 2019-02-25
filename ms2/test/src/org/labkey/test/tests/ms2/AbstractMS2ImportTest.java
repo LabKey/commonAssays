@@ -51,6 +51,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected static final String PEPTIDE2 = "R.TIDPVIAR.K";
     protected static final String PEPTIDE3 = "K.HVSGKIIGFFY.-";
     protected static final String PEPTIDE4 = "R.ISSTKMDGIGPK.K";
+    protected static final String PEPTIDE5 = "K.ITSYKFESVNFDSK.I";
     protected static final String SEARCH_TYPE = "xtandem";
     protected static final String SEARCH_NAME3 = "X! Tandem";
     protected static final String ENZYME = "trypsin";
