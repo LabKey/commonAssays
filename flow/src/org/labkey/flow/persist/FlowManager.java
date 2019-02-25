@@ -47,6 +47,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowException;
@@ -1074,7 +1075,7 @@ public class FlowManager
         newObject.setTypeId(type.getTypeId());
         if (uri != null)
         {
-            newObject.setUri(uri.toString());
+            newObject.setUri(FileUtil.uriToString(uri));
         }
         flowObjectModified();
         return Table.insert(null, getTinfoObject(), newObject);
