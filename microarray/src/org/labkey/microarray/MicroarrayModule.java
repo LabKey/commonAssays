@@ -90,7 +90,7 @@ public class MicroarrayModule extends SpringModule
 
     public double getVersion()
     {
-        return 18.30;
+        return 19.10;
     }
 
     protected void init()
