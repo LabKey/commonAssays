@@ -22,23 +22,19 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.DailyB;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.components.CustomizeView;
 import org.labkey.test.ms2.MS2TestBase;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.SimpleHttpResponse;
 import org.labkey.test.util.TextSearcher;
-import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.labkey.test.components.WebPartPanel.WebPart;
 import static org.labkey.test.util.DataRegionTable.DataRegion;
 
@@ -119,15 +115,13 @@ public class LibraTest extends MS2TestBase
         clickButton("Compare");
         assertElementPresent(Locator.linkWithText("itraq/iTRAQ (Libra)"), 1);
         assertTextPresent("R.TDTGEPM'GR.G");
-        WebElement proteinLink = Locator.linkContainingText("gi|34392343").findElement(getDriver());
-        SimpleHttpResponse response = WebTestHelper.getHttpResponse(proteinLink.getAttribute("href"));
-        String expectedText = "84,731";
-        if (response.getResponseCode() != 200 || response.getResponseBody().contains(expectedText))
+
+        // The compare page is generated with a POST redirect, can't use 'goBack()' to return there
+        openLinkInNewWindow(Locator.linkContainingText("gi|34392343").findElementOrNull(getDriver()));
         {
-            // The browser doesn't like to 'goBack()' to the compare protein page.
-            // Only navigate away when failing test
-            clickAndWait(proteinLink);
-            fail("Didn't find expected text: '" + expectedText + "'");
+            waitForText("84,731");
+            getDriver().close();
+            switchToMainWindow();
         }
 
         // Customize view to pull in other columns
