@@ -450,11 +450,12 @@ public class MS2Test extends AbstractMS2ImportTest
                 "Next AA",
                 "Protein",
                 "gi|30089158|low_density_lipop");
-        assertTextPresent(allPeptidesSearch, "\n", 24);
-        assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE2, PEPTIDE1);
-        assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE3, PEPTIDE4);
+        assertTextPresent(allPeptidesSearch, "\n", 5);
+        assertTextPresentInThisOrder(allPeptidesSearch, PEPTIDE5, PEPTIDE1);
         assertTextNotPresent(allPeptidesSearch, "K.LLASMLAK.A",
                 "R.GGNEESTK.T",
+                PEPTIDE3,
+                PEPTIDE4,
                 "gi|27805893|guanine_nucleotid");
 
         drt = new DataRegionTable(REGION_NAME_PEPTIDES, getDriver());
@@ -469,8 +470,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 "Peptide",
                 "RetTime");
         assertTextPresent(allAmtFileSrch, "\n", 26);
-        assertTextPresentInThisOrder(allAmtFileSrch, PEPTIDE2, PEPTIDE1);
-        assertTextPresentInThisOrder(allAmtFileSrch, PEPTIDE3, PEPTIDE4);
+        assertTextPresent(allAmtFileSrch, PEPTIDE2, PEPTIDE1, PEPTIDE3, PEPTIDE4);
         assertTextNotPresent(allAmtFileSrch, "K.LLASMLAK.A",
                 "R.GGNEESTK.T",
                 "Protein");
@@ -495,8 +495,8 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(selectedAmtSrch, "\n", 3);
         assertTextNotPresent(selectedAmtSrch, "Next AA");
 
-        log("Test default view");
-        peptidesTable.goToView("default");
+        selectOptionByText(Locator.name("viewParams"), "<Standard View>");
+        clickButton("Go");
         assertTextPresent("K.LLASMLAK.A",
                 "R.GGNEESTK.T");
 
@@ -584,6 +584,9 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test exporting from Protein Prophet view");
         log("Test exporting in TSV");
+        // Expand to show peptide details
+        checkCheckbox(Locator.checkboxByName("expanded"));
+        clickAndWait(Locator.id("viewTypeSubmitButton"));
         File allTSVFile = doAndWaitForDownload(() -> peptidesTable.clickHeaderMenu("Export All", false, "TSV"));
         TextSearcher allTsvSrch = new TextSearcher(allTSVFile);
         assertTextPresent(allTsvSrch, "Group",
