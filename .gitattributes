@@ -165,6 +165,7 @@ flow/resources/schemas/dbscripts/postgresql/flow-0.00-14.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-18.20-18.21.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-18.20-18.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-18.30-18.31.sql -text
+flow/resources/schemas/dbscripts/postgresql/flow-18.30-19.10.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/obsolete/flow-0.00-13.10.sql -text
@@ -177,6 +178,7 @@ flow/resources/schemas/dbscripts/sqlserver/flow-0.00-14.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-18.20-18.21.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-18.20-18.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-18.30-18.31.sql -text
+flow/resources/schemas/dbscripts/sqlserver/flow-18.30-19.10.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.20.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-11.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/obsolete/flow-0.00-13.10.sql -text
@@ -722,8 +724,10 @@ ms1/gwtsrc/org/labkey/ms1/client/MS1VennDiagramView.java -text
 ms1/module.properties -text
 ms1/resources/schemas/dbscripts/postgresql/ms1-0.00-9.10.sql -text
 ms1/resources/schemas/dbscripts/postgresql/ms1-18.30-18.31.sql -text
+ms1/resources/schemas/dbscripts/postgresql/ms1-18.30-19.10.sql -text
 ms1/resources/schemas/dbscripts/sqlserver/ms1-0.00-9.10.sql -text
 ms1/resources/schemas/dbscripts/sqlserver/ms1-18.30-18.31.sql -text
+ms1/resources/schemas/dbscripts/sqlserver/ms1-18.30-19.10.sql -text
 ms1/resources/schemas/ms1.xml -text
 ms1/src/org/labkey/ms1/CompareServiceImpl.java -text
 ms1/src/org/labkey/ms1/MS1Controller.java -text
@@ -853,6 +857,7 @@ ms2/resources/queries/protein/GOMolecularFunction.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-0.00-16.30.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-16.30-17.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-18.30-18.31.sql -text
+ms2/resources/schemas/dbscripts/postgresql/ms2-18.30-19.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-0.00-12.10.sql -text
@@ -883,6 +888,7 @@ ms2/resources/schemas/dbscripts/postgresql/obsolete/ms2-16.30-16.31.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-0.00-16.30.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-16.30-17.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-18.30-18.31.sql -text
+ms2/resources/schemas/dbscripts/sqlserver/ms2-18.30-19.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/obsolete/ms2-0.00-12.10.sql -text
