@@ -1014,6 +1014,7 @@ ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixProtocolSchema.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinSequenceDataTable.java -text
 ms2/src/org/labkey/ms2/metadata/FractionsDisplayColumn.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecBulkPropertiesTemplateAction.java -text
+ms2/src/org/labkey/ms2/metadata/MassSpecFractionsDomainKind.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
 ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text

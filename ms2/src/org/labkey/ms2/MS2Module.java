@@ -25,6 +25,7 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.FolderTypeManager;
@@ -52,6 +53,7 @@ import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixAssayProvider;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixExperimentListener;
+import org.labkey.ms2.metadata.MassSpecFractionsDomainKind;
 import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.metadata.MassSpecMetadataController;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -223,6 +225,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Service.setInstance(new MS2ServiceImpl());
 
         ProteinService.setInstance(new ProteinServiceImpl());
+        PropertyService.get().registerDomainKind(new MassSpecFractionsDomainKind());
     }
 
     @Override
