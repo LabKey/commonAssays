@@ -19,4 +19,14 @@ package org.labkey.flow.controllers.protocol;
 public class UpdateSamplesForm extends ProtocolForm
 {
     public int fileCount;
+
+    public int getFileCount()
+    {
+        return fileCount;
+    }
+
+    public void setFileCount(int fileCount)
+    {
+        this.fileCount = fileCount;
+    }
 }

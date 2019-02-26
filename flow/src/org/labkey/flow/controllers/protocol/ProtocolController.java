@@ -121,6 +121,8 @@ public class ProtocolController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleSetForm>
     {
+        private int _fileCount;
+
         public void validateCommand(JoinSampleSetForm form, Errors errors)
         {
         }
@@ -143,12 +145,14 @@ public class ProtocolController extends BaseFlowController
                 fields.put(samplePropertyURI, fcsKey);
             }
             getProtocol().setSampleSetJoinFields(getUser(), fields);
+            _fileCount = getProtocol().updateSampleIds(getUser());
+
             return true;
         }
 
         public ActionURL getSuccessURL(JoinSampleSetForm form)
         {
-            return getProtocol().urlFor(UpdateSamplesAction.class);
+            return getProtocol().urlFor(UpdateSamplesAction.class).addParameter("fileCount", _fileCount);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -165,7 +169,6 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(UpdateSamplesForm form, BindException errors) throws Exception
         {
             protocol = form.getProtocol();
-            form.fileCount = protocol.updateSampleIds(getUser());
             return FormPage.getView(ProtocolController.class, form, "updateSamples.jsp");
         }
 
