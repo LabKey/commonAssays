@@ -143,7 +143,7 @@ public class FlowSchema extends UserSchema
 
     public static final String ORIGINAL_FCSFILE_NAME = "OriginalFCSFile";
     public static final FieldKey ORIGINAL_FCSFILE_FIELDKEY = FieldKey.fromParts(ORIGINAL_FCSFILE_NAME);
-    
+
     public static final FieldKey SPECIMENID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.SPECIMENID_PROPERTY_NAME);
     public static final FieldKey PARTICIPANTID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
     public static final FieldKey VISITID_FIELDKEY = FieldKey.fromParts(AbstractAssayProvider.VISITID_PROPERTY_NAME);
@@ -512,7 +512,7 @@ public class FlowSchema extends UserSchema
     /**
      *  FlowDataTable is ExpDataTable with an ObjectId column
      *
-     *  basically rejoins what is effectively a vertically partitioned table (ACKK) 
+     *  basically rejoins what is effectively a vertically partitioned table (ACKK)
      */
     class JoinFlowDataTable extends AbstractTableInfo implements ExpDataTable
     {
@@ -1159,7 +1159,7 @@ public class FlowSchema extends UserSchema
             col.setParentTable(this);
             return col;
         }
-        
+
         public ColumnInfo createPropertyColumn(String alias)
         {
             ColumnInfo col = _expData.createPropertyColumn(alias);
@@ -1333,7 +1333,7 @@ public class FlowSchema extends UserSchema
             super(name, type);
         }
     }
-    
+
 
     public FlowDataTable createDataTable(String name, final FlowDataType type)
     {
@@ -1717,7 +1717,7 @@ public class FlowSchema extends UserSchema
             parts.add(insertAt, ORIGINAL_FCSFILE_FIELDKEY.getName());
             return FieldKey.fromParts(parts);
         }
-        
+
         return null;
     }
 
@@ -1732,7 +1732,7 @@ public class FlowSchema extends UserSchema
         return null;
     }
 
-    
+
     public ExpDataTable createCompensationControlTable(String alias)
     {
         ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl, false);
@@ -2011,7 +2011,7 @@ public class FlowSchema extends UserSchema
 
     SQLFragment getBackgroundJunctionFromSql(String tableAlias, Container c)
     {
-        String attr =  c.getId() + "/bgjunction";
+        String attr = c.getId() + "/bgjunction";
         MaterializedQueryHelper helper = fastflowCache.get(attr);
         if (null == helper)
         {
@@ -2021,10 +2021,11 @@ public class FlowSchema extends UserSchema
 
         if (null == helper)
             return null;
-        return helper.getFromSql(tableAlias, null);
+        return helper.getFromSql(generateBackgroundJuctionSql(), tableAlias, null);
     }
 
-    MaterializedQueryHelper createBackgroundJunctionHelper(Container c)
+
+    SQLFragment generateBackgroundJuctionSql()
     {
         DbSchema flow = FlowManager.get().getSchema();
 
@@ -2091,6 +2092,17 @@ public class FlowSchema extends UserSchema
         }
 
         SQLFragment select = new SQLFragment(selectInto);
+        return select;
+    }
+
+    MaterializedQueryHelper createBackgroundJunctionHelper(Container c)
+    {
+        DbSchema flow = FlowManager.get().getSchema();
+
+        ICSMetadata ics = _protocol.getICSMetadata();
+        if (!ics.hasCompleteBackground())
+            return null;
+
         List<String> indexes = Arrays.asList(
                 "CREATE INDEX ix_fg_${NAME} ON temp.${NAME} (fg);\n",
                 "CREATE INDEX ix_bg_${NAME} ON temp.${NAME} (bg);\n"
@@ -2098,7 +2110,7 @@ public class FlowSchema extends UserSchema
 
         Supplier<String> uptodate = () -> String.valueOf(FlowManager.get().flowObjectModificationCount.get());
         return MaterializedQueryHelper.create("fbg",flow.getScope(),
-                select,
+                null,
                 uptodate,
                 indexes,
                 30 * CacheManager.MINUTE);
