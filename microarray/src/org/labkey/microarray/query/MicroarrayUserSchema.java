@@ -109,16 +109,21 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
-            SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo).init();
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
             {
-                table.setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(getUser()));
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                return table;
             }
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
             {
-                table.setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(getUser()));
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                return table;
             }
-            return table;
+            else
+            {
+                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo).init();
+                return table;
+            }
         }
 
         return null;
@@ -136,7 +141,13 @@ public class MicroarrayUserSchema extends SimpleUserSchema
             }
         }
 
-        return super.createView(context, settings, errors);
+        QueryView ret = super.createView(context, settings, errors);
+        if (queryName.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
+        {
+            // NOTE FeatureAnnotationSetQueryView handles this for TABLE_FEATURE_ANNOTATION_SET
+            ret.setAllowableContainerFilterTypes(ContainerFilter.Type.CurrentPlusProjectAndShared);
+        }
+        return ret;
     }
 
     public TableInfo getAnnotationSetTable()

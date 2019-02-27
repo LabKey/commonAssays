@@ -65,7 +65,7 @@ public class FeatureAnnotationSetQueryView extends QueryView
         setShowBorders(true);
         setShadeAlternatingRows(true);
 
-        setAllowableContainerFilterTypes(ContainerFilter.Type.Current, ContainerFilter.Type.CurrentPlusProjectAndShared);
+        setAllowableContainerFilterTypes(ContainerFilter.Type.CurrentPlusProjectAndShared);
 
         getSettings().getBaseSort().insertSortColumn(FieldKey.fromParts("Name"));
     }

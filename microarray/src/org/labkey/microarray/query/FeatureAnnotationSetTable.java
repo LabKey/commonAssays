@@ -16,64 +16,68 @@
 
 package org.labkey.microarray.query;
 
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.DatabaseTableType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.DefaultQueryUpdateService;
-import org.labkey.api.query.DetailsURL;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.UserIdQueryForeignKey;
-import org.labkey.api.security.UserPrincipal;
-import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.view.ActionURL;
+import org.labkey.api.query.SimpleUserSchema;
+import org.labkey.api.util.GUID;
 
-public class FeatureAnnotationSetTable { }
-/*
-public class FeatureAnnotationSetTable extends FilteredTable<MicroarrayUserSchema>
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+// class for BOTH FeatureAnnotationSet and FeatureAnnotation
+
+public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<MicroarrayUserSchema>
 {
-    public FeatureAnnotationSetTable(MicroarrayUserSchema schema)
+    FeatureAnnotationSetTable(MicroarrayUserSchema s, TableInfo t)
     {
-        super(MicroarrayUserSchema schema);
-
-        ActionURL url = new ActionURL(GEOMicroarrayController.ShowFeatureAnnotationSetAction.class, _userSchema.getContainer());
-        DetailsURL detailsURL = new DetailsURL(url, "rowId", FieldKey.fromParts("RowId"));
-        detailsURL.setContainerContext(_userSchema.getContainer());
-
-        addWrapColumn(_rootTable.getColumn("RowId")).setHidden(true);
-        ColumnInfo nameCol = addWrapColumn(_rootTable.getColumn("Name"));
-        nameCol.setURL(detailsURL);
-        setDetailsURL(detailsURL);
-        addWrapColumn(_rootTable.getColumn("Vendor"));
-        ColumnInfo folderCol = wrapColumn("Folder", _rootTable.getColumn("Container"));
-        addWrapColumn(_rootTable.getColumn("Created"));
-        addWrapColumn(_rootTable.getColumn("CreatedBy"));
-        addWrapColumn(_rootTable.getColumn("Modified"));
-        addWrapColumn(_rootTable.getColumn("ModifiedBy"));
-        getColumn("CreatedBy").setFk(new UserIdQueryForeignKey(_userSchema.getUser(), getContainer()));
-        getColumn("ModifiedBy").setFk(new UserIdQueryForeignKey(_userSchema.getUser(), getContainer()));
-
-        addColumn(ContainerForeignKey.initColumn(folderCol, schema));
-
-        setPublicSchemaName(schema.getSchemaName());
-
+        super(s, t);
+        setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(s.getUser()));
     }
 
     @Override
-    public QueryUpdateService getUpdateService()
+    protected void _setContainerFilter(@NotNull ContainerFilter filter)
     {
-        TableInfo table = getRealTable();
-        if (table != null && table.getTableType() == DatabaseTableType.TABLE)
-            return new DefaultQueryUpdateService(this, table);
-        return null;
+        super._setContainerFilter(filter);
     }
 
     @Override
-    public boolean hasPermission(UserPrincipal user, Class<? extends Permission> perm)
+    protected void applyContainerFilter(ContainerFilter filter)
     {
-        return _userSchema.getContainer().hasPermission(user, perm);
+        super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(filter));
+    }
+
+    class ProjectSharedContainerFilterWrapper extends ContainerFilter
+    {
+        final ContainerFilter _inner;
+
+        @Override
+        public @Nullable Collection<GUID> getIds(Container currentContainer)
+        {
+            Set<GUID> ret = new HashSet<>();
+            Collection<GUID> ids = _inner.getIds(currentContainer);
+            if (null != ids)
+                ret.addAll(ids);
+            ret.add(ContainerManager.getSharedContainer().getEntityId());
+            Container project = currentContainer.getProject();
+            if (null != project)
+                ret.add(project.getEntityId());
+            return ret;
+        }
+
+        @Override
+        public @Nullable Type getType()
+        {
+            return _inner.getType();
+        }
+
+        ProjectSharedContainerFilterWrapper(ContainerFilter cf)
+        {
+            _inner = cf;
+        }
     }
 }
-*/

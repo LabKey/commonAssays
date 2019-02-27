@@ -322,6 +322,7 @@ public class FeatureAnnotationSetController extends SpringActionController
             grid.setShowInsertNewButton(false);
             grid.setShowImportDataButton(false);
             grid.setShowDeleteButton(false);
+            grid.setAllowableContainerFilterTypes();
 
             return new VBox(dv, grid);
         }
