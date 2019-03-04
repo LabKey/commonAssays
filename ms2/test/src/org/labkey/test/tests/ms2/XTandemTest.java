@@ -113,18 +113,9 @@ public class XTandemTest extends AbstractXTandemTest
         log("Test Comparing Peptides");
         navigateToFolder(FOLDER_NAME);
         DataRegionTable ms2Runs = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
-        ms2Runs.checkAll();
-        ms2Runs.clickHeaderMenu("Compare", "Peptide (Legacy)");
-        selectOptionByText(Locator.name("viewParams"), VIEW);
+        ms2Runs.checkAllOnPage();
+        ms2Runs.clickHeaderMenu("Compare", "Peptide");
         clickButton("Compare");
-        assertTextPresent("(Mass > 1000.0)");
-
-        //Put in once bug with filters in postgres is fixed
-        assertTextNotPresent(PEPTIDE);
-
-        DataRegionTable compareRegion = new DataRegionTable("MS2Compare", this);
-        compareRegion.setSort("Peptide", SortDirection.DESC);
-        assertTextBefore(PEPTIDE5, PEPTIDE4);
 
         navigateToFolder(FOLDER_NAME);
         verifyPeptideCrosstab();
