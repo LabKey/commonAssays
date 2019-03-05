@@ -264,13 +264,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         List<WebElement> qcFlaggedCells = redCellLoc.findElements(getDriver());
 
         List<String> expectedQcFlaggedValues = new ArrayList<>(Arrays.asList(texts));
-        List<String> qcFlaggedValues = new ArrayList<>();
-        for (WebElement el : qcFlaggedCells)
-        {
-            String text = el.getText();
-            if ( !badVals.contains(text) )
-                qcFlaggedValues.add(text);
-        }
+        List<String> qcFlaggedValues = getTexts(qcFlaggedCells);
+        qcFlaggedValues.removeAll(badVals);
 
         Collections.sort(expectedQcFlaggedValues);
         Collections.sort(qcFlaggedValues);
