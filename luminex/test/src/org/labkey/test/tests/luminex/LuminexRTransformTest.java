@@ -182,6 +182,7 @@ public final class LuminexRTransformTest extends LuminexTest
 
     private void verifyPDFsGenerated(boolean hasStandardPDFs)
     {
+        DataRegionTable.DataRegion(getDriver()).find(); // Make sure page is loaded
         WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
         shortWait().until(LabKeyExpectedConditions.animationIsDone(curvePng));
         mouseOver(curvePng);
