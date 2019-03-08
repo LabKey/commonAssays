@@ -23,6 +23,7 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.*;
@@ -996,7 +997,10 @@ public class ProteinManager
         {
             boolean result = Boolean.parseBoolean(param);
             // Stash as the user's preference
-            PreferenceService.get().setProperty(ALL_PEPTIDES_PREFERENCE_NAME, Boolean.toString(result), user);
+            try (var ignored = SpringActionController.ignoreSqlUpdates())
+            {
+                PreferenceService.get().setProperty(ALL_PEPTIDES_PREFERENCE_NAME, Boolean.toString(result), user);
+            }
             return result;
         }
         // Next check if the user has a preference stored
