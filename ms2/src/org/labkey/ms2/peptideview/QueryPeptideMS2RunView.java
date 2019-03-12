@@ -261,7 +261,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         {
             throw new RuntimeException(e);
         }
-        PeptideQueryView view = new PeptideQueryView(schema, settings, true, true);
+        PeptideQueryView view = new PeptideQueryView(schema, settings, true, false);
         DataRegion region = view.createDataRegion();
         if (!(region instanceof NestableDataRegion))
         {

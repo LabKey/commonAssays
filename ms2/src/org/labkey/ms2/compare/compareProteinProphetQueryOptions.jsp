@@ -33,7 +33,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
 
 <script type="text/javascript" src="<%=getWebappURL("MS2/inlineViewDesigner.js")%>"></script>
 
-<labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm" method="POST">
+<labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
     <p>This comparison view is based on ProteinProphet data so the runs must be associated with ProteinProphet data.

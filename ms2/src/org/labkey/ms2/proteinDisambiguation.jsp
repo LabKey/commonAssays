@@ -86,7 +86,7 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<labkey:form action="<%=formUrl%>" method="POST" onsubmit="return validate();">
+<form action="<%=formUrl%>" method="GET" onsubmit="return validate();">
     <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
     <% } %>
@@ -126,7 +126,7 @@
 %>
 <br>
 <%= button("Continue").submit(true) %>&nbsp;<%=generateBackButton("Cancel")%>
-</labkey:form>
+</form>
 <%
     }
 %>
