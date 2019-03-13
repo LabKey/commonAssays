@@ -491,6 +491,7 @@ public class MS2Test extends AbstractMS2ImportTest
         peptidesTable.checkCheckbox(1);
         File selectedAmtFile = doAndWaitForDownload(() ->  peptidesTable.clickHeaderMenu("Export Selected", false, "AMT"));
         TextSearcher selectedAmtSrch = new TextSearcher(selectedAmtFile);
+        selectedAmtSrch.setSourceTransformer(String::trim); // File has an extra blank line on Windows
         assertTextPresent(selectedAmtSrch, "Peptide");
         assertTextPresent(selectedAmtSrch, "\n", 3);
         assertTextNotPresent(selectedAmtSrch, "Next AA");
