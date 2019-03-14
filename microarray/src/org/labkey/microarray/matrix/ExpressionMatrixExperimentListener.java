@@ -18,12 +18,16 @@ package org.labkey.microarray.matrix;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExperimentListener;
 import org.labkey.api.security.User;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -34,14 +38,12 @@ public class ExpressionMatrixExperimentListener implements ExperimentListener
     @Override
     public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user)
     {
+        SqlDialect d = MicroarrayUserSchema.getSchema().getSqlDialect();
         SqlExecutor sqlExecutor = new SqlExecutor(MicroarrayUserSchema.getSchema());
-        for (ExpMaterial material : materials)
-        {
-            SQLFragment sql = new SQLFragment("DELETE FROM ");
-            sql.append(MicroarrayUserSchema.getSchema().getTable("FeatureData"));
-            sql.append(" WHERE SampleId = ?");
-            sql.add(material.getRowId());
-            sqlExecutor.execute(sql);
-        }
+        SQLFragment sql = new SQLFragment("DELETE FROM ");
+        sql.append(MicroarrayUserSchema.getSchema().getTable("FeatureData"));
+        sql.append(" WHERE SampleId ");
+        d.appendInClauseSql(sql, materials.stream().map(ExpObject::getRowId).collect(Collectors.toList()));
+        sqlExecutor.execute(sql);
     }
 }
