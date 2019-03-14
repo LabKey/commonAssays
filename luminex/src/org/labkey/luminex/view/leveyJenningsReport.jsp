@@ -133,18 +133,19 @@
 
             // verify that the given titration/singlepointcontrol exists and has run's associated with it as a Standard or QC Control
             var sql;
-            if ('Titration' == _controlType) {
-                sql = "SELECT COUNT(*) AS RunCount FROM Titration WHERE Name='" + _controlName + "' AND IncludeInQcReport=true";
+            if ('Titration' === _controlType) {
+                sql = "SELECT COUNT(*) AS RunCount FROM Titration WHERE Name=CONTROL_NAME AND IncludeInQcReport=true";
             }
             else {
-                sql = "SELECT COUNT(*) AS RunCount FROM SinglePointControl WHERE Name='" + _controlName + "'";
+                sql = "SELECT COUNT(*) AS RunCount FROM SinglePointControl WHERE Name=CONTROL_NAME";
             }
             LABKEY.Query.executeSql({
                 containerFilter: LABKEY.Query.containerFilter.allFolders,
                 schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(_protocolName),
-                sql: sql,
+                sql: 'PARAMETERS(CONTROL_NAME VARCHAR) ' + sql,
+                parameters: {CONTROL_NAME: _controlName},
                 success: function(data) {
-                    if (data.rows.length == 0 || data.rows[0]['RunCount'] == 0)
+                    if (data.rows.length === 0 || data.rows[0]['RunCount'] === 0)
                     {
                         Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: there were no records found in '"
                             + $h(_protocolName) + "' for '" + $h(_controlName) + "'.</span>");
