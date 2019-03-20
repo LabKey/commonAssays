@@ -9,9 +9,9 @@ sourceSets {
 }
 
 dependencies {
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:modules:flow", depProjectConfig: 'xmlSchema')
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:api")
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: ":server:internal")
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: project.path, depProjectConfig: 'xmlSchema')
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
+    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
     engineCompile "org.labkey:labkey-client-api:${project.version}"
     engineCompile 'org.apache.tomcat:jsp-api'
     engineCompile 'org.apache.tomcat:jasper'
@@ -19,7 +19,7 @@ dependencies {
 
     compile sourceSets.engine.output
     jspCompile sourceSets.engine.output
-    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: ":server:modules:flow", depProjectConfig: 'xmlSchema')
+    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'xmlSchema')
 }
 
 project.task("engineJar",
