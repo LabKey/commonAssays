@@ -1,10 +1,9 @@
 import org.labkey.gradle.util.BuildUtils
 
-dependencies 
-{
+dependencies {
    external 'commons-httpclient:commons-httpclient:3.1'
-   BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: ":server:modules:ms1", depProjectConfig: 'apiCompile', specialParams: {
-      if(!BuildUtils.shouldBuildFromSource(project.project(":server:modules:ms1"))) {
+   BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath:  BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "ms1"), depProjectConfig: 'apiCompile', specialParams: {
+      if(!BuildUtils.shouldBuildFromSource(project.project(BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "ms1")))) {
          exclude group: 'org.labkey', module: 'ms2'
       }
    })
