@@ -227,10 +227,13 @@ public class MS2Controller extends SpringActionController
     {
         appendRootNavTrail(root, null, page, helpTopic);
 
-        if (null != runURL)
-            root.addChild(run.getDescription(), runURL);
-        else
-            root.addChild(run.getDescription());
+        if (null != run)
+        {
+            if (null != runURL)
+                root.addChild(run.getDescription(), runURL);
+            else
+                root.addChild(run.getDescription());
+        }
 
         if (null != title)
             root.addChild(title);
