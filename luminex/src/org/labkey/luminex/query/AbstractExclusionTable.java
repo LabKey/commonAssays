@@ -200,7 +200,6 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         {
             Set<String> defCols = new HashSet<>(super.getAutoPopulatedColumns());
             defCols.add("Analytes");
-            defCols.add("Run");
             return Collections.unmodifiableSet(defCols);
         }
 
