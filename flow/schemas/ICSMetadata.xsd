@@ -6,7 +6,7 @@
            elementFormDefault="qualified"
            attributeFormDefault="unqualified">
     <xs:import namespace="http://cpas.fhcrc.org/flow/script/xml" schemaLocation="flowPipelineScript.xsd"/>
-    <xs:import namespace="http://labkey.org/study/xml" schemaLocation="../../../api/schemas/study.xsd"/>
+    <xs:import namespace="http://labkey.org/study/xml" schemaLocation="../../../platform/api/schemas/study.xsd"/>
     <xs:element name="ICSMetadata" type="ICSMetadataType"/>
     <xs:complexType name="ICSMetadataType">
         <xs:sequence>
