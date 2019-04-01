@@ -56,7 +56,7 @@ public final class LuminexPositivityTest extends LuminexTest
     private Boolean _expectedNegativeControlValue = false;
     private Boolean _newNegativeControlValue = false;
     private static String _negControlAnalyte = _analyteNames.get(1);
-    protected static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/luminex/resources/transformscripts/description_parsing_example.pl");
+    protected static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/description_parsing_example.pl");
     private static final String RUN_ID_BASE = "Positivity";
 
     @BeforeClass

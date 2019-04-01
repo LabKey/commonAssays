@@ -88,8 +88,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_2 = TestFileUtils.getSampleData("Luminex/plate 2_IgA-Biot (Standard2).xls");
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3 = TestFileUtils.getSampleData("Luminex/plate 3_IgA-Biot (Standard1).xls");
 
-    public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/luminex/resources/transformscripts/labkey_luminex_transform.R");
-    public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/luminex/resources/transformscripts/tomaras_luminex_transform.R");
+    public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
+    public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
 
     public static final String ASSAY_ID_FIELD  = "name";
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
