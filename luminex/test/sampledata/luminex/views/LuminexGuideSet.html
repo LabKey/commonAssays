@@ -73,7 +73,7 @@
             {table: "CurveFit", insertRow: {}, insertFailureExpected: true},
             {table: "GuideSet", keyVar: "rowId", updateVar: "comment", insertRow: {analyteName: "Test Analyte", titrationName: "Test Titration", currentGuideSet: false}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: true},
             {table: "GuideSetCurveFit", insertRow: {}, insertFailureExpected: true},
-            {table: "QCFlags", keyVar: "rowId", updateVar: "comment", insertRow: {Run: 1, flagType: "TEST", description: "Test Description", enabled: true}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
+            {table: "QCFlags", keyVar: "rowId", updateVar: "comment", insertRow: {runId: 1, flagType: "TEST", description: "Test Description", enabled: true}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
             {table: "Titration", insertRow: {}, insertFailureExpected: true},
             {table: "RunExclusion", keyVar: "runId", updateVar: "comment", insertRow: {runId: 1}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
             {table: "WellExclusion", keyVar: "rowId", updateVar: "comment", insertRow: {dataId: 1, type: "T1", description: "TEST"}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false}
