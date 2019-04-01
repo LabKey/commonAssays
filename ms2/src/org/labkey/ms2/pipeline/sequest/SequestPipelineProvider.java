@@ -46,7 +46,7 @@ import java.util.Map;
  * Date: Aug 24, 2006
  * Time: 12:45:45 PM
  */
-public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<AbstractSequestSearchTaskFactory>
+public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<SequestSearchTask.Factory>
 {
     private static final String ACTION_LABEL = "Sequest Peptide Search";
 
@@ -54,7 +54,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<A
 
     public SequestPipelineProvider(Module owningModule)
     {
-        super(name, owningModule, AbstractSequestSearchTaskFactory.class);
+        super(name, owningModule, SequestSearchTask.Factory.class);
     }
 
     public boolean isStatusViewableFile(Container container, String name, String basename)

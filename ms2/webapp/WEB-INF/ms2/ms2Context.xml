@@ -37,14 +37,6 @@
                         </list>
                     </property>
                 </bean>
-                <bean class="org.labkey.ms2.pipeline.sequest.UWSequestSearchTask$Factory">
-                    <property name="inputTypes">
-                        <list>
-                            <ref bean="ms2MatchesFileType" />
-                            <ref bean="ms1FileType" />
-                        </list>
-                    </property>
-                </bean>
                 <bean class="org.labkey.ms2.pipeline.TPPTask$Factory">
                     <property name="javaVMOptions" value="-Xmx1200m" />
                 </bean>
