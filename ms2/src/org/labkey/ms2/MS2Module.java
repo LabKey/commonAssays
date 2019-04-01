@@ -77,8 +77,6 @@ import org.labkey.ms2.pipeline.sequest.RealNumberParamsValidator;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
-import org.labkey.ms2.pipeline.sequest.UWSequestParamsBuilder;
-import org.labkey.ms2.pipeline.sequest.UWSequestSearchTask;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
@@ -423,10 +421,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
             NaturalNumberParamsValidator.TestCase.class,
             MultipleIntegerParamsValidator.TestCase.class,
             MultipleDoubleParamsValidator.TestCase.class,
-            UWSequestParamsBuilder.TestCase.class,
-            UWSequestSearchTask.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,
-            UWSequestSearchTask.TestCase.class,
             Comet2014ParamsBuilder.LimitedParseTestCase.class,
             Comet2015ParamsBuilder.LimitedParseTestCase.class,
             TPPTask.TestCase.class,
