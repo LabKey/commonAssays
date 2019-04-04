@@ -116,6 +116,7 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         setTitle("AntigenStats");
     }
 
+    @NotNull
     @Override
     public ContainerFilter getContainerFilter()
     {

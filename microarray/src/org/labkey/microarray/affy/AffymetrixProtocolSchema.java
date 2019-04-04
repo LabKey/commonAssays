@@ -19,9 +19,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilterable;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayProtocolSchema;
@@ -37,16 +38,16 @@ public class AffymetrixProtocolSchema extends AssayProtocolSchema
 
     @Nullable
     @Override
-    public ContainerFilterable createDataTable(boolean includeCopiedToStudyColumns)
+    public TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        return new AssayResultTable(this, includeCopiedToStudyColumns);
+        return new AssayResultTable(this, cf, includeCopiedToStudyColumns);
     }
 
     @Nullable
     @Override
-    public final ContainerFilterable createDataTable()
+    public final TableInfo createDataTable(ContainerFilter cf)
     {
-        ContainerFilterable table = super.createDataTable();
+        TableInfo table = super.createDataTable(cf);
 
         if (null != table)
         {

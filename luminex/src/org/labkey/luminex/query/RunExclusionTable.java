@@ -41,26 +41,26 @@ import java.util.Map;
  */
 public class RunExclusionTable extends AbstractExclusionTable
 {
-    public RunExclusionTable(LuminexProtocolSchema schema, boolean filter)
+    public RunExclusionTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(LuminexProtocolSchema.getTableInfoRunExclusion(), schema, filter);
+        super(LuminexProtocolSchema.getTableInfoRunExclusion(), schema, cf, filter);
 
         getColumn("RunId").setLabel("Assay ID");
-        getColumn("RunId").setFk(new LookupForeignKey("RowId")
+        getColumn("RunId").setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createRunsTable();
+                return _userSchema.createRunsTable(getLookupContainerFilter());
             }
         });
 
-        getColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey("RunId")
+        getColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "RunId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createRunExclusionAnalyteTable();
+                return _userSchema.createRunExclusionAnalyteTable(getLookupContainerFilter());
             }
         }, "AnalyteId"));
 

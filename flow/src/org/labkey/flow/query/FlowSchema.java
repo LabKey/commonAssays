@@ -21,25 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.cache.StringKeyCache;
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.FilterInfo;
-import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.MaterializedQueryHelper;
-import org.labkey.api.data.NullColumnInfo;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
@@ -227,7 +209,7 @@ public class FlowSchema extends UserSchema
         try
         {
             FlowTableType type = FlowTableType.valueOf(name);
-            AbstractTableInfo table = (AbstractTableInfo)getTable(type);
+            AbstractTableInfo table = (AbstractTableInfo)getTable(type, null);
             table.setDescription(type.getDescription());
             return table;
         }
@@ -240,16 +222,23 @@ public class FlowSchema extends UserSchema
 
     public TableInfo getTable(FlowTableType type)
     {
+        // flow schema is not converted yet!
+        return getTable(type, null);
+    }
+
+    // TODO ContainerFilter -- not converted yet
+    public TableInfo getTable(FlowTableType type, ContainerFilter cf)
+    {
         switch (type)
         {
             case FCSFiles:
                 return createFCSFileTable(type.toString());
             case FCSAnalyses:
-                return createFCSAnalysisTable(type.toString(), FlowDataType.FCSAnalysis, true);
+                return createFCSAnalysisTable(cf, type.toString(), FlowDataType.FCSAnalysis, true);
             case CompensationControls:
                 return createCompensationControlTable(type.toString());
             case Runs:
-                return createRunTable(type.toString(), null);
+                return createRunTable(type.toString(), null, cf);
             case CompensationMatrices:
                 return createCompensationMatrixTable(type.toString());
             case AnalysisScripts:
@@ -371,9 +360,9 @@ public class FlowSchema extends UserSchema
         return sqlDataId;
     } */
 
-    public ExpRunTable createRunTable(String alias, FlowDataType type)
+    public ExpRunTable createRunTable(String alias, FlowDataType type, ContainerFilter cf)
     {
-        ExpRunTable ret = ExperimentService.get().createRunTable(FlowTableType.Runs.toString(), this);
+        ExpRunTable ret = ExperimentService.get().createRunTable(FlowTableType.Runs.toString(), this, cf);
 
         if (_experiment != null)
         {
@@ -438,10 +427,12 @@ public class FlowSchema extends UserSchema
             });
 
             ColumnInfo colWorkspace = ret.addDataInputColumn("Workspace", InputRole.Workspace.toString());
-            ExpDataTable workspacesTable = ExperimentService.get().createDataTable("Datas", this);
+            ExpDataTable workspacesTable = ExperimentService.get().createDataTable("Datas", this, cf);
             workspacesTable.setPublicSchemaName(ExpSchema.SCHEMA_NAME);
             workspacesTable.populate();
-            colWorkspace.setFk(new QueryForeignKey(workspacesTable, null, "RowId", "Name"));
+            colWorkspace.setFk(QueryForeignKey
+                    .from(ret.getUserSchema(), ret.getContainerFilter())
+                    .table(workspacesTable).key("RowId").display("Name"));
             colWorkspace.setHidden(true);
         }
 
@@ -522,11 +513,12 @@ public class FlowSchema extends UserSchema
         final String _expDataAlias;
         FlowPropertySet _fps;
 
-        JoinFlowDataTable(String name, FlowDataType type)
+        // TODO ContainerFilter Do I need to over-ride getDefaultContainerFilter() so that AbstractTableInfo doesn't wrap a second CF?
+        JoinFlowDataTable(String name, FlowDataType type, ContainerFilter cf)
         {
             super(getDbSchema(), name);
             _expDataAlias = "_expdata_";
-            _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
+            _expData = ExperimentService.get().createDataTable(name, FlowSchema.this, cf);
             _flowObject = FlowManager.get().getTinfoObject();
             _type = type;
             _fps = new FlowPropertySet(_expData);
@@ -535,7 +527,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(getContainer(), _fps, _type));
+            colStatistic.setFk(new StatisticForeignKey(FlowSchema.this, _fps, _type));
             colStatistic.setIsUnselectable(true);
             addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
             return colStatistic;
@@ -553,7 +545,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addGraphColumn(String columnAlias)
         {
             ColumnInfo colGraph = addObjectIdColumn(columnAlias);
-            colGraph.setFk(new GraphForeignKey(getContainer(), _fps));
+            colGraph.setFk(new GraphForeignKey(FlowSchema.this, _fps));
             colGraph.setIsUnselectable(true);
             return colGraph;
         }
@@ -810,10 +802,10 @@ public class FlowSchema extends UserSchema
         ExpRun _run = null;
         boolean _runSpecified = false;
 
-        FastFlowDataTable(String name, FlowDataType type)
+        FastFlowDataTable(String name, FlowDataType type, ContainerFilter cf)
         {
             super(getDbSchema(), name);
-            _expData = ExperimentService.get().createDataTable(name, FlowSchema.this);
+            _expData = ExperimentService.get().createDataTable(name, FlowSchema.this, cf);
             _expData.setDataType(type);
             _flowObject = FlowManager.get().getTinfoObject();
             _type = type;
@@ -848,7 +840,7 @@ public class FlowSchema extends UserSchema
             // Replace ExpDataTable's DownloadLink column with ours
             ColumnInfo colDownload = new AliasedColumn(this, Column.DownloadLink.name(), this.getColumn(ExpDataTable.Column.RowId));
             // Remove RowIdForeignKey
-            colDownload.setFk(null);
+            colDownload.clearFk();
             colDownload.setKeyField(false);
             colDownload.setHidden(true);
             colDownload.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -920,7 +912,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addStatisticColumn(String columnAlias)
         {
             ColumnInfo colStatistic = addObjectIdColumn(columnAlias);
-            colStatistic.setFk(new StatisticForeignKey(getContainer(), _fps, _type));
+            colStatistic.setFk(new StatisticForeignKey(FlowSchema.this, _fps, _type));
             colStatistic.setIsUnselectable(true);
             addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
             return colStatistic;
@@ -938,7 +930,7 @@ public class FlowSchema extends UserSchema
         ColumnInfo addGraphColumn(String columnAlias)
         {
             ColumnInfo colGraph = addObjectIdColumn(columnAlias);
-            colGraph.setFk(new GraphForeignKey(getContainer(), _fps));
+            colGraph.setFk(new GraphForeignKey(FlowSchema.this, _fps));
             colGraph.setIsUnselectable(true);
             return colGraph;
         }
@@ -1210,7 +1202,7 @@ public class FlowSchema extends UserSchema
             FieldKey fieldKey = new FieldKey(null, report.getDescriptor().getReportName());
             ExprColumn col = new ExprColumn(this, fieldKey, sql, JdbcType.VARCHAR);
 
-            PropertyForeignKey fk = new PropertyForeignKey(domain, FlowSchema.this)
+            PropertyForeignKey fk = new PropertyForeignKey(FlowSchema.this, null, domain)
             {
                 @Override
                 protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
@@ -1328,16 +1320,16 @@ public class FlowSchema extends UserSchema
 
     public class FlowDataTable extends FastFlowDataTable
     {
-        FlowDataTable(String name, FlowDataType type)
+        FlowDataTable(String name, FlowDataType type, ContainerFilter cf)
         {
-            super(name, type);
+            super(name, type, cf);
         }
     }
 
 
-    public FlowDataTable createDataTable(String name, final FlowDataType type)
+    public FlowDataTable createDataTable(String name, final FlowDataType type, ContainerFilter cf)
     {
-        FlowDataTable ret = new FlowDataTable(name, type);
+        FlowDataTable ret = new FlowDataTable(name, type, cf);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.RowId).setHidden(true);
         ret.addColumn(ExpDataTable.Column.LSID).setHidden(true);
@@ -1360,7 +1352,7 @@ public class FlowSchema extends UserSchema
         {
             public TableInfo getLookupTableInfo()
             {
-                return detach().createRunTable("run", type);
+                return detach().createRunTable("run", type, cf);
             }
         });
         if (_experiment != null)
@@ -1479,7 +1471,8 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createFCSFileTable(String name, boolean specimenRelativeFromFCSFileTable)
     {
-        final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile);
+        // TODO ContainerFilter
+        final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile, null);
         ret.getColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
@@ -1617,9 +1610,10 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public ExpDataTable createFCSAnalysisTable(String alias, FlowDataType type, boolean includeCopiedToStudyColumns)
+    public ExpDataTable createFCSAnalysisTable(ContainerFilter cf, String alias, FlowDataType type, boolean includeCopiedToStudyColumns)
     {
-        FlowDataTable ret = createDataTable(alias, type);
+        // TODO ContainerFilter
+        FlowDataTable ret = createDataTable(alias, type, cf);
 
         ColumnInfo colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), JdbcType.INTEGER);
         ret.addColumn(colAnalysisScript);
@@ -1735,7 +1729,8 @@ public class FlowSchema extends UserSchema
 
     public ExpDataTable createCompensationControlTable(String alias)
     {
-        ExpDataTable ret = createFCSAnalysisTable(alias, FlowDataType.CompensationControl, false);
+        // TODO ContainerFilter
+        ExpDataTable ret = createFCSAnalysisTable(null, alias, FlowDataType.CompensationControl, false);
         List<FieldKey> defColumns = new ArrayList<>(ret.getDefaultVisibleColumns());
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Count, null).toString()));
         defColumns.add(FieldKey.fromParts("Statistic", new StatisticSpec(FCSAnalyzer.compSubset, StatisticSpec.STAT.Freq_Of_Parent, null).toString()));
@@ -1745,7 +1740,8 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createCompensationMatrixTable(String alias)
     {
-        FlowDataTable ret = createDataTable(alias, FlowDataType.CompensationMatrix);
+        // TODO ContainerFilter
+        FlowDataTable ret = createDataTable(alias, FlowDataType.CompensationMatrix, null);
         if (getExperiment() != null)
         {
             ret.setExperiment(ExperimentService.get().getExpExperiment(getExperiment().getLSID()));
@@ -1761,7 +1757,8 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createAnalysisScriptTable(String alias, boolean includePrivate)
     {
-        FlowDataTable ret = createDataTable(alias, FlowDataType.Script);
+        // TODO ContainerFilter
+        FlowDataTable ret = createDataTable(alias, FlowDataType.Script, null);
         if (!includePrivate)
         {
             SQLFragment runIdCondition = new SQLFragment("RunId IS NULL");
@@ -1783,13 +1780,15 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createWorkspaceTable(String alias)
     {
-        FlowDataTable ret = createDataTable(alias, FlowDataType.Workspace);
+        // TODO ContainerFilter
+        FlowDataTable ret = createDataTable(alias, FlowDataType.Workspace, null);
         return ret;
     }
 
     public ExpExperimentTable createAnalysesTable(String name)
     {
-        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(name, new ExpSchema(getUser(), getContainer()));
+        // TODO ContainerFilter
+        ExpExperimentTable ret = ExperimentService.get().createExperimentTable(name, new ExpSchema(getUser(), getContainer()), null);
         ret.populate();
         FlowProtocol compensationProtocol = FlowProtocolStep.calculateCompensation.getForContainer(getContainer());
         FlowProtocol analysisProtocol = FlowProtocolStep.analysis.getForContainer(getContainer());

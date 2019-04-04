@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -193,7 +194,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createPeptideMembershipsTable();
+                return _userSchema.createPeptideMembershipsTable(getLookupContainerFilter());
             }
         });
         proteinGroup.setKeyField(false);
@@ -246,7 +247,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createFractionsTable();
+                return _userSchema.createFractionsTable(getLookupContainerFilter());
             }
         });
 
@@ -614,7 +615,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 return new DeltaScanColumn(colInfo);
             }
         });
-        deltaScanColumn.setFk(null);
+        deltaScanColumn.clearFk();
         table.addColumn(deltaScanColumn);
     }
 

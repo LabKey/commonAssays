@@ -18,9 +18,9 @@ package org.labkey.flow.query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasManager;
+import org.labkey.api.query.UserSchema;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
@@ -41,10 +41,10 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
 
     protected Container _container;
 
-    public AttributeForeignKey(@NotNull Container c)
+    public AttributeForeignKey(UserSchema schema)
     {
-        _container = c;
-        assert _container != null;
+        super(schema, null);
+        _container = schema.getContainer();
     }
 
     public TableInfo getLookupTableInfo()

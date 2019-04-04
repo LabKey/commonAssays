@@ -572,7 +572,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         fs.insertParent(FieldKey.fromParts("FCSFile"));
         FlowSchema schema = new FlowSchema(user, getContainer());
-        ExpDataTable table = schema.createFCSAnalysisTable("FCSAnalysis", FlowDataType.FCSAnalysis, false);
+        ExpDataTable table = schema.createFCSAnalysisTable(null,"FCSAnalysis", FlowDataType.FCSAnalysis, false);
         Map<FieldKey, ColumnInfo> columns = new HashMap<>();
         ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
         columns.put(new FieldKey(null, "RowId"), colRowId);

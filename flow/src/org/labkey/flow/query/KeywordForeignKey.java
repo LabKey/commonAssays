@@ -40,7 +40,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
 
     public KeywordForeignKey(FlowSchema schema, FlowPropertySet fps)
     {
-        super(schema.getContainer());
+        super(schema);
         _schema = schema;
         _fps = fps;
     }

@@ -33,9 +33,9 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
     FlowPropertySet _fps;
     FlowDataType _type;
 
-    public StatisticForeignKey(Container c, FlowPropertySet fps, FlowDataType type)
+    public StatisticForeignKey(FlowSchema schema, FlowPropertySet fps, FlowDataType type)
     {
-        super(c);
+        super(schema);
         _fps = fps;
         _type = type;
     }

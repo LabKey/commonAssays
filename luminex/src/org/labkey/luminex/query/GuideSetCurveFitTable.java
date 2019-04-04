@@ -36,20 +36,20 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
 
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
-    public GuideSetCurveFitTable(LuminexProtocolSchema schema, String curveType)
+    public GuideSetCurveFitTable(LuminexProtocolSchema schema, ContainerFilter cf, String curveType)
     {
-        super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema);
+        super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema, cf);
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
         ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this, JdbcType.INTEGER);
         guideSetIdColumn.setLabel("Guide Set");
-        guideSetIdColumn.setFk(new LookupForeignKey("RowId")
+        guideSetIdColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createGuideSetTable(false);
+                return _userSchema.createGuideSetTable(getLookupContainerFilter(),false);
             }
         });
         addColumn(guideSetIdColumn);

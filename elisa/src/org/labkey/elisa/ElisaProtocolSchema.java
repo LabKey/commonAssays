@@ -18,6 +18,7 @@ package org.labkey.elisa;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
@@ -36,8 +37,8 @@ public class ElisaProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        return new ElisaResultsTable(this, includeCopiedToStudyColumns);
+        return new ElisaResultsTable(this, cf, includeCopiedToStudyColumns);
     }
 }

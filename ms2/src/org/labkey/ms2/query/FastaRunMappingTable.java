@@ -31,14 +31,19 @@ public class FastaRunMappingTable extends FilteredTable<MS2Schema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");
 
-    public FastaRunMappingTable(MS2Schema schema)
+    public FastaRunMappingTable(MS2Schema schema, ContainerFilter cf)
     {
-        super(MS2Manager.getTableInfoFastaRunMapping(), schema);
+        super(MS2Manager.getTableInfoFastaRunMapping(), schema, cf);
         wrapAllColumns(true);
         setDescription("Contains a row for each FASTA file used for a given imported MS2 search");
 
-        getColumn("FastaId").setFk(new QueryForeignKey(ProteinUserSchema.NAME, schema.getContainer(), null, schema.getUser(), ProteinUserSchema.FASTA_FILE_TABLE_NAME, null, null, false));
-        getColumn("Run").setFk(new QueryForeignKey(schema, null, MS2Schema.TableType.MS2RunDetails.name(), null, "Description"));
+        getColumn("FastaId").setFk( QueryForeignKey
+                .from(schema, getContainerFilter())
+                .schema(ProteinUserSchema.NAME, schema.getContainer())
+                .table(ProteinUserSchema.FASTA_FILE_TABLE_NAME));
+        getColumn("Run").setFk( QueryForeignKey
+                .from(schema, getContainerFilter())
+                .to(MS2Schema.TableType.MS2RunDetails.name(), null, "Description"));
     }
 
     @Override

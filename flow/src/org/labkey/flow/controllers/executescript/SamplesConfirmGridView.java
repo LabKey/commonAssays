@@ -25,6 +25,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.InputColumn;
@@ -36,6 +37,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
@@ -45,6 +47,7 @@ import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.KeywordUtil;
 import org.springframework.validation.Errors;
 
@@ -80,12 +83,12 @@ public class SamplesConfirmGridView extends GridView
 
     Map<Integer, FlowRun> _runs = new HashMap<>();
 
-    public SamplesConfirmGridView(SelectedSamples data, boolean resolving, Errors errors)
+    public SamplesConfirmGridView(User user, Container container, SelectedSamples data, boolean resolving, Errors errors)
     {
-        this(data.getKeywords(), data.getSamples(), resolving, data.getRows(), errors);
+        this(user, container, data.getKeywords(), data.getSamples(), resolving, data.getRows(), errors);
     }
 
-    public SamplesConfirmGridView(Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
+    public SamplesConfirmGridView(User user, Container container, Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
 
@@ -225,7 +228,8 @@ public class SamplesConfirmGridView extends GridView
             // Add Matched column
             ColumnInfo matchCol = new ColumnInfo(MATCHED_FILE_FIELD_KEY, null, JdbcType.INTEGER);
             matchCol.setLabel("Matched FCS File");
-            matchCol.setFk(new FCSFilesFilesForeignKey(FlowFCSFile.getOriginal(getViewContext().getContainer())));
+            FlowSchema schema = new FlowSchema(user, container);
+            matchCol.setFk(new FCSFilesFilesForeignKey(schema, FlowFCSFile.getOriginal(container)));
             matchCol.setInputType("select");
             dc = new MatchedFileDisplayColumn(matchCol);
             dr.addDisplayColumn(dc);
@@ -380,8 +384,9 @@ public class SamplesConfirmGridView extends GridView
         List<FlowFCSFile> _files;
         NamedObjectList _list;
 
-        FCSFilesFilesForeignKey(List<FlowFCSFile> files)
+        FCSFilesFilesForeignKey(FlowSchema schema, List<FlowFCSFile> files)
         {
+            super(schema, null);
             _files = files;
 
             _list = new NamedObjectList();

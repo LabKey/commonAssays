@@ -20,6 +20,7 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.Parameter;
 import org.labkey.api.data.StatementUtils;
@@ -65,9 +66,9 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
     protected final AssayProvider _provider;
     private Domain _virusDomain = null;
 
-    public NabVirusDataTable(AssayProtocolSchema schema, Domain virusDomain)
+    public NabVirusDataTable(AssayProtocolSchema schema, ContainerFilter cf, Domain virusDomain)
     {
-        super(StorageProvisioner.createTableInfo(virusDomain), schema);
+        super(StorageProvisioner.createTableInfo(virusDomain), schema, cf);
 
         _protocol = _userSchema.getProtocol();
         _provider = _userSchema.getProvider();

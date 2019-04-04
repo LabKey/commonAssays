@@ -17,6 +17,7 @@ package org.labkey.nab.query;
 
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 
 /**
@@ -25,9 +26,9 @@ import org.labkey.api.exp.api.ExpProtocol;
  */
 public class NabDilutionDataTable extends NabBaseTable
 {
-    public NabDilutionDataTable(final NabProtocolSchema schema, ExpProtocol protocol)
+    public NabDilutionDataTable(final NabProtocolSchema schema, ContainerFilter cf, ExpProtocol protocol)
     {
-        super(schema, DilutionManager.getTableInfoDilutionData(), protocol);
+        super(schema, DilutionManager.getTableInfoDilutionData(), cf, protocol);
         addRunColumn();
 
         for (ColumnInfo col : getRealTable().getColumns())

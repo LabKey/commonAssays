@@ -16,6 +16,7 @@
 package org.labkey.elispot.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -41,9 +42,9 @@ import java.util.List;
  */
 public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunAntigenTable(final AssaySchema schema, final Domain domain, ExpProtocol protocol)
+    public ElispotRunAntigenTable(final AssaySchema schema, ContainerFilter cf, final Domain domain, ExpProtocol protocol)
     {
-        super(schema, StorageProvisioner.createTableInfo(domain), protocol);
+        super(schema, StorageProvisioner.createTableInfo(domain), cf, protocol);
         setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
         setTitle("Antigen");
         this.setPublic(false);
@@ -84,13 +85,13 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
             // node can still be queried there.
             result = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
             result.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey("ObjectId")
+            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
             {
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
                     Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
-                    return new ElispotRunAntigenTable(_userSchema, domain, _protocol);
+                    return new ElispotRunAntigenTable(_userSchema, getLookupContainerFilter(), domain, _protocol);
                 }
             };
             fk.setPrefixColumnCaption(false);

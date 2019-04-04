@@ -17,7 +17,6 @@
 package org.labkey.flow.query;
 
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.ExprColumn;
@@ -33,9 +32,9 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 {
     FlowPropertySet _fps;
 
-    public GraphForeignKey(Container c, FlowPropertySet fps)
+    public GraphForeignKey(FlowSchema schema, FlowPropertySet fps)
     {
-        super(c);
+        super(schema);
         _fps = fps;
     }
 

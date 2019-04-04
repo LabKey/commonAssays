@@ -29,17 +29,17 @@ import org.labkey.api.study.assay.AssayProtocolSchema;
  */
 public class SinglePointControlTable extends AbstractLuminexTable
 {
-    public SinglePointControlTable(LuminexProtocolSchema schema, boolean filterTable)
+    public SinglePointControlTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filterTable)
     {
         // expose the actual columns in the table
-        super(LuminexProtocolSchema.getTableInfoSinglePointControl(), schema, filterTable);
+        super(LuminexProtocolSchema.getTableInfoSinglePointControl(), schema, cf, filterTable);
         setName(LuminexProtocolSchema.SINGLE_POINT_CONTROL_TABLE_NAME);
         addWrapColumn(getRealTable().getColumn("RowId"));
         addWrapColumn(getRealTable().getColumn("Name"));
 
         // Alias the RunId column to be consistent with other Schema columns
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
-        runColumn.setFk(new QueryForeignKey(schema, null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
+        runColumn.setFk( QueryForeignKey.from(schema, cf).to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name") );
     }
 
     @Override

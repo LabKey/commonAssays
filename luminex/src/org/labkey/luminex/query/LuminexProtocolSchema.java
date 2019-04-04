@@ -161,28 +161,28 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    protected TableInfo createProviderTable(String tableType)
+    protected TableInfo createProviderTable(String tableType, ContainerFilter cf)
     {
         if (tableType != null)
         {
             if (ANALYTE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createAnalyteTable(true);
+                return createAnalyteTable(cf, true);
             }
 
             if (TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createTitrationTable(true);
+                return createTitrationTable(cf, true);
             }
 
             if (GUIDE_SET_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createGuideSetTable(true);
+                return createGuideSetTable(cf, true);
             }
 
             if (ANALYTE_TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                AnalyteTitrationTable result = createAnalyteTitrationTable(true);
+                AnalyteTitrationTable result = createAnalyteTitrationTable(cf, true);
                 SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
                 filter.append(getTableInfoAnalytes(), "a");
                 filter.append(" WHERE a.DataId ");
@@ -194,7 +194,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                ExpDataTable result = createDataFileTable();
+                ExpDataTable result = createDataFileTable(cf);
                 SQLFragment filter = new SQLFragment("RowId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("RowId"));
@@ -203,7 +203,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(true);
+                FilteredTable result = createWellExclusionTable(cf, true);
                 result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.NONBLANK));
                 result.removeColumn(new ColumnInfo("Dilution"));
                 SQLFragment filter = new SQLFragment("DataId");
@@ -214,7 +214,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(true);
+                FilteredTable result = createWellExclusionTable(cf, true);
                 result.setName(TITRATION_EXCLUSION_TABLE_NAME);
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.ISBLANK);
@@ -232,7 +232,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(true);
+                FilteredTable result = createWellExclusionTable(cf, true);
                 result.setName(SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME);
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.NONBLANK);
@@ -249,7 +249,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                CurveFitTable result = createCurveFitTable(true);
+                CurveFitTable result = createCurveFitTable(cf, true);
                 SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
                 filter.append(getTableInfoAnalytes(), "a");
                 filter.append(" WHERE a.DataId ");
@@ -261,12 +261,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createGuideSetCurveFitTable();
+                return createGuideSetCurveFitTable(cf);
             }
 
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createRunExclusionTable(true);
+                FilteredTable result = createRunExclusionTable(cf, true);
                 SQLFragment filter = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
                 filter.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
                 filter.append(", ");
@@ -280,67 +280,67 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createAnalyteTitrationQCFlagTable();
+                return createAnalyteTitrationQCFlagTable(cf);
             }
 
             if (ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createAnalyteSinglePointControlQCFlagTable();
+                return createAnalyteSinglePointControlQCFlagTable(cf);
             }
 
             if (CV_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createCVQCFlagTable();
+                return createCVQCFlagTable(cf);
             }
 
             if (SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createSinglePointControlTable(true);
+                return createSinglePointControlTable(cf, true);
             }
 
             if (ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createAnalyteSinglePointControlTable(true);
+                return createAnalyteSinglePointControlTable(cf, true);
             }
         }
 
         return super.createProviderTable(tableType);
     }
 
-    public AnalyteTitrationTable createAnalyteTitrationTable(boolean filter)
+    public AnalyteTitrationTable createAnalyteTitrationTable(ContainerFilter cf, boolean filter)
     {
-        return new AnalyteTitrationTable(this, filter);
+        return new AnalyteTitrationTable(this, cf, filter);
     }
 
-    public GuideSetTable createGuideSetTable(boolean filterTable)
+    public GuideSetTable createGuideSetTable(ContainerFilter cf, boolean filterTable)
     {
-        return new GuideSetTable(this, filterTable);
+        return new GuideSetTable(this, cf, filterTable);
     }
 
-    public CurveFitTable createCurveFitTable(boolean filterTable)
+    public CurveFitTable createCurveFitTable(ContainerFilter cf, boolean filterTable)
     {
-        return new CurveFitTable(this, filterTable);
+        return new CurveFitTable(this, cf, filterTable);
     }
 
-    public GuideSetCurveFitTable createGuideSetCurveFitTable()
+    public GuideSetCurveFitTable createGuideSetCurveFitTable(ContainerFilter cf)
     {
-        return new GuideSetCurveFitTable(this, null);
+        return new GuideSetCurveFitTable(this, cf, null);
     }
 
     /** @param curveType the type of curve to filter the results to */
-    public GuideSetCurveFitTable createGuideSetCurveFitTable(String curveType)
+    public GuideSetCurveFitTable createGuideSetCurveFitTable(ContainerFilter cf, String curveType)
     {
-        return new GuideSetCurveFitTable(this, curveType);
+        return new GuideSetCurveFitTable(this, cf, curveType);
     }
 
-    private WellExclusionTable createWellExclusionTable(boolean filterTable)
+    private WellExclusionTable createWellExclusionTable(ContainerFilter cf, boolean filterTable)
     {
-        return new WellExclusionTable(this, filterTable);
+        return new WellExclusionTable(this, cf, filterTable);
     }
 
-    private SinglePointControlTable createSinglePointControlTable(boolean filterTable)
+    private SinglePointControlTable createSinglePointControlTable(ContainerFilter cf, boolean filterTable)
     {
-        SinglePointControlTable result = new SinglePointControlTable(this, filterTable);
+        SinglePointControlTable result = new SinglePointControlTable(this, cf, filterTable);
         if (filterTable)
         {
             SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
@@ -355,9 +355,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(boolean filterTable)
+    public AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(ContainerFilter cf, boolean filterTable)
     {
-        AnalyteSinglePointControlTable result = new AnalyteSinglePointControlTable(this, filterTable);
+        AnalyteSinglePointControlTable result = new AnalyteSinglePointControlTable(this, cf, filterTable);
         if (filterTable)
         {
             SQLFragment sql = new SQLFragment("SinglePointControlId IN (SELECT RowId FROM ");
@@ -374,14 +374,14 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    private RunExclusionTable createRunExclusionTable(boolean filterTable)
+    private RunExclusionTable createRunExclusionTable(ContainerFilter cf, boolean filterTable)
     {
-        return new RunExclusionTable(this, filterTable);
+        return new RunExclusionTable(this, cf, filterTable);
     }
 
-    public AnalyteTable createAnalyteTable(boolean filterTable)
+    public AnalyteTable createAnalyteTable(ContainerFilter cf, boolean filterTable)
     {
-        AnalyteTable result = new AnalyteTable(this, filterTable);
+        AnalyteTable result = new AnalyteTable(this, cf, filterTable);
 
         if (filterTable)
         {
@@ -393,9 +393,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public TitrationTable createTitrationTable(boolean filter)
+    public TitrationTable createTitrationTable(ContainerFilter cf, boolean filter)
     {
-        TitrationTable result = new TitrationTable(this, filter);
+        TitrationTable result = new TitrationTable(this, cf, filter);
         if (filter)
         {
             SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
@@ -410,9 +410,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public ExpDataTable createDataFileTable()
+    public ExpDataTable createDataFileTable(ContainerFilter cf)
     {
-        final ExpDataTable ret = ExperimentService.get().createDataTable(DATA_FILE_TABLE_NAME, this);
+        final ExpDataTable ret = ExperimentService.get().createDataTable(DATA_FILE_TABLE_NAME, this, cf);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
@@ -431,8 +431,8 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpRunTable result = AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container);
-                    result.setContainerFilter(ret.getContainerFilter());
+                    ExpRunTable result = AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container, null);
+                    result.setContainerFilter(getLookupContainerFilter());
                     return result;
                 }
             });
@@ -452,9 +452,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public LuminexDataTable createDataTable(boolean includeCopiedToStudyColumns)
+    public LuminexDataTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        LuminexDataTable table = new LuminexDataTable(this);
+        LuminexDataTable table = new LuminexDataTable(this, cf);
         if (includeCopiedToStudyColumns)
         {
             addCopiedToStudyColumns(table, true);
@@ -462,16 +462,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return table;
     }
 
-    public ExpQCFlagTable createAnalyteTitrationQCFlagTable()
+    public ExpQCFlagTable createAnalyteTitrationQCFlagTable(ContainerFilter cf)
     {
-        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, this);
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, this, cf);
         result.populate();
         result.setAssayProtocol(getProtocol());
 
         ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
-        analyteColumn.setFk(new AnalyteForeignKey(this));
+        analyteColumn.setFk(new AnalyteForeignKey(this, cf));
         ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
-        titrationColumn.setFk(new TitrationForeignKey(this));
+        titrationColumn.setFk(new TitrationForeignKey(this, cf));
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
         SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType != ?");
@@ -486,16 +486,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public ExpQCFlagTable createAnalyteSinglePointControlQCFlagTable()
+    public ExpQCFlagTable createAnalyteSinglePointControlQCFlagTable(ContainerFilter cf)
     {
-        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME, this);
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME, this, cf);
         result.populate();
         result.setAssayProtocol(getProtocol());
 
         ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
-        analyteColumn.setFk(new AnalyteForeignKey(this));
+        analyteColumn.setFk(new AnalyteForeignKey(this, cf));
         ColumnInfo titrationColumn = result.addColumn("SinglePointControl", ExpQCFlagTable.Column.IntKey2);
-        titrationColumn.setFk(new SinglePointControlForeignKey(this));
+        titrationColumn.setFk(new SinglePointControlForeignKey(this, cf));
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/single point control combination");
         SQLFragment nonCVFlagFilter = new SQLFragment(" Key1 IS NULL AND Key2 IS NULL AND FlagType = ?");
@@ -510,14 +510,14 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    public ExpQCFlagTable createCVQCFlagTable()
+    public ExpQCFlagTable createCVQCFlagTable(ContainerFilter cf)
     {
-        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this);
+        ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this, cf);
         result.populate();
         result.setAssayProtocol(getProtocol());
 
         ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
-        analyteColumn.setFk(new AnalyteForeignKey(this));
+        analyteColumn.setFk(new AnalyteForeignKey(this, cf));
         result.addColumn("DataId", ExpQCFlagTable.Column.IntKey2);
         ColumnInfo wellTypeColumn = result.addColumn("WellType", ExpQCFlagTable.Column.Key1);
         wellTypeColumn.setLabel("Well Type");
@@ -627,26 +627,26 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return getSchema().getTable(RUN_EXCLUSION_ANALYTE_TABLE_NAME);
     }
 
-    public TableInfo createWellExclusionAnalyteTable()
+    public TableInfo createWellExclusionAnalyteTable(ContainerFilter cf)
     {
-        FilteredTable result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this);
+        FilteredTable result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
-        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
+        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
     }
 
-    public TableInfo createRunExclusionAnalyteTable()
+    public TableInfo createRunExclusionAnalyteTable(ContainerFilter cf)
     {
-        FilteredTable result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this);
+        FilteredTable result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
-        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this));
+        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        final ExpRunTable result = super.createRunsTable();
+        final ExpRunTable result = super.createRunsTable(cf);
 
         // Render any PDF outputs we found as direct download links since they should be plots of standard curves
         ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
@@ -745,16 +745,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         private final LuminexProtocolSchema _schema;
 
-        public AnalyteForeignKey(LuminexProtocolSchema schema)
+        public AnalyteForeignKey(LuminexProtocolSchema schema, ContainerFilter cf)
         {
-            super("RowId");
+            super(cf,"RowId", null);
             _schema = schema;
         }
 
         @Override
         public TableInfo getLookupTableInfo()
         {
-            return _schema.createAnalyteTable(false);
+            return _schema.createAnalyteTable(getLookupContainerFilter(),false);
         }
     }
 
@@ -762,16 +762,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         private final LuminexProtocolSchema _schema;
 
-        public TitrationForeignKey(LuminexProtocolSchema schema)
+        public TitrationForeignKey(LuminexProtocolSchema schema, ContainerFilter cf)
         {
-            super("RowId");
+            super(cf,"RowId", null);
             _schema = schema;
         }
 
         @Override
         public TableInfo getLookupTableInfo()
         {
-            return _schema.createTitrationTable(false);
+            return _schema.createTitrationTable(getLookupContainerFilter(), false);
         }
     }
 
@@ -779,16 +779,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         private final LuminexProtocolSchema _schema;
 
-        public SinglePointControlForeignKey(LuminexProtocolSchema schema)
+        public SinglePointControlForeignKey(LuminexProtocolSchema schema, ContainerFilter cf)
         {
-            super("RowId");
+            super(cf,"RowId", null);
             _schema = schema;
         }
 
         @Override
         public TableInfo getLookupTableInfo()
         {
-            return _schema.createSinglePointControlTable(false);
+            return _schema.createSinglePointControlTable(getLookupContainerFilter(), false);
         }
     }
 
@@ -827,7 +827,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     SimpleFilter f = new SimpleFilter();
                     f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
                     f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
-                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration"), f, null);
+                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration", getContainerFilter()), f, null);
                     long rows = tbs.getRowCount();
                     if (rows > 0)
                     {

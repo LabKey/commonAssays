@@ -34,9 +34,9 @@ import org.labkey.luminex.LuminexDataHandler;
  */
 public class CurveFitTable extends AbstractLuminexTable
 {
-    public CurveFitTable(LuminexProtocolSchema schema, boolean filterTable)
+    public CurveFitTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filterTable)
     {
-        super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, filterTable);
+        super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, cf, filterTable);
         setName(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         wrapAllColumns(true);
         ColumnInfo titrationCol = getColumn("TitrationId");
@@ -46,7 +46,7 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(cf,false);
             }
         });
 
@@ -57,7 +57,7 @@ public class CurveFitTable extends AbstractLuminexTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createAnalyteTable(false);
+                return _userSchema.createAnalyteTable(cf,false);
             }
         });
 
@@ -108,6 +108,5 @@ public class CurveFitTable extends AbstractLuminexTable
         }
         sql.append("))");
         return sql;
-
     }
 }

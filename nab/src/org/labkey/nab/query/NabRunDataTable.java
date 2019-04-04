@@ -22,6 +22,7 @@ import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -60,9 +61,9 @@ public class NabRunDataTable extends NabBaseTable
 {
     protected final NAbSpecimenTable _nabSpecimenTable;
 
-    public NabRunDataTable(final NabProtocolSchema schema, final ExpProtocol protocol)
+    public NabRunDataTable(final NabProtocolSchema schema, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(schema, new NAbSpecimenTable(schema), protocol);
+        super(schema, new NAbSpecimenTable(schema, cf), cf, protocol);
         _nabSpecimenTable = (NAbSpecimenTable) getRealTable();
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -143,12 +144,12 @@ public class NabRunDataTable extends NabBaseTable
             // node when this was OntologyManager-backed can still be queried there
             result = wrapColumn("Properties", getRealTable().getColumn("RowId"));
             result.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey("RowId")
+            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "RowId", null)
             {
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new NabRunDataTable(_schema, _protocol);
+                    return new NabRunDataTable(_schema, getLookupContainerFilter(), _protocol);
                 }
 
                 @Override
@@ -228,7 +229,8 @@ public class NabRunDataTable extends NabBaseTable
 
         // add object ID again, this time as a lookup to a virtual property table that contains our selected NAB properties:
 
-        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)             // Needed by NewNab only to get defaultHiddenProperties
+        // TODO ContainerFilter -- add ContainerFilter to QcAwarePropertyForeignKey
+        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(schema, this, pds)             // Needed by NewNab only to get defaultHiddenProperties
         {
             @Override
             protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
@@ -237,13 +239,12 @@ public class NabRunDataTable extends NabBaseTable
                 if (getInputMaterialPropertyName().equals(pd.getName()))
                 {
                     result.setLabel("Specimen");
-                    result.setFk(new LookupForeignKey("LSID")
+                    result.setFk(new LookupForeignKey(NabRunDataTable.this.getContainerFilter(), "LSID", null)
                     {
                         public TableInfo getLookupTableInfo()
                         {
-                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
+                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                             // Make sure we are filtering to the same set of containers
-                            materials.setContainerFilter(getContainerFilter());
                             if (sampleSet != null)
                             {
                                 materials.setSampleSet(sampleSet, true);
@@ -275,7 +276,7 @@ public class NabRunDataTable extends NabBaseTable
         for (Double value : cutoffValuess)
         {
             final Integer intCutoff = (int)Math.floor(value);
-            final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
+            final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema, getContainerFilter());
             cutoffValueTable.removeContainerAndProtocolFilters();
             cutoffValueTable.addCondition(new SimpleFilter(FieldKey.fromString("Cutoff"), intCutoff));
             ColumnInfo nabSpecimenColumn = cutoffValueTable.getColumn("NabSpecimenId");

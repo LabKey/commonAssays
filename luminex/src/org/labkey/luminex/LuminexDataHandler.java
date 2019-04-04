@@ -519,8 +519,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
             throws SQLException, ValidationException
     {
-        // Do a query to find all of the rows that have already been inserted 
-        LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(false);
+        // Do a query to find all of the rows that have already been inserted
+        LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(null, false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromParts("Data"), dataIds));
 
         Map<DataRowKey, LuminexDataRow> existingRows = new HashMap<>();
@@ -815,7 +815,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), (LuminexAssayProvider)provider, protocol, null);
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
-        ExpQCFlagTable qcFlagTable = schema.createAnalyteSinglePointControlQCFlagTable();
+        ExpQCFlagTable qcFlagTable = schema.createAnalyteSinglePointControlQCFlagTable(null);
         SimpleFilter analyteSinglePointControlFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         analyteSinglePointControlFilter.addCondition(FieldKey.fromParts("SinglePointControl"), singlePointControl.getRowId());
         List<AnalyteSinglePointControlQCFlag> existingQCFlags = new TableSelector(qcFlagTable, analyteSinglePointControlFilter, null).getArrayList(AnalyteSinglePointControlQCFlag.class);
@@ -824,7 +824,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (null != analyteSinglePointControl.getGuideSetId())
         {
-            GuideSetTable guideSetTable = schema.createGuideSetTable(false);
+            GuideSetTable guideSetTable = schema.createGuideSetTable(null,false);
             GuideSet guideSetRow = new TableSelector(guideSetTable).getObject(analyteSinglePointControl.getGuideSetId(), GuideSet.class);
 
             if (guideSetRow == null)
@@ -1456,7 +1456,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, expRun.getContainer(), (LuminexAssayProvider)provider, protocol, null);
 
         // query the QC Flags table to get any existing analyte/titration QC Flags
-        ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable();
+        ExpQCFlagTable qcFlagTable = schema.createAnalyteTitrationQCFlagTable(null);
         SimpleFilter analyteTitrationFilter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         analyteTitrationFilter.addCondition(FieldKey.fromParts("Titration"), titration.getRowId());
         List<AnalyteTitrationQCFlag> existingAnalyteTitrationQCFlags = new TableSelector(qcFlagTable, analyteTitrationFilter, null).getArrayList(AnalyteTitrationQCFlag.class);
@@ -1466,7 +1466,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (null != analyteTitration.getGuideSetId())
         {
             // query the guide set table to get the average and stddev values for the out of guide set range comparisons
-            GuideSetTable guideSetTable = schema.createGuideSetTable(false);
+            GuideSetTable guideSetTable = schema.createGuideSetTable(null,false);
             GuideSet guideSetRow = new TableSelector(guideSetTable).getObject(analyteTitration.getGuideSetId(), GuideSet.class);
 
             if (guideSetRow == null)

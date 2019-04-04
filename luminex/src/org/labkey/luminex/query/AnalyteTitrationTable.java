@@ -36,7 +36,6 @@ import org.labkey.api.query.InvalidKeyException;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
@@ -68,28 +67,28 @@ import java.util.Objects;
  */
 public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 {
-    public AnalyteTitrationTable(final LuminexProtocolSchema schema, boolean filter)
+    public AnalyteTitrationTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, filter, "AnalyteId");
+        super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, cf, filter, "AnalyteId");
         setName(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
 
         ColumnInfo analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
-        analyteCol.setFk(new LookupForeignKey("RowId")
+        analyteCol.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createAnalyteTable(false);
+                return _userSchema.createAnalyteTable(getLookupContainerFilter(),false);
             }
         });
         setTitleColumn(analyteCol.getName());
         ColumnInfo titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
-        LookupForeignKey titrationFk = new LookupForeignKey("RowId")
+        LookupForeignKey titrationFk = new LookupForeignKey(cf,"RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(getLookupContainerFilter(),false);
             }
         };
         titrationFk.setPrefixColumnCaption(false);
@@ -113,7 +112,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         addColumn(maxFiFlagEnabledColumn);
 
         ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
-        guideSetCol.setFk(new QueryForeignKey(schema, null, "GuideSet", "RowId", "AnalyteName"));
+        guideSetCol.setFk(QueryForeignKey.from(schema, getContainerFilter()).to("GuideSet", "RowId", "AnalyteName"));
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 
@@ -195,14 +194,14 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         setDefaultVisibleColumns(defaultCols);
     }
 
-    protected LookupForeignKey createCurveFitFK(final String curveType)
+    protected LookupForeignKey createCurveFitFK(ContainerFilter cf, final String curveType)
     {
-        LookupForeignKey fk = new LookupForeignKey("AnalyteId")
+        LookupForeignKey fk = new LookupForeignKey(cf,"AnalyteId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                CurveFitTable result = _userSchema.createCurveFitTable(false);
+                CurveFitTable result = _userSchema.createCurveFitTable(getLookupContainerFilter(),false);
                 result.addCondition(result.getRealTable().getColumn("CurveType"), curveType);
                 return result;
             }
@@ -235,7 +234,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     public QueryUpdateService getUpdateService()
     {
         // Pair<Integer, Integer> is analyteid/titrationid combo
-        return new AbstractLuminexControlUpdateService<AnalyteTitration>(this, AnalyteTitration.class)
+        return new AbstractLuminexControlUpdateService<>(this, AnalyteTitration.class)
         {
             @Override
             protected AnalyteTitration createNewBean()

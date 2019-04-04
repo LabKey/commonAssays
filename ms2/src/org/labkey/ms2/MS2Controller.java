@@ -1570,7 +1570,7 @@ public class MS2Controller extends SpringActionController
             }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
-            SequencesTableInfo tableInfo = schema.createSequencesTable();
+            SequencesTableInfo tableInfo = schema.createSequencesTable(null);
             MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
             tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
@@ -2999,7 +2999,7 @@ public class MS2Controller extends SpringActionController
             {
                 protected TableInfo createTable()
                 {
-                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable();
+                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
                     table.addPeptideFilter(form, getViewContext());
                     int[] seqIds = form.getSeqId();
                     if (seqIds.length <= 500)
@@ -3204,7 +3204,7 @@ public class MS2Controller extends SpringActionController
             if (_seqId == null)
             {
                 MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
-                SequencesTableInfo tableInfo = schema.createSequencesTable();
+                SequencesTableInfo tableInfo = schema.createSequencesTable(null);
                 tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {

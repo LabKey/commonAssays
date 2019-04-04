@@ -16,6 +16,7 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -33,7 +34,6 @@ import org.labkey.api.study.assay.AbstractAssayProvider;
 import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.api.util.StringExpression;
@@ -49,9 +49,9 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
     protected final NabProtocolSchema _schema;
     protected final ExpProtocol _protocol;
 
-    public NabBaseTable(final NabProtocolSchema schema, TableInfo table, final ExpProtocol protocol)
+    public NabBaseTable(final NabProtocolSchema schema, TableInfo table, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(table, schema);
+        super(table, schema, cf);
         _schema = schema;
         _protocol = protocol;
     }
@@ -66,14 +66,12 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
         specimenColumn.setLabel("Specimen");
         specimenColumn.setKeyField(false);
         specimenColumn.setIsUnselectable(true);
-        LookupForeignKey lfkSpecimen = new LookupForeignKey("LSID")
+        LookupForeignKey lfkSpecimen = new LookupForeignKey(getContainerFilter(), "LSID", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema);
-                // Make sure we are filtering to the same set of containers
-                materials.setContainerFilter(getContainerFilter());
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema, getLookupContainerFilter());
                 if (sampleSet != null)
                 {
                     materials.setSampleSet(sampleSet, true);
@@ -96,13 +94,12 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
     {
         final AssayProvider provider = AssayService.get().getProvider(_protocol);
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
-        runColumn.setFk(new LookupForeignKey("RowID")
+        runColumn.setFk(new LookupForeignKey(getContainerFilter(), "RowID", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = AssayService.get().createRunTable(_protocol, provider, _schema.getUser(), _schema.getContainer());
-                expRunTable.setContainerFilter(getContainerFilter());
+                ExpRunTable expRunTable = AssayService.get().createRunTable(_protocol, provider, _schema.getUser(), _schema.getContainer(), getLookupContainerFilter());
                 return expRunTable;
             }
 

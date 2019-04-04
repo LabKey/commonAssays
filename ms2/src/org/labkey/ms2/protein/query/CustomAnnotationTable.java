@@ -64,7 +64,8 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
         _domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
         if (_domain != null)
         {
-            propertyCol.setFk(new PropertyForeignKey(_domain, schema));
+            // TODO ContainerFilter
+            propertyCol.setFk(new PropertyForeignKey(schema, null, _domain));
         }
 
         List<FieldKey> defaultCols = new ArrayList<>();
@@ -104,7 +105,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
             public TableInfo getLookupTableInfo()
             {
                 MS2Schema schema = new MS2Schema(_userSchema.getUser(), _userSchema.getContainer());
-                return schema.createSequencesTable();
+                return schema.createSequencesTable(null);
             }
         });
         addColumn(col);

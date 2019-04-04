@@ -18,6 +18,7 @@ package org.labkey.elispot.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -49,14 +50,14 @@ import java.util.List;
  */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
-    public ElispotRunDataTable(final AssaySchema schema, final ExpProtocol protocol)
+    public ElispotRunDataTable(final AssaySchema schema, ContainerFilter cf, final ExpProtocol protocol)
     {
-        this(schema, ElispotManager.getTableInfoElispotRunData(), protocol);
+        this(schema, ElispotManager.getTableInfoElispotRunData(), cf, protocol);
     }
 
-    public ElispotRunDataTable(final AssaySchema schema, TableInfo table, final ExpProtocol protocol)
+    public ElispotRunDataTable(final AssaySchema schema, TableInfo table, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(schema, table, protocol);
+        super(schema, table, cf, protocol);
 
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
 
@@ -116,11 +117,12 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
         ColumnInfo antigenLsidColumn = getColumn("AntigenLsid");
         antigenLsidColumn.setLabel("Antigen");
-        antigenLsidColumn.setFk(new LookupForeignKey(null, "AntigenName")
+        antigenLsidColumn.setFk(new LookupForeignKey( (String)null, "AntigenName")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return ElispotManager.getTableInfoElispotAntigen(_protocol);
             }
         });
@@ -138,12 +140,12 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             // node can still be queried there.
             result = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
             result.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey("ObjectId")
+            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
             {
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ElispotRunDataTable(_userSchema, _protocol);
+                    return new ElispotRunDataTable(_userSchema, getLookupContainerFilter(), _protocol);
                 }
             };
             fk.setPrefixColumnCaption(false);

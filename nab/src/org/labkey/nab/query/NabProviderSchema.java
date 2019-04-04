@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.SampleInfoMethod;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.EnumTableInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
@@ -90,7 +91,7 @@ public class NabProviderSchema extends DilutionProviderSchema
     }
 
     @Override
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         if (SAMPLE_PREPARATION_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
@@ -113,14 +114,14 @@ public class NabProviderSchema extends DilutionProviderSchema
             String tableName = AssaySchema.getLegacyProtocolTableName(protocol, NabProtocolSchema.DATA_ROW_TABLE_NAME);
             if (tableName.equalsIgnoreCase(name))
             {
-                return createDataRowTable(protocol);
+                return createDataRowTable(protocol, cf);
             }
         }
-        return super.createTable(name);
+        return super.createTable(name, cf);
     }
 
-    public NabRunDataTable createDataRowTable(ExpProtocol protocol)
+    public NabRunDataTable createDataRowTable(ExpProtocol protocol, ContainerFilter cf)
     {
-        return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), getProvider(), protocol, getTargetStudy()), protocol);
+        return new NabRunDataTable(new NabProtocolSchema(getUser(), getContainer(), getProvider(), protocol, getTargetStudy()), cf, protocol);
     }
 }

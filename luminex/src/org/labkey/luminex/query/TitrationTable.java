@@ -34,9 +34,9 @@ import org.labkey.luminex.LuminexController;
  */
 public class TitrationTable extends AbstractLuminexTable
 {
-    public TitrationTable(LuminexProtocolSchema schema, boolean filter)
+    public TitrationTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(LuminexProtocolSchema.getTableInfoTitration(), schema, filter);
+        super(LuminexProtocolSchema.getTableInfoTitration(), schema, cf, filter);
         setName(LuminexProtocolSchema.TITRATION_TABLE_NAME);
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
@@ -63,7 +63,7 @@ public class TitrationTable extends AbstractLuminexTable
         addColumn(new ExprColumn(this, "IncludeInQcReport", qcReportSQL, JdbcType.BOOLEAN));
 
         ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
-        QueryForeignKey runFk = new QueryForeignKey(schema, null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
+        var runFk = QueryForeignKey.from(schema, cf).to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
         runColumn.setFk(runFk);
         setTitleColumn("Name");
     }

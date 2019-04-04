@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
@@ -54,9 +55,9 @@ import java.util.Set;
  */
 public abstract class AbstractExclusionTable extends AbstractLuminexTable
 {
-    protected AbstractExclusionTable(TableInfo realTable, LuminexProtocolSchema schema, boolean filter)
+    protected AbstractExclusionTable(TableInfo realTable, LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(realTable, schema, filter);
+        super(realTable, schema, cf, filter);
         wrapAllColumns(true);
 
         assert getRealTable().getPkColumnNames().size() == 1;
@@ -65,7 +66,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
 
-        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema, true);
         getColumn("ModifiedBy").setFk(userIdForeignKey);
         getColumn("CreatedBy").setFk(userIdForeignKey);
 

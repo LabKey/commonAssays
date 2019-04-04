@@ -69,9 +69,9 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = super.createRunsTable();
+        ExpRunTable result = super.createRunsTable(cf);
         SQLFragment searchCountSQL = new SQLFragment();
         searchCountSQL.append(getSearchRunSQL(getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId", "COUNT(DISTINCT(er.RowId))"));
         ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, JdbcType.INTEGER);
@@ -166,12 +166,11 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(getProtocol().getLSID());
         result.addCondition(runConditionSQL, FieldKey.fromParts("RunId"));
-        result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey("RowId")
+        result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = createRunsTable();
-                expRunTable.setContainerFilter(result.getContainerFilter());
+                ExpRunTable expRunTable = createRunsTable(getLookupContainerFilter());
                 return expRunTable;
             }
         });

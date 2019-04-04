@@ -36,7 +36,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 
     public BackgroundForeignKey(FlowSchema schema, FlowPropertySet fps, FlowDataType type)
     {
-        super(schema.getContainer());
+        super(schema);
         _schema = schema;
         _fps = fps;
         _type = type;

@@ -16,6 +16,7 @@
 package org.labkey.elisa.query;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
@@ -41,9 +42,9 @@ import java.util.List;
  */
 public class ElisaResultsTable extends AssayResultTable
 {
-    public ElisaResultsTable(final AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
+    public ElisaResultsTable(final AssayProtocolSchema schema, ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        super(schema, includeCopiedToStudyColumns);
+        super(schema, cf, includeCopiedToStudyColumns);
 
         List<FieldKey> visibleColumns = new ArrayList<>();
 
@@ -65,7 +66,7 @@ public class ElisaResultsTable extends AssayResultTable
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, cf);
                 // Make sure we are filtering to the same set of containers
                 materials.setContainerFilter(getContainerFilter());
                 if (sampleSet != null)

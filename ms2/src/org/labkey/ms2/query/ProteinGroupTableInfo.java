@@ -20,6 +20,7 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -59,14 +60,14 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
     private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
     private List<MS2Run> _runs;
 
-    public ProteinGroupTableInfo(MS2Schema schema)
+    public ProteinGroupTableInfo(MS2Schema schema, ContainerFilter cf)
     {
-        this(schema, true);
+        this(schema, cf, true);
     }
 
-    public ProteinGroupTableInfo(MS2Schema schema, boolean includeFirstProteinColumn)
+    public ProteinGroupTableInfo(MS2Schema schema, ContainerFilter cf, boolean includeFirstProteinColumn)
     {
-        super(MS2Manager.getTableInfoProteinGroups(), schema);
+        super(MS2Manager.getTableInfoProteinGroups(), schema, cf);
 
         ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -91,6 +92,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ProteinQuantitationTable(_userSchema);
             }
         });
@@ -104,6 +106,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ITraqProteinQuantitationTable(_userSchema);
             }
         });
@@ -122,6 +125,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ProteinProphetFileTableInfo(_userSchema);
             }
         };
@@ -144,11 +148,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             firstProteinSQL.append(")");
 
             ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, JdbcType.INTEGER);
-            firstProteinColumn.setFk(new LookupForeignKey("SeqId")
+            firstProteinColumn.setFk(new LookupForeignKey(cf, "SeqId", null)
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new SequencesTableInfo(null, _userSchema);
+                    return new SequencesTableInfo(null, _userSchema, getLookupContainerFilter());
                 }
             });
             addColumn(firstProteinColumn);
@@ -206,10 +210,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
     public void addProteinsColumn()
     {
         ColumnInfo proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
-        LookupForeignKey fk = new LookupForeignKey("ProteinGroupId")
+        LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ProteinGroupId", null)
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
                 FilteredTable result = new FilteredTable<>(info, getUserSchema());
                 for (ColumnInfo col : info.getColumns())
@@ -240,11 +245,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                 });
                 result.addColumn(proteinColumn);
 
-                proteinColumn.setFk(new LookupForeignKey("SeqId", "DatabaseSequenceName")
+                proteinColumn.setFk(new LookupForeignKey(getContainerFilter(), "SeqId", "DatabaseSequenceName")
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        SequencesTableInfo result = new SequencesTableInfo(null, _userSchema);
+                        SequencesTableInfo result = new SequencesTableInfo(_userSchema, getLookupContainerFilter());
                         ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", new SQLFragment("#PLACEHOLDER#"), JdbcType.VARCHAR)
                         {
                             @Override
