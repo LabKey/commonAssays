@@ -1100,11 +1100,6 @@ public class FlowSchema extends UserSchema
         public ColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
             checkLocked();
-            /*
-            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
-            col.setParentTable(this);
-            return addColumn(col);
-            */
             ExprColumn col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
             col.setFk(schema.materialIdForeignKey(sampleSet, null));
             return addColumn(col);
