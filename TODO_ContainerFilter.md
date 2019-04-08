@@ -11,6 +11,7 @@ Find classes that override:
 - AssayProtocolSchema.createProviderTable(String name)
 - AssayProtocolSchema.createDataTable(boolean includeCopiedToStudyColumns)
 - AssayProtocolSchema.createRunsTable()
+- AssayResultTable.AssayResultTable(AssayProtocolSchema schema, boolean includeCopiedToStudyColumns)
 
 convert schemas: ms2, study, annoucements, flow
 
@@ -36,3 +37,6 @@ Check subclasses of LookupForeignKey.  getLookupTableInfo() should use getLookup
 update MultiValuedForeignKey to take CF, check usages of passed in FK to make sure they are configured with CF
 
 Check that subclasses of QueryView initialize ContainerFilter when they construct TableInfo
+
+How does setting effectiveContainer (when != source container) on QFK affect the ContainerFilter?  If effectiveContainer != sourceContainer
+maybe it should have the same effect as setting lookupContainer?  see for instance, ExperimentsTable in oconnorexperiments
