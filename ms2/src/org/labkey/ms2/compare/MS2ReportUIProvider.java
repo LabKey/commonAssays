@@ -20,8 +20,8 @@ import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.view.DefaultReportUIProvider;
-import org.labkey.api.reports.report.view.RReportBean;
 import org.labkey.api.reports.report.view.ReportUtil;
+import org.labkey.api.reports.report.view.ScriptReportBean;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 
@@ -55,7 +55,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         {
             addDesignerURL(context, settings, reportDesigners, SingleMS2RunRReport.TYPE, SingleMS2RunRReport.PARAMS);
 
-            RReportBean bean = new RReportBean(settings);
+            ScriptReportBean bean = new ScriptReportBean(settings);
             bean.setReportType(SpectraCountRReport.TYPE);
             bean.setRedirectUrl(context.getActionURL().toString());
 
