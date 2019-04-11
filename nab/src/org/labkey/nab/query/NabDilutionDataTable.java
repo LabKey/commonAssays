@@ -42,7 +42,7 @@ public class NabDilutionDataTable extends NabBaseTable
             String name = col.getName();
             if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
-            ColumnInfo newCol = addWrapColumn(name, col);
+            var newCol = addWrapColumn(name, col);
             if (col.isHidden())
             {
                 newCol.setHidden(col.isHidden());

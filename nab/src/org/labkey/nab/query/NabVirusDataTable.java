@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
@@ -81,9 +82,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
         List<FieldKey> visibleColumns = new ArrayList<>();
         for (ColumnInfo baseColumn : getRealTable().getColumns())
         {
-            ColumnInfo col;
-
-            col = wrapColumn(baseColumn);
+            var col = wrapColumn(baseColumn);
 
             if (NabVirusDomainKind.VIRUS_LSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
             {
@@ -111,7 +110,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
 
             if (col.getMvColumnName() != null)
             {
-                ColumnInfo rawValueCol = createRawValueColumn(baseColumn, col, RawValueColumn.RAW_VALUE_SUFFIX, "Raw Value", "This column contains the raw value itself, regardless of any missing value indicators that may have been set.");
+                var rawValueCol = createRawValueColumn(baseColumn, col, RawValueColumn.RAW_VALUE_SUFFIX, "Raw Value", "This column contains the raw value itself, regardless of any missing value indicators that may have been set.");
                 addColumn(rawValueCol);
             }
 
@@ -119,7 +118,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
                 visibleColumns.add(col.getFieldKey());
         }
 
-        getColumn(NabAssayProvider.VIRUS_LSID_COLUMN_NAME).setShownInUpdateView(false);
+        getMutableColumn(NabAssayProvider.VIRUS_LSID_COLUMN_NAME).setShownInUpdateView(false);
         setDefaultVisibleColumns(visibleColumns);
     }
 
@@ -129,10 +128,10 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
         return _virusDomain;
     }
 
-    private ColumnInfo createRawValueColumn(ColumnInfo baseColumn, ColumnInfo col, String nameSuffix, String labelSuffix, String descriptionSuffix)
+    private BaseColumnInfo createRawValueColumn(ColumnInfo baseColumn, ColumnInfo col, String nameSuffix, String labelSuffix, String descriptionSuffix)
     {
-        ColumnInfo rawValueCol = new AliasedColumn(baseColumn.getName() + nameSuffix, col);
-        rawValueCol.setDisplayColumnFactory(ColumnInfo.DEFAULT_FACTORY);
+        var rawValueCol = new AliasedColumn(baseColumn.getName() + nameSuffix, col);
+        rawValueCol.setDisplayColumnFactory(BaseColumnInfo.DEFAULT_FACTORY);
         rawValueCol.setLabel(baseColumn.getLabel() + " " + labelSuffix);
         String description = baseColumn.getDescription();
         if (description == null)

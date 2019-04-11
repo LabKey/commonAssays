@@ -45,8 +45,8 @@ public class RunExclusionTable extends AbstractExclusionTable
     {
         super(LuminexProtocolSchema.getTableInfoRunExclusion(), schema, cf, filter);
 
-        getColumn("RunId").setLabel("Assay ID");
-        getColumn("RunId").setFk(new LookupForeignKey(cf, "RowId", null)
+        getMutableColumn("RunId").setLabel("Assay ID");
+        getMutableColumn("RunId").setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
@@ -55,7 +55,7 @@ public class RunExclusionTable extends AbstractExclusionTable
             }
         });
 
-        getColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "RunId", null)
+        getMutableColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "RunId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()

@@ -17,6 +17,7 @@ package org.labkey.microarray.affy;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -54,7 +55,7 @@ public class AffymetrixProtocolSchema extends AssayProtocolSchema
             ColumnInfo columnInfo = table.getColumn(AffymetrixAssayProvider.SAMPLE_NAME_COLUMN);
             if (columnInfo != null)
             {
-                columnInfo.setDisplayColumnFactory(new DisplayColumnFactory()
+                ((BaseColumnInfo)columnInfo).setDisplayColumnFactory(new DisplayColumnFactory()
                 {
                     @Override
                     public DisplayColumn createRenderer(ColumnInfo colInfo)

@@ -18,6 +18,7 @@ package org.labkey.nab.query;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.AbstractForeignKey;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
@@ -68,7 +69,7 @@ public class NabWellDataTable extends NabBaseTable
             else if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
 
-            ColumnInfo newCol;
+            BaseColumnInfo newCol;
             if ("Row".equalsIgnoreCase(name) || "Column".equalsIgnoreCase(name))
                 newCol = addOneBasedColumn(name, col);
             else
@@ -93,7 +94,7 @@ public class NabWellDataTable extends NabBaseTable
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 
-    private ColumnInfo addOneBasedColumn(String name, ColumnInfo column)
+    private BaseColumnInfo addOneBasedColumn(String name, ColumnInfo column)
     {
         if (!JdbcType.INTEGER.equals(column.getJdbcType()))
             throw new IllegalStateException("Can only add 1 to value of integer type.");
@@ -157,7 +158,7 @@ public class NabWellDataTable extends NabBaseTable
             }
         }
 
-        final ColumnInfo wellgroupNameColumn = getColumn(wellgroupNameColumnName);
+        final var wellgroupNameColumn = getMutableColumn(wellgroupNameColumnName);
 
         final TableInfo parentTable = this;
         wellgroupNameColumn.setFk(new AbstractForeignKey(getUserSchema(), getContainerFilter())

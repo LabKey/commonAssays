@@ -40,3 +40,9 @@ Check that subclasses of QueryView initialize ContainerFilter when they construc
 
 How does setting effectiveContainer (when != source container) on QFK affect the ContainerFilter?  If effectiveContainer != sourceContainer
 maybe it should have the same effect as setting lookupContainer?  see for instance, ExperimentsTable in oconnorexperiments
+
+
+
+OTHER BIGGER IDEAS
+* separate ContainerFilter factory e.g. CurrentContainer(?) from  ContainerFilter bound instance e.g. "CurrentContainer("/home")
+* Make ColumnInfo and ColumnRenderProperties read-only interfaces and AbstactColumnInfo the constrctable implementation 

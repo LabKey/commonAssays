@@ -62,7 +62,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
 
-        ColumnInfo specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
+        var specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
         specimenColumn.setLabel("Specimen");
         specimenColumn.setKeyField(false);
         specimenColumn.setIsUnselectable(true);
@@ -76,7 +76,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
                 {
                     materials.setSampleSet(sampleSet, true);
                 }
-                ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)
                 {
                     ((PropertyForeignKey) propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, _protocol, _schema));

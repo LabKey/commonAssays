@@ -19,6 +19,7 @@ package org.labkey.viability;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -137,7 +138,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         ret.addColumn(ExpDataTable.Column.Created);
         ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
-        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
+        var protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
         ret.setPublicSchemaName(ExpSchema.SCHEMA_NAME);
         return ret;
@@ -155,9 +156,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());
         }
 
-        protected ColumnInfo addVisible(ColumnInfo col)
+        protected BaseColumnInfo addVisible(BaseColumnInfo col)
         {
-            ColumnInfo ret = addColumn(col);
+            var ret = addColumn(col);
             addDefaultVisible(col.getName());
             return ret;
         }
@@ -184,7 +185,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         }
     }
 
-    protected static ColumnInfo copyProperties(ColumnInfo column, DomainProperty dp)
+    protected static BaseColumnInfo copyProperties(BaseColumnInfo column, DomainProperty dp)
     {
         if (dp != null)
         {
@@ -214,11 +215,11 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             for (DomainProperty property : resultDomainProperties)
                 propertyMap.put(property.getName(), property);
 
-            ColumnInfo rowId = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
+            var rowId = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
             rowId.setHidden(true);
             rowId.setKeyField(true);
 
-            ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
+            var dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
             dataColumn.setHidden(true);
             dataColumn.setFk(new LookupForeignKey("RowId")
             {
@@ -231,10 +232,10 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             });
 
             boolean addedTargetStudy = false;
-            ColumnInfo objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
+            var objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
             for (DomainProperty dp : resultDomainProperties)
             {
-                ColumnInfo col;
+                BaseColumnInfo col;
 
                 // UNDONE: OOR columns?
 
@@ -291,7 +292,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 }
             }
 
-            ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
+            var runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
             runColumn.setHidden(true);
             runColumn.setFk(new LookupForeignKey(cf, "RowId", null)
             {
@@ -305,19 +306,19 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             });
 
 
-            ColumnInfo specimenCount = addVisible(wrapColumn("SpecimenCount", getRealTable().getColumn("SpecimenCount")));
+            var specimenCount = addVisible(wrapColumn("SpecimenCount", getRealTable().getColumn("SpecimenCount")));
 
-            ColumnInfo specimenMatchCount = wrapColumn("SpecimenMatchCount", getRealTable().getColumn("SpecimenMatchCount"));
+            var specimenMatchCount = wrapColumn("SpecimenMatchCount", getRealTable().getColumn("SpecimenMatchCount"));
             specimenMatchCount.setHidden(true);
             addColumn(specimenMatchCount);
 
-            ColumnInfo specimenMatches = wrapColumn("SpecimenMatches", getRealTable().getColumn("SpecimenMatches"));
+            var specimenMatches = wrapColumn("SpecimenMatches", getRealTable().getColumn("SpecimenMatches"));
             specimenMatches.setHidden(true);
             addColumn(specimenMatches);
 
             if (!addedTargetStudy)
             {
-                ColumnInfo targetStudy = createTargetStudyCol();
+                var targetStudy = createTargetStudyCol();
                 addColumn(targetStudy);
             }
 
@@ -335,14 +336,14 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         @Override
         protected ColumnInfo resolveColumn(String name)
         {
-            ColumnInfo result = super.resolveColumn(name);
+            var result = super.resolveColumn(name);
 
             if ("Properties".equalsIgnoreCase(name))
             {
                 // Hook up a column that joins back to this table so that the columns formerly under the Properties
                 // node can still be queried there.
-                result = wrapColumn("Properties", getRealTable().getColumn("RowId"));
-                result.setIsUnselectable(true);
+                var wrapped = wrapColumn("Properties", getRealTable().getColumn("RowId"));
+                wrapped.setIsUnselectable(true);
                 LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "RowId", null)
                 {
                     @Override
@@ -352,15 +353,16 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                     }
                 };
                 fk.setPrefixColumnCaption(false);
-                result.setFk(fk);
+                wrapped.setFk(fk);
+                result = wrapped;
             }
 
             return result;
         }
 
-        private ColumnInfo createTargetStudyCol()
+        private BaseColumnInfo createTargetStudyCol()
         {
-            ColumnInfo col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
+            var col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
             fixupRenderers(col, col);
             col.setUserEditable(false);
             col.setReadOnly(true);
@@ -501,7 +503,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         {
             super(ViabilitySchema.getTableInfoResultSpecimens(), cf);
 
-            ColumnInfo resultIDCol = addVisible(wrapColumn(getRealTable().getColumn("ResultID")));
+            var resultIDCol = addVisible(wrapColumn(getRealTable().getColumn("ResultID")));
             resultIDCol.setLabel("Result");
             resultIDCol.setKeyField(true);
             resultIDCol.setFk(new LookupForeignKey(cf, "RowID", null)
@@ -514,7 +516,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 }
             });
 
-            ColumnInfo specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
+            var specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
             specimenID.setLabel("Specimen");
             specimenID.setKeyField(true);
             AssayTableMetadata metadata = new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata(_provider, getProtocol());
@@ -524,7 +526,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             fk.addSpecimenFilter(filter);
             specimenID.setFk(fk);
 
-            ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
+            var indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
             indexCol.setKeyField(true);
         }
 

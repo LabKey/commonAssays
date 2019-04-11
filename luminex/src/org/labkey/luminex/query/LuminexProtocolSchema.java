@@ -19,25 +19,7 @@ package org.labkey.luminex.query;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.CompareType;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.MenuButton;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -205,7 +187,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             {
                 FilteredTable result = createWellExclusionTable(cf, true);
                 result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.NONBLANK));
-                result.removeColumn(new ColumnInfo("Dilution"));
+                result.removeColumn(new BaseColumnInfo("Dilution"));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
@@ -219,11 +201,11 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.ISBLANK);
                 result.addCondition(exclusionFilter);
-                result.removeColumn(new ColumnInfo("Dilution"));
-                result.removeColumn(new ColumnInfo("Type"));
-                result.removeColumn(new ColumnInfo("Well"));
-                result.removeColumn(new ColumnInfo("Wells"));
-                result.removeColumn(new ColumnInfo("Well Role"));
+                result.removeColumn(new BaseColumnInfo("Dilution"));
+                result.removeColumn(new BaseColumnInfo("Type"));
+                result.removeColumn(new BaseColumnInfo("Well"));
+                result.removeColumn(new BaseColumnInfo("Wells"));
+                result.removeColumn(new BaseColumnInfo("Well Role"));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
@@ -237,10 +219,10 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.NONBLANK);
                 result.addCondition(exclusionFilter);
-                result.removeColumn(new ColumnInfo("Type"));
-                result.removeColumn(new ColumnInfo("Well"));
-                result.removeColumn(new ColumnInfo("Wells"));
-                result.removeColumn(new ColumnInfo("Well Role"));
+                result.removeColumn(new BaseColumnInfo("Type"));
+                result.removeColumn(new BaseColumnInfo("Well"));
+                result.removeColumn(new BaseColumnInfo("Wells"));
+                result.removeColumn(new BaseColumnInfo("Well Role"));
                 SQLFragment filter = new SQLFragment("DataId");
                 filter.append(createDataFilterInClause());
                 result.addCondition(filter, FieldKey.fromParts("DataId"));
@@ -421,10 +403,10 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         ret.addColumn(ExpDataTable.Column.DataFileUrl).setHidden(true);
         ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
-        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
+        var protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
 
-        ColumnInfo runCol = ret.addColumn(ExpDataTable.Column.Run);
+        var runCol = ret.addColumn(ExpDataTable.Column.Run);
         if (getProtocol() != null)
         {
             runCol.setFk(new LookupForeignKey("RowId")
@@ -468,9 +450,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.populate();
         result.setAssayProtocol(getProtocol());
 
-        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));
-        ColumnInfo titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
+        var titrationColumn = result.addColumn("Titration", ExpQCFlagTable.Column.IntKey2);
         titrationColumn.setFk(new TitrationForeignKey(this, cf));
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/titration combination");
@@ -492,9 +474,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.populate();
         result.setAssayProtocol(getProtocol());
 
-        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));
-        ColumnInfo titrationColumn = result.addColumn("SinglePointControl", ExpQCFlagTable.Column.IntKey2);
+        var titrationColumn = result.addColumn("SinglePointControl", ExpQCFlagTable.Column.IntKey2);
         titrationColumn.setFk(new SinglePointControlForeignKey(this, cf));
 
         result.setDescription("Contains Run QC Flags that are associated with an analyte/single point control combination");
@@ -516,12 +498,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         result.populate();
         result.setAssayProtocol(getProtocol());
 
-        ColumnInfo analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
+        var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));
         result.addColumn("DataId", ExpQCFlagTable.Column.IntKey2);
-        ColumnInfo wellTypeColumn = result.addColumn("WellType", ExpQCFlagTable.Column.Key1);
+        var wellTypeColumn = result.addColumn("WellType", ExpQCFlagTable.Column.Key1);
         wellTypeColumn.setLabel("Well Type");
-        ColumnInfo wellDescriptionColumn = result.addColumn("WellDescription", ExpQCFlagTable.Column.Key2);
+        var wellDescriptionColumn = result.addColumn("WellDescription", ExpQCFlagTable.Column.Key2);
         wellDescriptionColumn.setLabel("Well Description");
 
         result.setDescription("Contains %CV QC Flags that are associated with well replicates");
@@ -631,7 +613,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         FilteredTable result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
-        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
+        result.getMutableColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
     }
 
@@ -639,7 +621,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         FilteredTable result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
-        result.getColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
+        result.getMutableColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
     }
 
@@ -649,7 +631,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         final ExpRunTable result = super.createRunsTable(cf);
 
         // Render any PDF outputs we found as direct download links since they should be plots of standard curves
-        ColumnInfo curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
+        var curvesColumn = result.addColumn("Curves", ExpRunTable.Column.Name);
         curvesColumn.setWidth("30");
         curvesColumn.setReadOnly(true);
         curvesColumn.setShownInInsertView(false);

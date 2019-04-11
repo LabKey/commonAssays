@@ -37,11 +37,11 @@ public class FastaRunMappingTable extends FilteredTable<MS2Schema>
         wrapAllColumns(true);
         setDescription("Contains a row for each FASTA file used for a given imported MS2 search");
 
-        getColumn("FastaId").setFk( QueryForeignKey
+        getMutableColumn("FastaId").setFk( QueryForeignKey
                 .from(schema, getContainerFilter())
                 .schema(ProteinUserSchema.NAME, schema.getContainer())
                 .table(ProteinUserSchema.FASTA_FILE_TABLE_NAME));
-        getColumn("Run").setFk( QueryForeignKey
+        getMutableColumn("Run").setFk( QueryForeignKey
                 .from(schema, getContainerFilter())
                 .to(MS2Schema.TableType.MS2RunDetails.name(), null, "Description"));
     }

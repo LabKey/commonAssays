@@ -68,8 +68,8 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         DetailsURL url = DetailsURL.fromString("experiment/resolveLSID.view?lsid=${lsid}");
         url.setStrictContainerContextEval(true);
         table.setDetailsURL(url);
-        table.getColumn(COLUMN_NAME_FILE).setURL(url);
-        table.getColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
+        table.getMutableColumn(COLUMN_NAME_FILE).setURL(url);
+        table.getMutableColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
 
         return table;
     }

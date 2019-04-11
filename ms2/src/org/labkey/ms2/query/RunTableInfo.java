@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpSchema;
@@ -43,18 +42,18 @@ public class RunTableInfo extends FilteredTable<MS2Schema>
 
         DetailsURL url = new DetailsURL(new ActionURL(MS2Controller.ShowListAction.class, getContainer()));
         url.setContainerContext(new ContainerContext.FieldKeyContext(FieldKey.fromParts("Container")));
-        ColumnInfo containerColumn = getColumn("Container");
+        var containerColumn = getMutableColumn("Container");
         ContainerForeignKey.initColumn(containerColumn, _userSchema, null);
         containerColumn.setURL(url);
         containerColumn.setHidden(true);
 
-        ColumnInfo folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
+        var folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
         folderColumn.setHidden(false);
         ContainerForeignKey.initColumn(folderColumn, _userSchema, null);
         folderColumn.setURL(url);
         addColumn(folderColumn);
 
-        ColumnInfo erLSIDColumn = getColumn("ExperimentRunLSID");
+        var erLSIDColumn = getMutableColumn("ExperimentRunLSID");
         erLSIDColumn.setLabel("Experiment Run");
         erLSIDColumn.setFk(new LookupForeignKey("LSID")
         {

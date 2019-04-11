@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
@@ -63,7 +64,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         }
     }
 
-    protected void initColumn(StatisticSpec stat, String preferredName, ColumnInfo column)
+    protected void initColumn(StatisticSpec stat, String preferredName, BaseColumnInfo column)
     {
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());

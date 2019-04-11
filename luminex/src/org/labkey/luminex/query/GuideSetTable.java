@@ -79,14 +79,14 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             // value-based average and std dev columns will be aliased and only editable via the Manage Guide Set UI
             if (col.getName().endsWith("Average") || col.getName().endsWith("StdDev"))
             {
-                ColumnInfo valueBasedCol = addWrapColumn(col);
+                var valueBasedCol = addWrapColumn(col);
                 valueBasedCol.setJdbcType(JdbcType.DOUBLE);
                 valueBasedCol.setHidden(true);
                 valueBasedCol.setUserEditable(false);
             }
             else
             {
-                ColumnInfo wrapCol = addWrapColumn(col);
+                var wrapCol = addWrapColumn(col);
                 wrapCol.setHidden(col.isHidden());
 
                 if (wrapCol.getName().equals("ValueBased"))
@@ -94,7 +94,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         }
 
-        ColumnInfo protocolCol = getColumn("ProtocolId");
+        var protocolCol = getMutableColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");
         protocolCol.setHidden(true);
         protocolCol.setShownInDetailsView(false);
@@ -175,10 +175,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addRunCounts();
 
         ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema, true);
-        getColumn("ModifiedBy").setFk(userIdForeignKey);
-        getColumn("CreatedBy").setFk(userIdForeignKey);
+        getMutableColumn("ModifiedBy").setFk(userIdForeignKey);
+        getMutableColumn("CreatedBy").setFk(userIdForeignKey);
 
-        getColumn("Created").setLabel("Guide Set Start Date");
+        getMutableColumn("Created").setLabel("Guide Set Start Date");
 
         addCurveTypeColumns();
 

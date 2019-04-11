@@ -88,7 +88,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
     public ExpRunTable createRunsTable()
     {
         final ExpRunTable runTable = super.createRunsTable();
-        ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
+        var nameColumn = runTable.getMutableColumn(ExpRunTable.Column.Name);
         // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
         // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
         nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -105,7 +105,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
     protected void addQCFlagColumn(ExpRunTable runTable)
     {
         runTable.addColumn(new AssayQCFlagColumn(runTable, getSchemaName(), false));
-        ColumnInfo qcEnabled = runTable.addColumn(new ExprColumn(runTable, "QCFlagsEnabled", AssayQCFlagColumn.createSQLFragment(runTable.getSqlDialect(), "Enabled"), JdbcType.VARCHAR));
+        var qcEnabled = runTable.addColumn(new ExprColumn(runTable, "QCFlagsEnabled", AssayQCFlagColumn.createSQLFragment(runTable.getSqlDialect(), "Enabled"), JdbcType.VARCHAR));
         qcEnabled.setLabel("QC Flags Enabled State");
         qcEnabled.setHidden(true);
     }

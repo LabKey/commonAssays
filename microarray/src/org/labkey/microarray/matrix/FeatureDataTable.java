@@ -16,7 +16,6 @@
 package org.labkey.microarray.matrix;
 
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -43,12 +42,12 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
 
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
-        ColumnInfo valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
+        var valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
         valueColumn.setHidden(false);
         valueColumn.setLabel("Value");
         valueColumn.setFormat("0.000000");
 
-        ColumnInfo featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
+        var featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
         featureIdColumn.setHidden(false);
         featureIdColumn.setLabel("Probe Id");
         featureIdColumn.setFk(QueryForeignKey
@@ -56,7 +55,7 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
                 .schema(MicroarrayUserSchema.SCHEMA_NAME)
                 .to(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "FeatureId"));
 
-        ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
+        var sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
@@ -71,13 +70,13 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         runSQL.append(" WHERE d.RowId = ");
         runSQL.append(ExprColumn.STR_TABLE_ALIAS);
         runSQL.append(".DataId)");
-        ColumnInfo runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
+        var runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
         addColumn(runIdColumn);
         runIdColumn.setFk(QueryForeignKey
                 .from(getUserSchema(), getContainerFilter())
                 .to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
 
-        ColumnInfo dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
+        var dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
         dataIdColumn.setHidden(false);
         dataIdColumn.setLabel("Data Id");
         dataIdColumn.setFk(QueryForeignKey

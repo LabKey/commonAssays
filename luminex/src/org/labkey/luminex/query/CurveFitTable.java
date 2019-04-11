@@ -39,7 +39,7 @@ public class CurveFitTable extends AbstractLuminexTable
         super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, cf, filterTable);
         setName(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         wrapAllColumns(true);
-        ColumnInfo titrationCol = getColumn("TitrationId");
+        var titrationCol = getMutableColumn("TitrationId");
         titrationCol.setLabel("Titration");
         titrationCol.setFk(new LookupForeignKey("RowId")
         {
@@ -50,7 +50,7 @@ public class CurveFitTable extends AbstractLuminexTable
             }
         });
 
-        ColumnInfo analyteCol = getColumn("AnalyteId");
+        var analyteCol = getMutableColumn("AnalyteId");
         analyteCol.setLabel("Analyte");
         analyteCol.setFk(new LookupForeignKey("RowId")
         {
@@ -61,7 +61,7 @@ public class CurveFitTable extends AbstractLuminexTable
             }
         });
 
-        ColumnInfo ec50Col = getColumn("EC50");
+        var ec50Col = getMutableColumn("EC50");
         ec50Col.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
@@ -76,7 +76,7 @@ public class CurveFitTable extends AbstractLuminexTable
         ec50FlagEnabledColumn.setHidden(true);
         addColumn(ec50FlagEnabledColumn);
 
-        ColumnInfo aucCol = getColumn("AUC");
+        var aucCol = getMutableColumn("AUC");
         aucCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override

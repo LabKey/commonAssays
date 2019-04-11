@@ -74,10 +74,10 @@ public class WellExclusionTable extends AbstractExclusionTable
     {
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, cf, filter);
 
-        getColumn("DataId").setLabel("Data File");
-        getColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey());
-        
-        getColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "WellExclusionId", null)
+        getMutableColumn("DataId").setLabel("Data File");
+        getMutableColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey());
+
+        getMutableColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "WellExclusionId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
@@ -85,7 +85,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                 return _userSchema.createWellExclusionAnalyteTable(getLookupContainerFilter());
             }
         }, "AnalyteId"));
-        getColumn("Analytes").setUserEditable(false);
+        getMutableColumn("Analytes").setUserEditable(false);
 
         SQLFragment joinSQL = new SQLFragment(" FROM ");
         joinSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");

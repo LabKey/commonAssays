@@ -16,7 +16,6 @@
 package org.labkey.ms2.matrix;
 
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -43,19 +42,19 @@ public class ProteinSequenceDataTable extends FilteredTable<ProteinExpressionMat
 
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
-        ColumnInfo valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
+        var valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
         valueColumn.setHidden(false);
         valueColumn.setLabel("Value");
         valueColumn.setFormat("0.000000");
 
-        ColumnInfo seqIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SeqId")));
+        var seqIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SeqId")));
         seqIdColumn.setHidden(false);
         seqIdColumn.setLabel("Protein");
         seqIdColumn.setFk( QueryForeignKey.from(getUserSchema(), cf)
                 .schema(ProteinUserSchema.NAME)
                 .to(ProteinUserSchema.SEQUENCES_TABLE_NAME, "SeqId", "BestName") );
 
-        ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
+        var sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
@@ -68,11 +67,11 @@ public class ProteinSequenceDataTable extends FilteredTable<ProteinExpressionMat
         runSQL.append(" WHERE d.RowId = ");
         runSQL.append(ExprColumn.STR_TABLE_ALIAS);
         runSQL.append(".DataId)");
-        ColumnInfo runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
+        var runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
         addColumn(runIdColumn);
         runIdColumn.setFk( QueryForeignKey.from(getUserSchema(), getContainerFilter()).to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name") );
 
-        ColumnInfo dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
+        var dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
         dataIdColumn.setHidden(false);
         dataIdColumn.setLabel("Data Id");
         dataIdColumn.setFk( QueryForeignKey.from(getUserSchema(), getContainerFilter())

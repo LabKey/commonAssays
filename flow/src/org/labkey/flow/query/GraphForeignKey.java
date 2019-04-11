@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -61,7 +62,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         }
     }
 
-    protected void initColumn(final GraphSpec spec, String preferredName, ColumnInfo column)
+    protected void initColumn(final GraphSpec spec, String preferredName, BaseColumnInfo column)
     {
         column.setSqlTypeName("VARCHAR");
         SubsetSpec subset = _fps.simplifySubset(spec.getSubset());

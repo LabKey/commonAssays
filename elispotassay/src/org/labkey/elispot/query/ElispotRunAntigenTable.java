@@ -56,7 +56,7 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
         else
             sql.append("CONCAT(AntigenName, ' (', REPLACE(AntigenWellgroupName, 'Antigen ', ''), ')') END");
 
-        ColumnInfo antigenHeading = new ExprColumn(this, "AntigenHeading", sql, JdbcType.VARCHAR, getColumn("AntigenWellgroupName"), getColumn("AntigenName"));
+        ExprColumn antigenHeading = new ExprColumn(this, "AntigenHeading", sql, JdbcType.VARCHAR, getColumn("AntigenWellgroupName"), getColumn("AntigenName"));
         antigenHeading.setHidden(true);
         addColumn(antigenHeading);
     }
@@ -83,8 +83,8 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
         {
             // Hook up a column that joins back to this table so that the columns formerly under the Properties
             // node can still be queried there.
-            result = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
-            result.setIsUnselectable(true);
+            var wrapped = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
+            wrapped.setIsUnselectable(true);
             LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
             {
                 @Override
@@ -95,7 +95,8 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
                 }
             };
             fk.setPrefixColumnCaption(false);
-            result.setFk(fk);
+            wrapped.setFk(fk);
+            result = wrapped;
         }
 
         return result;
@@ -110,7 +111,7 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
             {
                 continue;
             }
-            ColumnInfo wrapColumn = addWrapColumn(column);
+            var wrapColumn = addWrapColumn(column);
             if ("AntigenLsid".equalsIgnoreCase(column.getName()) || "SpecimenLsid".equalsIgnoreCase(column.getName()))
                 wrapColumn.setHidden(true);
             else if ("Mean".equalsIgnoreCase(column.getName()) || "Median".equalsIgnoreCase(column.getName()))

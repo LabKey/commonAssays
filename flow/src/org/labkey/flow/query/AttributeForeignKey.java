@@ -47,6 +47,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
         _container = schema.getContainer();
     }
 
+    @Override
     public TableInfo getLookupTableInfo()
     {
         VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null)
@@ -63,7 +64,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
             T attrName = entry.getAttribute();
             AttributeCache.Entry preferred = entry.getAliasedEntry();
 
-            ColumnInfo column = new ColumnInfo(new FieldKey(null, attrName.toString()), ret);
+            var column = new BaseColumnInfo(new FieldKey(null, attrName.toString()), ret);
             String alias = am.decideAlias(StringUtils.defaultString(preferred==null?null:preferred.getName(), attrName.toString()));
             column.setAlias(alias);
             initColumn(attrName, preferred, column);
@@ -72,7 +73,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
         return ret;
     }
 
-    private void initColumn(T attrName, AttributeCache.Entry preferred, ColumnInfo column)
+    private void initColumn(T attrName, AttributeCache.Entry preferred, BaseColumnInfo column)
     {
         initColumn(attrName, preferred != null ? preferred.getName() : null, column);
 
@@ -83,6 +84,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
         }
     }
 
+    @Override
     public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
     {
         if (displayField == null)
@@ -107,6 +109,6 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
     abstract protected AttributeType type();
     abstract protected Collection<? extends AttributeCache.Entry<T, ? extends AttributeCache.Entry>> getAttributes();
     abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
-    abstract protected void initColumn(T attrName, String preferredName, ColumnInfo column);
+    abstract protected void initColumn(T attrName, String preferredName, BaseColumnInfo column);
     abstract protected T attributeFromString(String field);
 }

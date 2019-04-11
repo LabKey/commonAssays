@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
@@ -40,7 +39,7 @@ public class TitrationTable extends AbstractLuminexTable
         setName(LuminexProtocolSchema.TITRATION_TABLE_NAME);
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
-        ColumnInfo nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        var nameColumn = addColumn(wrapColumn(getRealTable().getColumn("Name")));
         ActionURL url = new ActionURL(LuminexController.LeveyJenningsReportAction.class, schema.getContainer());
         nameColumn.setURL(StringExpressionFactory.createURL(url + "rowId=${Run/Protocol/RowId}" + "&titration=${Name}"));
 
@@ -62,7 +61,7 @@ public class TitrationTable extends AbstractLuminexTable
         qcReportSQL.append(" THEN ").append(bTRUE).append(" ELSE ").append(bFALSE).append(" END)");
         addColumn(new ExprColumn(this, "IncludeInQcReport", qcReportSQL, JdbcType.BOOLEAN));
 
-        ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
+        var runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
         var runFk = QueryForeignKey.from(schema, cf).to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name");
         runColumn.setFk(runFk);
         setTitleColumn("Name");

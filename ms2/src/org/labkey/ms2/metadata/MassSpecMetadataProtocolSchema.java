@@ -78,7 +78,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
         searchCountCol.setLabel("MS2 Search Count");
         result.addColumn(searchCountCol);
 
-        ColumnInfo searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
+        var searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
         searchLinkCol.setHidden(false);
         searchLinkCol.setLabel("MS2 Search Results");
         searchLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -166,7 +166,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(getProtocol().getLSID());
         result.addCondition(runConditionSQL, FieldKey.fromParts("RunId"));
-        result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
+        result.getMutableColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
         {
             public TableInfo getLookupTableInfo()
             {

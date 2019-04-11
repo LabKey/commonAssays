@@ -147,7 +147,7 @@ public class MS1Schema extends UserSchema
 
         //setup the feature id column as an FK to itself so that the first feature measure will allow
         //users to add other info from the features table.
-        ColumnInfo featureIdCol = tinfo.getColumn("FeatureId");
+        var featureIdCol = tinfo.getMutableColumn("FeatureId");
         featureIdCol.setFk(new LookupForeignKey("FeatureId", "FeatureId")
         {
             public TableInfo getLookupTableInfo()
@@ -258,7 +258,7 @@ public class MS1Schema extends UserSchema
         ColumnInfo rowIdCol = result.getColumn("RowId");
         if(rowIdCol != null)
         {
-            ColumnInfo featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
+            var featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
                     new SQLFragment(rowIdCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)), rowIdCol.getJdbcType(), rowIdCol));
             featuresLinkCol.setDescription("Link to the msInspect features found in each run");
             featuresLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -271,7 +271,7 @@ public class MS1Schema extends UserSchema
         }
 
         //reset the URL on the name column to jump to our feature details view
-        ColumnInfo nameCol = result.getColumn("Name");
+        var nameCol = result.getMutableColumn(ExpRunTable.Column.Name );
         if(null != nameCol)
         {
             ActionURL featuresUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());

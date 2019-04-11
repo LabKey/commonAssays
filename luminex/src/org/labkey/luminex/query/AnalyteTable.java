@@ -16,7 +16,6 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
@@ -78,14 +77,14 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("PositivityThreshold")));
         addColumn(wrapColumn(getRealTable().getColumn("NegativeBead")));
 
-        ColumnInfo titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
+        var titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
         titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey(cf,"Analyte", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
                 final FilteredTable result = new FilteredTable<>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, getLookupContainerFilter());
-                ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
+                var titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
                 titrationColumn.setFk(new LookupForeignKey(cf,"RowId", null)
                 {
                     @Override
@@ -96,7 +95,7 @@ public class AnalyteTable extends AbstractLuminexTable
                         return titrationTable;
                     }
                 });
-                ColumnInfo analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
+                var analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
                 analyteColumn.setFk(new LookupForeignKey(cf,"RowId", null)
                 {
                     @Override
@@ -110,12 +109,12 @@ public class AnalyteTable extends AbstractLuminexTable
         }, "Titration"));
         titrationColumn.setHidden(false);
 
-        ColumnInfo lsidColumn = addColumn(wrapColumn(getRealTable().getColumn("LSID")));
+        var lsidColumn = addColumn(wrapColumn(getRealTable().getColumn("LSID")));
         lsidColumn.setHidden(true);
         lsidColumn.setShownInInsertView(false);
         lsidColumn.setShownInUpdateView(false);
 
-        ColumnInfo colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
+        var colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<>();
         for(DomainProperty pd : analyteDomain.getProperties())

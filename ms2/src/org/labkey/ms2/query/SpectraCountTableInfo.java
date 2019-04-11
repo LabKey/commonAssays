@@ -17,7 +17,6 @@
 package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
@@ -157,7 +156,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
 
         if (config.isGroupedByPeptide())
         {
-            ColumnInfo indexColumn;
+            ExprColumn indexColumn;
             if (form != null && form.hasTargetSeqIds())
             {
                 SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtSequence")));

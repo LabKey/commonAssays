@@ -15,6 +15,7 @@
  */
 package org.labkey.elisa.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
@@ -61,7 +62,7 @@ public class ElisaResultsTable extends AssayResultTable
         }
 
         // add a lookup to the material table
-        ColumnInfo specimenColumn = _columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
+        BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
         specimenColumn.setFk(new LookupForeignKey("LSID")
         {
             public TableInfo getLookupTableInfo()
@@ -73,7 +74,7 @@ public class ElisaResultsTable extends AssayResultTable
                 {
                     materials.setSampleSet(sampleSet, true);
                 }
-                ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)
                 {
                     ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(_provider, _protocol, schema));

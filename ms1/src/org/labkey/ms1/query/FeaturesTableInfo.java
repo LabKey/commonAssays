@@ -67,7 +67,7 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
         wrapAllColumns(true);
 
         //tell query that FileId is an FK to the Files user table info
-        getColumn("FileId").setFk(new LookupForeignKey("FileId")
+        getMutableColumn("FileId").setFk(new LookupForeignKey("FileId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -91,7 +91,7 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
 
         if(includePepFk)
         {
-            ColumnInfo ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO,
+            var ciPepId = addColumn(new ExprColumn(this, COLUMN_PEPTIDE_INFO,
                     new SQLFragment(COLUMN_PEPTIDE_INFO), JdbcType.INTEGER));
 
             //tell query that this new column is an FK to the peptides data table
@@ -109,7 +109,7 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
         } //if(includePepFk)
 
         //make the ms2 scan a hyperlink to showPeptide view
-        ColumnInfo ciMS2Scan = getColumn("MS2Scan");
+        var ciMS2Scan = getMutableColumn("MS2Scan");
         ciMS2Scan.setURL(StringExpressionFactory.createURL(urlPep));
         ciMS2Scan.setDisplayColumnFactory(dcfPep);
 
@@ -120,7 +120,7 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
             addColumn(new PeaksAvailableColumnInfo(this));
 
         //add a column for the find similar link
-        ColumnInfo similarLinkCol = addColumn(wrapColumn(COLUMN_FIND_SIMILAR_LINK, getSourceTable().getColumn("FeatureId")));
+        var similarLinkCol = addColumn(wrapColumn(COLUMN_FIND_SIMILAR_LINK, getSourceTable().getColumn("FeatureId")));
         similarLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -280,14 +280,14 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
     {
         for (ColumnInfo col : getSourceTable().getColumns())
         {
-            ColumnInfo newCol = new AliasedColumn(this, col.getName(), col);
+            var newCol = new AliasedColumn(this, col.getName(), col);
             addColumn(newCol);
             if (preserveHidden && col.isHidden())
                 newCol.setHidden(col.isHidden());
         }
     }
 
-    public ColumnInfo wrapColumn(String alias, ColumnInfo underlyingColumn)
+    public BaseColumnInfo wrapColumn(String alias, ColumnInfo underlyingColumn)
     {
         assert underlyingColumn.getParentTable() == getSourceTable();
         ExprColumn ret = new ExprColumn(this, alias, underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());

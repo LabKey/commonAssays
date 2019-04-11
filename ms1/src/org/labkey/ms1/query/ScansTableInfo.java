@@ -16,7 +16,6 @@
 
 package org.labkey.ms1.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
@@ -37,7 +36,7 @@ public class ScansTableInfo extends FilteredTable<MS1Schema>
         super(MS1Manager.get().getTable(MS1Manager.TABLE_SCANS), schema);
         wrapAllColumns(true);
 
-        ColumnInfo fid = getColumn("FileId");
+        var fid = getMutableColumn("FileId");
         fid.setFk(new LookupForeignKey("FileId")
         {
             public TableInfo getLookupTableInfo()

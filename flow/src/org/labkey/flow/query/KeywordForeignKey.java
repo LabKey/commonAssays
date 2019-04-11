@@ -16,21 +16,16 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.flow.data.AttributeType;
-import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.util.KeywordUtil;
 
 import java.util.Collection;
-import java.util.Map;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
@@ -51,17 +46,20 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         return AttributeType.keyword;
     }
 
+    @Override
     protected String attributeFromString(String field)
     {
         return field;
     }
 
+    @Override
     protected Collection<AttributeCache.KeywordEntry> getAttributes()
     {
         return _fps.getKeywordProperties();
     }
 
-    protected void initColumn(String attrName, String preferredName, ColumnInfo column)
+    @Override
+    protected void initColumn(String attrName, String preferredName, BaseColumnInfo column)
     {
         column.setSqlTypeName("VARCHAR");
         column.setLabel(attrName);
@@ -74,6 +72,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         column.setMeasure(false);
     }
 
+    @Override
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, int attrId)
     {
         // SQL server 2000 does not allow a TEXT column (i.e. flow.keyword.value) to appear in this subquery.

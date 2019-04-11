@@ -22,6 +22,7 @@ import org.labkey.api.collections.NamedObjectList;
 import org.labkey.api.collections.RowMapFactory;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
@@ -99,19 +100,19 @@ public class SamplesConfirmGridView extends GridView
         Map<FieldKey, ColumnInfo> columns = new LinkedHashMap<>();
         if (resolving)
         {
-            columns.put(MATCHED_FLAG_FIELD_KEY, new ColumnInfo(MATCHED_FLAG_FIELD_KEY, JdbcType.BOOLEAN));
-            columns.put(MATCHED_FILE_FIELD_KEY, new ColumnInfo(MATCHED_FILE_FIELD_KEY, JdbcType.INTEGER));
-            columns.put(CANDIDATE_FILES_FIELD_KEY, new ColumnInfo(CANDIDATE_FILES_FIELD_KEY, JdbcType.OTHER)); // List
+            columns.put(MATCHED_FLAG_FIELD_KEY, new BaseColumnInfo(MATCHED_FLAG_FIELD_KEY, JdbcType.BOOLEAN));
+            columns.put(MATCHED_FILE_FIELD_KEY, new BaseColumnInfo(MATCHED_FILE_FIELD_KEY, JdbcType.INTEGER));
+            columns.put(CANDIDATE_FILES_FIELD_KEY, new BaseColumnInfo(CANDIDATE_FILES_FIELD_KEY, JdbcType.OTHER)); // List
         }
-        columns.put(SAMPLE_ID_FIELD_KEY, new ColumnInfo(SAMPLE_ID_FIELD_KEY, JdbcType.VARCHAR));
-        columns.put(SAMPLE_NAME_FIELD_KEY, new ColumnInfo(SAMPLE_NAME_FIELD_KEY, JdbcType.VARCHAR));
+        columns.put(SAMPLE_ID_FIELD_KEY, new BaseColumnInfo(SAMPLE_ID_FIELD_KEY, JdbcType.VARCHAR));
+        columns.put(SAMPLE_NAME_FIELD_KEY, new BaseColumnInfo(SAMPLE_NAME_FIELD_KEY, JdbcType.VARCHAR));
         if (hasGroupInfo)
-            columns.put(GROUP_NAMES_FIELD_KEY, new ColumnInfo(GROUP_NAMES_FIELD_KEY, JdbcType.VARCHAR));
+            columns.put(GROUP_NAMES_FIELD_KEY, new BaseColumnInfo(GROUP_NAMES_FIELD_KEY, JdbcType.VARCHAR));
 
         for (String keyword : keywords)
         {
             FieldKey fieldKey = new FieldKey(null, keyword);
-            ColumnInfo col = new ColumnInfo(fieldKey, JdbcType.VARCHAR);
+            var col = new BaseColumnInfo(fieldKey, JdbcType.VARCHAR);
             col.setAlias(fieldKey.getName());
             if (!columns.containsKey(fieldKey))
                 columns.put(fieldKey, col);
@@ -226,7 +227,7 @@ public class SamplesConfirmGridView extends GridView
             dr.addDisplayColumn(dc);
 
             // Add Matched column
-            ColumnInfo matchCol = new ColumnInfo(MATCHED_FILE_FIELD_KEY, null, JdbcType.INTEGER);
+            var matchCol = new BaseColumnInfo(MATCHED_FILE_FIELD_KEY, null, JdbcType.INTEGER);
             matchCol.setLabel("Matched FCS File");
             FlowSchema schema = new FlowSchema(user, container);
             matchCol.setFk(new FCSFilesFilesForeignKey(schema, FlowFCSFile.getOriginal(container)));

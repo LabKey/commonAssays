@@ -62,7 +62,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
 
         // display column for spot counts
-        ColumnInfo col = getColumn(FieldKey.fromParts(ElispotDataHandler.SFU_PROPERTY_NAME));
+        var col = getMutableColumn(FieldKey.fromParts(ElispotDataHandler.SFU_PROPERTY_NAME));
         if (col != null)
         {
             col.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -76,7 +76,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         }
 
         // display column for spot size
-        ColumnInfo spotSizeCol = getColumn(FieldKey.fromParts(ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME));
+        var spotSizeCol = getMutableColumn(FieldKey.fromParts(ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME));
         if (spotSizeCol != null)
         {
             spotSizeCol.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -99,7 +99,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             {
                 continue;   // already added or added below
             }
-            ColumnInfo wrapColumn = addWrapColumn(column);
+            var wrapColumn = addWrapColumn(column);
             if ("ObjectUri".equalsIgnoreCase(column.getName()) || "RowId".equalsIgnoreCase(column.getName()))
                 wrapColumn.setHidden(true);
         }
@@ -115,7 +115,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             }
         }
 
-        ColumnInfo antigenLsidColumn = getColumn("AntigenLsid");
+        var antigenLsidColumn = getMutableColumn("AntigenLsid");
         antigenLsidColumn.setLabel("Antigen");
         antigenLsidColumn.setFk(new LookupForeignKey( (String)null, "AntigenName")
         {
@@ -138,8 +138,8 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         {
             // Hook up a column that joins back to this table so that the columns formerly under the Properties
             // node can still be queried there.
-            result = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
-            result.setIsUnselectable(true);
+            var wrapped = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
+            wrapped.setIsUnselectable(true);
             LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
             {
                 @Override
@@ -149,7 +149,8 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 }
             };
             fk.setPrefixColumnCaption(false);
-            result.setFk(fk);
+            wrapped.setFk(fk);
+            result = wrapped;
         }
 
         return result;

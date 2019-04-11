@@ -72,7 +72,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         super(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, cf, filter, "AnalyteId");
         setName(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
 
-        ColumnInfo analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
+        var analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
         analyteCol.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
@@ -82,7 +82,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
         });
         setTitleColumn(analyteCol.getName());
-        ColumnInfo titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
+        var titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
         LookupForeignKey titrationFk = new LookupForeignKey(cf,"RowId", null)
         {
             @Override
@@ -94,7 +94,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         titrationFk.setPrefixColumnCaption(false);
         titrationCol.setFk(titrationFk);
 
-        ColumnInfo maxFiCol = wrapColumn(getRealTable().getColumn("MaxFI"));
+        var maxFiCol = wrapColumn(getRealTable().getColumn("MaxFI"));
         maxFiCol.setLabel("High MFI");
         maxFiCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
@@ -111,14 +111,14 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         maxFiFlagEnabledColumn.setHidden(true);
         addColumn(maxFiFlagEnabledColumn);
 
-        ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
+        var guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
         guideSetCol.setFk(QueryForeignKey.from(schema, getContainerFilter()).to("GuideSet", "RowId", "AnalyteName"));
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 
         addCurveTypeColumns();
 
-        ColumnInfo ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
+        var ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
         ljPlots.setTextAlign("left");
         ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
             @Override

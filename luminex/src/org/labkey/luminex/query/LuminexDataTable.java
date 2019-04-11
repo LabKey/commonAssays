@@ -102,7 +102,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
 
-        ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
+        var dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
         dataColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             public TableInfo getLookupTableInfo()
@@ -112,11 +112,11 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
                 return result;
             }
         });
-        ColumnInfo rowIdColumn = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
+        var rowIdColumn = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
         rowIdColumn.setHidden(true);
         rowIdColumn.setKeyField(true);
         addColumn(wrapColumn(getRealTable().getColumn("LSID"))).setHidden(true);
-        ColumnInfo protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
+        var protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
         protocolColumn.setFk(new ExpSchema(_userSchema.getUser(), _userSchema.getContainer()).getProtocolForeignKey(cf,"RowId"));
         protocolColumn.setHidden(true);
         addColumn(wrapColumn(getRealTable().getColumn("WellRole")));
@@ -124,7 +124,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
         addColumn(wrapColumn(getRealTable().getColumn("Description")));
-        ColumnInfo specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
+        var specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
         specimenColumn.setFk(new SpecimenForeignKey(_userSchema, AssayService.get().getProvider(_userSchema.getProtocol()), _userSchema.getProtocol()));
         addColumn(specimenColumn);
         addColumn(wrapColumn(getRealTable().getColumn("ExtraSpecimenInfo")));
@@ -146,7 +146,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
 
-        ColumnInfo cvCol = wrapColumn(getRealTable().getColumn("CV"));
+        var cvCol = wrapColumn(getRealTable().getColumn("CV"));
         cvCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
@@ -169,7 +169,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(cvFlagEnabledColumn);
 
         addColumn(wrapColumn(getRealTable().getColumn("Summary")));
-        ColumnInfo titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
+        var titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
         titrationColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
@@ -179,7 +179,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             }
         });
 
-        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
+        var analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
         analyteTitrationColumn.setIsUnselectable(true);
         LookupForeignKey atFK = new LookupForeignKey(cf, null, null)
         {
@@ -201,9 +201,9 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         analyteTitrationColumn.setFk(atFK);
         addColumn(analyteTitrationColumn);
 
-        ColumnInfo singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
+        var singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
         singlePointControlCol.setHidden(true);
-        ColumnInfo analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
+        var analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
         analyteSinglePointControlColumn.setIsUnselectable(true);
         LookupForeignKey aspcFK = new LookupForeignKey(cf, null, null)
         {
@@ -227,7 +227,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
 
-        ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
+        var containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey(_userSchema));
 
@@ -289,7 +289,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         }
 
         Domain domain = getDomain();
-        for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))
+        for (var propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))
         {
             addColumn(propertyCol);
             defaultCols.add(propertyCol.getFieldKey());
@@ -315,7 +315,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         setDefaultVisibleColumns(defaultCols);
 
-        getColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_userSchema, cf));
+        getMutableColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_userSchema, cf));
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_userSchema.getProtocol().getRowId());

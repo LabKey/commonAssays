@@ -71,13 +71,13 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         super(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), schema, cf, filterTable);
         setName(LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
 
-        ColumnInfo singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
+        var singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
         singlePointControlCol.setFk(QueryForeignKey.from(schema, cf).to("SinglePointControl", "RowId", "Name"));
 
-        ColumnInfo runColumn = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
+        var runColumn = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
         runColumn.setFk(QueryForeignKey.from(schema, cf).to("Analyte", "RowId", "Name"));
 
-        ColumnInfo guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
+        var guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
         guideSetCol.setFk(QueryForeignKey.from(schema, cf).to("GuideSet", "RowId", "AnalyteName"));
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
@@ -119,7 +119,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         addColumn(averageFiBkgdFlagEnabledColumn);
 
         // add LJ plot column
-        ColumnInfo ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("SinglePointControlId")));
+        var ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("SinglePointControlId")));
         ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
             @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)

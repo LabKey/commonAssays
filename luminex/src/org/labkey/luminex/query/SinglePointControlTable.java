@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
@@ -38,7 +37,7 @@ public class SinglePointControlTable extends AbstractLuminexTable
         addWrapColumn(getRealTable().getColumn("Name"));
 
         // Alias the RunId column to be consistent with other Schema columns
-        ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
+        var runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
         runColumn.setFk( QueryForeignKey.from(schema, cf).to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name") );
     }
 

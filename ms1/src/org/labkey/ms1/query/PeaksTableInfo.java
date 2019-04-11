@@ -16,7 +16,6 @@
 
 package org.labkey.ms1.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
@@ -44,7 +43,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
         wrapAllColumns(true);
 
         //tell query that Peaks joins to PeaksToFamilies so we can add the PeakFamily columns
-        ColumnInfo peakFamCol = wrapColumn("PeakFamilies", getRealTable().getColumn("PeakId"));
+        var peakFamCol = wrapColumn("PeakFamilies", getRealTable().getColumn("PeakId"));
         peakFamCol.setIsUnselectable(true);
         peakFamCol.setDescription("Link to the Peak Family information");
         peakFamCol.setFk(new LookupForeignKey("PeakId")
@@ -58,7 +57,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
         addColumn(peakFamCol);
 
         //tell query to use our user schema for scans
-        ColumnInfo scanCol = getColumn("ScanId");
+        var scanCol = getMutableColumn("ScanId");
         scanCol.setFk(new LookupForeignKey("ScanId")
         {
             public TableInfo getLookupTableInfo()
@@ -78,7 +77,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
         setDefaultVisibleColumns(visibleColumns);
         
         //mark the PeakId column as hidden
-        getColumn("PeakId").setHidden(true);
+        getMutableColumn("PeakId").setHidden(true);
 
         //add a condition that limits the features returned to just those existing in the
         //current container. The FilteredTable class supports this automatically only if

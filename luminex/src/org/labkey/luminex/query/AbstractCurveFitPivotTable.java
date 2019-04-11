@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
@@ -50,14 +51,14 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
     {
         for (final String curveType : _userSchema.getCurveTypes())
         {
-            ColumnInfo curveTypeColumn = createCurveTypeColumn(curveType);
+            var curveTypeColumn = createCurveTypeColumn(curveType);
             addColumn(curveTypeColumn);
         }
     }
 
-    private ColumnInfo createCurveTypeColumn(final String curveType)
+    private BaseColumnInfo createCurveTypeColumn(final String curveType)
     {
-        ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
+        var curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
 
         LookupForeignKey fk = createCurveFitFK(getContainerFilter(), curveType);
         // We need the prefix to distinguish between the different kinds of curve fits

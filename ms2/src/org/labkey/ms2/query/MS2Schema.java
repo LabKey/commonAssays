@@ -244,7 +244,7 @@ public class MS2Schema extends UserSchema
                 result.addColumn(new ExprColumn(result, "MS3ScanCount", getScanCountSqlFragment(3), JdbcType.INTEGER));
                 result.addColumn(new ExprColumn(result, "MS4ScanCount", getScanCountSqlFragment(4), JdbcType.INTEGER));
 
-                ColumnInfo fastaColumnInfo = result.wrapColumn("FastaId", result.getRealTable().getColumn("Run"));
+                var fastaColumnInfo = result.wrapColumn("FastaId", result.getRealTable().getColumn("Run"));
                 fastaColumnInfo.setKeyField(false);
                 fastaColumnInfo.setFk(new MultiValuedForeignKey(QueryForeignKey.from(ms2,cf).to(FastaRunMapping.name(), "Run", null).build(), "FastaId"));
                 fastaColumnInfo.setLabel("FASTA");
@@ -257,7 +257,7 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("MascotFile"));
                 result.addWrapColumn(result.getRealTable().getColumn("DistillerRawFile"));
 
-                ColumnInfo iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
+                var iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
                 iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()
                 {
                     public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -511,7 +511,7 @@ public class MS2Schema extends UserSchema
         FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoProteinGroupMemberships(), this);
         result.wrapAllColumns(true);
 
-        result.getColumn("ProteinGroupId").setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
+        result.getMutableColumn("ProteinGroupId").setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
         {
             public TableInfo getLookupTableInfo()
             {
@@ -561,8 +561,8 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        result.getColumn("SeqId").setLabel("Protein");
-        result.getColumn("SeqId").setFk(createSequencesLookup());
+        result.getMutableColumn("SeqId").setLabel("Protein");
+        result.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         if (_runs != null && filterByRuns)
         {
@@ -594,7 +594,7 @@ public class MS2Schema extends UserSchema
             }
         }
 
-        ColumnInfo peptideMembershipsColumn = result.wrapColumn("PeptideMemberships", result.getRealTable().getColumn("ProteinGroupId"));
+        var peptideMembershipsColumn = result.wrapColumn("PeptideMemberships", result.getRealTable().getColumn("ProteinGroupId"));
         peptideMembershipsColumn.setFk(new LookupForeignKey(result.getContainerFilter(), "ProteinGroupId", null)
         {
             public TableInfo getLookupTableInfo()
@@ -653,17 +653,17 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(MS2Schema.this, getLookupContainerFilter());
-                result.getColumn("ProteinProphet").setHidden(true);
+                result.getMutableColumn("ProteinProphet").setHidden(true);
                 result.addProteinDetailColumns();
 
                 return result;
             }
         };
         fk.setPrefixColumnCaption(false);
-        result.getColumn("ProteinGroupId").setFk(fk);
+        result.getMutableColumn("ProteinGroupId").setFk(fk);
 
-        result.getColumn("PeptideId").setHidden(true);
-        result.getColumn("PeptideId").setFk(new LookupForeignKey("RowId")
+        result.getMutableColumn("PeptideId").setHidden(true);
+        result.getMutableColumn("PeptideId").setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -706,7 +706,7 @@ public class MS2Schema extends UserSchema
                 .append(" THEN ").append(dialect.getSubstringFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName"), new SQLFragment("1"), dialect.getStringIndexOfFunction(new SQLFragment("'.'"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".FileName")).append("- 1")))
                 .append(" ELSE " + ExprColumn.STR_TABLE_ALIAS + ".FileName END");
 
-        ColumnInfo fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
+        var fractionName = new ExprColumn(result, "FractionName", fractionNameSQL, JdbcType.VARCHAR);
         fractionName.setLabel("Name");
         fractionName.setWidth("200");
         result.addColumn(fractionName);
@@ -720,7 +720,7 @@ public class MS2Schema extends UserSchema
         result.addColumn(dataColumn);
 
         ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
-        result.getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
+        result.getMutableColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
             {
@@ -761,14 +761,14 @@ public class MS2Schema extends UserSchema
                 "\nFROM " + MS2Manager.getTableInfoRuns() + " ms2Runs " +
                 "\nWHERE ms2Runs.ExperimentRunLSID = " + ExprColumn.STR_TABLE_ALIAS + ".LSID AND ms2Runs.Deleted = ?)");
         sql.add(Boolean.FALSE);
-        ColumnInfo ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, JdbcType.INTEGER);
+        var ms2DetailsColumn = new ExprColumn(result, "MS2Details", sql, JdbcType.INTEGER);
         ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
         DetailsURL detailsURL = new DetailsURL(url, Collections.singletonMap("Run", ms2DetailsColumn.getFieldKey()));
         ms2DetailsColumn.setURL(detailsURL);
         ms2DetailsColumn.setFk( QueryForeignKey.from(this,filter).to(TableType.MS2RunDetails.name(), "Run", "Description" ) );
         result.addColumn(ms2DetailsColumn);
 
-        result.getColumn("Name").setDisplayColumnFactory(new DisplayColumnFactory()
+        result.getMutableColumn(ExpRunTable.Column.Name).setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
@@ -918,10 +918,10 @@ public class MS2Schema extends UserSchema
     {
         VirtualTable rawTable;
 
-        ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", JdbcType.INTEGER);
+        var normalizedIdCol = new BaseColumnInfo("NormalizedId", JdbcType.INTEGER);
         normalizedIdCol.setHidden(true);
 
-        ColumnInfo proteinGroupIdCol = new ColumnInfo("ProteinGroupId", JdbcType.INTEGER);
+        var proteinGroupIdCol = new BaseColumnInfo("ProteinGroupId", JdbcType.INTEGER);
         proteinGroupIdCol.setFk(new LookupForeignKey((ContainerFilter)null, "RowId", null)
         {
             public TableInfo getLookupTableInfo()
@@ -971,7 +971,7 @@ public class MS2Schema extends UserSchema
 
         FilteredTable baseTable = new FilteredTable<>(rawTable, this, null);
         baseTable.wrapAllColumns(true);
-        ColumnInfo peptideMembershipsColumn = baseTable.wrapColumn("PeptideMemberships", rawTable.getColumn("ProteinGroupId"));
+        var peptideMembershipsColumn = baseTable.wrapColumn("PeptideMemberships", rawTable.getColumn("ProteinGroupId"));
         peptideMembershipsColumn.setFk(new LookupForeignKey((ContainerFilter)null, "ProteinGroupId", null)
         {
             public TableInfo getLookupTableInfo()
@@ -987,7 +987,7 @@ public class MS2Schema extends UserSchema
         ExprColumn normalizedProteinCountCol = new ExprColumn(baseTable, "ProteinCount", new SQLFragment("(SELECT COUNT (DISTINCT SeqId) FROM " + name + " n,  " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId and n.NormalizedId = " + ExprColumn.STR_TABLE_ALIAS + ".NormalizedId)"), JdbcType.INTEGER);
         baseTable.addColumn(normalizedProteinCountCol);
 
-        ColumnInfo proteinsCol = baseTable.wrapColumn("Proteins", rawTable.getColumn("NormalizedId"));
+        var proteinsCol = baseTable.wrapColumn("Proteins", rawTable.getColumn("NormalizedId"));
         proteinsCol.setHidden(false);
         baseTable.addColumn(proteinsCol);
         LookupForeignKey proteinsFK = new LookupForeignKey("NormalizedId")
@@ -1004,9 +1004,9 @@ public class MS2Schema extends UserSchema
                         return new SQLFragment("SELECT DISTINCT NormalizedId, SeqId FROM " + name + " n, " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm WHERE n.ProteinGroupId = pgm.ProteinGroupId");
                     }
                 };
-                ColumnInfo normalizedIdCol = new ColumnInfo("NormalizedId", result, JdbcType.INTEGER);
+                var normalizedIdCol = new BaseColumnInfo("NormalizedId", result, JdbcType.INTEGER);
                 result.addColumn(normalizedIdCol);
-                ColumnInfo seqIdCol = new ColumnInfo("SeqId", result, JdbcType.INTEGER);
+                var seqIdCol = new BaseColumnInfo("SeqId", result, JdbcType.INTEGER);
                 LookupForeignKey seqFK = new LookupForeignKey("SeqId")
                 {
                     public TableInfo getLookupTableInfo()
@@ -1217,7 +1217,7 @@ public class MS2Schema extends UserSchema
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
         ActionURL showProteinURL = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
         rowDim.setUrl(showProteinURL.getLocalURIString() + "&seqId=${SeqId}");
-        rowDim.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory()
+        ((BaseColumnInfo)rowDim.getSourceColumn()).setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
@@ -1396,7 +1396,7 @@ public class MS2Schema extends UserSchema
         parameters.put("run", CrosstabMember.VALUE_NAME);
         parameters.put(MS2Manager.getDataRegionNamePeptides() + ".Peptide~eq", FieldKey.fromParts("peptide"));
         scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowPeptidePopupAction.class, getContainer()), parameters));
-        scansMeasure.getSourceColumn().setDisplayColumnFactory(new DisplayColumnFactory(){
+        ((BaseColumnInfo)scansMeasure.getSourceColumn()).setDisplayColumnFactory(new DisplayColumnFactory(){
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
                     DisplayColumn dc = new DataColumn(colInfo);
@@ -1460,8 +1460,8 @@ public class MS2Schema extends UserSchema
             filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
-        baseTable.getColumn("SeqId").setLabel("Search Engine Protein");
-        baseTable.getColumn("SeqId").setFk(createSequencesLookup());
+        baseTable.getMutableColumn("SeqId").setLabel("Search Engine Protein");
+        baseTable.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         return baseTable;
     }
