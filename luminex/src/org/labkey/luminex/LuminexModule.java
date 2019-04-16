@@ -17,12 +17,14 @@
 package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AssayDefaultFlagHandler;
+import org.labkey.api.assay.AssayFlagHandler;
+import org.labkey.api.assay.AssayQCFlagColumn;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.study.assay.AssayQCFlagColumn;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
@@ -72,6 +74,8 @@ public class LuminexModule extends DefaultModule
         AssayService.get().registerAssayProvider(new LuminexAssayProvider());
         PropertyService.get().registerDomainKind(new LuminexAnalyteDomainKind());
         PropertyService.get().registerDomainKind(new LuminexDataDomainKind());
+
+        AssayFlagHandler.registerHandler(AssayService.get().getProvider(LuminexAssayProvider.NAME), new AssayDefaultFlagHandler());
     }
 
     @Override
