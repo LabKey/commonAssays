@@ -86,7 +86,7 @@
         </tr>
         <tr>
             <td class="labkey-form-label">Password</td>
-            <td><input type="password" name="mascotUserPassword" size="50" value="<%=h(mascotConfig.getMascotUserPassword())%>" autocomplete="off"></td>
+            <td><input type="password" name="mascotUserPassword" size="50" autocomplete="off"></td>
         </tr>
         <tr>
             <td class="labkey-form-label">HTTP Proxy URL</td>
