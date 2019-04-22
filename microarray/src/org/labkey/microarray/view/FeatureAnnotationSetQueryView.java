@@ -74,7 +74,7 @@ public class FeatureAnnotationSetQueryView extends QueryView
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         super.populateButtonBar(view, bar);
-        ActionButton deleteButton = new ActionButton(FeatureAnnotationSetController.DeleteAction.class, "Delete", DataRegion.MODE_GRID, ActionButton.Action.GET);
+        ActionButton deleteButton = new ActionButton(FeatureAnnotationSetController.DeleteAction.class, "Delete", ActionButton.Action.GET);
         deleteButton.setDisplayPermission(DeletePermission.class);
         ActionURL deleteURL = new ActionURL(FeatureAnnotationSetController.DeleteAction.class, getContainer());
         deleteURL.addParameter(ActionURL.Param.returnUrl, getViewContext().getActionURL().toString());
@@ -83,14 +83,14 @@ public class FeatureAnnotationSetQueryView extends QueryView
         deleteButton.setRequiresSelection(true);
         bar.add(deleteButton);
 
-        ActionButton uploadButton = new ActionButton(FeatureAnnotationSetController.UploadAction.class, "Import Feature Annotation Set", DataRegion.MODE_GRID, ActionButton.Action.LINK);
+        ActionButton uploadButton = new ActionButton(FeatureAnnotationSetController.UploadAction.class, "Import Feature Annotation Set", ActionButton.Action.LINK);
         ActionURL uploadURL = new ActionURL(FeatureAnnotationSetController.UploadAction.class, getContainer());
         uploadURL.addParameter(ActionURL.Param.returnUrl, getViewContext().getActionURL().toString());
         uploadButton.setURL(uploadURL);
         uploadButton.setDisplayPermission(UpdatePermission.class);
         bar.add(uploadButton);
 
-        bar.add(new ActionButton(new ActionURL(FeatureAnnotationSetController.UploadAction.class, getContainer()), "Submit", DataRegion.MODE_UPDATE));
+        bar.add(new ActionButton(new ActionURL(FeatureAnnotationSetController.UploadAction.class, getContainer()), "Submit"));
     }
 
 
