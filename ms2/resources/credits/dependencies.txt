@@ -1,2 +1,0 @@
-# direct external dependencies for project :server:modules:commonAssays:ms2
-commons-httpclient-3.1.jar

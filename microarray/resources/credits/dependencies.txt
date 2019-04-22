@@ -1,2 +1,0 @@
-# direct external dependencies for project :server:modules:commonAssays:microarray
-jai_imageio-1.1.jar
