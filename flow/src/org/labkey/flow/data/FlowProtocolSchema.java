@@ -64,7 +64,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
         ExpDataTable ti;
-        ti = flowSchema.createFCSAnalysisTable(cf, FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        ti = flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), cf, FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
         return ti;
     }
 
