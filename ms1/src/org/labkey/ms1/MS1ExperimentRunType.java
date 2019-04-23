@@ -44,7 +44,7 @@ public class MS1ExperimentRunType extends ExperimentRunType
     {
         ActionURL compareUrl = new ActionURL(MS1Controller.CompareRunsSetupAction.class, context.getContainer());
         String script = MS1Controller.createVerifySelectedScript(view, compareUrl);
-        ActionButton b = new ActionButton(compareUrl, "Compare", DataRegion.MODE_ALL, ActionButton.Action.LINK);
+        ActionButton b = new ActionButton(compareUrl, "Compare", ActionButton.Action.LINK);
         b.setScript(script);
         bar.add(b);
     }

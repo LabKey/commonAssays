@@ -264,7 +264,7 @@ public class FlowQueryView extends QueryView
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
 
                 ActionButton publishButton = new ActionButton(publishURL,
-                        "Copy to Study", DataRegion.MODE_GRID, ActionButton.Action.POST);
+                        "Copy to Study", ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
 
