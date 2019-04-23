@@ -1124,8 +1124,8 @@ public class FlowSchema extends UserSchema
         public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
             checkLocked();
-            var col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
-            col.setParentTable(this);
+            var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
+            col.setFk(schema.materialIdForeignKey(sampleSet, null));
             return addColumn(col);
         }
 
@@ -2034,7 +2034,10 @@ public class FlowSchema extends UserSchema
                 "    flow.object.compid,\n" +
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
-                "    flow.object.uri\n" +
+                "    flow.object.uri,\n" +
+// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleSet ss)
+                "    (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId\n" +
+                "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
                 "FROM exp.data\n" +
                 "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n");
         select.append(" WHERE flow.Object.container = ").append(c).append(" AND TypeId = ").append(String.valueOf(typeid));

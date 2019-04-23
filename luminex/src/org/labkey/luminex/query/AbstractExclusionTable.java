@@ -43,6 +43,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.luminex.model.Analyte;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -193,6 +194,13 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
             }
 
             return result;
+        }
+        @Override
+        protected Set<String> getAutoPopulatedColumns()
+        {
+            Set<String> defCols = new HashSet<>(super.getAutoPopulatedColumns());
+            defCols.add("Analytes");
+            return Collections.unmodifiableSet(defCols);
         }
 
         @Override
