@@ -286,7 +286,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
         }
 
-        return super.createProviderTable(tableType);
+        return super.createProviderTable(tableType, cf);
     }
 
     public AnalyteTitrationTable createAnalyteTitrationTable(ContainerFilter cf, boolean filter)
