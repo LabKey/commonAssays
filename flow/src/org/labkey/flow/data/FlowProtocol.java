@@ -284,7 +284,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
 
-        ExpMaterialTable sampleTable = schema.getSampleTable(ss);
+        ExpMaterialTable sampleTable = schema.getSampleTable(ss, null);
         List<ColumnInfo> selectedColumns = new ArrayList<>();
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
