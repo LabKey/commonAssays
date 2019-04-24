@@ -175,10 +175,6 @@ public class RunController extends BaseFlowController
         public ModelAndView getView(RunsForm form, BindException errors)
         {
             experiment = form.getExperiment();
-            if (experiment == null)
-            {
-                throw new NotFoundException();
-            }
 //            script = form.getScript();
 
             checkContainer(experiment);
