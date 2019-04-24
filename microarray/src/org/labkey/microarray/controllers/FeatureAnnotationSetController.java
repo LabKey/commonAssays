@@ -302,7 +302,7 @@ public class FeatureAnnotationSetController extends SpringActionController
             editURL.addParameter("RowId", form.getRowId());
             editURL.addReturnURL(getViewContext().getActionURL());
 
-            ActionButton edit = new ActionButton(editURL, "Edit", DataRegion.MODE_DETAILS);
+            ActionButton edit = new ActionButton(editURL, "Edit");
             edit.setActionType(ActionButton.Action.LINK);
             edit.setDisplayPermission(UpdatePermission.class);
             bb.add(edit);
