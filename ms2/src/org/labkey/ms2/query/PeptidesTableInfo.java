@@ -78,14 +78,14 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes, boolean highestScore)
     {
-        super(MS2Manager.getTableInfoPeptidesData(), schema);
+        super(MS2Manager.getTableInfoPeptidesData(), schema, containerFilter);
         setName(MS2Schema.TableType.Peptides.name());
         if (runTypes != null && runTypes.length == 1)
         {
             setName(runTypes[0].getPeptideTableName());
         }
         _runTypes = runTypes;
-        setContainerFilter(containerFilter);
+        addRunFilter();
         if (highestScore)
         {
             addHighestScoreFilter();
@@ -284,13 +284,6 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
         if (includeFeatureFk)
             addFeatureInfoColumn();
-    }
-
-    @Override
-    public void setContainerFilter(@NotNull ContainerFilter filter)
-    {
-        super.setContainerFilter(filter);
-        addRunFilter();
     }
 
     private void addRunFilter()

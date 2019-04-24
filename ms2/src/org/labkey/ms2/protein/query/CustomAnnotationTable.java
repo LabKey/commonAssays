@@ -18,6 +18,7 @@ package org.labkey.ms2.protein.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -50,12 +51,12 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 
     public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema)
     {
-        this(annotationSet, schema, false);
+        this(annotationSet, schema, null, false);
     }
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, boolean includeSeqId)
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, ContainerFilter cf, boolean includeSeqId)
     {
-        super(ProteinManager.getTableInfoCustomAnnotation(), schema);
+        super(ProteinManager.getTableInfoCustomAnnotation(), schema, cf);
         _includeSeqId = includeSeqId;
         wrapAllColumns(true);
         _annotationSet = annotationSet;

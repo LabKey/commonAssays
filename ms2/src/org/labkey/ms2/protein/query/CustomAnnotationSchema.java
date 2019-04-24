@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.protein.query;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.DefaultSchema;
@@ -76,11 +77,11 @@ public class CustomAnnotationSchema extends UserSchema
         return getAnnotationSets().keySet();
     }
     
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         CustomAnnotationSet annotationSet = getAnnotationSets().get(name);
         if (annotationSet != null)
-            return new CustomAnnotationTable(annotationSet, this, _includeSequences);
+            return new CustomAnnotationTable(annotationSet, this, cf, _includeSequences);
 
         return null;
     }
