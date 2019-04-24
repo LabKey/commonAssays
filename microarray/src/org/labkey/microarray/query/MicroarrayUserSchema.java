@@ -142,7 +142,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         }
 
         QueryView ret = super.createView(context, settings, errors);
-        if (queryName.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
+        if (ret != null && TABLE_FEATURE_ANNOTATION.equalsIgnoreCase(queryName))
         {
             // NOTE FeatureAnnotationSetQueryView handles this for TABLE_FEATURE_ANNOTATION_SET
             ret.setAllowableContainerFilterTypes(ContainerFilter.Type.CurrentPlusProjectAndShared);
