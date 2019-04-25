@@ -409,7 +409,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         var runCol = ret.addColumn(ExpDataTable.Column.Run);
         if (getProtocol() != null)
         {
-            runCol.setFk(new LookupForeignKey("RowId")
+            runCol.setFk(new LookupForeignKey(ret.getContainerFilter(),"RowId", null)
             {
                 public TableInfo getLookupTableInfo()
                 {
