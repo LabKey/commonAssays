@@ -16,14 +16,14 @@
 
 package org.labkey.flow.controllers.run;
 
-import org.labkey.flow.query.FlowQueryForm;
-import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.query.FlowTableType;
-import org.labkey.flow.data.FlowExperiment;
-import org.labkey.flow.data.FlowScript;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.view.ActionURL;
+import org.labkey.flow.data.FlowExperiment;
+import org.labkey.flow.data.FlowScript;
+import org.labkey.flow.query.FlowQueryForm;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 /**
  * User: kevink
@@ -88,7 +88,7 @@ public class RunsForm extends FlowQueryForm
 
         // adding the filter doesn't work because of bug 6520
         // 6520 : can't set filter/sort on QuerySettings progamatically
-        if (getScript() != null)
+        if (getScript() != null && getScript().getExpObject() != null)
         {
             ActionURL sortFilter = getScript().getRunsUrl(ret.getSortFilterURL());
             ret.setSortFilterURL(sortFilter);
