@@ -125,9 +125,10 @@ isNegativeControl <- function(analytedata, analyteVal)
     negControl = FALSE;
     if (!is.null(analytedata$NegativeControl))
     {
-        if (!is.na(analytedata$NegativeControl[analytedata$Name == analyteVal]))
+        negControlVal = as.logical(analytedata$NegativeControl[analytedata$Name == analyteVal]);
+        if (!is.na(negControlVal))
         {
-            negControl = as.logical(analytedata$NegativeControl[analytedata$Name == analyteVal]);
+            negControl = negControlVal
         }
     }
 
