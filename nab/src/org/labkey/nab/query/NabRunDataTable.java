@@ -367,7 +367,7 @@ public class NabRunDataTable extends NabBaseTable
                     public TableInfo getLookupTableInfo()
                     {
                         AssayProtocolSchema protocolSchema = provider.createProtocolSchema(schema.getUser(), getContainer(), protocol, null);
-                        return protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+                        return protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, getContainerFilter());
                     }
                 };
                 virusColumn.setFk(fkVirus);
