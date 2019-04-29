@@ -361,7 +361,7 @@ public class NabRunDataTable extends NabBaseTable
                 virusColumn.setLabel("Virus");
                 virusColumn.setIsUnselectable(true);
                 virusColumn.setKeyField(false);
-                LookupForeignKey fkVirus = new LookupForeignKey("VirusLsid")
+                LookupForeignKey fkVirus = new LookupForeignKey(getContainerFilter(), "VirusLsid", null)
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
