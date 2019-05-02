@@ -201,7 +201,7 @@ public class NabAssayController extends SpringActionController
     {
         AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
         if (!(provider instanceof DilutionAssayProvider))
-            throw new IllegalArgumentException("Run " + run.getRowId() + " is not a NAb run.");
+            throw new NotFoundException("Run " + run.getRowId() + " is not a NAb run.");
         return (DilutionAssayProvider) provider;
     }
 
