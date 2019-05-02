@@ -99,11 +99,11 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return hs;
     }
 
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         if (TABLE_RUNS.equalsIgnoreCase(name))
         {
-            return createRunsTable();
+            return createRunsTable(cf);
         }
 
         if (getTableNames().contains(name))
@@ -111,17 +111,17 @@ public class MicroarrayUserSchema extends SimpleUserSchema
             SchemaTableInfo tableInfo = getSchema().getTable(name);
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
                 return table;
             }
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
                 return table;
             }
             else
             {
-                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo, cf).init();
                 return table;
             }
         }
@@ -160,9 +160,12 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION);
     }
 
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = _expSchema.getRunsTable();
+        ExpRunTable result = _expSchema.getRunsTable(true);
+        // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
+        cf = null==cf ? getDefaultContainerFilter() : cf;
+        result.setContainerFilter(cf);
         configureRunsTable(result);
 
         return result;

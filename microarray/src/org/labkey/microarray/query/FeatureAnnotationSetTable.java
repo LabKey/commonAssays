@@ -33,10 +33,15 @@ import java.util.Set;
 
 public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<MicroarrayUserSchema>
 {
-    FeatureAnnotationSetTable(MicroarrayUserSchema s, TableInfo t)
+    @Override
+    protected ContainerFilter getDefaultContainerFilter()
     {
-        super(s, t);
-        setContainerFilter(new ContainerFilter.CurrentPlusProjectAndShared(s.getUser()));
+        return new ContainerFilter.CurrentPlusProjectAndShared(getUserSchema().getUser());
+    }
+
+    FeatureAnnotationSetTable(MicroarrayUserSchema s, TableInfo t, ContainerFilter cf)
+    {
+        super(s, t, cf);
     }
 
     @Override
