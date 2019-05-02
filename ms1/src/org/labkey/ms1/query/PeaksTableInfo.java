@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.query;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Container;
@@ -35,9 +36,9 @@ import java.util.ArrayList;
  */
 public class PeaksTableInfo extends FilteredTable<MS1Schema>
 {
-    public PeaksTableInfo(MS1Schema schema)
+    public PeaksTableInfo(MS1Schema schema, ContainerFilter cf)
     {
-        super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS), schema);
+        super(MS1Manager.get().getTable(MS1Manager.TABLE_PEAKS), schema, cf);
 
         //wrap all the columns
         wrapAllColumns(true);
@@ -63,7 +64,7 @@ public class PeaksTableInfo extends FilteredTable<MS1Schema>
             public TableInfo getLookupTableInfo()
             {
                 setPrefixColumnCaption(false);
-                return _userSchema.getScansTableInfo();
+                return _userSchema.getScansTableInfo(cf);
             }
         });
 

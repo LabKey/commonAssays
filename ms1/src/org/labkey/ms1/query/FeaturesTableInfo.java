@@ -50,14 +50,14 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
     private List<FeaturesFilter> _filters = null;
     private boolean _includeDeleted = false;
 
-    public FeaturesTableInfo(MS1Schema schema, boolean includePepFk)
+    public FeaturesTableInfo(MS1Schema schema, ContainerFilter cf, boolean includePepFk)
     {
-        this(schema, includePepFk, null);
+        this(schema, cf, includePepFk, null);
     }
 
-    public FeaturesTableInfo(MS1Schema schema, boolean includePepFk, Boolean peaksAvailable)
+    public FeaturesTableInfo(MS1Schema schema, ContainerFilter cf, boolean includePepFk, Boolean peaksAvailable)
     {
-        super(schema.getDbSchema(), "Features", schema);
+        super(schema.getDbSchema(), "Features", schema, cf);
         setDescription("Contains all features from all MS1 experiment runs loaded into this folder.");
 
         _sourceTable = MS1Manager.get().getTable(MS1Service.Tables.Features.name());
@@ -66,12 +66,13 @@ public class FeaturesTableInfo extends VirtualTable<MS1Schema>
         //wrap all the columns
         wrapAllColumns(true);
 
+        // TODO use QueryForeignKey
         //tell query that FileId is an FK to the Files user table info
         getMutableColumn("FileId").setFk(new LookupForeignKey("FileId")
         {
             public TableInfo getLookupTableInfo()
             {
-                return getUserSchema().getFilesTableInfo();
+                return getUserSchema().getFilesTableInfo(cf);
             }
         });
 
