@@ -2968,7 +2968,16 @@ public class MS2Controller extends SpringActionController
             }
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
-            QueryView proteinsView = new QueryView(schema, proteinsSettings, errors);
+            QueryView proteinsView = new QueryView(schema, proteinsSettings, errors)
+            {
+                @Override
+                protected TableInfo createTable()
+                {
+                    MS2Schema schema = (MS2Schema)getSchema();
+                    SequencesTableInfo tableInfo = schema.createSequencesTable(null);
+                    return tableInfo;
+                }
+            };
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
