@@ -511,7 +511,6 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 public TableInfo getLookupTableInfo()
                 {
                     ResultsTable results = new ResultsTable(getLookupContainerFilter());
-                    results.setContainerFilter(new DelegatingContainerFilter(ResultSpecimensTable.this));
                     return results;
                 }
             });
