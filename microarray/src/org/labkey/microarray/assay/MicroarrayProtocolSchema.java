@@ -55,9 +55,9 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = super.createRunsTable();
+        ExpRunTable result = super.createRunsTable(cf);
 
         new MicroarrayUserSchema(getUser(), getContainer()).configureRunsTable(result);
         if (getProvider().isEditableRuns(getProtocol()))

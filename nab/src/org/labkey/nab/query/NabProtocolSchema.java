@@ -85,9 +85,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        final ExpRunTable runTable = super.createRunsTable();
+        final ExpRunTable runTable = super.createRunsTable(cf);
         var nameColumn = runTable.getMutableColumn(ExpRunTable.Column.Name);
         // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
         // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
