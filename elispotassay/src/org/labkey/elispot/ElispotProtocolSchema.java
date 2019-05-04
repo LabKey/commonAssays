@@ -68,6 +68,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return (ElispotAssayProvider)super.getProvider();
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         Set<String> names = super.getTableNames();
@@ -76,6 +77,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return names;
     }
 
+    @Override
     public TableInfo createProviderTable(String name, ContainerFilter cf)
     {
         if (name.equalsIgnoreCase(ANTIGEN_TABLE_NAME))
@@ -117,6 +119,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
             super(protocol, context, settings);
         }
 
+        @Override
         public DataView createDataView()
         {
             DataView view = super.createDataView();

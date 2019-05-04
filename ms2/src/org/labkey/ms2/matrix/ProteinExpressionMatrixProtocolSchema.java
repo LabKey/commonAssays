@@ -77,6 +77,5 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     {
         return MS2Manager.getSchema().getTable(PROTEIN_SEQ_DATA_TABLE_NAME);
     }
-
 }
 

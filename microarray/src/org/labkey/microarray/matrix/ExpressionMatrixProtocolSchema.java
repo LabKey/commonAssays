@@ -15,7 +15,6 @@
  */
 package org.labkey.microarray.matrix;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -29,7 +28,6 @@ import org.labkey.api.study.assay.matrix.AbstractMatrixProtocolSchema;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
