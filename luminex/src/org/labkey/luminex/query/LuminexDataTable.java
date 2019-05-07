@@ -108,7 +108,6 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
             public TableInfo getLookupTableInfo()
             {
                 ExpDataTable result = _userSchema.createDataFileTable(getLookupContainerFilter());
-                result.setContainerFilter(new DelegatingContainerFilter(LuminexDataTable.this));
                 return result;
             }
         });
