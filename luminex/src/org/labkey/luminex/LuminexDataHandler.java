@@ -702,7 +702,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 if (!newCVQCFlags.contains(newQcFlag))
                 {
                     newCVQCFlags.add(newQcFlag);
-                    AssayService.get().saveFlag(provider, newQcFlag, user);
+                    AssayService.get().saveFlag(expRun.getContainer(), user, provider, newQcFlag);
                 }
             }
         }
@@ -852,7 +852,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!existingQCFlags.contains(newQCFlag))
             {
-                AssayService.get().saveFlag(provider, newQCFlag, user);
+                AssayService.get().saveFlag(expRun.getContainer(), user, provider, newQCFlag);
             }
         }
 
@@ -861,7 +861,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                AssayService.get().deleteFlags(provider, existingAnalyteTitrationQCFlag.getRowId(), user);
+                AssayService.get().deleteFlags(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag.getRowId());
             }
         }
     }
@@ -1521,7 +1521,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!existingAnalyteTitrationQCFlags.contains(newAnalyteTitrationQCFlag))
             {
-                AssayService.get().saveFlag(provider, newAnalyteTitrationQCFlag, user);
+                AssayService.get().saveFlag(expRun.getContainer(), user, provider, newAnalyteTitrationQCFlag);
             }
         }
 
@@ -1530,7 +1530,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newAnalyteTitrationQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                AssayService.get().deleteFlags(provider, existingAnalyteTitrationQCFlag.getRowId(), user);
+                AssayService.get().deleteFlags(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag.getRowId());
             }
         }
     }
