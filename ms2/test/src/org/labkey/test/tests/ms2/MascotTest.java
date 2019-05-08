@@ -266,14 +266,14 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         value = peptidesTable.getDataAsText(0, "CalcMH+");
         assertEquals("Wrong value for 'CalcMH+' in first row", 1272.43, Double.parseDouble(value), 0.01);
         navigateToFolder(FOLDER_NAME);
-        waitForElement(Locator.id("filter-engine"));
-        setFormElement(Locator.id("filter-engine"), "MASCOT");
-        setFormElement(Locator.id("filter-fasta"), "Bovine_mini1.fasta");
+        BodyWebPart ms2Overview = new BodyWebPart(getDriver(), "MS2 Runs Overview");
+        WebElement filterEngine = Locator.id("filter-engine").waitForElement(ms2Overview, WAIT_FOR_JAVASCRIPT);
+        setFormElement(filterEngine, "MASCOT");
+        setFormElement(Locator.id("filter-fasta").findElement(ms2Overview), "Bovine_mini1.fasta");
         _extHelper.selectExtGridItem("path", "/MS2VerifyProject/ms2folder", -1, "x-grid-panel", false);
-        click(Locator.button("Show Matching MS2 Runs"));
-        waitAndClick(Locator.linkWithText("CAexample_mini.dat"));
-        waitForText("Peptides");
-        assertTextPresent("CAexample_mini.mgf");
+        Locator.button("Show Matching MS2 Runs").findElement(ms2Overview).click();
+        clickAndWait(Locator.linkWithText("CAexample_mini.dat").waitForElement(ms2Overview, WAIT_FOR_JAVASCRIPT));
+        waitForText("Peptides", "CAexample_mini.mgf");
         click(Locator.linkWithText("K.GTPAAGDP.-"));
 
         switchToWindow(1);
