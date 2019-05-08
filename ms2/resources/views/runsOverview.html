@@ -364,6 +364,11 @@ function setQueryOptions()
                 viewReady    : function(grid)
                 {
                     grid.getSelectionModel().selectAll();
+                },
+                columnmodelcustomize : function(cm, idx) {
+                    for (var tp in idx) {
+                        idx[tp].renderer = Ext.util.Format.htmlEncode;
+                    }
                 }
             }
         });
@@ -635,6 +640,11 @@ function displayResults(runIds, formValues, exportOnly)
                 afterrender: function()
                 {
                     setTimeout(seeGrid, 500);
+                },
+                columnmodelcustomize : function(cm, idx) {
+                    for (var tp in idx) {
+                        idx[tp].renderer = Ext.util.Format.htmlEncode;
+                    }
                 }
             }
         });
