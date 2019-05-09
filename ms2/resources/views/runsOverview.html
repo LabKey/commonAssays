@@ -638,9 +638,6 @@ function displayResults(runIds, formValues, exportOnly)
                 afterrender: function()
                 {
                     setTimeout(seeGrid, 500);
-                },
-                columnmodelcustomize : function(cm, idx) {
-                    idx["CreatedBy/DisplayName"].renderer = Ext.util.Format.htmlEncode;
                 }
             }
         });
