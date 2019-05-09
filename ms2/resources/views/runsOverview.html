@@ -366,9 +366,7 @@ function setQueryOptions()
                     grid.getSelectionModel().selectAll();
                 },
                 columnmodelcustomize : function(cm, idx) {
-                    for (var tp in idx) {
-                        idx[tp].renderer = Ext.util.Format.htmlEncode;
-                    }
+                    idx["CreatedBy/DisplayName"].renderer = Ext.util.Format.htmlEncode;
                 }
             }
         });
@@ -642,9 +640,7 @@ function displayResults(runIds, formValues, exportOnly)
                     setTimeout(seeGrid, 500);
                 },
                 columnmodelcustomize : function(cm, idx) {
-                    for (var tp in idx) {
-                        idx[tp].renderer = Ext.util.Format.htmlEncode;
-                    }
+                    idx["CreatedBy/DisplayName"].renderer = Ext.util.Format.htmlEncode;
                 }
             }
         });
