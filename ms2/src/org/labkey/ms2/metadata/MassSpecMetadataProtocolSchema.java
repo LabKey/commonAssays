@@ -153,7 +153,7 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
     @Override
     public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        final ExpDataTable result = new ExpSchema(getUser(), getContainer()).getDatasTable();
+        final ExpDataTable result = new ExpSchema(getUser(), getContainer()).getDatasTable(true);
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(getProtocol().getLSID());
