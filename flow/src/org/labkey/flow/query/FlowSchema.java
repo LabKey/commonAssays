@@ -221,13 +221,7 @@ public class FlowSchema extends UserSchema
         return null;
     }
 
-    public TableInfo getTable(FlowTableType type)
-    {
-        // flow schema is not converted yet!
-        return getTable(type, null);
-    }
 
-    // TODO ContainerFilter -- not converted yet
     public TableInfo getTable(FlowTableType type, ContainerFilter cf)
     {
         switch (type)
@@ -514,7 +508,6 @@ public class FlowSchema extends UserSchema
         final String _expDataAlias;
         FlowPropertySet _fps;
 
-        // TODO ContainerFilter Do I need to over-ride getDefaultContainerFilter() so that AbstractTableInfo doesn't wrap a second CF?
         JoinFlowDataTable(String name, FlowDataType type, ContainerFilter cf)
         {
             super(getDbSchema(), name);
@@ -1518,7 +1511,6 @@ public class FlowSchema extends UserSchema
 
     public FlowDataTable createFCSFileTable(String name, ContainerFilter cf, boolean specimenRelativeFromFCSFileTable)
     {
-        // TODO ContainerFilter
         final FlowDataTable ret = createDataTable(name, FlowDataType.FCSFile, cf);
         ret.getMutableColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
@@ -1659,7 +1651,6 @@ public class FlowSchema extends UserSchema
 
     public ExpDataTable createFCSAnalysisTable(String alias, ContainerFilter cf, FlowDataType type, boolean includeCopiedToStudyColumns)
     {
-        // TODO ContainerFilter
         FlowDataTable ret = createDataTable(alias, type, cf);
 
         var colAnalysisScript = new ExprColumn(ret, "AnalysisScript", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".scriptid"), JdbcType.INTEGER);
