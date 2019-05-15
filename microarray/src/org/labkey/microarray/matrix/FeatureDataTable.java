@@ -16,7 +16,6 @@
 package org.labkey.microarray.matrix;
 
 import org.labkey.api.data.AbstractTableInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -34,48 +33,56 @@ import java.util.List;
 
 public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSchema>
 {
-    public FeatureDataTable(ExpressionMatrixProtocolSchema schema)
+    public FeatureDataTable(ExpressionMatrixProtocolSchema schema, ContainerFilter cf)
     {
-        super(ExpressionMatrixProtocolSchema.getTableInfoFeatureData(), schema);
+        super(ExpressionMatrixProtocolSchema.getTableInfoFeatureData(), schema, cf);
 
         setDetailsURL(AbstractTableInfo.LINK_DISABLER);
         setImportURL(AbstractTableInfo.LINK_DISABLER);
 
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
 
-        ColumnInfo valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
+        var valueColumn = addColumn(wrapColumn(getRealTable().getColumn("Value")));
         valueColumn.setHidden(false);
         valueColumn.setLabel("Value");
         valueColumn.setFormat("0.000000");
 
-        ColumnInfo featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
+        var featureIdColumn = addColumn(wrapColumn(getRealTable().getColumn("FeatureId")));
         featureIdColumn.setHidden(false);
         featureIdColumn.setLabel("Probe Id");
-        featureIdColumn.setFk(new QueryForeignKey(MicroarrayUserSchema.SCHEMA_NAME, schema.getContainer(), null,
-                schema.getUser(), MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "FeatureId"));
+        featureIdColumn.setFk(QueryForeignKey
+                .from(schema, cf)
+                .schema(MicroarrayUserSchema.SCHEMA_NAME)
+                .to(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, "RowId", "FeatureId"));
 
-        ColumnInfo sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
+        var sampleIdColumn = addColumn(wrapColumn(getRealTable().getColumn("SampleId")));
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
         // Lookup to exp.materials since we don't know the sample set
-        sampleIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(),
-               "materials","RowId","Name"));
+        sampleIdColumn.setFk(QueryForeignKey
+                .from(schema, cf)
+                .schema(ExpSchema.SCHEMA_NAME)
+                .to("materials", "RowId", "Name"));
 
         SQLFragment runSQL = new SQLFragment("(SELECT d.RunId FROM ");
         runSQL.append(ExperimentService.get().getTinfoData(), "d");
         runSQL.append(" WHERE d.RowId = ");
         runSQL.append(ExprColumn.STR_TABLE_ALIAS);
         runSQL.append(".DataId)");
-        ColumnInfo runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
+        var runIdColumn = new ExprColumn(this, "Run", runSQL, JdbcType.INTEGER);
         addColumn(runIdColumn);
-        runIdColumn.setFk(new QueryForeignKey(getUserSchema(), null, AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
+        runIdColumn.setFk(QueryForeignKey
+                .from(getUserSchema(), getContainerFilter())
+                .to(AssayProtocolSchema.RUNS_TABLE_NAME, "RowId", "Name"));
 
-        ColumnInfo dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
+        var dataIdColumn = addColumn(wrapColumn(getRealTable().getColumn("DataId")));
         dataIdColumn.setHidden(false);
         dataIdColumn.setLabel("Data Id");
-        dataIdColumn.setFk(new QueryForeignKey(ExpSchema.SCHEMA_NAME, schema.getContainer(), null, schema.getUser(), ExpSchema.TableType.Data.toString(),
-                "RowId", "Name"));
+        dataIdColumn.setFk(QueryForeignKey
+                .from(getUserSchema(), getContainerFilter())
+                .schema(ExpSchema.SCHEMA_NAME, schema.getContainer())
+                .to( ExpSchema.TableType.Data.name(),"RowId", "Name"));
 
         List<FieldKey> columns = new ArrayList<>(getDefaultVisibleColumns());
         columns.remove(dataIdColumn.getFieldKey());

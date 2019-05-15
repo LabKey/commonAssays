@@ -16,7 +16,7 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.JdbcType;
@@ -36,52 +36,52 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
 
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
-    public GuideSetCurveFitTable(LuminexProtocolSchema schema, String curveType)
+    public GuideSetCurveFitTable(LuminexProtocolSchema schema, ContainerFilter cf, String curveType)
     {
-        super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema);
+        super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema, cf);
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
-        ColumnInfo guideSetIdColumn = new ColumnInfo("GuideSetId", this, JdbcType.INTEGER);
+        var guideSetIdColumn = new BaseColumnInfo("GuideSetId", this, JdbcType.INTEGER);
         guideSetIdColumn.setLabel("Guide Set");
-        guideSetIdColumn.setFk(new LookupForeignKey("RowId")
+        guideSetIdColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createGuideSetTable(false);
+                return _userSchema.createGuideSetTable(getLookupContainerFilter(),false);
             }
         });
         addColumn(guideSetIdColumn);
 
-        ColumnInfo runCountColumn = new ColumnInfo("RunCount", this, JdbcType.INTEGER);
+        var runCountColumn = new BaseColumnInfo("RunCount", this, JdbcType.INTEGER);
         addColumn(runCountColumn);
 
-        ColumnInfo aucAverageColumn = new ColumnInfo("AUCAverage", this, JdbcType.REAL);
+        var aucAverageColumn = new BaseColumnInfo("AUCAverage", this, JdbcType.REAL);
         aucAverageColumn.setFormat("0.00");
         aucAverageColumn.setLabel("AUC Average");
         aucAverageColumn.setDescription("Average of area under the curve values");
         addColumn(aucAverageColumn);
 
-        ColumnInfo aucStdDevColumn = new ColumnInfo("AUCStdDev", this, JdbcType.REAL);
+        var aucStdDevColumn = new BaseColumnInfo("AUCStdDev", this, JdbcType.REAL);
         aucStdDevColumn.setFormat("0.00");
         aucStdDevColumn.setLabel("AUC Std Dev");
         aucStdDevColumn.setDescription("Standard deviation of area under the curve values");
         addColumn(aucStdDevColumn);
 
-        ColumnInfo ec50AverageColumn = new ColumnInfo("EC50Average", this, JdbcType.REAL);
+        var ec50AverageColumn = new BaseColumnInfo("EC50Average", this, JdbcType.REAL);
         ec50AverageColumn.setFormat("0.00");
         ec50AverageColumn.setLabel("EC50 Average");
         ec50AverageColumn.setDescription("Average of EC50 values");
         addColumn(ec50AverageColumn);
 
-        ColumnInfo ec50StdDevColumn = new ColumnInfo("EC50StdDev", this, JdbcType.REAL);
+        var ec50StdDevColumn = new BaseColumnInfo("EC50StdDev", this, JdbcType.REAL);
         ec50StdDevColumn.setFormat("0.00");
         ec50StdDevColumn.setLabel("EC50 Std Dev");
         ec50StdDevColumn.setDescription("Standard deviation of EC50 values");
         addColumn(ec50StdDevColumn);
 
-        ColumnInfo curveTypeColumn = new ColumnInfo("CurveType", this, JdbcType.VARCHAR);
+        var curveTypeColumn = new BaseColumnInfo("CurveType", this, JdbcType.VARCHAR);
         addColumn(curveTypeColumn);
     }
 
@@ -99,13 +99,11 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_userSchema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
-        analyteTitrationTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_userSchema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, ContainerFilter.EVERYTHING);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = (CurveFitTable)_userSchema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
-        curveFitTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        CurveFitTable curveFitTable = (CurveFitTable)_userSchema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME, ContainerFilter.EVERYTHING);
         result.append(curveFitTable, "cf");
 
         result.append(" WHERE at.AnalyteId = cf.AnalyteId AND at.TitrationId = cf.TitrationId AND at.GuideSetId IS NOT NULL AND at.IncludeInGuideSetCalculation = ?\n");

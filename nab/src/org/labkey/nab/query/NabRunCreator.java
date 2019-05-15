@@ -69,7 +69,7 @@ public class NabRunCreator extends PlateBasedRunCreator<NabAssayProvider>
         {
             ExpData outputData = datas.iterator().next();
             AssayProtocolSchema protocolSchema = context.getProvider().createProtocolSchema(context.getUser(), context.getContainer(), context.getProtocol(), null);
-            TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+            TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
 
             if (virusTable instanceof FilteredTable)
             {

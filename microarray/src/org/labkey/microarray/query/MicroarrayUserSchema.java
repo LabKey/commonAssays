@@ -99,11 +99,11 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return hs;
     }
 
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         if (TABLE_RUNS.equalsIgnoreCase(name))
         {
-            return createRunsTable();
+            return createRunsTable(cf);
         }
 
         if (getTableNames().contains(name))
@@ -111,17 +111,17 @@ public class MicroarrayUserSchema extends SimpleUserSchema
             SchemaTableInfo tableInfo = getSchema().getTable(name);
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
                 return table;
             }
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
                 return table;
             }
             else
             {
-                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo).init();
+                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo, cf).init();
                 return table;
             }
         }
@@ -160,9 +160,12 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION);
     }
 
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = _expSchema.getRunsTable();
+        ExpRunTable result = _expSchema.getRunsTable(true);
+        // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
+        cf = null==cf ? getDefaultContainerFilter() : cf;
+        result.setContainerFilter(cf);
         configureRunsTable(result);
 
         return result;
@@ -170,14 +173,14 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 
     public void configureRunsTable(ExpRunTable result)
     {
-        result.getColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
+        result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
 
         result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
                 "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.THUMBNAIL_INPUT_TYPE.getNamespacePrefix() + "%')");
-        ColumnInfo thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, JdbcType.INTEGER);
+        var thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, JdbcType.INTEGER);
         thumbnailColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -191,7 +194,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         SQLFragment qcReportSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
                 "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_INPUT_TYPE.getNamespacePrefix() + "%')");
-        ColumnInfo qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, JdbcType.INTEGER);
+        var qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, JdbcType.INTEGER);
         qcReportColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)

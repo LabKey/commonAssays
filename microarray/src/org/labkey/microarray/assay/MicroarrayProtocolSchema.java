@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.FieldKey;
@@ -54,9 +55,9 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = super.createRunsTable();
+        ExpRunTable result = super.createRunsTable(cf);
 
         new MicroarrayUserSchema(getUser(), getContainer()).configureRunsTable(result);
         if (getProvider().isEditableRuns(getProtocol()))
@@ -68,9 +69,9 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public AssayResultTable createDataTable(boolean includeCopiedToStudyColumns)
+    public AssayResultTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        AssayResultTable result = new AssayResultTable(this, includeCopiedToStudyColumns);
+        AssayResultTable result = new AssayResultTable(this, cf, includeCopiedToStudyColumns);
         if (!AbstractAssayProvider.getDomainByPrefix(getProtocol(), ExpProtocol.ASSAY_DOMAIN_DATA).getProperties().isEmpty())
         {
             List<FieldKey> cols = new ArrayList<>(result.getDefaultVisibleColumns());

@@ -18,7 +18,7 @@ package org.labkey.elispot.query;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.AggregateColumnInfo;
-import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.CrosstabDimension;
 import org.labkey.api.data.CrosstabMeasure;
@@ -110,12 +110,13 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
     {
         super(crosstabSettings, members);
         _nonBasePropertyNames = nonBasePropertyNames;
-        getColumn("InstanceCount").setHidden(true);
-        getColumn("Run").setHidden(true);
-        getColumn("SpecimenLsid").setHidden(true);
+        getMutableColumn("InstanceCount").setHidden(true);
+        getMutableColumn("Run").setHidden(true);
+        getMutableColumn("SpecimenLsid").setHidden(true);
         setTitle("AntigenStats");
     }
 
+    @NotNull
     @Override
     public ContainerFilter getContainerFilter()
     {
@@ -153,7 +154,7 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
     }
 
     @Override
-    protected ColumnInfo createMemberMeasureCol(@Nullable CrosstabMember member, CrosstabMeasure measure)
+    protected BaseColumnInfo createMemberMeasureCol(@Nullable CrosstabMember member, CrosstabMeasure measure)
     {
         AggregateColumnInfo column = (AggregateColumnInfo)super.createMemberMeasureCol(member, measure);
         column.setCrosstabColumnDimension(measure.getSourceColumn().getFieldKey());

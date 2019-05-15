@@ -148,7 +148,9 @@ public class FeaturesView extends QueryView
     {
         assert null != _ms1Schema : "MS1 Schema was not set in FeaturesView class!";
 
-        FeaturesTableInfo tinfo = _forSearch ? _ms1Schema.getFeaturesTableInfoSearch() : _ms1Schema.getFeaturesTableInfo(true, _peaksAvailable);
+        FeaturesTableInfo tinfo = _forSearch ?
+                _ms1Schema.getFeaturesTableInfoSearch(getContainerFilter()) :
+                _ms1Schema.getFeaturesTableInfo(getContainerFilter(), true, _peaksAvailable);
         tinfo.setBaseFilters(_baseFilters);
         return tinfo;
     }

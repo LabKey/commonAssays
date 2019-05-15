@@ -35,7 +35,7 @@ public class ProteinProphetFileTableInfo extends FilteredTable<MS2Schema>
         wrapAllColumns(true);
 
         ActionURL url = MS2Controller.getShowRunURL(_userSchema.getUser(), getContainer());
-        getColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
+        getMutableColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
             public TableInfo getLookupTableInfo()
             {

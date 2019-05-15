@@ -19,6 +19,7 @@ package org.labkey.ms2.compare;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
@@ -398,7 +399,7 @@ public abstract class CompareQuery extends SQLFragment
         throws SQLException
     {
         String columnFilter = setupComparisonColumnLink(linkURL, column.getLabel(), runPrefix);
-        ColumnInfo ci = new ColumnInfo(columnName);
+        var ci = new BaseColumnInfo(columnName);
         ci.setParentTable(ti);
         ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
         ci.setLabel(column.getLabel());

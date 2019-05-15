@@ -18,7 +18,9 @@ package org.labkey.nab.query;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.AbstractForeignKey;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -47,9 +49,10 @@ public class NabWellDataTable extends NabBaseTable
     public static final String VIRUS_WELLGROUP_NAME = "VirusWellgroup";
     public static final String SPECIMEN_WELLGROUP_NAME = "SpecimenWellgroup";
     public static final String REPLICATE_WELLGROUP_NAME = "ReplicateWellgroup";
-    public NabWellDataTable(final NabProtocolSchema schema, ExpProtocol protocol)
+
+    public NabWellDataTable(final NabProtocolSchema schema, ContainerFilter cf, ExpProtocol protocol)
     {
-        super(schema, DilutionManager.getTableInfoWellData(), protocol);
+        super(schema, DilutionManager.getTableInfoWellData(), cf, protocol);
 
         addRunColumn();
         addSpecimenColumn();
@@ -66,7 +69,7 @@ public class NabWellDataTable extends NabBaseTable
             else if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
 
-            ColumnInfo newCol;
+            BaseColumnInfo newCol;
             if ("Row".equalsIgnoreCase(name) || "Column".equalsIgnoreCase(name))
                 newCol = addOneBasedColumn(name, col);
             else
@@ -91,7 +94,7 @@ public class NabWellDataTable extends NabBaseTable
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 
-    private ColumnInfo addOneBasedColumn(String name, ColumnInfo column)
+    private BaseColumnInfo addOneBasedColumn(String name, ColumnInfo column)
     {
         if (!JdbcType.INTEGER.equals(column.getJdbcType()))
             throw new IllegalStateException("Can only add 1 to value of integer type.");
@@ -155,10 +158,10 @@ public class NabWellDataTable extends NabBaseTable
             }
         }
 
-        final ColumnInfo wellgroupNameColumn = getColumn(wellgroupNameColumnName);
+        final var wellgroupNameColumn = getMutableColumn(wellgroupNameColumnName);
 
         final TableInfo parentTable = this;
-        wellgroupNameColumn.setFk(new AbstractForeignKey()
+        wellgroupNameColumn.setFk(new AbstractForeignKey(getUserSchema(), getContainerFilter())
         {
             // This is a little interesting. The virtual table has an ExprColumn for each property, but since the properties
             // are all from the plate template, their values are fixed, from the point of view of this protocol
@@ -183,7 +186,7 @@ public class NabWellDataTable extends NabBaseTable
             @Override
             public TableInfo getLookupTableInfo()
             {
-                VirtualTable ret = new VirtualTable(ExperimentService.get().getSchema(), null);
+                VirtualTable ret = new VirtualTable(ExperimentService.get().getSchema(), null, getUserSchema());
                 for (Map.Entry<String, Map<String, Object>> propertyEntry : propertyMap.entrySet())
                 {
                     SQLFragment sql = new SQLFragment("(CASE ");

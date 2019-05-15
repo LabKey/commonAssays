@@ -21,7 +21,9 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -60,9 +62,9 @@ public class NabRunDataTable extends NabBaseTable
 {
     protected final NAbSpecimenTable _nabSpecimenTable;
 
-    public NabRunDataTable(final NabProtocolSchema schema, final ExpProtocol protocol)
+    public NabRunDataTable(final NabProtocolSchema schema, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(schema, new NAbSpecimenTable(schema), protocol);
+        super(schema, new NAbSpecimenTable(schema, cf), cf, protocol);
         _nabSpecimenTable = (NAbSpecimenTable) getRealTable();
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -78,7 +80,7 @@ public class NabRunDataTable extends NabBaseTable
         addRunColumn();
 
         ExprColumn runIdColumn = new ExprColumn(this, DilutionProviderSchema.RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
-        ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
+        var addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 
         Set<String> hiddenProperties = new HashSet<>();
@@ -141,14 +143,14 @@ public class NabRunDataTable extends NabBaseTable
         {
             // Hook up a column that joins back to this table so that the columns formerly under the Properties
             // node when this was OntologyManager-backed can still be queried there
-            result = wrapColumn("Properties", getRealTable().getColumn("RowId"));
-            result.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey("RowId")
+            var wrapped = wrapColumn("Properties", getRealTable().getColumn("RowId"));
+            wrapped.setIsUnselectable(true);
+            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "RowId", null)
             {
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new NabRunDataTable(_schema, _protocol);
+                    return new NabRunDataTable(_schema, getLookupContainerFilter(), _protocol);
                 }
 
                 @Override
@@ -166,7 +168,8 @@ public class NabRunDataTable extends NabBaseTable
                 }
             };
             fk.setPrefixColumnCaption(false);
-            result.setFk(fk);
+            wrapped.setFk(fk);
+            result = wrapped;
         }
         else if ("Fit Error".equalsIgnoreCase(name))
         {
@@ -218,37 +221,37 @@ public class NabRunDataTable extends NabBaseTable
         // get all the properties from this plated-based protocol:
         Collection<PropertyDescriptor> pds = getExistingDataProperties(protocol);
 
-        ColumnInfo objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
+        var objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
         objectUriColumn.setIsUnselectable(true);
         objectUriColumn.setHidden(true);
-        ColumnInfo rowIdColumn = addWrapColumn(_rootTable.getColumn("RowId"));
+        var rowIdColumn = addWrapColumn(_rootTable.getColumn("RowId"));
         rowIdColumn.setKeyField(true);
         rowIdColumn.setHidden(true);
         rowIdColumn.setIsUnselectable(true);
 
         // add object ID again, this time as a lookup to a virtual property table that contains our selected NAB properties:
 
-        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(pds, this, schema)             // Needed by NewNab only to get defaultHiddenProperties
+        // TODO ContainerFilter -- add ContainerFilter to QcAwarePropertyForeignKey
+        QcAwarePropertyForeignKey fk = new QcAwarePropertyForeignKey(schema, this, pds)             // Needed by NewNab only to get defaultHiddenProperties
         {
             @Override
-            protected ColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
+            protected BaseColumnInfo constructColumnInfo(ColumnInfo parent, FieldKey name, PropertyDescriptor pd)
             {
-                ColumnInfo result = super.constructColumnInfo(parent, name, pd);
+                var result = super.constructColumnInfo(parent, name, pd);
                 if (getInputMaterialPropertyName().equals(pd.getName()))
                 {
                     result.setLabel("Specimen");
-                    result.setFk(new LookupForeignKey("LSID")
+                    result.setFk(new LookupForeignKey(NabRunDataTable.this.getContainerFilter(), "LSID", null)
                     {
                         public TableInfo getLookupTableInfo()
                         {
-                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
+                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                             // Make sure we are filtering to the same set of containers
-                            materials.setContainerFilter(getContainerFilter());
                             if (sampleSet != null)
                             {
                                 materials.setSampleSet(sampleSet, true);
                             }
-                            ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                            var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                             if (propertyCol.getFk() instanceof PropertyForeignKey)
                             {
                                 ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, protocol, schema));
@@ -275,18 +278,18 @@ public class NabRunDataTable extends NabBaseTable
         for (Double value : cutoffValuess)
         {
             final Integer intCutoff = (int)Math.floor(value);
-            final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema);
+            final CutoffValueTable cutoffValueTable = new CutoffValueTable(schema, getContainerFilter());
             cutoffValueTable.removeContainerAndProtocolFilters();
             cutoffValueTable.addCondition(new SimpleFilter(FieldKey.fromString("Cutoff"), intCutoff));
-            ColumnInfo nabSpecimenColumn = cutoffValueTable.getColumn("NabSpecimenId");
+            var nabSpecimenColumn = cutoffValueTable.getMutableColumn("NabSpecimenId");
             nabSpecimenColumn.setIsUnselectable(true);
             nabSpecimenColumn.setHidden(true);
 
             // Update column labels like IC_4pl to Curve ICxx 4pl
-            for (ColumnInfo column : cutoffValueTable.getColumns())
+            for (var column : cutoffValueTable.getMutableColumns())
                 updateLabelWithCutoff(column, intCutoff);
 
-            ColumnInfo cutoffColumn = wrapColumn("Cutoff" + intCutoff, _rootTable.getColumn("RowId"));
+            var cutoffColumn = wrapColumn("Cutoff" + intCutoff, _rootTable.getColumn("RowId"));
             cutoffColumn.setLabel("Cutoff " + intCutoff);
             cutoffColumn.setKeyField(false);
             cutoffColumn.setIsUnselectable(true);
@@ -317,7 +320,7 @@ public class NabRunDataTable extends NabBaseTable
             }
             else if (columnName.equals("wellgroupname"))
             {
-                ColumnInfo wellgroupColumn = wrapColumn(columnInfo);
+                var wellgroupColumn = wrapColumn(columnInfo);
                 wellgroupColumn.setLabel("Wellgroup Name");
                 addColumn(wellgroupColumn);
             }
@@ -354,17 +357,17 @@ public class NabRunDataTable extends NabBaseTable
             Domain domain = ((NabAssayProvider)provider).getVirusWellGroupDomain(protocol);
             if (null != domain)
             {
-                ColumnInfo virusColumn = wrapColumn(_rootTable.getColumn("VirusLsid"));
+                var virusColumn = wrapColumn(_rootTable.getColumn("VirusLsid"));
                 virusColumn.setLabel("Virus");
                 virusColumn.setIsUnselectable(true);
                 virusColumn.setKeyField(false);
-                LookupForeignKey fkVirus = new LookupForeignKey("VirusLsid")
+                LookupForeignKey fkVirus = new LookupForeignKey(getContainerFilter(), "VirusLsid", null)
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
                         AssayProtocolSchema protocolSchema = provider.createProtocolSchema(schema.getUser(), getContainer(), protocol, null);
-                        return protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+                        return protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, getContainerFilter());
                     }
                 };
                 virusColumn.setFk(fkVirus);
@@ -375,7 +378,7 @@ public class NabRunDataTable extends NabBaseTable
         }
     }
 
-    private static void updateLabelWithCutoff(ColumnInfo column, Integer intCutoff)
+    private static void updateLabelWithCutoff(BaseColumnInfo column, Integer intCutoff)
     {
         if (null != intCutoff)
         {

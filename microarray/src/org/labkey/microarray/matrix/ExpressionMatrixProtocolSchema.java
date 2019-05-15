@@ -15,10 +15,10 @@
  */
 package org.labkey.microarray.matrix;
 
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FilteredTable;
@@ -28,7 +28,6 @@ import org.labkey.api.study.assay.matrix.AbstractMatrixProtocolSchema;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -47,17 +46,17 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
     
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        FeatureDataTable result = new FeatureDataTable(this);
+        FeatureDataTable result = new FeatureDataTable(this, cf);
         result.setName(AssayProtocolSchema.DATA_TABLE_NAME);
         return result;
     }
 
     @Override
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
-        return super.createTable(name, FEATURE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE); //TODO: Looks a bit funny, modify?
+        return super.createTable(name, cf, FEATURE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE); //TODO: Looks a bit funny, modify?
     }
 
     @Override
@@ -69,9 +68,9 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
 
     @Override
-    public TableInfo getDataTableInfo()
+    public TableInfo getDataTableInfo(ContainerFilter cf)
     {
-        return new FeatureDataTable(this);
+        return new FeatureDataTable(this, cf);
     }
 
     public static TableInfo getTableInfoFeatureData()

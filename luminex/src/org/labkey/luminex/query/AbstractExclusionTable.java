@@ -18,8 +18,8 @@ package org.labkey.luminex.query;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
@@ -55,29 +55,29 @@ import java.util.Set;
  */
 public abstract class AbstractExclusionTable extends AbstractLuminexTable
 {
-    protected AbstractExclusionTable(TableInfo realTable, LuminexProtocolSchema schema, boolean filter)
+    protected AbstractExclusionTable(TableInfo realTable, LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(realTable, schema, filter);
+        super(realTable, schema, cf, filter);
         wrapAllColumns(true);
 
         assert getRealTable().getPkColumnNames().size() == 1;
-        ColumnInfo analytesColumn = wrapColumn("Analytes", getRealTable().getColumn(getRealTable().getPkColumnNames().get(0)));
+        var analytesColumn = wrapColumn("Analytes", getRealTable().getColumn(getRealTable().getPkColumnNames().get(0)));
         analytesColumn.setKeyField(false);
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
 
-        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
-        getColumn("ModifiedBy").setFk(userIdForeignKey);
-        getColumn("CreatedBy").setFk(userIdForeignKey);
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema, true);
+        getMutableColumn("ModifiedBy").setFk(userIdForeignKey);
+        getMutableColumn("CreatedBy").setFk(userIdForeignKey);
 
         addColumn(analytesColumn);
 
-        getColumn("Created").setLabel("Excluded At");
-        getColumn("CreatedBy").setLabel("Excluded By");
-        getColumn("Comment").setLabel("Reason for Exclusion");
+        getMutableColumn("Created").setLabel("Excluded At");
+        getMutableColumn("CreatedBy").setLabel("Excluded By");
+        getMutableColumn("Comment").setLabel("Reason for Exclusion");
 
         //Needed to retain original creator of exclusions on reimport.
-        getColumn("CreatedBy").setReadOnly(false);
+        getMutableColumn("CreatedBy").setReadOnly(false);
     }
 
     @Override
