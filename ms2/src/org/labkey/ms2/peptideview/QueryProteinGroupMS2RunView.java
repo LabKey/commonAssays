@@ -50,7 +50,7 @@ import java.util.List;
  * User: jeckels
  * Date: Apr 11, 2007
  */
-public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
+public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
 {
     private static final String DATA_REGION_NAME = "ProteinGroups";
 
@@ -68,6 +68,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return settings;
     }
 
+    @Override
     public ProteinGroupQueryView createGridView(boolean expanded, boolean forExport)
     {
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
@@ -102,6 +103,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         {
             super(schema, settings, expanded, forExport, new QueryNestingOption(FieldKey.fromParts("RowId"), FieldKey.fromParts("RowId"), getAJAXNestedGridURL())
             {
+                @Override
                 public boolean isOuter(FieldKey fieldKey)
                 {
                     return fieldKey.size() == 1;
@@ -109,6 +111,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             });
         }
 
+        @Override
         protected DataRegion createDataRegion()
         {
             DataRegion rgn = super.createDataRegion();
@@ -125,6 +128,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
             return new Sort("RowId");
         }
 
+        @Override
         public ProteinGroupTableInfo createTable()
         {
             ProteinGroupTableInfo result = ((MS2Schema)getSchema()).createProteinGroupsForRunTable(false);
@@ -133,11 +137,13 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         }
     }
 
+    @Override
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
 
     }
 
+    @Override
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -176,6 +182,7 @@ public class QueryProteinGroupMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
+    @Override
     protected List<MS2ExportType> getExportTypes()
     {
         return Arrays.asList(MS2ExportType.Excel, MS2ExportType.TSV);

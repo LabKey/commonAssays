@@ -59,7 +59,7 @@ import java.util.StringTokenizer;
  * User: jeckels
  * Date: Mar 6, 2006
  */
-public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
+public class QueryPeptideMS2RunView extends AbstractMS2RunView
 {
     private PeptidesTableInfo _peptidesTable;
 
@@ -134,6 +134,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         }
     }
 
+    @Override
     public PeptideQueryView createGridView(boolean expanded, boolean forExport)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -174,6 +175,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             setShowDetailsColumn(false);
         }
 
+        @Override
         public List<DisplayColumn> getDisplayColumns()
         {
             List<DisplayColumn> result = new ArrayList<>();
@@ -192,6 +194,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             return result;
         }
 
+        @Override
         protected DataRegion createDataRegion()
         {
             DataRegion rgn = super.createDataRegion();
@@ -211,6 +214,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
             return ProteinManager.getPeptideBaseSort();
         }
 
+        @Override
         public PeptidesTableInfo createTable()
         {
             return createPeptideTable((MS2Schema)getSchema());
@@ -243,10 +247,12 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return _peptidesTable;
     }
 
+    @Override
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
     }
 
+    @Override
     public GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns)
     {
         MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -292,6 +298,7 @@ public class QueryPeptideMS2RunView extends AbstractQueryMS2RunView
         return result;
     }
 
+    @Override
     protected List<MS2ExportType> getExportTypes()
     {
         return Arrays.asList(MS2ExportType.Excel, MS2ExportType.TSV, MS2ExportType.AMT, MS2ExportType.MS2Ions, MS2ExportType.Bibliospec);

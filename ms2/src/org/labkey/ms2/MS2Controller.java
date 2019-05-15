@@ -120,7 +120,6 @@ import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.compare.SpectraCountQueryView;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
-import org.labkey.ms2.peptideview.AbstractQueryMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
@@ -257,7 +256,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private AbstractMS2RunView<? extends WebPartView> getPeptideView(String grouping, MS2Run... runs)
+    private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs)
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
@@ -1081,9 +1080,9 @@ public class MS2Controller extends SpringActionController
                 throw new NotFoundException("Unsupported GO chart type: " + form.getChartType());
             }
 
-            AbstractMS2RunView<? extends WebPartView> peptideView = getPeptideView(queryURL.getParameter("grouping"), _run);
+            AbstractMS2RunView peptideView = getPeptideView(queryURL.getParameter("grouping"), _run);
 
-            Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL, _run);
+            Map<String, SimpleFilter> filters = peptideView.getFilter(queryURL);
 
             String chartTitle = "GO " + _goChartType + " Classifications";
             SQLFragment fragment = peptideView.getProteins(queryURL, _run, form);
@@ -3819,7 +3818,7 @@ public class MS2Controller extends SpringActionController
                 run = form.validateRun();
                 QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
                 SimpleFilter filter = getAllPeptidesFilter(getViewContext(), getViewContext().getActionURL().clone(), run);
-                AbstractQueryMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
+                AbstractMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
                 protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
             }
 
