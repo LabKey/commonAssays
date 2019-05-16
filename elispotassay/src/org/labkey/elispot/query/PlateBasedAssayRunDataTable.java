@@ -17,7 +17,6 @@
 package org.labkey.elispot.query;
 
 import org.labkey.api.data.*;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
@@ -47,9 +46,9 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         return ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY;
     }
 
-    public PlateBasedAssayRunDataTable(final AssaySchema schema, final TableInfo table, final ExpProtocol protocol)
+    public PlateBasedAssayRunDataTable(final AssaySchema schema, final TableInfo table, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(table, schema);
+        super(table, schema, cf);
         _protocol = protocol;
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -63,7 +62,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, provider, schema.getUser(), schema.getContainer());
+                ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, provider, schema.getUser(), schema.getContainer(), PlateBasedAssayRunDataTable.this.getContainerFilter());
                 expRunTable.setContainerFilter(getContainerFilter());
                 return expRunTable;
             }
@@ -76,25 +75,23 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         final boolean hasMaterialSpecimenPropertyColumnDecorator = hasMaterialSpecimenPropertyColumnDecorator();
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
-        ColumnInfo materialColumn = getColumn("SpecimenLsid"); //  new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), false);
+        var materialColumn = getMutableColumn("SpecimenLsid"); //  new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), false);
         materialColumn.setLabel("Specimen");
         materialColumn.setHidden(true);
-        materialColumn.setFk(new LookupForeignKey("LSID")
+        materialColumn.setFk(new LookupForeignKey(cf,"LSID", null)
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema);
-                // Make sure we are filtering to the same set of containers
-                materials.setContainerFilter(getContainerFilter());
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                 if (sampleSet != null)
                 {
                     materials.setSampleSet(sampleSet, true);
                 }
-                ColumnInfo propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (hasMaterialSpecimenPropertyColumnDecorator && propertyCol.getFk() instanceof PropertyForeignKey)
                 {
                     ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(provider, protocol, schema));
-                    propertyCol.setDisplayColumnFactory(ColumnInfo.NOLOOKUP_FACTORY);
+                    propertyCol.setDisplayColumnFactory(BaseColumnInfo.NOLOOKUP_FACTORY);
                 }
                 propertyCol.setHidden(false);
                 materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
@@ -103,7 +100,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         });
 
         ExprColumn runIdColumn = new ExprColumn(this, RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
-        ColumnInfo addedRunIdColumn = addColumn(runIdColumn);
+        var addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 
         Set<String> hiddenProperties = new HashSet<>();

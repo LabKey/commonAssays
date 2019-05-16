@@ -37,9 +37,9 @@ public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocol
 
     private static final FieldKey CONTAINER_FAKE_COLUMN_NAME = FieldKey.fromParts("Container");
 
-    public AbstractLuminexTable(TableInfo table, LuminexProtocolSchema schema, boolean filter)
+    public AbstractLuminexTable(TableInfo table, LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(table, schema);
+        super(table, schema, cf);
         _needsFilter = filter;
 
         applyContainerFilter(getContainerFilter());

@@ -37,13 +37,11 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.AliasedColumn;
-import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.RowIdQueryUpdateService;
 import org.labkey.api.query.UserIdQueryForeignKey;
 import org.labkey.api.query.ValidationException;
@@ -59,11 +57,9 @@ import org.labkey.luminex.model.GuideSet;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -73,9 +69,9 @@ import java.util.Map;
  */
 public class GuideSetTable extends AbstractCurveFitPivotTable
 {
-    public GuideSetTable(final LuminexProtocolSchema schema, boolean filter)
+    public GuideSetTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(LuminexProtocolSchema.getTableInfoGuideSet(), schema, filter, "RowId");
+        super(LuminexProtocolSchema.getTableInfoGuideSet(), schema, cf, filter, "RowId");
         setName(LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
 
         for (ColumnInfo col : getRealTable().getColumns())
@@ -83,14 +79,14 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             // value-based average and std dev columns will be aliased and only editable via the Manage Guide Set UI
             if (col.getName().endsWith("Average") || col.getName().endsWith("StdDev"))
             {
-                ColumnInfo valueBasedCol = addWrapColumn(col);
+                var valueBasedCol = addWrapColumn(col);
                 valueBasedCol.setJdbcType(JdbcType.DOUBLE);
                 valueBasedCol.setHidden(true);
                 valueBasedCol.setUserEditable(false);
             }
             else
             {
-                ColumnInfo wrapCol = addWrapColumn(col);
+                var wrapCol = addWrapColumn(col);
                 wrapCol.setHidden(col.isHidden());
 
                 if (wrapCol.getName().equals("ValueBased"))
@@ -98,7 +94,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             }
         }
 
-        ColumnInfo protocolCol = getColumn("ProtocolId");
+        var protocolCol = getMutableColumn("ProtocolId");
         protocolCol.setLabel("Assay Design");
         protocolCol.setHidden(true);
         protocolCol.setShownInDetailsView(false);
@@ -168,7 +164,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(valueBasedCol);
 
         addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "TitrationMax", "Titration Max", "GuideSetId");
-        AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(false);
+        AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(cf, false);
         analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
@@ -178,11 +174,11 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         addRunCounts();
 
-        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema.getUser(), schema.getContainer(), true);
-        getColumn("ModifiedBy").setFk(userIdForeignKey);
-        getColumn("CreatedBy").setFk(userIdForeignKey);
+        ForeignKey userIdForeignKey = new UserIdQueryForeignKey(schema, true);
+        getMutableColumn("ModifiedBy").setFk(userIdForeignKey);
+        getMutableColumn("CreatedBy").setFk(userIdForeignKey);
 
-        getColumn("Created").setLabel("Guide Set Start Date");
+        getMutableColumn("Created").setLabel("Guide Set Start Date");
 
         addCurveTypeColumns();
 
@@ -318,14 +314,14 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(aucRunCounts);
     }
 
-    protected LookupForeignKey createCurveFitFK(final String curveType)
+    protected LookupForeignKey createCurveFitFK(ContainerFilter cf, final String curveType)
     {
-        return new LookupForeignKey("GuideSetId")
+        return new LookupForeignKey(cf, "GuideSetId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createGuideSetCurveFitTable(curveType);
+                return _userSchema.createGuideSetCurveFitTable(getLookupContainerFilter(), curveType);
             }
         };
     }

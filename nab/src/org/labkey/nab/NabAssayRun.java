@@ -120,7 +120,7 @@ public abstract class NabAssayRun extends DilutionAssayRun
                 throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.size());
 
             AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
-            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
 
             Map<String, Map<PropertyDescriptor, Object>> samplePropertiesMap = getSampleProperties();
             DilutionSummary[] dilutionSummaries = getSummaries();

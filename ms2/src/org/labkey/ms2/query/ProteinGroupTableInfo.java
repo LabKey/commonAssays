@@ -20,6 +20,7 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
@@ -59,16 +60,16 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
     private static final Set<String> HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES = new CaseInsensitiveHashSet("ProteinGroupId", "SeqId");
     private List<MS2Run> _runs;
 
-    public ProteinGroupTableInfo(MS2Schema schema)
+    public ProteinGroupTableInfo(MS2Schema schema, ContainerFilter cf)
     {
-        this(schema, true);
+        this(schema, cf, true);
     }
 
-    public ProteinGroupTableInfo(MS2Schema schema, boolean includeFirstProteinColumn)
+    public ProteinGroupTableInfo(MS2Schema schema, ContainerFilter cf, boolean includeFirstProteinColumn)
     {
-        super(MS2Manager.getTableInfoProteinGroups(), schema);
+        super(MS2Manager.getTableInfoProteinGroups(), schema, cf);
 
-        ColumnInfo groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
+        var groupNumberColumn = wrapColumn("Group", getRealTable().getColumn("GroupNumber"));
         groupNumberColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -83,34 +84,36 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 
         setTitleColumn("Group");
         addColumn(wrapColumn("ProteinProphet", getRealTable().getColumn("ProteinProphetFileId")));
-        getColumn("ProteinProphetFileId").setHidden(true);
+        getMutableColumn("ProteinProphetFileId").setHidden(true);
 
-        ColumnInfo quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
+        var quantitation = wrapColumn("Quantitation", getRealTable().getColumn("RowId"));
         quantitation.setIsUnselectable(true);
         quantitation.setFk(new LookupForeignKey("ProteinGroupId")
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ProteinQuantitationTable(_userSchema);
             }
         });
         quantitation.setKeyField(false);
         addColumn(quantitation);
 
-        ColumnInfo iTraqQuantitation = wrapColumn("iTRAQQuantitation", getRealTable().getColumn("RowId"));
+        var iTraqQuantitation = wrapColumn("iTRAQQuantitation", getRealTable().getColumn("RowId"));
         iTraqQuantitation.setLabel("iTRAQ Quantitation");
         iTraqQuantitation.setIsUnselectable(true);
         iTraqQuantitation.setFk(new LookupForeignKey("ProteinGroupId")
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ITraqProteinQuantitationTable(_userSchema);
             }
         });
         iTraqQuantitation.setKeyField(false);
         addColumn(iTraqQuantitation);
 
-        for (ColumnInfo col : getColumns())
+        for (var col : getMutableColumns())
         {
             if (HIDDEN_PROTEIN_GROUP_COLUMN_NAMES.contains(col.getName()))
             {
@@ -122,12 +125,13 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 return new ProteinProphetFileTableInfo(_userSchema);
             }
         };
         foreignKey.setPrefixColumnCaption(false);
-        getColumn("ProteinProphetFileId").setFk(foreignKey);
-        getColumn("ProteinProphet").setFk(foreignKey);
+        getMutableColumn("ProteinProphetFileId").setFk(foreignKey);
+        getMutableColumn("ProteinProphet").setFk(foreignKey);
 
         if (includeFirstProteinColumn)
         {
@@ -144,11 +148,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             firstProteinSQL.append(")");
 
             ExprColumn firstProteinColumn = new ExprColumn(this, "FirstProtein", firstProteinSQL, JdbcType.INTEGER);
-            firstProteinColumn.setFk(new LookupForeignKey("SeqId")
+            firstProteinColumn.setFk(new LookupForeignKey(cf, "SeqId", null)
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new SequencesTableInfo(null, _userSchema);
+                    return new SequencesTableInfo(null, _userSchema, getLookupContainerFilter());
                 }
             });
             addColumn(firstProteinColumn);
@@ -205,23 +209,24 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 
     public void addProteinsColumn()
     {
-        ColumnInfo proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
-        LookupForeignKey fk = new LookupForeignKey("ProteinGroupId")
+        var proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
+        LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ProteinGroupId", null)
         {
             public TableInfo getLookupTableInfo()
             {
+                // TODO ContainerFilter
                 TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
                 FilteredTable result = new FilteredTable<>(info, getUserSchema());
                 for (ColumnInfo col : info.getColumns())
                 {
-                    ColumnInfo newColumn = result.addWrapColumn(col);
+                    var newColumn = result.addWrapColumn(col);
                     if (HIDDEN_PROTEIN_GROUP_MEMBERSHIPS_COLUMN_NAMES.contains(newColumn.getName()))
                     {
                         newColumn.setHidden(true);
                     }
                 }
 
-                ColumnInfo proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
+                var proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
                 proteinColumn.setDisplayColumnFactory(new DisplayColumnFactory()
                 {
                     public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -240,11 +245,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                 });
                 result.addColumn(proteinColumn);
 
-                proteinColumn.setFk(new LookupForeignKey("SeqId", "DatabaseSequenceName")
+                proteinColumn.setFk(new LookupForeignKey(getContainerFilter(), "SeqId", "DatabaseSequenceName")
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        SequencesTableInfo result = new SequencesTableInfo(null, _userSchema);
+                        SequencesTableInfo result = new SequencesTableInfo(_userSchema, getLookupContainerFilter());
                         ExprColumn col = new ExprColumn(result, "DatabaseSequenceName", new SQLFragment("#PLACEHOLDER#"), JdbcType.VARCHAR)
                         {
                             @Override
@@ -304,28 +309,28 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             }
         };
 
-        ColumnInfo proteinNameColumn = wrapColumn("Protein", rowIdColumn);
+        var proteinNameColumn = wrapColumn("Protein", rowIdColumn);
         proteinNameColumn.setDisplayColumnFactory(factory);
         addColumn(proteinNameColumn);
 
-        ColumnInfo bestNameColumn = wrapColumn("BestName", rowIdColumn);
+        var bestNameColumn = wrapColumn("BestName", rowIdColumn);
         bestNameColumn.setDisplayColumnFactory(factory);
         addColumn(bestNameColumn);
 
-        ColumnInfo bestGeneNameColumn = wrapColumn("BestGeneName", rowIdColumn);
+        var bestGeneNameColumn = wrapColumn("BestGeneName", rowIdColumn);
         bestGeneNameColumn.setDisplayColumnFactory(factory);
         addColumn(bestGeneNameColumn);
 
-        ColumnInfo massColumn = wrapColumn("SequenceMass", rowIdColumn);
+        var massColumn = wrapColumn("SequenceMass", rowIdColumn);
         massColumn.setDisplayColumnFactory(factory);
         addColumn(massColumn);
 
-        ColumnInfo descriptionColumn = wrapColumn("Description", rowIdColumn);
+        var descriptionColumn = wrapColumn("Description", rowIdColumn);
         descriptionColumn.setDisplayColumnFactory(factory);
         addColumn(descriptionColumn);
 
 
-        ColumnInfo totalCount = wrapColumn("TotalFilteredPeptides", rowIdColumn);
+        var totalCount = wrapColumn("TotalFilteredPeptides", rowIdColumn);
         totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -336,7 +341,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         });
         addColumn(totalCount);
 
-        ColumnInfo uniqueCount = wrapColumn("UniqueFilteredPeptides", rowIdColumn);
+        var uniqueCount = wrapColumn("UniqueFilteredPeptides", rowIdColumn);
         uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)

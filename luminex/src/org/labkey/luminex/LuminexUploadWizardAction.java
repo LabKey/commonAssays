@@ -22,6 +22,7 @@ import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
@@ -200,7 +201,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     view.setInitialValue(inputName, analyteDefaultValue);
 
-                    ColumnInfo info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getUser(), getContainer());
+                    var info = analyteDP.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidColumn, getUser(), getContainer());
                     info.setName(inputName);
                     info.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
                     {
@@ -248,7 +249,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             List<DisplayColumn> negativeBeadCols = new ArrayList<>();
             for (String analyte : analyteNames)
             {
-                ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
+                var info = new BaseColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME), view.getDataRegion().getTable());
                 String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                 info.setName(inputName);
                 info.setDisplayColumnFactory(new NegativeBeadDisplayColumnFactory(analyte, inputName, initNegativeControlAnalytes));
@@ -266,7 +267,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             List<DisplayColumn> posThresholdCols = new ArrayList<>();
             for (String analyte : analyteNames)
             {
-                ColumnInfo info = new ColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
+                var info = new BaseColumnInfo(LuminexProtocolSchema.getTableInfoAnalytes().getColumn(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME), view.getDataRegion().getTable());
                 String inputName = AnalyteDefaultValueService.getAnalytePropertyName(analyte, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
                 info.setName(inputName);
                 info.setDisplayColumnFactory(createAnalytePropertyDisplayColumnFactory(inputName, LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME));

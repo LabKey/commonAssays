@@ -16,6 +16,7 @@
 
 package org.labkey.ms1.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.data.*;
@@ -85,6 +86,12 @@ public class MS1Schema extends UserSchema
         }
     }
 
+    @Override
+    public @NotNull ContainerFilter getDefaultContainerFilter()
+    {
+        return _containerFilter;
+    }
+
     public boolean isRestrictContainer()
     {
         return _restrictContainer;
@@ -102,29 +109,29 @@ public class MS1Schema extends UserSchema
         return ret;
     }
 
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         if (TABLE_FEATURE_RUNS.equalsIgnoreCase(name))
-            return getMS1ExpRunsTableInfo();
+            return getMS1ExpRunsTableInfo(cf);
         else if(TABLE_FEATURES.equalsIgnoreCase(name))
-            return getFeaturesTableInfo();
+            return getFeaturesTableInfo(cf);
         else if(TABLE_FEATURES_SEARCH.equalsIgnoreCase(name))
-            return getFeaturesTableInfoSearch();
+            return getFeaturesTableInfoSearch(cf);
         else if(TABLE_PEAKS.equalsIgnoreCase(name))
-            return getPeaksTableInfo();
+            return getPeaksTableInfo(cf);
         else if(TABLE_FILES.equalsIgnoreCase(name))
-            return getFilesTableInfo();
+            return getFilesTableInfo(cf);
         else if(TABLE_SCANS.equalsIgnoreCase(name))
-            return getScansTableInfo();
+            return getScansTableInfo(cf);
         else if(TABLE_COMPARE_PEP.equalsIgnoreCase(name))
-            return getComparePeptideTableInfo(null);
+            return getComparePeptideTableInfo(cf, null);
 
         return null;
     } //getTable()
 
-    public CrosstabTableInfo getComparePeptideTableInfo(int[] runIds)
+    public CrosstabTableInfo getComparePeptideTableInfo(ContainerFilter cf, int[] runIds)
     {
-        FeaturesTableInfo tinfo = getFeaturesTableInfo(true, true);
+        FeaturesTableInfo tinfo = getFeaturesTableInfo(cf, true, true);
         ArrayList<FeaturesFilter> filters = new ArrayList<>();
         //OK if runIds is null
         RunFilter runFilter = new RunFilter(runIds);
@@ -147,12 +154,12 @@ public class MS1Schema extends UserSchema
 
         //setup the feature id column as an FK to itself so that the first feature measure will allow
         //users to add other info from the features table.
-        ColumnInfo featureIdCol = tinfo.getColumn("FeatureId");
+        var featureIdCol = tinfo.getMutableColumn("FeatureId");
         featureIdCol.setFk(new LookupForeignKey("FeatureId", "FeatureId")
         {
             public TableInfo getLookupTableInfo()
             {
-                FeaturesTableInfo table = getFeaturesTableInfo(false, Boolean.TRUE);
+                FeaturesTableInfo table = getFeaturesTableInfo(cf,false, Boolean.TRUE);
                 //set include deleted true so that we don't include the files table in the join
                 //without it, we get a too many tables exception from SQL Server
                 table.setIncludeDeleted(true);
@@ -198,14 +205,14 @@ public class MS1Schema extends UserSchema
         return cti;
     }
 
-    public FeaturesTableInfo getFeaturesTableInfo()
+    public FeaturesTableInfo getFeaturesTableInfo(ContainerFilter cf)
     {
-        return getFeaturesTableInfo(true);
+        return getFeaturesTableInfo(cf,true);
     } //getFeaturesTableInfo()
 
-    public FeaturesTableInfo getFeaturesTableInfoSearch()
+    public FeaturesTableInfo getFeaturesTableInfoSearch(ContainerFilter cf)
     {
-        FeaturesTableInfo table = getFeaturesTableInfo(true);
+        FeaturesTableInfo table = getFeaturesTableInfo(cf,true);
 
         //change the default visible columnset
         ArrayList<FieldKey> visibleColumns = new ArrayList<>(table.getDefaultVisibleColumns());
@@ -219,35 +226,37 @@ public class MS1Schema extends UserSchema
         return table;
     } //getFeaturesTableInfo()
 
-    public FeaturesTableInfo getFeaturesTableInfo(boolean includePepFk)
+    public FeaturesTableInfo getFeaturesTableInfo(ContainerFilter cf, boolean includePepFk)
     {
-        return new FeaturesTableInfo(this, includePepFk);
+        return new FeaturesTableInfo(this, cf, includePepFk);
     } //getFeaturesTableInfo()
 
-    public FeaturesTableInfo getFeaturesTableInfo(boolean includePepFk, Boolean peaksAvailable)
+    public FeaturesTableInfo getFeaturesTableInfo(ContainerFilter cf, boolean includePepFk, Boolean peaksAvailable)
     {
-        return new FeaturesTableInfo(this, includePepFk, peaksAvailable);
+        return new FeaturesTableInfo(this, cf, includePepFk, peaksAvailable);
     } //getFeaturesTableInfo()
 
-    public PeaksTableInfo getPeaksTableInfo()
+    public PeaksTableInfo getPeaksTableInfo(ContainerFilter cf)
     {
-        return new PeaksTableInfo(this);
+        return new PeaksTableInfo(this, cf);
     }
 
-    public FilesTableInfo getFilesTableInfo()
+    public FilesTableInfo getFilesTableInfo(ContainerFilter cf)
     {
         return new FilesTableInfo(_expSchema, _containerFilter);
     }
 
-    public ScansTableInfo getScansTableInfo()
+    public ScansTableInfo getScansTableInfo(ContainerFilter cf)
     {
-        return new ScansTableInfo(this);
+        return new ScansTableInfo(this, cf);
     }
 
-    public ExpRunTable getMS1ExpRunsTableInfo()
+    public ExpRunTable getMS1ExpRunsTableInfo(ContainerFilter cf)
     {
         // Start with a standard experiment run table
-        ExpRunTable result = _expSchema.getRunsTable();
+        ExpRunTable result = _expSchema.getRunsTable(true);
+        if (null != cf)
+            result.setContainerFilter(cf);
         result.setDescription("Contains a row per MS1 experiment run imported into this folder.");
 
         // Filter to just the runs with the MS1 protocol
@@ -258,7 +267,7 @@ public class MS1Schema extends UserSchema
         ColumnInfo rowIdCol = result.getColumn("RowId");
         if(rowIdCol != null)
         {
-            ColumnInfo featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
+            var featuresLinkCol = result.addColumn(new ExprColumn(result, "Features Link",
                     new SQLFragment(rowIdCol.getValueSql(ExprColumn.STR_TABLE_ALIAS)), rowIdCol.getJdbcType(), rowIdCol));
             featuresLinkCol.setDescription("Link to the msInspect features found in each run");
             featuresLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -271,7 +280,7 @@ public class MS1Schema extends UserSchema
         }
 
         //reset the URL on the name column to jump to our feature details view
-        ColumnInfo nameCol = result.getColumn("Name");
+        var nameCol = result.getMutableColumn(ExpRunTable.Column.Name );
         if(null != nameCol)
         {
             ActionURL featuresUrl = new ActionURL(MS1Controller.ShowFeaturesAction.class, getContainer());

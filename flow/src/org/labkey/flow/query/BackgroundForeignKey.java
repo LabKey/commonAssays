@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
@@ -36,7 +37,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
 
     public BackgroundForeignKey(FlowSchema schema, FlowPropertySet fps, FlowDataType type)
     {
-        super(schema.getContainer());
+        super(schema);
         _schema = schema;
         _fps = fps;
         _type = type;
@@ -48,11 +49,13 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
+    @Override
     protected Collection<AttributeCache.StatisticEntry> getAttributes()
     {
         return _fps.getStatistics();
     }
 
+    @Override
     protected StatisticSpec attributeFromString(String field)
     {
         try
@@ -65,7 +68,8 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         }
     }
 
-    protected void initColumn(StatisticSpec stat, String preferredName, ColumnInfo column)
+    @Override
+    protected void initColumn(StatisticSpec stat, String preferredName, BaseColumnInfo column)
     {
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
         stat = new StatisticSpec(subset, stat.getStatistic(), stat.getParameter());
@@ -85,6 +89,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
         column.setFormat("#,##0.###");
     }
 
+    @Override
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)
     {
         ICSMetadata ics = _schema.getProtocol().getICSMetadata();

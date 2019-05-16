@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.JdbcType;
@@ -36,9 +37,9 @@ public class BackgroundMethod extends AbstractTableMethodInfo
         _objectIdColumn = objectIdColumn;
     }
 
-    public ColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
+    public BaseColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
     {
-        ColumnInfo ret = super.createColumnInfo(parentTable, arguments, alias);
+        var ret = super.createColumnInfo(parentTable, arguments, alias);
         ret.setFormat("#,##0.###");
         return ret;
     }

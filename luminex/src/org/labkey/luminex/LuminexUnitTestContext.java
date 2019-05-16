@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -196,9 +197,9 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
         Map<ColumnInfo, String> ret = new HashMap<>();
-        ColumnInfo item = new ColumnInfo("PositivityThreshold");
+        ColumnInfo item = new BaseColumnInfo("PositivityThreshold");
         ret.put(item, "50.0");
-        ColumnInfo item2 = new ColumnInfo("NegativeBead");
+        ColumnInfo item2 = new BaseColumnInfo("NegativeBead");
         ret.put(item2, "Blank (3)");
 
         return ret;
