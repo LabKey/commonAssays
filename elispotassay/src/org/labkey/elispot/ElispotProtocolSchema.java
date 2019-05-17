@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.CrosstabMember;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.TableInfo;
@@ -67,6 +68,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return (ElispotAssayProvider)super.getProvider();
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         Set<String> names = super.getTableNames();
@@ -75,26 +77,27 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         return names;
     }
 
-    public TableInfo createProviderTable(String name)
+    @Override
+    public TableInfo createProviderTable(String name, ContainerFilter cf)
     {
         if (name.equalsIgnoreCase(ANTIGEN_TABLE_NAME))
         {
             Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
             if (null != domain)
-                return new ElispotRunAntigenTable(this, domain, getProtocol());
+                return new ElispotRunAntigenTable(this, cf, domain, getProtocol());
         }
         else if (name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))
         {
-            return ElispotAntigenCrosstabTable.create((ElispotRunAntigenTable) createProviderTable(ANTIGEN_TABLE_NAME), getProtocol(), this);
+            return ElispotAntigenCrosstabTable.create((ElispotRunAntigenTable) createProviderTable(ANTIGEN_TABLE_NAME, cf), getProtocol(), this);
         }
 
-        return super.createProviderTable(name);
+        return super.createProviderTable(name, cf);
     }
 
     @Override
-    public ElispotRunDataTable createDataTable(boolean includeCopiedToStudyColumns)
+    public ElispotRunDataTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        ElispotRunDataTable table = new ElispotRunDataTable(this, getProtocol());
+        ElispotRunDataTable table = new ElispotRunDataTable(this, cf, getProtocol());
         if (includeCopiedToStudyColumns)
         {
             addCopiedToStudyColumns(table, true);
@@ -116,6 +119,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
             super(protocol, context, settings);
         }
 
+        @Override
         public DataView createDataView()
         {
             DataView view = super.createDataView();

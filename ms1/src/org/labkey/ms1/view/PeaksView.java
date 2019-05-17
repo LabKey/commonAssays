@@ -44,11 +44,6 @@ import java.sql.SQLException;
  */
 public class PeaksView extends QueryView
 {
-    public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature)
-    {
-        this(ctx, schema, run, feature, feature.getScanFirst().intValue(), feature.getScanLast().intValue());
-    }
-
     public PeaksView(ViewContext ctx, MS1Schema schema, ExpRun run, Feature feature, int scanFirst, int scanLast)
     {
         super(schema);
@@ -80,7 +75,7 @@ public class PeaksView extends QueryView
 
     protected TableInfo createTable()
     {
-        PeaksTableInfo tinfo = _schema.getPeaksTableInfo();
+        PeaksTableInfo tinfo = _schema.getPeaksTableInfo(getContainerFilter());
         tinfo.addScanRangeCondition(_expRun.getRowId(), _scanFirst, _scanLast, getContainer());
         return tinfo;
     }

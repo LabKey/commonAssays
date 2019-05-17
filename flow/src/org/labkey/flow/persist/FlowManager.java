@@ -1345,7 +1345,7 @@ public class FlowManager
         FlowSchema schema = new FlowSchema(user, container);
 
         // count(fcsfile)
-        TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+        TableInfo table = schema.getTable(FlowTableType.FCSFiles, null);
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
 
@@ -1368,7 +1368,7 @@ public class FlowManager
     {
         FlowSchema schema = new FlowSchema(user, container);
 
-        TableInfo table = schema.getTable(FlowTableType.FCSFiles);
+        TableInfo table = schema.getTable(FlowTableType.FCSFiles, null);
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Sample", "Name"), null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
@@ -1389,7 +1389,7 @@ public class FlowManager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("FCSFileCount"), 0, CompareType.NEQ);
         filter.addCondition(FieldKey.fromParts("ProtocolStep"), "Keywords", CompareType.EQUAL);
-        TableInfo table = schema.getTable(FlowTableType.Runs);
+        TableInfo table = schema.getTable(FlowTableType.Runs, null);
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);

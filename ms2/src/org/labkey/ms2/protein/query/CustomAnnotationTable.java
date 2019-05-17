@@ -17,7 +17,8 @@
 package org.labkey.ms2.protein.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -50,21 +51,22 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 
     public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema)
     {
-        this(annotationSet, schema, false);
+        this(annotationSet, schema, null, false);
     }
 
-    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, boolean includeSeqId)
+    public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, ContainerFilter cf, boolean includeSeqId)
     {
-        super(ProteinManager.getTableInfoCustomAnnotation(), schema);
+        super(ProteinManager.getTableInfoCustomAnnotation(), schema, cf);
         _includeSeqId = includeSeqId;
         wrapAllColumns(true);
         _annotationSet = annotationSet;
 
-        ColumnInfo propertyCol = addColumn(createPropertyColumn("Property"));
+        var propertyCol = addColumn(createPropertyColumn("Property"));
         _domain = PropertyService.get().getDomain(_annotationSet.lookupContainer(), _annotationSet.getLsid());
         if (_domain != null)
         {
-            propertyCol.setFk(new PropertyForeignKey(_domain, schema));
+            // TODO ContainerFilter
+            propertyCol.setFk(new PropertyForeignKey(schema, null, _domain));
         }
 
         List<FieldKey> defaultCols = new ArrayList<>();
@@ -98,22 +100,22 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
     private void addProteinDetailsColumn()
     {
         SQLFragment sql = new SQLFragment(getName() + ".SeqId");
-        ColumnInfo col = new ExprColumn(this, "Protein", sql, JdbcType.INTEGER);
+        var col = new ExprColumn(this, "Protein", sql, JdbcType.INTEGER);
         col.setFk(new LookupForeignKey("SeqId")
         {
             public TableInfo getLookupTableInfo()
             {
                 MS2Schema schema = new MS2Schema(_userSchema.getUser(), _userSchema.getContainer());
-                return schema.createSequencesTable();
+                return schema.createSequencesTable(null);
             }
         });
         addColumn(col);
     }
 
-    public ColumnInfo createPropertyColumn(String name)
+    public BaseColumnInfo createPropertyColumn(String name)
     {
         String sql = ExprColumn.STR_TABLE_ALIAS + ".objecturi";
-        ColumnInfo ret = new ExprColumn(this, name, new SQLFragment(sql), JdbcType.VARCHAR);
+        var ret = new ExprColumn(this, name, new SQLFragment(sql), JdbcType.VARCHAR);
         ret.setIsUnselectable(true);
         return ret;
     }

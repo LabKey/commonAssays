@@ -18,6 +18,7 @@ package org.labkey.ms2.matrix;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FilteredTable;
@@ -44,17 +45,17 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     }
 
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        ProteinSequenceDataTable result = new ProteinSequenceDataTable(this);
+        ProteinSequenceDataTable result = new ProteinSequenceDataTable(this, cf);
         result.setName(AssayProtocolSchema.DATA_TABLE_NAME);
         return result;
     }
 
     @Override
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
-        return super.createTable(name, SEQUENCE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE);
+        return super.createTable(name, cf, SEQUENCE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE);
     }
 
     @Override
@@ -67,15 +68,14 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     }
 
     @Override
-    public TableInfo getDataTableInfo()
+    public TableInfo getDataTableInfo(ContainerFilter cf)
     {
-        return new ProteinSequenceDataTable(this);
+        return new ProteinSequenceDataTable(this, cf);
     }
 
     public static TableInfo getTableInfoSequenceData()
     {
         return MS2Manager.getSchema().getTable(PROTEIN_SEQ_DATA_TABLE_NAME);
     }
-
 }
 

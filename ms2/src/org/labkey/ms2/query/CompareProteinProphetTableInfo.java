@@ -45,7 +45,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
 
     public CompareProteinProphetTableInfo(MS2Schema schema, List<MS2Run> runs, boolean forExport, HttpServletRequest request, String peptideViewName)
     {
-        super(MS2Schema.HiddenTableType.CompareProteinProphet.toString(), schema);
+        super(MS2Schema.HiddenTableType.CompareProteinProphet.toString(), schema, null);
 
         _runs = runs;
         _forExport = forExport;
@@ -91,7 +91,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
                 {
                     public TableInfo getLookupTableInfo()
                     {
-                        return new ProteinGroupTableInfo(_userSchema, false);
+                         return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);
                     }
                 };
                 if (!_forExport)
@@ -111,7 +111,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ProteinGroupTableInfo(_userSchema, false);
+                    return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);
                 }
             });
             addColumn(proteinGroupIdColumn);

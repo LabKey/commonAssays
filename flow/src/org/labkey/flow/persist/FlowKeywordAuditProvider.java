@@ -20,6 +20,7 @@ import org.labkey.api.audit.AuditTypeEvent;
 import org.labkey.api.audit.AuditTypeProvider;
 import org.labkey.api.audit.query.AbstractAuditDomainKind;
 import org.labkey.api.audit.query.DefaultAuditTypeTable;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
@@ -59,16 +60,16 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
     }
 
     @Override
-    public TableInfo createTableInfo(UserSchema userSchema)
+    public TableInfo createTableInfo(UserSchema userSchema, ContainerFilter cf)
     {
-        DefaultAuditTypeTable table = new DefaultAuditTypeTable(this, createStorageTableInfo(), userSchema, getDefaultVisibleColumns());
+        DefaultAuditTypeTable table = new DefaultAuditTypeTable(this, createStorageTableInfo(), userSchema, cf, getDefaultVisibleColumns());
 
 
         DetailsURL url = DetailsURL.fromString("experiment/resolveLSID.view?lsid=${lsid}");
         url.setStrictContainerContextEval(true);
         table.setDetailsURL(url);
-        table.getColumn(COLUMN_NAME_FILE).setURL(url);
-        table.getColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
+        table.getMutableColumn(COLUMN_NAME_FILE).setURL(url);
+        table.getMutableColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
 
         return table;
     }

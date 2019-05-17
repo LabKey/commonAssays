@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DisplayColumn;
@@ -227,7 +226,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 if (initialValue != null)
                     view.setInitialValue(inputName, initialValue);
 
-                ColumnInfo col = resultDomainProperty.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidCol, form.getUser(), form.getContainer());
+                var col = resultDomainProperty.getPropertyDescriptor().createColumnInfo(view.getDataRegion().getTable(), lsidCol, form.getUser(), form.getContainer());
                 col.setUserEditable(editable);
                 col.setName(inputName);
 
