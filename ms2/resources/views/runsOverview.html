@@ -364,6 +364,9 @@ function setQueryOptions()
                 viewReady    : function(grid)
                 {
                     grid.getSelectionModel().selectAll();
+                },
+                columnmodelcustomize : function(cm, idx) {
+                    idx["CreatedBy/DisplayName"].renderer = Ext.util.Format.htmlEncode;
                 }
             }
         });

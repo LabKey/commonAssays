@@ -665,7 +665,7 @@ public class LuminexManager
             throw new NotFoundException("Luminex assay provider not found");
 
         LuminexProtocolSchema schema = new LuminexProtocolSchema(user, container, (LuminexAssayProvider)provider, protocol, null);
-        LuminexDataTable table = new LuminexDataTable(schema);
+        LuminexDataTable table = new LuminexDataTable(schema, null);
 
         // data file, analyte, description, dilution, and type are needed to match an existing exclusion to data from an Excel file row
         FieldKey readerSerialNumberFK = FieldKey.fromParts("Data", "ReaderSerialNumber");

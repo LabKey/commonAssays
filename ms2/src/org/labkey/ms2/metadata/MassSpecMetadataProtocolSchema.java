@@ -20,8 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.IconDisplayColumn;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RenderContext;
@@ -69,25 +67,19 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        ExpRunTable result = super.createRunsTable();
+        ExpRunTable result = super.createRunsTable(cf);
         SQLFragment searchCountSQL = new SQLFragment();
         searchCountSQL.append(getSearchRunSQL(getContainer(), result.getContainerFilter(), ExprColumn.STR_TABLE_ALIAS + ".RowId", "COUNT(DISTINCT(er.RowId))"));
         ExprColumn searchCountCol = new ExprColumn(result, SEARCH_COUNT_COLUMN, searchCountSQL, JdbcType.INTEGER);
         searchCountCol.setLabel("MS2 Search Count");
         result.addColumn(searchCountCol);
 
-        ColumnInfo searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
+        var searchLinkCol = result.addColumn(SEARCHES_COLUMN, ExpRunTable.Column.RowId);
         searchLinkCol.setHidden(false);
         searchLinkCol.setLabel("MS2 Search Results");
-        searchLinkCol.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new LinkDisplayColumn(colInfo, getContainer());
-            }
-        });
+        searchLinkCol.setDisplayColumnFactory(colInfo -> new LinkDisplayColumn(colInfo, getContainer()));
 
         List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultCols.add(2, FieldKey.fromParts(searchLinkCol.getName()));
@@ -159,20 +151,19 @@ public class MassSpecMetadataProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        final ExpDataTable result = new ExpSchema(getUser(), getContainer()).getDatasTable();
+        final ExpDataTable result = new ExpSchema(getUser(), getContainer()).getDatasTable(true);
         SQLFragment runConditionSQL = new SQLFragment("RunId IN (SELECT RowId FROM " +
                 ExperimentService.get().getTinfoExperimentRun() + " WHERE ProtocolLSID = ?)");
         runConditionSQL.add(getProtocol().getLSID());
         result.addCondition(runConditionSQL, FieldKey.fromParts("RunId"));
-        result.getColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey("RowId")
+        result.getMutableColumn(ExpDataTable.Column.Run).setFk(new LookupForeignKey(cf, "RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = createRunsTable();
-                expRunTable.setContainerFilter(result.getContainerFilter());
-                return expRunTable;
+                return createRunsTable(getLookupContainerFilter());
             }
         });
 

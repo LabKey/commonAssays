@@ -84,7 +84,7 @@
     }
 
     SelectedSamples selectedSamples = form.getSelectedSamples();
-    SamplesConfirmGridView resolveView = new SamplesConfirmGridView(selectedSamples, form.isResolving(), null);
+    SamplesConfirmGridView resolveView = new SamplesConfirmGridView(getUser(), container, selectedSamples, form.isResolving(), null);
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=h(form.getSelectFCSFilesOption())%>">

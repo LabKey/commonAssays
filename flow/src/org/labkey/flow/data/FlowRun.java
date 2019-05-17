@@ -447,7 +447,7 @@ public class FlowRun extends FlowObject<ExpRun>
             return getFCSFiles();
         FlowSchema schema = new FlowSchema(null, getContainer());
         schema.setRun(this);
-        TableInfo table = schema.createFCSFileTable("FCSFiles");
+        TableInfo table = schema.createFCSFileTable("FCSFiles", null);
         ColumnInfo colRowId = table.getColumn("RowId");
         List<FlowFCSFile> ret = new ArrayList<>();
 

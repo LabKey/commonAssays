@@ -92,7 +92,7 @@ public class MascotClientImpl implements SearchClient
 
     public MascotClientImpl(String url, Logger instanceLogger, String userAccount, String userPassword)
     {
-        _url = url;
+        _url = (null == url) ? "" : url;
         _instanceLogger = (null == instanceLogger) ? _log : instanceLogger;
         _userAccount = (null == userAccount) ? "" : userAccount;
         _userPassword = (null == userPassword) ? "" : userPassword;

@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.DelegatingContainerFilter;
 import org.labkey.api.data.DisplayColumn;
@@ -89,9 +90,9 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         REMAPPED_SCHEMA_COLUMNS = Collections.unmodifiableMap(result);
     }
 
-    public LuminexDataTable(LuminexProtocolSchema schema)
+    public LuminexDataTable(LuminexProtocolSchema schema, ContainerFilter cf)
     {
-        super(LuminexProtocolSchema.getTableInfoDataRow(), schema);
+        super(LuminexProtocolSchema.getTableInfoDataRow(), schema, cf);
         final ExpProtocol protocol = schema.getProtocol();
 
         setName(AssayProtocolSchema.DATA_TABLE_NAME);
@@ -101,29 +102,28 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         setDescription("Contains all the Luminex data rows for the " + protocol.getName() + " assay definition");
 
-        ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
-        dataColumn.setFk(new LookupForeignKey("RowId")
+        var dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
+        dataColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpDataTable result = _userSchema.createDataFileTable();
-                result.setContainerFilter(new DelegatingContainerFilter(LuminexDataTable.this));
+                ExpDataTable result = _userSchema.createDataFileTable(getLookupContainerFilter());
                 return result;
             }
         });
-        ColumnInfo rowIdColumn = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
+        var rowIdColumn = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
         rowIdColumn.setHidden(true);
         rowIdColumn.setKeyField(true);
         addColumn(wrapColumn(getRealTable().getColumn("LSID"))).setHidden(true);
-        ColumnInfo protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
-        protocolColumn.setFk(new ExpSchema(_userSchema.getUser(), _userSchema.getContainer()).getProtocolForeignKey("RowId"));
+        var protocolColumn = addColumn(wrapColumn("Protocol", getRealTable().getColumn("ProtocolId")));
+        protocolColumn.setFk(new ExpSchema(_userSchema.getUser(), _userSchema.getContainer()).getProtocolForeignKey(cf,"RowId"));
         protocolColumn.setHidden(true);
         addColumn(wrapColumn(getRealTable().getColumn("WellRole")));
         addColumn(wrapColumn(getRealTable().getColumn("Type")));
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
         addColumn(wrapColumn(getRealTable().getColumn("Description")));
-        ColumnInfo specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
+        var specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
         specimenColumn.setFk(new SpecimenForeignKey(_userSchema, AssayService.get().getProvider(_userSchema.getProtocol()), _userSchema.getProtocol()));
         addColumn(specimenColumn);
         addColumn(wrapColumn(getRealTable().getColumn("ExtraSpecimenInfo")));
@@ -145,7 +145,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(wrapColumn(getRealTable().getColumn("SamplingErrors")));
         addColumn(wrapColumn(getRealTable().getColumn("BeadCount")));
 
-        ColumnInfo cvCol = wrapColumn(getRealTable().getColumn("CV"));
+        var cvCol = wrapColumn(getRealTable().getColumn("CV"));
         cvCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
@@ -168,24 +168,24 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(cvFlagEnabledColumn);
 
         addColumn(wrapColumn(getRealTable().getColumn("Summary")));
-        ColumnInfo titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
-        titrationColumn.setFk(new LookupForeignKey("RowId")
+        var titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
+        titrationColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(getLookupContainerFilter(), false);
             }
         });
 
-        ColumnInfo analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
+        var analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
         analyteTitrationColumn.setIsUnselectable(true);
-        LookupForeignKey atFK = new LookupForeignKey()
+        LookupForeignKey atFK = new LookupForeignKey(cf, null, null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createAnalyteTitrationTable(false);
+                return _userSchema.createAnalyteTitrationTable(getLookupContainerFilter(), false);
             }
 
             @Override
@@ -200,16 +200,16 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         analyteTitrationColumn.setFk(atFK);
         addColumn(analyteTitrationColumn);
 
-        ColumnInfo singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
+        var singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
         singlePointControlCol.setHidden(true);
-        ColumnInfo analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
+        var analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
         analyteSinglePointControlColumn.setIsUnselectable(true);
-        LookupForeignKey aspcFK = new LookupForeignKey()
+        LookupForeignKey aspcFK = new LookupForeignKey(cf, null, null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createAnalyteSinglePointControlTable(false);
+                return _userSchema.createAnalyteSinglePointControlTable(getLookupContainerFilter(), false);
             }
 
             @Override
@@ -226,7 +226,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
 
-        ColumnInfo containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
+        var containerColumn = addColumn(wrapColumn(getRealTable().getColumn("Container")));
         containerColumn.setHidden(true);
         containerColumn.setFk(new ContainerForeignKey(_userSchema));
 
@@ -288,7 +288,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         }
 
         Domain domain = getDomain();
-        for (ColumnInfo propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))
+        for (var propertyCol : domain.getColumns(this, getColumn("LSID"), schema.getContainer(), schema.getUser()))
         {
             addColumn(propertyCol);
             defaultCols.add(propertyCol.getFieldKey());
@@ -314,7 +314,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         setDefaultVisibleColumns(defaultCols);
 
-        getColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_userSchema));
+        getMutableColumn("Analyte").setFk(new LuminexProtocolSchema.AnalyteForeignKey(_userSchema, cf));
 
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_userSchema.getProtocol().getRowId());

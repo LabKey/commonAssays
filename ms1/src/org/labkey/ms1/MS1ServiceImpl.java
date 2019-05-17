@@ -37,6 +37,6 @@ public class MS1ServiceImpl implements MS1Service
 
     public TableInfo createFeaturesTableInfo(User user, Container container, boolean includePepFk)
     {
-        return new MS1Schema(user, container).getFeaturesTableInfo(includePepFk);
+        return new MS1Schema(user, container).getFeaturesTableInfo(null, includePepFk);
     }
 }

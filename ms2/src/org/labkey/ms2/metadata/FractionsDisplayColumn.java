@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.metadata;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
@@ -38,8 +39,8 @@ public class FractionsDisplayColumn extends SimpleDisplayColumn
         _form = form;
         setCaption("Fractions");
 
-        _col = new ColumnInfo("Fractions");
-        _col.setInputType("file");
+        _col = new BaseColumnInfo("Fractions");
+        ((BaseColumnInfo)_col).setInputType("file");
         setWidth("100%");
     }
 

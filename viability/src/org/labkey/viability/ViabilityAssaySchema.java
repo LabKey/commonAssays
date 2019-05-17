@@ -19,6 +19,7 @@ package org.labkey.viability;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -105,37 +106,39 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return result;
     }
 
-    public TableInfo createProviderTable(String name)
+    @Override
+    public TableInfo createProviderTable(String name, ContainerFilter cf)
     {
         if (name.equalsIgnoreCase(UserTables.ResultSpecimens.name()))
-            return createResultSpecimensTable();
+            return createResultSpecimensTable(cf);
 
-        return super.createProviderTable(name);
+        return super.createProviderTable(name, cf);
     }
 
     @Override
-    public FilteredTable createDataTable(boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
         // UNDONE: add copy to study columns when copy to study is implemented
         //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
-        return new ResultsTable();
+        return new ResultsTable(cf);
     }
 
-    public ResultSpecimensTable createResultSpecimensTable()
+    public ResultSpecimensTable createResultSpecimensTable(ContainerFilter cf)
     {
-        return new ResultSpecimensTable();
+        return new ResultSpecimensTable(cf);
     }
 
     public ExpDataTable createDataFileTable()
     {
-        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Data.toString(), this);
+        // TODO ContainerFilter
+        ExpDataTable ret = ExperimentService.get().createDataTable(ExpSchema.TableType.Data.toString(), this, null);
         ret.addColumn(ExpDataTable.Column.RowId);
         ret.addColumn(ExpDataTable.Column.Name);
         ret.addColumn(ExpDataTable.Column.Flag);
         ret.addColumn(ExpDataTable.Column.Created);
         ret.addColumn(ExpDataTable.Column.SourceProtocolApplication).setHidden(true);
         ret.setTitleColumn("Name");
-        ColumnInfo protocol = ret.addColumn(ExpDataTable.Column.Protocol);
+        var protocol = ret.addColumn(ExpDataTable.Column.Protocol);
         protocol.setHidden(true);
         ret.setPublicSchemaName(ExpSchema.SCHEMA_NAME);
         return ret;
@@ -145,17 +148,17 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     {
         ViabilityAssayProvider _provider;
 
-        protected ViabilityAssayTable(TableInfo table)
+        protected ViabilityAssayTable(TableInfo table, ContainerFilter cf)
         {
-            super(table, ViabilityAssaySchema.this);
+            super(table, ViabilityAssaySchema.this, cf);
             _provider = ViabilityManager.get().getProvider();
             _defaultVisibleColumns = new ArrayList<>();
             setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());
         }
 
-        protected ColumnInfo addVisible(ColumnInfo col)
+        protected BaseColumnInfo addVisible(BaseColumnInfo col)
         {
-            ColumnInfo ret = addColumn(col);
+            var ret = addColumn(col);
             addDefaultVisible(col.getName());
             return ret;
         }
@@ -182,7 +185,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         }
     }
 
-    protected static ColumnInfo copyProperties(ColumnInfo column, DomainProperty dp)
+    protected static BaseColumnInfo copyProperties(BaseColumnInfo column, DomainProperty dp)
     {
         if (dp != null)
         {
@@ -201,9 +204,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     {
         protected Domain _resultsDomain;
 
-        public ResultsTable()
+        public ResultsTable(ContainerFilter cf)
         {
-            super(ViabilitySchema.getTableInfoResults());
+            super(ViabilitySchema.getTableInfoResults(), cf);
             setName(AssayProtocolSchema.DATA_TABLE_NAME);
 
             _resultsDomain = _provider.getResultsDomain(getProtocol());
@@ -212,11 +215,11 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             for (DomainProperty property : resultDomainProperties)
                 propertyMap.put(property.getName(), property);
 
-            ColumnInfo rowId = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
+            var rowId = addColumn(wrapColumn(getRealTable().getColumn("RowId")));
             rowId.setHidden(true);
             rowId.setKeyField(true);
 
-            ColumnInfo dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
+            var dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
             dataColumn.setHidden(true);
             dataColumn.setFk(new LookupForeignKey("RowId")
             {
@@ -229,10 +232,10 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             });
 
             boolean addedTargetStudy = false;
-            ColumnInfo objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
+            var objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
             for (DomainProperty dp : resultDomainProperties)
             {
-                ColumnInfo col;
+                BaseColumnInfo col;
 
                 // UNDONE: OOR columns?
 
@@ -289,32 +292,33 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 }
             }
 
-            ColumnInfo runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
+            var runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
             runColumn.setHidden(true);
-            runColumn.setFk(new LookupForeignKey("RowId")
+            runColumn.setFk(new LookupForeignKey(cf, "RowId", null)
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider, ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer());
+                    ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider,
+                            ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer(), getLookupContainerFilter());
                     expRunTable.setContainerFilter(getContainerFilter());
                     return expRunTable;
                 }
             });
 
 
-            ColumnInfo specimenCount = addVisible(wrapColumn("SpecimenCount", getRealTable().getColumn("SpecimenCount")));
+            var specimenCount = addVisible(wrapColumn("SpecimenCount", getRealTable().getColumn("SpecimenCount")));
 
-            ColumnInfo specimenMatchCount = wrapColumn("SpecimenMatchCount", getRealTable().getColumn("SpecimenMatchCount"));
+            var specimenMatchCount = wrapColumn("SpecimenMatchCount", getRealTable().getColumn("SpecimenMatchCount"));
             specimenMatchCount.setHidden(true);
             addColumn(specimenMatchCount);
 
-            ColumnInfo specimenMatches = wrapColumn("SpecimenMatches", getRealTable().getColumn("SpecimenMatches"));
+            var specimenMatches = wrapColumn("SpecimenMatches", getRealTable().getColumn("SpecimenMatches"));
             specimenMatches.setHidden(true);
             addColumn(specimenMatches);
 
             if (!addedTargetStudy)
             {
-                ColumnInfo targetStudy = createTargetStudyCol();
+                var targetStudy = createTargetStudyCol();
                 addColumn(targetStudy);
             }
 
@@ -332,32 +336,33 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         @Override
         protected ColumnInfo resolveColumn(String name)
         {
-            ColumnInfo result = super.resolveColumn(name);
+            var result = super.resolveColumn(name);
 
             if ("Properties".equalsIgnoreCase(name))
             {
                 // Hook up a column that joins back to this table so that the columns formerly under the Properties
                 // node can still be queried there.
-                result = wrapColumn("Properties", getRealTable().getColumn("RowId"));
-                result.setIsUnselectable(true);
-                LookupForeignKey fk = new LookupForeignKey("RowId")
+                var wrapped = wrapColumn("Properties", getRealTable().getColumn("RowId"));
+                wrapped.setIsUnselectable(true);
+                LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "RowId", null)
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return new ResultsTable();
+                        return new ResultsTable(getLookupContainerFilter());
                     }
                 };
                 fk.setPrefixColumnCaption(false);
-                result.setFk(fk);
+                wrapped.setFk(fk);
+                result = wrapped;
             }
 
             return result;
         }
 
-        private ColumnInfo createTargetStudyCol()
+        private BaseColumnInfo createTargetStudyCol()
         {
-            ColumnInfo col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
+            var col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
             fixupRenderers(col, col);
             col.setUserEditable(false);
             col.setReadOnly(true);
@@ -383,8 +388,8 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             @Override
             public void declareJoins(String parentAlias, Map<String, SQLFragment> map)
             {
-                ResultSpecimensTable rs = new ResultSpecimensTable();
-                // 9024: propogate container filter
+                ResultSpecimensTable rs = new ResultSpecimensTable(getContainerFilter());
+                // 9024: propagate container filter
                 rs.setContainerFilter(getContainerFilter());
                 List<FieldKey> fields = new ArrayList<>();
                 FieldKey resultId = FieldKey.fromParts("ResultID");
@@ -494,24 +499,23 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
 
     public class ResultSpecimensTable extends ViabilityAssayTable
     {
-        public ResultSpecimensTable()
+        public ResultSpecimensTable(ContainerFilter cf)
         {
-            super(ViabilitySchema.getTableInfoResultSpecimens());
+            super(ViabilitySchema.getTableInfoResultSpecimens(), cf);
 
-            ColumnInfo resultIDCol = addVisible(wrapColumn(getRealTable().getColumn("ResultID")));
+            var resultIDCol = addVisible(wrapColumn(getRealTable().getColumn("ResultID")));
             resultIDCol.setLabel("Result");
             resultIDCol.setKeyField(true);
-            resultIDCol.setFk(new LookupForeignKey("RowID")
+            resultIDCol.setFk(new LookupForeignKey(cf, "RowID", null)
             {
                 public TableInfo getLookupTableInfo()
                 {
-                    ResultsTable results = new ResultsTable();
-                    results.setContainerFilter(new DelegatingContainerFilter(ResultSpecimensTable.this));
+                    ResultsTable results = new ResultsTable(getLookupContainerFilter());
                     return results;
                 }
             });
 
-            ColumnInfo specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
+            var specimenID = addVisible(wrapColumn(getRealTable().getColumn("SpecimenID")));
             specimenID.setLabel("Specimen");
             specimenID.setKeyField(true);
             AssayTableMetadata metadata = new ViabilityAssayProvider.ResultsSpecimensAssayTableMetadata(_provider, getProtocol());
@@ -521,7 +525,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             fk.addSpecimenFilter(filter);
             specimenID.setFk(fk);
 
-            ColumnInfo indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
+            var indexCol = addVisible(wrapColumn(getRealTable().getColumn("SpecimenIndex")));
             indexCol.setKeyField(true);
         }
 

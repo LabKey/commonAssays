@@ -17,7 +17,6 @@
 package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
@@ -136,11 +135,11 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         List<FieldKey> defaultCols = new ArrayList<>();
 
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
-        runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
+        runColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
         {
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema);
+                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema, getLookupContainerFilter());
                 result.setContainerFilter(ContainerFilter.EVERYTHING);
                 return result;
             }
@@ -157,7 +156,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
 
         if (config.isGroupedByPeptide())
         {
-            ColumnInfo indexColumn;
+            ExprColumn indexColumn;
             if (form != null && form.hasTargetSeqIds())
             {
                 SQLFragment indexSQL = new SQLFragment(getSqlDialect().getStringIndexOfFunction(new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".TrimmedPeptide"), new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".ProtSequence")));
@@ -189,11 +188,11 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         }
         proteinColumn.setDescription("The protein associated with the peptide identification. Only available if a grouping by protein information, or a target protein has been specified.");
         addColumn(proteinColumn);
-        proteinColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
+        proteinColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
         {
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createSequencesTable();
+                return _userSchema.createSequencesTable(getLookupContainerFilter());
             }
         });
 

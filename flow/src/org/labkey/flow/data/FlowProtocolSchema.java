@@ -18,8 +18,10 @@ package org.labkey.flow.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.ContainerFilterable;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
@@ -49,19 +51,21 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs);
+        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs, cf);
     }
 
     @Override
-    public ContainerFilterable createDataTable(boolean includeCopiedToStudyColumns)
+    public TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        ExpDataTable ti;
+        ti = flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), cf, FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        return ti;
     }
 
     @Nullable

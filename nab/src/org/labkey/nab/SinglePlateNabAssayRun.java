@@ -326,7 +326,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
         {
             Lsid virusLsid = DilutionDataHandler.createVirusWellGroupLsid(outputDatas.get(0), virusWellGroupName);
             AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
-            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME);
+            TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
             if (null != virusTable)
             {
                 ColumnInfo columnInfo = virusTable.getColumn(AbstractPlateBasedAssayProvider.VIRUS_NAME_PROPERTY_NAME);

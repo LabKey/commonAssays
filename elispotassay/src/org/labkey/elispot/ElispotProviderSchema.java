@@ -18,6 +18,7 @@ package org.labkey.elispot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.EnumTableInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.User;
@@ -53,7 +54,7 @@ public class ElispotProviderSchema extends AssayProviderSchema
     }
 
     @Override
-    public TableInfo createTable(String name)
+    public TableInfo createTable(String name, ContainerFilter cf)
     {
         if (name.equalsIgnoreCase(ELISPOT_PLATE_READER_TABLE))
         {
@@ -69,6 +70,6 @@ public class ElispotProviderSchema extends AssayProviderSchema
 
             return result;
         }
-        return super.createTable(name);
+        return super.createTable(name, cf);
     }
 }
