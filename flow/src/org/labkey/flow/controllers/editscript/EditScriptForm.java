@@ -300,7 +300,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             FlowSchema schema = new FlowSchema(getUser(), getContainer());
             if (run != null)
                 schema.setRun(run);
-            FlowPropertySet fps = new FlowPropertySet(schema.createFCSFileTable("foo"));
+            FlowPropertySet fps = new FlowPropertySet(schema.createFCSFileTable("foo", null));
             keywords.addAll(fps.getVisibleKeywords());
         }
         catch (Throwable t)

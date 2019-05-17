@@ -15,7 +15,9 @@
  */
 package org.labkey.luminex.query;
 
+import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.LookupForeignKey;
 
@@ -28,9 +30,9 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
     private static final String CURVE_FIT_SUFFIX = "CurveFit";
     private final String _primaryCurveFitJoinColumn;
 
-    public AbstractCurveFitPivotTable(TableInfo table, LuminexProtocolSchema schema, boolean filter, String primaryCurveFitJoinColumn)
+    public AbstractCurveFitPivotTable(TableInfo table, LuminexProtocolSchema schema, ContainerFilter cf, boolean filter, String primaryCurveFitJoinColumn)
     {
-        super(table, schema, filter);
+        super(table, schema, cf, filter);
         _primaryCurveFitJoinColumn = primaryCurveFitJoinColumn;
     }
 
@@ -49,16 +51,16 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
     {
         for (final String curveType : _userSchema.getCurveTypes())
         {
-            ColumnInfo curveTypeColumn = createCurveTypeColumn(curveType);
+            var curveTypeColumn = createCurveTypeColumn(curveType);
             addColumn(curveTypeColumn);
         }
     }
 
-    private ColumnInfo createCurveTypeColumn(final String curveType)
+    private BaseColumnInfo createCurveTypeColumn(final String curveType)
     {
-        ColumnInfo curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
+        var curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
 
-        LookupForeignKey fk = createCurveFitFK(curveType);
+        LookupForeignKey fk = createCurveFitFK(getContainerFilter(), curveType);
         // We need the prefix to distinguish between the different kinds of curve fits
         fk.setPrefixColumnCaption(true);
         curveFitColumn.setIsUnselectable(true);
@@ -71,5 +73,5 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
         return curveFitColumn;
     }
     
-    protected abstract LookupForeignKey createCurveFitFK(final String curveType);
+    protected abstract LookupForeignKey createCurveFitFK(ContainerFilter cf, final String curveType);
 }

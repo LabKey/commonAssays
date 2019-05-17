@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -61,36 +62,44 @@ import java.util.StringTokenizer;
  */
 public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredTable<SchemaType>
 {
+    // TODO ContainerFilter
+    @Deprecated
     protected SequencesTableInfo(String name, SchemaType schema)
     {
-        this(schema);
+        this(schema, null);
         setName(name);
     }
 
-    public SequencesTableInfo(SchemaType schema)
+    protected SequencesTableInfo(String name, SchemaType schema, ContainerFilter cf)
     {
-        super(ProteinManager.getTableInfoSequences(), schema);
+        this(schema, cf);
+        setName(name);
+    }
+
+    public SequencesTableInfo(SchemaType schema, ContainerFilter cf)
+    {
+        super(ProteinManager.getTableInfoSequences(), schema, cf);
         setPublicSchemaName(ProteinUserSchema.NAME);
         setTitleColumn("BestName");
         wrapAllColumns(true);
 
-        getColumn("OrgId").setFk(new QueryForeignKey(ProteinUserSchema.NAME, schema.getContainer(), null, schema.getUser(), ProteinUserSchema.TableType.Organisms.name(), null, null));
+        getMutableColumn("OrgId").setFk( QueryForeignKey.from(schema, getContainerFilter()).schema(ProteinUserSchema.NAME).table(ProteinUserSchema.TableType.Organisms.name()) );
 
         addColumn(wrapColumn("Source", getRealTable().getColumn("SourceId")));
-        getColumn("Source").setFk(new QueryForeignKey(schema, null, ProteinUserSchema.TableType.InfoSources.name(), null, null));
+        getMutableColumn("Source").setFk( QueryForeignKey.from(schema, getContainerFilter()).to(ProteinUserSchema.TableType.InfoSources.name(), null, null) );
         removeColumn(getColumn("SourceId"));
 
         ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _userSchema.getContainer());
         url.addParameter("seqId", "${SeqId}");
-        ColumnInfo bnColumn = getColumn("BestName");
+        var bnColumn = getMutableColumn("BestName");
         bnColumn.setURL(StringExpressionFactory.createURL(url));
         bnColumn.setURLTargetWindow("prot");
 
         setDetailsURL(new DetailsURL(url));
 
-        ColumnInfo annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
+        var annotationColumn = wrapColumn("CustomAnnotations", _rootTable.getColumn("SeqId"));
         annotationColumn.setIsUnselectable(true);
-        annotationColumn.setFk(new AbstractForeignKey()
+        annotationColumn.setFk(new AbstractForeignKey(schema, cf)
         {
             public StringExpression getURL(ColumnInfo parent)
             {
@@ -122,6 +131,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                         {
                             public TableInfo getLookupTableInfo()
                             {
+                                // TODO ContainerFilter
                                 return new CustomAnnotationTable(annotationSet, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
                             }
                         });
@@ -139,19 +149,19 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         });
         addColumn(annotationColumn);
 
-        ColumnInfo goMPColumn = wrapColumn("GOMetabolicProcesses", getRealTable().getColumn("SeqId"));
+        var goMPColumn = wrapColumn("GOMetabolicProcesses", getRealTable().getColumn("SeqId"));
         goMPColumn.setLabel("GO Metabolic Processes");
-        goMPColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOMetabolicProcess", "SeqId", "BestName"), "GOMPAnnotId"));
+        goMPColumn.setFk(new MultiValuedForeignKey(QueryForeignKey.from(schema, cf).schema(ProteinUserSchema.NAME).to("GOMetabolicProcess", "SeqId", "BestName"), "GOMPAnnotId"));
         addColumn(goMPColumn);
 
-        ColumnInfo goCLColumn = wrapColumn("GOCellularLocations", getRealTable().getColumn("SeqId"));
+        var goCLColumn = wrapColumn("GOCellularLocations", getRealTable().getColumn("SeqId"));
         goCLColumn.setLabel("GO Cellular Locations");
-        goCLColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOCellularLocation", "SeqId", "BestName"), "GOCLAnnotId"));
+        goCLColumn.setFk(new MultiValuedForeignKey(QueryForeignKey.from(schema, cf).schema(ProteinUserSchema.NAME).to("GOCellularLocation", "SeqId", "BestName"), "GOCLAnnotId"));
         addColumn(goCLColumn);
 
-        ColumnInfo goMFColumn = wrapColumn("GOMolecularFunctions", getRealTable().getColumn("SeqId"));
+        var goMFColumn = wrapColumn("GOMolecularFunctions", getRealTable().getColumn("SeqId"));
         goMFColumn.setLabel("GO Molecular Functions");
-        goMFColumn.setFk(new MultiValuedForeignKey(new QueryForeignKey(ProteinUserSchema.NAME, getUserSchema().getContainer(), null, getUserSchema().getUser(), "GOMolecularFunction", "SeqId", "BestName"), "GOMFAnnotId"));
+        goMFColumn.setFk(new MultiValuedForeignKey(QueryForeignKey.from(schema, cf).schema(ProteinUserSchema.NAME).to("GOMolecularFunction", "SeqId", "BestName"), "GOMFAnnotId"));
         addColumn(goMFColumn);
 
         for (CustomAnnotationType type : CustomAnnotationType.values())
@@ -188,7 +198,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
 
     public void addPeptideAggregationColumns()
     {
-        ColumnInfo aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));
+        var aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));
         aaColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -200,7 +210,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         });
         addColumn(aaColumn);
 
-        ColumnInfo totalCount = wrapColumn("Peptides", getRealTable().getColumn("SeqId"));
+        var totalCount = wrapColumn("Peptides", getRealTable().getColumn("SeqId"));
         totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -211,7 +221,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         });
         addColumn(totalCount);
 
-        ColumnInfo uniqueCount = wrapColumn("UniquePeptides", getRealTable().getColumn("SeqId"));
+        var uniqueCount = wrapColumn("UniquePeptides", getRealTable().getColumn("SeqId"));
         uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             public DisplayColumn createRenderer(ColumnInfo colInfo)

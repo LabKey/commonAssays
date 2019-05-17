@@ -34,34 +34,34 @@ import org.labkey.luminex.LuminexDataHandler;
  */
 public class CurveFitTable extends AbstractLuminexTable
 {
-    public CurveFitTable(LuminexProtocolSchema schema, boolean filterTable)
+    public CurveFitTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filterTable)
     {
-        super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, filterTable);
+        super(LuminexProtocolSchema.getTableInfoCurveFit(), schema, cf, filterTable);
         setName(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME);
         wrapAllColumns(true);
-        ColumnInfo titrationCol = getColumn("TitrationId");
+        var titrationCol = getMutableColumn("TitrationId");
         titrationCol.setLabel("Titration");
         titrationCol.setFk(new LookupForeignKey("RowId")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createTitrationTable(false);
+                return _userSchema.createTitrationTable(cf,false);
             }
         });
 
-        ColumnInfo analyteCol = getColumn("AnalyteId");
+        var analyteCol = getMutableColumn("AnalyteId");
         analyteCol.setLabel("Analyte");
         analyteCol.setFk(new LookupForeignKey("RowId")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createAnalyteTable(false);
+                return _userSchema.createAnalyteTable(cf,false);
             }
         });
 
-        ColumnInfo ec50Col = getColumn("EC50");
+        var ec50Col = getMutableColumn("EC50");
         ec50Col.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
@@ -76,7 +76,7 @@ public class CurveFitTable extends AbstractLuminexTable
         ec50FlagEnabledColumn.setHidden(true);
         addColumn(ec50FlagEnabledColumn);
 
-        ColumnInfo aucCol = getColumn("AUC");
+        var aucCol = getMutableColumn("AUC");
         aucCol.setDisplayColumnFactory(new DisplayColumnFactory()
         {
             @Override
@@ -108,6 +108,5 @@ public class CurveFitTable extends AbstractLuminexTable
         }
         sql.append("))");
         return sql;
-
     }
 }

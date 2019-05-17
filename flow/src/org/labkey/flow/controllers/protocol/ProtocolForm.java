@@ -45,7 +45,7 @@ public class ProtocolForm extends ViewForm
         options.put(FieldKey.fromParts("Name"), "FCS file name");
         options.put(FieldKey.fromParts("Run", "Name"), "Run name");
         FlowSchema schema = new FlowSchema(getUser(), getContainer());
-        ExpDataTable table = schema.createFCSFileTable(null);
+        ExpDataTable table = schema.createFCSFileTable("FcsFile", null);
         FlowPropertySet fps = new FlowPropertySet(table);
         FieldKey keyKeyword = FieldKey.fromParts("Keyword");
         for (String keyword : fps.getVisibleKeywords())

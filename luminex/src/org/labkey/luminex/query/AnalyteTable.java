@@ -16,7 +16,6 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
@@ -30,16 +29,13 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.RowIdQueryUpdateService;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
@@ -50,7 +46,6 @@ import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.model.Analyte;
 
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -60,18 +55,18 @@ import java.util.TreeMap;
  */
 public class AnalyteTable extends AbstractLuminexTable
 {
-    public AnalyteTable(final LuminexProtocolSchema schema, boolean filter)
+    public AnalyteTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
-        super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, filter);
+        super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, cf, filter);
         setName(LuminexProtocolSchema.ANALYTE_TABLE_NAME);
         setPublicSchemaName(AssaySchema.NAME);
         
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
-        addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey("RowId")
+        addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey(cf,"RowId", null)
         {
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createDataFileTable();
+                return _userSchema.createDataFileTable(getLookupContainerFilter());
             }
         });
         addColumn(wrapColumn(getRealTable().getColumn("RowId"))).setHidden(true);
@@ -82,31 +77,31 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("PositivityThreshold")));
         addColumn(wrapColumn(getRealTable().getColumn("NegativeBead")));
 
-        ColumnInfo titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
-        titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey("Analyte")
+        var titrationColumn = addColumn(wrapColumn("Standard", getRealTable().getColumn("RowId")));
+        titrationColumn.setFk(new MultiValuedForeignKey(new LookupForeignKey(cf,"Analyte", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable<>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema);
-                ColumnInfo titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
-                titrationColumn.setFk(new LookupForeignKey("RowId")
+                final FilteredTable result = new FilteredTable<>(LuminexProtocolSchema.getTableInfoAnalyteTitration(), schema, getLookupContainerFilter());
+                var titrationColumn = result.addColumn(result.wrapColumn("Titration", result.getRealTable().getColumn("TitrationId")));
+                titrationColumn.setFk(new LookupForeignKey(cf,"RowId", null)
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        TitrationTable titrationTable = _userSchema.createTitrationTable(false);
+                        TitrationTable titrationTable = _userSchema.createTitrationTable(getLookupContainerFilter(), false);
                         titrationTable.addCondition(new SimpleFilter(FieldKey.fromParts("Standard"), Boolean.TRUE));
                         return titrationTable;
                     }
                 });
-                ColumnInfo analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
-                analyteColumn.setFk(new LookupForeignKey("RowId")
+                var analyteColumn = result.addColumn(result.wrapColumn("Analyte", result.getRealTable().getColumn("AnalyteId")));
+                analyteColumn.setFk(new LookupForeignKey(cf,"RowId", null)
                 {
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return _userSchema.createAnalyteTable(false);
+                        return _userSchema.createAnalyteTable(getLookupContainerFilter(), false);
                     }
                 });
                 return result;
@@ -114,19 +109,19 @@ public class AnalyteTable extends AbstractLuminexTable
         }, "Titration"));
         titrationColumn.setHidden(false);
 
-        ColumnInfo lsidColumn = addColumn(wrapColumn(getRealTable().getColumn("LSID")));
+        var lsidColumn = addColumn(wrapColumn(getRealTable().getColumn("LSID")));
         lsidColumn.setHidden(true);
         lsidColumn.setShownInInsertView(false);
         lsidColumn.setShownInUpdateView(false);
 
-        ColumnInfo colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
+        var colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
         Map<String, PropertyDescriptor> map = new TreeMap<>();
         for(DomainProperty pd : analyteDomain.getProperties())
         {
             map.put(pd.getName(), pd.getPropertyDescriptor());
         }
-        colProperty.setFk(new PropertyForeignKey(map, _userSchema));
+        colProperty.setFk(new PropertyForeignKey(_userSchema, getContainerFilter(), map));
         colProperty.setIsUnselectable(true);
         colProperty.setReadOnly(true);
         colProperty.setShownInInsertView(false);

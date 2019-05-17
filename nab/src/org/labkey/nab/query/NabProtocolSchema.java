@@ -27,6 +27,7 @@ import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.Wrapper;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -72,9 +73,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public NabRunDataTable createDataTable(boolean includeCopiedToStudyColumns)
+    public @Nullable TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
     {
-        NabRunDataTable table = new NabRunDataTable(this, getProtocol());
+        NabRunDataTable table = new NabRunDataTable(this, cf, getProtocol());
 
         if (includeCopiedToStudyColumns)
         {
@@ -84,10 +85,10 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ExpRunTable createRunsTable()
+    public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        final ExpRunTable runTable = super.createRunsTable();
-        ColumnInfo nameColumn = runTable.getColumn(ExpRunTable.Column.Name);
+        final ExpRunTable runTable = super.createRunsTable(cf);
+        var nameColumn = runTable.getMutableColumn(ExpRunTable.Column.Name);
         // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
         // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
         nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
@@ -104,7 +105,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
     protected void addQCFlagColumn(ExpRunTable runTable)
     {
         runTable.addColumn(new AssayQCFlagColumn(runTable, getSchemaName(), false));
-        ColumnInfo qcEnabled = runTable.addColumn(new ExprColumn(runTable, "QCFlagsEnabled", AssayQCFlagColumn.createSQLFragment(runTable.getSqlDialect(), "Enabled"), JdbcType.VARCHAR));
+        var qcEnabled = runTable.addColumn(new ExprColumn(runTable, "QCFlagsEnabled", AssayQCFlagColumn.createSQLFragment(runTable.getSqlDialect(), "Enabled"), JdbcType.VARCHAR));
         qcEnabled.setLabel("QC Flags Enabled State");
         qcEnabled.setHidden(true);
     }
@@ -175,49 +176,49 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    protected TableInfo createProviderTable(String tableType)
+    protected TableInfo createProviderTable(String tableType, ContainerFilter cf)
     {
         if(tableType != null)
         {
             if (DilutionManager.CUTOFF_VALUE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createCutoffValueTable();
+                return createCutoffValueTable(cf);
             }
 
             if (DilutionManager.NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createNAbSpecimenTable();
+                return createNAbSpecimenTable(cf);
             }
 
             if (DilutionManager.WELL_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                NabWellDataTable table = new NabWellDataTable(this, getProtocol());
+                NabWellDataTable table = new NabWellDataTable(this, cf, getProtocol());
                 return table;
             }
 
             if (DilutionManager.DILUTION_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return new NabDilutionDataTable(this, getProtocol());
+                return new NabDilutionDataTable(this, cf, getProtocol());
             }
 
             if (DilutionManager.VIRUS_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 Domain virusDomain = getVirusWellGroupDomain();
                 if (virusDomain != null)
-                    return new NabVirusDataTable(this, virusDomain);
+                    return new NabVirusDataTable(this, cf, virusDomain);
             }
         }
-        return super.createProviderTable(tableType);
+        return super.createProviderTable(tableType, cf);
     }
 
-    private NAbSpecimenTable createNAbSpecimenTable()
+    private NAbSpecimenTable createNAbSpecimenTable(ContainerFilter cf)
     {
-        return new NAbSpecimenTable(this);
+        return new NAbSpecimenTable(this, cf);
     }
 
-    private CutoffValueTable createCutoffValueTable()
+    private CutoffValueTable createCutoffValueTable(ContainerFilter cf)
     {
-        return new CutoffValueTable(this);
+        return new CutoffValueTable(this, cf);
     }
 
     public Set<String> getTableNames()

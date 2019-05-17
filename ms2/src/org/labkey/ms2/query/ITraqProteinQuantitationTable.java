@@ -29,6 +29,6 @@ public class ITraqProteinQuantitationTable extends FilteredTable<MS2Schema>
     {
         super(MS2Manager.getTableInfoITraqProteinQuantitation(), schema);
         wrapAllColumns(true);
-        getColumn("ProteinGroupId").setHidden(true);
+        getMutableColumn("ProteinGroupId").setHidden(true);
     }
 }

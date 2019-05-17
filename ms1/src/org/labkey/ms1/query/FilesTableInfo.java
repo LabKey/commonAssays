@@ -16,7 +16,6 @@
 
 package org.labkey.ms1.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -41,8 +40,8 @@ public class FilesTableInfo extends FilteredTable<ExpSchema>
 
         wrapAllColumns(true);
 
-        getColumn("FileId").setHidden(true);
-        ColumnInfo edfid = getColumn("ExpDataFileId");
+        getMutableColumn("FileId").setHidden(true);
+        var edfid = getMutableColumn("ExpDataFileId");
         edfid.setFk(new LookupForeignKey("RowId")
         {
             public TableInfo getLookupTableInfo()

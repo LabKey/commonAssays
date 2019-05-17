@@ -381,8 +381,7 @@ public class ViabilityManager
     @Nullable
     private static SQLFragment specimenAggregates(ViabilityAssaySchema schema, ExpRun run)
     {
-        ViabilityAssaySchema.ResultSpecimensTable rs = schema.createResultSpecimensTable();
-        rs.setContainerFilter(ContainerFilter.EVERYTHING);
+        ViabilityAssaySchema.ResultSpecimensTable rs = schema.createResultSpecimensTable(ContainerFilter.EVERYTHING);
 
         List<FieldKey> fields = new ArrayList<>();
         FieldKey resultId = FieldKey.fromParts("ResultID");
