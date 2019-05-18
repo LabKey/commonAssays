@@ -47,11 +47,13 @@ public class SpectraCountRReport extends RReport
     }
 
 
+    @Override
     public Results generateResults(ViewContext context, boolean allowAsyncQuery) throws Exception
     {
         return getQueryView(context).getResults();
     }
 
+    @Override
     public HttpView renderDataView(ViewContext context) throws Exception
     {
         SpectraCountQueryView view = getQueryView(context);
@@ -101,11 +103,13 @@ public class SpectraCountRReport extends RReport
         return context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.runList);
     }
 
+    @Override
     public String getType()
     {
         return TYPE;
     }
 
+    @Override
     public ActionURL getRunReportURL(ViewContext context)
     {
         if (hasValidParameters(context))
@@ -125,6 +129,7 @@ public class SpectraCountRReport extends RReport
         return false;
     }
 
+    @Override
     public ActionURL getEditReportURL(ViewContext context)
     {
         // no editing from the manage page
