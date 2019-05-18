@@ -40,11 +40,13 @@ public class ChooseRunsView extends FlowQueryView
         _form = form;
     }
 
+    @Override
     protected boolean canDelete()
     {
         return false;
     }
 
+    @Override
     protected DataRegion createDataRegion()
     {
         DataRegion rgn = new ChooseRunsRegion(_form);
@@ -53,6 +55,7 @@ public class ChooseRunsView extends FlowQueryView
     }
 
 
+    @Override
     public DataView createDataView()
     {
         DataView ret = super.createDataView();
@@ -68,6 +71,7 @@ public class ChooseRunsView extends FlowQueryView
     }
 
 
+    @Override
     protected void populateButtonBar(DataView view, ButtonBar bb)
     {
         view.getDataRegion().setShowRecordSelectors(true);
@@ -75,12 +79,14 @@ public class ChooseRunsView extends FlowQueryView
     }
 
 
+    @Override
     protected boolean verboseErrors()
     {
         return false;
     }
 
     
+    @Override
     protected ActionURL urlFor(QueryAction action)
     {
         switch (action)

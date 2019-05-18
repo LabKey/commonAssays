@@ -75,6 +75,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
 
+    @Override
     public List<DisplayColumn> getDisplayColumns()
     {
         List<DisplayColumn> ret = new ArrayList<>();
@@ -93,6 +94,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         return ret;
     }
 
+    @Override
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         ActionButton btnNewScript = new ActionButton("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, getContainer()));
