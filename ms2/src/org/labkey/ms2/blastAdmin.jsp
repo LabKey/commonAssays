@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -26,7 +25,7 @@
 <labkey:form method="POST">
     <table>
         <tr>
-            <td class="labkey-form-label">Base&nbsp;URL<%= PageFlowUtil.helpPopup("Base URL", "The sequence will be appended to the end of the URL to create links to the BLAST server")%></td>
+            <td class="labkey-form-label">Base&nbsp;URL<%= helpPopup("Base URL", "The sequence will be appended to the end of the URL to create links to the BLAST server")%></td>
             <td><input size="100" type="text" name="blastServerBaseURL" value="<%=h(url)%>"/></td>
             <td><%= button("Save").submit(true) %></td>
         </tr>
