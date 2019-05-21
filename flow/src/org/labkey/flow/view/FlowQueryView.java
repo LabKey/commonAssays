@@ -121,11 +121,13 @@ public class FlowQueryView extends QueryView
         rgn.setShowPaginationCount(false);
     }
 
+    @Override
     public User getUser()
     {
         return getViewContext().getUser();
     }
 
+    @Override
     protected void renderView(Object model, HttpServletRequest request, HttpServletResponse response) throws Exception
     {
         if (!isPrintView())
@@ -164,6 +166,7 @@ public class FlowQueryView extends QueryView
         super.renderView(model, request, response);
     }
 
+    @Override
     public FlowQuerySettings getSettings()
     {
         return (FlowQuerySettings) super.getSettings();
@@ -202,6 +205,7 @@ public class FlowQueryView extends QueryView
         return getSettings().getSubtractBackground();
     }
 
+    @Override
     protected URLHelper urlChangeView()
     {
         URLHelper ret = super.urlChangeView();
@@ -209,11 +213,13 @@ public class FlowQueryView extends QueryView
         return ret;
     }
 
+    @Override
     public FlowSchema getSchema()
     {
         return (FlowSchema) super.getSchema();
     }
 
+    @Override
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         if (showAnalysisFolderButton() && getSchema().getRun() == null /*&& getSchema().getScript() == null*/)
@@ -329,6 +335,7 @@ public class FlowQueryView extends QueryView
         return panelButton;
     }
 
+    @Override
     public List<DisplayColumn> getDisplayColumns()
     {
         if (_displayColumns != null)
@@ -358,6 +365,7 @@ public class FlowQueryView extends QueryView
         return __hasGraphs;
     }
 
+    @Override
     public NavTrailConfig getNavTrailConfig()
     {
         NavTrailConfig ntc = super.getNavTrailConfig();
@@ -391,6 +399,7 @@ public class FlowQueryView extends QueryView
         return ntc;
     }
 
+    @Override
     protected ColumnHeaderType getColumnHeaderType()
     {
         return ColumnHeaderType.FieldKey;

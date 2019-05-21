@@ -302,6 +302,7 @@ public class MS2Schema extends UserSchema
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(ms2Schema, cf);
+                result.setRunFilter(null);
                 return result;
             }
         },
