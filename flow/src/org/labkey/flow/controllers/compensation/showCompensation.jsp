@@ -18,16 +18,17 @@
 <%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController"%>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix"%>
 <%@ page import="org.labkey.flow.data.FlowDataType"%>
-<%@ page import="org.labkey.flow.data.FlowRun"%>
+<%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
 <%@ page import="org.labkey.flow.view.GraphDataRegion" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
@@ -99,7 +100,7 @@
     </tr>
     <% for (int iChannel = 0; iChannel < channelCount; iChannel++)
     {
-        _HtmlString className = getShadeRowClass(iChannel);
+        HtmlString className = getShadeRowClass(iChannel);
     %>
     <tr class="labkey-row">
         <td class="labkey-column-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></td>
@@ -111,19 +112,22 @@
     <%}%>
 </table>
 
+<%
+    final FlowRun run = flowComp.getRun();
 
-
-    <% final FlowRun run = flowComp.getRun();
     if (run == null)
     {
         return;
     }
+
     final List<FlowWell> appWells = (List<FlowWell>) run.getDatas(FlowDataType.CompensationControl);
-    final Map<String, FlowWell> wellMap = new HashMap();
+    final Map<String, FlowWell> wellMap = new HashMap<>();
+
     for (FlowWell well : appWells)
     {
         wellMap.put(well.getName(), well);
     }
+
     abstract class Callback
     {
         String title;
@@ -138,22 +142,24 @@
 
     final String graphSize = FlowPreference.graphSize.getValue(request);
     Callback[] callbacks = new Callback[]
+    {
+        new Callback("Uncompensated Graphs")
+        {
+            @Override
+            String render(int iChannel, int iChannelValue)
             {
-                    new Callback("Uncompensated Graphs")
-                    {
-                        String render(int iChannel, int iChannelValue)
-                        {
-                            return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue], graphSize);
-                        }
-                    },
-                    new Callback("Compensated Graphs")
-                    {
-                        String render(int iChannel, int iChannelValue)
-                        {
-                            return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">", graphSize);
-                        }
-                    }
-            };
+                return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue], graphSize);
+            }
+        },
+        new Callback("Compensated Graphs")
+        {
+            @Override
+            String render(int iChannel, int iChannelValue)
+            {
+                return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">", graphSize);
+            }
+        }
+    };
 %>
 <br/>
 <% include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);%>

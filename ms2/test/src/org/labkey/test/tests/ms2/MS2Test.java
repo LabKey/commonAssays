@@ -493,7 +493,7 @@ public class MS2Test extends AbstractMS2ImportTest
         TextSearcher selectedAmtSrch = new TextSearcher(selectedAmtFile);
         selectedAmtSrch.setSourceTransformer(String::trim); // File has an extra blank line on Windows
         assertTextPresent(selectedAmtSrch, "Peptide");
-        assertTextPresent(selectedAmtSrch, "\n", 3);
+        assertTextPresent(selectedAmtSrch, "\n", 4);
         assertTextNotPresent(selectedAmtSrch, "Next AA");
 
         selectOptionByText(Locator.name("viewParams"), "<Standard View>");
