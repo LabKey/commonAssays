@@ -52,6 +52,7 @@ public class AnalysesWebPart extends FlowQueryView
         setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
 
+    @Override
     protected void populateButtonBar(DataView view, ButtonBar bar)
     {
         super.populateButtonBar(view, bar);

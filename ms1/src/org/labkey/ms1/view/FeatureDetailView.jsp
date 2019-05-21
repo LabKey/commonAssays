@@ -193,14 +193,14 @@
                 String nextFeatureCaption = "Next Feature >>";
 
                 if (model.getPrevFeatureId() < 0)
-                    out.write(PageFlowUtil.generateDisabledButton(prevFeatureCaption));
+                    out.print(PageFlowUtil.generateDisabledButton(prevFeatureCaption));
                 else
                     out.print(button(prevFeatureCaption).href(model.getPrevFeatureUrl()));
 
-                out.write("&nbsp;");
+                out.print("&nbsp;");
 
                 if (model.getNextFeatureId() < 0)
-                    out.write(PageFlowUtil.generateDisabledButton(nextFeatureCaption));
+                    out.print(PageFlowUtil.generateDisabledButton(nextFeatureCaption));
                 else
                     out.print(button(nextFeatureCaption).href(model.getNextFeatureUrl()));
             %>

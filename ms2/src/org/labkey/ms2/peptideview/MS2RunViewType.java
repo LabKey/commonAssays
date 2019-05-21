@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.peptideview;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Run;
@@ -31,23 +32,27 @@ public enum MS2RunViewType
 {
     QUERY_PEPTIDES("Standard", "query")
     {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
+        @Override  @NotNull
+        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
         {
             return new QueryPeptideMS2RunView(viewContext, runs);
         }
     },
     QUERY_PROTEIN_GROUPS("Protein Groups", "queryproteingroups")
     {
-        public AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs)
+        @Override @NotNull
+        public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)
         {
             return new QueryProteinGroupMS2RunView(viewContext, runs);
         }
 
+        @Override
         public boolean supportsRun(MS2Run run)
         {
             return run.hasProteinProphet();
         }
 
+        @Override
         public boolean supportsExtraFilters()
         {
             return false;
@@ -89,7 +94,8 @@ public enum MS2RunViewType
         return true;
     }
 
-    public abstract AbstractMS2RunView<? extends WebPartView> createView(ViewContext viewContext, MS2Run... runs);
+    @NotNull
+    public abstract AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs);
 
     public static MS2RunViewType getViewType(String urlName)
     {

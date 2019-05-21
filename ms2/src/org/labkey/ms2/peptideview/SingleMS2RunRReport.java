@@ -44,6 +44,7 @@ public class SingleMS2RunRReport extends CustomRReport
         super(PARAMS, TYPE);
     }
 
+    @Override
     protected QueryView getQueryView(ViewContext context)
     {
         ActionURL url = context.getActionURL();
@@ -65,17 +66,13 @@ public class SingleMS2RunRReport extends CustomRReport
         String groupingString = url.getParameter(MS2Controller.RunForm.PARAMS.grouping);
         MS2RunViewType type = MS2RunViewType.getViewType(groupingString);
         AbstractMS2RunView view = type.createView(context, run);
-        if (view instanceof AbstractQueryMS2RunView)
-        {
-            String expandedString = url.getParameter(MS2Controller.RunForm.PARAMS.expanded);
-            boolean expanded = "1".equals(expandedString);
-            return ((AbstractQueryMS2RunView)view).createGridView(expanded, true);
-        }
-
-        throw new NotFoundException("Unsupported grouping type: " + groupingString);
+        String expandedString = url.getParameter(MS2Controller.RunForm.PARAMS.expanded);
+        boolean expanded = "1".equals(expandedString);
+        return view.createGridView(expanded, true);
     }
 
 
+    @Override
     protected boolean hasRequiredParams(ViewContext context)
     {
         try
