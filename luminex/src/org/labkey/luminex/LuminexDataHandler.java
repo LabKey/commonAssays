@@ -861,7 +861,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                AssayService.get().deleteFlags(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag.getRowId());
+                AssayService.get().deleteFlag(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag);
             }
         }
     }
@@ -1530,7 +1530,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newAnalyteTitrationQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                AssayService.get().deleteFlags(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag.getRowId());
+                AssayService.get().deleteFlag(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag);
             }
         }
     }

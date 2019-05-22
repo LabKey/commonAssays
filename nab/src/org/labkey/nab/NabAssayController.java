@@ -1055,7 +1055,7 @@ public class NabAssayController extends SpringActionController
                             DilutionManager.clearWellExclusions(scope.getSqlDialect(), form.getRunId());
 
                             // clear out prior qc flags
-                            AssayService.get().deleteFlags(getContainer(), getUser(), provider, form.getRunId());
+                            AssayService.get().deleteFlagsForRun(getContainer(), getUser(), provider, form.getRunId());
                             Set<String> excludedWells = new HashSet<>();
                             Collection<Integer> wellRowIds = new HashSet<>();
 
