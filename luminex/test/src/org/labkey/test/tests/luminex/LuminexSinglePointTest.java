@@ -31,7 +31,6 @@ import org.labkey.test.pages.luminex.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
@@ -171,7 +170,7 @@ public class LuminexSinglePointTest extends LuminexTest
 
         importLuminexRunPageTwo(filename, isotype, conjugate, "", "", "Notebook"+runNumber,
                 "Experimental", "TECH", df.format(testDate.getTime()),
-                new File(TestFileUtils.getLabKeyRoot(),"sampledata/Luminex/"+filename), 1);
+                TestFileUtils.getSampleData("Luminex/" + filename), 1);
 
          switch(runNumber){
              case 1 :
