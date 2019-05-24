@@ -89,6 +89,7 @@ public class PeptideFilter extends SimpleFilter.FilterClause implements Features
             return Arrays.asList(FieldKey.fromParts("TrimmedPeptide"));
     }
 
+    @Override
     public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
     {
         if(null == _sequences)
