@@ -834,13 +834,14 @@ public class ProteinManager
         for (SimpleFilter.FilterClause clause : fullFilter.getClauses())
         {
             boolean validClause = false;
-            for (String columnName : clause.getColumnNames())
+            for (FieldKey fieldKey : clause.getFieldKeys())
             {
                 for (TableInfo table : tables)
                 {
-                    ColumnInfo column = table.getColumn(columnName);
+                    ColumnInfo column = table.getColumn(fieldKey);
                     if (column == null)
                     {
+                        String columnName = fieldKey.toString();
                         int index = columnName.lastIndexOf('.');
                         if (index != -1)
                         {

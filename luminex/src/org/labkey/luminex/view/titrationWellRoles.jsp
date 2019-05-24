@@ -80,7 +80,7 @@
                         <td>&nbsp;</td>
                         <td style="padding-right: 10px;">Standard</td>
                         <td style="padding-right: 10px;">QC Control</td>
-                        <td>Other Control<%= PageFlowUtil.helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
+                        <td>Other Control<%= helpPopup("Other Control", "AUC and EC50 values are calculated for 'Other Control' titrations but they are not added to Levey-Jennings tracking plots.")%></td>
                     </tr>
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
