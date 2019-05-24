@@ -41,7 +41,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
     <div class="labkey-indented"><input type="radio" name="<%= MS2Controller.PeptideFilteringFormElements.peptideFilterType %>" id="<%= text(FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= MS2Controller.ProphetFilterType.customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
         Peptides that meet the filter criteria in a custom grid:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
-        <%= PageFlowUtil.textLink("Create or Edit", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
+        <%= textLink("Create or Edit", (ActionURL)null, "showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;", "editPeptidesViewLink") %>
 
         <br/>
         <br/>
@@ -50,7 +50,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
     <hr/>
     <p>
         Optionally require that peptides have a sequence match in protein: <input type="text" size="30" name="<%= MS2Controller.PeptideFilteringFormElements.targetProtein %>" value="<%= h(form.getTargetProtein()==null ? "" : form.getTargetProtein()) %>" />
-        <%= PageFlowUtil.helpPopup("Protein Filter", "<p>Show only peptides whose sequences match against a specified protein. It need not be the protein mapped to the peptide by the search engine or ProteinProphet.</p><p>If no protein matches the name specified, or if multiple proteins match, this page will be redisplayed to correct the search.</p>", true)%>
+        <%=helpPopup("Protein Filter", "<p>Show only peptides whose sequences match against a specified protein. It need not be the protein mapped to the peptide by the search engine or ProteinProphet.</p><p>If no protein matches the name specified, or if multiple proteins match, this page will be redisplayed to correct the search.</p>", true)%>
     </p>
 
     <p><labkey:button text="Compare"/></p>
