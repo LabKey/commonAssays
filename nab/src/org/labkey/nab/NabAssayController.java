@@ -1055,7 +1055,7 @@ public class NabAssayController extends SpringActionController
                             DilutionManager.clearWellExclusions(scope.getSqlDialect(), form.getRunId());
 
                             // clear out prior qc flags
-                            Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRunId()));
+                            AssayService.get().deleteFlagsForRun(getContainer(), getUser(), provider, form.getRunId());
                             Set<String> excludedWells = new HashSet<>();
                             Collection<Integer> wellRowIds = new HashSet<>();
 
@@ -1065,7 +1065,7 @@ public class NabAssayController extends SpringActionController
 
                                 // add the assay qc flag for the exclusions
                                 NabWellQCFlag flag = new NabWellQCFlag(form.getRunId(), well);
-                                Table.insert(getUser(), ExperimentService.get().getTinfoAssayQCFlag(), flag);
+                                AssayService.get().saveFlag(getContainer(), getUser(), provider, flag);
                             }
 
                             // get the rowid's for the wells to exclude
@@ -1257,9 +1257,10 @@ public class NabAssayController extends SpringActionController
             {
                 List<WellExclusion> exclusions = new ArrayList<>();
                 Map<String, NabWellQCFlag> qcFlagMap = new HashMap<>();
+                AssayProvider provider = AssayService.get().getProvider(run);
 
                 // get the saved assay QC flags to pull comment information from
-                for (NabWellQCFlag flag : new TableSelector(ExperimentService.get().getTinfoAssayQCFlag(), new SimpleFilter(FieldKey.fromParts("runId"), form.getRowId()), null).getArrayList(NabWellQCFlag.class))
+                for (NabWellQCFlag flag : AssayService.get().getFlags(provider, form.getRowId(), NabWellQCFlag.class))
                 {
                     qcFlagMap.put(flag.getKey1(), flag);
                 }

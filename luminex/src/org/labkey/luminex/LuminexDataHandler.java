@@ -684,6 +684,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     {
         LuminexWellGroup wellGroup = analyte.buildWellGroup(dataRows);
         List<LuminexWell> allReplicates = wellGroup.getWellData(true); // combine replicates and get mean MFI and %CV
+        AssayProvider provider = AssayService.get().getProvider(expRun);
 
         Set<CVQCFlag> newCVQCFlags = new HashSet<>();
         for (LuminexWell replicate : allReplicates)
@@ -701,7 +702,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 if (!newCVQCFlags.contains(newQcFlag))
                 {
                     newCVQCFlags.add(newQcFlag);
-                    Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQcFlag);
+                    AssayService.get().saveFlag(expRun.getContainer(), user, provider, newQcFlag);
                 }
             }
         }
@@ -851,7 +852,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!existingQCFlags.contains(newQCFlag))
             {
-                Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newQCFlag);
+                AssayService.get().saveFlag(expRun.getContainer(), user, provider, newQCFlag);
             }
         }
 
@@ -860,7 +861,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), existingAnalyteTitrationQCFlag.getRowId());
+                AssayService.get().deleteFlag(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag);
             }
         }
     }
@@ -1520,7 +1521,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!existingAnalyteTitrationQCFlags.contains(newAnalyteTitrationQCFlag))
             {
-                Table.insert(user, ExperimentService.get().getTinfoAssayQCFlag(), newAnalyteTitrationQCFlag);
+                AssayService.get().saveFlag(expRun.getContainer(), user, provider, newAnalyteTitrationQCFlag);
             }
         }
 
@@ -1529,7 +1530,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             if (!newAnalyteTitrationQCFlags.contains(existingAnalyteTitrationQCFlag))
             {
-                Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), existingAnalyteTitrationQCFlag.getRowId());
+                AssayService.get().deleteFlag(expRun.getContainer(), user, provider, existingAnalyteTitrationQCFlag);
             }
         }
     }
