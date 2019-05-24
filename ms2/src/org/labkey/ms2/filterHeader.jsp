@@ -62,9 +62,9 @@
                                 { %>
                                     <option value="<%=h(viewType.getURLName())%>"<%=selected(viewType.equals(bean.currentViewType))%>><%=h(viewType.getName())%></option><%
                                 } %>
-                                </select><%=PageFlowUtil.helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\" nowrap><b>Standard</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Peptides (Legacy)</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein (Legacy)</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>ProteinProphet (Legacy)</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr></table>", true, 500)%>
+                                </select><%=helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\" nowrap><b>Standard</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Peptides (Legacy)</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein (Legacy)</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>ProteinProphet (Legacy)</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr></table>", true, 500)%>
                             </td>
-                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=PageFlowUtil.helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
+                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
                             <td style="vertical-align: middle;" nowrap>
                                 <%= button("Go").id("viewTypeSubmitButton").submit(true) %></td>
                         </tr>
@@ -80,9 +80,9 @@
                             <legend><%=h(bean.run.getChargeFilterColumnName())%> charge filter</legend>
                             <table class="labkey-data-region-legacy">
                                 <tr>
-                                    <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=PageFlowUtil.helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
-                                    <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=PageFlowUtil.helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
-                                    <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=PageFlowUtil.helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;">1+&nbsp;<input id="Charge1" type="text" name=charge1 value="<%=bean.charge1%>" size="2"><%=helpPopup("1+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 1+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;">2+&nbsp;<input id="Charge2" type="text" name=charge2 value="<%=bean.charge2%>" size="2"><%=helpPopup("2+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 2+ charge state.")%></td>
+                                    <td nowrap style="vertical-align: middle;">3+&nbsp;<input id="Charge3" type="text" name=charge3 value="<%=bean.charge3%>" size="2"><%=helpPopup("3+ " + bean.run.getChargeFilterColumnName() + " charge filter", "The minimum " + bean.run.getChargeFilterColumnName() + " value for peptides in the 3+ charge state.")%></td>
                                     <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddChargeScoreFilterButton").submit(true) %></td>
                                 </tr>
                             </table>
@@ -95,9 +95,9 @@
                         <table>
                             <tr>
                                 <td nowrap style="vertical-align: middle;">
-                                    <input type="radio" name="tryptic"<%=checked(0 == bean.tryptic)%> value="0">0<%=PageFlowUtil.helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
-                                    <input type="radio" name="tryptic"<%=checked(1 == bean.tryptic)%> value="1">1<%=PageFlowUtil.helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
-                                    <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=PageFlowUtil.helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=checked(0 == bean.tryptic)%> value="0">0<%=helpPopup("0 tryptic ends", "All peptides will be shown, regardless of tryptic ends")%>
+                                    <input type="radio" name="tryptic"<%=checked(1 == bean.tryptic)%> value="1">1<%=helpPopup("1 tryptic end", "At least one end of the peptide must be tryptic")%>
+                                    <input type="radio" name="tryptic"<%=checked(2 == bean.tryptic)%> value="2">2<%=helpPopup("2 tryptic ends", "Both ends of the peptide must be tryptic")%>
                                 </td>
                                 <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddTrypticEndsFilterButton").submit(true) %></td>
                             </tr>
@@ -110,7 +110,7 @@
                         <table>
                             <tr>
                                 <td nowrap style="vertical-align: middle;">
-                                    <input type="checkbox" id="highestScore" name="highestScore"<%=checked(bean.highestScore)%> value="1">Only show highest score for <%=h(runChargeFilterColumnName)%><%=PageFlowUtil.helpPopup("Only show highest score for " + runChargeFilterColumnName, "Filter out all but highest " + runChargeFilterColumnName + " score for a peptide")%>
+                                    <input type="checkbox" id="highestScore" name="highestScore"<%=checked(bean.highestScore)%> value="1">Only show highest score for <%=h(runChargeFilterColumnName)%><%=helpPopup("Only show highest score for " + runChargeFilterColumnName, "Filter out all but highest " + runChargeFilterColumnName + " score for a peptide")%>
                                 </td>
                                 <td nowrap style="vertical-align: middle;"><%= button("Go").id("AddHighestScoreFilterButton").submit(true) %></td>
                             </tr>
