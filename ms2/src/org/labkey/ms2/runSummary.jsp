@@ -71,7 +71,7 @@ if (null != bean.quantAlgorithm)
 
         if (bean.writePermissions)
         { %>
-            <%=textLink("Rename", MS2Controller.getRenameRunURL(c, run, getActionURL()))%><%
+            <%=link("Rename", MS2Controller.getRenameRunURL(c, run, getActionURL()))%><%
         } %>
             <%=bean.modHref%><%
 

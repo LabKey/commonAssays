@@ -69,7 +69,7 @@
                 <td colspan="2">
                     Configuration is currently being inherited from <%= h(mascotConfig.getContainer().isRoot() ? "the site-level" : mascotConfig.getContainer().getPath())%>.
                     Saving will override the inherited configuration.<br/>
-                    <%= textLink("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
+                    <%= link("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
                 </td>
             </tr>
         <% } %>
