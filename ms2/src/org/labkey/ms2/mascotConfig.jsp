@@ -19,7 +19,6 @@
 <%@ page import="org.labkey.api.admin.AdminUrls"%>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.HelpTopic" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -102,7 +101,7 @@
     </table>
 
     <%= button("Save").submit(true) %>
-    <%= button("Cancel").href(PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL())%>
+    <%= button("Cancel").href(urlProvider(AdminUrls.class).getAdminConsoleURL())%>
     <% if (!inherited) { %>
     <%= button("Clear Settings").onClick("document.getElementById('resetInput').value = 'true'; document.forms['preferences'].submit();") %>
     <% } %>

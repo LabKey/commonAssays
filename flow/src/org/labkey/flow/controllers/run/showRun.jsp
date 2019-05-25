@@ -26,7 +26,6 @@
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
 <%@ page import="org.labkey.api.study.StudyService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
@@ -80,7 +79,7 @@
             Study study = StudyService.get().getStudy(c);
             if (study != null)
             {
-                ActionURL studyURL = PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c);
+                ActionURL studyURL = urlProvider(ProjectUrls.class).getBeginURL(c);
                 %><p> Target Study: <%=link(study.getLabel(), studyURL)%></p><%
             }
         }

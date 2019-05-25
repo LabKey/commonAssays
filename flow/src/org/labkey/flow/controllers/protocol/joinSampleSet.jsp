@@ -22,13 +22,14 @@
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% JoinSampleSetForm form = (JoinSampleSetForm) __form;
+<%
+    JoinSampleSetForm form = (JoinSampleSetForm) __form;
 
     if (form.getProtocol().getSampleSet() == null)
     {
         %>
         <p>You must first upload a sample set before specifying how to match samples to FCS files.</p>
-        <%=textLink("Upload Sample Descriptions", form.getProtocol().urlCreateSampleSet())%>
+        <%=link("Upload Sample Descriptions").href(form.getProtocol().urlCreateSampleSet())%>
         <%
     }
     else
