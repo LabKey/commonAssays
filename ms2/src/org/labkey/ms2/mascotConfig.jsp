@@ -20,14 +20,13 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.HelpTopic" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.pipeline.mascot.MascotConfig" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%=formatMissedErrors("form")%>
 <%
-    Container container = HttpView.currentView().getViewContext().getContainer();
+    Container container = getContainer();
     MascotConfig mascotConfig = MascotConfig.findMascotConfig(container);
     boolean inherited = !mascotConfig.getContainer().equals(container);
 %>
@@ -91,7 +90,7 @@
         </tr>
         <tr>
             <td></td>
-            <td><%=textLink("Test Mascot settings", "javascript:testMascot()")%>
+            <td><%=link("Test Mascot settings").href("javascript:testMascot()")%>
             </td>
         </tr>
 
