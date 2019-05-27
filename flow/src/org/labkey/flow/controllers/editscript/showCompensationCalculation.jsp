@@ -48,10 +48,10 @@
         <td><%=h(channel)%></td>
         <td><%=h(form.positiveKeywordName[i])%></td>
         <td><%=h(form.positiveKeywordValue[i])%></td>
-        <td><%=text(h(form.positiveSubset[i]))%></td>
+        <td><%=h(form.positiveSubset[i])%></td>
         <td><%=h(form.negativeKeywordName[i])%></td>
         <td><%=h(form.negativeKeywordValue[i])%></td>
-        <td><%=text(h(form.negativeSubset[i]))%></td>
+        <td><%=h(form.negativeSubset[i])%></td>
     </tr>
     <%
         }
