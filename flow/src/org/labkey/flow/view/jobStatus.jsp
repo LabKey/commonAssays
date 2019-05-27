@@ -107,7 +107,7 @@
     {
         cancelURL.addParameter("statusFile", psf.getFilePath());
 %>
-<br><%=PageFlowUtil.button("Cancel Job").href(cancelURL)%>
+<br><%=button("Cancel Job").href(cancelURL)%>
 <%
     }
 %>
