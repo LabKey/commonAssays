@@ -270,6 +270,16 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return view;
     }
 
+    @Override
+    protected void addHiddenRunProperties(ElispotRunUploadForm form, InsertView view) throws ExperimentException
+    {
+        super.addHiddenRunProperties(form, view);
+        if (form.getName() != null)
+            view.getDataRegion().addHiddenFormField("name", form.getName());
+        if (form.getComments() != null)
+            view.getDataRegion().addHiddenFormField("comments", form.getComments());
+    }
+
     protected ElispotRunStepHandler getRunStepHandler()
     {
         return new ElispotRunStepHandler();
