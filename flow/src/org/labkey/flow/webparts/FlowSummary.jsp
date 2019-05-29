@@ -412,11 +412,11 @@
             ActionURL urlPipelineRoot = urlProvider(PipelineUrls.class).urlSetup(c);
             if (!_hasPipelineRoot)
             {
-                %><div><%=textLink("Setup Pipeline", urlPipelineRoot)%></div><%
+                %><div><%=link("Setup Pipeline", urlPipelineRoot)%></div><%
             }
             else if (_fcsFileCount == 0)
             {
-                %><div><%=textLink("Change Pipeline", urlPipelineRoot)%></div><%
+                %><div><%=link("Change Pipeline", urlPipelineRoot)%></div><%
             }
         }
 
@@ -424,16 +424,16 @@
         {
             if (!_hasPipelineRoot)
             {
-                %><div><%=textLink("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
+                %><div><%=link("Import Workspace", new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, c))%></div><%
             }
             else
             {
-                %><div><%=textLink("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getActionURL()))%></div><%
+                %><div><%=link("Upload and Import", urlProvider(PipelineUrls.class).urlBrowse(c, getActionURL()))%></div><%
             }
 
             if (_fcsRealRunCount > 0)
             {
-                %><div><%=textLink("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
+                %><div><%=link("Create Analysis Script", new ActionURL(ScriptController.NewProtocolAction.class, c))%></div><%
             }
         }
     %>
@@ -443,35 +443,35 @@
 <% if (_protocol != null && _canUpdate) { %>
     <div class="summary-div">
         <h3 class="summary-header">Manage</h3>
-        <div><%= textLink("Settings", _protocol.urlShow())%></div>
+        <div><%= link("Settings", _protocol.urlShow())%></div>
 
         <%
         if (_sampleSet != null)
         {
         %>
-            <div><%=textLink("Show Samples", _protocol.urlShowSamples())%></div>
-            <div><%=textLink("Upload Samples", _protocol.urlUploadSamples())%></div>
+            <div><%=link("Show Samples", _protocol.urlShowSamples())%></div>
+            <div><%=link("Upload Samples", _protocol.urlUploadSamples())%></div>
         <%
         }
         else
         {
         %>
-            <div><%=textLink("Upload Samples", _protocol.urlCreateSampleSet())%></div>
+            <div><%=link("Upload Samples", _protocol.urlCreateSampleSet())%></div>
         <%
         }
         if (_fcsAnalysisCount > 0)
         {
         %>
-            <div><%=textLink("Edit Metadata", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div>
+            <div><%=link("Edit Metadata", new ActionURL(ProtocolController.EditICSMetadataAction.class, c))%></div>
         <%
         }
 
         int jobCount = PipelineService.get().getQueuedStatusFiles(c).size();
-        %><div><%=textLink("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
+        %><div><%=link("Show Jobs" + (jobCount > 0 ? " (" + jobCount + " running)" : ""), urlProvider(PipelineStatusUrls.class).urlBegin(c))%></div><%
 
         if (_canCreateFolder && _hasPipelineRoot)
         {
-            %><div><%=textLink("Copy Folder", new ActionURL(FlowController.NewFolderAction.class, c))%></div><%
+            %><div><%=link("Copy Folder", new ActionURL(FlowController.NewFolderAction.class, c))%></div><%
         }
         %>
     </div>

@@ -41,7 +41,7 @@
     FlowJob job = model.getJob();
 
     String log = PageFlowUtil.getFileContentsAsString(new File(psf.getFilePath()));
-    ActionURL cancelURL = new ActionURL(FlowController.CancelJobAction.class, getViewContext().getContainer());
+    ActionURL cancelURL = urlFor(FlowController.CancelJobAction.class);
 %>
 <p><%=h(psf.getDescription())%></p>
 <p><%=h(model.getStatus())%></p>
@@ -107,7 +107,7 @@
     {
         cancelURL.addParameter("statusFile", psf.getFilePath());
 %>
-<br><%=PageFlowUtil.button("Cancel Job").href(cancelURL)%>
+<br><%=button("Cancel Job").href(cancelURL)%>
 <%
     }
 %>

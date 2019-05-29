@@ -26,6 +26,7 @@
 <%@ page import="org.labkey.ms2.protein.fasta.FastaFile" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
@@ -70,23 +71,23 @@ if (null != bean.quantAlgorithm)
 
         if (bean.writePermissions)
         { %>
-            <%=textLink("Rename", MS2Controller.getRenameRunURL(c, run, getActionURL()))%><%
+            <%=link("Rename", MS2Controller.getRenameRunURL(c, run, getActionURL()))%><%
         } %>
             <%=bean.modHref%><%
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=textLink("Show " + run.getParamsFileName(), buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun(), null, "paramFileLink", java.util.Collections.singletonMap("target", "paramFile"))%><%
+            <%=link("Show " + run.getParamsFileName()).href(buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun()).id("paramFileLink").attributes(Collections.singletonMap("target", "paramFile"))%><%
         }
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=textLink("Show Peptide Prophet Details", buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun(), null, "peptideProphetDetailsLink", java.util.Collections.singletonMap("target", "peptideProphetSummary"))%><%
+            <%=link("Show Peptide Prophet Details").href(buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun()).id("peptideProphetDetailsLink").attributes(Collections.singletonMap("target", "peptideProphetSummary"))%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=textLink("Show Protein Prophet Details", buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun(), null, "proteinProphetDetailsLink", java.util.Collections.singletonMap("target", "proteinProphetSummary"))%><%
+            <%=link("Show Protein Prophet Details").href(buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun()).id("proteinProphetDetailsLink").attributes(Collections.singletonMap("target", "proteinProphetSummary"))%><%
         } %>
         </div>
     </td></tr>

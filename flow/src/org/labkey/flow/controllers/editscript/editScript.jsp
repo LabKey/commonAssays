@@ -18,6 +18,7 @@
 <%@ page import="org.labkey.flow.ScriptParser"%>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
 <%@ page import="org.labkey.flow.data.FlowScript"%>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.EditPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -26,7 +27,7 @@
 %>
 <labkey:form method="POST" action="<%=h(formAction(ScriptController.EditScriptAction.class))%>">
 <% if (error != null) { %>
-<p class="labkey-error"><%=h(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
+<p class="labkey-error"><%=PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
 <% if (error.getLine() != 0) { %>
 <script>
     function findOffset(text, line, column)

@@ -36,7 +36,7 @@
         <td>Data File:</td>
         <% urlDownload.addParameter("rowId", expData.getRowId()); %>
         <td><%=h(expData.getDataFileUrl())%>
-            <%=textLink("download", urlDownload)%>
+            <%=link("download", urlDownload)%>
         </td>
     </tr>
     <tr>
@@ -52,7 +52,7 @@
             }
         %>
         <td><%=h(dataFile.getMzXmlUrl())%>
-            <%=textLink("download", urlDownload)%> <% //TODO: "Open in msInspect" link? %>
+            <%=link("download", urlDownload)%> <% //TODO: "Open in msInspect" link? %>
         </td>
     </tr>
 </table>

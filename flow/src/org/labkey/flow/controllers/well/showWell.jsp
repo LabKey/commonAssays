@@ -24,11 +24,10 @@
 <%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
-<%@ page import="org.labkey.api.security.SecurityPolicy" %>
-<%@ page import="org.labkey.api.security.SecurityPolicyManager" %>
-<%@ page import="org.labkey.api.security.User"%>
+<%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
+<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
@@ -61,7 +60,6 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
-<%@ page import="org.labkey.api.util.DateUtil" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -572,9 +570,9 @@ else
             File f = r.resolvePath(rel.getPath());
             if (f != null && f.canRead())
             {
-                %><labkey:link href="<%=h(getWell().urlFor(WellController.ChooseGraphAction.class))%>" text="More Graphs" /><br><%
-                %><labkey:link href="<%=h(getWell().urlFor(WellController.KeywordsAction.class))%>" text="Keywords from the FCS file" /><br><%
-                %><labkey:link href="<%=h(getWell().urlDownload())%>" rel="nofollow" text="Download FCS file" /><br><%
+                %><%=link("More Graphs", getWell().urlFor(WellController.ChooseGraphAction.class))%><br><%
+                %><%=link("Keywords from the FCS file", getWell().urlFor(WellController.KeywordsAction.class))%><br><%
+                %><%=link("Download FCS file", getWell().urlDownload()).attributes(Map.of("rel", "nofollow"))%><br><%
             }
             else
             {
@@ -591,7 +589,7 @@ if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
 
 if (getRun() != null)
 {
-    %><labkey:link href="<%=PageFlowUtil.urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData())%>" text="Experiment Run Graph Details" /><br><%
+    %><%=link("Experiment Run Graph Details", urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData()))%><br><%
 }
 
 %></p><%

@@ -16,23 +16,21 @@
  */
 %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleSet"%>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.query.QueryAction" %>
+<%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.util.URLHelper" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="org.labkey.api.query.QueryAction" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
-<%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="org.labkey.api.util.URLHelper" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="static org.labkey.api.data.CompareType.IN" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -41,7 +39,7 @@
     FlowProtocol protocol = form.getProtocol();
     ExpSampleSet ss = protocol.getSampleSet();
 
-    ExperimentUrls expUrls = PageFlowUtil.urlProvider(ExperimentUrls.class);
+    ExperimentUrls expUrls = urlProvider(ExperimentUrls.class);
 
     Map<Pair<Integer, String>, List<Pair<Integer, String>>> fcsFilesBySample = protocol.getFCSFilesGroupedBySample(getUser(), getContainer());
     Map<Pair<Integer, String>, List<Pair<Integer,String>>> linkedSamples = new LinkedHashMap<>();

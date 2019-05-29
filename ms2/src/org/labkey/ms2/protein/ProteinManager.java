@@ -704,6 +704,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             ColumnInfo colInfo = columnMap != null ? columnMap.get(_fieldKey) : null;
@@ -764,6 +765,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sql = new SQLFragment();
@@ -1034,6 +1036,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
@@ -1083,6 +1086,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();

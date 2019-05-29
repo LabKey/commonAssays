@@ -19,16 +19,14 @@
 <%@ page import="org.labkey.api.admin.AdminUrls"%>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.HelpTopic" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.pipeline.mascot.MascotConfig" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%=formatMissedErrors("form")%>
 <%
-    Container container = HttpView.currentView().getViewContext().getContainer();
+    Container container = getContainer();
     MascotConfig mascotConfig = MascotConfig.findMascotConfig(container);
     boolean inherited = !mascotConfig.getContainer().equals(container);
 %>
@@ -70,7 +68,7 @@
                 <td colspan="2">
                     Configuration is currently being inherited from <%= h(mascotConfig.getContainer().isRoot() ? "the site-level" : mascotConfig.getContainer().getPath())%>.
                     Saving will override the inherited configuration.<br/>
-                    <%= textLink("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
+                    <%= link("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
                 </td>
             </tr>
         <% } %>
@@ -92,7 +90,7 @@
         </tr>
         <tr>
             <td></td>
-            <td><%=textLink("Test Mascot settings", "javascript:testMascot()")%>
+            <td><%=link("Test Mascot settings").href("javascript:testMascot()")%>
             </td>
         </tr>
 
@@ -102,7 +100,7 @@
     </table>
 
     <%= button("Save").submit(true) %>
-    <%= button("Cancel").href(PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL())%>
+    <%= button("Cancel").href(urlProvider(AdminUrls.class).getAdminConsoleURL())%>
     <% if (!inherited) { %>
     <%= button("Clear Settings").onClick("document.getElementById('resetInput').value = 'true'; document.forms['preferences'].submit();") %>
     <% } %>
