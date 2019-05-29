@@ -47,7 +47,7 @@
         ActionURL urlProteinDetailsPage = getViewContext().cloneActionURL();
         urlProteinDetailsPage.deleteParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
         <tr>
-            <td class="labkey-form-label">Peptides<%= PageFlowUtil.helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true) %></td>
+            <td class="labkey-form-label">Peptides<%=helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true)%></td>
             <td>
                 <labkey:form action="<%= urlProteinDetailsPage %>" method="GET">
                     <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>

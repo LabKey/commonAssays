@@ -31,18 +31,15 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayDataLinkDisplayColumn;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayQCFlagColumn;
 import org.labkey.api.study.assay.RunListDetailsQueryView;
 import org.labkey.api.study.query.ResultsQueryView;
 import org.labkey.api.study.query.RunListQueryView;
@@ -99,15 +96,6 @@ public class NabProtocolSchema extends AssayProtocolSchema
             }
         });
         return runTable;
-    }
-
-    @Override
-    protected void addQCFlagColumn(ExpRunTable runTable)
-    {
-        runTable.addColumn(new AssayQCFlagColumn(runTable, getSchemaName(), false));
-        var qcEnabled = runTable.addColumn(new ExprColumn(runTable, "QCFlagsEnabled", AssayQCFlagColumn.createSQLFragment(runTable.getSqlDialect(), "Enabled"), JdbcType.VARCHAR));
-        qcEnabled.setLabel("QC Flags Enabled State");
-        qcEnabled.setHidden(true);
     }
 
     @Nullable

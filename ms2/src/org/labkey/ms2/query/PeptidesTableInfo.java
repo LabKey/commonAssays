@@ -553,6 +553,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         addColumn(deltaMassPPM);
     }
 
+    @Override
     public List<FieldKey> getDefaultVisibleColumns()
     {
         if(null != _defaultVisibleColumns)
@@ -582,6 +583,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         return Collections.unmodifiableList(result);
     }
 
+    @Override
     public String getPublicName()
     {
         return _runTypes.length > 1 ? MS2Schema.TableType.Peptides.toString() : _runTypes[0].getPeptideTableName();
