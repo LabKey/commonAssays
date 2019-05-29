@@ -61,6 +61,12 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
         final ContainerFilter _inner;
 
         @Override
+        public String getCacheKey(Container c)
+        {
+            return getDefaultCacheKey(c);
+        }
+
+        @Override
         public @Nullable Collection<GUID> getIds(Container currentContainer)
         {
             Set<GUID> ret = new HashSet<>();
