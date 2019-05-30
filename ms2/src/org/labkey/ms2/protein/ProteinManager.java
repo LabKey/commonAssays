@@ -704,6 +704,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             ColumnInfo colInfo = columnMap != null ? columnMap.get(_fieldKey) : null;
@@ -764,6 +765,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sql = new SQLFragment();
@@ -834,13 +836,14 @@ public class ProteinManager
         for (SimpleFilter.FilterClause clause : fullFilter.getClauses())
         {
             boolean validClause = false;
-            for (String columnName : clause.getColumnNames())
+            for (FieldKey fieldKey : clause.getFieldKeys())
             {
                 for (TableInfo table : tables)
                 {
-                    ColumnInfo column = table.getColumn(columnName);
+                    ColumnInfo column = table.getColumn(fieldKey);
                     if (column == null)
                     {
+                        String columnName = fieldKey.toString();
                         int index = columnName.lastIndexOf('.');
                         if (index != -1)
                         {
@@ -1033,6 +1036,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();
@@ -1082,6 +1086,7 @@ public class ProteinManager
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             SQLFragment sqlf = new SQLFragment();

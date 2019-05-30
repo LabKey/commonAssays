@@ -1,19 +1,19 @@
 <%
-    /*
-     * Copyright (c) 2016-2017 LabKey Corporation
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *     http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
+/*
+ * Copyright (c) 2016-2017 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.api.util.StringUtilsLabKey" %>
 <%@ page import="org.labkey.luminex.LuminexAssayProvider" %>
 <%@ page import="org.labkey.api.data.ContainerFilter" %>
+<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -48,7 +49,7 @@
     </div>
     <br/><%
         ActionURL url = LuminexAssayProvider.getExcludedReportUrl(bean.getContainer(), bean.getProtocol(), ContainerFilter.CURRENT, bean.getReRunId().toString());
-    %>Please review the <%=textLink("exclusions report", url, true)%>for more information.
+    %>Please review the <%=link("exclusions report", url).attributes(Collections.singletonMap("target", "_blank"))%>for more information.
 </span>
 
 <script type="text/javascript">

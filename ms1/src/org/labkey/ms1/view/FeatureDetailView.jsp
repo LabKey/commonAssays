@@ -225,7 +225,7 @@
                 <tr>
                     <td class="labkey-alternate-row">m/z</td>
                     <td><%=text(model.formatNumber(feature.getMz()))%>
-                        &nbsp;<%=textLink("find similar", model.getFindSimilarUrl())%>
+                        &nbsp;<%=link("find similar").href(model.getFindSimilarUrl())%>
                     </td>
                 </tr>
                 <tr>
@@ -319,7 +319,7 @@
                                     out.print(pep.getPeptide());
                                     out.print("</a>");
 
-                                    out.print("&nbsp;" + textLink("features with same", model.getPepSearchUrl(pep.getTrimmedPeptide())));
+                                    out.print("&nbsp;" + link("features with same").href(model.getPepSearchUrl(pep.getTrimmedPeptide())).toString());
                                 }
                             }
                         %>

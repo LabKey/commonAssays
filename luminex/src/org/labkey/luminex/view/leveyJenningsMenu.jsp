@@ -53,7 +53,7 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", titrationName);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.Titration.toString());
-                %><%= textLink(titrationName, url) %><br/><%
+                %><%= link(titrationName, url) %><br/><%
             }%>
         </td>
         <td valign="top" style="padding: 5px" >
@@ -66,7 +66,7 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", singlePointControl);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.SinglePoint.toString());
-                %><%= textLink(singlePointControl, url) %><br/><%
+                %><%= link(singlePointControl, url) %><br/><%
             }%>
         </td>
     </tr>

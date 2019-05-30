@@ -26,7 +26,6 @@
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
 <%@ page import="org.labkey.api.study.StudyService" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
@@ -39,6 +38,7 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -79,8 +79,8 @@
             Study study = StudyService.get().getStudy(c);
             if (study != null)
             {
-                ActionURL studyURL = PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c);
-                %><p> Target Study: <a href="<%=h(studyURL)%>"><%=h(study.getLabel())%></a></p><%
+                ActionURL studyURL = urlProvider(ProjectUrls.class).getBeginURL(c);
+                %><p> Target Study: <%=link(study.getLabel(), studyURL)%></p><%
             }
         }
     }
@@ -93,16 +93,16 @@
 
     if (comp != null)
     {
-        %><labkey:link text="Show Compensation" href="<%=comp.urlFor(CompensationController.ShowCompensationAction.class)%>"/><br><%
+        %><%=link("Show Compensation", comp.urlFor(CompensationController.ShowCompensationAction.class))%><br><%
     }
 
     ActionURL urlShowRunGraph = urlProvider(ExperimentUrls.class).getShowRunGraphURL(run.getExperimentRun()); %>
-    <labkey:link href="<%=h(urlShowRunGraph)%>" text="Experiment Run Graph"/><br><%
+    <%=link("Experiment Run Graph", urlShowRunGraph)%><br><%
 
     ActionURL showFileURL = run.getDownloadWorkspaceURL();
     if (showFileURL != null)
     {
-        %><labkey:link href="<%=showFileURL%>" text="Download Workspace XML File"/><br/><%
+        %><%=link("Download Workspace XML File", showFileURL)%><br/><%
     }
 
     User user = getUser();
@@ -110,9 +110,9 @@
     {
         if (run.getPath() != null)
         {
-        %><labkey:link href="<%=run.urlDownload()%>" text="Download FCS Files" rel="nofollow"/><br><%
+        %><%=link("Download FCS Files", run.urlDownload()).attributes(Map.of("rel", "nofollow"))%><br><%
         }
-        %><labkey:link href='<%=run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")%>' text="Download Analysis zip" rel="nofollow" /><br><%
+        %><%=link("Download Analysis zip", run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")).attributes(Map.of("rel", "nofollow"))%><br><%
     }
 
 

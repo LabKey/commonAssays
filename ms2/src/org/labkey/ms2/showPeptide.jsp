@@ -77,7 +77,8 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.println("    " + textLink("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl));
+            out.print("    ");
+            out.println(link("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl));
         }
     }
     out.print(text(ctx.modificationHref));

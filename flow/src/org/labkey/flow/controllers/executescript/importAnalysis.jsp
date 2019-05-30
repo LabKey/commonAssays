@@ -82,7 +82,7 @@
 
 <labkey:errors/>
 
-<labkey:form name="<%=text(ImportAnalysisForm.NAME)%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+<labkey:form name="<%=ImportAnalysisForm.NAME%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
         Iterator i = form.getWorkspace().getHiddenFields().entrySet().iterator();
