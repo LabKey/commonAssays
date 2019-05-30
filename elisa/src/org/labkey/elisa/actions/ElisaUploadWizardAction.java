@@ -262,4 +262,14 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                 return null;
         }
     }
+
+    @Override
+    protected void addHiddenRunProperties(ElisaRunUploadForm form, InsertView view) throws ExperimentException
+    {
+        super.addHiddenRunProperties(form, view);
+        if (form.getName() != null)
+            view.getDataRegion().addHiddenFormField("name", form.getName());
+        if (form.getComments() != null)
+            view.getDataRegion().addHiddenFormField("comments", form.getComments());
+    }
 }
