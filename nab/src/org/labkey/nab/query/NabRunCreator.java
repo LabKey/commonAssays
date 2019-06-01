@@ -15,6 +15,7 @@
  */
 package org.labkey.nab.query;
 
+import org.labkey.api.assay.PlateBasedRunCreator;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
@@ -30,7 +31,6 @@ import org.labkey.api.study.actions.PlateUploadForm;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.ParticipantVisitResolver;
-import org.labkey.api.study.assay.PlateBasedRunCreator;
 import org.labkey.api.study.assay.PlateSamplePropertyHelper;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
