@@ -36,38 +36,45 @@ import java.util.Set;
 
 public class LuminexModule extends DefaultModule
 {
+    @Override
     public String getName()
     {
         return "Luminex";
     }
 
+    @Override
     public double getVersion()
     {
         return 19.10;
     }
 
+    @Override
     protected void init()
     {
         addController("luminex", LuminexController.class);
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
     }
 
+    @Override
     @NotNull
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();
     }
 
+    @Override
     public void doStartup(ModuleContext moduleContext)
     {
         ExperimentService.get().registerExperimentDataHandler(new LuminexDataHandler());
