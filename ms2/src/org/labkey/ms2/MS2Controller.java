@@ -49,6 +49,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -121,6 +122,8 @@ import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.compare.SpectraCountQueryView;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
+import org.labkey.ms2.peptideview.PeptideSequenceFilter;
+import org.labkey.ms2.peptideview.PeptidesView;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
@@ -867,8 +870,6 @@ public class MS2Controller extends SpringActionController
             peptideView.setTitle("Peptide Details: " + peptide.getPeptide());
 
             NavTree pepNavTree = new NavTree();
-            if (null != ctx.pepSearchHref && ctx.pepSearchHref.length() > 0)
-                pepNavTree.addChild("Find MS1 Features", ctx.pepSearchHref);
             pepNavTree.addChild("Blast", AppProps.getInstance().getBLASTServerBaseURL() + peptide.getTrimmedPeptide());
             peptideView.setNavMenu(pepNavTree);
             peptideView.setIsWebPart(false);
@@ -6062,11 +6063,113 @@ public class MS2Controller extends SpringActionController
             return url;
         }
 
+        public ActionURL getPepSearchUrl(Container container)
+        {
+            return getPepSearchUrl(container, null);
+        }
+
+        public ActionURL getPepSearchUrl(Container container, String sequence)
+        {
+            ActionURL url = new ActionURL(PepSearchAction.class, container);
+            if(null != sequence)
+                url.addParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
+            return url;
+        }
+
+
         public static MS2UrlsImpl get()
         {
             return (MS2UrlsImpl) PageFlowUtil.urlProvider(MS2Urls.class);
         }
     }
+
+    public static class PeptideFilterSearchForm extends ProteinService.PeptideSearchForm
+    {
+        @Override
+        public PeptideSequenceFilter createFilter(String sequenceColumnName)
+        {
+            return new PeptideSequenceFilter(getPepSeq(), isExact(), sequenceColumnName, null);
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class PepSearchAction extends QueryViewAction<PeptideFilterSearchForm, QueryView>
+    {
+        public PepSearchAction()
+        {
+            super(PeptideFilterSearchForm.class);
+        }
+
+        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion)
+        {
+            if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
+                return getPeptidesView(pepSearchForm, bindErrors, forExport);
+
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            {
+                if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
+                {
+                    return viewProvider.createView(getViewContext(), pepSearchForm, bindErrors);
+                }
+            }
+
+            throw new NotFoundException("Unknown data region: " + dataRegion);
+        }
+
+        protected PeptidesView getPeptidesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport)
+        {
+            //create the peptide search results view
+            //get a peptides table so that we can get the public schema and query name for it
+            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getUser(), getContainer());
+            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getUser(), getContainer()), peptidesTable.getPublicName());
+            pepView.setSearchSubfolders(form.isSubfolders());
+            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+                pepView.setPeptideFilter(new PeptideSequenceFilter(form.getPepSeq(), form.isExact()));
+            pepView.setTitle("Matching MS2 Peptides");
+            pepView.enableExpandCollapse("peptides", false);
+            return pepView;
+        }
+
+        public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors) throws Exception
+        {
+            //create the search view
+            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(),
+                    form.isExact(), form.isSubfolders(), form.getRunIds());
+            JspView<PepSearchModel> searchView = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", searchModel);
+            searchView.setTitle("Search Criteria");
+
+            //if no search terms were specified, return just the search view
+            if(searchModel.noSearchTerms())
+            {
+                searchModel.setErrorMsg("You must specify at least one Peptide Sequence");
+                return searchView;
+            }
+
+            VBox result = new VBox(searchView);
+
+            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)))
+            {
+                //create the peptide search results view
+                PeptidesView pepView = (PeptidesView)createInitializedQueryView(form, errors, false, PeptidesView.DATAREGION_NAME);
+                result.addView(pepView);
+            }
+
+            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            {
+                QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
+                if (queryView != null)
+                    result.addView(queryView);
+            }
+
+            return result;
+        }
+
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Peptide Search Results");
+        }
+    } //PepSearchAction
+
 
 
     public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>

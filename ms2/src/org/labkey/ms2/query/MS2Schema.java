@@ -744,7 +744,7 @@ public class MS2Schema extends UserSchema
 
     public TableInfo createPeptidesTable(ContainerFilter containerFilter, MS2RunType... runTypes)
     {
-        return new PeptidesTableInfo(this, true, containerFilter, runTypes);
+        return new PeptidesTableInfo(this, containerFilter, runTypes);
     }
 
     private ExpRunTable createSearchTable(String name, ContainerFilter filter, String... protocolObjectPrefix)
