@@ -274,7 +274,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return urlFor(ProtocolController.ShowSamplesAction.class);
     }
 
-    public Map<SampleKey, ExpMaterial> getSampleMap(User user) throws SQLException
+    public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
         ExpSampleSet ss = getSampleSet();
         if (ss == null)
@@ -313,16 +313,23 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 ret.put(key, sample);
             }
         }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
 
         return ret;
     }
 
-    public int updateSampleIds(User user) throws SQLException
+    public int updateSampleIds(User user)
     {
         ExperimentService svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleSetJoinFields();
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         ExpSampleSet ss = getSampleSet();
+
+        _log.info("updateSampleIds: protocol=" + this.getName() + ", sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", folder=" + this.getContainerPath());
+        _log.info("  joinFields: " + joinFields);
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
@@ -335,7 +342,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<FieldKey, ColumnInfo> columns = QueryService.get().getColumns(fcsFilesTable, fields);
         ColumnInfo colRowId = columns.get(fieldRowId);
         ColumnInfo colSampleId = columns.get(fieldSampleRowId);
-        int ret = 0;
+
+        int fcsFileCount = 0;
+        int unchanged = 0;
+        int linked = 0;
 
         try (ResultSet rs = new TableSelector(fcsFilesTable, new ArrayList<>(columns.values()), null, null).getResultSet();
              DbScope.Transaction transaction = svc.ensureTransaction())
@@ -349,6 +359,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 ExpData fcsFile = svc.getExpData(fcsFileId);
                 if (fcsFile == null)
                     continue;
+                fcsFileCount++;
                 SampleKey key = new SampleKey();
                 for (FieldKey fieldKey : joinFields.values())
                 {
@@ -364,7 +375,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 Integer newSampleId = sample == null ? null : sample.getRowId();
                 Object oldSampleId = colSampleId.getValue(rs);
                 if (Objects.equals(newSampleId, oldSampleId))
+                {
+                    unchanged++;
                     continue;
+                }
                 ExpProtocolApplication app = fcsFile.getSourceApplication();
                 if (app == null)
                 {
@@ -383,7 +397,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                         if (material.equals(sample))
                         {
                             found = true;
-                            ret ++;
+                            linked++;
                             break;
                         }
                     }
@@ -393,7 +407,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 if (!found && sample != null)
                 {
                     app.addMaterialInput(user, sample, null);
-                    ret ++;
+                    linked++;
                     changed = true;
                 }
 
@@ -409,7 +423,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
             transaction.commit();
         }
-        return ret;
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        _log.info("  fcsFileCount=" + fcsFileCount + ", sampleCount=" + sampleMap.size() + ", linked=" + linked + ", unchanged=" + unchanged);
+        return linked;
     }
 
     public int getUnlinkedSampleCount()
