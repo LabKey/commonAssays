@@ -19,7 +19,10 @@ package org.labkey.flow.data;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -37,27 +40,40 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.exp.api.SampleSetService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.SamplesSchema;
+import org.labkey.api.gwt.client.model.GWTPropertyDescriptor;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.TestContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.script.KeywordsJob;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -71,6 +87,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
@@ -90,9 +110,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (ret != null)
         {
             if (ret.getProtocol().getImplementation() == null)
-            {
                 ret.setProperty(user, ExperimentProperty.PROTOCOLIMPLEMENTATION.getPropertyDescriptor(), FlowProtocolImplementation.NAME);
-            }
             FlowProtocolStep.initProtocol(user, ret);
             return ret;
         }
@@ -101,6 +119,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             ExpProtocol protocol = ExperimentService.get().createExpProtocol(container, ExpProtocol.ApplicationType.ExperimentRun, DEFAULT_PROTOCOL_NAME);
             protocol.save(user);
+            protocol.setProperty(user, ExperimentProperty.PROTOCOLIMPLEMENTATION.getPropertyDescriptor(), FlowProtocolImplementation.NAME);
             ret = new FlowProtocol(protocol);
             FlowProtocolStep.initProtocol(user, ret);
             return ret;
@@ -293,6 +312,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             ColumnInfo lookupColumn = sampleTable.getColumn(propertyName);
             if (lookupColumn != null)
                 selectedColumns.add(lookupColumn);
+            else
+                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleSet");
         }
         Map<SampleKey, ExpMaterial> ret = new HashMap<>();
 
@@ -751,4 +772,140 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return "Protocol '" + getName() + "'";
     }
 
+    public static class TestCase
+    {
+        private Container c;
+        private User user;
+
+        @Before
+        public void setup()
+        {
+            JunitUtil.deleteTestContainer();
+            c = JunitUtil.getTestContainer();
+            user = TestContext.get().getUser();
+        }
+
+        @Test
+        public void testSampleJoin() throws Exception
+        {
+            FlowProtocol protocol = ensureForContainer(user, c);
+            PipeRoot root = PipelineService.get().findPipelineRoot(c);
+
+            // import some FCS files
+            ViewBackgroundInfo info = new ViewBackgroundInfo(c, user, null);
+            File dir = JunitUtil.getSampleData(null, "flow/flowjoquery/microFCS");
+            KeywordsJob job = new KeywordsJob(info, protocol, List.of(dir), null, root);
+            List<FlowRun> runs = job.go();
+            assertNotNull(runs);
+            assertEquals(1, runs.size());
+
+            FlowRun run = runs.get(0);
+            int runId = run.getRunId();
+            FlowFCSFile[] fcsFiles = run.getFCSFiles();
+            assertEquals(2, fcsFiles.length);
+            assertEquals(0, fcsFiles[0].getSamples().size());
+            assertEquals(0, fcsFiles[1].getSamples().size());
+
+            // add join fields
+            assertEquals(0, protocol.getSampleSetJoinFields().size());
+            protocol.setSampleSetJoinFields(user, Map.of(
+                    "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
+                    "WellId", FieldKey.fromParts("Keyword", "WELL ID")
+            ));
+
+            // create sample set
+            assertNull(protocol.getSampleSet());
+            String sampleSetLSID = protocol.getSampleSetLSID();
+            assertNull(SampleSetService.get().getSampleSet(sampleSetLSID));
+
+            List<GWTPropertyDescriptor> props = List.of(
+                    new GWTPropertyDescriptor("Name", "string"),
+                    new GWTPropertyDescriptor("ExprName", "string"),
+                    new GWTPropertyDescriptor("WellId", "string"),
+                    new GWTPropertyDescriptor("PTID", "string")
+            );
+            ExpSampleSet ss = SampleSetService.get().createSampleSet(c, user, SAMPLESET_NAME, null,
+                    props, List.of(), -1,-1,-1,-1,null);
+            assertNotNull(protocol.getSampleSet());
+
+            // import samples:
+            //   Name  PTID  WellId  ExprName
+            //   one   p01   E01     L02-060329-PV1-R1
+            //   two   p02   E02     L02-060329-PV1-R1
+            UserSchema schema = QueryService.get().getUserSchema(user, c, "samples");
+            TableInfo table = schema.getTable(SAMPLESET_NAME);
+
+            BatchValidationException errors = new BatchValidationException();
+            QueryUpdateService qus = table.getUpdateService();
+            List<Map<String, Object>> rows = qus.insertRows(user, c, List.of(
+                    CaseInsensitiveHashMap.of(
+                            "Name", "one",
+                            "ExprName", "L02-060329-PV1-R1",
+                            "WellId", "E01",
+                            "PTID", "p01"),
+                    CaseInsensitiveHashMap.of(
+                            "Name", "two",
+                            "ExprName", "L02-060329-PV1-R1",
+                            "WellId", "E02",
+                            "PTID", "p02")
+            ), errors, null, null);
+            if (errors.hasErrors())
+                throw errors;
+
+            // verify - FCSFile linked to sample
+            DomainProperty exprNameProp = ss.getDomain().getPropertyByName("ExprName");
+            DomainProperty wellIdProp = ss.getDomain().getPropertyByName("WellId");
+            DomainProperty ptidProp = ss.getDomain().getPropertyByName("PTID");
+
+            ExpMaterial toBeDeleted = null;
+            FlowRun afterSampleImportRun = FlowRun.fromRunId(runId);
+            for (FlowFCSFile file : afterSampleImportRun.getFCSFiles())
+            {
+                List<? extends ExpMaterial> samples = file.getSamples();
+                assertEquals(1, samples.size());
+                ExpMaterial sample = samples.get(0);
+
+                String WELL_ID = file.getKeyword("WELL ID");
+                String wellId = (String)sample.getProperty(wellIdProp);
+                assertEquals(WELL_ID, wellId);
+
+                if ("E01".equals(wellId))
+                    assertEquals("one", sample.getName());
+                else if ("E02".equals(wellId))
+                    assertEquals("two", sample.getName());
+
+                if (toBeDeleted == null)
+                    toBeDeleted = sample;
+            }
+
+            // verify - Samples aren't added as inputs to the FCSFile's run, just the individual Keywords protocol applications
+            Map<ExpMaterial, String> materialInputs = afterSampleImportRun.getExperimentRun().getMaterialInputs();
+            assertEquals(0, materialInputs.size());
+            assertEquals(2, sumInteralMaterialInputs(afterSampleImportRun));
+
+            // delete one sample
+            String toBeDeletedWellId = (String)toBeDeleted.getProperty(wellIdProp);
+            toBeDeleted.delete(user);
+
+            // verify - FCSFile no longer linked
+            FlowRun afterSampleDeletedRun = FlowRun.fromRunId(runId);
+            assertEquals(1, sumInteralMaterialInputs(afterSampleDeletedRun));
+            for (FlowFCSFile file : afterSampleImportRun.getFCSFiles())
+            {
+                String WELL_ID = file.getKeyword("WELL ID");
+                if (WELL_ID.equals(toBeDeletedWellId))
+                    assertEquals(0, file.getSamples().size());
+                else
+                    assertEquals(1, file.getSamples().size());
+            }
+        }
+
+        private int sumInteralMaterialInputs(FlowRun run)
+        {
+            return run
+                    .getExperimentRun()
+                    .getProtocolApplications()
+                    .stream().mapToInt(p -> p.getMaterialInputs().size()).sum();
+        }
+    }
 }
