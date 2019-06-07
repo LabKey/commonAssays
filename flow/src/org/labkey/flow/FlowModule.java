@@ -64,6 +64,7 @@ import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolImplementation;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.FlowContainerListener;
@@ -272,6 +273,7 @@ public class FlowModule extends SpringModule
         PipelineService.get().registerPipelineProvider(new FlowPipelineProvider(this));
         FlowDataType.register();
         ExperimentService.get().registerExperimentDataHandler(FlowDataHandler.instance);
+        ExperimentService.get().addExperimentListener(new FlowExperimentListener());
         FlowProtocolImplementation.register();
         AssayService.get().registerAssayProvider(new FlowAssayProvider());
 
@@ -333,6 +335,7 @@ public class FlowModule extends SpringModule
     {
         return new HashSet<>(Arrays.asList(
                 PersistTests.class,
+                FlowProtocol.TestCase.class,
                 FlowController.TestCase.class
         ));
     }
