@@ -15,7 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowRun;
@@ -36,7 +36,7 @@ public class ImportAnalysisForm
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMETER_SEPARATOR = "\ufe50";
 
-    public enum SelectFCSFileOption
+    public enum SelectFCSFileOption implements EnumHasHtmlString<SelectFCSFileOption>
     {
         None, Included, Previous, Browse
     }

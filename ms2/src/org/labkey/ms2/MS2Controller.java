@@ -86,6 +86,7 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
+import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
@@ -1489,7 +1490,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements
+    public enum PeptideFilteringFormElements implements EnumHasHtmlString<PeptideFilteringFormElements>
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1604,7 +1605,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType
+    public enum ProphetFilterType implements EnumHasHtmlString<ProphetFilterType>
     {
         none, probability, customView
     }
