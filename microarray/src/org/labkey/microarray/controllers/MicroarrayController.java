@@ -71,6 +71,7 @@ public class MicroarrayController extends SpringActionController
     @RequiresPermission(DesignAssayPermission.class)
     public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
     {
+        @Override
         protected ModelAndView createGWTView(Map<String, String> properties)
         {
             setHelpTopic(new HelpTopic("microarrayProperties"));

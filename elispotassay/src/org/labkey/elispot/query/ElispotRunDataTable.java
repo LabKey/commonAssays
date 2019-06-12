@@ -17,6 +17,7 @@
 package org.labkey.elispot.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
@@ -32,7 +33,6 @@ import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssaySchema;
 import org.labkey.api.study.assay.AssayService;

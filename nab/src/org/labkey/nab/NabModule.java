@@ -48,16 +48,19 @@ import java.util.Set;
  */
 public class NabModule extends DefaultModule
 {
+    @Override
     public String getName()
     {
         return "Nab";
     }
 
+    @Override
     public double getVersion()
     {
         return 19.10;
     }
 
+    @Override
     protected void init()
     {
         addController("nabassay", NabAssayController.class);
@@ -65,12 +68,14 @@ public class NabModule extends DefaultModule
         NabProviderSchema.register(this);
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
@@ -90,6 +95,7 @@ public class NabModule extends DefaultModule
         return Collections.singleton(NabProtocolSchema.NAB_VIRUS_SCHEMA_NAME);
     }
 
+    @Override
     public void doStartup(ModuleContext moduleContext)
     {
         PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());

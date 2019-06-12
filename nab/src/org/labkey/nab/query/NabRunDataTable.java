@@ -17,6 +17,7 @@
 package org.labkey.nab.query;
 
 import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
@@ -42,7 +43,6 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.query.QcAwarePropertyForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayProvider;
 import org.labkey.api.study.assay.AssayService;
@@ -51,7 +51,12 @@ import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
 import org.labkey.nab.SinglePlateNabDataHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: brittp

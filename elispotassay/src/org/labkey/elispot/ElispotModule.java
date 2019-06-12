@@ -17,7 +17,6 @@
 package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
@@ -37,28 +36,33 @@ import java.util.Set;
 
 public class ElispotModule extends DefaultModule
 {
+    @Override
     public String getName()
     {
         return "ELISpotAssay";
     }
 
+    @Override
     public double getVersion()
     {
         return 19.10;
     }
 
+    @Override
     protected void init()
     {
         addController("elispot-assay", ElispotController.class);
         PropertyService.get().registerDomainKind(new ElispotAntigenDomainKind());
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
@@ -71,6 +75,7 @@ public class ElispotModule extends DefaultModule
         return PageFlowUtil.set(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME);
     }
 
+    @Override
     public void doStartup(ModuleContext moduleContext)
     {
         PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());

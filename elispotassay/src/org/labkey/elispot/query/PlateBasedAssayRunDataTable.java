@@ -16,7 +16,12 @@
 
 package org.labkey.elispot.query;
 
-import org.labkey.api.data.*;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
@@ -25,11 +30,22 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.query.*;
-import org.labkey.api.study.assay.*;
+import org.labkey.api.query.ExprColumn;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
+import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.PropertyForeignKey;
+import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.study.assay.AssayProvider;
+import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.elispot.ElispotDataHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: Karl Lum
@@ -139,5 +155,4 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
             addCondition(filter.getSQLFragment(getSchema(), new SQLFragment("(SELECT d.Container FROM exp.ExperimentRun d WHERE d.RowId = RunId)"), getContainer()), containerColumn);
         }
     }
-
 }
