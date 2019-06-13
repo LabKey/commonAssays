@@ -77,6 +77,7 @@ public class NabManager extends AbstractNabManager
         return DbSchema.get(NabProtocolSchema.NAB_DBSCHEMA_NAME, DbSchemaType.Module);
     }
 
+    @Override
     public void deleteRunData(List<ExpData> datas) throws SQLException
     {
         super.deleteRunData(datas);

@@ -43,9 +43,9 @@ public class BioTekPlateReader extends ExcelPlateReader
             {
                 for (Cell cell : sheetRow)
                 {
-                    if (cell.getCellTypeEnum() == CellType.STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
+                    if (cell.getCellType() == CellType.STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
                         continue;
-                    else if (cell.getCellTypeEnum() != CellType.NUMERIC)
+                    else if (cell.getCellType() != CellType.NUMERIC)
                         return false;
                 }
             }

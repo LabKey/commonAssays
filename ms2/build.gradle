@@ -7,6 +7,7 @@ dependencies {
          exclude group: 'org.labkey', module: 'ms2'
       }
    })
+   BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
 
 // TODO move resources files into resources directory to avoid this overlap

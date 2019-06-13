@@ -20,6 +20,7 @@ dependencies {
     compile sourceSets.engine.output
     jspCompile sourceSets.engine.output
     BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'xmlSchema')
+    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
 
 project.task("engineJar",

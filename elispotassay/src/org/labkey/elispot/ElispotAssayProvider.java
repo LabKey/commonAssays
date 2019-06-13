@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.ObjectProperty;
@@ -37,7 +38,6 @@ import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProviderSchema;

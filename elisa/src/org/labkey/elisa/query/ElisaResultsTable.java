@@ -15,8 +15,8 @@
  */
 package org.labkey.elisa.query;
 
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.BaseColumnInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpSampleSet;
@@ -28,7 +28,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.AssayResultTable;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
