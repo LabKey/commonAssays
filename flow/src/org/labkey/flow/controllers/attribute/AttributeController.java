@@ -38,6 +38,7 @@ import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.persist.AttributeCache;
+import org.labkey.flow.persist.FlowCasingMismatchException;
 import org.labkey.flow.persist.FlowManager;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -286,6 +287,7 @@ public class AttributeController extends BaseFlowController
     public static class CreateAliasForm extends AttributeForm
     {
         private String _alias;
+        private boolean _allowCaseChangeAlias;
 
         public String getAlias()
         {
@@ -295,6 +297,16 @@ public class AttributeController extends BaseFlowController
         public void setAlias(String alias)
         {
             _alias = alias;
+        }
+
+        public boolean isAllowCaseChangeAlias()
+        {
+            return _allowCaseChangeAlias;
+        }
+
+        public void setAllowCaseChangeAlias(boolean allowCaseChangeAlias)
+        {
+            _allowCaseChangeAlias = allowCaseChangeAlias;
         }
     }
 
@@ -314,6 +326,9 @@ public class AttributeController extends BaseFlowController
             if (StringUtils.isBlank(alias))
                 errors.rejectValue("alias", ERROR_MSG, "Alias name must not be blank");
 
+            if (alias.equals(_entry.getName()))
+                errors.rejectValue("alias", ERROR_MSG, "Alias must not be identical to the original");
+
             try
             {
                 // parse the name
@@ -328,13 +343,23 @@ public class AttributeController extends BaseFlowController
         @Override
         public ModelAndView getView(CreateAliasForm form, boolean reshow, BindException errors)
         {
+            getPageConfig().setFocusId("alias");
             return new JspView<>("/org/labkey/flow/controllers/attribute/createAlias.jsp", form, errors);
         }
 
         @Override
         public boolean handlePost(CreateAliasForm form, BindException errors)
         {
-            FlowManager.get().ensureAlias(form.getAttributeType(), form.getRowId(), form.getAlias(), true, true);
+            try
+            {
+                FlowManager.get().ensureAlias(form.getAttributeType(), form.getRowId(), form.getAlias(), form.isAllowCaseChangeAlias(), true, true);
+            }
+            catch (FlowCasingMismatchException e)
+            {
+                errors.rejectValue("alias", ERROR_MSG, e.getMessage());
+                return false;
+            }
+
             return true;
         }
 
