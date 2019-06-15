@@ -46,11 +46,9 @@ import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FCSHeader;
-import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
@@ -702,6 +700,34 @@ public class FlowManager
         return new SqlExecutor(getSchema()).execute(sql);
     }
 
+    public void deleteAttribute(@NotNull Container c, AttributeType type, int rowId, boolean uncache)
+    {
+        FlowEntry entry = getAttributeEntry(type, rowId);
+        if (entry == null)
+            return;
+
+        if (!c.getId().equals(entry._containerId))
+            throw new IllegalArgumentException("container");
+
+        Collection aliases = getAliases(entry);
+        if (!aliases.isEmpty())
+            throw new IllegalArgumentException(type + " '" + entry._name + "' has " + aliases.size() + " aliases and can't be deleted");
+
+        Collection<FlowDataObject> usages = FlowManager.get().getUsages(entry);
+        if (!usages.isEmpty())
+            throw new IllegalArgumentException(type + " '" + entry._name + "' has " + usages.size() + " usages and can't be deleted");
+
+        try
+        {
+            Table.delete(getTinfoKeywordAttr(), entry._rowId);
+        }
+        finally
+        {
+            if (uncache)
+                AttributeCache.forType(type).uncacheNow(c);
+        }
+    }
+
 
     public boolean isAlias(AttributeType type, int rowId)
     {
@@ -937,14 +963,21 @@ public class FlowManager
      */
     public Collection<FlowDataObject> getUsages(AttributeType type, int rowId)
     {
-        FlowEntry entry = getAttributeEntry(type, rowId);
+        return getUsages(getAttributeEntry(type, rowId));
+    }
+
+    /**
+     * Get usages for an attribute, excluding its aliases.
+     */
+    public Collection<FlowDataObject> getUsages(FlowEntry entry)
+    {
         if (entry == null)
             return Collections.emptyList();
 
-        TableInfo attrTable = attributeTable(type);
-        TableInfo valueTable = valueTable(type);
-        String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
-        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
+        TableInfo attrTable = attributeTable(entry._type);
+        TableInfo valueTable = valueTable(entry._type);
+        String valueTableAttrIdColumn = valueTableAttrIdColumn(entry._type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(entry._type);
 
         SQLFragment sql = new SQLFragment()
                 .append("SELECT fo.rowid, fo.dataid,")
@@ -954,7 +987,7 @@ public class FlowManager
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(rowId).append("\n");
+                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(entry._rowId).append("\n");
 
         final List<FlowDataObject> usages = new ArrayList<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
