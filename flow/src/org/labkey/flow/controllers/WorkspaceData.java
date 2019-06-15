@@ -31,6 +31,7 @@ import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.SubsetPart;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.GraphSpec;
+import org.labkey.flow.analysis.web.SpecBase;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AnalysisSerializer;
@@ -38,7 +39,9 @@ import org.labkey.flow.persist.AttributeCache;
 import org.springframework.validation.Errors;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -214,20 +217,9 @@ public class WorkspaceData implements Serializable
         {
             for (String keyword : sample.getKeywords().keySet())
             {
-                if (seenKeyword.contains(keyword))
-                    continue;
-                seenKeyword.add(keyword);
-
-                AttributeCache.KeywordEntry entry = AttributeCache.KEYWORDS.byName(c, keyword);
-                if (entry == null)
-                    continue;
-
-                if (!keyword.equals(entry.getName()))
-                {
-                    errors.reject(ERROR_MSG, _object.getName() + ": Sample " + sample.getLabel() + ": Keyword '" + keyword + "' has different casing than existing keyword '" + entry.getName() + "'.  Please correct the casing before importing.");
-                    if (errors.getErrorCount() > 10)
-                        break;
-                }
+                checkAttribute(c, errors, sample, keyword, AttributeCache.KEYWORDS, seenKeyword, null, null);
+                if (errors.getErrorCount() > 10)
+                    break;
             }
 
             Analysis analysis = _object.getSampleAnalysis(sample);
@@ -236,44 +228,16 @@ public class WorkspaceData implements Serializable
 
             for (StatisticSpec spec : analysis.getStatistics())
             {
-                if (seenStat.contains(spec))
-                    continue;
-                seenStat.add(spec);
-
-                AttributeCache.StatisticEntry entry = AttributeCache.STATS.byAttribute(c, spec);
-                if (entry == null)
-                    continue;
-
-                if (!spec.toString().equals(entry.getAttribute().toString()))
-                {
-                    if (seenMismatch(subsetMismatches, parameterMismatches, entry.getAttribute().getSubset(), entry.getAttribute().getParameter(), spec.getSubset(), spec.getParameter()))
-                        continue;
-
-                    errors.reject(ERROR_MSG, _object.getName() + ": Sample " + sample.getLabel() + ": Statistic '" + spec + "' has different casing than existing statistic '" + entry.getName() + "'.  Please correct the casing before importing.");
-                    if (errors.getErrorCount() > 10)
-                        break;
-                }
+                checkAttribute(c, errors, sample, spec, AttributeCache.STATS, seenStat, subsetMismatches, parameterMismatches);
+                if (errors.getErrorCount() > 10)
+                    break;
             }
 
             for (GraphSpec spec : analysis.getGraphs())
             {
-                if (seenGraph.contains(spec))
-                    continue;
-                seenGraph.add(spec);
-
-                AttributeCache.GraphEntry entry = AttributeCache.GRAPHS.byAttribute(c, spec);
-                if (entry == null)
-                    continue;
-
-                if (!spec.toString().equals(entry.getAttribute().toString()))
-                {
-                    if (seenMismatch(subsetMismatches, parameterMismatches, entry.getAttribute().getSubset(), entry.getAttribute().getParameters(), spec.getSubset(), spec.getParameters()))
-                        continue;
-
-                    errors.reject(ERROR_MSG, _object.getName() + ": Sample " + sample.getLabel() + ": Graph '" + spec + "' has different casing than existing graph '" + entry.getName() + "'.  Please correct the casing before importing.");
-                    if (errors.getErrorCount() > 10)
-                        break;
-                }
+                checkAttribute(c, errors, sample, spec, AttributeCache.GRAPHS, seenGraph, subsetMismatches, parameterMismatches);
+                if (errors.getErrorCount() > 10)
+                    break;
             }
         }
 
@@ -281,9 +245,35 @@ public class WorkspaceData implements Serializable
             _log.debug("Mismatch counts while parsing workspace: " + _object.getName() + "\n" + subsetMismatches.toString() + "\n" + parameterMismatches.toString());
     }
 
-    boolean seenMismatch(Map<SubsetSpec, Integer> subsetMismatches, Map<String, Integer> parameterMismatches, SubsetSpec spec1, String param1, SubsetSpec spec2, String param2)
+    <Z extends Comparable<Z>> void checkAttribute(
+            Container c, Errors errors, ISampleInfo sample, Z attr, AttributeCache cache, Set<Z> seen,
+            Map<SubsetSpec, Integer> subsetMismatches, Map<String, Integer> parameterMismatches)
     {
-        return seenMismatch(subsetMismatches, parameterMismatches, spec1, param1 == null ? null : new String[] { param1 }, spec2, param2 == null ? null : new String[] { param2 });
+        // Skip checking if we've already seen this attribute
+        if (seen.contains(attr))
+            return;
+        seen.add(attr);
+
+        // If we don't have a match, one will be created during the import process
+        AttributeCache.Entry entry = cache.byAttribute(c, attr);
+        if (entry == null)
+            return;
+
+        // If we have an existing attribute, check if the casing matches
+        String attrString = attr.toString();
+        if (!attrString.equals(entry.getAttribute().toString()))
+        {
+            if (attr instanceof SpecBase)
+            {
+                SpecBase existing = (SpecBase)entry.getAttribute();
+                // don't report the same error again
+                if (seenMismatch(subsetMismatches, parameterMismatches, existing.getSubset(), existing.getParameters(), ((SpecBase)attr).getSubset(), ((SpecBase)attr).getParameters()))
+                    return;
+            }
+
+            errors.reject(ERROR_MSG, _object.getName() + ": Sample " + sample.getLabel() + ": " + entry.getType() + " '" + attrString + "' has different casing than existing entry '" + entry.getAttribute() + "'." +
+                    " Please correct the casing before importing or create '" + attrString + "' as an alias for '" + entry.getAttribute() + "'.");
+        }
     }
 
     // we already know there is a mismatch, but we want to identify where it is.  returns true if we've seen this mismatch before.
