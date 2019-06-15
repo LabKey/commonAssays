@@ -35,6 +35,7 @@ import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.AttributeType;
+import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.persist.FlowManager;
@@ -214,33 +215,56 @@ public class AttributeController extends BaseFlowController
                 throw new NotFoundException();
 
             String name = form.getName();
-            if (StringUtils.isBlank(name))
-                errors.rejectValue("name", ERROR_MSG, "Name must not be blank");
+            if (name == null || name.isBlank())
+            {
+                // check this attribute doesn't have aliases
+                Collection aliases = _entry.getAliases();
+                if (!aliases.isEmpty())
+                    errors.rejectValue("name", ERROR_MSG, _entry.getType() + " '" + _entry.getName() + "' has " + aliases.size() + " aliases and can't be deleted.");
 
-            try
-            {
-                // parse the name
-                _entry.getType().createAttribute(name);
+                // check there are no usages of the attribute
+                Collection<FlowDataObject> usages = FlowManager.get().getUsages(_entry.getType(), _entry.getRowId());
+                if (!usages.isEmpty())
+                    errors.rejectValue("name", ERROR_MSG, _entry.getType() + " '" + _entry.getName() + "' has " + usages.size() + " usages and can't be deleted.");
             }
-            catch (FlowException | IllegalArgumentException e)
+            else
             {
-                errors.rejectValue("name", ERROR_MSG, e.getMessage());
+                try
+                {
+                    // parse the name
+                    _entry.getType().createAttribute(name);
+                }
+                catch (FlowException | IllegalArgumentException e)
+                {
+                    errors.rejectValue("name", ERROR_MSG, e.getMessage());
+                }
             }
         }
 
         @Override
         public ModelAndView getView(EditAttributeForm form, boolean reshow, BindException errors)
         {
+            getPageConfig().setFocusId("name");
             return new JspView<>("/org/labkey/flow/controllers/attribute/edit.jsp", form, errors);
         }
 
         @Override
         public boolean handlePost(EditAttributeForm form, BindException errors)
         {
-            FlowManager.get().updateAttribute(getContainer(),
-                    _entry.getType(), _entry.getRowId(), form.getName(),
-                    _entry.getAliasedId() == null ? _entry.getRowId() : _entry.getAliasedId(),
-                    true);
+            String name = form.getName();
+            if (name == null || name.isBlank())
+            {
+                FlowManager.get().deleteAttribute(getContainer(),
+                        _entry.getType(), _entry.getRowId(), true);
+            }
+            else
+            {
+                FlowManager.get().updateAttribute(getContainer(),
+                        _entry.getType(), _entry.getRowId(), form.getName(),
+                        _entry.getAliasedId() == null ? _entry.getRowId() : _entry.getAliasedId(),
+                        true);
+            }
+
             return true;
         }
 
