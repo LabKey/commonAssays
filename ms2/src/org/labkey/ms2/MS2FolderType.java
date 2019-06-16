@@ -46,7 +46,7 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart(MS2Module.MS2_RUNS_NAME).createWebPart()
             ),
             buildPreferredWebPartsList(),
-            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
+            getDefaultModuleSet(module, getModule("Pipeline"), getModule("Experiment")),
             module);
     }
 

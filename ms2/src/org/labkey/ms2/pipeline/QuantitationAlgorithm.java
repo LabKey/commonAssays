@@ -46,49 +46,6 @@ public enum QuantitationAlgorithm
             return new String[] { "-X" + StringUtils.join(getCommonXpressQ3Params(params, pathMzXml).iterator(), ' ') };
         }
     },
-    q3
-    {
-        @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws FileNotFoundException
-        {
-            List<String> quantOpts = getCommonXpressQ3Params(params, pathMzXml);
-            String paramMinPP = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "min peptide prophet");
-            if (paramMinPP != null)
-                quantOpts.add("--minPeptideProphet=" + paramMinPP);
-            String paramMaxDelta = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "max fractional delta mass");
-            if (paramMaxDelta != null)
-                quantOpts.add("--maxFracDeltaMass=" + paramMaxDelta);
-            String paramCompatQ3 = params.get(ParameterNames.PIPELINE_QUANT_PREFIX + "q3 compat");
-            if ("yes".equalsIgnoreCase(paramCompatQ3))
-                quantOpts.add("--compat");
-
-            String ver = params.get("pipeline, msinspect ver");
-
-            // NOTE: The java command-line for msInspect gets passed as a
-            // single argument to xinteract, and the path to the java executable cannot contain spaces.
-            // If it does contains spaces, then just use "java", and rely on it being on the path.
-            String javaPath = PipelineJobService.get().getJavaPath();
-            if (javaPath.indexOf(' ') >= 0)
-                javaPath = "java";
-
-            // We can support viewerPath.jar paths with spaces by wrapping in \" - not sure why this same
-            // trick doesn't work with the path to the java executable, but it must be different xinteract internal
-            // handling of arguments
-            String viewerAppPath = PipelineJobService.get().getJarPath("viewerApp.jar", null, "msinspect", ver);
-            if (viewerAppPath.contains(" "))
-            {
-                viewerAppPath = "\\\"" + viewerAppPath + "\\\"";
-            }
-            
-            return new String[] {
-                "-C1" + javaPath + " " +
-                    (factory.getJavaVMOptions() == null ? "-Xmx1024M" : factory.getJavaVMOptions())
-                    + " -jar " + viewerAppPath
-                    + " --q3 " + StringUtils.join(quantOpts.iterator(), ' '),
-                    "-C2Q3ProteinRatioParser"
-            };
-        }
-    },
     libra
     {
         @Override
