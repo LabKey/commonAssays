@@ -636,10 +636,10 @@ public class PersistTests
         {
             assertThat(ex.getMessage(), containsString("Sample TEST: Can't create keyword with same casing as other keywords. Existing keyword"));
             assertThat(ex.getMessage(), containsString("with different casing from the requested name 'CaSe-TeSt':"));
-            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId + ")"));
+            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId));
             if (!sqlserver)
             {
-                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId + ")"));
+                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
             }
         }
 
@@ -656,10 +656,10 @@ public class PersistTests
         {
             assertThat(ex.getMessage(), containsString("Existing keyword"));
             assertThat(ex.getMessage(), containsString("with different casing from the requested name 'CaSe-TeSt':"));
-            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId + ")"));
+            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId));
             if (!sqlserver)
             {
-                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId + ")"));
+                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
             }
         }
 
