@@ -33,8 +33,6 @@ import org.labkey.flow.reports.FlowReportJob;
 import org.labkey.flow.reports.FlowReportManager;
 
 import java.io.File;
-import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -252,15 +250,7 @@ public abstract class FlowJob extends PipelineJob
     {
         if (_sampleMap == null)
         {
-            try
-            {
-                _sampleMap = getProtocol().getSampleMap(getUser());
-            }
-            catch (SQLException e)
-            {
-                _log.error("Error", e);
-                _sampleMap = Collections.EMPTY_MAP;
-            }
+            _sampleMap = getProtocol().getSampleMap(getUser());
         }
         return _sampleMap;
     }

@@ -17,11 +17,9 @@
 package org.labkey.viability;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.assay.viability.ViabilityService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.study.SpecimenService;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
@@ -36,33 +34,38 @@ public class ViabilityModule extends DefaultModule
 {
     public static final String NAME = "Viability";
 
+    @Override
     public String getName()
     {
         return NAME;
     }
 
+    @Override
     public double getVersion()
     {
         return 19.10;
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return Collections.emptyList();
     }
 
+    @Override
     protected void init()
     {
         addController(ViabilityController.NAME, ViabilityController.class);
-        ServiceRegistry.get().registerService(ViabilityService.class, ViabilityServiceImpl.get());
     }
 
+    @Override
     public void doStartup(ModuleContext moduleContext)
     {
         ExperimentService.get().registerExperimentDataHandler(new ViabilityTsvDataHandler());

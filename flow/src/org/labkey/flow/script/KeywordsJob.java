@@ -71,7 +71,7 @@ public class KeywordsJob extends ScriptJob
         go();
     }
 
-    List<FlowRun> go()
+    public List<FlowRun> go()
     {
         List<FlowRun> runs = new ArrayList<>();
 

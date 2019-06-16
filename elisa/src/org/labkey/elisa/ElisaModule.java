@@ -17,12 +17,12 @@
 package org.labkey.elisa;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.CodeOnlyModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.PlateService;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
 

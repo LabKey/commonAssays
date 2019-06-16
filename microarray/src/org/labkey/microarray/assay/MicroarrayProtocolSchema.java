@@ -109,6 +109,7 @@ public class MicroarrayProtocolSchema extends AssayProtocolSchema
             super(schema, settings, type);
         }
 
+        @Override
         protected void populateButtonBar(DataView view, ButtonBar bar)
         {
             super.populateButtonBar(view, bar);

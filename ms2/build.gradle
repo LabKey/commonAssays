@@ -2,6 +2,7 @@ import org.labkey.gradle.util.BuildUtils
 
 dependencies {
    external 'commons-httpclient:commons-httpclient:3.1'
+   BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
 
 // TODO move resources files into resources directory to avoid this overlap

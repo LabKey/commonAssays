@@ -109,7 +109,7 @@
         for (StatisticSet statset : form.ff_statisticSet)
         {
     %>
-        <input type="hidden" name="ff_statisticSet" value="<%=h(statset)%>">
+        <input type="hidden" name="ff_statisticSet" value="<%=statset%>">
     <% }} %>
 
     <input class="labkey-button" type="Submit" value="Submit"/>
