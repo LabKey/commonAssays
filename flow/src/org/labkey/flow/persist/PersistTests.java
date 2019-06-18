@@ -664,6 +664,7 @@ public class PersistTests
         }
 
         // verify -- allow insert alias that differs only by case if allowCaseChangeAlias is true
+        if (!sqlserver)
         {
             AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byName(c, UPPER_NAME);
             assertNotNull(ke1);
