@@ -78,12 +78,11 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
 
         HorizontalPanel quantEngineLabel = new HorizontalPanel();
         quantEngineLabel.add(new Label("Quantitation engine"));
-        quantEngineLabel.add(new HelpPopup("Quantitation engine", "<p>The tool to use for performing quantitation on isotopically labelled samples.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:XPRESS\" target=\"_blank\">XPRESS</a> and <a href=\"http://proteomics.fhcrc.org/CPL/msinspect/index.html\" target=\"_blank\">Q3</a> can be used for <a href=\"http://en.wikipedia.org/wiki/Isotope-coded_affinity_tag\" target=\"_blank\">Isotope-coded affinity tag</a> (ICAT) or <a href=\"http://en.wikipedia.org/wiki/SILAC\" target=\"_blank\">Stable isotope labeling by amino acids in cell culture</a> (SILAC) experiments.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra\" target=\"_blank\">Libra</a> analyzes <a href=\"http://en.wikipedia.org/wiki/Isobaric_tag_for_relative_and_absolute_quantitation\" target=\"_blank\">Isobaric tag for relative and absolute quantitation</a> (iTRAQ) samples.</p>"));
+        quantEngineLabel.add(new HelpPopup("Quantitation engine", "<p>The tool to use for performing quantitation on isotopically labelled samples.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:XPRESS\" target=\"_blank\">XPRESS</a> can be used for <a href=\"http://en.wikipedia.org/wiki/Isotope-coded_affinity_tag\" target=\"_blank\">Isotope-coded affinity tag</a> (ICAT) or <a href=\"http://en.wikipedia.org/wiki/SILAC\" target=\"_blank\">Stable isotope labeling by amino acids in cell culture</a> (SILAC) experiments.</p><p><a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:Libra\" target=\"_blank\">Libra</a> analyzes <a href=\"http://en.wikipedia.org/wiki/Isobaric_tag_for_relative_and_absolute_quantitation\" target=\"_blank\">Isobaric tag for relative and absolute quantitation</a> (iTRAQ) samples.</p>"));
         _instance.setWidget(++row, 0, quantEngineLabel);
         _instance.getCellFormatter().setStyleName(row, 0, "labkey-form-label-nowrap");
         _quantitationAlgorithmListBox.addItem("<none>");
         _quantitationAlgorithmListBox.addItem("Libra");
-        _quantitationAlgorithmListBox.addItem("Q3");
         _quantitationAlgorithmListBox.addItem("XPRESS");
         _quantitationAlgorithmListBox.setName("quantitationEngine");
         _instance.setText(row, 1, "<none>");

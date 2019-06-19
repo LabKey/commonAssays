@@ -13,8 +13,8 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
     BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
     engineCompile "org.labkey:labkey-client-api:${project.version}"
-    engineCompile 'org.apache.tomcat:jsp-api'
-    engineCompile 'org.apache.tomcat:jasper'
+    engineCompile "org.apache.tomcat:tomcat-jasper:${apacheTomcatVersion}"
+    engineCompile "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
     engineCompile project.files(project.tasks.schemasJar)
 
     compile sourceSets.engine.output

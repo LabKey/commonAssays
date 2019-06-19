@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
-import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.BVT;
@@ -27,18 +26,16 @@ import org.labkey.test.categories.FileBrowser;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.ms2.MS2PipelineFolder;
 import org.labkey.test.ms2.params.MS2EmailSuccessParams;
-import org.labkey.test.params.ms1.FeaturesTestParams;
-import org.labkey.test.params.ms1.PepMatchTestParams;
 import org.labkey.test.pipeline.PipelineFolder;
 import org.labkey.test.pipeline.PipelineTestParams;
 import org.labkey.test.pipeline.PipelineTestsBase;
 import org.labkey.test.pipeline.PipelineWebTestBase;
-import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PipelineToolsHelper;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Category({BVT.class, FileBrowser.class})
@@ -48,7 +45,6 @@ public class PipelineTest extends PipelineWebTestBase
     protected static final int MAX_WAIT_SECONDS = 60*5;
 
     protected PipelineTestsBase _testSetMS2 = new PipelineTestsBase(this);
-    protected PipelineTestsBase _testSetMS1 = new PipelineTestsBase(this);
     private final PipelineToolsHelper _pipelineToolsHelper = new PipelineToolsHelper(this);
 
     public PipelineTest()
@@ -58,8 +54,8 @@ public class PipelineTest extends PipelineWebTestBase
         MS2PipelineFolder folder = new MS2PipelineFolder(this, "pipe1",
                 TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe");
         folder.setFolderType("None");
-        folder.setTabs("Pipeline", "MS1", "MS2", "Dumbster");
-        folder.setWebParts("Data Pipeline", "MS1 Runs", "MS2 Runs", "Mail Record");
+        folder.setTabs("Pipeline", "MS2", "Dumbster");
+        folder.setWebParts("Data Pipeline", "MS2 Runs", "Mail Record");
 
         PipelineFolder.MailSettings mail = new PipelineFolder.MailSettings(this);
         mail.setNotifyOnSuccess(true, true, "brother@pipelinebvt.test");
@@ -71,12 +67,6 @@ public class PipelineTest extends PipelineWebTestBase
         _testSetMS2.setFolder(folder);
         _testSetMS2.addParams(mailParams(new MS2EmailSuccessParams(this, "bov_fract", "test1", sampleNames), mail));
         _testSetMS2.addParams(mailParams(new MS2EmailSuccessParams(this, "bov_fract", "test_fract"), mail));
-
-        _testSetMS1.setFolder(folder);
-        _testSetMS1.addParams(mailParams(new FeaturesTestParams(this, "bov_fract", "find_minmax",
-                false, sampleNames), mail, true));
-        _testSetMS1.addParams(mailParams(new PepMatchTestParams(this, "bov_fract/xtandem/test1", "match1",
-                true, sampleNames), mail, true));
     }
 
     private PipelineTestParams mailParams(PipelineTestParams params, PipelineFolder.MailSettings mail)
@@ -92,9 +82,10 @@ public class PipelineTest extends PipelineWebTestBase
         return params;
     }
 
+    @Override
     public List<String> getAssociatedModules()
     {
-        return Arrays.asList("pipeline", "ms1", "ms2");
+        return Arrays.asList("pipeline", "ms2");
     }
 
     @Override
@@ -103,11 +94,11 @@ public class PipelineTest extends PipelineWebTestBase
         return BrowserType.CHROME;
     }
 
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         super.doCleanup(afterTest);
         _testSetMS2.clean();
-        _testSetMS1.clean();
     }
 
     @Before
@@ -120,7 +111,6 @@ public class PipelineTest extends PipelineWebTestBase
     public void testSteps()
     {
         _testSetMS2.verifyClean();
-        _testSetMS1.verifyClean();
 
         _testSetMS2.setup();
 
@@ -134,46 +124,6 @@ public class PipelineTest extends PipelineWebTestBase
 
         // Make sure there haven't been any errors yet.
         checkErrors();
-
-        // Break the pipeline tools directory setting to cause errors.
-        _pipelineToolsHelper.setPipelineToolsDirectory(TestFileUtils.getLabKeyRoot() + "/external/noexist");
-        runProcessing(_testSetMS1);
-        checkEmail(4);
-
-        // Make sure the expected errors have been logged.
-        checkExpectedErrors(4);
-
-        // Test pipeline error escalation email.
-        _testSetMS1.getParams()[0].validateEmailEscalation(0);
-        checkEmail(1);
-        // Fix the pipeline tools directory.
-        _pipelineToolsHelper.resetPipelineToolsDirectory();
-
-        PipelineTestParams tpRetry = _testSetMS1.getParams()[0];
-        tpRetry.setExpectError(false);
-        for (String sampleExp : tpRetry.getExperimentLinks())
-        {
-            pushLocation();
-            clickAndWait(Locator.linkWithText("All"));
-            log("Trying to view status info for " + sampleExp);
-            // Create a fresh PipelineStatusTable every time through the loop so that we're looking at a current set
-            // of cached table info
-            PipelineStatusTable statusTable = new PipelineStatusTable(this);
-            statusTable.clickStatusLink(sampleExp);
-            log("Now on job with URL " + getURL());
-            clickButton("Retry");
-            popLocation();
-        }
-
-        waitToComplete(_testSetMS1);
-
-        // Could validate here more, but the final validation should be enough.
-        checkEmail(1);
-
-        for (PipelineTestParams tp : _testSetMS1.getParams())
-            tp.setExpectError(false);
-        runProcessing(_testSetMS1);
-        checkEmail(2);
     }
 
     public void checkEmail(int countExpect)
@@ -188,8 +138,7 @@ public class PipelineTest extends PipelineWebTestBase
             sleepCount++;
         }
         int count = emailTable.getEmailCount();
-        assertTrue("Expected " + countExpect + " notification emails, found " + count,
-                count == countExpect);
+        assertEquals("Expected " + countExpect + " notification emails, found " + count, count, countExpect);
         enableEmailRecorder();
     }
 

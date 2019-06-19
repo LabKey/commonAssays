@@ -43,6 +43,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ProteomicsWebPartFactory;
 import org.labkey.api.view.ViewContext;
@@ -114,6 +115,8 @@ import java.util.Set;
  */
 public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider, ProteomicsModule
 {
+    public static final String WEBPART_PEP_SEARCH = "Peptide Search";
+
     public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
     private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
     {
@@ -200,8 +203,17 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                     {
                         return new MSSearchWebpart();
                     }
-                }
-        ));
+                },
+                new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
+                {
+                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+                    {
+                        PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
+                        JspView<PepSearchModel> view = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", model);
+                        view.setTitle(WEBPART_PEP_SEARCH);
+                        return view;
+                    }
+                }));
     }
 
     public boolean hasScripts()
