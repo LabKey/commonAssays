@@ -675,8 +675,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         public void testQuantAlgorithmSelection()
         {
             TPPTask task = new TPPTask(_factory, _job);
-            assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "q3")));
-            assertEquals(QuantitationAlgorithm.q3, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3")));
             assertNull(task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "Q3a")));
             assertEquals(QuantitationAlgorithm.libra, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "libra")));
             assertEquals(QuantitationAlgorithm.xpress, task.getQuantitionAlgorithm(Collections.singletonMap(ParameterNames.QUANTITATION_ALGORITHM, "xpress")));

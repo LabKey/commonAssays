@@ -104,6 +104,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
         addProperty(sampleWellGroupDomain, NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, NabAssayProvider.VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING).setRequired(true);
     }
 
+    @Override
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();

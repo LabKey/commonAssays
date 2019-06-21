@@ -16,6 +16,8 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
@@ -35,8 +37,6 @@ import org.labkey.api.study.Plate;
 import org.labkey.api.study.PlateService;
 import org.labkey.api.study.Position;
 import org.labkey.api.study.WellGroup;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
-import org.labkey.api.study.assay.AbstractPlateBasedAssayProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
 
 import java.util.ArrayList;

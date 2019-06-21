@@ -17,9 +17,10 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.ms1.MS1Urls;
+import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 
 /**
@@ -55,8 +56,8 @@ public class ShowPeptideContext
         this.showGzUrl = showGzUrl;
         this.modificationHref = modHref;
 
-        MS1Urls ms1Urls = ServiceRegistry.get().getService(MS1Urls.class);
-        if(null != ms1Urls)
-            pepSearchHref = ms1Urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
+        MS2Urls urls = PageFlowUtil.urlProvider(MS2Urls.class);
+        if(null != url)
+            pepSearchHref = urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
     }
 }
