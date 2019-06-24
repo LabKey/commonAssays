@@ -46,11 +46,9 @@ import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.FCSHeader;
-import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
@@ -379,11 +377,6 @@ public class FlowManager
         }
     }
 
-    private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String attr, int aliasId)
-    {
-        return ensureAttributeName(container.getId(), sampleLabel, type, attr, aliasId);
-    }
-
     /**
      * Ensure the attribute exists.  If the aliasId >= 0, the aliasId points at the RowId of the preferred name for the attribute.
      * If an existing alias with different casing is found, an exception is thrown.
@@ -394,9 +387,10 @@ public class FlowManager
      * @param type attribute type
      * @param attr attribute name
      * @param aliasId RowId of aliased attribute or -1 to set alias to itself.
+     * @param allowCaseChangeAlias When true, allow an attribute to be registered as an alias of another attribute if it differs by casing.
      * @return The RowId of the newly inserted or existing attribute.
      */
-    private int ensureAttributeName(@NotNull String containerId, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId)
+    private int ensureAttributeName(@NotNull String containerId, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId, boolean allowCaseChangeAlias)
     {
         //_log.info("ensureAttributeName(" + containerId + ", " + type + ", " + attr + ", " + aliasId + ")");
         DbSchema schema = getSchema();
@@ -423,27 +417,19 @@ public class FlowManager
         List<FlowEntry> others = getAttributeEntryCaseInsensitive(containerId, type, attr);
         if (!others.isEmpty())
         {
-            StringBuilder msg = new StringBuilder();
-            if (sampleLabel != null)
-                msg.append("Sample ").append(sampleLabel).append(": ");
+            // Issue 37449: casing mismatch: check if we have an alias of the provided casing
+            // Disallow creating a new entry unless we are creating an alias and the allowCaseChangeAlias flag is true
+            if (!allowCaseChangeAlias || aliasId <= 0)
+                throw new FlowCasingMismatchException("Can't create " + type + " with same casing as other " + type + "s.", sampleLabel, type, others, attr);
 
-            msg.append("Found existing ");
-            if (others.size() > 1)
-                msg.append(type.name()).append("s");
-            else
-                msg.append(type.name());
+            // If we allow an alias to be created for an item that differs only by case,
+            // the 'to-be-aliased' item must be present in the set of alternate casings.
+            FlowEntry itemToBeAliased = others.stream().filter(item -> item._rowId == aliasId).findFirst().orElse(null);
+            if (itemToBeAliased == null)
+                throw new FlowCasingMismatchException("Item to be aliased wasn't found in the set of alternate cased items", sampleLabel, type, others, attr);
 
-            msg.append(" with different casing from the requested name '").append(attr).append("'");
-            msg.append(": ");
-
-            String sep = "";
-            for (FlowEntry other : others)
-            {
-                msg.append(sep).append(other._name).append(" (id=").append(other._rowId).append(")");
-                sep = ", ";
-            }
-
-            throw new FlowException(msg.toString());
+            // everything is a-ok - but let's just log a message for goodness
+            _log.info(FlowCasingMismatchException.casingMismatchMessage("Creating alias", sampleLabel, type, others, attr));
         }
 
 
@@ -469,7 +455,7 @@ public class FlowManager
 
     private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String name)
     {
-        return ensureAttributeName(container, sampleLabel, type, name, -1);
+        return ensureAttributeName(container.getId(), sampleLabel, type, name, -1, false);
     }
 
 
@@ -536,13 +522,13 @@ public class FlowManager
             if (aliasId == null)
                 aliasId = ensureAttributeName(c, sampleLabel, type, name);
             else
-                ensureAttributeName(c, sampleLabel, type, name, aliasId);
+                ensureAttributeName(c.getId(), sampleLabel, type, name, aliasId, false);
 
             if (!aliases.isEmpty())
             {
                 FlowEntry entry = getAttributeEntryForAliasing(type, aliasId);
                 for (Object alias : aliases)
-                    ensureAlias(entry, alias.toString(), false, false);
+                    ensureAlias(entry, alias.toString(), false, false, false);
             }
 
             return aliasId;
@@ -567,12 +553,12 @@ public class FlowManager
         return entry;
     }
 
-    public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean transact, boolean uncache)
+    public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean allowCaseChangeAlias, boolean transact, boolean uncache)
     {
-        ensureAlias(getAttributeEntryForAliasing(type, rowId), aliasName, transact, uncache);
+        ensureAlias(getAttributeEntryForAliasing(type, rowId), aliasName, allowCaseChangeAlias, transact, uncache);
     }
 
-    private void ensureAlias(@NotNull FlowEntry entry, @NotNull String aliasName, boolean transact, boolean uncache)
+    private void ensureAlias(@NotNull FlowEntry entry, @NotNull String aliasName, boolean allowCaseChangeAlias, boolean transact, boolean uncache)
     {
         final AttributeType type = entry._type;
         final int rowId = entry._rowId;
@@ -617,10 +603,10 @@ public class FlowManager
         else
         {
             // attribute wasn't found for the aliasName, so insert a new one
-            // NOTE: Alias will fail to insert if an there is an existing attribute with different casing
+            // NOTE: Alias will fail to insert if an there is an existing attribute with different casing and allowCaseChangeAlias is false
             try
             {
-                ensureAttributeName(entry._containerId, null, type, aliasName, entry._rowId);
+                ensureAttributeName(entry._containerId, null, type, aliasName, entry._rowId, allowCaseChangeAlias);
             }
             finally
             {
@@ -700,6 +686,34 @@ public class FlowManager
                 .append(" WHERE ").append(valueTableAttrIdColumn).append(" = ").append(currentRowId);
 
         return new SqlExecutor(getSchema()).execute(sql);
+    }
+
+    public void deleteAttribute(@NotNull Container c, AttributeType type, int rowId, boolean uncache)
+    {
+        FlowEntry entry = getAttributeEntry(type, rowId);
+        if (entry == null)
+            return;
+
+        if (!c.getId().equals(entry._containerId))
+            throw new IllegalArgumentException("container");
+
+        Collection aliases = getAliases(entry);
+        if (!aliases.isEmpty())
+            throw new IllegalArgumentException(type + " '" + entry._name + "' has " + aliases.size() + " aliases and can't be deleted");
+
+        Collection<FlowDataObject> usages = FlowManager.get().getUsages(entry);
+        if (!usages.isEmpty())
+            throw new IllegalArgumentException(type + " '" + entry._name + "' has " + usages.size() + " usages and can't be deleted");
+
+        try
+        {
+            Table.delete(getTinfoKeywordAttr(), entry._rowId);
+        }
+        finally
+        {
+            if (uncache)
+                AttributeCache.forType(type).uncacheNow(c);
+        }
     }
 
 
@@ -937,14 +951,21 @@ public class FlowManager
      */
     public Collection<FlowDataObject> getUsages(AttributeType type, int rowId)
     {
-        FlowEntry entry = getAttributeEntry(type, rowId);
+        return getUsages(getAttributeEntry(type, rowId));
+    }
+
+    /**
+     * Get usages for an attribute, excluding its aliases.
+     */
+    public Collection<FlowDataObject> getUsages(FlowEntry entry)
+    {
         if (entry == null)
             return Collections.emptyList();
 
-        TableInfo attrTable = attributeTable(type);
-        TableInfo valueTable = valueTable(type);
-        String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
-        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
+        TableInfo attrTable = attributeTable(entry._type);
+        TableInfo valueTable = valueTable(entry._type);
+        String valueTableAttrIdColumn = valueTableAttrIdColumn(entry._type);
+        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(entry._type);
 
         SQLFragment sql = new SQLFragment()
                 .append("SELECT fo.rowid, fo.dataid,")
@@ -954,7 +975,7 @@ public class FlowManager
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(rowId).append("\n");
+                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(entry._rowId).append("\n");
 
         final List<FlowDataObject> usages = new ArrayList<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
