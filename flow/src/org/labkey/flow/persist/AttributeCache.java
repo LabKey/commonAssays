@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018 LabKey Corporation
+ * Copyright (c) 2014-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
                 Z existing = byName.putIfAbsent(entry.getName(), entry);
                 if (existing != null)
-                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ")");
+                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ", aliasId=" + existing.getAliasedId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ", aliasId=" + entry.getAliasedId() + ")");
 
                 if (entry.getAliasedId() != null)
                     aliases.put(entry.getAliasedId(), entry.getRowId());
