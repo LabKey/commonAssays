@@ -267,7 +267,7 @@ public class SamplesConfirmGridView extends GridView
         protected int matchedCount = 0;
 
         @Override
-        protected Map<String, String> prepareMessages(RenderContext ctx) throws IOException
+        public Map<String, String> prepareMessages(RenderContext ctx) throws IOException
         {
             Map<String, String> messages = super.prepareMessages(ctx);
 
