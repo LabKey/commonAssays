@@ -37,7 +37,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
+import static org.apache.commons.lang3.ArrayUtils.EMPTY_STRING_ARRAY;
+
+public class StatisticSpec implements SpecBase<StatisticSpec>
 {
     final SubsetSpec _subset;
     final STAT _statistic;
@@ -179,6 +181,7 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
         }
     }
 
+    @Override
     public SubsetSpec getSubset()
     {
         return _subset;
@@ -192,6 +195,12 @@ public class StatisticSpec implements Serializable, Comparable<StatisticSpec>
     public String getParameter()
     {
         return _parameter;
+    }
+
+    @Override
+    public String[] getParameters()
+    {
+        return _parameter == null ? EMPTY_STRING_ARRAY : new String[] { _parameter };
     }
 
 	private transient String _toString = null;

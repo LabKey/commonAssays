@@ -96,7 +96,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
                 Z existing = byName.putIfAbsent(entry.getName(), entry);
                 if (existing != null)
-                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ")");
+                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ", aliasId=" + existing.getAliasedId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ", aliasId=" + entry.getAliasedId() + ")");
 
                 if (entry.getAliasedId() != null)
                     aliases.put(entry.getAliasedId(), entry.getRowId());
