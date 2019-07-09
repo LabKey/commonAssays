@@ -43,7 +43,7 @@ public class ViabilityModule extends DefaultModule
     @Override
     public double getVersion()
     {
-        return 19.10;
+        return 19.20;
     }
 
     @Override
