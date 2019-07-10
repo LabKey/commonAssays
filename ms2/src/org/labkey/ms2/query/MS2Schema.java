@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018 LabKey Corporation
+ * Copyright (c) 2007-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -744,7 +744,7 @@ public class MS2Schema extends UserSchema
 
     public TableInfo createPeptidesTable(ContainerFilter containerFilter, MS2RunType... runTypes)
     {
-        return new PeptidesTableInfo(this, true, containerFilter, runTypes);
+        return new PeptidesTableInfo(this, containerFilter, runTypes);
     }
 
     private ExpRunTable createSearchTable(String name, ContainerFilter filter, String... protocolObjectPrefix)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2017 LabKey Corporation
+ * Copyright (c) 2007-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart(MS2Module.MS2_RUNS_NAME).createWebPart()
             ),
             buildPreferredWebPartsList(),
-            getDefaultModuleSet(module, getModule("MS1"), getModule("Pipeline"), getModule("Experiment")),
+            getDefaultModuleSet(module, getModule("Pipeline"), getModule("Experiment")),
             module);
     }
 

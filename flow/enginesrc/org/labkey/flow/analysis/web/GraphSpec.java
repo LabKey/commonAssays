@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005-2018 LabKey Corporation
+ * Copyright (c) 2011-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package org.labkey.flow.analysis.web;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.StringTokenizer;
-import java.util.ArrayList;
-import java.io.Serializable;
 
-public class GraphSpec implements Serializable, Comparable<GraphSpec>
+public class GraphSpec implements SpecBase<GraphSpec>
 {
     public static class CaseInsensitiveComparator implements Comparator<GraphSpec>, Serializable
     {
@@ -101,11 +101,13 @@ public class GraphSpec implements Serializable, Comparable<GraphSpec>
         return ret.toString();
     }
 
+    @Override
     public String[] getParameters()
     {
         return _parameters;
     }
 
+    @Override
     public SubsetSpec getSubset()
     {
         return _subset;

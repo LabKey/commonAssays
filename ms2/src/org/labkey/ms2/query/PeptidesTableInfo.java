@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2018 LabKey Corporation
+ * Copyright (c) 2007-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.labkey.ms2.query;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
@@ -27,7 +26,6 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
-import org.labkey.api.ms1.MS1Service;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -68,15 +66,15 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), true, ContainerFilter.CURRENT, MS2RunType.values(), false);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), ContainerFilter.CURRENT, MS2RunType.values(), false);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes)
+    public PeptidesTableInfo(MS2Schema schema, ContainerFilter containerFilter, MS2RunType[] runTypes)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), includeFeatureFk, containerFilter, runTypes, false);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), containerFilter, runTypes, false);
     }
 
-    public PeptidesTableInfo(MS2Schema schema, ActionURL url, boolean includeFeatureFk, ContainerFilter containerFilter, MS2RunType[] runTypes, boolean highestScore)
+    public PeptidesTableInfo(MS2Schema schema, ActionURL url, ContainerFilter containerFilter, MS2RunType[] runTypes, boolean highestScore)
     {
         super(MS2Manager.getTableInfoPeptidesData(), schema, containerFilter);
         setName(MS2Schema.TableType.Peptides.name());
@@ -281,9 +279,6 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         retentionTimeMinutesColumn.setFormat("#.##");
         retentionTimeMinutesColumn.setSortFieldKeys(Collections.singletonList(FieldKey.fromParts("RetentionTime")));
         addColumn(retentionTimeMinutesColumn);
-
-        if (includeFeatureFk)
-            addFeatureInfoColumn();
     }
 
     private void addRunFilter()
@@ -383,33 +378,6 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             FieldKey fractionRunFieldKey = FieldKey.fromParts("Fraction", "Run");
             addCondition(sql, fractionRunFieldKey);
         }
-    }
-
-    private void addFeatureInfoColumn()
-    {
-        //add an expression column that finds the corresponding ms1 feature id based on
-        //the mzXmlUrl and MS2Scan (but not charge since, according to Roland, it may not always be correct)
-        //Since we're not matching on charge, we could get multiple rows back, so use MIN to
-        //select just the first matching one.
-        SQLFragment sqlFeatureJoin = new SQLFragment("(SELECT MIN(fe.FeatureId) as FeatureId FROM ms1.Features AS fe\n" +
-                "INNER JOIN ms1.Files AS fi ON (fe.FileId=fi.FileId)\n" +
-                "INNER JOIN exp.Data AS d ON (fi.ExpDataFileId=d.RowId)\n" +
-                "INNER JOIN ms2.Runs AS r ON (r.Container=d.Container)\n" +
-                "INNER JOIN ms2.Fractions AS fr ON (fr.Run=r.Run AND fr.MzXmlUrl=fi.MzXmlUrl)\n" +
-                "INNER JOIN ms2.PeptidesData AS pd ON (pd.Fraction=fr.Fraction AND pd.scan=fe.MS2Scan AND pd.Charge=fe.MS2Charge)\n" +
-                "WHERE pd.RowId=" + ExprColumn.STR_TABLE_ALIAS + ".RowId)");
-
-        var ciFeatureId = addColumn(new ExprColumn(this, "MS1 Feature", sqlFeatureJoin, JdbcType.INTEGER, getColumn("RowId")));
-
-        //tell query that this new column is an FK to the features table info
-        ciFeatureId.setFk(new LookupForeignKey("FeatureId")
-        {
-            public TableInfo getLookupTableInfo()
-            {
-                MS1Service ms1svc = MS1Service.get();
-                return null == ms1svc ? null : ms1svc.createFeaturesTableInfo(_userSchema.getUser(), _userSchema.getContainer(), false);
-            }
-        });
     }
 
     private void setupProteinColumns(final String showProteinURLString)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2015 LabKey Corporation
+ * Copyright (c) 2015-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,13 @@ import org.labkey.api.data.Container;
  */
 public interface MS2Urls extends UrlProvider
 {
-    public ActionURL getShowPeptideUrl(Container container);
+    ActionURL getShowPeptideUrl(Container container);
 
-    public ActionURL getShowListUrl(Container container);
+    ActionURL getShowListUrl(Container container);
 
-    public ActionURL getProteinSearchUrl(Container container);
+    ActionURL getProteinSearchUrl(Container container);
+
+    ActionURL getPepSearchUrl(Container container);
+    ActionURL getPepSearchUrl(Container container, String sequence);
+
 }

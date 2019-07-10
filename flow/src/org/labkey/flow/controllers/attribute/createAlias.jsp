@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
+<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.persist.AttributeCache" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
@@ -29,11 +30,13 @@
     ActionURL returnURL = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
 %>
 
-Create alias for <%=h(entry.getType().name())%> <%=h(entry.getName())%>
+Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
 <p>
 
-<labkey:errors/>
-<labkey:form action="<%=editURL%>" method="post">
+<div id="form-errors">
+    <labkey:errors/>
+</div>
+<labkey:form onsubmit="return validateForm();" id="alias-form" action="<%=editURL%>" method="post">
     <table>
         <tr>
             <td>
@@ -51,4 +54,45 @@ Create alias for <%=h(entry.getType().name())%> <%=h(entry.getName())%>
             </td>
         </tr>
     </table>
+    <labkey:input type="hidden" id="allowCaseChangeAlias" name="allowCaseChangeAlias" value="false"/>
 </labkey:form>
+
+<script>
+    var errorEl = document.getElementById('form-errors');
+    function showError(msg) {
+        errorEl.innerHTML = '<div class="labkey-error">' + LABKEY.Utils.encodeHtml(msg) + '</div>';
+    }
+
+    var formEl = document.getElementById('alias-form');
+    var aliasEl = document.getElementById('alias');
+    var allowCaseChangeAliasEl = document.getElementById('allowCaseChangeAlias');
+
+    function validateForm() {
+        errorEl.innerHTML = '';
+
+        var currentAttribute = <%=PageFlowUtil.jsString(entry.getName())%>;
+        var newAlias = aliasEl.value;
+
+        if (!newAlias) {
+            showError('Alias name must not be blank');
+            return false;
+        }
+
+        if (newAlias === currentAttribute) {
+            showError('Alias must not be identical to the original');
+            return false;
+        }
+
+        if (newAlias.toLowerCase() === currentAttribute.toLowerCase()) {
+            var type = <%=PageFlowUtil.jsString(entry.getType().name())%>;
+            var result = confirm("Current " + type + " '" + LABKEY.Utils.encodeHtml(currentAttribute) + "' and alias '" + newAlias + "' only differ by casing.\n\nWould you like to continue creating the alias?");
+            if (!result)
+                return false;
+
+            allowCaseChangeAliasEl.value = true;
+        }
+
+        return true;
+    };
+</script>
+

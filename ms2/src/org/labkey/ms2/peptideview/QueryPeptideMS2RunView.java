@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2018 LabKey Corporation
+ * Copyright (c) 2007-2019 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,7 +240,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
             {
                 highestScoreFlag = true;
             }
-            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), true, ContainerFilter.CURRENT, runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
+            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), ContainerFilter.CURRENT, runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
             // Manually apply the metadata
             _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<>());
         }
