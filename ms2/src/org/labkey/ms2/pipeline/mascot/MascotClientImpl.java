@@ -111,16 +111,19 @@ public class MascotClientImpl implements SearchClient
         _userPassword = (null == userPassword) ? "" : userPassword;
     }
 
+    @Override
     public int getErrorCode ()
     {
         return errorCode;
     }
 
+    @Override
     public String getErrorString ()
     {
         return errorString;
     }
 
+    @Override
     public boolean setProxyURL (String proxyURL)
     {
         // let' works on the proxy server setup
@@ -176,6 +179,7 @@ public class MascotClientImpl implements SearchClient
         }
     }
 
+    @Override
     public void findWorkableSettings(boolean useAuthentication)
     {
         errorCode = 0;
@@ -285,7 +289,6 @@ public class MascotClientImpl implements SearchClient
                     }
                     else
                     {
-                        errorCode = attemptStatus;
                         errorString = "Mascot server responded on " + testUrl + " with \"" + attemptMessage + "\"";
 
                         _lastWorkingSet = 1;
