@@ -48,16 +48,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 
@@ -69,14 +70,14 @@ public class MascotClientImpl implements SearchClient
 {
     private static Logger _log = Logger.getLogger(MascotClientImpl.class);
     
-    private Logger _instanceLogger = null;
+    private Logger _instanceLogger;
 
     private String _url;
-    private String _userAccount = "";
-    private String _userPassword = "";
+    private String _userAccount;
+    private String _userPassword;
     private String _proxyURL = "";
-    private int errorCode = 0;
-    private String errorString = "";
+    private int errorCode;
+    private String errorString;
 
     private static volatile int _lastWorkingSet = 0;
     private static volatile String _lastWorkingUrl = "";
@@ -144,26 +145,12 @@ public class MascotClientImpl implements SearchClient
             }
             catch (MalformedURLException x)
             {
-                getLogger().error("request(proxyURL="+proxyURL+")", x);
+                getLogger().info("request(proxyURL="+proxyURL+")", x);
             }
         }
         if (succeeded)
             _proxyURL = proxyURL;
         return succeeded;
-    }
-
-    public boolean requireAuthentication ()
-    {
-        //GET /cgi/login.pl?display=nothing&onerrdisplay=nothing&action=issecuritydisabled
-        errorCode = 0;
-        errorString = "";
-        Properties parameters = new Properties();
-        parameters.setProperty("cgi", "login.pl");
-        parameters.setProperty("display", "nothing");
-        parameters.setProperty("onerrdisplay", "nothing");
-        parameters.setProperty("action", "issecuritydisabled");
-        Properties results = request (parameters, true);
-        return (results.getProperty("error","0").equals("0"));
     }
 
     public String testConnectivity(boolean useAuthentication)
@@ -405,13 +392,13 @@ public class MascotClientImpl implements SearchClient
                     int nPos1 = result.indexOf("\n");
                     if (-1 != nPos1)
                     {
-                        sb.append(result.substring(0, nPos1 - 1));
+                        sb.append(result, 0, nPos1 - 1);
                     }
                     int nPos2 = result.indexOf("\n", nPos1 + 1);
                     if (-1 != nPos2)
                     {
                         if (-1 != nPos1) sb.append(",");
-                        sb.append(result.substring(nPos1 + 1, nPos2 - 1));
+                        sb.append(result, nPos1 + 1, nPos2 - 1);
                     }
                     throw new IOException(sb.toString());
                 }
@@ -446,27 +433,22 @@ public class MascotClientImpl implements SearchClient
         //results = request (parameters, false);
         //return results.getProperty("HTTPContent", "");
 
-        InputStream in = getRequestResultStream (parameters);
-        if (null == in)
-            return "STATUS=Fail to get result stream\n";
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        sb=new StringBuffer(5*1024*1024+4*1024);
-        char[] buffer = new char [4096]; // use 4-KB fragment
-        int readLen;
-        try
+        try (InputStream in = getRequestResultStream (parameters))
         {
-            while ((readLen = reader.read(buffer)) > 0) {
+            if (null == in)
+                return "STATUS=Fail to get result stream\n";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            sb = new StringBuffer(5 * 1024 * 1024 + 4 * 1024);
+            char[] buffer = new char[4096]; // use 4-KB fragment
+            int readLen;
+            while ((readLen = reader.read(buffer)) > 0)
+            {
                 sb.append(buffer, 0, readLen);
             }
         }
         catch (IOException e)
         {
-            getLogger().warn("Encounter exception after reading "+sb.length()+" byte(s)", e);
-        }
-        finally
-        {
-            try { in.close(); } catch (IOException ignored) { }
+            getLogger().warn("Encounter exception after reading " + sb.length() + " byte(s)", e);
         }
 
         return sb.toString();
@@ -556,7 +538,7 @@ public class MascotClientImpl implements SearchClient
         if (0 == errorCode) {
             return mascotErrorString;
         } else {
-            return "Sorry, unable to get Mascot error string for code " + Integer.toString(mascotErrorCode);
+            return "Sorry, unable to get Mascot error string for code " + mascotErrorCode;
         }
     }
 
@@ -935,12 +917,11 @@ public class MascotClientImpl implements SearchClient
                 try {
                     Thread.sleep(delayAfterSubmitSec * 1000);
                 }
-                catch (InterruptedException e) {
-                }
+                catch (InterruptedException ignored) { }
 
                 searchStatus = getTaskStatus(mascotSessionId, taskID);
                 secSinceSameStatus += delayAfterSubmitSec;
-                if (null == prevSearchStatus || !searchStatus.equals(prevSearchStatus)
+                if (!searchStatus.equals(prevSearchStatus)
                         || secSinceSameStatus >= delayBetweenSameStatus) {
                     getLogger().info("Mascot search status: " + searchStatus);
                     secSinceSameStatus = 0;
@@ -966,8 +947,7 @@ public class MascotClientImpl implements SearchClient
                     try {
                         Thread.sleep(delayBetweenRetrySec * 1000);
                     }
-                    catch (InterruptedException e) {
-                    }
+                    catch (InterruptedException ignored) {}
                     continue;
                 }
                 else
@@ -981,7 +961,7 @@ public class MascotClientImpl implements SearchClient
             {
                 Thread.sleep(delayBetweenResultRetrievalSec*1000);
             }
-            catch (InterruptedException e) { }
+            catch (InterruptedException ignored) { }
 
             getLogger().info("Retrieving Mascot search result...");
             if (getResultFile (mascotSessionId, taskID, resultFile))
@@ -1131,10 +1111,7 @@ public class MascotClientImpl implements SearchClient
                 float float2 = Float.valueOf(parentMassErrorMinus);
                 parentMassError = (float1 > float2) ? parentMassErrorPlus : parentMassErrorMinus;
             }
-            else if (parentMassErrorPlus != null)
-                parentMassError = parentMassErrorPlus;
-            else
-                parentMassError = parentMassErrorMinus;
+            else parentMassError = Objects.requireNonNullElse(parentMassErrorPlus, parentMassErrorMinus);
         }
         else
             parentMassError = parser.getInputParameter("search, tol");
@@ -1194,7 +1171,7 @@ public class MascotClientImpl implements SearchClient
         }
 
         PostMethod post = new PostMethod(mascotRequestURL);
-        post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), post.getParams()) );
+        post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[0]), post.getParams()) );
         HttpClient client = new HttpClient();
 
         int statusCode = -1;
@@ -1213,7 +1190,7 @@ public class MascotClientImpl implements SearchClient
             {
                 getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
                         queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-                        Integer.toString(attempt+1) + ".\n", err);
+                        (attempt + 1) + ".\n", err);
                 attempt = maxAttempt;
             }
             attempt++;
@@ -1259,14 +1236,14 @@ public class MascotClientImpl implements SearchClient
             {
             	getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
             			queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-            			Integer.toString(attempt+1) + ".\n" + "Mascot output: " + response.toString());
+                        (attempt + 1) + ".\n" + "Mascot output: " + response.toString());
             }
         }
         catch (IOException err)
         {
             getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
                     queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-                    Integer.toString(attempt+1) + ".\n",err);
+                    (attempt + 1) + ".\n",err);
         }
         finally
         {
@@ -1319,10 +1296,10 @@ public class MascotClientImpl implements SearchClient
         }
         finally
         {
-            try { in.close(); } catch (IOException e) { }
+            try { in.close(); } catch (IOException ignored) {}
             if (null != out)
             {
-                try { out.close(); } catch (IOException e) { }
+                try { out.close(); } catch (IOException ignored) {}
             }
         }
 
@@ -1332,29 +1309,22 @@ public class MascotClientImpl implements SearchClient
             return false;
 
         // let's check that we have the right file
-        BufferedReader resultStream = null;
         final int maxLines=20;
         List<String> contentLines = new ArrayList<>();
-        String firstLine = "";
-        try
+        String firstLine;
+        try (BufferedReader resultStream = new BufferedReader(new InputStreamReader(new FileInputStream(outFile))))
         {
-            resultStream = new BufferedReader(new InputStreamReader(new FileInputStream(outFile)));
-            for (int index=0; index<maxLines; index++) {
+            for (int index = 0; index < maxLines; index++)
+            {
                 firstLine = resultStream.readLine();
-                if (null != firstLine) {
+                if (null != firstLine)
+                {
                     contentLines.add(firstLine);
                 }
             }
         }
-        catch (FileNotFoundException e)
+        catch (IOException ignored)
         {
-        }
-        catch (IOException e)
-        {
-        }
-        finally
-        {
-            try { if (null != resultStream) resultStream.close(); } catch (IOException ignored) {}
         }
 
         firstLine=contentLines.get(0);
@@ -1417,20 +1387,12 @@ public class MascotClientImpl implements SearchClient
                 {
                     requestURLLSB.append("&");
                 }
-                try {
-                    requestURLLSB.append(URLEncoder.encode(s, "UTF-8"));
-                } catch (UnsupportedEncodingException x) {
-                    requestURLLSB.append(s);
-                }
+                requestURLLSB.append(URLEncoder.encode(s, StandardCharsets.UTF_8));
                 String val = parameters.getProperty(s);
                 if (!"".equals(val))
                 {
                     requestURLLSB.append("=");
-                    try {
-                        requestURLLSB.append(URLEncoder.encode(val, "UTF-8"));
-                    } catch (UnsupportedEncodingException x) {
-                        requestURLLSB.append(val);
-                    }
+                    requestURLLSB.append(URLEncoder.encode(val, StandardCharsets.UTF_8));
                 }
             }
         }
