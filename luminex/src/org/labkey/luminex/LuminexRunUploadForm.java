@@ -164,7 +164,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
                 // If we don't have one yet, do a lookup against the last uploaded set of values
                 // issue 21171: last entered values should be per user/container
                 SQLFragment sql = new SQLFragment("SELECT ObjectURI FROM " + OntologyManager.getTinfoObject()
-                        + " WHERE Container = ? AND ObjectId = (SELECT MAX(ObjectId) FROM "
+                        + " WHERE Container = ? AND ObjectId = (SELECT MAX(o.ObjectId) FROM "
                         + OntologyManager.getTinfoObject() + " o, "
                         + ExperimentService.get().getTinfoData() + " d, "
                         + LuminexProtocolSchema.getTableInfoAnalytes() + " a"
