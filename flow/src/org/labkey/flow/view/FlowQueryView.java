@@ -33,8 +33,8 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.study.StudyUrls;
 import org.labkey.api.study.assay.AssayPublishService;
-import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -264,7 +264,7 @@ public class FlowQueryView extends QueryView
             if (protocol != null && !AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ExpProtocol expProtocol = protocol.getProtocol();
-                ActionURL publishURL = PageFlowUtil.urlProvider(AssayUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
+                ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
 
                 if (getTable().getContainerFilter() != null && getTable().getContainerFilter().getType() != null)
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
