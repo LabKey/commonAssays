@@ -43,10 +43,10 @@ public class MicroarrayRunType extends ExperimentRunType
 
     public Priority getPriority(ExpProtocol protocol)
     {
-        if (MicroarrayAssayProvider.PROTOCOL_PREFIX.equals(new Lsid(protocol.getLSID()).getNamespacePrefix()))
-        {
-            return Priority.HIGH;
-        }
+//        if (MicroarrayAssayProvider.PROTOCOL_PREFIX.equals(new Lsid(protocol.getLSID()).getNamespacePrefix()))
+//        {
+//            return Priority.HIGH;
+//        }
         return null;
     }
 
