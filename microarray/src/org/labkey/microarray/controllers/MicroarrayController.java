@@ -41,7 +41,7 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
 import org.labkey.microarray.MicroarrayRunType;
 import org.labkey.microarray.MicroarrayUploadWizardAction;
-import org.labkey.microarray.PendingMageMLFilesView;
+//import org.labkey.microarray.PendingMageMLFilesView; deleterp
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
@@ -84,10 +84,11 @@ public class MicroarrayController extends SpringActionController
         return new ActionURL(ShowRunsAction.class, c);
     }
 
-    public static ActionURL getPendingMageMLFilesURL(Container c)
-    {
-        return new ActionURL(ShowPendingMageMLFilesAction.class, c);
-    }
+    // deleterp
+//    public static ActionURL getPendingMageMLFilesURL(Container c)
+//    {
+//        return new ActionURL(ShowPendingMageMLFilesAction.class, c);
+//    }
 
     @RequiresPermission(ReadPermission.class)
     public class ShowRunsAction extends SimpleViewAction
@@ -106,19 +107,19 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-    @RequiresPermission(ReadPermission.class)
-    public class ShowPendingMageMLFilesAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new PendingMageMLFilesView(getViewContext());
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Pending MageML Files");
-        }
-    }
+//    @RequiresPermission(ReadPermission.class) deleterp
+//    public class ShowPendingMageMLFilesAction extends SimpleViewAction
+//    {
+//        public ModelAndView getView(Object o, BindException errors)
+//        {
+//            return new PendingMageMLFilesView(getViewContext());
+//        }
+//
+//        public NavTree appendNavTrail(NavTree root)
+//        {
+//            return root.addChild("Pending MageML Files");
+//        }
+//    }
 
     /**
      * Basic approach:

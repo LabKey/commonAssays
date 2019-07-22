@@ -35,8 +35,8 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.affy.AffymetrixAssayProvider;
-import org.labkey.microarray.affy.AffymetrixDataHandler;
-import org.labkey.microarray.assay.MageMLDataHandler;
+//import org.labkey.microarray.affy.AffymetrixDataHandler; deleterp
+//import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.controllers.MicroarrayController;
@@ -104,27 +104,27 @@ public class MicroarrayModule extends SpringModule
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return new ArrayList<>(Arrays.asList(
-            new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
-            {
-                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                {
-                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE);
-                    view.setShowExportButtons(true);
-                    view.setTitle(WEBPART_MICROARRAY_RUNS);
-                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-                    return view;
-                }
-            },
-            new BaseWebPartFactory(WEBPART_PENDING_FILES)
-            {
-                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                {
-                    QueryView view = new PendingMageMLFilesView(portalCtx);
-                    view.setTitle("Pending MageML Files");
-                    view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
-                    return view;
-                }
-            },
+//            new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
+//            {
+//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+//                {
+//                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE);
+//                    view.setShowExportButtons(true);
+//                    view.setTitle(WEBPART_MICROARRAY_RUNS);
+//                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+//                    return view;
+//                }
+//            },
+//            new BaseWebPartFactory(WEBPART_PENDING_FILES)
+//            {
+//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+//                {
+//                    QueryView view = new PendingMageMLFilesView(portalCtx);
+//                    view.setTitle("Pending MageML Files");
+//                    view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
+//                    return view;
+//                }
+//            },
             new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
@@ -176,8 +176,8 @@ public class MicroarrayModule extends SpringModule
         ContainerManager.addContainerListener(new MicroarrayContainerListener());
 
         ExperimentService.get().addExperimentListener(new ExpressionMatrixExperimentListener());
-        ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler());
-        ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
+//        ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler()); deleterp
+//        ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
