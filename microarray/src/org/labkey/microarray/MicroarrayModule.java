@@ -34,7 +34,7 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
-import org.labkey.microarray.affy.AffymetrixAssayProvider;
+//import org.labkey.microarray.affy.AffymetrixAssayProvider;
 //import org.labkey.microarray.affy.AffymetrixDataHandler; deleterp
 //import org.labkey.microarray.assay.MageMLDataHandler;
 import org.labkey.microarray.assay.MicroarrayAssayProvider;
@@ -124,17 +124,17 @@ public class MicroarrayModule extends SpringModule
 //                    view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
 //                    return view;
 //                }
+//            }, deleterp
+//            new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
+//            {
+//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+//                {
+//                    WebPartView view = new MicroarrayStatisticsView(portalCtx);
+//                    view.setTitle(WEBPART_MICROARRAY_STATISTICS);
+//                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
+//                    return view;
+//                }
 //            },
-            new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
-            {
-                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                {
-                    WebPartView view = new MicroarrayStatisticsView(portalCtx);
-                    view.setTitle(WEBPART_MICROARRAY_STATISTICS);
-                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-                    return view;
-                }
-            },
             new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
@@ -168,7 +168,7 @@ public class MicroarrayModule extends SpringModule
         final ModuleContext finalModuleContext = moduleContext;
         FolderTypeManager.get().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
-        AssayService.get().registerAssayProvider(new AffymetrixAssayProvider());
+//        AssayService.get().registerAssayProvider(new AffymetrixAssayProvider()); deleterp
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
