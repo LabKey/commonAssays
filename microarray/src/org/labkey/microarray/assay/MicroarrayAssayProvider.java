@@ -51,9 +51,9 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-import org.labkey.microarray.controllers.MicroarrayController;
+//import org.labkey.microarray.controllers.MicroarrayController; deleterp
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.MicroarrayUploadWizardAction;
+//import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -166,21 +166,21 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return new MicroarrayProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
-    public ActionURL getImportURL(Container container, ExpProtocol protocol)
-    {
-        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MicroarrayUploadWizardAction.class);
-    }
+//    public ActionURL getImportURL(Container container, ExpProtocol protocol)
+//    {
+//        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MicroarrayUploadWizardAction.class);
+//    }
 
-    @Override
-    public AssayRunCreator getRunCreator()
-    {
-        return new MicroarrayRunCreator(this);
-    }
+//    @Override
+//    public AssayRunCreator getRunCreator() deleterp
+//    {
+//        return new MicroarrayRunCreator(this);
+//    }
 
-    public Class<? extends Controller> getDesignerAction()
-    {
-        return MicroarrayController.DesignerAction.class;
-    }
+//    public Class<? extends Controller> getDesignerAction()
+//    {
+//        return MicroarrayController.DesignerAction.class;
+//    }
 
     public String getDescription()
     {

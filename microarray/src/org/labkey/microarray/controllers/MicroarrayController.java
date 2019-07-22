@@ -40,7 +40,7 @@ import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
 import org.labkey.microarray.MicroarrayRunType;
-import org.labkey.microarray.MicroarrayUploadWizardAction;
+//import org.labkey.microarray.MicroarrayUploadWizardAction;
 //import org.labkey.microarray.PendingMageMLFilesView; deleterp
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
@@ -59,8 +59,8 @@ public class MicroarrayController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(
         MicroarrayController.class,
-        MicroarrayBulkPropertiesTemplateAction.class,
-        MicroarrayUploadWizardAction.class
+        MicroarrayBulkPropertiesTemplateAction.class
+//        MicroarrayUploadWizardAction.class
     );
 
     public MicroarrayController()
@@ -68,16 +68,16 @@ public class MicroarrayController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(DesignAssayPermission.class)
-    public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
-    {
-        @Override
-        protected ModelAndView createGWTView(Map<String, String> properties)
-        {
-            setHelpTopic(new HelpTopic("microarrayProperties"));
-            return new GWTView(MicroarrayAssayDesigner.class, properties);
-        }
-    }
+//    @RequiresPermission(DesignAssayPermission.class)
+//    public class DesignerAction extends org.labkey.api.study.actions.DesignerAction
+//    {
+//        @Override
+//        protected ModelAndView createGWTView(Map<String, String> properties)
+//        {
+//            setHelpTopic(new HelpTopic("microarrayProperties"));
+//            return new GWTView(MicroarrayAssayDesigner.class, properties);
+//        }
+//    }
 
     public static ActionURL getRunsURL(Container c)
     {
