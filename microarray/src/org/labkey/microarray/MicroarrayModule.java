@@ -56,9 +56,9 @@ import java.util.Set;
 public class MicroarrayModule extends SpringModule
 {
     public static final String NAME = "Microarray";
-    public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
-    public static final String WEBPART_MICROARRAY_STATISTICS = "Microarray Summary";
-    public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
+//    public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
+//    public static final String WEBPART_MICROARRAY_STATISTICS = "Microarray Summary"; deleterp
+//    public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
     private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
 
     private static final String CONTROLLER_NAME = "microarray";

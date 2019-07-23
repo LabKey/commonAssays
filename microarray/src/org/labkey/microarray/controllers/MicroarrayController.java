@@ -26,14 +26,14 @@ import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.permissions.DesignAssayPermission;
+//import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.HelpTopic;
+//import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GWTView;
-import org.labkey.api.view.JspView;
+//import org.labkey.api.view.GWTView;
+//import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
@@ -42,7 +42,7 @@ import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
 import org.labkey.microarray.MicroarrayRunType;
 //import org.labkey.microarray.MicroarrayUploadWizardAction;
 //import org.labkey.microarray.PendingMageMLFilesView; deleterp
-import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
+//import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
@@ -168,19 +168,19 @@ public class MicroarrayController extends SpringActionController
     }
 
 
-    @RequiresPermission(ReadPermission.class)
-    public class MatrixQueryAction extends SimpleViewAction
-    {
-        @Override
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new JspView<>("/org/labkey/microarray/view/ExpressionMatrixQuery.jsp");
-        }
-
-        @Override
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Microarray Expression Data Comparison");
-        }
-    }
+//    @RequiresPermission(ReadPermission.class)
+//    public class MatrixQueryAction extends SimpleViewAction
+//    {
+//        @Override
+//        public ModelAndView getView(Object o, BindException errors)
+//        {
+//            return new JspView<>("/org/labkey/microarray/view/ExpressionMatrixQuery.jsp");
+//        }
+//
+//        @Override
+//        public NavTree appendNavTrail(NavTree root)
+//        {
+//            return root.addChild("Microarray Expression Data Comparison");
+//        }
+//    }
 }
