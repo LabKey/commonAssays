@@ -38,7 +38,7 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
 //import org.labkey.api.view.WebPartView;
-import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
+//import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
 //import org.labkey.microarray.MicroarrayRunType;
 //import org.labkey.microarray.MicroarrayUploadWizardAction;
 //import org.labkey.microarray.PendingMageMLFilesView; deleterp
@@ -58,8 +58,8 @@ import java.util.List;
 public class MicroarrayController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(
-        MicroarrayController.class,
-        MicroarrayBulkPropertiesTemplateAction.class
+        MicroarrayController.class
+//        MicroarrayBulkPropertiesTemplateAction.class
 //        MicroarrayUploadWizardAction.class
     );
 

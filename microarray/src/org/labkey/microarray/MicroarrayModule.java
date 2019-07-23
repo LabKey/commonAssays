@@ -37,7 +37,7 @@ import org.labkey.api.view.WebPartView;
 //import org.labkey.microarray.affy.AffymetrixAssayProvider;
 //import org.labkey.microarray.affy.AffymetrixDataHandler; deleterp
 //import org.labkey.microarray.assay.MageMLDataHandler;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
+//import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.matrix.ExpressionMatrixAssayProvider;
@@ -167,7 +167,7 @@ public class MicroarrayModule extends SpringModule
     {
         final ModuleContext finalModuleContext = moduleContext;
         FolderTypeManager.get().registerFolderType(this, new MicroarrayFolderType(this));
-        AssayService.get().registerAssayProvider(new MicroarrayAssayProvider());
+//        AssayService.get().registerAssayProvider(new MicroarrayAssayProvider()); deleterp? seems mage-specific
 //        AssayService.get().registerAssayProvider(new AffymetrixAssayProvider()); deleterp
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));

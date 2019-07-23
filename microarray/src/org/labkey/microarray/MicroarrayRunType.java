@@ -25,7 +25,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
+//import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 /**
