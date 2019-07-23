@@ -177,39 +177,39 @@ public class MicroarrayRunUploadForm extends BulkPropertiesUploadForm<Microarray
         return getProperties(barcode);
     }
 
-    public int getSampleCount(Document mageML) throws ExperimentException
-    {
-        if (isBulkUploadAttempted())
-        {
-            Integer result = getChannelCount(mageML);
-            if (result == null)
-            {
-                throw new ExperimentException("Unable to find the channel count");
-            }
-            return result.intValue();
-        }
-        else
-        {
-            return SampleChooserDisplayColumn.getSampleCount(getRequest(), MicroarrayAssayProvider.MAX_SAMPLE_COUNT);
-        }
-    }
+//    public int getSampleCount(Document mageML) throws ExperimentException deleterp
+//    {
+//        if (isBulkUploadAttempted())
+//        {
+//            Integer result = getChannelCount(mageML);
+//            if (result == null)
+//            {
+//                throw new ExperimentException("Unable to find the channel count");
+//            }
+//            return result.intValue();
+//        }
+//        else
+//        {
+//            return SampleChooserDisplayColumn.getSampleCount(getRequest(), MicroarrayAssayProvider.MAX_SAMPLE_COUNT);
+//        }
+//    }
 
-    public ExpMaterial getSample(int index) throws ExperimentException
-    {
-        if (isBulkUploadAttempted())
-        {
-            String name = getSampleName(index);
-            if (name != null)
-            {
-                return resolveSample(name);
-            }
-            throw new ExperimentException("No sample name was specified for sample " + (index + 1));
-        }
-        else
-        {
-            return SampleChooserDisplayColumn.getMaterial(index, getContainer(), getRequest());
-        }
-    }
+//    public ExpMaterial getSample(int index) throws ExperimentException deleterp
+//    {
+//        if (isBulkUploadAttempted())
+//        {
+//            String name = getSampleName(index);
+//            if (name != null)
+//            {
+//                return resolveSample(name);
+//            }
+//            throw new ExperimentException("No sample name was specified for sample " + (index + 1));
+//        }
+//        else
+//        {
+//            return SampleChooserDisplayColumn.getMaterial(index, getContainer(), getRequest());
+//        }
+//    }
 
     public String getSampleName(int index) throws ExperimentException
     {

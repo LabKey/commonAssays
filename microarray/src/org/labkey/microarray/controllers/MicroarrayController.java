@@ -18,12 +18,12 @@ package org.labkey.microarray.controllers;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.RedirectAction;
-import org.labkey.api.action.SimpleViewAction;
+//import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExperimentService;
+//import org.labkey.api.data.Container;
+//import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
-import org.labkey.api.query.QueryView;
+//import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 //import org.labkey.api.study.permissions.DesignAssayPermission;
@@ -31,22 +31,22 @@ import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 //import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.ActionURL;
+//import org.labkey.api.view.ActionURL;
 //import org.labkey.api.view.GWTView;
 //import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
+//import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.api.view.WebPartView;
+//import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
-import org.labkey.microarray.MicroarrayRunType;
+//import org.labkey.microarray.MicroarrayRunType;
 //import org.labkey.microarray.MicroarrayUploadWizardAction;
 //import org.labkey.microarray.PendingMageMLFilesView; deleterp
 //import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
-import org.springframework.validation.BindException;
+//import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.web.servlet.ModelAndView;
+//import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,10 +79,10 @@ public class MicroarrayController extends SpringActionController
 //        }
 //    }
 
-    public static ActionURL getRunsURL(Container c)
-    {
-        return new ActionURL(ShowRunsAction.class, c);
-    }
+//    public static ActionURL getRunsURL(Container c) deleterp
+//    {
+//        return new ActionURL(ShowRunsAction.class, c);
+//    }
 
     // deleterp
 //    public static ActionURL getPendingMageMLFilesURL(Container c)
@@ -90,22 +90,22 @@ public class MicroarrayController extends SpringActionController
 //        return new ActionURL(ShowPendingMageMLFilesAction.class, c);
 //    }
 
-    @RequiresPermission(ReadPermission.class)
-    public class ShowRunsAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunType.INSTANCE);
-            result.setShowExportButtons(true);
-            result.setFrame(WebPartView.FrameType.NONE);
-            return result;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Microarray Runs");
-        }
-    }
+//    @RequiresPermission(ReadPermission.class) deleterp
+//    public class ShowRunsAction extends SimpleViewAction
+//    {
+//        public ModelAndView getView(Object o, BindException errors)
+//        {
+//            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunType.INSTANCE);
+//            result.setShowExportButtons(true);
+//            result.setFrame(WebPartView.FrameType.NONE);
+//            return result;
+//        }
+//
+//        public NavTree appendNavTrail(NavTree root)
+//        {
+//            return root.addChild("Microarray Runs");
+//        }
+//    }
 
 //    @RequiresPermission(ReadPermission.class) deleterp
 //    public class ShowPendingMageMLFilesAction extends SimpleViewAction

@@ -155,10 +155,10 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION_SET);
     }
 
-    public TableInfo getAnnotationTable()
-    {
-        return getTable(TABLE_FEATURE_ANNOTATION);
-    }
+//    public TableInfo getAnnotationTable() deleterp?
+//    {
+//        return getTable(TABLE_FEATURE_ANNOTATION);
+//    }
 
     public ExpRunTable createRunsTable(ContainerFilter cf)
     {

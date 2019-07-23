@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package org.labkey.microarray.query;
-
-import org.labkey.api.data.DatabaseTableType;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.DefaultQueryUpdateService;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.QueryForeignKey;
-import org.labkey.api.query.QueryUpdateService;
-import org.labkey.api.query.UserIdQueryForeignKey;
-import org.labkey.api.security.UserPrincipal;
-import org.labkey.api.security.permissions.Permission;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class FeatureAnnotationTable { }
+//package org.labkey.microarray.query;
+//
+//import org.labkey.api.data.DatabaseTableType;
+//import org.labkey.api.data.TableInfo;
+//import org.labkey.api.query.DefaultQueryUpdateService;
+//import org.labkey.api.query.FieldKey;
+//import org.labkey.api.query.FilteredTable;
+//import org.labkey.api.query.QueryForeignKey;
+//import org.labkey.api.query.QueryUpdateService;
+//import org.labkey.api.query.UserIdQueryForeignKey;
+//import org.labkey.api.security.UserPrincipal;
+//import org.labkey.api.security.permissions.Permission;
+//
+//import java.util.ArrayList;
+//import java.util.List;
+//
+//public class FeatureAnnotationTable { } deleterp
 /*
 public class FeatureAnnotationTable extends FilteredTable<MicroarrayUserSchema>
 {

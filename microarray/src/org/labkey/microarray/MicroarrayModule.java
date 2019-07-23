@@ -188,9 +188,9 @@ public class MicroarrayModule extends SpringModule
             return Collections.emptySet();
         });
 
-        SearchService ss = SearchService.get();
-        if (null != ss)
-            ss.addDocumentParser(new MageMLDocumentParser());
+//        SearchService ss = SearchService.get(); deleterp
+//        if (null != ss)
+//            ss.addDocumentParser(new MageMLDocumentParser());
 
         // TODO: Are these module properties still needed?
         /*

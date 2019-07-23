@@ -78,8 +78,8 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
 
-    public static final int MAX_SAMPLE_COUNT = 2;
-    public static final int MIN_SAMPLE_COUNT = 1;
+//    public static final int MAX_SAMPLE_COUNT = 2; deleterp
+//    public static final int MIN_SAMPLE_COUNT = 1;
 
     private static final String DEFAULT_CHANNEL_COUNT_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Scan_NumChannels']/@value";
     private static final String DEFAULT_BARCODE_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:FeatureExtractor_Barcode']/@value";
