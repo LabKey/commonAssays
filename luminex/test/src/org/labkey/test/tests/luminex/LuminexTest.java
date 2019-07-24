@@ -578,7 +578,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     {
         PropertiesEditor propertiesEditor = PropertiesEditor(getDriver()).withTitleContaining(where).find();
         propertiesEditor.selectField(index);
-        propertiesEditor.fieldProperties().selectFormatTab().propertyFormat.set(formatStr);
+        propertiesEditor.fieldProperties().selectFormatTab().setPropertyFormat(formatStr);
     }
 
     public void importLuminexRunPageTwo(String name, String isotype, String conjugate, String stndCurveFitInput,
