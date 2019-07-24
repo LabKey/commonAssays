@@ -62,20 +62,20 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
-    public static final String TABLE_RUNS = "MicroarrayRuns";
-    public static final String TABLE_GEO_PROPS = "Geo_Properties";
+//    public static final String TABLE_RUNS = "MicroarrayRuns";
+//    public static final String TABLE_GEO_PROPS = "Geo_Properties";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
 //    public static final String QC_REPORT_COLUMN_NAME = "QCReport"; deleterp
 //    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
 
-    private ExpSchema _expSchema;
+//    private ExpSchema _expSchema;
 
     public MicroarrayUserSchema(User user, Container container)
     {
         super(SCHEMA_NAME, SCHMEA_DESCR, user, container, getSchema());
-        _expSchema = new ExpSchema(user, container);
+//        _expSchema = new ExpSchema(user, container);
     }
 
 
@@ -92,16 +92,16 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public Set<String> getTableNames()
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
-        hs.add(TABLE_RUNS);
-        hs.add(TABLE_GEO_PROPS);
+//        hs.add(TABLE_RUNS);
+//        hs.add(TABLE_GEO_PROPS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
     }
 
-//    public TableInfo createTable(String name, ContainerFilter cf)
+//    public TableInfo createTable(String name, ContainerFilter cf) !!!
 //    {
-//        if (TABLE_RUNS.equalsIgnoreCase(name))
+//        if (TABLE_RUNS.equalsIgnoreCase(name)) remove
 //        {
 //            return createRunsTable(cf);
 //        }
@@ -109,7 +109,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 //        if (getTableNames().contains(name))
 //        {
 //            SchemaTableInfo tableInfo = getSchema().getTable(name);
-//            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
+//            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET)) keep
 //            {
 //                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
 //                return table;
@@ -155,7 +155,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION_SET);
     }
 
-//    public TableInfo getAnnotationTable() deleterp?
+//    public TableInfo getAnnotationTable() keep
 //    {
 //        return getTable(TABLE_FEATURE_ANNOTATION);
 //    }
@@ -171,7 +171,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 //        return result;
 //    }
 
-//    public void configureRunsTable(ExpRunTable result)
+//    public void configureRunsTable(ExpRunTable result) delete
 //    {
 //        result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
 //
