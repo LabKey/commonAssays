@@ -939,7 +939,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void verifyGroupAudit()
     {
         List<Map<String, Object>> rows = executeSelectRowCommand("auditLog", "ExperimentAuditEvent").getRows();
-        assertEquals("Unexpected number of audit rows", 9, rows.size());
+        assertEquals("Unexpected number of audit rows", 11, rows.size());
         int addedCount = 0;
         int removedCount = 0;
         for (Map row : rows)
