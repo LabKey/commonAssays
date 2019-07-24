@@ -17,10 +17,8 @@
 package org.labkey.ms2.metadata;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.util.PageFlowUtil;
@@ -70,6 +68,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         return super.getAdditionalFileSetCount(context);
     }
 
+    @Override
     public HttpView getView(MassSpecMetadataAssayForm form)
     {
         StringBuilder sb = new StringBuilder(super.getHTML(form));
@@ -157,6 +156,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
         return new Pair<>(files.size(), annotated);
     }
 
+    @Override
     public AdditionalUploadType getAdditionalUploadType(MassSpecMetadataAssayForm context)
     {
         if (!context.isFractions() && getFileQueue(context).size() > 1)
