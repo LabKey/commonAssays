@@ -1,52 +1,52 @@
-<!--<?xml version="1.0" encoding="UTF-8"?>-->
-<!--<beans xmlns="http://www.springframework.org/schema/beans"-->
-<!--       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-<!--       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">-->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-<!--&lt;!&ndash;    <bean id="microarrayPipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">&ndash;&gt;-->
-<!--&lt;!&ndash;        <property name="factoryImpls">&ndash;&gt;-->
-<!--&lt;!&ndash;            <list>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                <bean class="org.labkey.microarray.pipeline.FeatureExtractorTask$Factory" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                <bean class="org.labkey.microarray.pipeline.MageMLDataCreatorTask$Factory" />&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;            </list>&ndash;&gt;-->
-<!--&lt;!&ndash;        </property>&ndash;&gt;-->
-<!--&lt;!&ndash;        <property name="pipelines">&ndash;&gt;-->
-<!--&lt;!&ndash;            <list>&ndash;&gt;-->
-<!--&lt;!&ndash;                &lt;!&ndash; Feature extractor pipeline &ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">&ndash;&gt;-->
-<!--&lt;!&ndash;                    <constructor-arg value="microarrayFeatureExtractionPipeline"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <property name="description" value="Microarray Feature Extractor"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <property name="protocolObjectId" value="Microarray.FeatureExtraction" />&ndash;&gt;-->
-<!--&lt;!&ndash;                    <property name="protocolName" value="Feature extraction" />&ndash;&gt;-->
-<!--&lt;!&ndash;                    <property name="protocolFactoryName" value="featureExtractor"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <property name="defaultDisplayState" value="toolbar" />&ndash;&gt;-->
+<!--    <bean id="microarrayPipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">-->
+<!--        <property name="factoryImpls">-->
+<!--            <list>-->
+<!--&lt;!&ndash;                <bean class="org.labkey.microarray.pipeline.FeatureExtractorTask$Factory" />&ndash;&gt;-->
+<!--&lt;!&ndash;                <bean class="org.labkey.microarray.pipeline.MageMLDataCreatorTask$Factory" />&ndash;&gt;-->
+<!--            </list>-->
+<!--        </property>-->
+<!--        <property name="pipelines">-->
+<!--            <list>-->
+<!--                &lt;!&ndash; Feature extractor pipeline &ndash;&gt;-->
+<!--                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">-->
+<!--                    <constructor-arg value="microarrayFeatureExtractionPipeline"/>-->
+<!--                    <property name="description" value="Microarray Feature Extractor"/>-->
+<!--                    <property name="protocolObjectId" value="Microarray.FeatureExtraction" />-->
+<!--                    <property name="protocolName" value="Feature extraction" />-->
+<!--                    <property name="protocolFactoryName" value="featureExtractor"/>-->
+<!--                    <property name="defaultDisplayState" value="toolbar" />-->
 
-<!--&lt;!&ndash;                    <property name="initialInputExt" ref="tiffFileType" />&ndash;&gt;-->
+<!--                    <property name="initialInputExt" ref="tiffFileType" />-->
 
-<!--&lt;!&ndash;                    <property name="taskProgressionSpec">&ndash;&gt;-->
-<!--&lt;!&ndash;                        <list>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                            <value type="java.lang.Class">org.labkey.microarray.pipeline.FeatureExtractorTask</value>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                            <value type="java.lang.Class">org.labkey.microarray.pipeline.MageMLDataCreatorTask</value>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                            &lt;!&ndash;<ref bean="xarGeneratorId"/>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                        </list>&ndash;&gt;-->
-<!--&lt;!&ndash;                    </property>&ndash;&gt;-->
-<!--&lt;!&ndash;                </bean>&ndash;&gt;-->
-<!--&lt;!&ndash;            </list>&ndash;&gt;-->
-<!--&lt;!&ndash;        </property>&ndash;&gt;-->
-<!--&lt;!&ndash;    </bean>&ndash;&gt;-->
+<!--                    <property name="taskProgressionSpec">-->
+<!--                        <list>-->
+<!--&lt;!&ndash;                            <value type="java.lang.Class">org.labkey.microarray.pipeline.FeatureExtractorTask</value>&ndash;&gt;-->
+<!--&lt;!&ndash;                            <value type="java.lang.Class">org.labkey.microarray.pipeline.MageMLDataCreatorTask</value>&ndash;&gt;-->
+<!--                            &lt;!&ndash;<ref bean="xarGeneratorId"/>&ndash;&gt;-->
+<!--                        </list>-->
+<!--                    </property>-->
+<!--                </bean>-->
+<!--            </list>-->
+<!--        </property>-->
+<!--    </bean>-->
 
-<!--&lt;!&ndash;    <bean id="tiffFileType" class="org.labkey.api.util.FileType">&ndash;&gt;-->
-<!--&lt;!&ndash;        <constructor-arg>&ndash;&gt;-->
-<!--&lt;!&ndash;            <list>&ndash;&gt;-->
-<!--&lt;!&ndash;                <value>.tiff</value>&ndash;&gt;-->
-<!--&lt;!&ndash;                <value>.tif</value>&ndash;&gt;-->
-<!--&lt;!&ndash;            </list>&ndash;&gt;-->
-<!--&lt;!&ndash;        </constructor-arg>&ndash;&gt;-->
-<!--&lt;!&ndash;        <constructor-arg value=".tiff"/>&ndash;&gt;-->
-<!--&lt;!&ndash;    </bean>&ndash;&gt;-->
+<!--    <bean id="tiffFileType" class="org.labkey.api.util.FileType">-->
+<!--        <constructor-arg>-->
+<!--            <list>-->
+<!--                <value>.tiff</value>-->
+<!--                <value>.tif</value>-->
+<!--            </list>-->
+<!--        </constructor-arg>-->
+<!--        <constructor-arg value=".tiff"/>-->
+<!--    </bean>-->
 
-<!--    &lt;!&ndash; Tasks registered in experiment module &ndash;&gt;-->
-<!--&lt;!&ndash;    <bean id="xarGeneratorId" class="org.labkey.api.pipeline.TaskId">&ndash;&gt;-->
-<!--&lt;!&ndash;        <constructor-arg><value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value></constructor-arg>&ndash;&gt;-->
-<!--&lt;!&ndash;    </bean>&ndash;&gt;-->
-<!--</beans>-->
+    <!-- Tasks registered in experiment module -->
+<!--    <bean id="xarGeneratorId" class="org.labkey.api.pipeline.TaskId">-->
+<!--        <constructor-arg><value type="java.lang.Class">org.labkey.api.exp.pipeline.XarGeneratorId</value></constructor-arg>-->
+<!--    </bean>-->
+</beans>

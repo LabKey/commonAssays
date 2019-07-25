@@ -62,8 +62,8 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
-//    public static final String TABLE_RUNS = "MicroarrayRuns";
-//    public static final String TABLE_GEO_PROPS = "Geo_Properties";
+    public static final String TABLE_RUNS = "MicroarrayRuns";
+    public static final String TABLE_GEO_PROPS = "Geo_Properties";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
@@ -92,42 +92,37 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public Set<String> getTableNames()
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
-//        hs.add(TABLE_RUNS);
-//        hs.add(TABLE_GEO_PROPS);
+        hs.add(TABLE_RUNS);
+        hs.add(TABLE_GEO_PROPS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
     }
 
-//    public TableInfo createTable(String name, ContainerFilter cf) !!!
-//    {
-//        if (TABLE_RUNS.equalsIgnoreCase(name)) remove
-//        {
-//            return createRunsTable(cf);
-//        }
-//
-//        if (getTableNames().contains(name))
-//        {
-//            SchemaTableInfo tableInfo = getSchema().getTable(name);
-//            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET)) keep
-//            {
-//                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
-//                return table;
-//            }
-//            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
-//            {
-//                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
-//                return table;
-//            }
-//            else
-//            {
-//                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo, cf).init();
-//                return table;
-//            }
-//        }
-//
-//        return null;
-//    }
+    public TableInfo createTable(String name, ContainerFilter cf)
+    {
+        if (getTableNames().contains(name))
+        {
+            SchemaTableInfo tableInfo = getSchema().getTable(name);
+            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
+            {
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
+                return table;
+            }
+            if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
+            {
+                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
+                return table;
+            }
+            else
+            {
+                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo, cf).init();
+                return table;
+            }
+        }
+
+        return null;
+    }
 
     @Override
     public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
