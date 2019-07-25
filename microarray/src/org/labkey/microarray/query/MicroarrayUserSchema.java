@@ -49,7 +49,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
-//import org.labkey.microarray.assay.MicroarrayAssayProvider;
+import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.view.FeatureAnnotationSetQueryView;
 import org.springframework.validation.BindException;
 
@@ -67,7 +67,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
-//    public static final String QC_REPORT_COLUMN_NAME = "QCReport"; deleterp
+    public static final String QC_REPORT_COLUMN_NAME = "QCReport";
     public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
 
     private ExpSchema _expSchema;
@@ -101,6 +101,11 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 
     public TableInfo createTable(String name, ContainerFilter cf)
     {
+        if (TABLE_RUNS.equalsIgnoreCase(name))
+        {
+            return createRunsTable(cf);
+        }
+
         if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
@@ -161,55 +166,55 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
         cf = null==cf ? getDefaultContainerFilter() : cf;
         result.setContainerFilter(cf);
-//        configureRunsTable(result);
+        configureRunsTable(result);
 
         return result;
     }
 
-//    public void configureRunsTable(ExpRunTable result) delete
-//    {
-//        result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
-//
-//        result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
-//
-//        SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
-//                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-//                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.THUMBNAIL_INPUT_TYPE.getNamespacePrefix() + "%')");
-//        var thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, JdbcType.INTEGER);
-//        thumbnailColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-//        {
-//            public DisplayColumn createRenderer(ColumnInfo colInfo)
-//            {
-//                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-//                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/microarrayThumbnailIcon.png");
-//            }
-//        });
-//        result.addColumn(thumbnailColumn);
-//
-//        SQLFragment qcReportSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
-//                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-//                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_INPUT_TYPE.getNamespacePrefix() + "%')");
-//        var qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, JdbcType.INTEGER);
-//        qcReportColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-//        {
-//            public DisplayColumn createRenderer(ColumnInfo colInfo)
-//            {
-//                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-//                url.addParameter("inline", "true");
-//                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/qcReportIcon.png");
-//            }
-//        });
-//        result.addColumn(qcReportColumn);
-//
-//        List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
-//        defaultCols.remove(FieldKey.fromParts(qcReportColumn.getName()));
-//        defaultCols.remove(FieldKey.fromParts(thumbnailColumn.getName()));
-//        defaultCols.add(2, FieldKey.fromParts(qcReportColumn.getName()));
-//        defaultCols.add(2, FieldKey.fromParts(thumbnailColumn.getName()));
-//        result.setDefaultVisibleColumns(defaultCols);
-//
-//        result.setDescription("Contains a row per microarray analysis result loaded in this folder.");
-//    }
+    public void configureRunsTable(ExpRunTable result)
+    {
+        result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
+
+        result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
+
+        SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
+                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
+                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.THUMBNAIL_INPUT_TYPE.getNamespacePrefix() + "%')");
+        var thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, JdbcType.INTEGER);
+        thumbnailColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/microarrayThumbnailIcon.png");
+            }
+        });
+        result.addColumn(thumbnailColumn);
+
+        SQLFragment qcReportSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
+                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
+                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_INPUT_TYPE.getNamespacePrefix() + "%')");
+        var qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, JdbcType.INTEGER);
+        qcReportColumn.setDisplayColumnFactory(new DisplayColumnFactory()
+        {
+            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            {
+                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                url.addParameter("inline", "true");
+                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/qcReportIcon.png");
+            }
+        });
+        result.addColumn(qcReportColumn);
+
+        List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
+        defaultCols.remove(FieldKey.fromParts(qcReportColumn.getName()));
+        defaultCols.remove(FieldKey.fromParts(thumbnailColumn.getName()));
+        defaultCols.add(2, FieldKey.fromParts(qcReportColumn.getName()));
+        defaultCols.add(2, FieldKey.fromParts(thumbnailColumn.getName()));
+        result.setDefaultVisibleColumns(defaultCols);
+
+        result.setDescription("Contains a row per microarray analysis result loaded in this folder.");
+    }
 
     public static DbSchema getSchema()
     {
