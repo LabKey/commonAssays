@@ -35,8 +35,8 @@ public class MicroarrayFolderType extends MultiPortalFolderType
         super("Microarray",
                 "Import and analyze microarray data",
             Arrays.asList(
-//                Portal.getPortalPart("Data Pipeline").createWebPart(), deleterp
-//                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_STATISTICS).createWebPart()
+                Portal.getPortalPart("Data Pipeline").createWebPart()
+//                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_STATISTICS).createWebPart() deleterp
             ),
             Arrays.asList(
 //                Portal.getPortalPart(MicroarrayModule.WEBPART_MICROARRAY_RUNS).createWebPart(),
