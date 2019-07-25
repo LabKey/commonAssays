@@ -68,14 +68,14 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
 //    public static final String QC_REPORT_COLUMN_NAME = "QCReport"; deleterp
-//    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
+    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
 
-//    private ExpSchema _expSchema;
+    private ExpSchema _expSchema;
 
     public MicroarrayUserSchema(User user, Container container)
     {
         super(SCHEMA_NAME, SCHMEA_DESCR, user, container, getSchema());
-//        _expSchema = new ExpSchema(user, container);
+        _expSchema = new ExpSchema(user, container);
     }
 
 
@@ -150,21 +150,21 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION_SET);
     }
 
-//    public TableInfo getAnnotationTable() keep
-//    {
-//        return getTable(TABLE_FEATURE_ANNOTATION);
-//    }
+    public TableInfo getAnnotationTable()
+    {
+        return getTable(TABLE_FEATURE_ANNOTATION);
+    }
 
-//    public ExpRunTable createRunsTable(ContainerFilter cf)
-//    {
-//        ExpRunTable result = _expSchema.getRunsTable(true);
-//        // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
-//        cf = null==cf ? getDefaultContainerFilter() : cf;
-//        result.setContainerFilter(cf);
+    public ExpRunTable createRunsTable(ContainerFilter cf)
+    {
+        ExpRunTable result = _expSchema.getRunsTable(true);
+        // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
+        cf = null==cf ? getDefaultContainerFilter() : cf;
+        result.setContainerFilter(cf);
 //        configureRunsTable(result);
-//
-//        return result;
-//    }
+
+        return result;
+    }
 
 //    public void configureRunsTable(ExpRunTable result) delete
 //    {
