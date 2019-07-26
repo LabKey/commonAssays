@@ -53,7 +53,6 @@
 //    @Override
 //    public RecordedActionSet run()
 //    {
-//        File[] mageFiles = getJob().getAnalysisDirectory().listFiles(ArrayPipelineManager.getMageFileFilter());
 //
 //        for (File mage : mageFiles)
 //        {
@@ -92,7 +91,6 @@
 //
 //        public Factory(String name)
 //        {
-//            super(FeatureExtractorTask.class, name);
 //            setJoin(true);
 //        }
 //

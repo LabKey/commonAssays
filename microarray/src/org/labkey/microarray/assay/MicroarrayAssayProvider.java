@@ -39,9 +39,7 @@ import org.labkey.api.study.assay.AssayDataCollector;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayPipelineProvider;
 import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayRunCreator;
 import org.labkey.api.study.assay.AssayTableMetadata;
-import org.labkey.api.study.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.PipelineDataCollector;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
@@ -51,10 +49,8 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
-//import org.labkey.microarray.controllers.MicroarrayController; deleterp
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
-import org.springframework.web.servlet.mvc.Controller;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -64,7 +60,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,9 +71,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 {
     public static final String PROTOCOL_PREFIX = "MicroarrayAssayProtocol";
     public static final String NAME = "Microarray";
-
-//    public static final int MAX_SAMPLE_COUNT = 2; deleterp
-//    public static final int MIN_SAMPLE_COUNT = 1;
 
     private static final String DEFAULT_CHANNEL_COUNT_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:Scan_NumChannels']/@value";
     private static final String DEFAULT_BARCODE_XPATH = "/MAGE-ML/BioAssay_package/BioAssay_assnlist/MeasuredBioAssay/FeatureExtraction_assn/FeatureExtraction/ProtocolApplications_assnlist/ProtocolApplication/SoftwareApplications_assnlist/SoftwareApplication/ParameterValues_assnlist/ParameterValue[ParameterType_assnref/Parameter_ref/@identifier='Agilent.BRS:Parameter:FeatureExtractor_Barcode']/@value";
@@ -162,24 +154,9 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-//        return new MicroarrayProtocolSchema(user, container, this, protocol, targetStudy);
         return null;
     }
 
-//    public ActionURL getImportURL(Container container, ExpProtocol protocol)
-//    {
-//    }
-
-//    @Override
-//    public AssayRunCreator getRunCreator() deleterp
-//    {
-//        return new MicroarrayRunCreator(this);
-//    }
-
-//    public Class<? extends Controller> getDesignerAction()
-//    {
-//        return MicroarrayController.DesignerAction.class;
-//    }
 
     public String getDescription()
     {
@@ -224,22 +201,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         result.getKey().setProtocolParameters(params);
         return result;
     }
-
-//    public Map<DomainProperty, XPathExpression> getXpathExpressions(ExpProtocol protocol)
-//    {
-//        Map<DomainProperty, XPathExpression> result = new HashMap<>();
-//
-//        Domain domain = getRunDomain(protocol);
-//        for (DomainProperty runPD : domain.getProperties())
-//        {
-//            XPathExpression xpath = getXPath(runPD);
-//            if (xpath != null)
-//            {
-//                result.put(runPD, xpath);
-//            }
-//        }
-//        return result;
-//    }
 
     public static XPathExpression getXPath(DomainProperty runPD)
     {

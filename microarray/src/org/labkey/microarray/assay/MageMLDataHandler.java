@@ -128,7 +128,6 @@
 //                {
 //                    int endingOffset = reader.getLocation().getCharacterOffset();
 //                    reader.close();
-//                    InputStream tsvIn = new TrimmedFileInputStream(dataFile, startingOffset, endingOffset);
 //                    try
 //                    {
 //                        Map<String, Class> expectedColumns = new HashMap<>(columns.size());
