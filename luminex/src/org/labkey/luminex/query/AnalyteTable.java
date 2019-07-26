@@ -41,8 +41,8 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssaySchema;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.model.Analyte;
 

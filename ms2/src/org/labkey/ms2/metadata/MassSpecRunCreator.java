@@ -27,11 +27,11 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.assay.PipelineDataCollector;
 import org.labkey.api.util.GUID;
 import org.labkey.api.view.ViewBackgroundInfo;
 

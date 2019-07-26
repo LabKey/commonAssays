@@ -30,13 +30,13 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.assay.AbstractTsvAssayProvider;
-import org.labkey.api.study.assay.AssayDataType;
-import org.labkey.api.study.assay.AssayPipelineProvider;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayRunCreator;
-import org.labkey.api.study.assay.AssayTableMetadata;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.AbstractTsvAssayProvider;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayPipelineProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayRunCreator;
+import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
@@ -87,7 +87,7 @@ public class AffymetrixAssayProvider extends AbstractTsvAssayProvider
 
     @NotNull
     @Override
-    public org.labkey.api.study.assay.AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
+    public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(
                 this,

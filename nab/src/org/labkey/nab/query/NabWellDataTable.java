@@ -28,11 +28,11 @@ import org.labkey.api.data.VirtualTable;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.StringExpression;
 import org.labkey.nab.NabAssayProvider;
 

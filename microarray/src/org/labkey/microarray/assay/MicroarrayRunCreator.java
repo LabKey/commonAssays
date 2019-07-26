@@ -20,16 +20,15 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.MicroarrayRunUploadForm;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.Map;
 
 /**

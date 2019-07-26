@@ -22,7 +22,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.EnumTableInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.assay.AssayProviderSchema;
 
 import java.util.Collections;
 import java.util.Set;

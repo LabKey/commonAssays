@@ -20,7 +20,7 @@ import org.jmock.Mockery;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 

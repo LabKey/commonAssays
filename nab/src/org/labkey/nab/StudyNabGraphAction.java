@@ -21,7 +21,7 @@ import org.labkey.api.assay.nab.NabGraph;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;

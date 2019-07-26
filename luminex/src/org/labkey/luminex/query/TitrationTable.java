@@ -22,7 +22,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.QueryForeignKey;
-import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.luminex.LuminexController;

@@ -21,9 +21,9 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.ExcelLoader;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.nab.NabAssayProvider;
 

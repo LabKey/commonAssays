@@ -32,8 +32,8 @@ import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.SchemaKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.view.ViewContext;
 
 import java.util.ArrayList;

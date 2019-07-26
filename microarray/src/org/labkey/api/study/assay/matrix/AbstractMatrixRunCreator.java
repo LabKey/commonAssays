@@ -17,6 +17,7 @@ package org.labkey.api.study.assay.matrix;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.matrix.AbstractMatrixDataHandler;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
@@ -27,10 +28,10 @@ import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.AssayRunUploadContext;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 
 import java.io.File;

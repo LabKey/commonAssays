@@ -16,10 +16,10 @@
 
 package org.labkey.elispot;
 
-import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.property.DomainProperty;
 

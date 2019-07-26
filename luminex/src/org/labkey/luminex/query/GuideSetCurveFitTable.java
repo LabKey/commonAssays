@@ -24,7 +24,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.assay.AssaySchema;
 
 /**
  * User: jeckels

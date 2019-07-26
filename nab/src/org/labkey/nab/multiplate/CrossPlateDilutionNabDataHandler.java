@@ -23,9 +23,9 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 
 import java.util.ArrayList;

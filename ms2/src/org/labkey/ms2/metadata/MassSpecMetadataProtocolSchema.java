@@ -40,7 +40,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Module;

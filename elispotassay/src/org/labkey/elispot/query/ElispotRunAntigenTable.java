@@ -26,9 +26,9 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.study.assay.AbstractAssayProvider;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssaySchema;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 

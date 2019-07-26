@@ -20,7 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.permissions.DeletePermission;
-import org.labkey.api.study.assay.PipelineDataCollector;
+import org.labkey.api.assay.PipelineDataCollector;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;

@@ -18,16 +18,15 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.data.Container;
-import org.labkey.api.study.AbstractPlateTypeHandler;
-import org.labkey.api.study.PlateService;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
+import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.multiplate.HighThroughputNabDataHandler;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

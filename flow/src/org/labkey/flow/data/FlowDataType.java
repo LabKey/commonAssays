@@ -24,7 +24,7 @@ import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.study.assay.AssayDataType;
+import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.persist.ObjectType;

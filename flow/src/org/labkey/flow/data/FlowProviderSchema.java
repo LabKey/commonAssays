@@ -17,7 +17,7 @@ package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProviderSchema;
+import org.labkey.api.assay.AssayProviderSchema;
 
 /**
  * User: kevink

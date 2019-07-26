@@ -21,9 +21,9 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.study.actions.BulkPropertiesUploadForm;
+import org.labkey.api.assay.actions.BulkPropertiesUploadForm;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
-import org.labkey.api.study.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.util.FileUtil;
 
 import java.io.File;
