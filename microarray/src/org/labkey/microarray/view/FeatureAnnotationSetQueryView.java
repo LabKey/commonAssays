@@ -38,11 +38,6 @@ import org.springframework.validation.Errors;
  */
 public class FeatureAnnotationSetQueryView extends QueryView
 {
-//    public FeatureAnnotationSetQueryView(QueryForm form, Errors errors)
-//    {
-//        super(form, errors);
-//        init();
-//    }
 
     public FeatureAnnotationSetQueryView(UserSchema schema, QuerySettings settings, @Nullable Errors errors)
     {
