@@ -31,9 +31,6 @@ public class MicroarrayContainerListener extends ContainerManager.AbstractContai
 {
     public void containerDeleted(Container c, User user)
     {
-        DbSchema ms = MicroarrayUserSchema.getSchema();
-        ContainerUtil.purgeTable(ms.getTable(MicroarrayUserSchema.TABLE_GEO_PROPS), c, "Container");
-
         MicroarrayManager.get().delete(c);
     }
 }

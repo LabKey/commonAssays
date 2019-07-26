@@ -63,7 +63,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
-    public static final String TABLE_GEO_PROPS = "Geo_Properties";
+//    public static final String TABLE_GEO_PROPS = "Geo_Properties";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
