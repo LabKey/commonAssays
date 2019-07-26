@@ -53,7 +53,6 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 //import org.labkey.microarray.controllers.MicroarrayController; deleterp
 import org.labkey.microarray.MicroarrayModule;
-//import org.labkey.microarray.MicroarrayUploadWizardAction;
 import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -169,7 +168,6 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
 
 //    public ActionURL getImportURL(Container container, ExpProtocol protocol)
 //    {
-//        return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, MicroarrayUploadWizardAction.class);
 //    }
 
 //    @Override
@@ -227,21 +225,21 @@ public class MicroarrayAssayProvider extends AbstractTsvAssayProvider
         return result;
     }
 
-    public Map<DomainProperty, XPathExpression> getXpathExpressions(ExpProtocol protocol)
-    {
-        Map<DomainProperty, XPathExpression> result = new HashMap<>();
-
-        Domain domain = getRunDomain(protocol);
-        for (DomainProperty runPD : domain.getProperties())
-        {
-            XPathExpression xpath = getXPath(runPD);
-            if (xpath != null)
-            {
-                result.put(runPD, xpath);
-            }
-        }
-        return result;
-    }
+//    public Map<DomainProperty, XPathExpression> getXpathExpressions(ExpProtocol protocol)
+//    {
+//        Map<DomainProperty, XPathExpression> result = new HashMap<>();
+//
+//        Domain domain = getRunDomain(protocol);
+//        for (DomainProperty runPD : domain.getProperties())
+//        {
+//            XPathExpression xpath = getXPath(runPD);
+//            if (xpath != null)
+//            {
+//                result.put(runPD, xpath);
+//            }
+//        }
+//        return result;
+//    }
 
     public static XPathExpression getXPath(DomainProperty runPD)
     {

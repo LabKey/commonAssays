@@ -93,7 +93,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
         hs.add(TABLE_RUNS);
-        hs.add(TABLE_GEO_PROPS);
+//        hs.add(TABLE_GEO_PROPS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
@@ -155,10 +155,10 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION_SET);
     }
 
-    public TableInfo getAnnotationTable()
-    {
-        return getTable(TABLE_FEATURE_ANNOTATION);
-    }
+//    public TableInfo getAnnotationTable()
+//    {
+//        return getTable(TABLE_FEATURE_ANNOTATION);
+//    }
 
     public ExpRunTable createRunsTable(ContainerFilter cf)
     {

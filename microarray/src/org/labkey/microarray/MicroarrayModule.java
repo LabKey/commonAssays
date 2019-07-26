@@ -24,8 +24,6 @@ import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.search.SearchService;
 import org.labkey.api.study.assay.AssayDataType;
 import org.labkey.api.study.assay.AssayService;
 import org.labkey.api.util.FileType;
@@ -34,10 +32,6 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
-//import org.labkey.microarray.affy.AffymetrixAssayProvider;
-//import org.labkey.microarray.affy.AffymetrixDataHandler; deleterp
-//import org.labkey.microarray.assay.MageMLDataHandler;
-//import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.matrix.ExpressionMatrixAssayProvider;
@@ -56,9 +50,6 @@ import java.util.Set;
 public class MicroarrayModule extends SpringModule
 {
     public static final String NAME = "Microarray";
-//    public static final String WEBPART_MICROARRAY_RUNS = "Microarray Runs";
-//    public static final String WEBPART_MICROARRAY_STATISTICS = "Microarray Summary"; deleterp
-//    public static final String WEBPART_PENDING_FILES = "Pending MAGE-ML Files";
     private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
 
     private static final String CONTROLLER_NAME = "microarray";
@@ -68,8 +59,6 @@ public class MicroarrayModule extends SpringModule
 
     public static final AssayDataType MAGE_ML_INPUT_TYPE =
             new AssayDataType("MicroarrayAssayData", new FileType(Arrays.asList("_MAGEML.xml", "MAGE-ML.xml", ".mage"), "_MAGEML.xml"), "MageML");
-    public static final AssayDataType TIFF_INPUT_TYPE =
-            new AssayDataType("MicroarrayTIFF", new FileType(Arrays.asList(".tiff", ".tif"), ".tiff"), "Image");
     public static final AssayDataType QC_REPORT_INPUT_TYPE =
             new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
     public static final AssayDataType THUMBNAIL_INPUT_TYPE =
@@ -104,37 +93,6 @@ public class MicroarrayModule extends SpringModule
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return new ArrayList<>(Arrays.asList(
-//            new BaseWebPartFactory(WEBPART_MICROARRAY_RUNS)
-//            {
-//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-//                {
-//                    QueryView view = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), MicroarrayRunType.INSTANCE);
-//                    view.setShowExportButtons(true);
-//                    view.setTitle(WEBPART_MICROARRAY_RUNS);
-//                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-//                    return view;
-//                }
-//            },
-//            new BaseWebPartFactory(WEBPART_PENDING_FILES)
-//            {
-//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-//                {
-//                    QueryView view = new PendingMageMLFilesView(portalCtx);
-//                    view.setTitle("Pending MageML Files");
-//                    view.setTitleHref(MicroarrayController.getPendingMageMLFilesURL(portalCtx.getContainer()));
-//                    return view;
-//                }
-//            }, deleterp
-//            new BaseWebPartFactory(WEBPART_MICROARRAY_STATISTICS, WebPartFactory.LOCATION_RIGHT)
-//            {
-//                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-//                {
-//                    WebPartView view = new MicroarrayStatisticsView(portalCtx);
-//                    view.setTitle(WEBPART_MICROARRAY_STATISTICS);
-//                    view.setTitleHref(MicroarrayController.getRunsURL(portalCtx.getContainer()));
-//                    return view;
-//                }
-//            },
             new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
             {
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
@@ -167,8 +125,6 @@ public class MicroarrayModule extends SpringModule
     {
         final ModuleContext finalModuleContext = moduleContext;
         FolderTypeManager.get().registerFolderType(this, new MicroarrayFolderType(this));
-//        AssayService.get().registerAssayProvider(new MicroarrayAssayProvider()); deleterp? seems mage-specific
-//        AssayService.get().registerAssayProvider(new AffymetrixAssayProvider()); deleterp
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
@@ -176,8 +132,6 @@ public class MicroarrayModule extends SpringModule
         ContainerManager.addContainerListener(new MicroarrayContainerListener());
 
         ExperimentService.get().addExperimentListener(new ExpressionMatrixExperimentListener());
-//        ExperimentService.get().registerExperimentDataHandler(new MageMLDataHandler()); deleterp
-//        ExperimentService.get().registerExperimentDataHandler(new AffymetrixDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
         ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
@@ -188,9 +142,6 @@ public class MicroarrayModule extends SpringModule
             return Collections.emptySet();
         });
 
-//        SearchService ss = SearchService.get(); deleterp
-//        if (null != ss)
-//            ss.addDocumentParser(new MageMLDocumentParser());
 
         // TODO: Are these module properties still needed?
         /*

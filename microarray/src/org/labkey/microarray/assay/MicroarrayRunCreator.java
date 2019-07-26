@@ -25,7 +25,6 @@
 //import org.labkey.api.study.assay.DefaultAssayRunCreator;
 //import org.labkey.api.study.assay.ParticipantVisitResolverType;
 //import org.labkey.microarray.MicroarrayModule;
-//import org.labkey.microarray.MicroarrayRunUploadForm;
 //
 //import java.io.File;
 //import java.io.FileFilter;
@@ -45,7 +44,6 @@
 //
 //    protected void addInputMaterials(AssayRunUploadContext<MicroarrayAssayProvider> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
 //    {
-//        MicroarrayRunUploadForm form = (MicroarrayRunUploadForm)context;
 //        int count = form.getSampleCount(form.getCurrentMageML());
 //        for (int i = 0; i < count; i++)
 //        {

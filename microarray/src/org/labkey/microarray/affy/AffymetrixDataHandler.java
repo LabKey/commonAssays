@@ -55,7 +55,6 @@
 //    @Override
 //    public DataType getDataType()
 //    {
-//        return AffymetrixAssayProvider.GENE_TITAN_DATA_TYPE;
 //    }
 //
 //    @Override
@@ -88,7 +87,6 @@
 //                // Look for a property that matches based on aliases, labels, etc
 //                DomainProperty property = importMap.get(value);
 //
-//                if ("hyb_name".equalsIgnoreCase(value) || (property != null && AffymetrixAssayProvider.SAMPLE_NAME_COLUMN.equalsIgnoreCase(property.getName())))
 //                {
 //                    hybNameColumn = columns[i].name;
 //                }
@@ -125,10 +123,6 @@
 //                    String celFileName = (String) excelRow.get(sampleFileNameColumn);
 //                    String celFilePath = StringUtils.trimToEmpty((String) excelRow.get(sampleFilePathColumn));
 //                    String sampleName = (String) excelRow.get(hybNameColumn);
-//
-//                    runDataRow.put(AffymetrixAssayProvider.SAMPLE_NAME_COLUMN, sampleName);
-//                    runDataRow.put(AffymetrixAssayProvider.SAMPLE_ID_COLUMN, getSampleId(sampleName, materialInputs));
-//                    runDataRow.put(AffymetrixAssayProvider.CEL_FILE_ID_COLUMN, getCelFileId(dataFile, celFilePath, celFileName, dataOutputs));
 //
 //                    for (String key : excelRow.keySet())
 //                    {

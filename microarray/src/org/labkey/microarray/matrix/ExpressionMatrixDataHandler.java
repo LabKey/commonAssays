@@ -58,7 +58,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
     private static final Logger LOG = Logger.getLogger(ExpressionMatrixDataHandler.class);
 
     // CONSIDER: move this flag to the assay design
-    private static boolean autoCreateSamples = true;
+//    private static boolean autoCreateSamples = true;
 
     public ExpressionMatrixDataHandler()
     {

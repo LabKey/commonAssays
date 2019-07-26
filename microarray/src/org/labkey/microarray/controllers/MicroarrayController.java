@@ -29,22 +29,10 @@ import org.labkey.api.security.permissions.ReadPermission;
 //import org.labkey.api.study.permissions.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
-//import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
-//import org.labkey.api.view.ActionURL;
-//import org.labkey.api.view.GWTView;
-//import org.labkey.api.view.JspView;
-//import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
-//import org.labkey.api.view.WebPartView;
-//import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
-//import org.labkey.microarray.MicroarrayRunType;
-//import org.labkey.microarray.MicroarrayUploadWizardAction;
-//import org.labkey.microarray.PendingMageMLFilesView; deleterp
-//import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
-//import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 //import org.springframework.web.servlet.ModelAndView;
 
@@ -59,8 +47,6 @@ public class MicroarrayController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(
         MicroarrayController.class
-//        MicroarrayBulkPropertiesTemplateAction.class
-//        MicroarrayUploadWizardAction.class
     );
 
     public MicroarrayController()
