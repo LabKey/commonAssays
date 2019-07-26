@@ -63,7 +63,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
-//    public static final String TABLE_GEO_PROPS = "Geo_Properties";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
@@ -93,7 +92,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
         hs.add(TABLE_RUNS);
-//        hs.add(TABLE_GEO_PROPS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
