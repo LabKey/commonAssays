@@ -15,13 +15,12 @@
  */
 package org.labkey.elispot;
 
-import org.labkey.api.exp.DuplicateMaterialException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.plate.PlateReader;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.elispot.plate.FluorescentPlateInfo;
 
 import java.io.File;

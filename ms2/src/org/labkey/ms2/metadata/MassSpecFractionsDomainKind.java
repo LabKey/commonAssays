@@ -18,7 +18,7 @@ package org.labkey.ms2.metadata;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.property.AssayDomainKind;
+import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;

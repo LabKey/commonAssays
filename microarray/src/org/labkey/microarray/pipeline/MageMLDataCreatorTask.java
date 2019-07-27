@@ -20,11 +20,10 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.util.FileType;
 import org.labkey.microarray.MicroarrayModule;
 

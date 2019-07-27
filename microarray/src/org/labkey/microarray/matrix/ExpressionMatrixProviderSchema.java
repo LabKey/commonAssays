@@ -16,17 +16,6 @@
 
 package org.labkey.microarray.matrix;
 
-import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.TableInfo;
-import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayProviderSchema;
-
-import java.util.HashSet;
-import java.util.Set;
-
 public class ExpressionMatrixProviderSchema { }
 /*
 public class ExpressionMatrixProviderSchema extends AssayProviderSchema

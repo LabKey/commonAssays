@@ -27,10 +27,10 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.AssayDataCollector;
-import org.labkey.api.study.assay.AssayFileWriter;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.actions.UploadWizardAction;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayFileWriter;
 import org.springframework.validation.Errors;
 
 import java.io.File;

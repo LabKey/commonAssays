@@ -17,10 +17,10 @@ package org.labkey.elisa.actions;
 
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Arrays;

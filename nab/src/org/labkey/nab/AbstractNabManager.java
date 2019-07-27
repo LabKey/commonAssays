@@ -18,8 +18,8 @@ package org.labkey.nab;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
-import org.labkey.api.study.PlateService;
-import org.labkey.api.study.PlateTemplate;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateTemplate;
 
 import java.sql.SQLException;
 import java.util.List;

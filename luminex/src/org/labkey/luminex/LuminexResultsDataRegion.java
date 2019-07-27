@@ -20,8 +20,8 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.query.ResultsQueryView;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.query.ResultsQueryView;
 import org.labkey.luminex.query.LuminexDataTable;
 
 import java.util.Collections;

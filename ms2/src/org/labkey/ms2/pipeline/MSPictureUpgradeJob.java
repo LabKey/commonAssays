@@ -24,7 +24,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.study.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;

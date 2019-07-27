@@ -16,7 +16,7 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.assay.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionManager;
@@ -33,11 +33,11 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.PlateService;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.AssayProtocolSchema;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -17,10 +17,10 @@ package org.labkey.luminex.model;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.PositionImpl;
-import org.labkey.api.study.WellGroup;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.PositionImpl;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.luminex.LuminexReplicate;
 import org.labkey.luminex.query.LuminexDataTable;
 

@@ -20,7 +20,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.labkey.api.study.assay.plate.ExcelPlateReader;
+import org.labkey.api.assay.plate.ExcelPlateReader;
 
 /**
  * User: klum

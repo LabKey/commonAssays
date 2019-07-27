@@ -24,7 +24,7 @@ import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.action.SimpleApiJsonForm;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;

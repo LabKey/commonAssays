@@ -21,11 +21,11 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.UploadWizardAction;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.actions.UploadWizardAction;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.view.InsertView;
 

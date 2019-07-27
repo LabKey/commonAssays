@@ -20,10 +20,10 @@ import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.Position;
-import org.labkey.api.study.Well;
-import org.labkey.api.study.WellGroup;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.Well;
+import org.labkey.api.assay.plate.WellGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -21,7 +21,7 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.matrix.AbstractMatrixRunCreator;
 import org.labkey.microarray.MicroarrayManager;
 
