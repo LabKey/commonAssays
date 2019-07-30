@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
@@ -44,12 +43,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class MicroarrayModule extends SpringModule
 {
-    public static final String NAME = "Microarray";
     private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
 
     private static final String CONTROLLER_NAME = "microarray";
@@ -61,14 +58,6 @@ public class MicroarrayModule extends SpringModule
             new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
     public static final AssayDataType THUMBNAIL_INPUT_TYPE =
             new AssayDataType("MicroarrayImageData", new FileType(".jpg"), "ThumbnailImage");
-    public static final AssayDataType FEATURES_INPUT_TYPE =
-            new AssayDataType("MicroarrayFeaturesData", new FileType("_feat.csv"), "Features");
-    public static final AssayDataType GRID_INPUT_TYPE =
-            new AssayDataType("MicroarrayGridData", new FileType("_grid.csv"), "Grid");
-
-    /** Collection of all of the non-MageML input types that are handled specially in the code */
-    public static final List<AssayDataType> RELATED_INPUT_TYPES =
-            Arrays.asList(QC_REPORT_INPUT_TYPE, THUMBNAIL_INPUT_TYPE, FEATURES_INPUT_TYPE, GRID_INPUT_TYPE);
 
     public String getName()
     {
@@ -121,7 +110,6 @@ public class MicroarrayModule extends SpringModule
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
-        final ModuleContext finalModuleContext = moduleContext;
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
@@ -130,14 +118,6 @@ public class MicroarrayModule extends SpringModule
 
         ExperimentService.get().addExperimentListener(new ExpressionMatrixExperimentListener());
         ExperimentService.get().registerExperimentDataHandler(new ExpressionMatrixDataHandler());
-        ExperimentService.get().registerExperimentRunTypeSource(container ->
-        {
-            if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MicroarrayModule.this))
-            {
-                return Collections.singleton(MicroarrayRunType.INSTANCE);
-            }
-            return Collections.emptySet();
-        });
     }
 
     @Override
