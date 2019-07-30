@@ -57,8 +57,6 @@ public class MicroarrayModule extends SpringModule
 
     public static final String DB_SCHEMA_NAME = "microarray";
 
-    public static final AssayDataType MAGE_ML_INPUT_TYPE =
-            new AssayDataType("MicroarrayAssayData", new FileType(Arrays.asList("_MAGEML.xml", "MAGE-ML.xml", ".mage"), "_MAGEML.xml"), "MageML");
     public static final AssayDataType QC_REPORT_INPUT_TYPE =
             new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
     public static final AssayDataType THUMBNAIL_INPUT_TYPE =
