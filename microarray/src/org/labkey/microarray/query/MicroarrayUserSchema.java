@@ -49,7 +49,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.view.FeatureAnnotationSetQueryView;
 import org.springframework.validation.BindException;
 
@@ -168,8 +167,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public void configureRunsTable(ExpRunTable result)
     {
         result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
-
-        result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +

@@ -24,8 +24,6 @@ import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.query.QueryView;
-import org.labkey.api.search.SearchService;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.FileType;
@@ -126,7 +124,6 @@ public class MicroarrayModule extends SpringModule
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         final ModuleContext finalModuleContext = moduleContext;
-        FolderTypeManager.get().registerFolderType(this, new MicroarrayFolderType(this));
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
         PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
@@ -143,18 +140,6 @@ public class MicroarrayModule extends SpringModule
             }
             return Collections.emptySet();
         });
-
-
-        // TODO: Are these module properties still needed?
-        /*
-        ModuleProperty reportProperty = new ModuleProperty(this, "ComparisonReportId");
-        reportProperty.setCanSetPerContainer(true);
-        addModuleProperty(reportProperty);
-
-        ModuleProperty assayDesignName = new ModuleProperty(this, "AssayDesignName");
-        assayDesignName.setCanSetPerContainer(true);
-        addModuleProperty(assayDesignName);
-        */
     }
 
     @Override
