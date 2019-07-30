@@ -668,7 +668,6 @@ microarray/resources/web/microarray/images/qcReportIcon.png -text
 microarray/src/org/labkey/microarray/MicroarrayContainerListener.java -text
 microarray/src/org/labkey/microarray/MicroarrayManager.java -text
 microarray/src/org/labkey/microarray/MicroarrayModule.java -text
-microarray/src/org/labkey/microarray/MicroarrayRunType.java -text
 microarray/src/org/labkey/microarray/controllers/FeatureAnnotationSetController.java -text
 microarray/src/org/labkey/microarray/controllers/MicroarrayController.java -text
 microarray/src/org/labkey/microarray/matrix/ExpressionMatrixAssayProvider.java -text
