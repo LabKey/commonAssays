@@ -19,10 +19,9 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
-import org.labkey.api.reader.TabLoader;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.assay.plate.PlateUtils;
-import org.labkey.api.study.assay.plate.TextPlateReader;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.PlateUtils;
+import org.labkey.api.assay.plate.TextPlateReader;
 
 import java.io.File;
 import java.io.IOException;

@@ -18,7 +18,7 @@ package org.labkey.luminex;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
 

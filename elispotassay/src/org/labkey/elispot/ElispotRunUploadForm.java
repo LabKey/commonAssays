@@ -18,9 +18,9 @@ package org.labkey.elispot;
 
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.actions.AssayRunUploadForm;
-import org.labkey.api.study.actions.PlateUploadForm;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.actions.PlateUploadForm;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

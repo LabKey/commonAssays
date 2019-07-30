@@ -16,7 +16,7 @@
 
 package org.labkey.luminex;
 
-import org.labkey.api.study.actions.ProtocolIdForm;
+import org.labkey.api.assay.actions.ProtocolIdForm;
 
 /**
 * User: cnathe

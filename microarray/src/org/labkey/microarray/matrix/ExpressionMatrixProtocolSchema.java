@@ -23,8 +23,8 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.matrix.AbstractMatrixProtocolSchema;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.matrix.AbstractMatrixProtocolSchema;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 

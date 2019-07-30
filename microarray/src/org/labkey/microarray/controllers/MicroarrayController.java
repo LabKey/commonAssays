@@ -22,6 +22,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.assay.security.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.URLHelper;
@@ -93,5 +94,5 @@ public class MicroarrayController extends SpringActionController
             return new URLHelper(baseURL + analysisDir.getAbsolutePath());
         }
     }
-    
+
 }

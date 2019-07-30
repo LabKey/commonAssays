@@ -36,7 +36,7 @@ import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.study.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AbstractAssayProvider;
 
 import java.util.HashSet;
 import java.util.List;

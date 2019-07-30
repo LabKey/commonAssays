@@ -15,7 +15,7 @@
  */
 package org.labkey.nab.query;
 
-import org.labkey.api.assay.PlateBasedRunCreator;
+import org.labkey.api.assay.plate.PlateBasedRunCreator;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.Table;
@@ -27,11 +27,11 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
-import org.labkey.api.study.actions.PlateUploadForm;
-import org.labkey.api.study.assay.AssayProtocolSchema;
-import org.labkey.api.study.assay.AssayRunUploadContext;
+import org.labkey.api.assay.actions.PlateUploadForm;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.ParticipantVisitResolver;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
 

@@ -21,7 +21,6 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.api.view.ViewForm;
-import org.labkey.api.study.Well;
 
 public class ChooseGraphForm extends ViewForm
 {

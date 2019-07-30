@@ -19,10 +19,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.PlateTemplate;
-import org.labkey.api.study.WellGroup;
-import org.labkey.api.study.WellGroupTemplate;
-import org.labkey.api.study.assay.PlateSampleFilePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 
 import javax.servlet.http.HttpServletRequest;

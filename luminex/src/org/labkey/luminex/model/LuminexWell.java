@@ -15,8 +15,8 @@
  */
 package org.labkey.luminex.model;
 
-import org.labkey.api.study.Plate;
-import org.labkey.api.study.WellData;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.WellData;
 
 /**
  * User: jeckels

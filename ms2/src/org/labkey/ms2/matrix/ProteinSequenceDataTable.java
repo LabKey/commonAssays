@@ -25,7 +25,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryForeignKey;
-import org.labkey.api.study.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
 
 import java.util.ArrayList;

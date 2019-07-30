@@ -21,7 +21,7 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.exp.property.AssayDomainKind;
+import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;

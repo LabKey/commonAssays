@@ -16,8 +16,8 @@
 package org.labkey.elisa.actions;
 
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.study.actions.PlateUploadFormImpl;
-import org.labkey.api.study.assay.PlateSamplePropertyHelper;
+import org.labkey.api.assay.actions.PlateUploadFormImpl;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Map;

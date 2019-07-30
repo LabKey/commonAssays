@@ -20,15 +20,13 @@ import org.labkey.api.data.BaseSelector;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
 import org.labkey.api.study.SpecimenChangeListener;
-import org.labkey.api.study.assay.AssayProvider;
-import org.labkey.api.study.assay.AssayService;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
