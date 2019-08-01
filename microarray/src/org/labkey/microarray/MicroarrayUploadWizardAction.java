@@ -25,10 +25,12 @@ import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.actions.BulkPropertiesDisplayColumn;
+import org.labkey.api.study.assay.AssayProtocolSchema;
 import org.labkey.api.study.assay.BulkPropertiesUploadWizardAction;
 import org.labkey.api.study.assay.SampleChooserDisplayColumn;
 import org.labkey.api.util.PageFlowUtil;
@@ -171,7 +173,11 @@ public class MicroarrayUploadWizardAction extends BulkPropertiesUploadWizardActi
             LOG.warn(e);
         }
 
-        InsertView result = createInsertView(ExperimentService.get().getTinfoExperimentRun(),
+        AssayProtocolSchema schema = getAssayProtocolSchema();
+        ExpRunTable runTable = (ExpRunTable)schema.createTable(AssayProtocolSchema.RUNS_TABLE_NAME);
+        runTable.addAllowablePermission(InsertPermission.class);
+
+        InsertView result = createInsertView(runTable,
                 "lsid", userProperties,
                 errorReshow, RunStepHandler.NAME, form, errors);
         
