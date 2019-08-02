@@ -17,7 +17,7 @@ package org.labkey.microarray.controllers;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
@@ -83,13 +83,10 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends RedirectAction
+    public class BeginAction extends SimpleRedirectAction
     {
         @Override
-        public URLHelper getURL(Object o, Errors errors)
-        {
-            return new ActionURL(ManageAction.class, getContainer());
-        }
+        public URLHelper getRedirectURL(Object o) { return new ActionURL(ManageAction.class, getContainer()); }
     }
 
     @RequiresPermission(ReadPermission.class)

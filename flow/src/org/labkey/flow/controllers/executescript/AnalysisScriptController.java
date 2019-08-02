@@ -20,7 +20,7 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -405,9 +405,10 @@ public class AnalysisScriptController extends BaseFlowController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class ShowUploadRunsAction extends RedirectAction
+    public class ShowUploadRunsAction extends SimpleRedirectAction
     {
-        public ActionURL getURL(Object o, Errors errors)
+        @Override
+        public URLHelper getRedirectURL(Object o)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }

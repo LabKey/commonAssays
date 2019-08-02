@@ -17,7 +17,7 @@
 package org.labkey.microarray.controllers;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.action.RedirectAction;
+import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
@@ -128,10 +128,10 @@ public class MicroarrayController extends SpringActionController
      * 4. The Analyst plugin takes over from here.
      */
     @RequiresPermission(ReadPermission.class)
-    public class GeneDataAnalysisAction extends RedirectAction<PipelinePathForm>
+    public class GeneDataAnalysisAction extends SimpleRedirectAction<PipelinePathForm>
     {
         @Override
-        public @Nullable URLHelper getURL(PipelinePathForm form, Errors errors) throws URISyntaxException, IOException
+        public URLHelper getRedirectURL(PipelinePathForm form) throws Exception
         {
             String baseURL = GeneDataPipelineProvider.getGeneDataBaseURL();
             File root = GeneDataPipelineProvider.getGeneDataFileRoot();
