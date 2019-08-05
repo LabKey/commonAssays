@@ -18,20 +18,6 @@
  -->
 <tables xsi:schemaLocation="http://labkey.org/data/xml ../../../../../schemas/tableInfo.xsd" xmlns="http://labkey.org/data/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <table tableName="geo_properties" tableDbType="TABLE">
-    <columns>
-      <column columnName="rowid"/>
-      <column columnName="prop_name"/>
-      <column columnName="category"/>
-      <column columnName="value"/>
-      <column columnName="container"/>
-      <column columnName="created"/>
-      <column columnName="createdby"/>
-      <column columnName="modified"/>
-      <column columnName="modifiedby"/>
-    </columns>
-  </table>
-
   <table tableName="FeatureAnnotationSet" tableDbType="TABLE" useColumnOrder="true">
       <pkColumnName>RowId</pkColumnName>
       <titleColumn>Name</titleColumn>
