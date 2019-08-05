@@ -131,7 +131,7 @@ public class MicroarrayController extends SpringActionController
     public class GeneDataAnalysisAction extends SimpleRedirectAction<PipelinePathForm>
     {
         @Override
-        public URLHelper getRedirectURL(PipelinePathForm form) throws Exception
+        public @Nullable URLHelper getRedirectURL(PipelinePathForm form) throws URISyntaxException, IOException
         {
             String baseURL = GeneDataPipelineProvider.getGeneDataBaseURL();
             File root = GeneDataPipelineProvider.getGeneDataFileRoot();

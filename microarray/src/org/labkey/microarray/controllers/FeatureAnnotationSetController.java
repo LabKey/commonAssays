@@ -86,7 +86,10 @@ public class FeatureAnnotationSetController extends SpringActionController
     public class BeginAction extends SimpleRedirectAction
     {
         @Override
-        public URLHelper getRedirectURL(Object o) { return new ActionURL(ManageAction.class, getContainer()); }
+        public URLHelper getRedirectURL(Object o)
+        {
+            return new ActionURL(ManageAction.class, getContainer());
+        }
     }
 
     @RequiresPermission(ReadPermission.class)

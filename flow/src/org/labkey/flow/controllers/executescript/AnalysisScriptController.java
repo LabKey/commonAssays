@@ -408,7 +408,7 @@ public class AnalysisScriptController extends BaseFlowController
     public class ShowUploadRunsAction extends SimpleRedirectAction
     {
         @Override
-        public URLHelper getRedirectURL(Object o)
+        public ActionURL getRedirectURL(Object o)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
