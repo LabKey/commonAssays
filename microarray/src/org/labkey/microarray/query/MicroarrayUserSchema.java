@@ -49,7 +49,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
-import org.labkey.microarray.assay.MicroarrayAssayProvider;
 import org.labkey.microarray.view.FeatureAnnotationSetQueryView;
 import org.springframework.validation.BindException;
 
@@ -63,7 +62,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
     public static final String TABLE_RUNS = "MicroarrayRuns";
-    public static final String TABLE_GEO_PROPS = "Geo_Properties";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
 
@@ -93,7 +91,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
         hs.add(TABLE_RUNS);
-        hs.add(TABLE_GEO_PROPS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
@@ -155,10 +152,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         return getTable(TABLE_FEATURE_ANNOTATION_SET);
     }
 
-    public TableInfo getAnnotationTable()
-    {
-        return getTable(TABLE_FEATURE_ANNOTATION);
-    }
 
     public ExpRunTable createRunsTable(ContainerFilter cf)
     {
@@ -174,8 +167,6 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     public void configureRunsTable(ExpRunTable result)
     {
         result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
-
-        result.setProtocolPatterns("urn:lsid:%:" + MicroarrayAssayProvider.PROTOCOL_PREFIX + ".%");
 
         SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
                 "\nFROM " + ExperimentService.get().getTinfoData() + " d " +

@@ -18,49 +18,28 @@ package org.labkey.microarray.controllers;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SimpleRedirectAction;
-import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
-import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.security.DesignAssayPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GWTView;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.UnauthorizedException;
-import org.labkey.api.view.WebPartView;
-import org.labkey.microarray.MicroarrayBulkPropertiesTemplateAction;
-import org.labkey.microarray.MicroarrayRunType;
-import org.labkey.microarray.MicroarrayUploadWizardAction;
-import org.labkey.microarray.PendingMageMLFilesView;
-import org.labkey.microarray.designer.client.MicroarrayAssayDesigner;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
-import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class MicroarrayController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(
-        MicroarrayController.class,
-        MicroarrayBulkPropertiesTemplateAction.class,
-        MicroarrayUploadWizardAction.class
+        MicroarrayController.class
     );
 
     public MicroarrayController()
@@ -68,57 +47,6 @@ public class MicroarrayController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @RequiresPermission(DesignAssayPermission.class)
-    public class DesignerAction extends org.labkey.api.assay.actions.DesignerAction
-    {
-        @Override
-        protected ModelAndView createGWTView(Map<String, String> properties)
-        {
-            setHelpTopic(new HelpTopic("microarrayProperties"));
-            return new GWTView(MicroarrayAssayDesigner.class, properties);
-        }
-    }
-
-    public static ActionURL getRunsURL(Container c)
-    {
-        return new ActionURL(ShowRunsAction.class, c);
-    }
-
-    public static ActionURL getPendingMageMLFilesURL(Container c)
-    {
-        return new ActionURL(ShowPendingMageMLFilesAction.class, c);
-    }
-
-    @RequiresPermission(ReadPermission.class)
-    public class ShowRunsAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            QueryView result = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MicroarrayRunType.INSTANCE);
-            result.setShowExportButtons(true);
-            result.setFrame(WebPartView.FrameType.NONE);
-            return result;
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Microarray Runs");
-        }
-    }
-
-    @RequiresPermission(ReadPermission.class)
-    public class ShowPendingMageMLFilesAction extends SimpleViewAction
-    {
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new PendingMageMLFilesView(getViewContext());
-        }
-
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Pending MageML Files");
-        }
-    }
 
     /**
      * Basic approach:
@@ -166,20 +94,4 @@ public class MicroarrayController extends SpringActionController
         }
     }
 
-
-    @RequiresPermission(ReadPermission.class)
-    public class MatrixQueryAction extends SimpleViewAction
-    {
-        @Override
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            return new JspView<>("/org/labkey/microarray/view/ExpressionMatrixQuery.jsp");
-        }
-
-        @Override
-        public NavTree appendNavTrail(NavTree root)
-        {
-            return root.addChild("Microarray Expression Data Comparison");
-        }
-    }
 }
