@@ -17,10 +17,7 @@ package org.labkey.microarray;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.util.ContainerUtil;
-import org.labkey.microarray.query.MicroarrayUserSchema;
 
 /**
  * User: bbimber
@@ -31,9 +28,6 @@ public class MicroarrayContainerListener extends ContainerManager.AbstractContai
 {
     public void containerDeleted(Container c, User user)
     {
-        DbSchema ms = MicroarrayUserSchema.getSchema();
-        ContainerUtil.purgeTable(ms.getTable(MicroarrayUserSchema.TABLE_GEO_PROPS), c, "Container");
-
         MicroarrayManager.get().delete(c);
     }
 }

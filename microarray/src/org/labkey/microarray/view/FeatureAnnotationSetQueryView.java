@@ -19,9 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.DataRegion;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryForm;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
@@ -38,11 +36,6 @@ import org.springframework.validation.Errors;
  */
 public class FeatureAnnotationSetQueryView extends QueryView
 {
-    public FeatureAnnotationSetQueryView(QueryForm form, Errors errors)
-    {
-        super(form, errors);
-        init();
-    }
 
     public FeatureAnnotationSetQueryView(UserSchema schema, QuerySettings settings, @Nullable Errors errors)
     {

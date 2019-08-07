@@ -79,12 +79,6 @@ public class MicroarrayManager
     }
 
 
-    private static TableInfo getAnnotationSetQueryTableInfo(User user, Container container)
-              {
-                  MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
-                  return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET);
-              }
-
     private static TableInfo getAnnotationQueryTableInfo(User user, Container container)
     {
         MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
