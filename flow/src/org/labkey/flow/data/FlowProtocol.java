@@ -315,14 +315,21 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             else
                 _log.warn("Flow sample join property '" + propertyName + "' not found on SampleSet");
         }
-        Map<SampleKey, ExpMaterial> ret = new HashMap<>();
 
+        Map<Integer, ExpMaterial> materialMap = new HashMap<>();
+        List<? extends ExpMaterial> materials = ss.getSamples(getContainer());
+        for (ExpMaterial material : materials)
+        {
+            materialMap.put(material.getRowId(), material);
+        }
+
+        Map<SampleKey, ExpMaterial> ret = new HashMap<>();
         try (ResultSet rsSamples = new TableSelector(sampleTable, selectedColumns, null, null).getResultSet())
         {
             while (rsSamples.next())
             {
                 int rowId = ((Number) colRowId.getValue(rsSamples)).intValue();
-                ExpMaterial sample = ExperimentService.get().getExpMaterial(rowId);
+                ExpMaterial sample = materialMap.get(rowId);
                 if (sample == null)
                     continue;
                 SampleKey key = new SampleKey();
@@ -344,13 +351,17 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public int updateSampleIds(User user)
     {
+        _log.info("updateSampleIds: protocol=" + this.getName() + ", folder=" + this.getContainerPath());
+
         ExperimentService svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleSetJoinFields();
-        Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
-        ExpSampleSet ss = getSampleSet();
+        _log.debug("joinFields: " + joinFields);
 
-        _log.info("updateSampleIds: protocol=" + this.getName() + ", sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", folder=" + this.getContainerPath());
-        _log.info("  joinFields: " + joinFields);
+        Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
+        _log.debug("sampleMap=" + sampleMap.size());
+
+        ExpSampleSet ss = getSampleSet();
+        _log.debug("sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", lsid=" + (ss == null ? "<none>" : ss.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
@@ -368,16 +379,28 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         int unchanged = 0;
         int linked = 0;
 
+        List<? extends ExpData> fcsFiles = ExperimentService.get().getExpDatas(getContainer(), FlowDataType.FCSFile, null);
+        Map<Integer, ExpData> fcsFileMap = new HashMap<>();
+        for (ExpData fcsFile : fcsFiles)
+        {
+            fcsFileMap.put(fcsFile.getRowId(), fcsFile);
+        }
+
         try (ResultSet rs = new TableSelector(fcsFilesTable, new ArrayList<>(columns.values()), null, null).getResultSet();
              DbScope.Transaction transaction = svc.ensureTransaction())
         {
-            transaction.addCommitTask(() -> FlowManager.get().flowObjectModified(), DbScope.CommitTaskOption.POSTCOMMIT);
+            _log.debug("entered transaction");
+            transaction.addCommitTask(() -> {
+                _log.debug("update flow object on tx post-commit");
+                FlowManager.get().flowObjectModified();
+            }, DbScope.CommitTaskOption.POSTCOMMIT);
 
             Set<ExpRun> fcsFileRuns = new HashSet<>();
             while (rs.next())
             {
-                int fcsFileId = ((Number) colRowId.getValue(rs)).intValue();
-                ExpData fcsFile = svc.getExpData(fcsFileId);
+                Number fcsFileId = ((Number) colRowId.getValue(rs));
+                ExpData fcsFile = fcsFileMap.get(fcsFileId);
+                _log.debug("-- fcsFileId=" + fcsFileId + ", fcsFile=" + fcsFile);
                 if (fcsFile == null)
                     continue;
                 fcsFileCount++;
@@ -392,29 +415,39 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     }
                     key.addValue(value);
                 }
+                _log.debug("   sampleKey=" + key);
+
                 ExpMaterial sample = sampleMap.get(key);
                 Integer newSampleId = sample == null ? null : sample.getRowId();
                 Object oldSampleId = colSampleId.getValue(rs);
+                _log.debug("   newSampleId=" + newSampleId + ", oldSampleId=" + oldSampleId);
                 if (Objects.equals(newSampleId, oldSampleId))
                 {
                     unchanged++;
+                    _log.debug("   unchanged");
                     continue;
                 }
                 ExpProtocolApplication app = fcsFile.getSourceApplication();
                 if (app == null)
                 {
                     // This will happen for orphaned FCSFiles (where the ExperimentRun has been deleted).
+                    _log.debug("   orphaned FCSFile");
                     continue;
                 }
+                _log.debug("   protocol app=" + app.getName());
 
                 boolean changed = false;
                 boolean found = false;
                 for (ExpMaterial material : app.getInputMaterials())
                 {
-                    if (material.getSampleSet() == null || material.getSampleSet().getRowId() != ss.getRowId())
+                    if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), ss.getLSID()))
+                    {
+                        _log.debug("   sample's sampleset isn't ours: " + material.getCpasType());
                         continue;
+                    }
                     if (sample != null)
                     {
+                        _log.debug("   found previously linked sample, no change");
                         if (material.equals(sample))
                         {
                             found = true;
@@ -422,11 +455,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                             break;
                         }
                     }
+                    _log.debug("   found previously linked sample no longer needed, remove = " + material.getName());
                     app.removeMaterialInput(user, material);
                     changed = true;
                 }
                 if (!found && sample != null)
                 {
+                    _log.debug("   didn't find previously linked sample, add");
                     app.addMaterialInput(user, sample, null);
                     linked++;
                     changed = true;
@@ -440,16 +475,27 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             }
 
             if (!fcsFileRuns.isEmpty())
+            {
+                _log.info(fcsFileRuns.size() + " runs changed, syncing edges");
                 ExperimentService.get().syncRunEdges(fcsFileRuns);
+            }
 
-            transaction.commit();
+            if (!transaction.isAborted())
+            {
+                _log.debug("commit...");
+                transaction.commit();
+            }
+            else
+            {
+                _log.debug("tx aborted, not committing");
+            }
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
 
-        _log.info("  fcsFileCount=" + fcsFileCount + ", sampleCount=" + sampleMap.size() + ", linked=" + linked + ", unchanged=" + unchanged);
+        _log.debug("fcsFileCount=" + fcsFileCount + ", sampleCount=" + sampleMap.size() + ", linked=" + linked + ", unchanged=" + unchanged);
         return linked;
     }
 
