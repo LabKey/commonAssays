@@ -174,7 +174,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
 
         //Check for Batch Properties
         assertTextPresentInThisOrder("----- Start Batch Properties -----", "----- End Batch Properties -----");
-        assertTextPresent("Participant Visit", "Target Study", "Species", "Lab ID", "Analysis", "Network", "Transform Script Version", "Ruminex Version");
+        assertTextPresent("Participant Visit", "Species", "Lab ID", "Analysis", "Network", "Transform Script Version", "Ruminex Version");
     }
 
     @LogMethod
