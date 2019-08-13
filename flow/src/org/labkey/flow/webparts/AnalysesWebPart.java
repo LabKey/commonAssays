@@ -76,7 +76,7 @@ public class AnalysesWebPart extends FlowQueryView
             }
 
             ActionURL createRunGroupURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateRunGroupURL(getContainer(), getReturnURL(), false);
-            ActionButton createExperiment = new ActionButton(createRunGroupURL, "Create Analysis Folder", ActionButton.Action.POST);
+            ActionButton createExperiment = new ActionButton(createRunGroupURL, "Create Analysis Folder");
             createExperiment.setActionType(ActionButton.Action.LINK);
             createExperiment.setDisplayPermission(InsertPermission.class);
             bar.add(createExperiment);
