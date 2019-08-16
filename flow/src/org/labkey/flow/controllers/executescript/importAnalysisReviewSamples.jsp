@@ -35,6 +35,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.TreeMap" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -73,8 +74,8 @@
     for (ISampleInfo sample : sampleInfos)
     {
         Map<String, Object> map = new HashMap<>();
-        map.put("sampleId", sample.getSampleId());
-        map.put("label", sample.getLabel());
+        map.put("sampleId", HtmlString.of(sample.getSampleId()));
+        map.put("label", HtmlString.of(sample.getLabel()));
         List<String> sampleGroups = new ArrayList<>(10);
         if (sample instanceof Workspace.SampleInfo)
             for (PopulationName pop : ((Workspace.SampleInfo)sample).getGroupNames())
@@ -103,7 +104,7 @@
 <% } %>
 <hr/>
 <script>
-    var samples = <%=new JSONArray(samples)%>;
+    var samples = <%=new JSONArray(samples).getHtmlString()%>;
     var groups = <%=new JSONObject(groups)%>;
     var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
