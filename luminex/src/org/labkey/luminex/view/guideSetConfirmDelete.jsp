@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.luminex.LuminexController" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -60,7 +61,7 @@
             <br>
             Type: <% if(gs.isValueBased()) out.print("Value-based"); else out.print("Run-based"); %>
             <br><br>
-            Current Guide Set: <%=gs.getCurrent()%>
+            Current Guide Set: <%=HtmlString.of(gs.getCurrent().toString())%>
             <br>
             <% if (gs.getMemberRuns().size() > 0 ) { %>
                 <br>
