@@ -894,7 +894,7 @@ public class MS2Controller extends SpringActionController
                     {
                         navTree.addChild("Edit Elution Profile", editUrl);
                     }
-                    navTree.addChild((quant.includeInProteinCalc() ? "Invalidate" : "Revalidate") + " Quantitation Results").setScript(PageFlowUtil.postOnClickJavaScript(toggleUrl));
+                    navTree.addChild((quant.includeInProteinCalc() ? "Invalidate" : "Revalidate") + " Quantitation Results", toggleUrl).usePost();
                     quantView.setNavMenu(navTree);
                     quantView.setIsWebPart(false);
                 }

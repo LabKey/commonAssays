@@ -196,8 +196,13 @@ public class ElispotController extends SpringActionController
             ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
             ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
             ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
-            return root.addChild("Assay List", assayListURL).addChild(_protocol.getName() +
-                    " Runs", runListURL).addChild(_protocol.getName() + " Data", runDataURL).addChild(title);
+
+            root.addChild("Assay List", assayListURL);
+            root.addChild(_protocol.getName() + " Runs", runListURL);
+            root.addChild(_protocol.getName() + " Data", runDataURL);
+            root.addChild(title);
+
+            return root;
         }
     }
 

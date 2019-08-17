@@ -190,8 +190,10 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = super.appendNavTrail(root);
-            return result.addChild(_protocol.getName() + " Excluded Data");
+            super.appendNavTrail(root);
+            root.addChild(_protocol.getName() + " Excluded Data");
+
+            return root;
         }
     }
 
