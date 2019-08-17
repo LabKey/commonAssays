@@ -255,9 +255,11 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
-            return result.addChild("Titration QC Report");
+            root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            root.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            root.addChild("Titration QC Report");
+
+            return root;
         }
     }
 
@@ -285,9 +287,11 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
-            return result.addChild("Single Point Control QC Report");
+            root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            root.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            root.addChild("Single Point Control QC Report");
+
+            return root;
         }
     }
 
@@ -316,10 +320,12 @@ public class LuminexController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             setHelpTopic("luminexSinglePoint");
-            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            result.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
-            result.addChild("Levey-Jennings Reports", new ActionURL(LeveyJenningsMenuAction.class, getContainer()).addParameter("rowId", _form.getProtocol().getRowId()));
-            return result.addChild(_form.getControlName());
+            root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            root.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
+            root.addChild("Levey-Jennings Reports", new ActionURL(LeveyJenningsMenuAction.class, getContainer()).addParameter("rowId", _form.getProtocol().getRowId()));
+            root.addChild(_form.getControlName());
+
+            return root;
         }
     }
 
@@ -342,9 +348,11 @@ public class LuminexController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             setHelpTopic("trackLuminexAnalytes");
-            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            result.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
-            return result.addChild("Levey-Jennings Reports");
+            root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            root.addChild(_form.getProtocol().getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _form.getProtocol()));
+            root.addChild("Levey-Jennings Reports");
+
+            return root;
         }
     }
 
@@ -407,7 +415,8 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Set Default Values");
+            root.addChild("Set Default Values");
+            return root;
         }
     }
 
@@ -578,7 +587,8 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Import Default Values");
+            root.addChild("Import Default Values");
+            return root;
         }
     }
 
@@ -711,7 +721,8 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return root.addChild("Confirm Deletion");
+            root.addChild("Confirm Deletion");
+            return root;
         }
     }
 
@@ -931,9 +942,11 @@ public class LuminexController extends SpringActionController
         @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            NavTree result = root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
-            result.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
-            return result.addChild("Manage Guide Sets");
+            root.addChild("Assay List", PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            root.addChild(_protocol.getName(), PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _protocol));
+            root.addChild("Manage Guide Sets");
+
+            return root;
         }
     }
 }
