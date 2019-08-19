@@ -47,23 +47,23 @@
     IWorkspace workspace = workspaceData.getWorkspaceObject();
 
     Map<String, String> groupOptions = new TreeMap<>();
-    Map<HtmlString, Collection<HtmlString[]>> groups = new TreeMap<>();
+    Map<String, Collection<String[]>> groups = new TreeMap<>();
     if (workspace instanceof Workspace)
     {
         Workspace w = (Workspace)workspace;
         for (Workspace.GroupInfo group : w.getGroups())
         {
-            Map<String, HtmlString[]> groupSamples = new TreeMap<>();
+            Map<String, String[]> groupSamples = new TreeMap<>();
             for (String sampleID : group.getSampleIds())
             {
                 Workspace.SampleInfo sampleInfo = w.getSample(sampleID);
                 if (sampleInfo != null)
-                    groupSamples.put(sampleInfo.getLabel(), new HtmlString[] { HtmlString.of(sampleInfo.getSampleId()), HtmlString.of(sampleInfo.getLabel()) });
+                    groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
             }
             if (group.isAllSamples() || groupSamples.size() > 0)
             {
                 String groupName = group.getGroupName().toString();
-                groups.put(HtmlString.of(groupName), groupSamples.values());
+                groups.put(groupName, groupSamples.values());
                 groupOptions.put(groupName, groupName + " (" + groupSamples.size() + " samples)");
             }
         }
@@ -74,8 +74,8 @@
     for (ISampleInfo sample : sampleInfos)
     {
         Map<String, Object> map = new HashMap<>();
-        map.put("sampleId", HtmlString.of(sample.getSampleId()));
-        map.put("label", HtmlString.of(sample.getLabel()));
+        map.put("sampleId", sample.getSampleId());
+        map.put("label", sample.getLabel());
         List<String> sampleGroups = new ArrayList<>(10);
         if (sample instanceof Workspace.SampleInfo)
             for (PopulationName pop : ((Workspace.SampleInfo)sample).getGroupNames())
