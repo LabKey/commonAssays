@@ -403,7 +403,7 @@ FlowPropertySet.keywords = [<%
     comma = "";
     for (String s : fps.getVisibleKeywords())
     {
-        %><%=h(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
@@ -414,7 +414,7 @@ SampleSet.properties = [<%
     comma = "";
     for (String s : sampleSetProperties)
     {
-        %><%=h(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
