@@ -299,6 +299,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
         {
             this.statCombo.getStore().removeAll();
             var storeData = createStatStore(stats);
+
             this.statCombo.getStore().loadData(storeData);
             this.statCombo.focus();
         }
@@ -394,7 +395,7 @@ function createStatStore(stats)
             items.push(item);
     }
 
-    return {stats: items};
+    return {stats: h(items)};
 }
 
 var FlowPropertySet = {};
@@ -402,7 +403,7 @@ FlowPropertySet.keywords = [<%
     comma = "";
     for (String s : fps.getVisibleKeywords())
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=h(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
@@ -413,7 +414,7 @@ SampleSet.properties = [<%
     comma = "";
     for (String s : sampleSetProperties)
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=h(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
