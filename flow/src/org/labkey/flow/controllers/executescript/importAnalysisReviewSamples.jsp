@@ -104,7 +104,7 @@
 <% } %>
 <hr/>
 <script>
-    var samples = <%=new JSONArray(samples).getHtmlString()%>;
+    var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
     var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
