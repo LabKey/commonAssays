@@ -34,6 +34,7 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -115,7 +116,7 @@
         <% if (hasScripts)
         {
         %>
-        <tr><td>Analysis Script:</td><td><select name="<%=FlowParam.scriptId%>" onchange="this.form.submit()">
+        <tr><td>Analysis Script:</td><td><select name="<%=HtmlString.of(FlowParam.scriptId.toString())%>" onchange="this.form.submit()">
             <labkey:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
         </select></td></tr>
         <%
