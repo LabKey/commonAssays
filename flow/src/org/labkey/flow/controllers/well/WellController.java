@@ -679,7 +679,7 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors)
         {
-            return new JspView<>(WellController.class, "bulkUpdate.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/well/bulkUpdate.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)

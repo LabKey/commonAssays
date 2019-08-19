@@ -82,7 +82,7 @@ public class ReportsController extends BaseFlowController
     {
         public BeginView()
         {
-            super(ReportsController.class, "reports.jsp", null);
+            super("/org/labkey/flow/controllers/reports.jsp");
             setTitle("Flow Reports");
             setTitleHref(new ActionURL(BeginAction.class, getViewContext().getContainer()));
         }
@@ -483,7 +483,7 @@ public class ReportsController extends BaseFlowController
     {
         SelectReportView(IdForm form)
         {
-            super(ReportsController.class, "selectReport.jsp", form);
+            super("/org/labkey/flow/controllers/selectReport.jsp", form);
         }
     }
 }

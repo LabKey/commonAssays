@@ -464,17 +464,24 @@ public class AnalysisScriptController extends BaseFlowController
 
     public enum ImportAnalysisStep
     {
-        SELECT_ANALYSIS("Select Analysis"),
-        SELECT_FCSFILES("Select FCS Files"),
-        REVIEW_SAMPLES("Review Samples"),
-        CHOOSE_ANALYSIS("Analysis Folder"),
-        CONFIRM("Confirm");
+        SELECT_ANALYSIS("Select Analysis", "/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp"),
+        SELECT_FCSFILES("Select FCS Files", "/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp"),
+        REVIEW_SAMPLES("Review Samples", "/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp"),
+        CHOOSE_ANALYSIS("Analysis Folder", "/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp"),
+        CONFIRM("Confirm", "/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp");
 
-        String title;
+        final String title;
+        final String jspPath;
 
-        ImportAnalysisStep(String title)
+        ImportAnalysisStep(String title, String jspPath)
         {
             this.title = title;
+            this.jspPath = jspPath;
+        }
+
+        public JspView<ImportAnalysisForm> getJspView(ImportAnalysisForm form)
+        {
+            return new JspView<>(jspPath, form);
         }
 
         public String getTitle()

@@ -45,6 +45,7 @@ public class FlowSummaryWebPart extends JspView<FlowSummaryWebPart>
     // web parts shouldn't assume the current container
     public Container c;
 
+    @SuppressWarnings("unused")
     public FlowSummaryWebPart(ViewContext portalCtx)
     {
         this(portalCtx.getContainer());
@@ -52,7 +53,7 @@ public class FlowSummaryWebPart extends JspView<FlowSummaryWebPart>
 
     public FlowSummaryWebPart(Container c)
     {
-        super(FlowSummaryWebPart.class, "FlowSummary.jsp", null);
+        super("/org/labkey/flow/webparts/FlowSummary.jsp", null);
         setTitle("Flow Summary");
         setFrame(WebPartView.FrameType.PORTAL);
         setModelBean(this);
