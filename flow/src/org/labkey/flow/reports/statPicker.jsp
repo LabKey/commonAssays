@@ -374,7 +374,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
      {
         config.mode = 'local';
-        config.store = <%=h(ops)%>
+        config.store = <%=ops%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
@@ -395,7 +395,7 @@ function createStatStore(stats)
             items.push(item);
     }
 
-    return {stats: h(items)};
+    return {stats: items};
 }
 
 var FlowPropertySet = {};
