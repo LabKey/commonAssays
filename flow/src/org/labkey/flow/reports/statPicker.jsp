@@ -374,14 +374,14 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
      {
         config.mode = 'local';
-        config.store = <%=ops%>
+        config.store = <%=unsafe(ops.toString())%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
 });
 Ext.reg('opCombo', OpCombo);
 
-var FlowStatistics = <%=stats%>;
+var FlowStatistics = <%=unsafe(stats.toString())%>;
 
 function createStatStore(stats)
 {
@@ -407,7 +407,7 @@ FlowPropertySet.keywords = [<%
         comma=",";
     }
 %>];
-FlowPropertySet.statistics = <%=jsonStats%>;
+FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
 var SampleSet = {};
 SampleSet.properties = [<%
