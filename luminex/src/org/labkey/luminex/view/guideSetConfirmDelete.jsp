@@ -61,7 +61,7 @@
             <br>
             Type: <% if(gs.isValueBased()) out.print("Value-based"); else out.print("Run-based"); %>
             <br><br>
-            Current Guide Set: <%=HtmlString.of(gs.getCurrent().toString())%>
+            Current Guide Set: <%=h(gs.getCurrent())%>
             <br>
             <% if (gs.getMemberRuns().size() > 0 ) { %>
                 <br>
