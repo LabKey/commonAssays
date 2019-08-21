@@ -305,7 +305,7 @@ function showKeywords()
     for (var i=0 ; i<keywords.length ; i++)
     {
         var o = keywords[i];
-        o.label = o.index == 0 ? h('Keywords') : h('Parameter ' + _pad(o.index) + ' -- ' + o.name);
+        o.label = o.index == 0 ? 'Keywords' : 'Parameter ' + _pad(o.index) + ' -- ' + o.name;
     }
 
     var store = new Ext.data.GroupingStore({
