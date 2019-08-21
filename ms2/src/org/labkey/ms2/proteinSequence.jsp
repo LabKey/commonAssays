@@ -39,4 +39,4 @@
         </tr>
     </table>
 <% } %>
-<big><tt><%= HtmlString.of(bean.protein.getFormattedSequence(bean.run).toString()) %></tt></big>
+<big><tt><%= h(bean.protein.getFormattedSequence(bean.run)) %></tt></big>
