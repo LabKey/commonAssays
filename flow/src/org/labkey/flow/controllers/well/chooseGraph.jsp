@@ -116,7 +116,7 @@
         <% if (hasScripts)
         {
         %>
-        <tr><td>Analysis Script:</td><td><select name="<%=h(FlowParam.scriptId)%>" onchange="this.form.submit()">
+        <tr><td>Analysis Script:</td><td><select name="<%=FlowParam.scriptId%>" onchange="this.form.submit()">
             <labkey:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
         </select></td></tr>
         <%
