@@ -38,4 +38,4 @@
         </tr>
     </table>
 <% } %>
-<big><tt><%= h(bean.protein.getFormattedSequence(bean.run)) %></tt></big>
+<big><tt><%= bean.protein.getFormattedSequence(bean.run) %></tt></big>
