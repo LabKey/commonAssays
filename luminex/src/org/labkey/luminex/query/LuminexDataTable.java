@@ -49,6 +49,7 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.LuminexDataHandler;
@@ -122,9 +123,16 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         addColumn(wrapColumn(getRealTable().getColumn("Well")));
         addColumn(wrapColumn(getRealTable().getColumn("Outlier")));
         addColumn(wrapColumn(getRealTable().getColumn("Description")));
+
+        // For now, if study module doesn't exists, leave the SpecimenID column in place, but don't FK to SpecimenForeignKey
+        StudyService studyService = StudyService.get();
         var specimenColumn = wrapColumn(getRealTable().getColumn("SpecimenID"));
-        specimenColumn.setFk(new SpecimenForeignKey(_userSchema, AssayService.get().getProvider(_userSchema.getProtocol()), _userSchema.getProtocol()));
+        if (null != studyService)
+        {
+            specimenColumn.setFk(new SpecimenForeignKey(_userSchema, AssayService.get().getProvider(_userSchema.getProtocol()), _userSchema.getProtocol()));
+        }
         addColumn(specimenColumn);
+
         addColumn(wrapColumn(getRealTable().getColumn("ExtraSpecimenInfo")));
         addColumn(wrapColumn(getRealTable().getColumn("FIString"))).setLabel("FI String");
         OORDisplayColumnFactory.addOORColumns(this, getRealTable().getColumn("FI"), getRealTable().getColumn("FIOORIndicator"));

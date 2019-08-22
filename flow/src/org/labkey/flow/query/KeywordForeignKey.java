@@ -20,7 +20,6 @@ import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.persist.AttributeCache;
 import org.labkey.flow.util.KeywordUtil;
@@ -29,14 +28,11 @@ import java.util.Collection;
 
 public class KeywordForeignKey extends AttributeForeignKey<String>
 {
-    private final FlowSchema _schema;
-    FlowPropertySet _fps;
-    private SpecimenForeignKey _specimenFK;
+    private final FlowPropertySet _fps;
 
     public KeywordForeignKey(FlowSchema schema, FlowPropertySet fps)
     {
         super(schema);
-        _schema = schema;
         _fps = fps;
     }
 
