@@ -323,7 +323,9 @@ public class NabAssayController extends SpringActionController
             if (null != _protocol)
             {
                 ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
-                return root.addChild(_protocol.getName() + " Data", runDataURL).addChild("Run " + _runRowId + " Details");
+                root.addChild(_protocol.getName() + " Data", runDataURL);
+                root.addChild("Run " + _runRowId + " Details");
+                return root;
             }
             return null;
         }
@@ -812,7 +814,9 @@ public class NabAssayController extends SpringActionController
         public NavTree appendNavTrail(NavTree root)
         {
             ActionURL detailsURL = new ActionURL(DetailsAction.class, getContainer()).addParameter("rowId", _runId);
-            return root.addChild("Run " + _runId + " Details", detailsURL).addChild(_editMode ? "QC NAb Data" : "Excluded Data");
+            root.addChild("Run " + _runId + " Details", detailsURL);
+            root.addChild(_editMode ? "QC NAb Data" : "Excluded Data");
+            return root;
         }
     }
 

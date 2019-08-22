@@ -137,7 +137,7 @@ public class AttributeController extends BaseFlowController
         if (type != null)
         {
             ActionURL summaryURL = new ActionURL(SummaryAction.class, getContainer()).addParameter(Param.type.name(), type.name());
-            tree = tree.addChild(StringUtils.capitalize(type.name() + " Summary"), summaryURL);
+            tree.addChild(StringUtils.capitalize(type.name() + " Summary"), summaryURL);
         }
 
         if (title != null)
