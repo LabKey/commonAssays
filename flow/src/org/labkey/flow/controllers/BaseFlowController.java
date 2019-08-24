@@ -49,10 +49,10 @@ import java.util.ArrayList;
 public abstract class BaseFlowController extends SpringActionController
 {
     public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
-    
-    protected JspBase getFlowPage(String name)
+
+    protected JspBase getFlowPage(String jspPath)
     {
-        return (JspBase)JspLoader.createPage(getClass().getPackage().getName(), name);
+        return (JspBase)JspLoader.createPage((String)null, jspPath);
     }
 
     protected FlowScript getScript()

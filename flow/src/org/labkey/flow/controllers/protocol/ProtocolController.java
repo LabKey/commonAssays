@@ -92,7 +92,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
-            return FormPage.getView(ProtocolController.class, form, errors, "showProtocol.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/showProtocol.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -109,7 +109,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
-            return FormPage.getView(ProtocolController.class, form, errors, "showSamples2.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/showSamples2.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -254,7 +254,7 @@ public class ProtocolController extends BaseFlowController
                 metadata = getProtocol().getICSMetadata();
 
             form.init(metadata);
-            return FormPage.getView(ProtocolController.class, form, errors, "editICSMetadata.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/editICSMetadata.jsp", form, errors);
         }
 
         public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception

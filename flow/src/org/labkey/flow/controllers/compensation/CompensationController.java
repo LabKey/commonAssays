@@ -93,7 +93,7 @@ public class CompensationController extends BaseFlowController
 
         public ModelAndView getView(UploadCompensationForm form, boolean reshow, BindException errors)
         {
-            return FormPage.getView(CompensationController.class, form, errors, "upload.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/compensation/upload.jsp", form, errors);
         }
 
 

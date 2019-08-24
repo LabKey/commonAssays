@@ -25,7 +25,6 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
@@ -170,20 +169,15 @@ public class WellController extends BaseFlowController
         return sortList.toArray(new String[0]);
     }
 
-    public Page getPage(String name)
+    public Page getPage(String jspPath)
     {
-        Page ret = (Page) getFlowPage(name);
+        Page ret = (Page) getFlowPage(jspPath);
         FlowWell well = getWell();
         if (well == null)
             throw new NotFoundException("well not found");
 
         ret.setWell(well);
         return ret;
-    }
-
-    public static ActionURL getShowWellURL()
-    {
-        return new ActionURL(ShowWellAction.class, ContainerManager.getRoot());
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -193,7 +187,7 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(Object o, BindException errors)
         {
-            Page page = getPage("showWell.jsp");
+            Page page = getPage("/org/labkey/flow/controllers/well/showWell.jsp");
             well = page.getWell();
             JspView v = new JspView(page);
             v.setClientDependencies(page.getClientDependencies());
@@ -288,7 +282,7 @@ public class WellController extends BaseFlowController
                     form.ff_keywordName = getKeywordIntersection(wells, true);
                 }
             }
-            return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/well/editWell.jsp", form, errors);
         }
 
         @Override
