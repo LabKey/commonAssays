@@ -50,16 +50,9 @@ public abstract class BaseFlowController extends SpringActionController
 {
     public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
     
-    protected BaseFlowController.FlowPage getFlowPage(String name)
+    protected JspBase getFlowPage(String name)
     {
-        return getFlowPage(name, getClass().getPackage());
-    }
-
-    protected BaseFlowController.FlowPage getFlowPage(String name, Package thePackage)
-    {
-        BaseFlowController.FlowPage ret = (BaseFlowController.FlowPage) JspLoader.createPage(thePackage.getName(), name);
-        ret._controller = this;
-        return ret;
+        return (JspBase)JspLoader.createPage(getClass().getPackage().getName(), name);
     }
 
     protected FlowScript getScript()
@@ -188,24 +181,8 @@ public abstract class BaseFlowController extends SpringActionController
         }
     }
 
-    abstract static public class FlowPage<C extends BaseFlowController> extends JspBase
+    abstract static public class FlowPage extends JspBase
     {
-        C _controller;
-
-        public void setPageFlow(C controller)
-        {
-            _controller = controller;
-        }
-
-        public C getPageFlow()
-        {
-            return _controller;
-        }
-
-        public String getContainerPath()
-        {
-            return getContainer().getPath();
-        }
     }
 
 

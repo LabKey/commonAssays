@@ -31,6 +31,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryAction;
@@ -806,7 +807,7 @@ public class WellController extends BaseFlowController
     }
 
     
-    static abstract public class Page extends FlowPage
+    static abstract public class Page extends JspBase
     {
         private FlowRun _run;
         private FlowWell _well;

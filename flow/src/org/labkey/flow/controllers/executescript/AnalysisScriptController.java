@@ -26,6 +26,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
@@ -124,20 +125,13 @@ public class AnalysisScriptController extends BaseFlowController
                 return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
             }
             FlowPreference.showRuns.updateValue(getRequest());
-            return new JspView<>(AnalysisScriptController.class, "showScript.jsp", script, errors);
+            return new JspView<>("/org/labkey/flow/controllers/executescript/showScript.jsp", script, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
         {
             return appendFlowNavTrail(getPageConfig(), root, script, null);
         }
-    }
-
-    protected Page getPage(String name)
-    {
-        Page ret = (Page) getFlowPage(name);
-        ret.setScript(getScript());
-        return ret;
     }
 
     public abstract class BaseAnalyzeRunsAction extends SimpleViewAction<ChooseRunsToAnalyzeForm>
@@ -149,13 +143,13 @@ public class AnalysisScriptController extends BaseFlowController
         {
             nav = new Pair<>("Choose runs", Action.chooseRunsToAnalyze);
             form.populate(errors);
-            return new JspView<>(AnalysisScriptController.class, "chooseRunsToAnalyze.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/executescript/chooseRunsToAnalyze.jsp", form, errors);
         }
 
         protected ModelAndView chooseAnalysisName(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             nav = new Pair<>("Choose new analysis name", Action.chooseAnalysisName);
-            return new JspView<>(AnalysisScriptController.class, "chooseAnalysisName.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp", form, errors);
         }
 
         protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, BindException errors,
@@ -349,7 +343,7 @@ public class AnalysisScriptController extends BaseFlowController
             validatePipeline();
 
             collectNewPaths(form, errors);
-            return new JspView<PipelinePathForm>(AnalysisScriptController.class, "confirmRunsToImport.jsp", form, errors);
+            return new JspView<PipelinePathForm>("/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp", form, errors);
         }
 
         protected ModelAndView uploadRuns(ImportRunsForm form, BindException errors) throws Exception
@@ -414,7 +408,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    abstract static public class Page extends FlowPage
+    abstract static public class Page extends JspBase
     {
         FlowScript _analysisScript;
         public void setScript(FlowScript script)
@@ -558,7 +552,7 @@ public class AnalysisScriptController extends BaseFlowController
                 validateCommand(form, errors);
 
             title = form.getWizardStep().getTitle();
-            return new JspView<>(AnalysisScriptController.class, "importAnalysis.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysis.jsp", form, errors);
         }
 
         public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception

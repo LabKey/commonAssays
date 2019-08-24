@@ -406,7 +406,7 @@ public class FlowController extends BaseFlowController
         {
             checkPerms();
             getPageConfig().setFocusId("folderName");
-            return new JspView<>(FlowController.class, "newFolder.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/newFolder.jsp", form, errors);
         }
 
         public boolean handlePost(NewFolderForm form, BindException errors) throws Exception

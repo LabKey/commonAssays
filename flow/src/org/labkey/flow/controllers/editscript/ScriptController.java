@@ -38,6 +38,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.jsp.JspBase;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -409,7 +410,7 @@ public class ScriptController extends BaseFlowController
         public ScriptParser.Error scriptParseError;
     }
 
-    abstract static public class Page<F extends EditScriptForm> extends BaseFlowController.FlowPage<ScriptController>
+    abstract static public class Page<F extends EditScriptForm> extends JspBase
     {
         public F form;
 
