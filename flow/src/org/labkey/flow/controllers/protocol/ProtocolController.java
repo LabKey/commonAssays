@@ -130,7 +130,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors)
         {
             form.init();
-            return FormPage.getView(ProtocolController.class, form, "joinSampleSet.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/joinSampleSet.jsp", form);
         }
 
         public boolean handlePost(JoinSampleSetForm form, BindException errors) throws Exception
@@ -169,7 +169,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(UpdateSamplesForm form, BindException errors) throws Exception
         {
             protocol = form.getProtocol();
-            return FormPage.getView(ProtocolController.class, form, "updateSamples.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/updateSamples.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -188,7 +188,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(EditFCSAnalysisNameForm form, boolean reshow, BindException errors)
         {
             form.init();
-            return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisName.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/editFCSAnalysisName.jsp", form);
         }
 
         public boolean handlePost(EditFCSAnalysisNameForm form, BindException errors) throws Exception
@@ -219,7 +219,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(EditFCSAnalysisFilterForm form, boolean reshow, BindException errors)
         {
             form.init();
-            return FormPage.getView(ProtocolController.class, form, "editFCSAnalysisFilter.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/editFCSAnalysisFilter.jsp", form);
         }
 
         public boolean handlePost(EditFCSAnalysisFilterForm form, BindException errors) throws Exception

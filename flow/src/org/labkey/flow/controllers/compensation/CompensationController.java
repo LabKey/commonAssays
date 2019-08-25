@@ -193,7 +193,7 @@ public class CompensationController extends BaseFlowController
         public ModelAndView getView(ViewForm form, BindException errors)
         {
             _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
-            return FormPage.getView(CompensationController.class, form, "showCompensation.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/compensation/showCompensation.jsp", form);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -225,7 +225,7 @@ public class CompensationController extends BaseFlowController
             {
                 throw new NotFoundException();
             }
-            return FormPage.getView(CompensationController.class, form, "delete.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/compensation/delete.jsp", form);
         }
 
         public boolean handlePost(ViewForm viewForm, BindException errors)

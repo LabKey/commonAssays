@@ -384,7 +384,7 @@ public class WellController extends BaseFlowController
             if (!canRead)
                 return new HtmlView("<span class='labkey-error'>The original FCS file is no longer available or is not readable" + (rel == null ? "." : ": " + PageFlowUtil.filter(rel.getPath())) + "</span>");
 
-            FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
+            FormPage page = FormPage.get("/org/labkey/flow/controllers/well/chooseGraph.jsp", form);
             return new JspView(page);
         }
 
