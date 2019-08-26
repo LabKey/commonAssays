@@ -459,7 +459,7 @@ public class SamplesConfirmGridView extends GridView
         @Override
         public String getFormFieldName(RenderContext ctx)
         {
-            // Bind select combobox to ImportAnalyisForm.selectedSamples.matchedFile
+            // Bind select combobox to ImportAnalysisForm.selectedSamples.matchedFile
             String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
             return "selectedSamples.rows[" + sampleId + "].matchedFile";
         }
