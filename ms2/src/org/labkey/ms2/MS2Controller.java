@@ -1507,7 +1507,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType
+    public enum PivotType implements EnumHasHtmlString<PivotType>
     {
         run, fraction
     }
