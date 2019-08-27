@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
+import org.labkey.api.util.HtmlString;
 
 import java.util.*;
 
@@ -169,9 +170,9 @@ public class Protein
     static final String startTag = "<font color=\"green\" ><u>";
     static final String endTag = "</u></font>";
 
-    public StringBuffer getFormattedSequence(MS2Run run)
+    public HtmlString getFormattedSequence(MS2Run run)
     {
-        StringBuffer formatted = new StringBuffer(_sequence);
+        StringBuilder formatted = new StringBuilder(_sequence);
 
         for (int i = 10; i < formatted.length(); i += 11)
             formatted.insert(i, ' ');
@@ -190,7 +191,7 @@ public class Protein
         }
 
         formatted.deleteCharAt(formatted.length() - 1);  // Get rid of extra space at end
-        return formatted;
+        return HtmlString.unsafe(formatted.toString());
     }
     /*
         Formats and returns an html table showing where peptides matched a specific portion of a protein.

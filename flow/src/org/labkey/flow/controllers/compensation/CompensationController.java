@@ -205,7 +205,11 @@ public class CompensationController extends BaseFlowController
                 return appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
             // fall back on showing compensation query
             else
-                return root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer())).addChild(_comp.getLabel(), _comp.urlShow());
+            {
+                root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
+                root.addChild(_comp.getLabel(), _comp.urlShow());
+                return root;
+            }
         }
     }
 

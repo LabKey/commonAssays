@@ -266,7 +266,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         {
             setHelpTopic("featureAnnotationSets");
             ActionURL url = new ActionURL(ManageAction.class, getContainer());
-            return root.addChild("Feature Annotation Sets", url).addChild("Upload Annotation Set");
+            root.addChild("Feature Annotation Sets", url);
+            root.addChild("Upload Annotation Set");
+            return root;
         }
     }
 
@@ -332,7 +334,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         {
             setHelpTopic("featureAnnotationSets");
             ActionURL url = new ActionURL(ManageAction.class, getContainer());
-            return root.addChild("Feature Annotation Sets", url).addChild("Feature Annotation Set");
+            root.addChild("Feature Annotation Sets", url);
+            root.addChild("Feature Annotation Set");
+            return root;
         }
     }
 
