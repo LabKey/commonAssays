@@ -35,7 +35,7 @@
 </p>
 <labkey:form method="get" action="<%=h(bean.nextURL)%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
-    <%=bean.select%><br/>
+    <%=h(bean.select)%><br/>
     <br/><br/>
     <% out.flush(); bean.extraOptionsView.render(request, response); %><br/>
     <%= button(bean.buttonText).submit(true).attributes("name=\"submit\"") %>
