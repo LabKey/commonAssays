@@ -399,7 +399,7 @@ FlowPropertySet.keywords = [<%
         comma=",";
     }
 %>];
-FlowPropertySet.statistics = <%=jsonStats%>;
+FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
 var SampleSet = {};
 SampleSet.properties = [<%
