@@ -26,6 +26,8 @@
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.json.JSONArray" %>
+<%@ page import="java.util.Arrays" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -93,16 +95,7 @@
     }
     stats.append("}");
 
-    StringBuilder ops = new StringBuilder();
-    ops.append("[");
-    comma = "";
-    for (CompareType ct : new CompareType[] { CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN })
-    {
-        ops.append(comma);
-        ops.append("[\"").append(ct.getPreferredUrlKey()).append("\", \"").append(ct.getDisplayValue()).append("\"]");
-        comma = ",\n";
-    }
-    ops.append("]");
+    JSONArray ops = toJsonArray(Arrays.asList(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN ));
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();
@@ -380,7 +373,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
 });
 Ext.reg('opCombo', OpCombo);
 
-var FlowStatistics = <%=stats%>;
+var FlowStatistics = <%=unsafe(stats.toString())%>;
 
 function createStatStore(stats)
 {
@@ -402,18 +395,18 @@ FlowPropertySet.keywords = [<%
     comma = "";
     for (String s : fps.getVisibleKeywords())
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
-FlowPropertySet.statistics = <%=jsonStats%>;
+FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
 var SampleSet = {};
 SampleSet.properties = [<%
     comma = "";
     for (String s : sampleSetProperties)
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
