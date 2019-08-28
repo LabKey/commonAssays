@@ -37,20 +37,25 @@
     Container c = getContainer();
 
     Map<String, String> paths = form.getNewPaths();
-
-    // Get set of valid copy to study targets
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
-    targetStudies.put("", "[None]");
-    for (Study study : validStudies)
-    {
-        Container studyContainer = study.getContainer();
-        targetStudies.put(studyContainer.getId(), studyContainer.getPath() + " (" + study.getLabel() + ")");
-    }
 
-    // Pre-select the most recent target study
-    if (form.getTargetStudy() == null)
-        form.setTargetStudy(FlowRun.findMostRecentTargetStudy(c));
+    AssayPublishService aps = AssayPublishService.get();
+
+    if (null != aps)
+    {
+        // Get set of valid copy to study targets
+        Set<Study> validStudies = aps.getValidPublishTargets(getUser(), ReadPermission.class);
+        targetStudies.put("", "[None]");
+        for (Study study : validStudies)
+        {
+            Container studyContainer = study.getContainer();
+            targetStudies.put(studyContainer.getId(), studyContainer.getPath() + " (" + study.getLabel() + ")");
+        }
+
+        // Pre-select the most recent target study
+        if (form.getTargetStudy() == null)
+            form.setTargetStudy(FlowRun.findMostRecentTargetStudy(c));
+    }
 
     %><labkey:errors/><%
 
@@ -74,10 +79,10 @@
         }%>
         </ul>
 
-        <% if (targetStudies.size() > 0) { %>
+        <% if (!targetStudies.isEmpty()) { %>
             <p>
-                <em>Optionally,</em> select a target study for imported FCS files.  The target study will be used
-                as the detault copy to study target and, if the flow metadata specifies a specimen ID column, used
+                <em>Optionally,</em> select a target study for imported FCS files. The target study will be used
+                as the default copy to study target and, if the flow metadata specifies a specimen ID column, used
                 to look up specimen information from the target study's specimen repository.
             </p>
             <p class="labkey-indented">

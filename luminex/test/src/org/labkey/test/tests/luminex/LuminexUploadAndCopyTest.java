@@ -22,11 +22,12 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
+import org.labkey.test.categories.Study;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({DailyA.class, Assays.class})
+@Category({DailyA.class, Assays.class, Study.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 35)
 public final class LuminexUploadAndCopyTest extends LuminexTest
 {
@@ -36,6 +37,12 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
     private static final String TEST_ASSAY_LUM_RUN_NAME2 = "testRunName2";
     private static final String TEST_ASSAY_LUM_RUN_NAME3 = "WithIndices.xls";
     private static final String TEST_ASSAY_LUM_RUN_NAME4 = "testRunName4";
+
+    @Override
+    protected boolean requiresStudy()
+    {
+        return true;
+    }
 
     @Override
     protected boolean useXarImport()

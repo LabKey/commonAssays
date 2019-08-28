@@ -205,7 +205,7 @@ those results must be put into different analysis folders.
 
 <%
 // Let user select a Target Study only if we are also importing a keywords directory.
-if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
+if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && AssayPublishService.get() != null)
 {
     // Get set of valid copy to study targets
     Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
