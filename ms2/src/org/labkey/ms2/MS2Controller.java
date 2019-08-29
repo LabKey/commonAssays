@@ -98,6 +98,8 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
+import org.labkey.api.util.element.Option;
+import org.labkey.api.util.element.Select;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GWTView;
@@ -521,7 +523,7 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public ActionURL applyViewURL;
-        public StringBuilder applyView;
+        public Select.SelectBuilder applyView;
         public ActionURL saveViewURL;
         public ActionURL manageViewsURL;
         public ActionURL extraFilterURL;
@@ -606,39 +608,49 @@ public class MS2Controller extends SpringActionController
      * Render current user's MS2Views in a drop down box with a submit button beside.
      * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
      */
-    private StringBuilder renderViewSelect(boolean selectCurrent)
+    private Select.SelectBuilder renderViewSelect(boolean selectCurrent)
     {
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
-        StringBuilder viewSelect = new StringBuilder("<select id=\"views\" name=\"viewParams\" style=\"width:200\">");
+        // still need the     style = width:200
+        Select.SelectBuilder select = new Select.SelectBuilder()
+                                        .id("views")
+                                        .name("viewParams")
+                                        .attributes(Collections.singletonMap("style", "width:200"));
+
+        List<Option> options = new ArrayList<>();
+
+        List<String> twoLabels = Arrays.asList("&lt;Select a saved view&gt;", "&lt;Standard View&gt;");
+
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">&lt;Select a saved view&gt;</option>\n");
-        viewSelect.append("\n<option value=\"doNotApplyDefaultView=yes\">&lt;Standard View&gt;</option>\n");
+        for (String label: twoLabels)
+        {
+            options.add(new Option.OptionBuilder()
+                    .value("doNotApplyDefaultView=yes")
+                    .label(label)
+                    .build()
+            );
+        }
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
         // Use TreeSet to sort by name
         TreeSet<String> names = new TreeSet<>(m.keySet());
-
         for (String name : names)
         {
             String viewParams = m.get(name);
-
-            viewSelect.append("<option value=\"");
-            viewSelect.append(PageFlowUtil.filter(viewParams));
-            viewSelect.append('"');
-            if (selectCurrent && viewParams.equals(currentViewParams))
-                viewSelect.append(" selected");
-            viewSelect.append('>');
-            viewSelect.append(PageFlowUtil.filter(name));
-            viewSelect.append("</option>\n");
+            options.add(new Option.OptionBuilder()
+                .value(PageFlowUtil.filter(viewParams))
+                .selected(selectCurrent && viewParams.equals(currentViewParams))
+                .label(PageFlowUtil.filter(name))
+                .build()
+            );
         }
+        select.addOptions(options);
 
-        viewSelect.append("</select>");
-
-        return viewSelect;
+        return select;
     }
 
 
@@ -1359,7 +1371,7 @@ public class MS2Controller extends SpringActionController
     public static class PickViewBean
     {
         public ActionURL nextURL;
-        public StringBuilder select;
+        public Select.SelectBuilder select;
         public HttpView extraOptionsView;
         public String viewInstructions;
         public int runList;
