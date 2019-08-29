@@ -57,12 +57,6 @@ public class LuminexSinglePointTest extends LuminexTest
         assayDesigner.saveAndClose();
     }
 
-    @Override
-    protected boolean renameTargetStudy()
-    {
-        return true;
-    }
-
     @Test
     public void testSinglePoint()
     {
