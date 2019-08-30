@@ -299,6 +299,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
         {
             this.statCombo.getStore().removeAll();
             var storeData = createStatStore(stats);
+
             this.statCombo.getStore().loadData(storeData);
             this.statCombo.focus();
         }
@@ -373,14 +374,14 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
      {
         config.mode = 'local';
-        config.store = <%=ops%>
+        config.store = <%=unsafe(ops.toString())%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
 });
 Ext.reg('opCombo', OpCombo);
 
-var FlowStatistics = <%=stats%>;
+var FlowStatistics = <%=unsafe(stats.toString())%>;
 
 function createStatStore(stats)
 {
@@ -402,18 +403,18 @@ FlowPropertySet.keywords = [<%
     comma = "";
     for (String s : fps.getVisibleKeywords())
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];
-FlowPropertySet.statistics = <%=jsonStats%>;
+FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
 var SampleSet = {};
 SampleSet.properties = [<%
     comma = "";
     for (String s : sampleSetProperties)
     {
-        %><%=text(comma)%><%=PageFlowUtil.jsString(s)%><%
+        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
         comma=",";
     }
 %>];

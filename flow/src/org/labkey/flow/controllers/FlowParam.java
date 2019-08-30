@@ -16,7 +16,9 @@
 
 package org.labkey.flow.controllers;
 
-public enum FlowParam
+import org.labkey.api.util.EnumHasHtmlString;
+
+public enum FlowParam implements EnumHasHtmlString<FlowParam>
 {
     actionSequence,
     compId,
