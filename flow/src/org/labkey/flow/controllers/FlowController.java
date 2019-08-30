@@ -33,7 +33,6 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.reports.LabkeyScriptEngineManager;
 import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
@@ -42,7 +41,6 @@ import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
@@ -75,8 +73,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.io.File;
 import java.net.URI;
 
@@ -410,7 +406,7 @@ public class FlowController extends BaseFlowController
         {
             checkPerms();
             getPageConfig().setFocusId("folderName");
-            return new JspView<>(FlowController.class, "newFolder.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/newFolder.jsp", form, errors);
         }
 
         public boolean handlePost(NewFolderForm form, BindException errors) throws Exception
@@ -494,7 +490,7 @@ public class FlowController extends BaseFlowController
         public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors)
         {
             getPageConfig().setFocusId("workingDirectory");
-            return new JspView<>(FlowController.class, "flowAdmin.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/flowAdmin.jsp", form, errors);
         }
 
         public boolean handlePost(FlowAdminForm form, BindException errors)

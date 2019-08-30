@@ -71,7 +71,7 @@ public class ControlsQCReport extends FilterFlowReport
     @Override
     public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
     {
-        return new JspView<>(ControlsQCReport.class, "editQCReport.jsp", Tuple3.of(this, returnURL, cancelURL));
+        return new JspView<>("/org/labkey/flow/reports/editQCReport.jsp", Tuple3.of(this, returnURL, cancelURL));
     }
 
     @Override

@@ -25,12 +25,12 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryAction;
@@ -169,20 +169,15 @@ public class WellController extends BaseFlowController
         return sortList.toArray(new String[0]);
     }
 
-    public Page getPage(String name)
+    public Page getPage(String jspPath)
     {
-        Page ret = (Page) getFlowPage(name);
+        Page ret = (Page) getFlowPage(jspPath);
         FlowWell well = getWell();
         if (well == null)
             throw new NotFoundException("well not found");
 
         ret.setWell(well);
         return ret;
-    }
-
-    public static ActionURL getShowWellURL()
-    {
-        return new ActionURL(ShowWellAction.class, ContainerManager.getRoot());
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -192,7 +187,7 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(Object o, BindException errors)
         {
-            Page page = getPage("showWell.jsp");
+            Page page = getPage("/org/labkey/flow/controllers/well/showWell.jsp");
             well = page.getWell();
             JspView v = new JspView(page);
             v.setClientDependencies(page.getClientDependencies());
@@ -287,7 +282,7 @@ public class WellController extends BaseFlowController
                     form.ff_keywordName = getKeywordIntersection(wells, true);
                 }
             }
-            return FormPage.getView(WellController.class, form, errors, "editWell.jsp");
+            return FormPage.getView("/org/labkey/flow/controllers/well/editWell.jsp", form, errors);
         }
 
         @Override
@@ -389,7 +384,7 @@ public class WellController extends BaseFlowController
             if (!canRead)
                 return new HtmlView("<span class='labkey-error'>The original FCS file is no longer available or is not readable" + (rel == null ? "." : ": " + PageFlowUtil.filter(rel.getPath())) + "</span>");
 
-            FormPage page = FormPage.get(WellController.class, form, "chooseGraph.jsp");
+            FormPage page = FormPage.get("/org/labkey/flow/controllers/well/chooseGraph.jsp", form);
             return new JspView(page);
         }
 
@@ -679,7 +674,7 @@ public class WellController extends BaseFlowController
 
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors)
         {
-            return new JspView<>(WellController.class, "bulkUpdate.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/well/bulkUpdate.jsp", form, errors);
         }
 
         public NavTree appendNavTrail(NavTree root)
@@ -806,7 +801,7 @@ public class WellController extends BaseFlowController
     }
 
     
-    static abstract public class Page extends FlowPage
+    static abstract public class Page extends JspBase
     {
         private FlowRun _run;
         private FlowWell _well;

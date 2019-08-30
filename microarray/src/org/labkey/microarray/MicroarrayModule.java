@@ -92,11 +92,13 @@ public class MicroarrayModule extends SpringModule
         ));
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
     }
 
+    @Override
     @NotNull
     public Collection<String> getSummary(Container c)
     {

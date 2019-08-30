@@ -82,7 +82,7 @@ public class ReportsController extends BaseFlowController
     {
         public BeginView()
         {
-            super(ReportsController.class, "reports.jsp", null);
+            super("/org/labkey/flow/controllers/reports.jsp");
             setTitle("Flow Reports");
             setTitleHref(new ActionURL(BeginAction.class, getViewContext().getContainer()));
         }
@@ -273,7 +273,7 @@ public class ReportsController extends BaseFlowController
             if (form.getReportName() == null || form.getReportName().length() == 0)
                 form.setReportName("Copy of " + r.getDescriptor().getReportName());
             getPageConfig().setFocusId("reportName");
-            return new JspView<>(ReportsController.class, "copyReport.jsp", Pair.of(form, r), errors);
+            return new JspView<>("/org/labkey/flow/controllers/copyReport.jsp", Pair.of(form, r), errors);
         }
 
         public boolean handlePost(CopyForm form, BindException errors)
@@ -396,7 +396,7 @@ public class ReportsController extends BaseFlowController
                 else
                 {
                     // Prompt for confirmation
-                    view = new JspView<>(ReportsController.class, "confirmExecuteReport.jsp", Pair.of(form, r), errors);
+                    view = new JspView<>("/org/labkey/flow/controllers/confirmExecuteReport.jsp", Pair.of(form, r), errors);
                 }
             }
             else
@@ -483,7 +483,7 @@ public class ReportsController extends BaseFlowController
     {
         SelectReportView(IdForm form)
         {
-            super(ReportsController.class, "selectReport.jsp", form);
+            super("/org/labkey/flow/controllers/selectReport.jsp", form);
         }
     }
 }

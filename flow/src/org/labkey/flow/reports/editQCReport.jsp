@@ -26,6 +26,7 @@
 <%@ page import="org.labkey.flow.controllers.ReportsController" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
+<%@ page import="org.labkey.flow.reports.StatPickerView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -351,6 +352,6 @@ Ext.onReady(function() {
 </script>
 
 <%
-    JspView<Object> statPicker = new JspView<>(FlowReport.class, "statPicker.jsp", null, null);
+    JspView<Object> statPicker = new StatPickerView();
     statPicker.include(statPicker, out);
 %>

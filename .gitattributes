@@ -1,5 +1,5 @@
 * text=auto !eol
-/build.gradle -text
+
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
 elisa/src/org/labkey/elisa/ElisaController.java -text

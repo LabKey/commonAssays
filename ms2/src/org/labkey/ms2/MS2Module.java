@@ -216,6 +216,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 }));
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;
