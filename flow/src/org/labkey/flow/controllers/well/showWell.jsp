@@ -348,10 +348,10 @@ Ext.onReady(function()
     }
 });
 
-var statistics = <%=jsonStats%>;
+var statistics = <%=unsafe(jsonStats.toString())%>;
 var treeData;
 var stats;
-var keywords = <%=jsonKeywords%>;
+var keywords = <%=unsafe(jsonKeywords.toString())%>;
 </script>
 <table class="lk-fields-table"><%
 
