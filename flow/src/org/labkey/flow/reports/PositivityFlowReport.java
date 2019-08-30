@@ -93,7 +93,7 @@ public class PositivityFlowReport extends FilterFlowReport
     @Override
     public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
     {
-        return new JspView<>(PositivityFlowReport.class, "editPositivityReport.jsp", Tuple3.of(this, returnURL, cancelURL));
+        return new JspView<>("/org/labkey/flow/reports/editPositivityReport.jsp", Tuple3.of(this, returnURL, cancelURL));
     }
 
     SubsetSpec getSubset()

@@ -146,6 +146,7 @@ public class RunController extends BaseFlowController
     {
         FlowRun run;
 
+        @Override
         public ModelAndView getView(RunForm form, BindException errors)
         {
             run = form.getRun();
@@ -156,9 +157,10 @@ public class RunController extends BaseFlowController
 
             run.checkContainer(getContainer(), getUser(), getActionURL());
 
-            return new JspView<>(RunController.class, "showRun.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/run/showRun.jsp", form, errors);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             String label = run != null ? null : "Run not found";
@@ -172,6 +174,7 @@ public class RunController extends BaseFlowController
         FlowExperiment experiment;
 //        FlowScript script;
 
+        @Override
         public ModelAndView getView(RunsForm form, BindException errors)
         {
             experiment = form.getExperiment();
@@ -179,9 +182,10 @@ public class RunController extends BaseFlowController
 
             checkContainer(experiment);
 
-            return new JspView<>(RunController.class, "showRuns.jsp", form, errors);
+            return new JspView<>("/org/labkey/flow/controllers/run/showRuns.jsp", form, errors);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             if (experiment == null)

@@ -21,17 +21,15 @@
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.exp.property.Domain" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
-<%@ page import="org.labkey.api.jsp.JspLoader" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
-<%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.util.DateUtil"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
-<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
@@ -48,8 +46,8 @@
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReportManager" %>
-<%@ page import="org.labkey.flow.view.GraphDataRegion" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.flow.view.SetGraphSizeView" %>
 <%@ page import="java.io.File" %>
 <%@ page import="java.net.URI" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -452,7 +450,7 @@ if (getGraphs().length > 0)
 {
     final String graphSize = FlowPreference.graphSize.getValue(request);
     %><br/><%
-    include(new JspView(JspLoader.createPage(GraphDataRegion.class, "setGraphSize.jsp")), out);
+    include(new SetGraphSizeView(), out);
     for (GraphSpec graph : getGraphs())
     {
         %>

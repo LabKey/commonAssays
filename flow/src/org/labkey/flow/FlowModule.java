@@ -252,6 +252,7 @@ public class FlowModule extends SpringModule
                 );
     }
 
+    @Override
     public boolean hasScripts()
     {
         return true;

@@ -24,6 +24,7 @@
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.ImportAnalysisStep.CONFIRM" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -105,7 +106,7 @@
         }
     %>
 
-<% if (form.getWizardStep().getNumber() < AnalysisScriptController.ImportAnalysisStep.CONFIRM.getNumber()) { %>
+<% if (form.getWizardStep().getNumber() < CONFIRM.getNumber()) { %>
 <p>
     <%= button("Cancel").href(cancelUrl) %>
     &nbsp;&nbsp;
@@ -114,25 +115,7 @@
 </p>
 
     <%
-        JspView<ImportAnalysisForm> view = null;
-        switch (form.getWizardStep())
-        {
-            case SELECT_ANALYSIS:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp", form);
-                break;
-
-            case SELECT_FCSFILES:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp", form);
-                break;
-
-            case REVIEW_SAMPLES:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp", form);
-                break;
-
-            case CHOOSE_ANALYSIS:
-                view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp", form);
-                break;
-        }
+        JspView<ImportAnalysisForm> view = form.getWizardStep().getJspView(form);
         include(view, out);
     %>
 
@@ -145,7 +128,7 @@
     
 <% } else { %>
     <%
-    JspView<ImportAnalysisForm> view = new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysisConfirm.jsp", form);
+    JspView<ImportAnalysisForm> view = CONFIRM.getJspView(form);
     include(view, out);
     %>
 <% } %>

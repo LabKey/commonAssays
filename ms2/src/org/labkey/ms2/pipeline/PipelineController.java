@@ -668,8 +668,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors)
         {
-            ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get(
-                    PipelineController.class, form, "ConfigureSequenceDB.jsp");
+            ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get("/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp", form);
 
             File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer(), false);
             if (fileRoot == null)
@@ -700,7 +699,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<>(XTandemPipelineProvider.class, "setTandemDefaults.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -724,7 +723,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<>(MascotCPipelineProvider.class, "setMascotDefaults.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -748,7 +747,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<>(SequestPipelineProvider.class, "setSequestDefaults.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/pipeline/sequest/setSequestDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()
@@ -772,7 +771,7 @@ public class PipelineController extends SpringActionController
 
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
-            return new JspView<>(CometPipelineProvider.class, "setCometDefaults.jsp", form, errors);
+            return new JspView<>("/org/labkey/ms2/pipeline/comet/setCometDefaults.jsp", form, errors);
         }
 
         public HelpTopic getHelpTopic()

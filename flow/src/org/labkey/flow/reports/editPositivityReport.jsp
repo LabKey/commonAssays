@@ -30,6 +30,7 @@
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
 <%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
+<%@ page import="org.labkey.flow.reports.StatPickerView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -379,7 +380,7 @@ Ext.onReady(function() {
 </script>
 
 <%
-    JspView<Object> statPicker = new JspView<>(FlowReport.class, "statPicker.jsp", null, null);
+    JspView<Object> statPicker = new StatPickerView();
     statPicker.include(statPicker, out);
 %>
 

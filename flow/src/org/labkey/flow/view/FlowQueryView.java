@@ -26,7 +26,6 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.PanelButton;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryView;
@@ -156,7 +155,7 @@ public class FlowQueryView extends QueryView
 
                 if (showGraphs == FlowQuerySettings.ShowGraphs.Inline)
                 {
-                    JspView view = new JspView(JspLoader.createPage(FlowQueryView.class, "setGraphSize.jsp"));
+                    JspView view = new SetGraphSizeView();
                     view.setFrame(FrameType.NONE);
                     HttpView.currentView().include(view, out);
                 }

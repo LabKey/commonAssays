@@ -38,6 +38,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
+import org.labkey.api.jsp.JspBase;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -186,7 +187,7 @@ public class ScriptController extends BaseFlowController
                 _error = validateScript(script);
             }
 
-            EditPage page = (EditPage)getPage("editScript.jsp", form);
+            EditPage page = (EditPage)getPage("/org/labkey/flow/controllers/editscript/editScript.jsp", form);
             page.scriptParseError = _error;
             return new JspView<>(page, form, errors);
         }
@@ -233,7 +234,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(NewProtocolForm form, boolean reshow, BindException errors) throws Exception
         {
             // TODO: Ensure this works and figure out a new strategy for setting focus element
-            JspView<NewProtocolForm> page = FormPage.getView(ScriptController.class, form, errors, "newProtocol.jsp");
+            JspView<NewProtocolForm> page = FormPage.getView("/org/labkey/flow/controllers/editscript/newProtocol.jsp", form, errors);
 //            HomeTemplate template = new HomeTemplate(getViewContext(), getContainer(), page);
 //            template.getModelBean().setFocusId("ff_name");
             return page;
@@ -277,9 +278,9 @@ public class ScriptController extends BaseFlowController
         return ExperimentService.get().getExpData(lsid) == null;
     }
 
-    public Page getPage(String name, EditScriptForm form)
+    public Page getPage(String jspPath, EditScriptForm form)
     {
-        Page ret = (Page)getFlowPage(name);
+        Page ret = (Page)getFlowPage(jspPath);
         ret.setForm(form);
         return ret;
     }
@@ -311,7 +312,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(AnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            return new JspView<>(getPage("editAnalysis.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editAnalysis.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -409,7 +410,7 @@ public class ScriptController extends BaseFlowController
         public ScriptParser.Error scriptParseError;
     }
 
-    abstract static public class Page<F extends EditScriptForm> extends BaseFlowController.FlowPage<ScriptController>
+    abstract static public class Page<F extends EditScriptForm> extends JspBase
     {
         public F form;
 
@@ -500,7 +501,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(UploadAnalysisForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            UploadAnalysisPage page = (UploadAnalysisPage) getPage("uploadAnalysis.jsp", form);
+            UploadAnalysisPage page = (UploadAnalysisPage) getPage("/org/labkey/flow/controllers/editscript/uploadAnalysis.jsp", form);
             page.form = form;
 
             return new JspView<>(page, form, errors);
@@ -576,7 +577,7 @@ public class ScriptController extends BaseFlowController
             {
                 throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-            return new JspView<>(getPage("uploadCompensationCalculation.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/uploadCompensationCalculation.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -595,7 +596,7 @@ public class ScriptController extends BaseFlowController
             {
                 throw new UnsupportedOperationException("should call post on EditCompensationCalculationAction");
             }
-            return new JspView<>(getPage("chooseCompensationRun.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/chooseCompensationRun.jsp", form), form, errors);
         }
 
         @Override
@@ -645,7 +646,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(EditCompensationCalculationForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            String pageName = form.workspace == null ? "showCompensationCalculation.jsp" : "editCompensationCalculation.jsp";
+            String pageName = form.workspace == null ? "/org/labkey/flow/controllers/editscript/showCompensationCalculation.jsp" : "/org/labkey/flow/controllers/editscript/editCompensationCalculation.jsp";
             CompensationCalculationPage page = (CompensationCalculationPage) getPage(pageName, form);
 
             return new JspView<>(page, form, errors);
@@ -798,7 +799,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(EditGateTreeForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            return new JspView<>(getPage("editGateTree.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editGateTree.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -880,7 +881,7 @@ public class ScriptController extends BaseFlowController
             setForm(form);
             scriptName = form.getFlowScript().getName();
 
-            return new JspView<>(getPage("copy.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/copy.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -951,7 +952,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(EditPropertiesForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            return new JspView<>(getPage("editProperties.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editProperties.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -993,7 +994,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(EditSettingsForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            return new JspView<>(getPage("editSettings.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editSettings.jsp", form), form, errors);
         }
 
         public String getPageTitle()
@@ -1111,7 +1112,7 @@ public class ScriptController extends BaseFlowController
         public ModelAndView getView(EditScriptForm form, boolean reshow, BindException errors) throws Exception
         {
             setForm(form);
-            return new JspView<>(getPage("delete.jsp", form), form, errors);
+            return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/delete.jsp", form), form, errors);
         }
 
         public String getPageTitle()
