@@ -371,7 +371,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
      {
         config.mode = 'local';
-        config.store = <%=unsafe(ops.toString())%>
+        config.store = <%=ops%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
