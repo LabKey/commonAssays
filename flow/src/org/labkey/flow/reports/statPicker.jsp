@@ -296,6 +296,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
         {
             this.statCombo.getStore().removeAll();
             var storeData = createStatStore(stats);
+
             this.statCombo.getStore().loadData(storeData);
             this.statCombo.focus();
         }
@@ -370,7 +371,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
      {
         config.mode = 'local';
-        config.store = <%=ops%>
+        config.store = <%=unsafe(ops.toString())%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
