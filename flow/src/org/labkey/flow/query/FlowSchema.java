@@ -1530,7 +1530,8 @@ public class FlowSchema extends UserSchema
         // SpecimenID
         ICSMetadata metadata = getProtocol() == null ? null : getProtocol().getICSMetadata();
         FieldKey specimenIdFieldKey = metadata != null ? removeParent(metadata.getSpecimenIdColumn(), FCSFILE_NAME) : null;
-        if (specimenIdFieldKey != null)
+        StudyService studyService = StudyService.get();
+        if (null != studyService && null != specimenIdFieldKey)
         {
             var colSpecimen = new FCSFileCoalescingColumn(ret, SPECIMENID_FIELDKEY, JdbcType.VARCHAR, metadata, true);
             ret.addColumn(colSpecimen);

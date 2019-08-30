@@ -27,7 +27,8 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="org.json.JSONArray" %>
-<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.stream.Stream" %>
+<%@ page import="java.util.stream.Collectors" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -95,7 +96,10 @@
     }
     stats.append("}");
 
-    JSONArray ops = toJsonArray(Arrays.asList(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN ));
+
+    var stream = Stream.of(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN )
+            .map(ct -> new String[] {ct.getPreferredUrlKey(), ct.getDisplayValue()});
+    JSONArray ops = toJsonArray(stream.collect(Collectors.toList()));
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();
@@ -292,6 +296,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
         {
             this.statCombo.getStore().removeAll();
             var storeData = createStatStore(stats);
+
             this.statCombo.getStore().loadData(storeData);
             this.statCombo.focus();
         }

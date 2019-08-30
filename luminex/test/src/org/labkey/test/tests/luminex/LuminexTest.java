@@ -142,6 +142,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
         return false;
     }
 
+    protected boolean requiresStudy()
+    {
+        return false;
+    }
+
     @BeforeClass
     public static void initTest()
     {
@@ -161,12 +166,15 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
         log("Testing Luminex Assay Designer");
         //create a new test project
-        _containerHelper.createProject(getProjectName(), "Study");
-        goToProjectHome(getProjectName());
-        createDefaultStudy();
+        _containerHelper.createProject(getProjectName(), requiresStudy() ? "Study" : "Assay");
+        if (requiresStudy())
+        {
+            //create a study within this project to which we will publish
+            goToProjectHome(getProjectName());
+            createDefaultStudy();
+            goToProjectHome();
+        }
 
-        //create a study within this project to which we will publish
-        goToProjectHome();
         PortalHelper portalHelper = new PortalHelper(this);
         //add the Assay List web part so we can create a new luminex assay
         portalHelper.addWebPart("Assay List");
@@ -184,7 +192,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
             // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
-            if (renameTargetStudy())
+            if (requiresStudy() && renameTargetStudy())
                 assayDesigner.batchFields().selectField(1).setName("TargetStudyTemp");
 
             assayDesigner.saveAndClose();

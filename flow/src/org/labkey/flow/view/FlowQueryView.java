@@ -255,13 +255,14 @@ public class FlowQueryView extends QueryView
 
         super.populateButtonBar(view, bar);
 
-        // NOTE: Only add "Copy to Study" to FCSAnlayses wells.  This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        // NOTE: Only add "Copy to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        AssayPublishService aps = AssayPublishService.get();
         String queryName = getSettings().getQueryName();
-        if (queryName.equals(FlowTableType.FCSAnalyses.toString()))
+        if (null != aps && queryName.equals(FlowTableType.FCSAnalyses.toString()))
         {
             // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
             FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-            if (protocol != null && !AssayPublishService.get().getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
+            if (protocol != null && !aps.getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ExpProtocol expProtocol = protocol.getProtocol();
                 ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
