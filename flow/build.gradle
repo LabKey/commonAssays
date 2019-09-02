@@ -3,36 +3,35 @@ import org.labkey.gradle.util.BuildUtils
 sourceSets {
     engine {
         java {
-            srcDirs = ['./enginesrc']
+            srcDirs = ['./enginesrc', "$project.buildDir/xb"]
         }
     }
 }
 
 dependencies {
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: project.path, depProjectConfig: 'xmlSchema')
     BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
     BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
     engineCompile "org.labkey:labkey-client-api:${project.version}"
     engineCompile "org.apache.tomcat:tomcat-jasper:${apacheTomcatVersion}"
     engineCompile "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
-    engineCompile project.files(project.tasks.schemasJar)
+    engineCompile project.files(project.tasks.schemasCompile)
 
     compile sourceSets.engine.output
     jspCompile sourceSets.engine.output
-    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'xmlSchema')
+    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'compile')
     BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
 
-project.task("engineJar",
-        group: "Build",
-        type: Jar,
-        description: "produce jar file for flow engine source",
-        {
-            classifier "engine"
-            from project.sourceSets.engine.output
-            baseName "${project.name}_engine"
-            destinationDir = project.file(project.labkey.explodedModuleLibDir)
-        })
+project.tasks.register("engineJar", Jar) {
+    Jar jar ->
+        jar.group = "Build"
+        jar.description = "produce jar file for flow engine source"
+        jar.archiveClassifier.set("engine")
+        jar.from project.sourceSets.engine.output
+        jar.archiveBaseName.set("${project.name}_engine")
+        jar.destinationDir(project.file(project.labkey.explodedModuleLibDir))
+        jar.dependsOn(project.tasks.schemasCompile)
+}
 
 project.tasks.engineJar.dependsOn(project.engineClasses)
 project.tasks.assemble.dependsOn(project.tasks.engineJar)
