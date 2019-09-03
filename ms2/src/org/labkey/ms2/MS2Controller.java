@@ -620,7 +620,7 @@ public class MS2Controller extends SpringActionController
 
         List<Option> options = new ArrayList<>();
 
-        List<String> twoLabels = Arrays.asList("&lt;Select a saved view&gt;", "&lt;Standard View&gt;");
+        List<String> twoLabels = Arrays.asList("<Select a saved view>", "<Standard View>");
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
@@ -642,9 +642,9 @@ public class MS2Controller extends SpringActionController
         {
             String viewParams = m.get(name);
             options.add(new Option.OptionBuilder()
-                .value(PageFlowUtil.filter(viewParams))
+                .value(viewParams)
                 .selected(selectCurrent && viewParams.equals(currentViewParams))
-                .label(PageFlowUtil.filter(name))
+                .label(name)
                 .build()
             );
         }
