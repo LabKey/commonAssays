@@ -18,6 +18,7 @@ dependencies {
 
     compile sourceSets.engine.output
     jspCompile sourceSets.engine.output
+    jspCompile project.files(project.tasks.schemasCompile)
     BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'compile')
     BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
