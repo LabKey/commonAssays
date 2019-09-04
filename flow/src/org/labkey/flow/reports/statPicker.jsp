@@ -96,10 +96,9 @@
     }
     stats.append("}");
 
-
-    var stream = Stream.of(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN )
+    var compareTypesToDisplay = Stream.of(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN )
             .map(ct -> new String[] {ct.getPreferredUrlKey(), ct.getDisplayValue()});
-    JSONArray ops = toJsonArray(stream.collect(Collectors.toList()));
+    JSONArray ops = toJsonArray(compareTypesToDisplay.collect(Collectors.toList()));
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();

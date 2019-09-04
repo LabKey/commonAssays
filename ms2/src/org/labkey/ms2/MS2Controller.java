@@ -612,7 +612,6 @@ public class MS2Controller extends SpringActionController
     {
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
-        // still need the     style = width:200
         Select.SelectBuilder select = new Select.SelectBuilder()
                                         .id("views")
                                         .name("viewParams")
@@ -625,7 +624,7 @@ public class MS2Controller extends SpringActionController
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        for (String label: twoLabels)
+        for (String label : twoLabels)
         {
             options.add(new Option.OptionBuilder()
                     .value("doNotApplyDefaultView=yes")

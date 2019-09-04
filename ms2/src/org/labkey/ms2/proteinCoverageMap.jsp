@@ -18,7 +18,6 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -33,4 +32,4 @@ LABKEY.requiresScript("util.js");
     Ext.QuickTips.init();
 </script>
 
-<%=HtmlString.unsafe(bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth).toString()) %>
+<%=unsafe(bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth))%>
