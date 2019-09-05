@@ -198,7 +198,7 @@ public class Protein
         done in 3 passes. first pass builds up an array of SequencePos objects, one for each AA of the protein
         sequence.  Second pass loops through the range objectds which are the peptide evidence for the
         protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
-        objects and accumlates their html output.
+        objects and accumulates their html output.
      */
     public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
