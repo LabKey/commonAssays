@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
@@ -25,10 +26,8 @@
 <%@ page import="org.labkey.flow.persist.AttributeCache" %>
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
-<%@ page import="org.json.JSONArray" %>
+<%@ page import="java.util.Collection" %>
 <%@ page import="java.util.stream.Stream" %>
-<%@ page import="java.util.stream.Collectors" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -64,18 +63,13 @@
     }
     jsonStats.append("]");
 
-    StringBuilder jsonSamples = new StringBuilder();
-    jsonSamples.append("[");
-    List<String> sampleSetProperties = new ArrayList<>();
+    Collection<String> sampleSetProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-    if (protocol != null)
+    ExpSampleSet sampleSet = protocol.getSampleSet();
+    if (sampleSet != null)
     {
-        ExpSampleSet sampleSet = protocol.getSampleSet();
-        if (sampleSet != null)
-        {
-            for (DomainProperty dp : sampleSet.getType().getProperties())
-                sampleSetProperties.add(dp.getName());
-        }
+        for (DomainProperty dp : sampleSet.getType().getProperties())
+            sampleSetProperties.add(dp.getName());
     }
 
     StringBuilder stats = new StringBuilder();
@@ -95,10 +89,6 @@
         comma = ",\n";
     }
     stats.append("}");
-
-    var compareTypesToDisplay = Stream.of(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK, CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH, CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN )
-            .map(ct -> (Object) new String[] {ct.getPreferredUrlKey(), ct.getDisplayValue()});
-    JSONArray ops = toJsonArray(compareTypesToDisplay);
 %>
 <script type="text/javascript">
 Ext.QuickTips.init();
@@ -258,7 +248,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
 {
     constructor : function (config)
     {
-        config.labelStyle = 'font-weight: normal;',
+        config.labelStyle = 'font-weight: normal;';
 
         config.items = [{
             xtype: 'subsetField',
@@ -368,9 +358,13 @@ Ext.reg('statisticField', StatisticField);
 
 var OpCombo = Ext.extend(Ext.form.ComboBox, {
     constructor : function (config)
-     {
+    {
         config.mode = 'local';
-        config.store = <%=ops%>
+        config.store = <%=Stream.of(CompareType.EQUAL, CompareType.NEQ_OR_NULL, CompareType.ISBLANK, CompareType.NONBLANK,
+                CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH,
+                CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN)
+            .map(ct -> new String[] {ct.getPreferredUrlKey(), ct.getDisplayValue()})
+            .collect(JSONArray.collector())%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
@@ -395,24 +389,10 @@ function createStatStore(stats)
 }
 
 var FlowPropertySet = {};
-FlowPropertySet.keywords = [<%
-    comma = "";
-    for (String s : fps.getVisibleKeywords())
-    {
-        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
-        comma=",";
-    }
-%>];
+FlowPropertySet.keywords = <%=toJsonArray(fps.getVisibleKeywords())%>;
 FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
 var SampleSet = {};
-SampleSet.properties = [<%
-    comma = "";
-    for (String s : sampleSetProperties)
-    {
-        %><%=unsafe(comma)%><%=PageFlowUtil.jsString(s)%><%
-        comma=",";
-    }
-%>];
+SampleSet.properties = <%=toJsonArray(sampleSetProperties)%>;
 
 </script>
