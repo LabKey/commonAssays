@@ -32,4 +32,4 @@ LABKEY.requiresScript("util.js");
     Ext.QuickTips.init();
 </script>
 
-<%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth) %>
+<%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth)%>
