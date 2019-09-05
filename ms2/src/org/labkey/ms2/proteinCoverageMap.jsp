@@ -32,4 +32,4 @@ LABKEY.requiresScript("util.js");
     Ext.QuickTips.init();
 </script>
 
-<%=unsafe(bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth).toString())%>
+<%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth)%>

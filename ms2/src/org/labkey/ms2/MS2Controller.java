@@ -99,7 +99,7 @@ import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.element.Option;
-import org.labkey.api.util.element.Select;
+import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GWTView;
@@ -523,7 +523,7 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public ActionURL applyViewURL;
-        public Select.SelectBuilder applyView;
+        public SelectBuilder applyView;
         public ActionURL saveViewURL;
         public ActionURL manageViewsURL;
         public ActionURL extraFilterURL;
@@ -608,14 +608,14 @@ public class MS2Controller extends SpringActionController
      * Render current user's MS2Views in a drop down box with a submit button beside.
      * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
      */
-    private Select.SelectBuilder renderViewSelect(boolean selectCurrent)
+    private SelectBuilder renderViewSelect(boolean selectCurrent)
     {
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
-        Select.SelectBuilder select = new Select.SelectBuilder()
+        SelectBuilder select = new SelectBuilder()
                                         .id("views")
                                         .name("viewParams")
-                                        .attributes(Collections.singletonMap("style", "width:200"));
+                                        .style("width:200");
 
         List<Option> options = new ArrayList<>();
 
@@ -1370,7 +1370,7 @@ public class MS2Controller extends SpringActionController
     public static class PickViewBean
     {
         public ActionURL nextURL;
-        public Select.SelectBuilder select;
+        public SelectBuilder select;
         public HttpView extraOptionsView;
         public String viewInstructions;
         public int runList;
