@@ -1,5 +1,0 @@
-<module>
-    <inherits name='org.labkey.api.gwt.Internal'/>
-
-    <entry-point class="org.labkey.microarray.designer.client.MicroarrayAssayDesigner"/>
-</module>
