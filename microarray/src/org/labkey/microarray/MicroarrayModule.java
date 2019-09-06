@@ -17,15 +17,13 @@
 package org.labkey.microarray;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.util.FileType;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
@@ -54,21 +52,19 @@ public class MicroarrayModule extends SpringModule
 
     public static final String DB_SCHEMA_NAME = "microarray";
 
-    public static final AssayDataType QC_REPORT_INPUT_TYPE =
-            new AssayDataType("MicroarrayQCData", new FileType(".pdf"), "QCReport");
-    public static final AssayDataType THUMBNAIL_INPUT_TYPE =
-            new AssayDataType("MicroarrayImageData", new FileType(".jpg"), "ThumbnailImage");
-
+    @Override
     public String getName()
     {
         return "Microarray";
     }
 
+    @Override
     public double getVersion()
     {
         return 19.21;
     }
 
+    @Override
     protected void init()
     {
         addController(CONTROLLER_NAME, MicroarrayController.class);
@@ -76,12 +72,14 @@ public class MicroarrayModule extends SpringModule
         MicroarrayUserSchema.register(this);
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         return new ArrayList<>(Arrays.asList(
             new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
             {
+                @Override
                 public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     String dataRegionName = MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET + webPart.getIndex();
