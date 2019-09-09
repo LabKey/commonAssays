@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -33,7 +32,7 @@
     and pick a name. The next time you do a comparison, your saved view will appear in the list below and you can
     select it to apply the same filter to your comparison.
 </p>
-<labkey:form method="get" action="<%=h(bean.nextURL)%>">
+<labkey:form method="get" action="<%=bean.nextURL%>">
     <input type="hidden" name="runList" value="<%=bean.runList%>">
     <%=bean.select%><br/>
     <br/><br/>

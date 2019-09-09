@@ -23,7 +23,7 @@
 <%
     MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<labkey:form method="post" action="<%=h(buildURL(MS2Controller.SaveViewAction.class))%>" className="labkey-data-region">
+<labkey:form method="post" action="<%=buildURL(MS2Controller.SaveViewAction.class)%>" className="labkey-data-region">
     <table class="lk-fields-table">
         <tr>
             <td>Name:</td>
