@@ -427,7 +427,7 @@ public class RunController extends BaseFlowController
             // If no run or well IDs were in the request, check for selected rows.
             if ((runId == null || runId.length == 0) && (wellId == null || wellId.length == 0))
             {
-                Set<String> selection = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), true, true);
+                Set<String> selection = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), true);
                 if (form.getSelectionType() == null || form.getSelectionType().equals("runs"))
                     runId = PageFlowUtil.toInts(selection);
                 else

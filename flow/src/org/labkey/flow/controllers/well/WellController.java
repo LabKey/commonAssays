@@ -267,7 +267,7 @@ public class WellController extends BaseFlowController
                 }
                 if (wells == null || wells.size() == 0)
                 {
-                    Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, true, false);
+                    Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, false);
                     wells = new ArrayList<>();
 
                     for (String wellId : selected)
