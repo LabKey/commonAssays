@@ -25,7 +25,7 @@
     FlowScript script = getScript();
     ScriptParser.Error error = scriptParseError;
 %>
-<labkey:form method="POST" action="<%=h(formAction(ScriptController.EditScriptAction.class))%>">
+<labkey:form method="POST" action="<%=formAction(ScriptController.EditScriptAction.class)%>">
 <% if (error != null) { %>
 <p class="labkey-error"><%=PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>")%></p>
 <% if (error.getLine() != 0) { %>

@@ -21,7 +21,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% EditPropertiesForm form = (EditPropertiesForm) getForm(); %>
 <labkey:errors/>
-<labkey:form action="<%=h(form.urlFor(ScriptController.EditPropertiesAction.class))%>" method="POST">
+<labkey:form action="<%=form.urlFor(ScriptController.EditPropertiesAction.class)%>" method="POST">
     <p>Description:<br>
         <textarea rows="5" cols="40" name="ff_description"><%=h(form.ff_description)%></textarea>
     </p>

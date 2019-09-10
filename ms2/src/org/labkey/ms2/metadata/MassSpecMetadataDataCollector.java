@@ -118,7 +118,7 @@ public class MassSpecMetadataDataCollector extends PipelineDataCollector<MassSpe
                         "});" +
                         "}" +
                         "return false;";
-                sb.append(PageFlowUtil.textLink("delete assay runs", "", click, ""));
+                sb.append(PageFlowUtil.link("delete assay runs").onClick(click));
                 sb.append("</div>");
             }
         }

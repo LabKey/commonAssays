@@ -178,7 +178,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
             return new HtmlView(
                     "<p class='labkey-error'>Positivity report requires configuring flow experiment metadata for study and background information before running.</p>" +
-                    PageFlowUtil.textLink("Edit Metadata", editICSMetadataURL));
+                    PageFlowUtil.link("Edit Metadata").href(editICSMetadataURL));
         }
         else
         {
