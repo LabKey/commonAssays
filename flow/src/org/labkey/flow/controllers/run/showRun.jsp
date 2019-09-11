@@ -110,9 +110,9 @@
     {
         if (run.getPath() != null)
         {
-        %><%=link("Download FCS Files", run.urlDownload()).attributes(Map.of("rel", "nofollow"))%><br><%
+        %><%=link("Download FCS Files", run.urlDownload()).nofollow()%><br><%
         }
-        %><%=link("Download Analysis zip", run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")).attributes(Map.of("rel", "nofollow"))%><br><%
+        %><%=link("Download Analysis zip", run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")).nofollow()%><br><%
     }
 
 
