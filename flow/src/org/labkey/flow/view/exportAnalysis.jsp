@@ -100,9 +100,9 @@
         <td></td>
         <td>
             <% if (bean.getRunId() != null || bean.getWellId() != null) { %>
-            <%= button("Export").submit(true).rel("nofollow")%>
+            <%= button("Export").submit(true).nofollow()%>
             <% } else { %>
-            <%= button("Export").submit(true).onClick("return verifySelected(this.form, '" + exportURL + "', 'POST', " + q(selectionType) + ")").rel("nofollow") %>
+            <%= button("Export").submit(true).onClick("return verifySelected(this.form, '" + exportURL + "', 'POST', " + q(selectionType) + ")").nofollow() %>
             <% } %>
         </td>
     </tr>
