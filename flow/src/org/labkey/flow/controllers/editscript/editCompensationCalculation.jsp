@@ -104,7 +104,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<labkey:form method="POST" action="<%=h(formAction(ScriptController.EditCompensationCalculationAction.class))%>">
+<labkey:form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>">
 
 <% if (hasAutoCompScripts) { %>
         <labkey:panel title="Choose AutoCompensation script">

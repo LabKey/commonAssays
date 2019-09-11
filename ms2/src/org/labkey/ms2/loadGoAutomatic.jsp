@@ -55,7 +55,7 @@ switch to the "Manual" tab and follow the instructions there.</span> For more in
 <% } %>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
-<labkey:form action="<%=h(buildURL(MS2Controller.LoadGoAction.class))%>" method="post">
+<labkey:form action="<%=buildURL(MS2Controller.LoadGoAction.class)%>" method="post">
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
 </labkey:form>

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.ProteinService" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.protein.ProteinService" %>
 <%@ page import="org.labkey.ms2.PepSearchModel" %>
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -29,7 +29,7 @@
 <% if (model.hasErrorMsg()) { %>
 <p class="error"><%=h(model.getErrorMsg())%></p>
 <% } %>
-<labkey:form action="<%=h(model.getResultsUri())%>" method="get">
+<labkey:form action="<%=model.getResultsUri()%>" method="get">
     <input type="hidden" name="<%=h(ProteinService.PeptideSearchForm.ParamNames.runIds.name())%>" value="<%=h(model.getRunIds())%>"/>
     <table class="lk-fields-table">
         <tr>

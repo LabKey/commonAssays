@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -27,7 +26,7 @@
 %>
 <labkey:errors />
 <br>
-<labkey:form method="post" action="<%=h(buildURL(MS2Controller.InsertAnnotsAction.class))%>" enctype="multipart/form-data">
+<labkey:form method="post" action="<%=buildURL(MS2Controller.InsertAnnotsAction.class)%>" enctype="multipart/form-data">
 <table class="lk-fields-table">
     <tr>
       <td class="labkey-form-label">Full file path</td>

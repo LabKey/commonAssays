@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.security.User" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
@@ -34,7 +33,7 @@
     else
         isStandardView = grouping.equals("query");
 %>
-<labkey:form method="post" action="<%=h(bean.applyViewURL)%>">
+<labkey:form method="post" action="<%=bean.applyViewURL%>">
     <table id="ms2RunViewConfig" class="lk-fields-table">
         <tr>
             <td valign=bottom><%=bean.applyView%></td>
@@ -47,7 +46,7 @@
         </tr>
     </table>
 </labkey:form>
-<labkey:form method="post" id="extraFilter" action="<%=h(bean.extraFilterURL)%>">
+<labkey:form method="post" id="extraFilter" action="<%=bean.extraFilterURL%>">
     <table>
         <tr>
             <td style="height: 100%; padding-right: 1em" id="ms2RunGrouping">
