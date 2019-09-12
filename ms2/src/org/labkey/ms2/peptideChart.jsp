@@ -31,7 +31,7 @@
 <% } %>
 
 <% if (bean.foundData) { %>
-    <labkey:form name="chartForm" action="<%=h(buildURL(MS2Controller.PeptideChartsAction.class))%>">
+    <labkey:form name="chartForm" action="<%=buildURL(MS2Controller.PeptideChartsAction.class)%>">
     <%=bean.imageMap%>
     <table align="left">
     <tr>

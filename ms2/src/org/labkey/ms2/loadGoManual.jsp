@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -56,7 +56,7 @@ Loading will take place in the background and you can continue to use your LabKe
 you can monitor the progress by refreshing the status information on the next page.<br><br>
 
 Click "Cancel" to return to the Protein Databases Admin page.<br><br>
-<labkey:form action="<%=h(loadGo)%>" enctype="multipart/form-data" method="post">
+<labkey:form action="<%=loadGo%>" enctype="multipart/form-data" method="post">
     <input type="file" name="gofile" size="60" onChange="showPathname(this, 'filename')">&nbsp;<label id="filename"></label><br><br>
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>

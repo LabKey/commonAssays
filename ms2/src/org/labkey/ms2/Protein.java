@@ -198,14 +198,14 @@ public class Protein
         done in 3 passes. first pass builds up an array of SequencePos objects, one for each AA of the protein
         sequence.  Second pass loops through the range objectds which are the peptide evidence for the
         protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
-        objects and accumlates their html output.
+        objects and accumulates their html output.
      */
-    public StringBuilder getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
+    public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
         return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS);
     }
 
-    public StringBuilder getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
+    public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
     {
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
@@ -312,7 +312,7 @@ public class Protein
         }   //  generate the 4 types of rows again for each wrapping level
         sb.append("</table></div>");
 
-        return sb;
+        return HtmlString.unsafe(sb.toString());
     }
 
     public void setForCoverageMapExport(boolean forCoverageMapExport)

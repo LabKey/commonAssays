@@ -16,70 +16,44 @@
 
 package org.labkey.microarray.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
-import org.labkey.api.data.IconDisplayColumn;
-import org.labkey.api.data.JdbcType;
-import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SchemaTableInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
-import org.labkey.api.query.DetailsURL;
-import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.settings.AppProps;
-import org.labkey.api.assay.actions.AssayDetailRedirectAction;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.view.FeatureAnnotationSetQueryView;
 import org.springframework.validation.BindException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class MicroarrayUserSchema extends SimpleUserSchema
 {
     public static final String SCHEMA_NAME = "Microarray";
     public static final String SCHMEA_DESCR = "Contains data about Microarray assay runs";
-    public static final String TABLE_RUNS = "MicroarrayRuns";
     public static final String TABLE_FEATURE_ANNOTATION_SET = "FeatureAnnotationSet";
     public static final String TABLE_FEATURE_ANNOTATION = "FeatureAnnotation";
-
-    public static final String QC_REPORT_COLUMN_NAME = "QCReport";
-    public static final String THUMBNAIL_IMAGE_COLUMN_NAME = "ThumbnailImage";
-
-    private ExpSchema _expSchema;
 
     public MicroarrayUserSchema(User user, Container container)
     {
         super(SCHEMA_NAME, SCHMEA_DESCR, user, container, getSchema());
-        _expSchema = new ExpSchema(user, container);
     }
-
 
     static public void register(Module module)
     {
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider(module) {
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 return new MicroarrayUserSchema(schema.getUser(), schema.getContainer());
@@ -87,39 +61,32 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         });
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         CaseInsensitiveHashSet hs = new CaseInsensitiveHashSet();
-        hs.add(TABLE_RUNS);
         hs.add(TABLE_FEATURE_ANNOTATION_SET);
         hs.add(TABLE_FEATURE_ANNOTATION);
         return hs;
     }
 
+    @Override
     public TableInfo createTable(String name, ContainerFilter cf)
     {
-        if (TABLE_RUNS.equalsIgnoreCase(name))
-        {
-            return createRunsTable(cf);
-        }
-
         if (getTableNames().contains(name))
         {
             SchemaTableInfo tableInfo = getSchema().getTable(name);
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION_SET))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
-                return table;
+                return new FeatureAnnotationSetTable(this, tableInfo, cf).init();
             }
             if (name.equalsIgnoreCase(TABLE_FEATURE_ANNOTATION))
             {
-                SimpleTable<MicroarrayUserSchema> table = new FeatureAnnotationSetTable(this, tableInfo, cf).init();
-                return table;
+                return new FeatureAnnotationSetTable(this, tableInfo, cf).init();
             }
             else
             {
-                SimpleTable<MicroarrayUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, tableInfo, cf).init();
-                return table;
+                return new SimpleTable<>(this, tableInfo, cf).init();
             }
         }
 
@@ -127,7 +94,8 @@ public class MicroarrayUserSchema extends SimpleUserSchema
     }
 
     @Override
-    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    @NotNull
+    public QueryView createView(ViewContext context, @NotNull QuerySettings settings, BindException errors)
     {
         String queryName = settings.getQueryName();
         if (queryName != null)
@@ -139,7 +107,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
         }
 
         QueryView ret = super.createView(context, settings, errors);
-        if (ret != null && TABLE_FEATURE_ANNOTATION.equalsIgnoreCase(queryName))
+        if (TABLE_FEATURE_ANNOTATION.equalsIgnoreCase(queryName))
         {
             // NOTE FeatureAnnotationSetQueryView handles this for TABLE_FEATURE_ANNOTATION_SET
             ret.setAllowableContainerFilterTypes(ContainerFilter.Type.CurrentPlusProjectAndShared);
@@ -149,62 +117,7 @@ public class MicroarrayUserSchema extends SimpleUserSchema
 
     public TableInfo getAnnotationSetTable()
     {
-        return getTable(TABLE_FEATURE_ANNOTATION_SET);
-    }
-
-
-    public ExpRunTable createRunsTable(ContainerFilter cf)
-    {
-        ExpRunTable result = _expSchema.getRunsTable(true);
-        // CONSIDER: wrap with FilteredTable instead of hacking on the ExpRunTable?
-        cf = null==cf ? getDefaultContainerFilter() : cf;
-        result.setContainerFilter(cf);
-        configureRunsTable(result);
-
-        return result;
-    }
-
-    public void configureRunsTable(ExpRunTable result)
-    {
-        result.getMutableColumn(ExpRunTable.Column.Name).setURL(new DetailsURL(new ActionURL(AssayDetailRedirectAction.class, _expSchema.getContainer()), Collections.singletonMap("runId", "rowId")));
-
-        SQLFragment thumbnailSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
-                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.THUMBNAIL_INPUT_TYPE.getNamespacePrefix() + "%')");
-        var thumbnailColumn = new ExprColumn(result, THUMBNAIL_IMAGE_COLUMN_NAME, thumbnailSQL, JdbcType.INTEGER);
-        thumbnailColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/microarrayThumbnailIcon.png");
-            }
-        });
-        result.addColumn(thumbnailColumn);
-
-        SQLFragment qcReportSQL = new SQLFragment("(SELECT MIN(d.RowId)\n" +
-                "\nFROM " + ExperimentService.get().getTinfoData() + " d " +
-                "\nWHERE d.RunId = " + ExprColumn.STR_TABLE_ALIAS + ".RowId AND d.LSID LIKE '%:" + MicroarrayModule.QC_REPORT_INPUT_TYPE.getNamespacePrefix() + "%')");
-        var qcReportColumn = new ExprColumn(result, QC_REPORT_COLUMN_NAME, qcReportSQL, JdbcType.INTEGER);
-        qcReportColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-                url.addParameter("inline", "true");
-                return new IconDisplayColumn(colInfo, 18, 18, url, "rowId", AppProps.getInstance().getContextPath() + "/microarray/images/qcReportIcon.png");
-            }
-        });
-        result.addColumn(qcReportColumn);
-
-        List<FieldKey> defaultCols = new ArrayList<>(result.getDefaultVisibleColumns());
-        defaultCols.remove(FieldKey.fromParts(qcReportColumn.getName()));
-        defaultCols.remove(FieldKey.fromParts(thumbnailColumn.getName()));
-        defaultCols.add(2, FieldKey.fromParts(qcReportColumn.getName()));
-        defaultCols.add(2, FieldKey.fromParts(thumbnailColumn.getName()));
-        result.setDefaultVisibleColumns(defaultCols);
-
-        result.setDescription("Contains a row per microarray analysis result loaded in this folder.");
+        return getTable(TABLE_FEATURE_ANNOTATION_SET, null);
     }
 
     public static DbSchema getSchema()

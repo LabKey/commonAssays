@@ -1,6 +1,5 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
-   external 'com.sun.media:jai_imageio:1.1'
    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
 }
