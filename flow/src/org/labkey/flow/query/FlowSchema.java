@@ -886,7 +886,7 @@ public class FlowSchema extends UserSchema
                             String url = renderURL(ctx);
                             if (url != null)
                             {
-                                out.write(PageFlowUtil.iconLink("fa fa-download", null, url, null, null, null));
+                                out.write(PageFlowUtil.iconLink("fa fa-download", null).href(url).toString());
                             }
                         }
                     };

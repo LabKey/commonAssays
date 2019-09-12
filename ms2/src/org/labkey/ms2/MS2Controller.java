@@ -708,7 +708,7 @@ public class MS2Controller extends SpringActionController
 
         onClick.append("', 100); return false;");
 
-        return PageFlowUtil.textLink("Show Modifications", (ActionURL)null, onClick.toString(), "modificationsLink");
+        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
     }
 
 
@@ -868,10 +868,10 @@ public class MS2Controller extends SpringActionController
 
             String nextPrevStr = "";
             if (null != previousURL) {
-                 nextPrevStr += PageFlowUtil.textLink("Previous", previousURL);
+                 nextPrevStr += PageFlowUtil.link("Previous").href(previousURL);
             }
             if (null != nextURL) {
-                 nextPrevStr += PageFlowUtil.textLink("Next", nextURL);
+                 nextPrevStr += PageFlowUtil.link("Next").href(nextURL);
             }
             if (nextPrevStr.length() > 0) {
                 result.addView(new HtmlView(nextPrevStr));
