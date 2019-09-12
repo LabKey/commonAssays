@@ -77,7 +77,7 @@ if (null != bean.quantAlgorithm)
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=link("Show " + run.getParamsFileName()).href(buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun()).id("paramFileLink").attributes(Collections.singletonMap("target", "paramFile"))%><%
+            <%=link("Show " + run.getParamsFileName()).href(buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun()).id("paramFileLink").target("paramFile")%><%
         }
 
         if (run.getHasPeptideProphet())
