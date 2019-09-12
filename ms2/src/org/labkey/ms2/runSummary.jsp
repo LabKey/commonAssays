@@ -82,12 +82,12 @@ if (null != bean.quantAlgorithm)
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=link("Show Peptide Prophet Details").href(buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun()).id("peptideProphetDetailsLink").attributes(Collections.singletonMap("target", "peptideProphetSummary"))%><%
+            <%=link("Show Peptide Prophet Details").href(buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun()).id("peptideProphetDetailsLink").target("peptideProphetSummary")%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=link("Show Protein Prophet Details").href(buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun()).id("proteinProphetDetailsLink").attributes(Collections.singletonMap("target", "proteinProphetSummary"))%><%
+            <%=link("Show Protein Prophet Details").href(buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun()).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
         } %>
         </div>
     </td></tr>
