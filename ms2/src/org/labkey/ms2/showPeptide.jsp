@@ -20,9 +20,10 @@
 <%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager"%>
+<%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
 <%@ page import="org.labkey.ms2.MassType" %>
@@ -30,7 +31,6 @@
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -239,6 +239,8 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
 <!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
 <div id="lorikeet"></div>
 <script type="text/javascript">
+
+    var $ = jQuery.noConflict();
 
     $(function() {
         /* render the spectrum with the given options */
