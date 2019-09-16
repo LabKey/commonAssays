@@ -84,18 +84,30 @@ public class LuminexExcelParser
         _dataFiles = dataFiles;
     }
 
+//    to verify:
+//        The firstSheet is only called once
     private void parseFile() throws ExperimentException
     {
+        Map<String, HashMap<String, Integer>> bigBoi = new CaseInsensitiveHashMap<>();
+        Map<String, Titration> bigBoiPotentialTitrations = new CaseInsensitiveHashMap<>();
+
         if (_parsed) return;
         Set<String> analyteNames = new HashSet<>();
 
+        // multiple data files
         for (File dataFile : _dataFiles)
         {
+            Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<>();
+            Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<>();
+            Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<>();
+            boolean firstSheet = true;
             analyteNames.clear();
+
             try
             {
                 Workbook workbook = ExcelFactory.create(dataFile);
 
+                //for each tab
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {
                     Sheet sheet = workbook.getSheetAt(sheetIndex);
@@ -135,80 +147,95 @@ public class LuminexExcelParser
                         row++;
                     }
 
-                    Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<>();
-                    Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<>();
-                    Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<>();
 
-                    if (row <= sheet.getLastRowNum())
+                    if (firstSheet)
                     {
-                        boolean hasMoreRows;
-                        do
+                        // for each row in the sheet
+                        if (row <= sheet.getLastRowNum())
                         {
-                            LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
-
-                            if (dataRow.getDescription() != null)
+                            boolean hasMoreRows;
+                            do
                             {
-                                // track the number of rows per sample for summary and raw separately
-                                if (dataRow.isSummary())
-                                {
-                                    Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
-                                    potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
-                                }
-                                else
-                                {
-                                    Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
-                                    potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
-                                }
+                                LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
 
-                                if (!potentialTitrations.containsKey(dataRow.getDescription()))
+                                if (dataRow.getDescription() != null)
                                 {
-                                    Titration newTitration = new Titration();
-                                    newTitration.setName(dataRow.getDescription());
-                                    if (dataRow.getType() != null)
+                                    // track the number of rows per sample for summary and raw separately
+                                    if (dataRow.isSummary())
                                     {
-                                        newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
-                                        newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
-                                        newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
+                                        // build the map of potential titrations summary counts
+                                        Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
+                                        potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                    }
+                                    else
+                                    {
+                                        // build the map of potential titration raw counts
+                                        Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
+                                        potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
                                     }
 
-                                    potentialTitrations.put(dataRow.getDescription(), newTitration);
+                                    // makes sure potentialTitrations has every row description as a key
+                                    if (!potentialTitrations.containsKey(dataRow.getDescription()))
+                                    {
+                                        Titration newTitration = new Titration();
+                                        newTitration.setName(dataRow.getDescription());
+                                        if (dataRow.getType() != null)
+                                        {
+                                            newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
+                                            newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
+                                            newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
+                                        }
+
+                                        potentialTitrations.put(dataRow.getDescription(), newTitration);
+                                    }
                                 }
+
+                                dataRows.add(dataRow);
+                                Pair<Boolean, Integer> nextRow = findNextDataRow(sheet, row);
+                                hasMoreRows = nextRow.getKey();
+                                row = nextRow.getValue();
                             }
+                            while (hasMoreRows);
 
-                            dataRows.add(dataRow);
-                            Pair<Boolean, Integer> nextRow = findNextDataRow(sheet, row);
-                            hasMoreRows = nextRow.getKey();
-                            row = nextRow.getValue();
+                            // Skip over the blank line
+                            row++;
                         }
-                        while (hasMoreRows);
+                        while (row <= sheet.getLastRowNum())
+                        {
+                            row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
+                        }
 
-                        // Skip over the blank line
-                        row++;
-                    }
-                    while (row <= sheet.getLastRowNum())
-                    {
-                        row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
+                        firstSheet = false;
                     }
 
-                    // Check if we've accumulated enough instances to consider it to be a titration
+//                  potentialTitrations {1: {'A': 4, 'B': 4}, 2: {'A': 6, 'B': 3}, 3: {'A': 10, 'B': 5}}
                     for (String desc : potentialTitrations.keySet())
                     {
-                        if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT) ||
-                            (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT))
+                        if (bigBoi.containsKey(desc))
                         {
-                            _titrations.put(desc, potentialTitrations.get(desc));
-                        }
-                        // detect potential single point controls
-                        if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl()) // Type starts with 'C'
-                        {
-                            if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT) ||
-                                    (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))
+                            if (bigBoi.get(desc).containsKey(analyteName))
                             {
-                                _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+                                Integer count = bigBoi.get(desc).get(analyteName);
+                                bigBoi.get(desc).put(analyteName, count + potentialTitrationRawCounts.get(desc));
+
+                            } else {
+                                bigBoi.get(desc).put(analyteName, potentialTitrationRawCounts.get(desc));
                             }
+                        } else {
+                            HashMap<String, Integer> mini = new HashMap<>();
+                            mini.put(analyteName, potentialTitrationRawCounts.get(desc));
+                            bigBoi.put(desc, mini);
                         }
                     }
+
+
+
+
+
+
                 }
+
+                bigBoiPotentialTitrations.putAll(potentialTitrations);
             }
             catch (IOException e)
             {
@@ -219,6 +246,36 @@ public class LuminexExcelParser
                 throw new XarFormatException("Failed to parse file as Excel: " + dataFile.getName(), e);
             }
         }
+
+        for (String desc : bigBoi.keySet())
+        {
+            for (String analyte : bigBoi.get(desc).keySet())
+            {
+                if (bigBoi.get(desc).get(analyte) >= 5)
+                {
+                    _titrations.put(desc, bigBoiPotentialTitrations.get(desc));
+                }
+            }
+        }
+
+        // Check if we've accumulated enough instances to consider it to be a titration
+//        for (String desc : potentialTitrations.keySet())
+//        {
+//            if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT) ||
+//                    (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT))
+//            {
+//                _titrations.put(desc, potentialTitrations.get(desc));
+//            }
+//            // detect potential single point controls
+//            if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl()) // Type starts with 'C'
+//            {
+//                if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT) ||
+//                        (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))
+//                {
+//                    _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+//                }
+//            }
+//        }
 
         boolean foundRealRow = false;
         for (List<LuminexDataRow> rows : _sheets.values())
