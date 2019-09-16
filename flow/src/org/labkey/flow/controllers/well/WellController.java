@@ -40,6 +40,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
@@ -90,6 +91,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static org.labkey.api.util.DOM.*;
 
 public class WellController extends BaseFlowController
 {
@@ -267,7 +270,7 @@ public class WellController extends BaseFlowController
                 }
                 if (wells == null || wells.size() == 0)
                 {
-                    Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, true, false);
+                    Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, false);
                     wells = new ArrayList<>();
 
                     for (String wellId : selected)
@@ -735,13 +738,7 @@ public class WellController extends BaseFlowController
     {
         MessageView(String message, ActionURL url)
         {
-            super(null);
-            StringBuilder sb = new StringBuilder();
-            sb.append("<span style='color:green;'>");
-            sb.append(PageFlowUtil.filter(message));
-            sb.append("</span><br>");
-            sb.append(PageFlowUtil.button("OK").href(url));
-            setHtml(sb.toString());
+            super(SPAN(at(Attribute.style, "color:green;"), message, BR(), PageFlowUtil.button("OK").href(url)));
         }
     }
 

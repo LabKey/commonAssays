@@ -35,7 +35,7 @@
     Container c = getContainer();
 %>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=h(buildURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class))%>">
+<labkey:form method="POST" action="<%=buildURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class)%>">
     <p>What do you want to call the new analysis folder?<br>
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))

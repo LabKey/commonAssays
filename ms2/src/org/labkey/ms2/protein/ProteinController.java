@@ -88,6 +88,7 @@ public class ProteinController extends SpringActionController
             _showSequences = showSequences;
         }
 
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             UserSchema schema = new CustomAnnotationSchema(getUser(), getContainer(), _showSequences);
@@ -99,6 +100,7 @@ public class ProteinController extends SpringActionController
 
             QueryView queryView = new QueryView(schema, settings, errors)
             {
+                @Override
                 public DataView createDataView()
                 {
                     DataView result = super.createDataView();
@@ -106,6 +108,7 @@ public class ProteinController extends SpringActionController
                     return result;
                 }
 
+                @Override
                 public MenuButton createQueryPickerButton(String label)
                 {
                     return super.createQueryPickerButton("Custom Protein List");
@@ -122,13 +125,13 @@ public class ProteinController extends SpringActionController
             {
                 url = new ActionURL(ShowAnnotationSetAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. " + PageFlowUtil.textLink("show without proteins", url);
+                header = "This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. " + PageFlowUtil.link("show without proteins").href(url);
             }
             else
             {
                 url = new ActionURL(ShowAnnotationSetWithSequencesAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows just the data uploaded as part of the list. " + PageFlowUtil.textLink("show with matching proteins loaded into this server", url);
+                header = "This view shows just the data uploaded as part of the list. " + PageFlowUtil.link("show with matching proteins loaded into this server").href(url);
             }
 
             HtmlView linkView = new HtmlView(header);
@@ -136,6 +139,7 @@ public class ProteinController extends SpringActionController
             return new VBox(linkView, queryView);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
