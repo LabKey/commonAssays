@@ -28,6 +28,9 @@ abstract public class FlowProperty
     static public final SystemProperty FCSAnalysisFilter = new SystemProperty(PROPERTY_BASE + "FCSAnalysisFilter", PropertyType.STRING);
     static public final SystemProperty ICSMetadata = new SystemProperty(PROPERTY_BASE + "ICSMetadata", PropertyType.STRING);
 
+    static public final SystemProperty CaseSensitiveKeywords = new SystemProperty(PROPERTY_BASE + "CaseSensitiveKeywords", PropertyType.BOOLEAN);
+    static public final SystemProperty CaseSensitiveStatsAndGraphs = new SystemProperty(PROPERTY_BASE + "CaseSensitiveStatsAndGraphs", PropertyType.BOOLEAN);
+
     // Property on FlowRun ExpRun object: name of analysis engine (AnalysisEngine)
     static public final SystemProperty AnalysisEngine = new SystemProperty(PROPERTY_BASE + "AnalysisEngine", PropertyType.STRING);
 

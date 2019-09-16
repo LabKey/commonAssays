@@ -96,7 +96,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 {
     static private final Logger _log = Logger.getLogger(FlowProtocol.class);
     static protected final String DEFAULT_PROTOCOL_NAME = "Flow";
-    static final private String SAMPLESET_NAME = "Samples";
+    static private final String SAMPLESET_NAME = "Samples";
+
+    static private final boolean DEFAULT_CASE_SENSITIVE_KEYWORDS = true;
+    static private final boolean DEFAULT_CASE_SENSITIVE_STATS_AND_GRAPHS = false;
 
     static public String getProtocolLSIDPrefix()
     {
@@ -737,6 +740,28 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public void setFCSAnalysisFilter(User user, String value) throws SQLException
     {
         setProperty(user, FlowProperty.FCSAnalysisFilter.getPropertyDescriptor(), value);
+    }
+
+    public boolean isCaseSensitiveKeywords()
+    {
+        Boolean value = (Boolean)getProperty(FlowProperty.CaseSensitiveKeywords.getPropertyDescriptor());
+        return value != null ? value.booleanValue() : DEFAULT_CASE_SENSITIVE_KEYWORDS;
+    }
+
+    public void setCaseSensitiveKeywords(User user, boolean caseSensitive) throws SQLException
+    {
+        setProperty(user, FlowProperty.CaseSensitiveKeywords.getPropertyDescriptor(), caseSensitive);
+    }
+
+    public boolean isCaseSensitiveStatsAndGraphs()
+    {
+        Boolean value = (Boolean)getProperty(FlowProperty.CaseSensitiveStatsAndGraphs.getPropertyDescriptor());
+        return value != null ? value.booleanValue() : DEFAULT_CASE_SENSITIVE_STATS_AND_GRAPHS;
+    }
+
+    public void setCaseSensitiveStatsAndGraphs(User user, boolean caseSensitive) throws SQLException
+    {
+        setProperty(user, FlowProperty.CaseSensitiveStatsAndGraphs.getPropertyDescriptor(), caseSensitive);
     }
 
     public String getICSMetadataString()
