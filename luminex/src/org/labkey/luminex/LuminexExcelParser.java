@@ -230,29 +230,54 @@ public class LuminexExcelParser
             }
         }
 
-        for (String desc : crossFilePTRaw.keySet())
+        //Should make this into helper function
+        for (String desc : crossFilePTs.keySet())
         {
-            for (String analyte : crossFilePTRaw.get(desc).keySet())
+            boolean foundTitration = false;
+
+            if (crossFilePTRaw.containsKey(desc))
             {
-                boolean foundTitration = false;
-                if (((crossFilePTRaw.get(desc).get(analyte) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT) || (crossFilePTSummary.get(desc).get(analyte) >=  LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT))
-                    && (dilutionCounts.get(desc).size() >= 3))
+                for (String analyte : crossFilePTRaw.get(desc).keySet())
                 {
-                    _titrations.put(desc, crossFilePTs.get(desc));
-                    foundTitration = true;
-                }
-
-                if (crossFilePTs.get(desc).isQcControl())
-                {
-                    if ((crossFilePTRaw.get(desc).get(analyte) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT) || (crossFilePTSummary.get(desc).get(analyte) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT))
+                    if ((crossFilePTRaw.get(desc).get(analyte) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT) && (dilutionCounts.get(desc).size() >= 3))
                     {
-                        _singlePointControls.put(desc, new SinglePointControl(crossFilePTs.get(desc)));
+                        _titrations.put(desc, crossFilePTs.get(desc));
+                        foundTitration = true;
                     }
+                    if (crossFilePTs.get(desc).isQcControl())
+                    {
+                        if ((crossFilePTRaw.get(desc).get(analyte) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))
+                        {
+                            _singlePointControls.put(desc, new SinglePointControl(crossFilePTs.get(desc)));
+                        }
+                    }
+                    if (foundTitration)
+                        break;
                 }
+            }
 
-                if (foundTitration)
+            if (foundTitration)
+                break;
+
+            if (crossFilePTSummary.containsKey(desc))
+            {
+                for (String analyte : crossFilePTSummary.get(desc).keySet())
                 {
-                    break;
+                    if ((crossFilePTSummary.get(desc).get(analyte) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT) && (dilutionCounts.get(desc).size() >= 3))
+                    {
+                        _titrations.put(desc, crossFilePTs.get(desc));
+                        foundTitration = true;
+                    }
+                    if (crossFilePTs.get(desc).isQcControl())
+                    {
+                        if ((crossFilePTSummary.get(desc).get(analyte) <= LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT))
+                        {
+                            _singlePointControls.put(desc, new SinglePointControl(crossFilePTs.get(desc)));
+                        }
+                    }
+
+                    if (foundTitration)
+                        break;
                 }
             }
         }
