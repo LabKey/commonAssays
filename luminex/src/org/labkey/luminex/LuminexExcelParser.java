@@ -157,6 +157,7 @@ public class LuminexExcelParser
 
                                 if (dataRow.getDescription() != null)
                                 {
+                                    // monitor how many unique dilutions a description appears with
                                     if (dilutionCounts.containsKey(dataRow.getDescription()))
                                     {
                                         dilutionCounts.get(dataRow.getDescription()).add(dataRow.getDilution());
