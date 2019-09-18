@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.User;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -123,11 +124,11 @@ public class WorkspaceData implements Serializable
         _includesFCSFiles = includesFCSFiles;
     }
 
-    public void validate(Container container, Errors errors, HttpServletRequest request)
+    public void validate(User user, Container container, Errors errors, HttpServletRequest request)
     {
         try
         {
-            validate(container, errors);
+            validate(user, container, errors);
         }
         catch (FlowException | WorkspaceValidationException ex)
         {
@@ -141,7 +142,7 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    public void validate(Container container, Errors errors) throws WorkspaceValidationException, IOException
+    public void validate(User user, Container container, Errors errors) throws Exception
     {
         if (_object == null)
         {
@@ -200,7 +201,7 @@ public class WorkspaceData implements Serializable
 
                 _object = readWorkspace(file, path);
 
-                FlowProtocol protocol = FlowProtocol.getForContainer(container);
+                FlowProtocol protocol = FlowProtocol.ensureForContainer(user,  container);
                 validateKeywordCasing(container, errors, protocol.isCaseSensitiveKeywords());
                 validateStatAndGraphCasing(container, errors, protocol.isCaseSensitiveStatsAndGraphs());
             }
