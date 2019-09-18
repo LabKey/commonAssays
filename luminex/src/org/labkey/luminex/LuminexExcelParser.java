@@ -157,11 +157,7 @@ public class LuminexExcelParser
 
                                 if (dataRow.getDescription() != null)
                                 {
-
-//                                    if (_titrations.containsKey(dataRow.getDescription()))
-//                                    {
-//                                        break;
-//                                    }
+                                    
                                     // monitor how many unique dilutions a description appears with
                                     if (dilutionCounts.containsKey(dataRow.getDescription()))
                                     {
@@ -287,6 +283,9 @@ public class LuminexExcelParser
                 // Check for single-file titrations. Does not check for dilution counts.
                 if (potentialTitrationCounts.get(desc) != null)
                 {
+                    // To Reviewer: It's possible to make the runtime better by removing the description from consideration in the main function's potentialTitration(Raw or Summary)Counts
+                    // once we recognize that it is a titration. However I found this makes debugging a bit harder / perhaps the code less readable because the description count is
+                    // no longer there/updated and accurate to the data.
                     mini.put(analyteName, potentialTitrationCounts.get(desc));
                     crossFilePT.put(desc, mini);
                     if ((type.contentEquals("raw")) && ((potentialTitrationCounts.get(desc)) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT))
@@ -329,6 +328,7 @@ public class LuminexExcelParser
                         _titrations.put(desc, crossFilePTs.get(desc));
                         foundTitration = true;
                     }
+                    // to reviewer: Realized I didn't ask this. Are cross-plate point controls something that is done? If not, we can remove this chunk.
                     if (crossFilePTs.get(desc).isQcControl())
                     {
                         if (((type.contentEquals("raw")) && (crossFilePT.get(desc).get(analyte) <= single_point_control_count)) ||
