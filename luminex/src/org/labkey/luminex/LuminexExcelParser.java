@@ -331,7 +331,8 @@ public class LuminexExcelParser
                     }
                     if (crossFilePTs.get(desc).isQcControl())
                     {
-                        if ((crossFilePT.get(desc).get(analyte) <= single_point_control_count))
+                        if (((type.contentEquals("raw")) && (crossFilePT.get(desc).get(analyte) <= single_point_control_count)) ||
+                            ((type.contentEquals("summary")) && (crossFilePT.get(desc).get(analyte) == single_point_control_count)))
                         {
                             _singlePointControls.put(desc, new SinglePointControl(crossFilePTs.get(desc)));
                         }
