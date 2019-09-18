@@ -46,7 +46,7 @@
         </tr>
         <tr>
             <td colspan="2" style="padding-top: 10px;">
-                <%= button("Search").submit(true).attributes(Map.of("id", "btnSearch", "name", "submit"))%>
+                <%= button("Search").submit(true).id("btnSearch").name("submit")%>
             </td>
         </tr>
     </table>
