@@ -2,8 +2,7 @@
     <library compileInProductionMode="false">
         <script path="MS2/lorikeet_0.3/css/lorikeet.css"/>
 
-        <script path="MS2/lorikeet_0.3/js/jquery-1.4.2.min.js"/>
-        <script path="MS2/lorikeet_0.3/js/jquery-ui-1.8.4.min.js"/>
+        <script path="MS2/lorikeet_0.3/js/jquery-ui-1.12.1.min.js"/>
         <script path="MS2/lorikeet_0.3/js/jquery.flot.js"/>
         <script path="MS2/lorikeet_0.3/js/jquery.flot.selection.js"/>
 
