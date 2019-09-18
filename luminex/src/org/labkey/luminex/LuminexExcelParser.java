@@ -283,6 +283,8 @@ public class LuminexExcelParser
             else
             {
                 HashMap<String, Integer> mini = new HashMap<>();
+
+                // Check for single-file titrations. Does not check for dilution counts.
                 if (potentialTitrationCounts.get(desc) != null)
                 {
                     mini.put(analyteName, potentialTitrationCounts.get(desc));
@@ -294,7 +296,15 @@ public class LuminexExcelParser
                     else if ((type.contentEquals("summary")) && ((potentialTitrationCounts.get(desc)) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT))
                     {
                         _titrations.put(desc, potentialTitrations.get(desc));
+                    }
 
+                    if (potentialTitrations.get(desc).isQcControl() )
+                    {
+                        if ((type.contentEquals("raw") && (potentialTitrationCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT)) ||
+                            (type.contentEquals("summary") && (potentialTitrationCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT)))
+                        {
+                            _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+                        }
                     }
                 }
             }
