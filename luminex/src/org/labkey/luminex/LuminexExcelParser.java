@@ -282,7 +282,7 @@ public class LuminexExcelParser
             }
             else
             {
-                HashMap<String, Integer> mini = new HashMap<>(); //this is prob where we wanna do the titration check
+                HashMap<String, Integer> mini = new HashMap<>();
                 if (potentialTitrationCounts.get(desc) != null)
                 {
                     mini.put(analyteName, potentialTitrationCounts.get(desc));
