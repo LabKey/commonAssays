@@ -636,7 +636,7 @@ public class AnalysisScriptController extends BaseFlowController
                 }
             }
 
-            workspace.validate(getContainer(), errors, getRequest());
+            workspace.validate(getUser(), getContainer(), errors, getRequest());
         }
 
         private FlowRun getExistingKeywordRun(ImportAnalysisForm form, Errors errors)
