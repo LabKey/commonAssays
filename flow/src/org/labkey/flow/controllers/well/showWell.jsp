@@ -570,7 +570,7 @@ else
             {
                 %><%=link("More Graphs", getWell().urlFor(WellController.ChooseGraphAction.class))%><br><%
                 %><%=link("Keywords from the FCS file", getWell().urlFor(WellController.KeywordsAction.class))%><br><%
-                %><%=link("Download FCS file", getWell().urlDownload()).attributes(Map.of("rel", "nofollow"))%><br><%
+                %><%=link("Download FCS file", getWell().urlDownload()).nofollow()%><br><%
             }
             else
             {
