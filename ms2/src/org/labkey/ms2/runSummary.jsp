@@ -77,17 +77,17 @@ if (null != bean.quantAlgorithm)
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=link("Show " + run.getParamsFileName()).href(buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun()).id("paramFileLink").attributes(Collections.singletonMap("target", "paramFile"))%><%
+            <%=link("Show " + run.getParamsFileName()).href(buildURL(MS2Controller.ShowParamsFileAction.class) + "run=" + run.getRun()).id("paramFileLink").target("paramFile")%><%
         }
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=link("Show Peptide Prophet Details").href(buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun()).id("peptideProphetDetailsLink").attributes(Collections.singletonMap("target", "peptideProphetSummary"))%><%
+            <%=link("Show Peptide Prophet Details").href(buildURL(MS2Controller.ShowPeptideProphetDetailsAction.class) + "run=" + run.getRun()).id("peptideProphetDetailsLink").target("peptideProphetSummary")%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=link("Show Protein Prophet Details").href(buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun()).id("proteinProphetDetailsLink").attributes(Collections.singletonMap("target", "proteinProphetSummary"))%><%
+            <%=link("Show Protein Prophet Details").href(buildURL(MS2Controller.ShowProteinProphetDetailsAction.class) + "run=" + run.getRun()).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
         } %>
         </div>
     </td></tr>
