@@ -146,73 +146,69 @@ public class LuminexExcelParser
                         row++;
                     }
 
-                    if (firstSheet)
+                    if (row <= sheet.getLastRowNum())
                     {
-                        if (row <= sheet.getLastRowNum())
+                        boolean hasMoreRows;
+                        do
                         {
-                            boolean hasMoreRows;
-                            do
+                            LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
+
+                            if (firstSheet && dataRow.getDescription() != null)
                             {
-                                LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
-
-                                if (dataRow.getDescription() != null)
+                                // monitor how many unique dilutions a description appears with
+                                if (dilutionCounts.containsKey(dataRow.getDescription()))
                                 {
-                                    
-                                    // monitor how many unique dilutions a description appears with
-                                    if (dilutionCounts.containsKey(dataRow.getDescription()))
-                                    {
-                                        dilutionCounts.get(dataRow.getDescription()).add(dataRow.getDilution());
-                                    }
-                                    else
-                                    {
-                                        HashSet<Double> dilutionValue = new HashSet<>();
-                                        dilutionValue.add(dataRow.getDilution());
-                                        dilutionCounts.put(dataRow.getDescription(), dilutionValue);
-                                    }
-
-                                    // track the number of rows per sample for summary and raw separately
-                                    if (dataRow.isSummary())
-                                    {
-                                        Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
-                                        potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
-                                    }
-                                    else
-                                    {
-                                        Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
-                                        potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
-                                    }
-
-                                    if (!potentialTitrations.containsKey(dataRow.getDescription()))
-                                    {
-                                        Titration newTitration = new Titration();
-                                        newTitration.setName(dataRow.getDescription());
-                                        if (dataRow.getType() != null)
-                                        {
-                                            newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
-                                            newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
-                                            newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
-                                        }
-                                        potentialTitrations.put(dataRow.getDescription(), newTitration);
-                                    }
+                                    dilutionCounts.get(dataRow.getDescription()).add(dataRow.getDilution());
+                                }
+                                else
+                                {
+                                    HashSet<Double> dilutionValue = new HashSet<>();
+                                    dilutionValue.add(dataRow.getDilution());
+                                    dilutionCounts.put(dataRow.getDescription(), dilutionValue);
                                 }
 
-                                dataRows.add(dataRow);
-                                Pair<Boolean, Integer> nextRow = findNextDataRow(sheet, row);
-                                hasMoreRows = nextRow.getKey();
-                                row = nextRow.getValue();
+                                // track the number of rows per sample for summary and raw separately
+                                if (dataRow.isSummary())
+                                {
+                                    Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
+                                    potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                }
+                                else
+                                {
+                                    Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
+                                    potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                }
+
+                                if (!potentialTitrations.containsKey(dataRow.getDescription()))
+                                {
+                                    Titration newTitration = new Titration();
+                                    newTitration.setName(dataRow.getDescription());
+                                    if (dataRow.getType() != null)
+                                    {
+                                        newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
+                                        newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
+                                        newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
+                                    }
+                                    potentialTitrations.put(dataRow.getDescription(), newTitration);
+                                }
                             }
-                            while (hasMoreRows);
 
-                            // Skip over the blank line
-                            row++;
+                            dataRows.add(dataRow);
+                            Pair<Boolean, Integer> nextRow = findNextDataRow(sheet, row);
+                            hasMoreRows = nextRow.getKey();
+                            row = nextRow.getValue();
                         }
-                        while (row <= sheet.getLastRowNum())
-                        {
-                            row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
-                        }
+                        while (hasMoreRows);
 
-                        firstSheet = false;
+                        // Skip over the blank line
+                        row++;
                     }
+                    while (row <= sheet.getLastRowNum())
+                    {
+                        row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
+                    }
+
+                    firstSheet = false;
 
                     crossFilePTRaw = buildCrossFilePTs(crossFilePTRaw, potentialTitrations, analyteName, potentialTitrationRawCounts, "raw");
                     crossFilePTSummary = buildCrossFilePTs(crossFilePTSummary, potentialTitrations, analyteName, potentialTitrationSummaryCounts, "summary");
