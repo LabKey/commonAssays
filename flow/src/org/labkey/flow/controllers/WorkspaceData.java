@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.security.User;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -34,6 +35,7 @@ import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.SpecBase;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeCache;
 import org.springframework.validation.Errors;
@@ -42,8 +44,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -119,11 +124,11 @@ public class WorkspaceData implements Serializable
         _includesFCSFiles = includesFCSFiles;
     }
 
-    public void validate(Container container, Errors errors, HttpServletRequest request)
+    public void validate(User user, Container container, Errors errors, HttpServletRequest request)
     {
         try
         {
-            validate(container, errors);
+            validate(user, container, errors);
         }
         catch (FlowException | WorkspaceValidationException ex)
         {
@@ -137,7 +142,7 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    public void validate(Container container, Errors errors) throws WorkspaceValidationException, IOException
+    public void validate(User user, Container container, Errors errors) throws Exception
     {
         if (_object == null)
         {
@@ -195,7 +200,10 @@ public class WorkspaceData implements Serializable
                 }
 
                 _object = readWorkspace(file, path);
-                validateCasing(container, errors);
+
+                FlowProtocol protocol = FlowProtocol.ensureForContainer(user,  container);
+                validateKeywordCasing(container, errors, protocol.isCaseSensitiveKeywords());
+                validateStatAndGraphCasing(container, errors, protocol.isCaseSensitiveStatsAndGraphs());
             }
             else
             {
@@ -204,9 +212,27 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    private void validateCasing(Container c, Errors errors)
+    private void validateKeywordCasing(Container c, Errors errors, boolean isCaseSensitive)
     {
+        List<String> messages = new ArrayList<>(10);
         Set<String> seenKeyword = new HashSet<>();
+
+        for (ISampleInfo sample : _object.getSamples())
+        {
+            for (String keyword : sample.getKeywords().keySet())
+            {
+                checkAttribute(c, messages, sample, keyword, AttributeCache.KEYWORDS, seenKeyword, null, null);
+                if (messages.size() > 10)
+                    break;
+            }
+        }
+
+        addCaseSensitiveWarnings(errors, messages, isCaseSensitive);
+    }
+
+    private void validateStatAndGraphCasing(Container c, Errors errors, boolean isCaseSensitive)
+    {
+        List<String> messages = new ArrayList<>(10);
         Set<StatisticSpec> seenStat = new HashSet<>();
         Set<GraphSpec> seenGraph = new HashSet<>();
 
@@ -215,38 +241,33 @@ public class WorkspaceData implements Serializable
 
         for (ISampleInfo sample : _object.getSamples())
         {
-            for (String keyword : sample.getKeywords().keySet())
-            {
-                checkAttribute(c, errors, sample, keyword, AttributeCache.KEYWORDS, seenKeyword, null, null);
-                if (errors.getErrorCount() > 10)
-                    break;
-            }
-
             Analysis analysis = _object.getSampleAnalysis(sample);
             if (analysis == null)
                 continue;
 
             for (StatisticSpec spec : analysis.getStatistics())
             {
-                checkAttribute(c, errors, sample, spec, AttributeCache.STATS, seenStat, subsetMismatches, parameterMismatches);
-                if (errors.getErrorCount() > 10)
+                checkAttribute(c, messages, sample, spec, AttributeCache.STATS, seenStat, subsetMismatches, parameterMismatches);
+                if (messages.size() > 10)
                     break;
             }
 
             for (GraphSpec spec : analysis.getGraphs())
             {
-                checkAttribute(c, errors, sample, spec, AttributeCache.GRAPHS, seenGraph, subsetMismatches, parameterMismatches);
-                if (errors.getErrorCount() > 10)
+                checkAttribute(c, messages, sample, spec, AttributeCache.GRAPHS, seenGraph, subsetMismatches, parameterMismatches);
+                if (messages.size() > 10)
                     break;
             }
         }
 
         if (!subsetMismatches.isEmpty() && !parameterMismatches.isEmpty())
             _log.debug("Mismatch counts while parsing workspace: " + _object.getName() + "\n" + subsetMismatches.toString() + "\n" + parameterMismatches.toString());
+
+        addCaseSensitiveWarnings(errors, messages, isCaseSensitive);
     }
 
     <Z extends Comparable<Z>> void checkAttribute(
-            Container c, Errors errors, ISampleInfo sample, Z attr, AttributeCache cache, Set<Z> seen,
+            Container c, List<String> messages, ISampleInfo sample, Z attr, AttributeCache cache, Set<Z> seen,
             Map<SubsetSpec, Integer> subsetMismatches, Map<String, Integer> parameterMismatches)
     {
         // Skip checking if we've already seen this attribute
@@ -261,7 +282,7 @@ public class WorkspaceData implements Serializable
 
         // If we have an existing attribute, check if the casing matches
         String attrString = attr.toString();
-        if (!attrString.equals(entry.getAttribute().toString()))
+        if (!matchesCasing(entry, attrString))
         {
             if (attr instanceof SpecBase)
             {
@@ -271,8 +292,48 @@ public class WorkspaceData implements Serializable
                     return;
             }
 
-            errors.reject(ERROR_MSG, _object.getName() + ": Sample " + sample.getLabel() + ": " + entry.getType() + " '" + attrString + "' has different casing than existing entry '" + entry.getAttribute() + "'." +
-                    " Please correct the casing before importing or create '" + attrString + "' as an alias for '" + entry.getAttribute() + "'.");
+            messages.add(_object.getName() + ": Sample " + sample.getLabel() + ": " + entry.getType() + " '" + attrString + "' has different casing than existing entry '" + entry.getAttribute() + "'." +
+                    " Please consider correcting the casing before importing or create '" + attrString + "' as an alias for '" + entry.getAttribute() + "'.");
+        }
+    }
+
+    // Issue 37449: Case-sensitivity on flow gates ignores aliasing
+    // Check if the casing of the attribute string matches the attribute entry or one of it's aliases
+    boolean matchesCasing(AttributeCache.Entry entry, String attrString)
+    {
+        // Check that the entry's attribute matches the expected value
+        if (attrString.equals(entry.getAttribute().toString()))
+            return true;
+
+        // If the passed in attribute isn't the preferred attribute, fetch it now.
+        AttributeCache.Entry preferred = entry.getAliasedEntry();
+
+        // Check that any of the preferred entry's aliases matches the expected value
+        Collection<AttributeCache.Entry> aliases = preferred != null ? preferred.getAliases() : entry.getAliases();
+        for (AttributeCache.Entry alias : aliases)
+        {
+            if (attrString.equals(alias.getAttribute().toString()))
+                return true;
+        }
+
+        // no match found
+        return false;
+    }
+
+    // Add the messages to either the Errors collection or the workspace's warning list
+    private void addCaseSensitiveWarnings(Errors errors, List<String> messages, boolean isCaseSensitive)
+    {
+        if (messages.isEmpty())
+            return;
+
+        if (isCaseSensitive)
+        {
+            for (String msg : messages)
+                errors.reject(ERROR_MSG, msg);
+        }
+        else
+        {
+            _object.getWarnings().addAll(messages);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.TableInfo;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -61,6 +62,12 @@ public enum AttributeType
                 {
                     return AttributeCache.KEYWORDS;
                 }
+
+                @Override
+                public boolean isCaseSensitive(@NotNull FlowProtocol protocol)
+                {
+                    return protocol.isCaseSensitiveKeywords();
+                }
             },
 
     statistic
@@ -100,6 +107,12 @@ public enum AttributeType
                 {
                     return AttributeCache.STATS;
                 }
+
+                @Override
+                public boolean isCaseSensitive(@NotNull FlowProtocol protocol)
+                {
+                    return protocol.isCaseSensitiveStatsAndGraphs();
+                }
             },
     graph
             {
@@ -138,6 +151,12 @@ public enum AttributeType
                 {
                     return AttributeCache.GRAPHS;
                 }
+
+                @Override
+                public boolean isCaseSensitive(@NotNull FlowProtocol protocol)
+                {
+                    return protocol.isCaseSensitiveStatsAndGraphs();
+                }
             };
 
     /** Created a parsed representation of the attribute. */
@@ -154,6 +173,8 @@ public enum AttributeType
 
     /** The column name of original attribute id column on the value table. */
     public abstract String getValueTableOriginalAttributeIdColumn();
+
+    public abstract boolean isCaseSensitive(FlowProtocol protocol);
 
     public abstract AttributeCache getCache();
 
