@@ -189,7 +189,7 @@
     <%}%>
 </table>
 <% } %>
-<labkey:link href="<%=flowComp.urlDownload()%>" text="Download" rel="nofollow"/><br>
+<%=link("Download").href(flowComp.urlDownload()).nofollow()%><br>
 <%
     DiscussionService service = DiscussionService.get();
     if (service != null)
