@@ -137,7 +137,7 @@
             cancelURL = new ActionURL(form.editWellReturnUrl).toString();
         }
     %>
-    <labkey:button text="cancel" href="<%=text(cancelURL)%>"/>
+    <labkey:button text="cancel" href="<%=cancelURL%>"/>
 </labkey:form>
 <script type="text/javascript">
     (function ($) {
