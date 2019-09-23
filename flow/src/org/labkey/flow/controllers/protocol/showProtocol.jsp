@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.flow.controllers.attribute.AttributeController"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction"%>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
-<%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.AttributeType" %>
-<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
+<%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% ProtocolForm form = (ProtocolForm) __form;
@@ -60,6 +60,7 @@
 </p>
 <p><b>Manage Names and Aliases</b><br>
     Create and remove names and aliases for Keywords, Statistics, and Graphs.<br>
+    <labkey:link href='<%=protocol.urlFor(AttributeController.CaseSensitivityAction.class).addReturnURL(getActionURL())%>' text="Case sensitivity"/><br/>
     <labkey:link href='<%=protocol.urlFor(AttributeController.DeleteUnusedAction.class).addReturnURL(getActionURL())%>' text="Delete Unused"/><br/>
     <labkey:link href='<%=protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.keyword.name())%>' text="Manage Keywords"/><br/>
     <labkey:link href='<%=protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.statistic.name())%>' text="Manage Statistics"/><br/>
