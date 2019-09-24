@@ -54,6 +54,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowProperty;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
@@ -204,7 +205,7 @@ public class FlowManager
      */
 
     /**
-     * Get the FlowEntry for the attribute name.
+     * Get the FlowEntry for the attribute name, matching exact casing.
      * DOES NOT CACHE.
      *
      * @param containerId The container.
@@ -250,6 +251,7 @@ public class FlowManager
         }
     }
 
+    // Get list of entries sorted by name that match the 'attr' case-insensitively
     private List<FlowEntry> getAttributeEntryCaseInsensitive(String containerId, AttributeType type, String attr)
     {
         //_log.info("getAttributeEntryCaseInsensitive(" + containerId + ", " + type + ", " + attr + ")");
@@ -264,13 +266,13 @@ public class FlowManager
             Integer aliasId = (Integer)map.get("Id");
             FlowEntry a = new FlowEntry(type, rowId, containerId, name, aliasId);
             return a;
-        }).collect(Collectors.toList());
+        }).sorted().collect(Collectors.toList());
     }
 
 
     /**
      * Get an entry by type and rowId.
-     * DOES NOT CACHE
+     * DOES NOT USE CACHE
      */
     @Nullable
     public FlowEntry getAttributeEntry(@NotNull AttributeType type, int rowId)
@@ -390,8 +392,14 @@ public class FlowManager
      * @param allowCaseChangeAlias When true, allow an attribute to be registered as an alias of another attribute if it differs by casing.
      * @return The RowId of the newly inserted or existing attribute.
      */
-    private int ensureAttributeName(@NotNull String containerId, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId, boolean allowCaseChangeAlias)
+    private int ensureAttributeName(@NotNull Container container, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId, boolean allowCaseChangeAlias)
     {
+        // Get case-sensitivity rule
+        final FlowProtocol protocol = FlowProtocol.getForContainer(container);
+        boolean caseSensitive = protocol != null ? type.isCaseSensitive(protocol) : true;
+
+        final String containerId = container.getId();
+
         //_log.info("ensureAttributeName(" + containerId + ", " + type + ", " + attr + ", " + aliasId + ")");
         DbSchema schema = getSchema();
         if (schema.getScope().isTransactionActive())
@@ -417,6 +425,24 @@ public class FlowManager
         List<FlowEntry> others = getAttributeEntryCaseInsensitive(containerId, type, attr);
         if (!others.isEmpty())
         {
+            if (!caseSensitive)
+            {
+                // Use the first attribute, sorted by case
+                int rowId = others.get(0)._rowId;
+
+                // If more than one attribute matches, check that all are pointing to the same preferred attribute
+                if (others.size() > 1)
+                {
+                    int preferredId = others.get(0)._aliasId;
+                    if (others.size() > 1 && others.stream().anyMatch(item -> item._aliasId != preferredId))
+                        throw new FlowCasingMismatchException("Can't create " + type + " with same casing as other " + type + "s when there is more than one preferred attribute.", sampleLabel, type, others, attr);
+                }
+
+                // everything is a-ok - but let's just log a message for goodness
+                _log.info(FlowCasingMismatchException.casingMismatchMessage("Using existing attribute " + rowId + " with different casing", sampleLabel, type, others, attr));
+                return rowId;
+            }
+
             // Issue 37449: casing mismatch: check if we have an alias of the provided casing
             // Disallow creating a new entry unless we are creating an alias and the allowCaseChangeAlias flag is true
             if (!allowCaseChangeAlias || aliasId <= 0)
@@ -455,7 +481,7 @@ public class FlowManager
 
     private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String name)
     {
-        return ensureAttributeName(container.getId(), sampleLabel, type, name, -1, false);
+        return ensureAttributeName(container, sampleLabel, type, name, -1, false);
     }
 
 
@@ -522,7 +548,7 @@ public class FlowManager
             if (aliasId == null)
                 aliasId = ensureAttributeName(c, sampleLabel, type, name);
             else
-                ensureAttributeName(c.getId(), sampleLabel, type, name, aliasId, false);
+                ensureAttributeName(c, sampleLabel, type, name, aliasId, false);
 
             if (!aliases.isEmpty())
             {
@@ -606,7 +632,7 @@ public class FlowManager
             // NOTE: Alias will fail to insert if an there is an existing attribute with different casing and allowCaseChangeAlias is false
             try
             {
-                ensureAttributeName(entry._containerId, null, type, aliasName, entry._rowId, allowCaseChangeAlias);
+                ensureAttributeName(c, null, type, aliasName, entry._rowId, allowCaseChangeAlias);
             }
             finally
             {
@@ -717,6 +743,10 @@ public class FlowManager
     }
 
 
+    /**
+     * Checks for existance of a alias by type and rowId.
+     * DOES NOT USE CACHE
+     */
     public boolean isAlias(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
@@ -726,7 +756,10 @@ public class FlowManager
         return entry.isAlias();
     }
 
-    /** Return the preferred name for the rowId or null if rowId is not an alias id. */
+    /**
+     * Return the preferred name for the rowId or null if rowId is not an alias id.
+     * DOES NOT USE CACHE
+     */
     public FlowEntry getAliased(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
@@ -736,7 +769,10 @@ public class FlowManager
         return getAttributeEntry(type, entry._aliasId);
     }
 
-    /** Return the preferred/primary name for the rowId or null if rowId is not an alias id. */
+    /**
+     * Return the preferred/primary name for the rowId or null if rowId is not an alias id.
+     * DOES NOT USE CACHE
+     */
     public FlowEntry getAliased(FlowEntry entry)
     {
         if (entry == null || !entry.isAlias())
@@ -745,7 +781,10 @@ public class FlowManager
         return getAttributeEntry(entry._type, entry._aliasId);
     }
 
-    /** Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute. */
+    /**
+     * Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute.
+     * DOES NOT USE CACHE
+     */
     public Collection<FlowEntry> getAliases(final AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
@@ -755,7 +794,10 @@ public class FlowManager
         return getAliases(entry);
     }
 
-    /** Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute. */
+    /**
+     * Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute.
+     * DOES NOT USE CACHE
+     */
     public Collection<FlowEntry> getAliases(final FlowEntry entry)
     {
         //_log.info("getAliases");
