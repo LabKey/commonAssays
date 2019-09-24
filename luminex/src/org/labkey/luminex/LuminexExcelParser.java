@@ -158,16 +158,11 @@ public class LuminexExcelParser
                             if (firstSheet && rowDescription != null)
                             {
                                 // monitor how many unique dilutions a description appears with
-                                if (dilutionCounts.containsKey(rowDescription))
+                                if (!dilutionCounts.containsKey(rowDescription))
                                 {
-                                    dilutionCounts.get(rowDescription).add(dataRow.getDilution());
+                                    dilutionCounts.put(rowDescription, new HashSet<>());
                                 }
-                                else
-                                {
-                                    HashSet<Double> dilutionValue = new HashSet<>();
-                                    dilutionValue.add(dataRow.getDilution());
-                                    dilutionCounts.put(rowDescription, dilutionValue);
-                                }
+                                dilutionCounts.get(rowDescription).add(dataRow.getDilution());
 
                                 // track the number of rows per sample for summary and raw separately
                                 if (dataRow.isSummary())
@@ -210,10 +205,17 @@ public class LuminexExcelParser
                         row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
                     }
 
-                    firstSheet = false;
+                    // Update crossFilePTRaw/crossFilePTSummary
+                    if (firstSheet)
+                    {
+                        buildCrossFilePTs(crossFilePTRaw, potentialTitrations, analyteName, potentialTitrationRawCounts, "raw");
+                        buildCrossFilePTs(crossFilePTSummary, potentialTitrations, analyteName, potentialTitrationSummaryCounts, "summary");
 
-                    crossFilePTRaw = buildCrossFilePTs(crossFilePTRaw, potentialTitrations, analyteName, potentialTitrationRawCounts, "raw");
-                    crossFilePTSummary = buildCrossFilePTs(crossFilePTSummary, potentialTitrations, analyteName, potentialTitrationSummaryCounts, "summary");
+
+
+                    }
+
+                    firstSheet = false;
                 }
 
                 crossFilePTs.putAll(potentialTitrations);
@@ -317,7 +319,7 @@ public class LuminexExcelParser
                 for (String analyte : crossFilePT.get(desc).keySet())
                 {
                     boolean foundTitration = false;
-                    if ((crossFilePT.get(desc).get(analyte) >= minimum_titration_count) && (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
+                    if (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT) //ask cory for confirmation on change on this line
                     {
                         _titrations.put(desc, crossFilePTs.get(desc));
                         foundTitration = true;
