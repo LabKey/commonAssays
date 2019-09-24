@@ -453,6 +453,74 @@ public class AttributeController extends BaseFlowController
         }
     }
 
+
+    public static class CaseSensitivityForm extends ReturnUrlForm
+    {
+        private boolean _caseSensitiveKeywords;
+        private boolean _caseSensitiveStatsAndGraphs;
+
+        public boolean isCaseSensitiveKeywords()
+        {
+            return _caseSensitiveKeywords;
+        }
+
+        public void setCaseSensitiveKeywords(boolean caseSensitiveKeywords)
+        {
+            _caseSensitiveKeywords = caseSensitiveKeywords;
+        }
+
+        public boolean isCaseSensitiveStatsAndGraphs()
+        {
+            return _caseSensitiveStatsAndGraphs;
+        }
+
+        public void setCaseSensitiveStatsAndGraphs(boolean caseSensitiveStatsAndGraphs)
+        {
+            _caseSensitiveStatsAndGraphs = caseSensitiveStatsAndGraphs;
+        }
+    }
+
+    @RequiresPermission(AdminPermission.class)
+    public class CaseSensitivityAction extends FormViewAction<CaseSensitivityForm>
+    {
+        @Override
+        public void validateCommand(CaseSensitivityForm form, Errors errors)
+        {
+        }
+
+        @Override
+        public ModelAndView getView(CaseSensitivityForm form, boolean reshow, BindException errors) throws Exception
+        {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            CaseSensitivityForm bean = new CaseSensitivityForm();
+            bean._caseSensitiveKeywords = protocol.isCaseSensitiveKeywords();
+            bean._caseSensitiveStatsAndGraphs = protocol.isCaseSensitiveStatsAndGraphs();
+
+            return new JspView<>("/org/labkey/flow/controllers/attribute/caseSensitivity.jsp", bean, errors);
+        }
+
+        @Override
+        public boolean handlePost(CaseSensitivityForm form, BindException errors) throws Exception
+        {
+            FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
+            protocol.setCaseSensitiveKeywords(getUser(), form.isCaseSensitiveKeywords());
+            protocol.setCaseSensitiveStatsAndGraphs(getUser(), form.isCaseSensitiveStatsAndGraphs());
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(CaseSensitivityForm form)
+        {
+            return form.getReturnActionURL(new ActionURL(ProtocolController.ShowProtocolAction.class, getContainer()));
+        }
+
+        @Override
+        public NavTree appendNavTrail(NavTree root)
+        {
+            return root.addChild("Case Sensitivity");
+        }
+    }
+
     @RequiresPermission(AdminPermission.class)
     public class MakePrimaryAction extends ConfirmAction<AttributeForm>
     {

@@ -36,6 +36,7 @@ import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.query.FlowSchema;
 
 import java.net.URI;
@@ -558,6 +559,11 @@ public class PersistTests
     @Test
     public void caseInsensitiveNames() throws Exception
     {
+        // check default case-sensitivity settings
+        FlowProtocol protocol = FlowProtocol.ensureForContainer(user, c);
+        assertTrue(protocol.isCaseSensitiveKeywords());
+        assertFalse(protocol.isCaseSensitiveStatsAndGraphs());
+
         final boolean sqlserver = FlowManager.get().getSchema().getSqlDialect().isSqlServer();
         final String UPPER_NAME = "CASE-TEST";
         final String lower_name = "case-test";
@@ -678,6 +684,45 @@ public class PersistTests
             AttributeCache.KeywordEntry alias = aliases.iterator().next();
             assertEquals("CaSe-TeSt", alias.getName());
             assertEquals(ke1, alias.getAliasedEntry());
+        }
+    }
+
+    @Test
+    public void caseSensitiveSetting() throws Exception
+    {
+        // check default case-sensitivity settings
+        FlowProtocol protocol = FlowProtocol.ensureForContainer(user, c);
+        assertTrue(protocol.isCaseSensitiveKeywords());
+        assertFalse(protocol.isCaseSensitiveStatsAndGraphs());
+
+        final String UPPER_NAME = "QQ-KEYWORD";
+        final String lower_name = "qq-keyword";
+
+        // setup -- create a keyword
+        int upperId = FlowManager.get().ensureKeywordName(c, "sample", UPPER_NAME, true);
+
+        // verify -- when case-sensitive, can't create keyword that only differs by case
+        try
+        {
+            assertTrue(protocol.isCaseSensitiveKeywords());
+
+            FlowManager.get().ensureKeywordName(c, "TEST", lower_name, false);
+        }
+        catch (FlowException ex)
+        {
+            assertThat(ex.getMessage(), containsString("Sample TEST: Can't create keyword with same casing as other keywords. Existing keyword"));
+            assertThat(ex.getMessage(), containsString("with different casing from the requested name 'qq-keyword':"));
+            assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId));
+        }
+
+        // verify -- when case-insensitive, ensure keyword will get the existing attribute that only differs by case
+        {
+            // turn off case-sensitivity
+            protocol.setCaseSensitiveKeywords(user, false);
+            assertFalse(protocol.isCaseSensitiveKeywords());
+
+            int rowId = FlowManager.get().ensureKeywordName(c, "TEST", lower_name, false);
+            assertEquals("Expected to get existing " + UPPER_NAME + " keyword when case-sensitivity is turned off", upperId, rowId);
         }
     }
 }
