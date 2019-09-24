@@ -246,10 +246,7 @@ public class LuminexExcelParser
             }
         }
 
-
         checkCrossFilePTs(crossFilePTs, dilutionCounts);
-        checkCrossFilePTs(crossFilePTs, dilutionCounts);
-
 
         boolean foundRealRow = false;
         for (List<LuminexDataRow> rows : _sheets.values())
