@@ -223,8 +223,8 @@ public class LuminexExcelParser
                             // detect potential single point controls
                             if ((potentialTitrations.get(desc) != null) && (potentialTitrations.get(desc).isQcControl())) // Type starts with 'C'
                             {
-                                if ( ((potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT)) ||
-                                        (potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT))
+                                if (((potentialTitrationRawCounts.get(desc) != null)  && (potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT)) ||
+                                        ((potentialTitrationSummaryCounts.get(desc) != null) && (potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT)))
                                 {
                                     _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
                                 }
