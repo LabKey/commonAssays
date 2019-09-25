@@ -120,7 +120,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
         // Issue 20074: provide better error message when attempting to import a diva xml file
         String tag = elDoc.getTagName();
         if (tag != null && tag.equals("bdfacs"))
-            throw new FlowException("BD FACSDiva XML files not yet supported; please contact support@labkey.com for assistance.");
+            throw new FlowException("BD FACSDiva XML files not yet supported.");
 
         String versionString = elDoc.getAttribute("version");
         double version = 0;
