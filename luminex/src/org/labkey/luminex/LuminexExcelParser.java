@@ -208,8 +208,10 @@ public class LuminexExcelParser
                     // Update crossFilePTRaw/crossFilePTSummary
                     if (firstSheet)
                     {
-                        buildCrossFilePTs(crossFilePTRaw, potentialTitrations, potentialTitrationRawCounts);
-                        buildCrossFilePTs(crossFilePTSummary, potentialTitrations, potentialTitrationSummaryCounts);
+                        if (potentialTitrationRawCounts.size() > 0)
+                            buildCrossFilePTs(crossFilePTRaw, potentialTitrations, potentialTitrationRawCounts);
+                        if (potentialTitrationSummaryCounts.size() > 0)
+                            buildCrossFilePTs(crossFilePTSummary, potentialTitrations, potentialTitrationSummaryCounts);
 
                         // Check for single-file titrations. Does not check for dilution counts.
                         for (String desc : potentialTitrations.keySet())
@@ -291,9 +293,9 @@ public class LuminexExcelParser
     {
         int minimum_titration_count = (type.equals("raw")) ? LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT : LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT;
 
-        for (String desc : crossFilePT.keySet())
+        for (String desc : crossFilePTs.keySet())
         {
-            if ((crossFilePT.get(desc) >= minimum_titration_count) && (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
+            if (crossFilePT.containsKey(desc) && (crossFilePT.get(desc) >= minimum_titration_count) && (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
             {
                 _titrations.put(desc, crossFilePTs.get(desc));
             }
