@@ -233,7 +233,6 @@ public class LuminexExcelParser
                     }
                     firstSheet = false;
                 }
-
                 crossFilePTs.putAll(potentialTitrations);
             }
             catch (IOException e)
@@ -246,7 +245,9 @@ public class LuminexExcelParser
             }
         }
 
-        checkCrossFilePTs(crossFilePTs, dilutionCounts);
+        checkCrossFilePTs(crossFilePTRaw, crossFilePTs, dilutionCounts, "raw");
+        checkCrossFilePTs(crossFilePTSummary, crossFilePTs, dilutionCounts, "summary");
+
 
         boolean foundRealRow = false;
         for (List<LuminexDataRow> rows : _sheets.values())
@@ -286,11 +287,13 @@ public class LuminexExcelParser
         }
     }
 
-    private void checkCrossFilePTs(Map<String, Titration> crossFilePTs, Map<String, HashSet<Double>> dilutionCounts)
+    private void checkCrossFilePTs(Map<String, Integer> crossFilePT, Map<String, Titration> crossFilePTs, Map<String, HashSet<Double>> dilutionCounts, String type)
     {
-        for (String desc : crossFilePTs.keySet())
+        int minimum_titration_count = (type.equals("raw")) ? LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT : LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT;
+
+        for (String desc : crossFilePT.keySet())
         {
-            if (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT)
+            if ((crossFilePT.get(desc) >= minimum_titration_count) && (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
             {
                 _titrations.put(desc, crossFilePTs.get(desc));
             }
