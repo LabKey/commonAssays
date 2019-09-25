@@ -295,7 +295,7 @@ public class LuminexExcelParser
 
         for (String desc : crossFilePTs.keySet())
         {
-            if (crossFilePT.containsKey(desc) && (crossFilePT.get(desc) >= minimum_titration_count) && (dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
+            if (crossFilePT.containsKey(desc) && (crossFilePT.get(desc) >= minimum_titration_count) && (dilutionCounts.containsKey(desc) && dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT))
             {
                 _titrations.put(desc, crossFilePTs.get(desc));
             }
