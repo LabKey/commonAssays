@@ -3,6 +3,10 @@ import org.labkey.gradle.util.BuildUtils
 dependencies {
    external 'commons-httpclient:commons-httpclient:3.1'
    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
+
+   BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtenstion: "module")
+   BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "pipeline"), depProjectConfig: "published", depExtenstion: "module")
+   BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtenstion: "module")
 }
 
 // TODO move resources files into resources directory to avoid this overlap
