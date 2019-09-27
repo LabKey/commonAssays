@@ -197,7 +197,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
 
-        Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_ANALYTE + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Analyte Properties");
+        Domain analyteDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_ANALYTE), "Analyte Properties");
         analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
         addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
@@ -210,7 +210,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         result.add(new Pair<>(analyteDomain, Collections.emptyMap()));
 
-        Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
+        Domain excelRunDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_EXCEL_RUN), "Excel File Run Properties");
         excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
         addProperty(excelRunDomain, "FileName", "File Name", PropertyType.STRING);
         addProperty(excelRunDomain, "AcquisitionDate", "Acquisition Date", PropertyType.DATE_TIME);
@@ -220,7 +220,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
         result.add(new Pair<>(excelRunDomain, Collections.emptyMap()));
 
-        Domain resultDomain = createResultsDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_CUSTOM_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
+        Domain resultDomain = createResultsDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_CUSTOM_DATA), "Data Fields");
         result.add(new Pair<>(resultDomain, Collections.emptyMap()));
 
         return result;

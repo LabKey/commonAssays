@@ -208,7 +208,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     protected Pair<Domain,Map<DomainProperty,Object>> createResultDomain(Container c, User user)
     {
-        Domain dataDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ExpProtocol.ASSAY_DOMAIN_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
+        Domain dataDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_DATA), "Data Fields");
         dataDomain.setDescription("The user is prompted to enter data values for row of data associated with a run, typically done as uploading a file.  This is part of the second step of the upload process.");
 
         DomainProperty specimenLsid = addProperty(dataDomain, ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Specimen", PropertyType.STRING, "Specimen Data Lookup");
