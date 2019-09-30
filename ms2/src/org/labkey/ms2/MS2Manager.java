@@ -61,7 +61,6 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -92,7 +91,6 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -220,11 +218,6 @@ public class MS2Manager
     public static TableInfo getTableInfoModifications()
     {
         return getSchema().getTable("Modifications");
-    }
-
-    public static TableInfo getTableInfoHistory()
-    {
-        return getSchema().getTable("History");
     }
 
     public static TableInfo getTableInfoPeptidesData()
@@ -770,7 +763,6 @@ public class MS2Manager
 
         new SqlExecutor(getSchema()).execute(markDeleted);
         _removeRunsFromCache(runIds);
-        invalidateBasicStats();
     }
 
     private static String _purgeStatus = null;
@@ -1223,58 +1215,6 @@ public class MS2Manager
         stats.put(prefix + "Runs", df.format(inProcessRuns));
         stats.put(prefix + "Peptides", df.format(inProcessPeptides));
         stats.put(prefix + "Spectra", df.format(inProcessSpectra));
-    }
-
-
-    public static void recomputeBasicStats()
-    {
-        _basicStats = computeBasicStats();
-
-        try
-        {
-            Map<String, String> stats = getBasicStats();
-            long runs = df.parse(stats.get("Runs")).longValue();
-            long peptides = df.parse(stats.get("Peptides")).longValue();
-            insertStats(runs, peptides);
-        }
-        catch (ParseException e)
-        {
-            throw new UnexpectedException(e);
-        }
-    }
-
-
-    // Cache the basic stats for the MS2 stats web part
-    private static Map<String, String> _basicStats = null;
-
-    public static synchronized Map<String, String> getBasicStats()
-    {
-        if (null == _basicStats)
-            _basicStats = computeBasicStats();
-
-        return _basicStats;
-    }
-
-    public static synchronized void invalidateBasicStats()
-    {
-        _basicStats = null;
-    }
-
-    private static Map<String, String> computeBasicStats()
-    {
-        Map<String, String> stats = new HashMap<>();
-        addStats(stats, "", "DELETED = ? AND StatusId = 1", new Object[]{Boolean.FALSE});
-        return stats;
-    }
-
-    private static void insertStats(long runs, long peptides)
-    {
-        Map<String, Object> m = new HashMap<>();
-        m.put("date", new Date());
-        m.put("runs", runs);
-        m.put("peptides", peptides);
-
-        Table.insert(null, getTableInfoHistory(), m);
     }
 
 
