@@ -3267,7 +3267,7 @@ public class MS2Controller extends SpringActionController
             if (gridView instanceof QueryView)
             {
                 QueryView queryView = (QueryView)gridView;
-                int count = DataRegionSelection.selectAll(queryView, queryView.getSettings().getSelectionKey());
+                int count = DataRegionSelection.setSelectionForAll(queryView, queryView.getSettings().getSelectionKey(), true);
                 return new DataRegionSelection.SelectionResponse(count);
             }
             throw new NotFoundException("Cannot select all for a non-query view");
