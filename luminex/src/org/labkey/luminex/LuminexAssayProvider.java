@@ -198,7 +198,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
 
         Domain analyteDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_ANALYTE), "Analyte Properties");
-        analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
+        analyteDomain.setDescription("Define the analyte properties for this assay design. The user will be prompted to enter these properties for each of the analytes in the file they upload.");
         addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
         addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
@@ -211,7 +211,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         result.add(new Pair<>(analyteDomain, Collections.emptyMap()));
 
         Domain excelRunDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_EXCEL_RUN), "Excel File Run Properties");
-        excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
+        excelRunDomain.setDescription("Define the Excel file run properties for this assay design. When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them.");
         addProperty(excelRunDomain, "FileName", "File Name", PropertyType.STRING);
         addProperty(excelRunDomain, "AcquisitionDate", "Acquisition Date", PropertyType.DATE_TIME);
         addProperty(excelRunDomain, "ReaderSerialNumber", "Reader Serial Number", PropertyType.STRING);
@@ -229,7 +229,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     private Domain createResultsDomain(Container c, String domainURI, String name)
     {
         Domain resultDomain = PropertyService.get().createDomain(c, domainURI, name);
-        resultDomain.setDescription("Additional result/data properties populated by the assay's associated transformation script, if any.");
+        resultDomain.setDescription("Define the additional results properties for this assay design. The user will not be prompted for these properties but instead they can be populated by the assay's associated transformation script(s), if any.");
         return resultDomain;
     }
 

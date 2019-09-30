@@ -321,7 +321,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_VIRUS_WELLGROUP);
         Domain virusWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Virus Fields");
 
-        virusWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the virus well groups in their chosen plate template.");
+        virusWellGroupDomain.setDescription("Define the virus properties for this assay design. The user will be prompted to enter these properties for each of the virus well groups in their chosen plate template.");
         addProperty(virusWellGroupDomain, VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING);
         addProperty(virusWellGroupDomain, VIRUS_ID_PROPERTY_NAME, PropertyType.STRING);
 
