@@ -548,7 +548,7 @@ public abstract class AbstractMS2RunView
         public void exportToExcel(HttpServletResponse response, List<String> selectedRows) throws IOException
         {
             createRowIdFragment(selectedRows);
-            getSettings().setMaxRows(ExcelWriter.MAX_ROWS_EXCEL_97);
+            getSettings().setMaxRows(ExcelWriter.ExcelDocumentType.xlsx.getMaxRows());
             exportToExcel(response);
         }
 
