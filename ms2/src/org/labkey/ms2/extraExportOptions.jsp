@@ -19,7 +19,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <p>
     Choose an export format:<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.Excel%>" checked>Excel (limited to 65,535 rows)<br/>
+    <input type="radio" name="exportFormat" value="<%=MS2ExportType.Excel%>" checked>Excel (.xlsx)<br/>
     <input type="radio" name="exportFormat" value="<%=MS2ExportType.TSV%>">TSV<br/>
     <input type="radio" name="exportFormat" value="<%=MS2ExportType.DTA%>">Spectra as DTA<br/>
     <input type="radio" name="exportFormat" value="<%=MS2ExportType.PKL%>">Spectra as PKL<br/>

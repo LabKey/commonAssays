@@ -41,7 +41,7 @@ public class CompareExcelWriter extends ExcelWriter
 
     public CompareExcelWriter(Results rs, List<DisplayColumn> displayColumns)
     {
-        super(rs, displayColumns);
+        super(rs, displayColumns, ExcelDocumentType.xlsx);
     }
 
     public void setMultiColumnCaptions(List<String> multiColumnCaptions)
