@@ -44,47 +44,6 @@
     <description>Contains a row for every fraction in a loaded MS2 search result.</description>
     <titleColumn>Fraction</titleColumn>
   </table>
-  <table tableName="History" tableDbType="TABLE">
-    <columns>
-      <column columnName="Date">
-        <columnTitle>Date</columnTitle>
-        <formatString>DateTime</formatString>
-        <inputType>text</inputType>
-        <displayWidth>140</displayWidth>
-        <scale>100</scale>
-        <inputLength>23</inputLength>
-        <nullable>true</nullable>
-        <isReadOnly>false</isReadOnly>
-      </column>
-      <column columnName="Runs">
-        <datatype>long</datatype>
-        <columnTitle>Runs</columnTitle>
-        <inputType>text</inputType>
-        <formatString>#,##0</formatString>
-        <displayWidth>75</displayWidth>
-        <scale>10</scale>
-        <inputLength>10</inputLength>
-        <nullable>false</nullable>
-        <isReadOnly>false</isReadOnly>
-        <isUserEditable>true</isUserEditable>
-      </column>
-      <column columnName="Peptides">
-        <datatype>long</datatype>
-        <columnTitle>Peptides</columnTitle>
-        <inputType>text</inputType>
-        <formatString>#,##0</formatString>
-        <displayWidth>75</displayWidth>
-        <scale>10</scale>
-        <inputLength>10</inputLength>
-        <nullable>false</nullable>
-        <isReadOnly>false</isReadOnly>
-        <isUserEditable>true</isUserEditable>
-      </column>
-    </columns>
-    <tableTitle>MS2History</tableTitle>
-    <pkColumnName>Date</pkColumnName>
-    <description>Contains a history of statistics for all MS2 runs loaded into the server.</description>
-  </table>
   <table tableName="Modifications" tableDbType="TABLE">
     <columns>
       <column columnName="Run"/>

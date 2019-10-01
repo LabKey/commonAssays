@@ -143,7 +143,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 19.20;
+        return 19.21;
     }
 
     @NotNull
@@ -170,13 +170,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                         WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SAMPLE_PREP_RUN_TYPE);
                         result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
                         return result;
-                    }
-                },
-                new BaseWebPartFactory("MS2 Statistics", WebPartFactory.LOCATION_RIGHT)
-                {
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        return new MS2StatsWebPart();
                     }
                 },
                 new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)

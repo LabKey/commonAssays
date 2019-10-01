@@ -2539,19 +2539,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    @RequiresLogin
-    public class ExportHistoryAction extends ExportAction
-    {
-        public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
-        {
-            TableInfo tinfo = MS2Manager.getTableInfoHistory();
-            ExcelWriter ew = new ExcelWriter(MS2Manager.getSchema(), "SELECT * FROM " + MS2Manager.getTableInfoHistory() + " ORDER BY Date");
-            ew.setColumns(tinfo.getColumns());
-            ew.setSheetName("MS2 History");
-            ew.write(response);
-        }
-    }
-
     @RequiresSiteAdmin
     public class ReloadFastaAction extends FormHandlerAction
     {
@@ -3297,7 +3284,7 @@ public class MS2Controller extends SpringActionController
             List<Long> peptideIds = new ArrayList<>(exportRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
-            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.MAX_ROWS_EXCEL_97); i++)
+            for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.ExcelDocumentType.xlsx.getMaxRows()); i++)
             {
                 String[] row = exportRows.get(i).split(",");
                 try
