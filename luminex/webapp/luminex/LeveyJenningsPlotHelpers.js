@@ -121,16 +121,31 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 {
     var plotData = [];
     var records = config.store.getRange();
+    var otherHoverProps = ['Network', 'AssayType', 'ExpPerformer', 'AcquisitionDate'];
 
     var _pushData = function(record)
     {
-        plotData.push({
+        var data = {
             xLabel: record.get('NotebookNo'),
             pointColor: record.get('LotNumber'),
             value: record.get(config.plotType),
             gsMean: record.get('GuideSet' + config.plotType + 'Average'),
             gsStdDev: record.get('GuideSet' + config.plotType + 'StdDev')
+        };
+
+        // add some other values to the data object for the hover display
+        Ext.each(otherHoverProps, function(prop) {
+            var val = record.get(prop);
+
+            // convert values that are date objects to a display string format
+            if (val != null && LABKEY.Utils.isDate(val)) {
+                val = new Date(val).format("Y-m-d");
+            }
+
+            data[prop] = val;
         });
+
+        plotData.push(data);
     };
 
     // find center point and trim
@@ -204,9 +219,18 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         color: 'pointColor',
         colorRange: ['black', 'red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown'],
         hoverTextFn: function(row){
-            return 'Notebook: ' + row.xLabel
+            var display = 'Notebook: ' + row.xLabel
                     + '\nLot Number: ' + row.pointColor
                     + '\n' + config.plotType + ': ' + row.value;
+
+            // add any of the non-null extra display values to the hover
+            Ext.each(otherHoverProps, function(prop) {
+                if (row[prop] != null) {
+                    display += '\n' + prop + ': ' + row[prop];
+                }
+            });
+
+            return display;
         }
     };
 
