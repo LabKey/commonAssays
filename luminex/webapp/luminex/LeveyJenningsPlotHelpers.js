@@ -139,7 +139,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
             // convert values that are date objects to a display string format
             if (val != null && LABKEY.Utils.isDate(val)) {
-                val = new Date(val).format("Y-m-d");
+                val = new Date(val).format("Y-m-d"); // TODO use LABKEY.extDefaultDateFormat?
             }
 
             data[prop] = val;
