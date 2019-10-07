@@ -89,7 +89,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.startDateField = new Ext.form.DateField({
             id: 'start-date-field',
-            format:  'Y-m-d',
+            format:  'Y-m-d', // TODO use LABKEY.extDefaultDateFormat?
             listeners: {
                 scope: this,
                 'valid': function (df) {
@@ -107,7 +107,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.endDateField = new Ext.form.DateField({
             id: 'end-date-field',
-            format:  'Y-m-d',
+            format:  'Y-m-d', // TODO use LABKEY.extDefaultDateFormat?
             listeners: {
                 scope: this,
                 'valid': function (df) {
