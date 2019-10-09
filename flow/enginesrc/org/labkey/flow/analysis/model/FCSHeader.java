@@ -16,12 +16,9 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.search.SearchService;
@@ -36,7 +33,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
 
 /**
  */
@@ -45,42 +44,6 @@ public class FCSHeader
     public static final String CONTENT_TYPE = "application/vnd.isac.fcs";
 
     private static final Logger LOG = Logger.getLogger(FCSHeader.class);
-
-    // Just like DateUtil.parseTime() except checks for >3 decimal places
-    // after the seconds and trims the string to only include 3 decimal places.
-    //    "00:00:00.000000"  => "00:00:00.000"
-    //    "00:00:00.0"       => "00:00:00.0"
-    //    "00:00:00"         => "00:00:00"
-    public static long parseTime(String s)
-    {
-        int len = s.length();
-        int period = s.lastIndexOf('.');
-        if (period > 6 && period >= len - 8 && period < len - 1 &&
-                s.charAt(period - 3) == ':' &&
-                s.charAt(period - 6) == ':')
-        {
-            s = s.substring(0, period + Math.min(4, len - period));
-        }
-        return DateUtil.parseTime(s);
-    }
-
-    // Just like DateUtil.parseDateTime() except checks for >3 decimal places
-    // after the seconds and trims the string to only include 3 decimal places.
-    //    "1/2/2000 00:00:00.000000"  => "00:00:00.000"
-    //    "1/2/2000 00:00:00.0"       => "00:00:00.0"
-    //    "1/2/2000 00:00:00"         => "00:00:00"
-    public static long parseDateTime(String s)
-    {
-        int len = s.length();
-        int period = s.lastIndexOf('.');
-        if (period > 6 && period >= len - 8 && period < len - 1 &&
-                s.charAt(period - 3) == ':' &&
-                s.charAt(period - 6) == ':')
-        {
-            s = s.substring(0, period + Math.min(4, len - period));
-        }
-        return DateUtil.parseDateTime(s);
-    }
 
     private Map<String, String> keywords = new CaseInsensitiveHashMap<>();
     int dataLast;
@@ -149,7 +112,7 @@ public class FCSHeader
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = FCSHeader.parseDateTime(exportTime);
+            long date = DateUtil.parseDateTime(exportTime);
 //            return Date.from(Instant.ofEpochMilli(date).truncatedTo(ChronoUnit.DAYS));
             return new Date(date);
         }
@@ -171,7 +134,7 @@ public class FCSHeader
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = FCSHeader.parseDateTime(exportTime);
+            long date = DateUtil.parseDateTime(exportTime);
             return new Date(date);
         }
 
@@ -184,7 +147,7 @@ public class FCSHeader
         if (btim == null)
             return 0;
 
-        return FCSHeader.parseTime(btim);
+        return DateUtil.parseTime(btim);
     }
 
     public long getEndTime()
@@ -193,7 +156,7 @@ public class FCSHeader
         if (etim == null)
             return 0;
 
-        return FCSHeader.parseTime(etim);
+        return DateUtil.parseTime(etim);
     }
 
     /** Get the duration in seconds. */
@@ -505,37 +468,4 @@ public class FCSHeader
     };
 
 
-    public static class TestCase extends Assert
-    {
-        // Partially copied from DateUtil.testDateTimeUS
-        @Test
-        public void testParseDateTime()
-        {
-            long datetimeExpected = java.sql.Timestamp.valueOf("2001-02-03 04:05:06").getTime();
-
-            // DateTime with time
-            Date dt = new Date(datetimeExpected);
-            assertEquals(datetimeExpected, parseDateTime(dt.toString()));
-            assertEquals(datetimeExpected, parseDateTime(dt.toGMTString()));
-            assertEquals(datetimeExpected, parseDateTime(dt.toLocaleString()));
-            assertEquals(datetimeExpected, parseDateTime("03-FEB-2001-04:05:06")); // FCS dates
-            // Issue 36691: flow: 18.3 upgrade error caused by date parsing issue
-            try
-            {
-                assertEquals(datetimeExpected, DateUtil.parseDateTime("03-FEB-2001 04:05:06.123456"));
-                fail("Expected DateUtil.parseDateTime to fail parsing date... for now");
-            }
-            catch (ConversionException ex)
-            {
-                // ok, expected for now
-                assertEquals("Can't parse \"03-FEB-2001 04:05:06.123456\" into a date", ex.getMessage());
-            }
-
-            assertEquals(datetimeExpected+100, parseDateTime("03-FEB-2001 04:05:06.1"));
-            assertEquals(datetimeExpected+120, parseDateTime("03-FEB-2001 04:05:06.12"));
-            assertEquals(datetimeExpected+123, parseDateTime("03-FEB-2001 04:05:06.123"));
-            assertEquals(datetimeExpected+123, parseDateTime("03-FEB-2001 04:05:06.1234"));
-            assertEquals(datetimeExpected+123, parseDateTime("03-FEB-2001 04:05:06.123456"));
-        }
-    }
 }
