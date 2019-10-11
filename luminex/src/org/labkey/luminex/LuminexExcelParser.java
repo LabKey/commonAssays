@@ -282,7 +282,7 @@ public class LuminexExcelParser
                 Integer count = crossFilePT.get(desc);
                 crossFilePT.put(desc, count + potentialTitrationCounts.get(desc));
             }
-            else
+            else if (potentialTitrationCounts.containsKey(desc))
             {
                 crossFilePT.put(desc, potentialTitrationCounts.get(desc));
             }
