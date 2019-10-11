@@ -98,7 +98,7 @@ public class ProteinExpressionMatrixAssayTest extends BaseWebDriverTest
         _containerHelper.setFolderType(FOLDER_TYPE_MS2);
 
         //create New Assay Design of type 'Protein Expression Matrix'
-        _assayHelper.createAssayWithDefaults("Protein Expression Matrix", ASSAY_NAME);
+        _assayHelper.createAssayDesignWithDefaults("Protein Expression Matrix", ASSAY_NAME);
     }
 
     @Before
