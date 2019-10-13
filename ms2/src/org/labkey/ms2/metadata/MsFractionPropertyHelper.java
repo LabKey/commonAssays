@@ -67,20 +67,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
 
     public static List<? extends DomainProperty> getProperties(@NotNull ExpSampleSet sampleSet, Container c)
     {
-        if (sampleSet.getType() != null)
-        {
-            return sampleSet.getType().getProperties();
-        }
-        else
-        {
-            Domain d = PropertyService.get().createDomain(c, sampleSet.getLSID(), sampleSet.getName());
-            DomainProperty namePD = d.addProperty();
-            namePD.setName("Name");
-            namePD.setLabel("Name");
-            namePD.setType(PropertyService.get().getType(c, PropertyType.STRING.getXmlName()));
-            namePD.setRequired(true);
-            return Collections.singletonList(namePD);
-        }
+        return sampleSet.getDomain().getProperties();
     }
 
     public List<DomainProperty> getNamePDs()

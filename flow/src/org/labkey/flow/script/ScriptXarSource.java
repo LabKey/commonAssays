@@ -78,11 +78,6 @@ public class ScriptXarSource extends XarSource
         return null != getRoot() ? getRoot().toPath() : null;
     }
 
-    public boolean allowImport(PipeRoot pr, Container container, File file)
-    {
-        return true;
-    }
-
     public boolean shouldIgnoreDataFiles()
     {
         return false;
