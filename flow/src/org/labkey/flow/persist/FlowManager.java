@@ -46,9 +46,9 @@ import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.data.AttributeType;
@@ -1600,7 +1600,7 @@ public class FlowManager
                     return;
                 }
 
-                long date = FCSHeader.parseDateTime(dateStr);
+                long date = DateUtil.parseDateTime(dateStr);
                 Date d = new Date(date);
 
                 // get the existing property if any
