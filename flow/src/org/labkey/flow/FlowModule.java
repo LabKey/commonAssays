@@ -18,6 +18,7 @@ package org.labkey.flow;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.audit.DefaultAuditProvider;
 import org.labkey.api.data.Container;
@@ -37,7 +38,6 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UsageReportingLevel;
@@ -325,8 +325,7 @@ public class FlowModule extends SpringModule
                 FlowJoWorkspace.LoadTests.class,
                 AnalysisSerializer.TestCase.class,
                 CompensationMatrix.TestFCS.class,
-                ExportAnalysisManifest.TestCase.class,
-                FCSHeader.TestCase.class
+                ExportAnalysisManifest.TestCase.class
                 ));
     }
 
