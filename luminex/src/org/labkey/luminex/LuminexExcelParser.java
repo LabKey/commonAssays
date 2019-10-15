@@ -86,12 +86,24 @@ public class LuminexExcelParser
 
     private void parseFile() throws ExperimentException
     {
+        // PT -> Potential Titration
+        Map<String, Integer> crossFilePTRaw = new CaseInsensitiveHashMap<>();
+        Map<String, Integer> crossFilePTSummary = new CaseInsensitiveHashMap<>();
+        Map<String, Titration> crossFilePTs = new CaseInsensitiveHashMap<>();
+        Map<String, HashSet<Double>> dilutionCounts = new HashMap<>();
+
         if (_parsed) return;
         Set<String> analyteNames = new HashSet<>();
 
         for (File dataFile : _dataFiles)
         {
+            Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<>();
+            Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<>();
+            Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<>();
+            boolean firstSheet = true;
+
             analyteNames.clear();
+
             try
             {
                 Workbook workbook = ExcelFactory.create(dataFile);
@@ -135,43 +147,46 @@ public class LuminexExcelParser
                         row++;
                     }
 
-                    Map<String, Integer> potentialTitrationRawCounts = new CaseInsensitiveHashMap<>();
-                    Map<String, Integer> potentialTitrationSummaryCounts = new CaseInsensitiveHashMap<>();
-                    Map<String, Titration> potentialTitrations = new CaseInsensitiveHashMap<>();
-
                     if (row <= sheet.getLastRowNum())
                     {
                         boolean hasMoreRows;
                         do
                         {
                             LuminexDataRow dataRow = createDataRow(analyte, sheet, colNames, row, dataFile);
+                            String rowDescription = dataRow.getDescription();
 
-                            if (dataRow.getDescription() != null)
+                            if (firstSheet && rowDescription != null)
                             {
+                                // monitor how many unique dilutions a description appears with
+                                if (!dilutionCounts.containsKey(rowDescription))
+                                {
+                                    dilutionCounts.put(rowDescription, new HashSet<>());
+                                }
+                                dilutionCounts.get(rowDescription).add(dataRow.getDilution());
+
                                 // track the number of rows per sample for summary and raw separately
                                 if (dataRow.isSummary())
                                 {
-                                    Integer count = potentialTitrationSummaryCounts.get(dataRow.getDescription());
-                                    potentialTitrationSummaryCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                    Integer count = potentialTitrationSummaryCounts.get(rowDescription);
+                                    potentialTitrationSummaryCounts.put(rowDescription, count == null ? 1 : count + 1);
                                 }
                                 else
                                 {
-                                    Integer count = potentialTitrationRawCounts.get(dataRow.getDescription());
-                                    potentialTitrationRawCounts.put(dataRow.getDescription(), count == null ? 1 : count + 1);
+                                    Integer count = potentialTitrationRawCounts.get(rowDescription);
+                                    potentialTitrationRawCounts.put(rowDescription, count == null ? 1 : count + 1);
                                 }
 
-                                if (!potentialTitrations.containsKey(dataRow.getDescription()))
+                                if (!potentialTitrations.containsKey(rowDescription))
                                 {
                                     Titration newTitration = new Titration();
-                                    newTitration.setName(dataRow.getDescription());
+                                    newTitration.setName(rowDescription);
                                     if (dataRow.getType() != null)
                                     {
                                         newTitration.setStandard(dataRow.getType().toUpperCase().startsWith("S") || dataRow.getType().toUpperCase().startsWith("ES"));
                                         newTitration.setQcControl(dataRow.getType().toUpperCase().startsWith("C"));
                                         newTitration.setUnknown(dataRow.getType().toUpperCase().startsWith("X"));
                                     }
-
-                                    potentialTitrations.put(dataRow.getDescription(), newTitration);
+                                    potentialTitrations.put(rowDescription, newTitration);
                                 }
                             }
 
@@ -190,25 +205,37 @@ public class LuminexExcelParser
                         row = handleHeaderOrFooterRow(sheet, row, analyte, dataFile);
                     }
 
-                    // Check if we've accumulated enough instances to consider it to be a titration
-                    for (String desc : potentialTitrations.keySet())
+                    // Update crossFilePTRaw/crossFilePTSummary
+                    if (firstSheet)
                     {
-                        if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT) ||
-                            (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT))
+                        if (potentialTitrationRawCounts.size() > 0)
+                            buildCrossFilePTs(crossFilePTRaw, potentialTitrations, potentialTitrationRawCounts);
+                        if (potentialTitrationSummaryCounts.size() > 0)
+                            buildCrossFilePTs(crossFilePTSummary, potentialTitrations, potentialTitrationSummaryCounts);
+
+                        // Check for single-file titrations. Does not check for dilution counts.
+                        for (String desc : potentialTitrations.keySet())
                         {
-                            _titrations.put(desc, potentialTitrations.get(desc));
-                        }
-                        // detect potential single point controls
-                        if (potentialTitrations.get(desc) != null && potentialTitrations.get(desc).isQcControl()) // Type starts with 'C'
-                        {
-                            if ((potentialTitrationSummaryCounts.get(desc) != null && potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT) ||
-                                    (potentialTitrationRawCounts.get(desc) != null && potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT))
+                            if (((potentialTitrationRawCounts.get(desc) != null) && ((potentialTitrationRawCounts.get(desc)) >= LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT)) ||
+                                    ((potentialTitrationSummaryCounts.get(desc) != null) && ((potentialTitrationSummaryCounts.get(desc)) >= LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT)))
                             {
-                                _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+                                _titrations.put(desc, potentialTitrations.get(desc));
+                            }
+
+                            // detect potential single point controls
+                            if ((potentialTitrations.get(desc) != null) && (potentialTitrations.get(desc).isQcControl())) // Type starts with 'C'
+                            {
+                                if (((potentialTitrationRawCounts.get(desc) != null)  && (potentialTitrationRawCounts.get(desc) <= LuminexDataHandler.SINGLE_POINT_CONTROL_RAW_COUNT)) ||
+                                        ((potentialTitrationSummaryCounts.get(desc) != null) && (potentialTitrationSummaryCounts.get(desc) == LuminexDataHandler.SINGLE_POINT_CONTROL_SUMMARY_COUNT)))
+                                {
+                                    _singlePointControls.put(desc, new SinglePointControl(potentialTitrations.get(desc)));
+                                }
                             }
                         }
                     }
+                    firstSheet = false;
                 }
+                crossFilePTs.putAll(potentialTitrations);
             }
             catch (IOException e)
             {
@@ -219,6 +246,10 @@ public class LuminexExcelParser
                 throw new XarFormatException("Failed to parse file as Excel: " + dataFile.getName(), e);
             }
         }
+
+        checkCrossFilePTs(crossFilePTRaw, crossFilePTs, dilutionCounts, "raw");
+        checkCrossFilePTs(crossFilePTSummary, crossFilePTs, dilutionCounts, "summary");
+
 
         boolean foundRealRow = false;
         for (List<LuminexDataRow> rows : _sheets.values())
@@ -240,6 +271,35 @@ public class LuminexExcelParser
             throw new ExperimentException("No data rows found. Most likely not a supported Luminex file.");
         }
         _parsed = true;
+    }
+
+    private void buildCrossFilePTs(Map<String, Integer> crossFilePT, Map<String, Titration> potentialTitrations, Map<String, Integer> potentialTitrationCounts)
+    {
+        for (String desc : potentialTitrations.keySet())
+        {
+            if (crossFilePT.containsKey(desc) && potentialTitrationCounts.containsKey(desc))
+            {
+                Integer count = (crossFilePT.get(desc) == null) ? 0 : crossFilePT.get(desc);
+                crossFilePT.put(desc, count + potentialTitrationCounts.get(desc));
+            }
+            else if (potentialTitrationCounts.containsKey(desc))
+            {
+                crossFilePT.put(desc, potentialTitrationCounts.get(desc));
+            }
+        }
+    }
+
+    private void checkCrossFilePTs(Map<String, Integer> crossFilePT, Map<String, Titration> crossFilePTs, Map<String, HashSet<Double>> dilutionCounts, String type)
+    {
+        int minimum_titration_count = (type.equals("raw")) ? LuminexDataHandler.MINIMUM_TITRATION_RAW_COUNT : LuminexDataHandler.MINIMUM_TITRATION_SUMMARY_COUNT;
+
+        for (String desc : crossFilePTs.keySet())
+        {
+            if ((dilutionCounts.containsKey(desc) && dilutionCounts.get(desc).size() >= LuminexDataHandler.MINIMUM_TITRATION_DILUTION_COUNT) && crossFilePT.containsKey(desc) && (crossFilePT.get(desc) >= minimum_titration_count))
+            {
+                _titrations.put(desc, crossFilePTs.get(desc));
+            }
+        }
     }
 
     private Pair<Boolean, Integer> findNextDataRow(Sheet sheet, int row)

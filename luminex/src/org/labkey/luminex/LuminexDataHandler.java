@@ -145,6 +145,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final int MINIMUM_TITRATION_SUMMARY_COUNT = 5;
     public static final int MINIMUM_TITRATION_RAW_COUNT = 10;
 
+    public static final int MINIMUM_TITRATION_DILUTION_COUNT = 3;
+
     public static final int SINGLE_POINT_CONTROL_SUMMARY_COUNT = 1;
     public static final int SINGLE_POINT_CONTROL_RAW_COUNT = 2;
     private static final int DELETE_BATCH_SIZE = 200;

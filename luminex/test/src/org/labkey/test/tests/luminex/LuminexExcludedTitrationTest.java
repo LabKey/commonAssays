@@ -19,10 +19,13 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.Locators;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.util.DataRegionTable;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -57,6 +60,40 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         exclusionMessage =  "excluding " + analyte + " analyte for titration " + titration;
         excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, 3, analyte);
         verifyTitrationAnalyteExclusion(titration, analyte, exclusionMessage);
+    }
+
+    @Test
+    public void testCrossPlateTitration()
+    {
+        List<File> files = new ArrayList<>();
+        files.add(TEST_ASSAY_LUM_FILE5);
+        files.add(TEST_ASSAY_LUM_FILE6);
+        files.add(TEST_ASSAY_LUM_FILE7);
+        files.add(TEST_ASSAY_LUM_FILE8);
+        files.add(TEST_ASSAY_LUM_FILE9);
+
+        ensureMultipleCurveDataPresent(TEST_ASSAY_LUM);
+
+        goToProjectHome();
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
+
+        DataRegionTable table = new DataRegionTable("Runs", getDriver());
+        table.clickHeaderButton("Import Data");
+        clickButton("Next");
+
+        waitForElement(Locators.panelWebpartTitle.withText("Run Properties"));
+        setFormElement(Locator.name("name"), "Cross Plate titration");
+
+        uploadAssayFiles(files);
+        clickButton("Next");
+
+        assertTextPresent("Standard1-CrossplateTitration");
+
+    }
+
+    private void uploadAssayFiles(List<File> guavaFiles)
+    {
+        setInput(Locator.name("__primaryFile__"), guavaFiles);
     }
 
     private void verifyTitrationAnalyteExclusion(String excludedTitration, String excludedAnalyte, String exclusionMessage)
