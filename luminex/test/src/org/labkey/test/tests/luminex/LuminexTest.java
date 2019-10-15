@@ -189,15 +189,16 @@ public abstract class LuminexTest extends BaseWebDriverTest
             // since we want to test special characters in the assay name, copy the assay design to rename
             goToManageAssays();
             clickAndWait(Locator.linkWithText(TEST_ASSAY_XAR_NAME));
-            AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
+            ReactAssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
             // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
             if (requiresStudy() && renameTargetStudy())
-                assayDesigner.batchFields().selectField(1).setName("TargetStudyTemp");
+                assayDesigner.goToFieldProperties("Batch Properties").getField(1).setName("TargetStudyTemp");
 
-            assayDesigner.saveAndClose();
+            assayDesigner.goToFieldProperties("Excel File Run Properties");
+            assayDesigner.clickFinish();
         }
         else
         {

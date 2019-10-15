@@ -26,6 +26,7 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
 import org.labkey.test.util.DataRegionTable;
@@ -101,9 +102,10 @@ public final class LuminexPositivityTest extends LuminexTest
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("MyAnalyte", 120, "Blank"));
 
         goToTestAssayHome();
-        AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
+        ReactAssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
         assayDesigner.setName(assayName);
-        assayDesigner.saveAndClose();
+        assayDesigner.goToFieldProperties("Excel File Run Properties");
+        assayDesigner.clickFinish();
 
         goToTestAssayHome(assayName);
         _assayHelper.setDefaultValues(assayName, AbstractAssayHelper.AssayDefaultAreas.ANALYTE_PROPERTIES);
