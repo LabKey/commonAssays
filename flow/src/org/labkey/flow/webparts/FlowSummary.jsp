@@ -77,7 +77,7 @@
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
     ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
-    List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples();
+    List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples(_sampleSet.getContainer());
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -257,7 +257,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=h(_sampleSet.getDescription())%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples().size()%>)</a>
+            <a title="<%=h(_sampleSet.getDescription())%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples(_sampleSet.getContainer()).size()%>)</a>
         </div>
     <% } %>
 

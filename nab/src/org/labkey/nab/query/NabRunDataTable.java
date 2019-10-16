@@ -218,7 +218,7 @@ public class NabRunDataTable extends NabBaseTable
         final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
         if (sampleSet != null)
         {
-            for (DomainProperty pd : sampleSet.getType().getProperties())
+            for (DomainProperty pd : sampleSet.getDomain().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
