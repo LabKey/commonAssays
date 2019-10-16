@@ -95,7 +95,7 @@ public class MassSpecMetadataAssayProvider extends AbstractAssayProvider
     {
         // don't call the standard createBatchDomain because we don't want the target study or participant data resolver
         Domain domain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_BATCH), "Batch Fields");
-        domain.setDescription("Define the batch properties for this assay design. The user is prompted for these properties once for each set of runs they import to this assay.");
+        domain.setDescription("Define the batch fields for this assay design. The user is prompted for these fields once for each set of runs they import to this assay.");
 
         return new Pair<>(domain, Collections.emptyMap());
     }
