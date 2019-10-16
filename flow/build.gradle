@@ -17,9 +17,9 @@ dependencies {
     engineCompile project.files(project.tasks.schemasCompile)
 
     compile sourceSets.engine.output
-    jspCompile sourceSets.engine.output
-    jspCompile project.files(project.tasks.schemasCompile)
-    BuildUtils.addLabKeyDependency(project: project, config: "jspCompile", depProjectPath: project.path, depProjectConfig: 'compile')
+    jspImplementation sourceSets.engine.output
+    jspImplementation project.files(project.tasks.schemasCompile)
+    BuildUtils.addLabKeyDependency(project: project, config: "jspImplementation", depProjectPath: project.path, depProjectConfig: 'compile')
     BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtension: "module")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
