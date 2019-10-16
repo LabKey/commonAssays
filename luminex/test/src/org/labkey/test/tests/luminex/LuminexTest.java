@@ -195,9 +195,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
             // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
             if (requiresStudy() && renameTargetStudy())
-                assayDesigner.goToFieldProperties("Batch Properties").getField(1).setName("TargetStudyTemp");
+                assayDesigner.goToBatchFields().getField(1).setName("TargetStudyTemp");
 
-            assayDesigner.goToFieldProperties("Excel File Run Properties");
             assayDesigner.clickFinish();
         }
         else
@@ -208,7 +207,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
                 .setDescription(TEST_ASSAY_LUM_DESC);
 
             // add batch properties for transform and Ruminex version numbers
-            DomainFormPanel batchPanel = assayDesignerPage.goToFieldProperties("Batch Properties");
+            DomainFormPanel batchPanel = assayDesignerPage.goToBatchFields();
             batchPanel.addField("Network").setLabel("Network").setType(FieldDefinition.ColumnType.String);
             batchPanel.addField("TransformVersion").setLabel("Transform Script Version").setType(FieldDefinition.ColumnType.String);
             batchPanel.addField("LabTransformVersion").setLabel("Lab Transform Script Version").setType(FieldDefinition.ColumnType.String);
@@ -216,7 +215,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             batchPanel.addField("RVersion").setLabel("R Version").setType(FieldDefinition.ColumnType.String);
 
             // add run properties for designation of which field to use for curve fit calc in transform
-            DomainFormPanel runPanel = assayDesignerPage.goToFieldProperties("Run Properties");
+            DomainFormPanel runPanel = assayDesignerPage.goToRunFields();
             runPanel.addField("SubtNegativeFromAll").setLabel("Subtract Negative Bead from All Wells").setType(FieldDefinition.ColumnType.Boolean);
             runPanel.addField("StndCurveFitInput").setLabel("Input Var for Curve Fit Calc of Standards").setType(FieldDefinition.ColumnType.String);
             runPanel.addField("UnkCurveFitInput").setLabel("Input Var for Curve Fit Calc of Unknowns").setType(FieldDefinition.ColumnType.String);
@@ -239,7 +238,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             analytePanel.addField("NegativeControl").setLabel("Negative Control").setType(FieldDefinition.ColumnType.Boolean);
 
             // add the data properties for the calculated columns, set format to two decimal place for easier testing later
-            DomainFormPanel resultsPanel = assayDesignerPage.goToFieldProperties("Results Properties");
+            DomainFormPanel resultsPanel = assayDesignerPage.goToResultFields();
             resultsPanel.addField("FIBackgroundNegative").setLabel("FI-Bkgd-Neg").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
             resultsPanel.addField("Standard").setLabel("Stnd for Calc").setType(FieldDefinition.ColumnType.String);
             resultsPanel.addField("EstLogConc_5pl").setLabel("Est Log Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");

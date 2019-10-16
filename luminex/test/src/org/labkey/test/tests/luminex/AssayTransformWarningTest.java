@@ -98,10 +98,9 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         String importData = "ParticipantId\nJavaWarned";
         String runName = "java transform run";
 
-        ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("General", assayName)
-            .addTransformScript(JAVA_TRANSFORM_SCRIPT);
-        assayDesignerPage.goToFieldProperties("Results Properties");
-        assayDesignerPage.clickFinish();
+        _assayHelper.createAssayDesign("General", assayName)
+            .addTransformScript(JAVA_TRANSFORM_SCRIPT)
+            .clickFinish();
 
         clickAndWait(Locator.linkWithText(assayName));
         clickButton("Import Data");
@@ -137,11 +136,11 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
 
         ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("General", assayName)
             .addTransformScript(R_TRANSFORM_SCRIPT);
-        assayDesignerPage.goToFieldProperties("Run Properties")
+        assayDesignerPage.goToRunFields()
             .addField("myFile")
             .setLabel("My File")
             .setType(FieldDefinition.ColumnType.File);
-        assayDesignerPage.clickNext().clickFinish();
+        assayDesignerPage.clickFinish();
 
         clickAndWait(Locator.linkWithText(assayName));
         clickButton("Import Data");

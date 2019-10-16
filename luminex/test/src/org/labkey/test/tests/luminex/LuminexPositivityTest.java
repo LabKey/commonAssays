@@ -102,10 +102,9 @@ public final class LuminexPositivityTest extends LuminexTest
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("MyAnalyte", 120, "Blank"));
 
         goToTestAssayHome();
-        ReactAssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
-        assayDesigner.setName(assayName);
-        assayDesigner.goToFieldProperties("Excel File Run Properties");
-        assayDesigner.clickFinish();
+        _assayHelper.copyAssayDesign()
+            .setName(assayName)
+            .clickFinish();
 
         goToTestAssayHome(assayName);
         _assayHelper.setDefaultValues(assayName, AbstractAssayHelper.AssayDefaultAreas.ANALYTE_PROPERTIES);
