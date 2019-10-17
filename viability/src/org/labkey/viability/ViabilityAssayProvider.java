@@ -317,7 +317,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         String lsid = getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_DATA);
         Domain resultDomain = PropertyService.get().createDomain(c, lsid, RESULT_DOMAIN_NAME);
-        resultDomain.setDescription("The user is prompted to enter data values for row of data associated with a run, typically done as uploading a file.  This is part of the second step of the upload process.");
+        resultDomain.setDescription("Define the results fields for this assay design. The user is prompted for these fields for individual rows within the imported run, typically done as a file upload.");
 
         for (ResultDomainProperty rdp : RESULT_DOMAIN_PROPERTIES.values())
         {

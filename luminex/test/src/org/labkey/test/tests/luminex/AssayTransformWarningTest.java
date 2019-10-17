@@ -26,7 +26,8 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.QCAssayScriptHelper;
 import org.labkey.test.util.RReportHelper;
@@ -97,10 +98,9 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         String importData = "ParticipantId\nJavaWarned";
         String runName = "java transform run";
 
-        AssayDesignerPage assayDesigner = _assayHelper.createAssayAndEdit("General", assayName);
-        assayDesigner.addTransformScript(JAVA_TRANSFORM_SCRIPT);
-        assayDesigner.save();
-        assayDesigner.saveAndClose();
+        _assayHelper.createAssayDesign("General", assayName)
+            .addTransformScript(JAVA_TRANSFORM_SCRIPT)
+            .clickFinish();
 
         clickAndWait(Locator.linkWithText(assayName));
         clickButton("Import Data");
@@ -134,11 +134,13 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         String importData = "ParticipantId\nRWarned";
         String runName = "R transform run";
 
-        AssayDesignerPage assayDesigner = _assayHelper.createAssayAndEdit("General", assayName);
-        assayDesigner.addTransformScript(R_TRANSFORM_SCRIPT);
-        assayDesigner.addRunField("myFile", "My File", "File");
-        assayDesigner.save();
-        assayDesigner.saveAndClose();
+        ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("General", assayName)
+            .addTransformScript(R_TRANSFORM_SCRIPT);
+        assayDesignerPage.goToRunFields()
+            .addField("myFile")
+            .setLabel("My File")
+            .setType(FieldDefinition.ColumnType.File);
+        assayDesignerPage.clickFinish();
 
         clickAndWait(Locator.linkWithText(assayName));
         clickButton("Import Data");

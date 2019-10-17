@@ -29,10 +29,13 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.components.PropertiesEditor;
+import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
+import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -56,7 +59,6 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.components.PropertiesEditor.PropertiesEditor;
-import static org.labkey.test.util.ListHelper.ListColumnType;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
@@ -187,92 +189,76 @@ public abstract class LuminexTest extends BaseWebDriverTest
             // since we want to test special characters in the assay name, copy the assay design to rename
             goToManageAssays();
             clickAndWait(Locator.linkWithText(TEST_ASSAY_XAR_NAME));
-            AssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
+            ReactAssayDesignerPage assayDesigner = _assayHelper.copyAssayDesign();
             assayDesigner.setName(TEST_ASSAY_LUM);
             assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
 
             // rename TargetStudy field to avoid the expensive assay-to-study SpecimenId join
             if (requiresStudy() && renameTargetStudy())
-                assayDesigner.batchFields().selectField(1).setName("TargetStudyTemp");
+                assayDesigner.goToBatchFields().getField(1).setName("TargetStudyTemp");
 
-            assayDesigner.saveAndClose();
+            assayDesigner.clickFinish();
         }
         else
         {
             log("Setting up Luminex assay");
-
             clickButton("Manage Assays");
-            AssayDesignerPage assayDesigner = _assayHelper.createAssayAndEdit("Luminex", TEST_ASSAY_LUM);
-            assayDesigner.setDescription(TEST_ASSAY_LUM_DESC);
+            ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("Luminex", TEST_ASSAY_LUM)
+                .setDescription(TEST_ASSAY_LUM_DESC);
 
             // add batch properties for transform and Ruminex version numbers
-            _listHelper.addField("Batch Fields", "Network", "Network", ListColumnType.String);
-            _listHelper.addField("Batch Fields", "TransformVersion", "Transform Script Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", "LabTransformVersion", "Lab Transform Script Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", "RuminexVersion", "Ruminex Version", ListColumnType.String);
-            _listHelper.addField("Batch Fields", "RVersion", "R Version", ListColumnType.String);
+            DomainFormPanel batchPanel = assayDesignerPage.goToBatchFields();
+            batchPanel.addField("Network").setLabel("Network").setType(FieldDefinition.ColumnType.String);
+            batchPanel.addField("TransformVersion").setLabel("Transform Script Version").setType(FieldDefinition.ColumnType.String);
+            batchPanel.addField("LabTransformVersion").setLabel("Lab Transform Script Version").setType(FieldDefinition.ColumnType.String);
+            batchPanel.addField("RuminexVersion").setLabel("Ruminex Version").setType(FieldDefinition.ColumnType.String);
+            batchPanel.addField("RVersion").setLabel("R Version").setType(FieldDefinition.ColumnType.String);
 
             // add run properties for designation of which field to use for curve fit calc in transform
-            _listHelper.addField("Run Fields", "SubtNegativeFromAll", "Subtract Negative Bead from All Wells", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", "StndCurveFitInput", "Input Var for Curve Fit Calc of Standards", ListColumnType.String);
-            _listHelper.addField("Run Fields", "UnkCurveFitInput", "Input Var for Curve Fit Calc of Unknowns", ListColumnType.String);
-            _listHelper.addField("Run Fields", "CurveFitLogTransform", "Curve Fit Log Transform", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", "SkipRumiCalculation", "Skip Ruminex Calculations", ListColumnType.Boolean);
+            DomainFormPanel runPanel = assayDesignerPage.goToRunFields();
+            runPanel.addField("SubtNegativeFromAll").setLabel("Subtract Negative Bead from All Wells").setType(FieldDefinition.ColumnType.Boolean);
+            runPanel.addField("StndCurveFitInput").setLabel("Input Var for Curve Fit Calc of Standards").setType(FieldDefinition.ColumnType.String);
+            runPanel.addField("UnkCurveFitInput").setLabel("Input Var for Curve Fit Calc of Unknowns").setType(FieldDefinition.ColumnType.String);
+            runPanel.addField("CurveFitLogTransform").setLabel("Curve Fit Log Transform").setType(FieldDefinition.ColumnType.Boolean);
+            runPanel.addField("SkipRumiCalculation").setLabel("Skip Ruminex Calculations").setType(FieldDefinition.ColumnType.Boolean);
 
             // add run properties for use with the Guide Set test
-            _listHelper.addField("Run Fields", "NotebookNo", "Notebook Number", ListColumnType.String);
-            _listHelper.addField("Run Fields", "AssayType", "Assay Type", ListColumnType.String);
-            _listHelper.addField("Run Fields", "ExpPerformer", "Experiment Performer", ListColumnType.String);
+            runPanel.addField("NotebookNo").setLabel("Notebook Number").setType(FieldDefinition.ColumnType.String);
+            runPanel.addField("AssayType").setLabel("Assay Type").setType(FieldDefinition.ColumnType.String);
+            runPanel.addField("ExpPerformer").setLabel("Experiment Performer").setType(FieldDefinition.ColumnType.String);
 
             // add run properties for use with Calculating Positivity
-            _listHelper.addField("Run Fields", "CalculatePositivity", "Calculate Positivity", ListColumnType.Boolean);
-            _listHelper.addField("Run Fields", "BaseVisit", "Baseline Visit", ListColumnType.Double);
-            _listHelper.addField("Run Fields", "PositivityFoldChange", "Positivity Fold Change", ListColumnType.Integer);
+            runPanel.addField("CalculatePositivity").setLabel("Calculate Positivity").setType(FieldDefinition.ColumnType.Boolean);
+            runPanel.addField("BaseVisit").setLabel("Baseline Visit").setType(FieldDefinition.ColumnType.Decimal);
+            runPanel.addField("PositivityFoldChange").setLabel("Positivity Fold Change").setType(FieldDefinition.ColumnType.Integer);
 
             // add analyte property for tracking lot number
-            _listHelper.addField("Analyte Properties", "LotNumber", "Lot Number", ListColumnType.String);
-            _listHelper.addField("Analyte Properties", "NegativeControl", "Negative Control", ListColumnType.Boolean);
+            DomainFormPanel analytePanel = assayDesignerPage.goToFieldProperties("Analyte Properties");
+            analytePanel.addField("LotNumber").setLabel("Lot Number").setType(FieldDefinition.ColumnType.String);
+            analytePanel.addField("NegativeControl").setLabel("Negative Control").setType(FieldDefinition.ColumnType.Boolean);
 
-            // add the data properties for the calculated columns
-            _listHelper.addField("Data Fields", "FIBackgroundNegative", "FI-Bkgd-Neg", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Standard", "Stnd for Calc", ListColumnType.String);
-            _listHelper.addField("Data Fields", "EstLogConc_5pl", "Est Log Conc Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "EstConc_5pl", "Est Conc Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "SE_5pl", "SE Rumi 5 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "EstLogConc_4pl", "Est Log Conc Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "EstConc_4pl", "Est Conc Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "SE_4pl", "SE Rumi 4 PL", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Slope_4pl", "Slope_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Lower_4pl", "Lower_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Upper_4pl", "Upper_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Inflection_4pl", "Inflection_4pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Slope_5pl", "Slope_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Lower_5pl", "Lower_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Upper_5pl", "Upper_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Inflection_5pl", "Inflection_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Asymmetry_5pl", "Asymmetry_5pl", ListColumnType.Double);
-            _listHelper.addField("Data Fields", "Positivity", "Positivity", ListColumnType.String);
+            // add the data properties for the calculated columns, set format to two decimal place for easier testing later
+            DomainFormPanel resultsPanel = assayDesignerPage.goToResultFields();
+            resultsPanel.addField("FIBackgroundNegative").setLabel("FI-Bkgd-Neg").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Standard").setLabel("Stnd for Calc").setType(FieldDefinition.ColumnType.String);
+            resultsPanel.addField("EstLogConc_5pl").setLabel("Est Log Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("EstConc_5pl").setLabel("Est Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("SE_5pl").setLabel("SE Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("EstLogConc_4pl").setLabel("Est Log Conc Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("EstConc_4pl").setLabel("Est Conc Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("SE_4pl").setLabel("SE Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Slope_4pl").setLabel("Slope_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Lower_4pl").setLabel("Lower_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Upper_4pl").setLabel("Upper_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Inflection_4pl").setLabel("Inflection_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Slope_5pl").setLabel("Slope_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Lower_5pl").setLabel("Lower_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Upper_5pl").setLabel("Upper_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Inflection_5pl").setLabel("Inflection_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Asymmetry_5pl").setLabel("Asymmetry_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
+            resultsPanel.addField("Positivity").setLabel("Positivity").setType(FieldDefinition.ColumnType.String);
 
-
-            // set format to two decimal place for easier testing later
-            setFormat("Data Fields", 0, "0.0");
-            setFormat("Data Fields", 2, "0.0");
-            setFormat("Data Fields", 3, "0.0");
-            setFormat("Data Fields", 4, "0.0");
-            setFormat("Data Fields", 5, "0.0");
-            setFormat("Data Fields", 6, "0.0");
-            setFormat("Data Fields", 7, "0.0");
-            setFormat("Data Fields", 8, "0.0");
-            setFormat("Data Fields", 9, "0.0");
-            setFormat("Data Fields", 10, "0.0");
-            setFormat("Data Fields", 11, "0.0");
-            setFormat("Data Fields", 12, "0.0");
-            setFormat("Data Fields", 13, "0.0");
-            setFormat("Data Fields", 14, "0.0");
-            setFormat("Data Fields", 15, "0.0");
-            setFormat("Data Fields", 16, "0.0");
-
-            assayDesigner.saveAndClose();
+            assayDesignerPage.clickFinish();
         }
     }
 

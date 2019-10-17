@@ -18,6 +18,7 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.nab.NabSpecimen;
@@ -258,7 +259,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer, ExpProtocol toCopy)
     {
-        try
+        // This gets called as part of GetProtocolAction getAssayTemplate() which is a ReadOnlyApiAction.
+        // For this NAb case, when there are no plate templates in the container, this ensurePlateTemplate will create the default one
+        try (var ignored = SpringActionController.ignoreSqlUpdates())
         {
             NabManager.get().ensurePlateTemplate(targetContainer, user);
         }
@@ -272,7 +275,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public Pair<ExpProtocol, List<Pair<Domain, Map<DomainProperty, Object>>>> getAssayTemplate(User user, Container targetContainer)
     {
-        try
+        // This gets called as part of GetProtocolAction getAssayTemplate() which is a ReadOnlyApiAction.
+        // For this NAb case, when there are no plate templates in the container, this ensurePlateTemplate will create the default one
+        try (var ignored = SpringActionController.ignoreSqlUpdates())
         {
             NabManager.get().ensurePlateTemplate(targetContainer, user);
         }
@@ -321,7 +326,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         String domainLsid = getPresubstitutionLsid(ASSAY_DOMAIN_VIRUS_WELLGROUP);
         Domain virusWellGroupDomain = PropertyService.get().createDomain(c, domainLsid, "Virus Fields");
 
-        virusWellGroupDomain.setDescription("The user will be prompted to enter these properties for each of the virus well groups in their chosen plate template.");
+        virusWellGroupDomain.setDescription("Define the virus fields for this assay design. The user will be prompted to enter these fields for each of the virus well groups in their chosen plate template.");
         addProperty(virusWellGroupDomain, VIRUS_NAME_PROPERTY_NAME, PropertyType.STRING);
         addProperty(virusWellGroupDomain, VIRUS_ID_PROPERTY_NAME, PropertyType.STRING);
 

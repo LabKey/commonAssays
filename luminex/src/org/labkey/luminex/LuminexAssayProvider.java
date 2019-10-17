@@ -197,8 +197,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
 
-        Domain analyteDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_ANALYTE + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Analyte Properties");
-        analyteDomain.setDescription("The user will be prompted to enter these properties for each of the analytes in the file they upload. This is the third and final step of the upload process.");
+        Domain analyteDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_ANALYTE), "Analyte Properties");
+        analyteDomain.setDescription("Define the analyte fields for this assay design. The user will be prompted to enter these fields for each of the analytes in the file they upload.");
         addProperty(analyteDomain, "StandardName", "Standard Name", PropertyType.STRING);
 
         addProperty(analyteDomain, "AnalyteType", "Analyte Type", PropertyType.STRING);
@@ -210,8 +210,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
         result.add(new Pair<>(analyteDomain, Collections.emptyMap()));
 
-        Domain excelRunDomain = PropertyService.get().createDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_EXCEL_RUN + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":${AssayName}", "Excel File Run Properties");
-        excelRunDomain.setDescription("When the user uploads a Luminex data file, the server will try to find these properties in the header and footer of the spreadsheet, and does not prompt the user to enter them. This is part of the second step of the upload process.");
+        Domain excelRunDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_EXCEL_RUN), "Excel File Run Properties");
+        excelRunDomain.setDescription("Define the Excel file run fields for this assay design. When the user uploads a Luminex data file, the server will try to find these fields in the header and footer of the spreadsheet, and does not prompt the user to enter them.");
         addProperty(excelRunDomain, "FileName", "File Name", PropertyType.STRING);
         addProperty(excelRunDomain, "AcquisitionDate", "Acquisition Date", PropertyType.DATE_TIME);
         addProperty(excelRunDomain, "ReaderSerialNumber", "Reader Serial Number", PropertyType.STRING);
@@ -220,7 +220,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         addProperty(excelRunDomain, "RP1Target", "RP1 Target", PropertyType.STRING);
         result.add(new Pair<>(excelRunDomain, Collections.emptyMap()));
 
-        Domain resultDomain = createResultsDomain(c, "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION + ":" + ASSAY_DOMAIN_CUSTOM_DATA + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION + ":" + ASSAY_NAME_SUBSTITUTION, "Data Fields");
+        Domain resultDomain = createResultsDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_CUSTOM_DATA), "Data Fields");
         result.add(new Pair<>(resultDomain, Collections.emptyMap()));
 
         return result;
@@ -229,7 +229,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     private Domain createResultsDomain(Container c, String domainURI, String name)
     {
         Domain resultDomain = PropertyService.get().createDomain(c, domainURI, name);
-        resultDomain.setDescription("Additional result/data properties populated by the assay's associated transformation script, if any.");
+        resultDomain.setDescription("Define the additional results fields for this assay design. The user will not be prompted for these fields but instead they can be populated by the assay's associated transformation script(s), if any.");
         return resultDomain;
     }
 
