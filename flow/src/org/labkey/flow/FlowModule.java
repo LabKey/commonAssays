@@ -324,8 +324,7 @@ public class FlowModule extends SpringModule
                 FlowJoWorkspace.LoadTests.class,
                 AnalysisSerializer.TestCase.class,
                 CompensationMatrix.TestFCS.class,
-                ExportAnalysisManifest.TestCase.class,
-                FCSHeader.TestCase.class
+                ExportAnalysisManifest.TestCase.class
                 ));
     }
 
