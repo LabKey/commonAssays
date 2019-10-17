@@ -74,7 +74,7 @@ public class JoinSampleSetForm extends ProtocolForm
         {
             if (sampleSet.hasNameAsIdCol())
                 ret.put("Name", "Name");
-            for (DomainProperty property : sampleSet.getType().getProperties())
+            for (DomainProperty property : sampleSet.getDomain().getProperties())
             {
                 ret.put(property.getName(), property.getName());
             }

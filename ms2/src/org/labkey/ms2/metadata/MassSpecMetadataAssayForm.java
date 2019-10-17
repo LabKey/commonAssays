@@ -155,7 +155,7 @@ public class MassSpecMetadataAssayForm extends BulkPropertiesUploadForm<MassSpec
         }
         else
         {
-            List<? extends DomainProperty> props = sampleSet.getType().getProperties();
+            List<? extends DomainProperty> props = sampleSet.getDomain().getProperties();
             Map<File, Map<DomainProperty, String>> result = new HashMap<>();
             for (File file : files)
             {

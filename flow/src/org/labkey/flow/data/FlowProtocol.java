@@ -502,48 +502,6 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return linked;
     }
 
-    public int getUnlinkedSampleCount()
-    {
-        ExpSampleSet ss = getSampleSet();
-        if (ss == null)
-            return 0;
-
-        return getUnlinkedSampleCount(ss.getSamples());
-    }
-
-    // TODO: Remove me as I am very expensive
-    public static int getUnlinkedSampleCount(List<? extends ExpMaterial> samples)
-    {
-        if (samples == null)
-            return 0;
-
-        int count = 0;
-        for (ExpMaterial material : samples)
-        {
-            List<FlowFCSFile> fcsFiles = getFCSFiles(material);
-            if (fcsFiles.size() == 0)
-                count++;
-        }
-        return count;
-    }
-
-    public static List<FlowFCSFile> getFCSFiles(ExpMaterial material)
-    {
-        if (material == null)
-            return Collections.emptyList();
-
-        List<? extends ExpProtocolApplication> apps = material.getTargetApplications();
-        if (apps == null || apps.size() == 0)
-            return Collections.emptyList();
-
-        ArrayList<FlowFCSFile> result = new ArrayList<>();
-        for (ExpProtocolApplication app : apps)
-        {
-            FlowDataObject.addDataOfType(app.getOutputDatas(), FlowDataType.FCSFile, result);
-        }
-        return result;
-    }
-
     // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
     public static Map<Pair<Integer, String>, List<Pair<Integer, String>>> getFCSFilesGroupedBySample(User user, Container c)
     {
