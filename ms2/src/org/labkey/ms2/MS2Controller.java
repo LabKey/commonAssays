@@ -2486,26 +2486,28 @@ public class MS2Controller extends SpringActionController
         if (exportToExcel)
         {
             ResultSet rs = rgn.getResultSet();
-            CompareExcelWriter ew = new CompareExcelWriter(new ResultsImpl(rs), rgn.getDisplayColumns());
-            ew.setAutoSize(true);
-            ew.setSheetName(query.getComparisonDescription());
-            ew.setFooter(query.getComparisonDescription());
-
-            // Set up the row display the run descriptions (which can span more than one data column)
-            ew.setOffset(offset);
-            ew.setColSpan(gridColumns.size());
-            ew.setMultiColumnCaptions(runCaptions);
-
-            List<String> headers = new ArrayList<>();
-            headers.add(query.getHeader());
-            headers.add("");
-            for (Pair<String, String> sqlSummary : query.getSQLSummaries(getUser()))
+            try (CompareExcelWriter ew = new CompareExcelWriter(new ResultsImpl(rs), rgn.getDisplayColumns()))
             {
-                headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
+                ew.setAutoSize(true);
+                ew.setSheetName(query.getComparisonDescription());
+                ew.setFooter(query.getComparisonDescription());
+
+                // Set up the row display the run descriptions (which can span more than one data column)
+                ew.setOffset(offset);
+                ew.setColSpan(gridColumns.size());
+                ew.setMultiColumnCaptions(runCaptions);
+
+                List<String> headers = new ArrayList<>();
+                headers.add(query.getHeader());
+                headers.add("");
+                for (Pair<String, String> sqlSummary : query.getSQLSummaries(getUser()))
+                {
+                    headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
+                }
+                headers.add("");
+                ew.setHeaders(headers);
+                ew.write(getViewContext().getResponse());
             }
-            headers.add("");
-            ew.setHeaders(headers);
-            ew.write(getViewContext().getResponse());
         }
         else
         {
