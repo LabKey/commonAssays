@@ -273,7 +273,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataId);
     }
 
-    protected String getSourceLSID(String runLSID, int dataId)
+    protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
     {
         return new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(dataId)).toString();
     }
