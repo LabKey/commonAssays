@@ -26,7 +26,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.components.html.BootstrapMenu;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LeveyJenningsPlotWindow;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
@@ -52,9 +52,9 @@ public class LuminexSinglePointTest extends LuminexTest
     {
         LuminexTest init = (LuminexTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+        ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.setBackgroundImport(true);
-        assayDesigner.saveAndClose();
+        assayDesigner.clickFinish();
     }
 
     @Test
