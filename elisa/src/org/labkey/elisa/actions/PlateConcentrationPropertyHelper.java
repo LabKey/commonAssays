@@ -15,12 +15,13 @@
  */
 package org.labkey.elisa.actions;
 
-import org.labkey.api.exp.SamplePropertyHelper;
-import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.exp.SamplePropertyHelper;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Arrays;
@@ -72,7 +73,8 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
         }
     }
 
-    protected WellGroupTemplate getObject(int index, Map<DomainProperty, String> sampleProperties)
+    @Override
+    protected WellGroupTemplate getObject(int index, Map<DomainProperty, String> sampleProperties, Set<ExpMaterial> parentMaterials)
     {
         int i = 0;
         for (WellGroupTemplate wellgroup : _template.getWellGroups())

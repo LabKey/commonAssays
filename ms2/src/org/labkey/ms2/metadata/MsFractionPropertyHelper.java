@@ -16,16 +16,18 @@
 
 package org.labkey.ms2.metadata;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.*;
+import org.labkey.api.exp.SamplePropertyHelper;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.exp.property.Domain;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: peter@labkey.com
@@ -55,7 +57,8 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
         return _names;
     }
 
-    protected File getObject(int index, Map<DomainProperty, String> sampleProperties)
+    @Override
+    protected File getObject(int index, Map<DomainProperty, String> sampleProperties, Set<ExpMaterial> parentMaterials)
     {
         return _files.get(index);
     }
