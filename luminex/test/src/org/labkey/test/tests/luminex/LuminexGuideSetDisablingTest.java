@@ -88,8 +88,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = _assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
-        assayDesigner.goToBatchFields()
-                .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("CustomProtocol"));
+        assayDesigner.expandFieldProperties("Batch")
+            .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("CustomProtocol"));
         assayDesigner.clickFinish();
 
         for (int i = 0; i < GUIDE_SET_FILES.length; i++)
