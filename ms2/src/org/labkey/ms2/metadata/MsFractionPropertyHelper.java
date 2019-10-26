@@ -58,7 +58,7 @@ public class MsFractionPropertyHelper extends SamplePropertyHelper<File>
     }
 
     @Override
-    protected File getObject(int index, Map<DomainProperty, String> sampleProperties, Set<ExpMaterial> parentMaterials)
+    protected File getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         return _files.get(index);
     }

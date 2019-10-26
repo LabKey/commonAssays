@@ -15,6 +15,7 @@
  */
 package org.labkey.elispot;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateTemplate;
@@ -82,7 +83,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
     }
 
     @Override
-    protected String getObject(int index, Map<DomainProperty, String> sampleProperties, Set<ExpMaterial> parentMaterials)
+    protected String getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         String analyteName = _analyteNames.get(index);
         if (analyteName != null)

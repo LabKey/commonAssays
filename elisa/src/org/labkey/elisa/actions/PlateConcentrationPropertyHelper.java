@@ -15,6 +15,7 @@
  */
 package org.labkey.elisa.actions;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.WellGroup;
@@ -74,7 +75,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     }
 
     @Override
-    protected WellGroupTemplate getObject(int index, Map<DomainProperty, String> sampleProperties, Set<ExpMaterial> parentMaterials)
+    protected WellGroupTemplate getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         int i = 0;
         for (WellGroupTemplate wellgroup : _template.getWellGroups())
