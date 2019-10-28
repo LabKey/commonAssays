@@ -15,12 +15,14 @@
  */
 package org.labkey.elispot;
 
-import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.SamplePropertyHelper;
-import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.SamplePropertyHelper;
+import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.elispot.plate.FluorescentPlateInfo;
 
 import java.io.File;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by aaronr on 3/23/15.
@@ -80,7 +83,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
     }
 
     @Override
-    protected String getObject(int index, Map<DomainProperty, String> sampleProperties)
+    protected String getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         String analyteName = _analyteNames.get(index);
         if (analyteName != null)
