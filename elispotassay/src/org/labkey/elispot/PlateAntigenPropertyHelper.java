@@ -16,16 +16,19 @@
 
 package org.labkey.elispot;
 
-import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.exp.SamplePropertyHelper;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Karl Lum
@@ -54,7 +57,8 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
         }
     }
 
-    protected String getObject(int index, Map<DomainProperty, String> sampleProperties)
+    @Override
+    protected String getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         int i = 0;
         for (WellGroupTemplate wellgroup : _template.getWellGroups())
