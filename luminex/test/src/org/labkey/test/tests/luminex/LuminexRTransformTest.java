@@ -22,7 +22,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LabKeyExpectedConditions;
 import org.labkey.test.util.LogMethod;
@@ -59,11 +59,11 @@ public final class LuminexRTransformTest extends LuminexTest
 
         // add the R transform script to the assay
         init.goToTestAssayHome();
-        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+        ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
-        assayDesigner.saveAndClose();
+        assayDesigner.clickFinish();
     }
 
     //requires drc, Ruminex and xtable packages installed in R

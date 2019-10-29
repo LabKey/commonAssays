@@ -19,7 +19,7 @@ package org.labkey.test.ms2;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -54,14 +54,14 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Create New Mass Spec Metadata Assay Design");
 
         log("Create a new MS2 sample prep assay definition.");
-        AssayDesignerPage assayDesigner = new AssayDesignerPage(getDriver());
+        ReactAssayDesignerPage assayDesigner = new ReactAssayDesignerPage(getDriver());
         assayDesigner.setName(TEST_ASSAY_NAME);
 
-        assayDesigner.runFields().addField(new FieldDefinition("IntegerField").setType(FieldDefinition.ColumnType.Integer));
-        assayDesigner.runFields().addField(new FieldDefinition("TextField").setType(FieldDefinition.ColumnType.String));
-        assayDesigner.runFields().addField(new FieldDefinition("BooleanField").setType(FieldDefinition.ColumnType.Boolean));
-
-        assayDesigner.save();
+        assayDesigner.goToRunFields()
+                .addField(new FieldDefinition("IntegerField").setType(FieldDefinition.ColumnType.Integer))
+                .addField(new FieldDefinition("TextField").setType(FieldDefinition.ColumnType.String))
+                .addField(new FieldDefinition("BooleanField").setType(FieldDefinition.ColumnType.Boolean));
+        assayDesigner.clickFinish();
 
         navigateToFolder(FOLDER_NAME);
         clickButton("Process and Import Data");

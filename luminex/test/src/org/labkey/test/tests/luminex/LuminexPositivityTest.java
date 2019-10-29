@@ -25,7 +25,6 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
@@ -68,12 +67,12 @@ public final class LuminexPositivityTest extends LuminexTest
 
         LuminexTest init = (LuminexTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+        ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(POSITIVITY_RTRANSFORM_SCRIPT_FILE);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
-        assayDesigner.saveAndClose();
+        assayDesigner.clickFinish();
     }
 
     @Test (timeout = 16 * 60 * 1000) // Preferable to have the individual test time out rather than the class

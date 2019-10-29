@@ -23,7 +23,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
@@ -43,10 +43,10 @@ public final class LuminexJavaTransformTest extends LuminexTest
     {
         LuminexJavaTransformTest init = (LuminexJavaTransformTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+        ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(TestFileUtils.getSampleData("qc/transform.jar"));
-        assayDesigner.saveAndClose();
+        assayDesigner.clickFinish();
     }
 
     @Test
