@@ -32,7 +32,6 @@ import org.labkey.test.components.PropertiesEditor;
 import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
-import org.labkey.test.pages.AssayDesignerPage;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.params.FieldDefinition;

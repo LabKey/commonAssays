@@ -25,10 +25,10 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
-import org.labkey.test.util.ListHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 import org.openqa.selenium.WebElement;
@@ -86,12 +86,11 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         // add the R transform script to the assay
         goToTestAssayHome();
-        _assayHelper.clickEditAssayDesign();
-        AssayDesignerPage assayDesigner = new AssayDesignerPage(this.getDriver());
+        ReactAssayDesignerPage assayDesigner = _assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
-        _listHelper.addField(TEST_ASSAY_LUM + " Batch Fields", "CustomProtocol", "Protocol", ListHelper.ListColumnType.String);
-        // save changes to assay design
-        assayDesigner.saveAndClose();
+        assayDesigner.expandFieldProperties("Batch")
+            .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("CustomProtocol"));
+        assayDesigner.clickFinish();
 
         for (int i = 0; i < GUIDE_SET_FILES.length; i++)
             _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, GUIDE_SET_FILES[i]);

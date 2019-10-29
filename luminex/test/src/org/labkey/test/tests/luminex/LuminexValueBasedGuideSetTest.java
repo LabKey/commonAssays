@@ -22,7 +22,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
-import org.labkey.test.pages.AssayDesignerPage;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.util.Map;
@@ -44,10 +44,10 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
     {
         LuminexTest init = (LuminexTest)getCurrentTest();
         init.goToTestAssayHome();
-        AssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+        ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
-        assayDesigner.saveAndClose();
+        assayDesigner.clickFinish();
     }
 
     @Test

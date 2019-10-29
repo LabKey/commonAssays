@@ -25,6 +25,7 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.DailyB;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
@@ -148,9 +149,10 @@ public class ProteinExpressionMatrixAssayTest extends BaseWebDriverTest
     {
         goToProjectHome();
         clickAndWait(Locator.linkWithText(ASSAY_NAME));
-        _assayHelper.clickEditAssayDesign();
-        assertTextPresent("protein.FastaFiles");
-        clickAndWait(Locator.linkWithSpan("Cancel"));
+        ReactAssayDesignerPage assayDesignerPage = _assayHelper.clickEditAssayDesign();
+        assayDesignerPage.expandFieldProperties("Run");
+        assertElementPresent(Locator.tagWithClass("div", "domain-field-details").containing("protein > FastaFiles"));
+        assayDesignerPage.clickFinish();
     }
 
     private void importProteinExpressionData(String assayId, File exprDataFile)
