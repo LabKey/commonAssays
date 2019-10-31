@@ -150,7 +150,7 @@ public class ProteinExpressionMatrixAssayTest extends BaseWebDriverTest
         goToProjectHome();
         clickAndWait(Locator.linkWithText(ASSAY_NAME));
         ReactAssayDesignerPage assayDesignerPage = _assayHelper.clickEditAssayDesign();
-        assayDesignerPage.expandFieldProperties("Run");
+        assayDesignerPage.expandFieldsPanel("Run");
         assertElementPresent(Locator.tagWithClass("div", "domain-field-details").containing("protein > FastaFiles"));
         assayDesignerPage.clickFinish();
     }
