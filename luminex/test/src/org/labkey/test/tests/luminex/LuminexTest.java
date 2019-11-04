@@ -232,12 +232,12 @@ public abstract class LuminexTest extends BaseWebDriverTest
             runPanel.addField("PositivityFoldChange").setLabel("Positivity Fold Change").setType(FieldDefinition.ColumnType.Integer);
 
             // add analyte property for tracking lot number
-            DomainFormPanel analytePanel = assayDesignerPage.goToFieldProperties("Analyte Properties");
+            DomainFormPanel analytePanel = assayDesignerPage.goToFieldsPanel("Analyte");
             analytePanel.addField("LotNumber").setLabel("Lot Number").setType(FieldDefinition.ColumnType.String);
             analytePanel.addField("NegativeControl").setLabel("Negative Control").setType(FieldDefinition.ColumnType.Boolean);
 
             // add the data properties for the calculated columns, set format to two decimal place for easier testing later
-            DomainFormPanel resultsPanel = assayDesignerPage.goToResultFields();
+            DomainFormPanel resultsPanel = assayDesignerPage.goToResultsFields();
             resultsPanel.addField("FIBackgroundNegative").setLabel("FI-Bkgd-Neg").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
             resultsPanel.addField("Standard").setLabel("Stnd for Calc").setType(FieldDefinition.ColumnType.String);
             resultsPanel.addField("EstLogConc_5pl").setLabel("Est Log Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");

@@ -64,7 +64,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner =_assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
-        assayDesigner.expandFieldProperties("Batch")
+        assayDesigner.expandFieldsPanel("Batch")
             .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("Protocol"));
         assayDesigner.clickFinish();
 
