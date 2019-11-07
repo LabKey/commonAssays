@@ -143,7 +143,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
     public double getVersion()
     {
-        return 19.21;
+        return 19.30;
     }
 
     @NotNull
