@@ -232,7 +232,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             runPanel.addField("PositivityFoldChange").setLabel("Positivity Fold Change").setType(FieldDefinition.ColumnType.Integer);
 
             // add analyte property for tracking lot number
-            DomainFormPanel analytePanel = assayDesignerPage.goToFieldsPanel("Analyte");
+            DomainFormPanel analytePanel = assayDesignerPage.expandFieldsPanel("Analyte");
             analytePanel.addField("LotNumber").setLabel("Lot Number").setType(FieldDefinition.ColumnType.String);
             analytePanel.addField("NegativeControl").setLabel("Negative Control").setType(FieldDefinition.ColumnType.Boolean);
 
