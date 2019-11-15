@@ -24,8 +24,11 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.flow.api.FlowService;
+import org.labkey.api.util.FileUtil;
 import org.labkey.flow.persist.FlowManager;
 
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,31 +41,44 @@ import java.util.List;
 
 public class FlowServiceImpl implements FlowService
 {
-    @Override
-    public List<ExpData> getExpDataByURL(String canonicalURL, @Nullable Container container)
+    public final FlowModule _module;
+
+    public FlowServiceImpl(FlowModule module)
     {
-        List<ExpData> ret = new LinkedList<>();
-        SQLFragment sql = new SQLFragment("SELECT dataid FROM ").append(FlowManager.get().getTinfoObject().getFromSQL("O")).append(" WHERE uri=?");
-        sql.add(canonicalURL);
+        _module = module;
+    }
 
-        if (null != container)
+    /** Flow data files are usually imported via temp files so ExperimentService.get().getExpDataByURL() doesn't work */
+    @Override
+    public List<ExpData> getExpDataByPath(Path path, @Nullable Container container)
+    {
+        if (container == null || container.getActiveModules().contains(_module))
         {
-            sql.append(" AND container=?");
-            sql.add(container);
+            List<ExpData> ret = new LinkedList<>();
+            SQLFragment sql = new SQLFragment("SELECT dataid FROM ").append(FlowManager.get().getTinfoObject().getFromSQL("O")).append(" WHERE uri=?");
+            sql.add(FileUtil.pathToString(path));
+
+            if (null != container)
+            {
+                sql.append(" AND container=?");
+                sql.add(container);
+            }
+
+            sql.append(" ORDER BY 1");
+
+            Integer[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
+
+            for (Integer dataid : dataids)
+            {
+                ExpData data = ExperimentService.get().getExpData(dataid);
+                if (null != data)
+                    ret.add(data);
+            }
+
+            return ret;
         }
 
-        sql.append(" ORDER BY 1");
-
-        Integer[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
-
-        for (Integer dataid : dataids)
-        {
-            ExpData data = ExperimentService.get().getExpData(dataid);
-            if (null != data)
-                ret.add(data);
-        }
-
-        return ret;
+        return Collections.emptyList();
     }
 
     @Override
