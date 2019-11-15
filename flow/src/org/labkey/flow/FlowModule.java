@@ -45,6 +45,7 @@ import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.webdav.WebdavService;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
@@ -104,11 +105,13 @@ public class FlowModule extends SpringModule
     private static String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
     private static String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
 
+    @Override
     public String getName()
     {
         return "Flow";
     }
 
+    @Override
     public double getVersion()
     {
         return 19.30;
@@ -120,6 +123,7 @@ public class FlowModule extends SpringModule
         return new FlowUpgradeCode();
     }
 
+    @Override
     protected void init()
     {
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider(this)
@@ -131,6 +135,7 @@ public class FlowModule extends SpringModule
                 return true;
             }
 
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 if (HttpView.hasCurrentView())
@@ -163,7 +168,8 @@ public class FlowModule extends SpringModule
         ReportService.get().addUIProvider(new ControlsQCReportUIProvider());
         ReportService.get().addUIProvider(new PositivityFlowReportUIProvider());
 
-        FlowService.setInstance(new FlowServiceImpl());
+        FlowServiceImpl flowService = new FlowServiceImpl(this);
+        FlowService.setInstance(flowService);
 
         registerModuleProperty(EXPORT_TO_SCRIPT_PATH, "Set the path of the script that will be invoked when exporting FCS files", "Export To Script - Path", ModuleProperty.InputType.text);
         registerModuleProperty(EXPORT_TO_SCRIPT_COMMAND_LINE, "Set the export to script command line with token replacements", "Export To Script - Command Line", ModuleProperty.InputType.text,
@@ -179,6 +185,8 @@ public class FlowModule extends SpringModule
                 "Export To Script - Delete on successful complete",
                 ModuleProperty.InputType.text,
                 "true");
+
+        WebdavService.get().addExpDataProvider(flowService);
     }
 
     private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type)
@@ -240,6 +248,7 @@ public class FlowModule extends SpringModule
         return prop.getEffectiveValue(c);
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
