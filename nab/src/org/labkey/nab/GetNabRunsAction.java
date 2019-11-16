@@ -22,6 +22,7 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ShowRows;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -153,10 +154,10 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
         QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
         DataView dataView = queryView.createDataView();
         List<Integer> rowIds = new ArrayList<>();
-        try (ResultSet rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext()))
+        try (Results results = dataView.getDataRegion().getResults(dataView.getRenderContext()))
         {
-            while (rs.next())
-                rowIds.add(rs.getInt("RowId"));
+            while (results.next())
+                rowIds.add(results.getInt("RowId"));
         }
         catch (SQLException e)
         {

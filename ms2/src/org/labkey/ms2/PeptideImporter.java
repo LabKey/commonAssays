@@ -25,7 +25,6 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
@@ -303,21 +302,14 @@ public abstract class PeptideImporter extends MS2Importer
         {
             // Execute insert with peptideId reselect
             setPeptideParameters(_stmtWithReselect, peptide, peptideProphetSummary);
-            ResultSet rs = null;
             long peptideId;
 
-            try
+            try (ResultSet rs = MS2Manager.getSqlDialect().executeWithResults(_stmtWithReselect))
             {
-                rs = MS2Manager.getSqlDialect().executeWithResults(_stmtWithReselect);
-
                 if (!rs.next())
                     throw new IllegalArgumentException("No peptideID found in result set");
 
                 peptideId = rs.getLong(1);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
             }
 
             if (hasProphet)
