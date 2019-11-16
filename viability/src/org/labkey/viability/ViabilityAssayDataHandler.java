@@ -44,6 +44,7 @@ import org.labkey.api.view.ActionURL;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -298,7 +299,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected void insertRowData(ExpData data, User user, Container container, ExpRun run, ExpProtocol protocol, AssayProvider provider, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws ValidationException
+    protected List<Map<String, Object>> insertRowData(ExpData data, User user, Container container, ExpRun run, ExpProtocol protocol, AssayProvider provider, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo) throws ValidationException
     {
         // Find the target study property on the batch, run, or result domains.
         // If the target study is on the batch or run domain, get the value from the ExpRun or the ExpExperiment.
@@ -331,6 +332,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             importMap.put(prop.getName(), prop.getPropertyDescriptor());
         }
 
+        List<Map<String, Object>> results = new ArrayList<>(fileData.size());
         int rowIndex = 0;
         for (Map<String, Object> row : fileData)
         {
@@ -355,9 +357,12 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             result.setProtocolID(protocol.getRowId());
 
             ViabilityManager.saveResult(user, container, result, rowIndex++);
+            results.add(result.toMap());
         }
 
         ViabilityManager.updateSpecimenAggregates(user, container, provider, protocol, run);
+
+        return results;
     }
 
     private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap, DomainProperty resultLevelTargetStudyProperty)

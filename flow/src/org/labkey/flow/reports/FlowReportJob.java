@@ -257,7 +257,7 @@ public class FlowReportJob extends RReportJob
 
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 
-        List<String> lsids = OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, loader.load(), true);
+        OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, loader.load(), true);
     }
 
     @Override
