@@ -19,9 +19,13 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
 import org.labkey.api.action.ReadOnlyApiAction;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.ShowRows;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -33,15 +37,11 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,10 +153,10 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
         QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
         DataView dataView = queryView.createDataView();
         List<Integer> rowIds = new ArrayList<>();
-        try (ResultSet rs = dataView.getDataRegion().getResultSet(dataView.getRenderContext()))
+        try (Results results = dataView.getDataRegion().getResults(dataView.getRenderContext()))
         {
-            while (rs.next())
-                rowIds.add(rs.getInt("RowId"));
+            while (results.next())
+                rowIds.add(results.getInt("RowId"));
         }
         catch (SQLException e)
         {
