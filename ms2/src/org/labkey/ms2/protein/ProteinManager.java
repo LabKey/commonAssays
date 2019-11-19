@@ -36,7 +36,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.Path;
-import org.labkey.api.util.ResultSetUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
@@ -1385,10 +1384,8 @@ public class ProteinManager
             if (count == 0)
                 return;
             sql.append(")\nORDER BY I.seqid");
-            ResultSet rs = null;
-            try
+            try (ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet(false))
             {
-                rs = new SqlSelector(getSchema(), sql).getResultSet(false);
                 int curSeqId = 0;
                 StringBuilder sb = null;
 
@@ -1420,7 +1417,7 @@ public class ProteinManager
                                     docid,
                                     c.getId(), "text/plain",
                                     sb.toString(),
-                                    url.clone().addParameter("seqId",curSeqId),
+                                    url.clone().addParameter("seqId", curSeqId),
                                     m);
                             task.addResource(r, SearchService.PRIORITY.item);
                         }
@@ -1428,16 +1425,13 @@ public class ProteinManager
                         sb = new StringBuilder(bestName + "\n" + description + "\n");
                         curSeqId = seqid;
                     }
-                    sb.append(ident + " ");
-                } while (seqid > 0);
+                    sb.append(ident).append(" ");
+                }
+                while (seqid > 0);
             }
             catch (SQLException x)
             {
                 throw new RuntimeSQLException(x);
-            }
-            finally
-            {
-                ResultSetUtil.close(rs);
             }
         }
     }
