@@ -256,7 +256,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    protected String getSourceLSID(String runLSID, int dataId)
+    protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
     {
         // SourceLSID is used by assay to render links back to the original data for rows
         // that have been copied into a study dataset.

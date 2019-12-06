@@ -88,7 +88,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
 
     public ViabilityAssayProvider()
     {
-        super("ViabilityAssayProtocol", "ViabilityAssayRun", (AssayDataType) ExperimentService.get().getDataType(GuavaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ViabilityModule.NAME));
+        super("ViabilityAssayProtocol", "ViabilityAssayRun", "Viability" + RESULT_LSID_PREFIX_PART, (AssayDataType) ExperimentService.get().getDataType(GuavaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ViabilityModule.NAME));
     }
 
     /** Relative from Results table. */

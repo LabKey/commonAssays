@@ -19,6 +19,7 @@ package org.labkey.viability;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayResultTable;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -320,6 +321,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 var targetStudy = createTargetStudyCol();
                 addColumn(targetStudy);
             }
+
+            var lsidCol = AssayResultTable.createRowExpressionLsidColumn(this);
+            addColumn(lsidCol);
 
             SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
             protocolIDFilter.add(getProtocol().getRowId());
