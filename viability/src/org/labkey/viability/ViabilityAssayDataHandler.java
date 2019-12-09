@@ -250,7 +250,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    public void beforeDeleteData(List<ExpData> datas)
+    public void beforeDeleteData(List<ExpData> datas, User user)
     {
         // Don't bother calling super, since we aren't storing data in StorageProvisioner backed tables
         Container c = datas.get(0).getContainer();
