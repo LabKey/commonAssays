@@ -1942,7 +1942,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
-    public void beforeDeleteData(List<ExpData> data)
+    public void beforeDeleteData(List<ExpData> data, User user)
     {
         List<Integer> ids = new ArrayList<>();
         data.forEach(d -> ids.add(d.getRowId()));

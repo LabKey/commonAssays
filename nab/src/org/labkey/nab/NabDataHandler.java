@@ -244,7 +244,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> datas, User user) throws ExperimentException
     {
         try
         {

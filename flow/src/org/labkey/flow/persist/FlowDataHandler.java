@@ -56,7 +56,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
-    public void beforeDeleteData(List<ExpData> datas)
+    public void beforeDeleteData(List<ExpData> datas, User user)
     {
         FlowManager.get().deleteData(datas);
     }

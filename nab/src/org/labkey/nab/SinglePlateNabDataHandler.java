@@ -344,7 +344,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    public void beforeDeleteData(List<ExpData> datas) throws ExperimentException
+    public void beforeDeleteData(List<ExpData> datas, User user) throws ExperimentException
     {
         try
         {
