@@ -214,7 +214,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     }
 
     @Override
-    public void beforeDeleteData(List<ExpData> expDatas)
+    public void beforeDeleteData(List<ExpData> expDatas, User user)
     {
         ElispotManager.get().deleteRunData(expDatas);
     }
