@@ -446,9 +446,9 @@ public class MS2Controller extends SpringActionController
             String pageTitle = (null != getPageConfig().getTitle() ? getPageConfig().getTitle() : "Run Summary");
 
             if (null != _run)
-                appendRunNavTrail(root, _run, null, pageTitle, getPageConfig(), "viewRuns");
+                appendRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
 
-            return root;
+            return root.addChild(pageTitle);
         }
     }
 
