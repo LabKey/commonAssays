@@ -443,10 +443,12 @@ public class MS2Controller extends SpringActionController
 
         public NavTree appendNavTrail(NavTree root)
         {
+            String pageTitle = (null != getPageConfig().getTitle() ? getPageConfig().getTitle() : "Run Summary");
+
             if (null != _run)
                 appendRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
 
-            return root;
+            return root.addChild(pageTitle);
         }
     }
 
