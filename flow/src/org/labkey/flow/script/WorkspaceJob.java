@@ -23,7 +23,9 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.collections.CaseInsensitiveArrayListValuedMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
@@ -53,6 +55,8 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -198,11 +202,15 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
 
+            User user = User.getSearchUser();
+            Container c = flowProtocol.getContainer();
+            TableInfo fcsFilesTable = new FlowSchema(user, c).getTable(FlowTableType.FCSFiles, ContainerFilter.CURRENT);
+
             List<String> filteredSampleIDs = new ArrayList<>(sampleIDs.size());
             for (String sampleID : sampleIDs)
             {
                 Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
-                if (matchesFilter(analysisFilter, sampleInfo.getLabel(), sampleInfo.getKeywords()))
+                if (matchesFilter(fcsFilesTable, analysisFilter, sampleInfo.getLabel(), sampleInfo.getKeywords()))
                 {
                     filteredSampleIDs.add(sampleID);
                 }

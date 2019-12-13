@@ -682,6 +682,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return (String) getProperty(FlowProperty.FCSAnalysisFilter);
     }
 
+    // Filter columns are relative to the FCSFiles table
     public SimpleFilter getFCSAnalysisFilter()
     {
         SimpleFilter ret = new SimpleFilter();

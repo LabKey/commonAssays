@@ -24,6 +24,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -256,7 +257,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         }
     }
 
-    protected boolean matchesFilter(SimpleFilter filter, String sampleName, Map<String, String> keywords)
+    protected boolean matchesFilter(TableInfo fcsFilesTable, SimpleFilter filter, String sampleName, Map<String, String> keywords)
     {
         // Build a map that uses FieldKey strings as keys to represent a fake row of the FCSFiles table.
         // The pairs in the map are those allowed by the ProtocolForm.getKeywordFieldMap().
@@ -271,7 +272,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             fakeRow.put(new FieldKey(keyKeyword, keyword), keywordValue);
         }
 
-        return filter.meetsCriteria(fakeRow);
+        return filter.meetsCriteria(fcsFilesTable, fakeRow);
     }
 
     protected abstract FlowRun createExperimentRun() throws Exception;
