@@ -29,13 +29,11 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.labkey.api.gwt.client.ui.FontButton;
 import org.labkey.api.gwt.client.ui.HelpPopup;
 import org.labkey.api.gwt.client.ui.ImageButton;
-import org.labkey.api.gwt.client.ui.PropertiesEditor;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -254,16 +252,17 @@ public class OtherParametersComposite extends SearchFormComposite
 
     private FontButton createDeleteButton(final String paramName)
     {
-        return PropertiesEditor.getDeleteButton(paramName, new ClickHandler()
-        {
-            public void onClick(ClickEvent event)
-            {
-                _inputXmlComposite.params.removeInputParameter(paramName);
-                _inputs.remove(paramName);
-                createTable();
-                _handler.onChange(null);
-            }
+        FontButton button = new FontButton("fa-times");
+        String id = "partdelete_" + paramName;
+        button.getElement().setId(id);
+        button.addClickHandler(clickEvent -> {
+            _inputXmlComposite.params.removeInputParameter(paramName);
+            _inputs.remove(paramName);
+            createTable();
+            _handler.onChange(null);
+
         });
+        return button;
     }
 
     public void setName(String name)
