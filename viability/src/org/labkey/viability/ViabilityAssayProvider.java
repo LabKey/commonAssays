@@ -47,6 +47,7 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.actions.AssayHeaderView;
 import org.labkey.api.study.assay.*;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.FileType;
@@ -209,11 +210,13 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         RESULT_DOMAIN_PROPERTIES = Collections.unmodifiableMap(map);
     }
 
+    @Override
     public String getName()
     {
         return NAME;
     }
 
+    @Override
     public String getDescription()
     {
         return "Imports Guava ViaCount and ExpressPlus cell count and viability data.";
@@ -232,11 +235,13 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return new ViabilityAssaySchema(user, container, this, protocol, targetStudy);
     }
 
+    @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("Currently the only supported file type is the Guava comma separated values (.csv) file format.");
+        return new HtmlView(HtmlString.of("Currently the only supported file type is the Guava comma separated values (.csv) file format."));
     }
 
+    @Override
     public ExpData getDataForDataRow(Object resultRowId, ExpProtocol protocol)
     {
         if (resultRowId == null)
@@ -306,14 +311,14 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
 
-        Pair<Domain, Map<DomainProperty, Object>> resultDomain = createResultDomain(c, user);
+        Pair<Domain, Map<DomainProperty, Object>> resultDomain = createResultDomain(c);
         if (resultDomain != null)
             result.add(resultDomain);
 
         return result;
     }
 
-    protected Pair<Domain, Map<DomainProperty, Object>> createResultDomain(Container c, User user)
+    protected Pair<Domain, Map<DomainProperty, Object>> createResultDomain(Container c)
     {
         String lsid = getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_DATA);
         Domain resultDomain = PropertyService.get().createDomain(c, lsid, RESULT_DOMAIN_NAME);
@@ -343,6 +348,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         return result;
     }
 
+    @Override
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Collections.emptyList();
@@ -352,6 +358,12 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     public DataExchangeHandler createDataExchangeHandler()
     {
         return new ViabilityDataExchangeHandler();
+    }
+
+    @Override
+    public Long getResultRowCount(List<? extends ExpProtocol> protocols)
+    {
+        return new TableSelector(ViabilitySchema.getTableInfoResults()).getRowCount();
     }
 
     @Override
@@ -404,7 +416,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
                     {
                         runId = Integer.parseInt((String)value);
                     }
-                    catch (NumberFormatException nfe) { }
+                    catch (NumberFormatException ignored) { }
 
                 boolean canInsert = c.hasPermission(user, InsertPermission.class);
                 boolean canDelete = c.hasPermission(user, DeletePermission.class);
@@ -443,6 +455,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
         }
     }
 
+    @Override
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(ViabilityModule.class,
