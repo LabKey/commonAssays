@@ -30,7 +30,6 @@ import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -59,6 +58,7 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.assay.pipeline.AssayRunAsyncContext;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
@@ -95,6 +95,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         setMaxFileInputs(100);  // no specific requirement for this, can be changed easily
     }
 
+    @Override
     public String getName()
     {
         return NAME;
@@ -106,16 +107,19 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return new LuminexProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
+    @Override
     public void registerLsidHandler()
     {
         super.registerLsidHandler();
         LsidManager.get().registerHandler(LUMINEX_DATA_ROW_LSID_PREFIX, new LsidManager.ExpObjectLsidHandler()
         {
+            @Override
             public ExpData getObject(Lsid lsid)
             {
                 return getDataForDataRow(lsid.getObjectId(), null);
             }
 
+            @Override
             @Nullable
             public ActionURL getDisplayURL(Lsid lsid)
             {
@@ -131,6 +135,12 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 return PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(expRun.getContainer(), protocol, expRun.getRowId());
             }
         });
+    }
+
+    @Override
+    public Long getResultRowCount(List<? extends ExpProtocol> protocols)
+    {
+        return new TableSelector(LuminexProtocolSchema.getTableInfoDataRow()).getRowCount();
     }
 
     @NotNull
@@ -157,7 +167,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             // This means we couldn't find the results domain.
 
             // We tried to add it during the the upgrade, but try it again in case we imported an old XAR file or similar
-            addResultsDomain(null, protocol);
+            addResultsDomain(protocol);
             // Clear the cache so we can find the domain we just created
             protocol.setObjectProperties(null);
             return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
@@ -177,6 +187,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
+    @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createRunDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
@@ -193,6 +204,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return result;
     }
 
+    @Override
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
@@ -233,17 +245,20 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return resultDomain;
     }
 
+    @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("Data files must be in the multi-sheet BioPlex Excel file format. "
-            + "<span style=\"font-style: italic;\">Multiple files must share the same standard curve.</span>");
+        return new HtmlView(HtmlString.unsafe("Data files must be in the multi-sheet BioPlex Excel file format. "
+            + "<span style=\"font-style: italic;\">Multiple files must share the same standard curve.</span>)"));
     }
 
+    @Override
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
 
+    @Override
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
@@ -273,26 +288,31 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return ExperimentService.get().getExpData(dataId);
     }
 
+    @Override
     protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
     {
         return new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(dataId)).toString();
     }
 
+    @Override
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new StudyParticipantVisitResolverType(), new ThawListResolverType());
     }
 
+    @Override
     public String getDescription()
     {
         return "Imports data in the multi-sheet BioPlex Excel file format.";
     }
 
+    @Override
     public DataExchangeHandler createDataExchangeHandler()
     {
         return new LuminexDataExchangeHandler();
     }
 
+    @Override
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(LuminexModule.class,
@@ -300,13 +320,13 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 this, "Import Luminex");
     }
 
-    private void addResultsDomain(User user, ExpProtocol protocol)
+    private void addResultsDomain(ExpProtocol protocol)
     {
         String domainURI = new Lsid(ASSAY_DOMAIN_CUSTOM_DATA, "Folder-" + protocol.getContainer().getRowId(), protocol.getName()).toString();
         Domain domain = createResultsDomain(protocol.getContainer(), domainURI, protocol.getName() + " Data Fields");
         try
         {
-            domain.save(user);
+            domain.save(null);
 
             ObjectProperty prop = new ObjectProperty(protocol.getLSID(), protocol.getContainer(), domainURI, domainURI);
             OntologyManager.insertProperties(protocol.getContainer(), protocol.getLSID(), prop);

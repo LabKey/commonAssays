@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -49,6 +50,7 @@ import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.assay.matrix.ColumnMappingProperty;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -118,7 +120,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("");
+        return new HtmlView(HtmlString.EMPTY_STRING);
     }
 
     @Override
@@ -200,13 +202,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
-        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
-
-        if (runProperties == null)
-        {
-            runProperties = new HashSet<>();
-            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, runProperties);
-        }
+        Set<String> runProperties = domainMap.computeIfAbsent(ExpProtocol.ASSAY_DOMAIN_RUN, k -> new HashSet<>());
 
         runProperties.add(FEATURE_ANNOTATION_SET_ID_COLUMN.getName());
         runProperties.add(IMPORT_VALUES_COLUMN.getName());
@@ -288,4 +284,10 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
             }
         };
     }
-}
+
+        @Override
+        public Long getResultRowCount(List<? extends ExpProtocol> protocols)
+        {
+            return new TableSelector(ExpressionMatrixProtocolSchema.getTableInfoFeatureData()).getRowCount();
+        }
+    }

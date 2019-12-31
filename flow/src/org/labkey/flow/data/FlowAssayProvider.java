@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -48,6 +49,7 @@ import org.labkey.api.assay.AssayProviderSchema;
 import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -59,6 +61,7 @@ import org.labkey.api.view.WebPartView;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.run.RunsForm;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
@@ -103,6 +106,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
             _relativeFromFCSFileTable = relativeFromFCSFileTable;
         }
 
+        @Override
         public FieldKey getSpecimenIDFieldKey()
         {
             if (_metadata != null && _metadata.getSpecimenIdColumn() != null)
@@ -227,7 +231,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("Data files must be FCS file format.");
+        return new HtmlView(HtmlString.of("Data files must be FCS file format."));
     }
 
     @Override
@@ -273,6 +277,12 @@ public class FlowAssayProvider extends AbstractAssayProvider
     {
         // Do not register a run LSID handler.
         // Flow ExpData LSID handlers are registered in the FlowDataType constructor.
+    }
+
+    @Override
+    public Long getResultRowCount(List<? extends ExpProtocol> protocols)
+    {
+        return new TableSelector(FlowManager.get().getTinfoStatistic()).getRowCount();
     }
 
     @Override
@@ -488,6 +498,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Container getAssociatedStudyContainer(ExpProtocol protocol, Object dataId)
     {
         ExpData data = getDataForDataRow(dataId, protocol);
