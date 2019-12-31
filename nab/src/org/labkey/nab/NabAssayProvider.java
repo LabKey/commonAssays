@@ -24,6 +24,8 @@ import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.PropertyType;
@@ -37,6 +39,7 @@ import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.assay.plate.PlateTemplate;
@@ -393,5 +396,16 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         //url.addParameter("rowId", run.getRowId());
 
         return url;
+    }
+
+    @Override
+    public Long getResultRowCount(List<? extends ExpProtocol> protocols)
+    {
+        long result = 0;
+        for (ExpProtocol protocol : protocols)
+        {
+            result += new TableSelector(NabManager.getTableInfoWellData(), new SimpleFilter(FieldKey.fromParts("ProtocolId"), protocol.getRowId()), null).getRowCount();
+        }
+        return result;
     }
 }
