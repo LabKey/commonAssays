@@ -15,10 +15,14 @@
  */
 package org.labkey.test.tests.luminex;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.assay.GetProtocolCommand;
+import org.labkey.remoteapi.assay.Protocol;
+import org.labkey.remoteapi.assay.ProtocolResponse;
+import org.labkey.remoteapi.assay.SaveProtocolCommand;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -35,6 +39,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.TreeMap;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Category({DailyA.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 8)
@@ -58,6 +65,33 @@ public class LuminexSinglePointTest extends LuminexTest
     }
 
     @Test
+    public void testAssayOverAPI() throws Exception
+    {
+        String assayName = "testLuminexAssayOverRemoteAPI";
+
+        Connection connection = createDefaultConnection(true);
+        GetProtocolCommand getProtocolCommand = new GetProtocolCommand("Luminex");
+        ProtocolResponse getProtocolResponse = getProtocolCommand.execute(connection, getCurrentContainerPath());
+
+        String autoCopyContainer = getContainerId();
+
+        Protocol newAssayProtocol = getProtocolResponse.getProtocol();
+        newAssayProtocol.setName(assayName)
+                .setSaveScriptFiles(true)
+                .setBackgroundUpload(true)
+                .setEditableRuns(true)
+                .setAutoCopyTargetContainerId(autoCopyContainer);
+        SaveProtocolCommand saveProtocolCommand = new SaveProtocolCommand(newAssayProtocol);
+        ProtocolResponse saveProtocolResponse = saveProtocolCommand.execute(connection, getCurrentContainerPath());
+
+        assertTrue(saveProtocolResponse.getProtocol().getSaveScriptFiles());
+        assertTrue(saveProtocolResponse.getProtocol().getBackgroundUpload());
+        assertTrue(saveProtocolResponse.getProtocol().getEditableRuns());
+        assertTrue(saveProtocolResponse.getProtocol().getAllowTransformationScript());
+        assertEquals(autoCopyContainer, saveProtocolResponse.getProtocol().getAutoCopyTargetContainerId());
+    }
+
+    @Test
     public void testSinglePoint()
     {
         importRun(file1, 1);
@@ -72,24 +106,24 @@ public class LuminexSinglePointTest extends LuminexTest
         DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
         tbl.setFilter("Analyte", "Equals", "ENV1");
         tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
-        Assert.assertEquals("27.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
-        Assert.assertEquals("30.0", tbl.getDataAsText(1, "Average Fi Bkgd"));
+        assertEquals("27.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
+        assertEquals("30.0", tbl.getDataAsText(1, "Average Fi Bkgd"));
 
         LeveyJenningsPlotWindow ljp = new LeveyJenningsPlotWindow(this);
 
         // check LJ plots column
         tbl.link(0, 2).click();
         ljp.waitTillReady();
-        Assert.assertEquals(ljp.getXTickTagElementText(), "Notebook1");
-        Assert.assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
+        assertEquals(ljp.getXTickTagElementText(), "Notebook1");
+        assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
         ljp.closeWindow();
 
         addUrlParameter("_testLJQueryLimit=0");
         tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
         tbl.link(0, 2).click();
         ljp.waitTillReady();
-        Assert.assertEquals("Notebook1", ljp.getXTickTagElementText());
-        Assert.assertEquals(Arrays.asList("Notebook1"), ljp.getXAxis());
+        assertEquals("Notebook1", ljp.getXTickTagElementText());
+        assertEquals(Arrays.asList("Notebook1"), ljp.getXAxis());
         ljp.closeWindow();
 
         clickAndWait(Locator.linkContainingText("graph"));
