@@ -225,8 +225,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         // toggle off the AUC QC flag and then validate errors
         waitForElement(Locator.checkboxByName("AUCCheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
-        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
-        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
+        saveGuideSetParameters();
 
         validateFlaggedForQC(plate1_EC50_5PL);
 
@@ -236,8 +235,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
-        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
-        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
+        saveGuideSetParameters();
 
         validateFlaggedForQC();
 
@@ -248,10 +246,17 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
-        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
-        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
+        saveGuideSetParameters();
 
         validateFlaggedForQC(plate2_AUC, plate1_EC50_5PL, plate1_AUC);
+    }
+
+    private void saveGuideSetParameters()
+    {
+        // Wait for grid to refresh before checking QC flags
+        doAndWaitForElementToRefresh(() -> click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save")),
+                Locator.tagWithId("div", "trackingDataPanel").append(Locator.byClass("x-grid3-body")), shortWait());
+        _guideSetHelper.waitForGuideSetExtMaskToDisappear();
     }
 
     private void validateFlaggedForQC(String... texts)
