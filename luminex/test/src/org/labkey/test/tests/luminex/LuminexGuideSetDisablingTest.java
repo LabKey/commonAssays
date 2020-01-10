@@ -255,7 +255,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         // Wait for grid to refresh before checking QC flags
         doAndWaitForElementToRefresh(() -> click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save")),
-                Locator.tagWithId("div", "trackingDataPanel").append(Locator.byClass("x-grid3-body")), shortWait());
+                Locator.tagWithId("div", "trackingDataPanel").append(Locator.byClass("x-grid3-row-table")), shortWait());
         _guideSetHelper.waitForGuideSetExtMaskToDisappear();
     }
 
