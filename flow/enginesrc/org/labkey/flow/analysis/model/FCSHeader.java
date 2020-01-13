@@ -105,7 +105,7 @@ public class FCSHeader
         String dateStr = getKeyword("$DATE");
         if (dateStr != null)
         {
-            long date = DateUtil.parseDate(dateStr);
+            long date = parseDateTime(dateStr);
             return new Date(date);
         }
 
@@ -157,6 +157,20 @@ public class FCSHeader
             return 0;
 
         return DateUtil.parseTime(etim);
+    }
+
+    // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
+    // turns off strict to allow overflow of jiffy seconds
+    private long parseDateTime(String dateStr)
+    {
+        return DateUtil.parseDateTime(dateStr, DateUtil.MonthDayOption.MONTH_DAY, false);
+    }
+
+    // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
+    // turns off strict to allow overflow of jiffy seconds
+    private long parseTime(String dateStr)
+    {
+        return DateUtil.parseTime(dateStr, false);
     }
 
     /** Get the duration in seconds. */
