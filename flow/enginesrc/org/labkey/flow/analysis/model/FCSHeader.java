@@ -105,15 +105,14 @@ public class FCSHeader
         String dateStr = getKeyword("$DATE");
         if (dateStr != null)
         {
-            long date = DateUtil.parseDate(dateStr);
+            long date = parseDateTime(dateStr);
             return new Date(date);
         }
 
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = DateUtil.parseDateTime(exportTime);
-//            return Date.from(Instant.ofEpochMilli(date).truncatedTo(ChronoUnit.DAYS));
+            long date = parseDateTime(exportTime);
             return new Date(date);
         }
 
@@ -134,7 +133,7 @@ public class FCSHeader
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = DateUtil.parseDateTime(exportTime);
+            long date = parseDateTime(exportTime);
             return new Date(date);
         }
 
@@ -147,7 +146,7 @@ public class FCSHeader
         if (btim == null)
             return 0;
 
-        return DateUtil.parseTime(btim);
+        return parseTime(btim);
     }
 
     public long getEndTime()
@@ -156,7 +155,21 @@ public class FCSHeader
         if (etim == null)
             return 0;
 
-        return DateUtil.parseTime(etim);
+        return parseTime(etim);
+    }
+
+    // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
+    // turns off strict to allow overflow of jiffy seconds
+    private long parseDateTime(String dateStr)
+    {
+        return DateUtil.parseDateTime(dateStr, DateUtil.MonthDayOption.MONTH_DAY, false);
+    }
+
+    // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
+    // turns off strict to allow overflow of jiffy seconds
+    private long parseTime(String dateStr)
+    {
+        return DateUtil.parseTime(dateStr, false);
     }
 
     /** Get the duration in seconds. */
