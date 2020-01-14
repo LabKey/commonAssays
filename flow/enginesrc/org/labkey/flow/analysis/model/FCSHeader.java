@@ -112,8 +112,7 @@ public class FCSHeader
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = DateUtil.parseDateTime(exportTime);
-//            return Date.from(Instant.ofEpochMilli(date).truncatedTo(ChronoUnit.DAYS));
+            long date = parseDateTime(exportTime);
             return new Date(date);
         }
 
@@ -134,7 +133,7 @@ public class FCSHeader
         String exportTime = getKeyword("EXPORT TIME");
         if (exportTime != null)
         {
-            long date = DateUtil.parseDateTime(exportTime);
+            long date = parseDateTime(exportTime);
             return new Date(date);
         }
 
@@ -147,7 +146,7 @@ public class FCSHeader
         if (btim == null)
             return 0;
 
-        return DateUtil.parseTime(btim);
+        return parseTime(btim);
     }
 
     public long getEndTime()
@@ -156,7 +155,7 @@ public class FCSHeader
         if (etim == null)
             return 0;
 
-        return DateUtil.parseTime(etim);
+        return parseTime(etim);
     }
 
     // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
