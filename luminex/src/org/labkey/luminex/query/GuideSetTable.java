@@ -151,6 +151,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 return new DataColumn(colInfo){
+                    @Override
                     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                     {
                         if ( (Boolean)ctx.get(this.getColumnInfo().getFieldKey()) )
@@ -314,6 +315,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         addColumn(aucRunCounts);
     }
 
+    @Override
     protected LookupForeignKey createCurveFitFK(ContainerFilter cf, final String curveType)
     {
         return new LookupForeignKey(cf, "GuideSetId", null)

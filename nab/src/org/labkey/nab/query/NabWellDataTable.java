@@ -18,10 +18,10 @@ package org.labkey.nab.query;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.AbstractForeignKey;
-import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
@@ -69,7 +69,7 @@ public class NabWellDataTable extends NabBaseTable
             else if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
 
-            BaseColumnInfo newCol;
+            MutableColumnInfo newCol;
             if ("Row".equalsIgnoreCase(name) || "Column".equalsIgnoreCase(name))
                 newCol = addOneBasedColumn(name, col);
             else
@@ -94,7 +94,7 @@ public class NabWellDataTable extends NabBaseTable
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
     }
 
-    private BaseColumnInfo addOneBasedColumn(String name, ColumnInfo column)
+    private MutableColumnInfo addOneBasedColumn(String name, ColumnInfo column)
     {
         if (!JdbcType.INTEGER.equals(column.getJdbcType()))
             throw new IllegalStateException("Can only add 1 to value of integer type.");

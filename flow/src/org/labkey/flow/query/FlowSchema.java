@@ -1118,7 +1118,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
         {
             checkLocked();
             var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
@@ -1127,7 +1127,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addDataInputColumn(String alias, String role)
+        public MutableColumnInfo addDataInputColumn(String alias, String role)
         {
             checkLocked();
             var col = _expData.addDataInputColumn(alias, role);
@@ -1136,7 +1136,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addInputRunCountColumn(String alias)
+        public MutableColumnInfo addInputRunCountColumn(String alias)
         {
             checkLocked();
             var col = _expData.addInputRunCountColumn(alias);
@@ -1153,13 +1153,13 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addColumn(Column column)
+        public MutableColumnInfo addColumn(Column column)
         {
             return addColumn(column.toString(), column);
         }
 
         @Override
-        public BaseColumnInfo addColumn(String alias, Column column)
+        public MutableColumnInfo addColumn(String alias, Column column)
         {
             var col = createColumn(alias, column);
             _expData.addColumn(col);
@@ -1181,7 +1181,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo createColumn(String alias, Column column)
+        public MutableColumnInfo createColumn(String alias, Column column)
         {
             var col = _expData.createColumn(alias,column);
             col.setParentTable(this);
@@ -1216,9 +1216,9 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addColumns(Domain domain, String legacyName)
+        public MutableColumnInfo addColumns(Domain domain, String legacyName)
         {
-            BaseColumnInfo col = _expData.addColumns(domain, legacyName);
+            var col = _expData.addColumns(domain, legacyName);
             col.setHidden(false);
             col.setParentTable(this);
             return addColumn(col);
