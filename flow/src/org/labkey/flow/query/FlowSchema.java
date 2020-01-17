@@ -730,7 +730,7 @@ public class FlowSchema extends UserSchema
         {
             for (ColumnInfo info : getColumns())
             {
-                if (info instanceof ExprColumn && info.getAlias().equals(column.toString()))
+                if (info.getName().equals(column.toString()))
                 {
                     return info;
                 }
@@ -1172,7 +1172,7 @@ public class FlowSchema extends UserSchema
         {
             for (ColumnInfo info : getColumns())
             {
-                if (info instanceof ExprColumn && info.getAlias().equals(column.toString()))
+                if (info.getName().equals(column.toString()))
                 {
                     return info;
                 }
