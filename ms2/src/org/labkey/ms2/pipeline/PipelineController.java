@@ -392,7 +392,7 @@ public class PipelineController extends SpringActionController
                 }
             }
             boolean success = errors == null || !errors.hasErrors();
-            if ("POST".equals(getViewContext().getRequest().getMethod()) && form.isRunSearch())
+            if (isPost() && form.isRunSearch())
             {
                 getPageConfig().setTemplate(PageConfig.Template.None);
 
