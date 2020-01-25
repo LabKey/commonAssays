@@ -118,10 +118,10 @@ CREATE INDEX IX_FeatureData_DataId ON microarray.featuredata(DataId);
 CREATE INDEX IX_FeatureData_FeatureId ON microarray.featuredata(FeatureId);
 GO
 
-/* microarray-15.10-15.11.sql */
-
 ALTER TABLE microarray.FeatureData ADD CONSTRAINT UQ_FeatureData_DataId_FeatureId_SampleId UNIQUE (DataId, FeatureId, SampleId);
 
-/* microarray-15.11-15.12.sql */
-
 DROP INDEX IX_FeatureData_DataId ON microarray.FeatureData;
+
+/* microarray-17.20-17.30.sql */
+
+ALTER TABLE microarray.FeatureAnnotationSet ADD comment NVARCHAR(200);
