@@ -1279,7 +1279,7 @@ public class ProteinManager
         new SqlExecutor(ProteinManager.getSchema()).execute(sql);
     }
 
-
+    // TODO: Delete - this has been a no-op for over 10 years...
     public static void indexProteins(@Nullable SearchService.IndexTask task, @Nullable Date modifiedSince)
     {
         if (1==1)
@@ -1310,7 +1310,7 @@ public class ProteinManager
     }
     
 
-    public static void indexProteins(final SearchService.IndexTask task, List<Integer> list)
+    private static void indexProteins(final SearchService.IndexTask task, List<Integer> list)
     {
         int from = 0;
         while (from < list.size())
@@ -1329,7 +1329,7 @@ public class ProteinManager
     }
 
 
-    public static void indexProteins(SearchService.IndexTask task, int[] ids)
+    private static void indexProteins(SearchService.IndexTask task, int[] ids)
     {
         Container c = ContainerManager.getHomeContainer();
         ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, c);
