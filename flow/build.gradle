@@ -9,18 +9,18 @@ sourceSets {
 }
 
 dependencies {
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
-    BuildUtils.addLabKeyDependency(project: project, config: "engineCompile", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
-    engineCompile "org.labkey:labkey-client-api:${project.version}"
-    engineCompile "org.apache.tomcat:tomcat-jasper:${apacheTomcatVersion}"
-    engineCompile "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
-    engineCompile project.files(project.tasks.schemasCompile)
+    BuildUtils.addLabKeyDependency(project: project, config: "engineImplementation", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
+    BuildUtils.addLabKeyDependency(project: project, config: "engineImplementation", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
+    engineImplementation "org.labkey:labkey-client-api:${project.version}"
+    engineImplementation "org.apache.tomcat:tomcat-jasper:${apacheTomcatVersion}"
+    engineImplementation "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
+    engineImplementation project.files(project.tasks.schemasCompile)
 
-    compile sourceSets.engine.output
+    implementation sourceSets.engine.output
     jspImplementation sourceSets.engine.output
     jspImplementation project.files(project.tasks.schemasCompile)
     BuildUtils.addLabKeyDependency(project: project, config: "jspImplementation", depProjectPath: project.path, depProjectConfig: 'compile')
-    BuildUtils.addLabKeyDependency(project: project, config: "compile", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
+    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiCompile")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtension: "module")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
 }
