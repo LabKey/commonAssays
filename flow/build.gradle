@@ -32,7 +32,7 @@ project.tasks.register("engineJar", Jar) {
         jar.archiveClassifier.set("engine")
         jar.from project.sourceSets.engine.output
         jar.archiveBaseName.set("${project.name}_engine")
-        jar.destinationDir(project.file(project.labkey.explodedModuleLibDir))
+        jar.destinationDirectory = project.file(project.labkey.explodedModuleLibDir)
         jar.dependsOn(project.tasks.schemasCompile)
 }
 
