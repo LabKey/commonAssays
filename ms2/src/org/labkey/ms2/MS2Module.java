@@ -116,7 +116,7 @@ import java.util.Set;
  * Date: Jul 18, 2005
  * Time: 3:25:52 PM
  */
-public class MS2Module extends SpringModule implements ProteomicsModule, DocumentProvider
+public class MS2Module extends SpringModule implements ProteomicsModule
 {
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
 
@@ -249,14 +249,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule, Documen
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
-        final ModuleContext finalModuleContext = moduleContext;
-//        SearchService ss = SearchService.get());
-//        if (null != ss)
-//        {
-//            ss.addSearchCategory(ProteinManager.proteinCategory);
-//            ss.addDocumentProvider(this);
-//        }
-
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
@@ -265,7 +257,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule, Documen
         service.registerPipelineProvider(new SequestPipelineProvider(this));
         service.registerPipelineProvider(new CometPipelineProvider(this), "Comet");
         service.registerPipelineProvider(new FractionRollupPipelineProvider(this));
-
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<>();
@@ -280,7 +271,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule, Documen
 
         ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
-            if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
+            if (container == null || container.getActiveModules(moduleContext.getUpgradeUser()).contains(MS2Module.this))
             {
                 return runTypes;
             }
@@ -414,19 +405,5 @@ public class MS2Module extends SpringModule implements ProteomicsModule, Documen
             SequestSearchTask.TestCase.class,
             TPPTask.TestCase.class
         );
-    }
-
-    @Override
-    public void enumerateDocuments(@NotNull SearchService.IndexTask task, @NotNull Container c, Date modifiedSince)
-    {
-        if (c == ContainerManager.getSharedContainer())
-        {
-            ProteinManager.indexProteins(task, modifiedSince);
-        }
-    }
-
-    @Override
-    public void indexDeleted()
-    {
     }
 }

@@ -73,7 +73,6 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
             XMLProteinHandler handler = new XMLProteinHandler(conn, this);
             handler.parse(_file);
             conn.setAutoCommit(false);
-            ProteinManager.indexProteins(null, (Date)null);
             info("Import completed successfully");
             setStatus(TaskStatus.complete);
             success = true;

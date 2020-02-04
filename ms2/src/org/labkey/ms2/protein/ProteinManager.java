@@ -26,20 +26,30 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.HashHelpers;
-import org.labkey.api.util.Path;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.webdav.SimpleDocumentResource;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Peptide;
@@ -50,9 +60,7 @@ import org.labkey.ms2.protein.fasta.PeptideGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -76,9 +84,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProteinManager
 {
-    public static final SearchService.SearchCategory proteinCategory = new SearchService.SearchCategory("protein", "Protein");
-    
-    private static Logger _log = Logger.getLogger(ProteinManager.class);
+    private static final Logger LOG = Logger.getLogger(ProteinManager.class);
     private static final String SCHEMA_NAME = "prot";
 
     public static final int RUN_FILTER = 1;
@@ -286,7 +292,7 @@ public class ProteinManager
         List<Protein> proteins = new SqlSelector(getSchema(), sql).getArrayList(Protein.class);
 
         if (proteins.isEmpty())
-            _log.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA files " + Arrays.asList(fastaIds));
+            LOG.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA files " + Arrays.asList(fastaIds));
 
         return proteins;
     }
@@ -1277,162 +1283,5 @@ public class ProteinManager
         sql.add(id);
 
         new SqlExecutor(ProteinManager.getSchema()).execute(sql);
-    }
-
-    // TODO: Delete - this has been a no-op for over 10 years...
-    public static void indexProteins(@Nullable SearchService.IndexTask task, @Nullable Date modifiedSince)
-    {
-        if (1==1)
-            return;
-        if (null != modifiedSince)
-        {
-            Date d = new SqlSelector(getSchema(),"SELECT MAX(InsertDate) FROM prot.annotinsertions").getObject(Timestamp.class);
-            if (null != d && d.compareTo(modifiedSince) <= 0)
-                return;
-        }
-
-        if (null == task)
-        {
-            SearchService ss = SearchService.get();
-            task = null == ss ? null : ss.createTask("Index Proteins");
-            if (null == task)
-                return;
-        }
-
-        final SearchService.IndexTask t = task;
-        task.addRunnable(new Runnable(){
-            public void run()
-            {
-                List<Integer> list = new SqlSelector(getSchema(), "SELECT SeqId FROM prot.Sequences").getArrayList(Integer.class);
-                indexProteins(t, list);
-            }
-        }, SearchService.PRIORITY.background);
-    }
-    
-
-    private static void indexProteins(final SearchService.IndexTask task, List<Integer> list)
-    {
-        int from = 0;
-        while (from < list.size())
-        {
-            final int[] ids = new int[1000];
-            int to=0;
-            while (to < ids.length && from < list.size())
-                ids[to++] = list.get(from++).intValue();
-            task.addRunnable(new Runnable(){
-                public void run()
-                {
-                    indexProteins(task,ids);
-                }
-            }, SearchService.PRIORITY.bulk);
-        }
-    }
-
-
-    private static void indexProteins(SearchService.IndexTask task, int[] ids)
-    {
-        Container c = ContainerManager.getHomeContainer();
-        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, c);
-
-        if (0==1) // one at at time
-        {
-            for (int id : ids)
-            {
-                if (0==id)
-                    continue;
-
-                Protein p = getProtein(id);
-                MultiValuedMap<String, String> map = getIdentifiersFromId(id);
-                StringBuilder sb = new StringBuilder();
-                sb.append(p.getBestName()).append("\n");
-                sb.append(p.getDescription()).append("\n");
-                for (String v : map.values())
-                {
-                    sb.append(v).append(" ");
-                }
-
-                String docid = "protein:" + id;
-                Map<String,Object> m = new HashMap<>();
-                m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
-                m.put(SearchService.PROPERTY.title.toString(), "Protein " + p.getBestName());
-                SimpleDocumentResource r = new SimpleDocumentResource(
-                        new Path(docid),
-                        docid,
-                        c.getId(), "text/plain",
-                        sb.toString(),
-                        url.clone().addParameter("seqId",id),
-                        m);
-                task.addResource(r, SearchService.PRIORITY.item);
-            }
-        }
-        else // fast query
-        {
-            SQLFragment sql = new SQLFragment();
-            sql.append("SELECT I.seqid, S.BestName, S.Description, I.identifier\n");
-            sql.append("FROM " + getTableInfoSequences() + " S INNER JOIN " + getTableInfoIdentifiers() + " I ON S.seqid = I.seqid\n");
-            sql.append("WHERE I.seqid IN (");
-            String comma = "";
-            int count = 0;
-            for (int id : ids)
-            {
-                if (id == 0) continue;
-                count++;
-                sql.append(comma);
-                sql.append(id);
-                comma = ",";
-            }
-            if (count == 0)
-                return;
-            sql.append(")\nORDER BY I.seqid");
-            try (ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet(false))
-            {
-                int curSeqId = 0;
-                StringBuilder sb = null;
-
-                int seqid;
-                String bestName = "";
-                String description = "";
-                String ident = "";
-
-                do
-                {
-                    seqid = 0;
-                    if (rs.next())
-                    {
-                        seqid = rs.getInt(1);
-                        bestName = rs.getString(2);
-                        description = rs.getString(3);
-                        ident = rs.getString(4);
-                    }
-                    if (seqid != curSeqId)
-                    {
-                        if (curSeqId > 0)
-                        {
-                            String docid = "protein:" + curSeqId;
-                            Map<String, Object> m = new HashMap<>();
-                            m.put(SearchService.PROPERTY.categories.toString(), proteinCategory);
-                            m.put(SearchService.PROPERTY.title.toString(), "Protein " + bestName);
-                            SimpleDocumentResource r = new SimpleDocumentResource(
-                                    new Path(docid),
-                                    docid,
-                                    c.getId(), "text/plain",
-                                    sb.toString(),
-                                    url.clone().addParameter("seqId", curSeqId),
-                                    m);
-                            task.addResource(r, SearchService.PRIORITY.item);
-                        }
-
-                        sb = new StringBuilder(bestName + "\n" + description + "\n");
-                        curSeqId = seqid;
-                    }
-                    sb.append(ident).append(" ");
-                }
-                while (seqid > 0);
-            }
-            catch (SQLException x)
-            {
-                throw new RuntimeSQLException(x);
-            }
-        }
     }
 }
