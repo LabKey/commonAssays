@@ -180,8 +180,6 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 sharedIdentsStrategy.close();
             }
         }
-
-        ProteinManager.indexProteins(null, (Date)null);
     }
 
     public int getFastaId()
