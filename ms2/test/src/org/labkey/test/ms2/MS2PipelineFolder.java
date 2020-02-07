@@ -18,6 +18,8 @@ package org.labkey.test.ms2;
 import org.labkey.test.pipeline.PipelineFolder;
 import org.labkey.test.pipeline.PipelineWebTestBase;
 
+import java.io.File;
+
 /**
  * <code>MS2PipelineFolder</code>
  */
@@ -25,7 +27,7 @@ public class MS2PipelineFolder extends PipelineFolder
 {
     public MS2PipelineFolder(PipelineWebTestBase test,
                              String folderName,
-                             String pipelinePath)
+                             File pipelinePath)
     {
         super(test, folderName, pipelinePath);
         setFolderType("MS2");   // Default to MS2 dashboard

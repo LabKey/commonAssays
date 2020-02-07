@@ -52,7 +52,7 @@ public class PipelineTest extends PipelineWebTestBase
         super("Pipeline BVT");
 
         MS2PipelineFolder folder = new MS2PipelineFolder(this, "pipe1",
-                TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe");
+                TestFileUtils.getSampleData("xarfiles/ms2pipe"));
         folder.setFolderType("None");
         folder.setTabs("Pipeline", "MS2", "Dumbster");
         folder.setWebParts("Data Pipeline", "MS2 Runs", "Mail Record");

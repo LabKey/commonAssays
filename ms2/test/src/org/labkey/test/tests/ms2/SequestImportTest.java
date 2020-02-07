@@ -129,7 +129,7 @@ public class SequestImportTest extends BaseWebDriverTest
     private void setupProject()
     {
         _containerHelper.createProject(PROJECT_NAME, "MS2 Extensions");
-        setPipelineRoot(TestFileUtils.getLabKeyRoot() + "/sampledata/raftflow");
+        setPipelineRoot(TestFileUtils.getSampleData("raftflow").getAbsolutePath());
         _containerHelper.enableModule(PROJECT_NAME, "MS2Extensions");
         List<ModulePropertyValue> properties = new ArrayList<>();
         // Clear out any custom queries that might have been set by the user
