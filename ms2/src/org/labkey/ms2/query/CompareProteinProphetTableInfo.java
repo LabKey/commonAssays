@@ -213,6 +213,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         return result;
     }
     
+    @Override
     protected ColumnInfo resolveColumn(String name)
     {
         ColumnInfo result = super.resolveColumn(name);
