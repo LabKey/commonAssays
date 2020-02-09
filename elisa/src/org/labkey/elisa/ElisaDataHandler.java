@@ -19,6 +19,20 @@ package org.labkey.elisa;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.log4j.Logger;
+import org.labkey.api.assay.AbstractAssayTsvDataHandler;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.AssayUploadXarContext;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.Well;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
@@ -26,24 +40,11 @@ import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ProvenanceService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.plate.Well;
-import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.AbstractAssayTsvDataHandler;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayRunUploadContext;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.AssayUploadXarContext;
-import org.labkey.api.assay.plate.PlateBasedAssayProvider;
-import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
@@ -161,7 +162,11 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 {
                                     ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
                                     if (material != null)
+                                    {
                                         row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
+                                        // TODO: Support adding the material to existing provenance inputs on the row, if any
+                                        row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
+                                    }
                                 }
 
                                 if (conc != -1)
@@ -198,7 +203,11 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     {
                                         ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
                                         if (material != null)
+                                        {
                                             row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
+                                            // TODO: Support adding the material to existing provenance inputs on the row, if any
+                                            row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
+                                        }
                                     }
 
                                     // compute the concentration
