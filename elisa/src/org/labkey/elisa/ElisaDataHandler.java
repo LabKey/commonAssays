@@ -93,6 +93,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
+        final ProvenanceService pvs = ProvenanceService.get();
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
         Container container = data.getContainer();
@@ -165,7 +166,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     {
                                         row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                         // TODO: Support adding the material to existing provenance inputs on the row, if any
-                                        row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
+                                        if (pvs != null)
+                                            row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
                                     }
                                 }
 
@@ -206,7 +208,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                         {
                                             row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
                                             // TODO: Support adding the material to existing provenance inputs on the row, if any
-                                            row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
+                                            if (pvs != null)
+                                                row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
                                         }
                                     }
 
