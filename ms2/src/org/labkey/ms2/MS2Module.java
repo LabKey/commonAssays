@@ -40,7 +40,6 @@ import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
-import org.labkey.api.search.SearchService.DocumentProvider;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
@@ -106,7 +105,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -147,7 +145,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
         return 20.000;
     }
