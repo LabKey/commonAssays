@@ -227,12 +227,11 @@ public class NabRunDataTable extends NabBaseTable
         Collection<PropertyDescriptor> pds = getExistingDataProperties(protocol);
 
         var objectUriColumn = addWrapColumn(_rootTable.getColumn("ObjectUri"));
-        objectUriColumn.setIsUnselectable(true);
         objectUriColumn.setHidden(true);
+
         var rowIdColumn = addWrapColumn(_rootTable.getColumn("RowId"));
         rowIdColumn.setKeyField(true);
         rowIdColumn.setHidden(true);
-        rowIdColumn.setIsUnselectable(true);
 
         // add object ID again, this time as a lookup to a virtual property table that contains our selected NAB properties:
 

@@ -43,7 +43,7 @@ public class CrossPlateDilutionNabAssayProvider extends HighThroughputNabAssayPr
 
     public CrossPlateDilutionNabAssayProvider()
     {
-        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, CrossPlateDilutionNabDataHandler.NAB_HIGH_THROUGHPUT_DATA_TYPE);
+        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, null, CrossPlateDilutionNabDataHandler.NAB_HIGH_THROUGHPUT_DATA_TYPE);
     }
 
     @Override
