@@ -37,9 +37,9 @@ import java.util.List;
  */
 public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
 {
-    public HighThroughputNabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
+    public HighThroughputNabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, String resultLSIDPrefix, AssayDataType dataType)
     {
-        super(protocolLSIDPrefix, runLSIDPrefix, dataType);
+        super(protocolLSIDPrefix, runLSIDPrefix, resultLSIDPrefix, dataType);
     }
 
     public abstract String getName();

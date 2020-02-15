@@ -16,6 +16,7 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayDefaultFlagHandler;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.assay.AssayFlagHandler;
@@ -55,7 +56,7 @@ public class NabModule extends DefaultModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
         return 20.000;
     }

@@ -51,7 +51,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
             "  <note label=\"pipeline quantitation, algorithm\" type=\"input\">xpress</note> \n" +
         "</bioml>";
 
-    public final static String PIPELINE_PATH = TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe";
+    public static final String PIPELINE_PATH = TestFileUtils.getSampleData("xarfiles/ms2pipe").getAbsolutePath();
 
     protected static final String REGION_NAME_PEPTIDES = "MS2Peptides";
     protected static final String REGION_NAME_PROTEINS = "MS2Proteins";

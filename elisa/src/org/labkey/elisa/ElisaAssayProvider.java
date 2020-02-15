@@ -142,7 +142,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public ElisaAssayProvider()
     {
-        super("ElisaAssayProtocol", "ElisaAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElisaModule.class));
+        super("ElisaAssayProtocol", "ElisaAssayRun", "Elisa" + RESULT_LSID_PREFIX_PART, (AssayDataType) ExperimentService.get().getDataType(ElisaDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElisaModule.class));
     }
 
     @NotNull
@@ -154,7 +154,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
                 protocol,
                 FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
-                FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME));
+                FieldKey.fromParts(AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME),
+                AbstractTsvAssayProvider.ROW_ID_COLUMN_NAME,
+                FieldKey.fromParts("LSID"));
     }
 
     @Override

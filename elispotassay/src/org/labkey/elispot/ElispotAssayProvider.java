@@ -168,7 +168,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
 
     public ElispotAssayProvider()
     {
-        super("ElispotAssayProtocol", "ElispotAssayRun", (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElispotModule.class));
+        super("ElispotAssayProtocol", "ElispotAssayRun", null, (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElispotModule.class));
     }
 
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
@@ -210,7 +210,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
                 protocol,
                 FieldKey.fromParts(ElispotDataHandler.ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, "Property"),
                 FieldKey.fromParts("Run"),
-                FieldKey.fromParts("RowId"));
+                FieldKey.fromParts("RowId"),
+                "RowId",
+                null);
     }
 
     public Domain getResultsDomain(ExpProtocol protocol)

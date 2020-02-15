@@ -56,7 +56,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
 
     public SinglePlateDilutionNabAssayProvider()
     {
-        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, SinglePlateDilutionNabDataHandler.SINGLE_PLATE_DILUTION_DATA_TYPE);
+        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, null, SinglePlateDilutionNabDataHandler.SINGLE_PLATE_DILUTION_DATA_TYPE);
     }
 
     @Override

@@ -19,15 +19,32 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayPipelineProvider;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayProviderSchema;
+import org.labkey.api.assay.AssayRunCreator;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.actions.PlateUploadForm;
 import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.exp.IdentifiableBase;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -42,19 +59,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.actions.AssayRunUploadForm;
-import org.labkey.api.assay.actions.PlateUploadForm;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayPipelineProvider;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayProviderSchema;
-import org.labkey.api.assay.AssayRunCreator;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.PageFlowUtil;
@@ -103,12 +108,13 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
 
     public NabAssayProvider()
     {
-        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, SinglePlateNabDataHandler.NAB_DATA_TYPE, ModuleLoader.getInstance().getModule(NabModule.class));
+        // NOTE: Can't use NAB_DATA_ROW_LSID_PREFIX for assayResultRowLsid as it's not unique for each row in the Nab results table
+        super(NAB_ASSAY_PROTOCOL, NAB_RUN_LSID_PREFIX, null, SinglePlateNabDataHandler.NAB_DATA_TYPE, ModuleLoader.getInstance().getModule(NabModule.class));
     }
 
-    public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, AssayDataType dataType)
+    public NabAssayProvider(String protocolLSIDPrefix, String runLSIDPrefix, String resultRowLSIDPrefix, AssayDataType dataType)
     {
-        super(protocolLSIDPrefix, runLSIDPrefix, dataType, ModuleLoader.getInstance().getModule(NabModule.class));
+        super(protocolLSIDPrefix, runLSIDPrefix, resultRowLSIDPrefix, dataType, ModuleLoader.getInstance().getModule(NabModule.class));
     }
 
     @Override
