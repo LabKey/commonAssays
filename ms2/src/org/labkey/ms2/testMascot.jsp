@@ -35,7 +35,6 @@
 
 <div><strong>Mascot settings tested</strong></div>
 <table class="lk-fields-table">
-    <tr><td colspan=2></td></tr>
     <tr><td class="labkey-form-label">Server</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotServer(), "<not set>")) %></td></tr>
     <tr><td class="labkey-form-label">User account</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotUserAccount(), "<not set>")) %></td></tr>
     <tr><td class="labkey-form-label">Password</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotUserPassword(), "<not set>")) %></td></tr>
