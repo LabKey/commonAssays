@@ -36,10 +36,10 @@
 <div><strong>Mascot settings tested</strong></div>
 <table class="lk-fields-table">
     <tr><td colspan=2></td></tr>
-    <tr><td class="labkey-form-label">Server</td><td><%= h(StringUtils.isBlank(form.getMascotServer()) ? "<not set>" : form.getMascotServer()) %></td></tr>
-    <tr><td class="labkey-form-label">User account</td><td><%= h(StringUtils.isBlank(form.getMascotUserAccount()) ? "<not set>" : form.getMascotUserAccount()) %></td></tr>
-    <tr><td class="labkey-form-label">Password</td><td><%= h(StringUtils.isBlank(form.getMascotUserPassword()) ? "<not set>" : form.getMascotUserPassword()) %></td></tr>
-    <tr><td class="labkey-form-label">HTTP Proxy URL</td><td><%= h(StringUtils.isBlank(form.getMascotHTTPProxy()) ? "<not set>" : form.getMascotHTTPProxy()) %></td></tr>
+    <tr><td class="labkey-form-label">Server</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotServer(), "<not set>")) %></td></tr>
+    <tr><td class="labkey-form-label">User account</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotUserAccount(), "<not set>")) %></td></tr>
+    <tr><td class="labkey-form-label">Password</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotUserPassword(), "<not set>")) %></td></tr>
+    <tr><td class="labkey-form-label">HTTP Proxy URL</td><td><%= h(StringUtils.defaultIfBlank(form.getMascotHTTPProxy(), "<not set>")) %></td></tr>
 <%
 if (!StringUtils.isBlank(form.getParameters())) { %>
     <tr><td colspan=2><br><strong>Your Mascot Server Configurations</strong></td></tr>
