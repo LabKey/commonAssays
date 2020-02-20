@@ -1769,10 +1769,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                     {
                         if (minStandardFI != null && dataRow.getFi() < minStandardFI && minStandardObsConc != null)
                         {
+                            ensureDataRowHasDilution(dataRow, analyte);
                             obsConc = dataRow.getDilution() * minStandardObsConc;
                         }
                         else if (maxStandardFI != null && dataRow.getFi() > maxStandardFI && maxStandardObsConc != null)
                         {
+                            ensureDataRowHasDilution(dataRow, analyte);
                             obsConc = dataRow.getDilution() * maxStandardObsConc;
                         }
                         else
@@ -1795,6 +1797,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             if (fiOORType != LuminexOORIndicator.IN_RANGE) // NOTE: don't need to reset the value if it is in range, see LuminexExcelParser.getCellDoubleValue
                 dataRow.setConcInRange(concInRangeOORType.getValue(dataRow.getConcInRangeString(), dataRows, concInRangeGetter, analyte));
         }
+    }
+
+    private void ensureDataRowHasDilution(LuminexDataRow dataRow, Analyte analyte)
+    {
+        if (dataRow.getDilution() == null)
+            throw new IllegalArgumentException("Error: unable to calculate obsConc because of null dilution value: " + dataRow.getDescription() + " " + dataRow.getWell() + " " + analyte.getName());
     }
 
     protected void handleParticipantResolver(LuminexDataRow dataRow, ParticipantVisitResolver resolver, Map<ExpMaterial, String> materialInputs, boolean parseDescription) throws ExperimentException
