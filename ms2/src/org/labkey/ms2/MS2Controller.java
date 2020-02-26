@@ -4748,6 +4748,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(AdminOperationsPermission.class)
     public class MascotTestAction extends SimpleViewAction<TestMascotForm>
     {
+        @Override
         public ModelAndView getView(TestMascotForm form, BindException errors)
         {
             String originalMascotServer = form.getMascotServer();
@@ -4772,8 +4773,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                message = "Test failed.";
-                message = message + "<br>" + mascotClient.getErrorString();
+                message = "Test failed. " + mascotClient.getErrorString();
             }
 
             form.setMessage(message);
@@ -4784,9 +4784,11 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/testMascot.jsp", form);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+            root.addChild("Test Mascot Settings");
             return root;
         }
     }

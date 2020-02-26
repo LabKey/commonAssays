@@ -97,7 +97,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         public ResultsAssayTableMetadata(AssayProvider provider, ExpProtocol protocol)
         {
-            super(provider, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
+            super(provider, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"), "RowId", FieldKey.fromParts("LSID"));
         }
 
         @Override
@@ -121,7 +121,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     {
         public ResultsSpecimensAssayTableMetadata(AssayProvider provider, ExpProtocol protocol)
         {
-            super(provider, protocol, FieldKey.fromParts("ResultID"), FieldKey.fromParts("ResultID", "Run"), FieldKey.fromParts("ResultID"));
+            super(provider, protocol, FieldKey.fromParts("ResultID"), FieldKey.fromParts("ResultID", "Run"), FieldKey.fromParts("ResultID"), "ResultId", FieldKey.fromParts("LSID"));
         }
 
         @Override
