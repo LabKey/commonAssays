@@ -255,7 +255,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         antigenWellGroupDomain.setDescription("Define the antigen fields for this assay design. The user will be prompted to enter these fields for each of the antigen well groups in their chosen plate template.");
 
         // Add properties for all required fields
-        DomainKind domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
+        DomainKind<?> domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
         for (PropertyStorageSpec propSpec : domainKind.getBaseProperties(null))
         {
             DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec);
@@ -317,7 +317,8 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         runProperties.add(READER_PROPERTY_NAME);
 
         Set<String> requiredAntigenProps = new HashSet<>();
-        for (PropertyStorageSpec propSpec : PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME).getBaseProperties(null))
+        DomainKind<?> domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
+        for (PropertyStorageSpec propSpec : domainKind.getBaseProperties(null))
             requiredAntigenProps.add(propSpec.getName());
         domainMap.put(ASSAY_DOMAIN_ANTIGEN_WELLGROUP, requiredAntigenProps);
         return domainMap;
