@@ -207,9 +207,11 @@ public class EditCompensationCalculationForm extends EditSettingsForm
     // On form POST, get the workspace from session using the token
     public void setToken(String token)
     {
-        this.token = token;
-        if (token != null)
+        // On error reshow, avoid setting the workspace twice (once in reset() method and again in form binding)
+        // as this would blow away the other form POSTed values the user entered (positiveKeywordName, etc)
+        if (token != null && !token.equals(this.token))
         {
+            this.token = token;
             setWorkspace((Workspace)SessionHelper.getStashedAttribute(getRequest(), token));
         }
     }
