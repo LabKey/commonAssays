@@ -231,7 +231,7 @@ if (analysisNames.length > 0)
         </labkey:panel>
 <% } %>
 
-    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form.workspace)%>">
+    <input type="hidden" name="token" value="<%=h(form.getToken())%>">
     <input class="labkey-button" type="Submit" value="Submit">
 </labkey:form>
 

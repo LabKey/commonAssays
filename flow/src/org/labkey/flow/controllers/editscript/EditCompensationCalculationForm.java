@@ -21,15 +21,18 @@ import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.SessionHelper;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowProtocolStep;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class EditCompensationCalculationForm extends EditSettingsForm
 {
+    private String token;
     public int selectedRunId;
     public Workspace workspace;
     public String selectGroupName;
@@ -191,6 +194,26 @@ public class EditCompensationCalculationForm extends EditSettingsForm
 
     }
 
+    // Stash the workspace in session and reference it via a token
+    public String getToken()
+    {
+        if (workspace != null && token == null)
+        {
+            token = SessionHelper.stashAttribute(getRequest(), workspace, TimeUnit.MINUTES.toMillis(10));
+        }
+        return token;
+    }
+
+    // On form POST, get the workspace from session using the token
+    public void setToken(String token)
+    {
+        this.token = token;
+        if (token != null)
+        {
+            setWorkspace((Workspace)SessionHelper.getStashedAttribute(getRequest(), token));
+        }
+    }
+
     @Override
     public void reset()
     {
@@ -199,7 +222,8 @@ public class EditCompensationCalculationForm extends EditSettingsForm
 
         try
         {
-            setWorkspace((Workspace) PageFlowUtil.decodeObject(getRequest().getParameter("workspaceObject")));
+            String token = getRequest().getParameter("token");
+            setToken(token);
         }
         catch (Exception e)
         {
