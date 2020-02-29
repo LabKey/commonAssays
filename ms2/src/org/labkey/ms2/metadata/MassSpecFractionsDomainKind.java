@@ -128,7 +128,8 @@ public class MassSpecFractionsDomainKind extends SampleSetDomainKind
     public Domain createDomain(GWTDomain domain, SampleTypeDomainKindProperties arguments, Container container, User user, @Nullable TemplateInfo templateInfo)
     {
         //TODO this is probably broken.
-        return _assayDelegate.createDomain(domain, arguments.toJSONObject(), container, user, templateInfo);
+        JSONObject args = arguments != null ? arguments.toJSONObject() : null;
+        return _assayDelegate.createDomain(domain, args, container, user, templateInfo);
     }
 
     @Override
