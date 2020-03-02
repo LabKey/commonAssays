@@ -58,7 +58,7 @@ Browse the pipeline
         String inputId = "workspace.path";
     %>
     You can browse the pipeline directories and find the analysis archive or FlowJo workspace to import.<br/><br/>
-    <%  if (!form.getWorkspace().getHiddenFields().containsKey("path")) { %>
+    <%  if (!form.getWorkspace().getHiddenFields(getViewContext()).containsKey("path")) { %>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv"></div>
