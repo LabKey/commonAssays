@@ -146,7 +146,7 @@ abstract public class FlowDataType extends AssayDataType
     }
 
     @Override
-    public URLHelper getDetailsURL(ExpData dataObject)
+    public ActionURL getDetailsURL(ExpData dataObject)
     {
         FlowDataObject fdo = FlowDataObject.fromData(dataObject);
         if (fdo != null)
