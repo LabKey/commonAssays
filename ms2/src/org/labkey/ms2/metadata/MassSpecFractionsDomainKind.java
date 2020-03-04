@@ -127,7 +127,6 @@ public class MassSpecFractionsDomainKind extends SampleSetDomainKind
     @Override
     public Domain createDomain(GWTDomain domain, SampleTypeDomainKindProperties arguments, Container container, User user, @Nullable TemplateInfo templateInfo)
     {
-        //TODO this is probably broken.
         JSONObject args = arguments != null ? arguments.toJSONObject() : null;
         return _assayDelegate.createDomain(domain, args, container, user, templateInfo);
     }
@@ -136,7 +135,6 @@ public class MassSpecFractionsDomainKind extends SampleSetDomainKind
     @NotNull
     public ValidationException updateDomain(GWTDomain<? extends GWTPropertyDescriptor> original, GWTDomain<? extends GWTPropertyDescriptor> update, @Nullable SampleTypeDomainKindProperties options, Container container, User user, boolean includeWarnings)
     {
-        //TODO this is probably broken too. Maybe we should throw a not supported exception here?
         JSONObject args = options != null ? options.toJSONObject() : null;
         return _assayDelegate.updateDomain(original, update, args, container, user, includeWarnings);
     }
