@@ -18,18 +18,20 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.SessionHelper;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.StatisticSet;
 import org.labkey.flow.analysis.model.Workspace;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class UploadAnalysisForm extends EditScriptForm
 {
     private static final Logger _log = Logger.getLogger(UploadAnalysisForm.class);
 
+    private String token;
     private int existingStatCount = 0;
     public Workspace _workspaceObject;
     public Set<StatisticSet> ff_statisticSet;
@@ -58,10 +60,26 @@ public class UploadAnalysisForm extends EditScriptForm
         }
     }
 
-    public void setWorkspaceObject(String object) throws Exception
+    // Stash the workspace in session and reference it via a token
+    public String getToken()
     {
-        _workspaceObject = (Workspace) PageFlowUtil.decodeObject(object);
+        if (_workspaceObject != null && token == null)
+        {
+            token = SessionHelper.stashAttribute(getRequest(), _workspaceObject, TimeUnit.MINUTES.toMillis(10));
+        }
+        return token;
     }
+
+    // On form POST, get the workspace from session using the token
+    public void setToken(String token)
+    {
+        this.token = token;
+        if (token != null)
+        {
+            _workspaceObject = (Workspace)SessionHelper.getStashedAttribute(getRequest(), token);
+        }
+    }
+
     public String groupName;
     public void setGroupName(String groupName)
     {
