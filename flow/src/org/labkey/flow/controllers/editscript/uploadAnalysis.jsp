@@ -38,7 +38,7 @@
 <labkey:form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form._workspaceObject != null)
     { %>
-    <input type="hidden" name="workspaceObject" value="<%=PageFlowUtil.encodeObject(form._workspaceObject)%>">
+    <input type="hidden" name="token" value="<%=h(form.getToken())%>">
     <%
         PopulationName[] analysisNames = this.getGroupAnalysisNames();
         if (analysisNames.length > 0)
