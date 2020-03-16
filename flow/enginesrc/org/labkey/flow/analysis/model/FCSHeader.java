@@ -354,14 +354,10 @@ public class FCSHeader
                 if (datatypeI && facsCalibur)
                     simpleLog = true;
             }
-            // NOTE: Scaling by gain fixes the FlowJo advanced tutorial graphs, but messes up the others.
-            /*
-            else
+            else if (KeywordUtil.isTimeChannel(name) && scale == 1.0 && gain != 0.0)
             {
-                if (gain != 0.0)
-                    scale = 1/gain;
+                scale = gain;
             }
-            */
 
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getParameterDescription(i));
