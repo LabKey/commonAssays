@@ -92,10 +92,8 @@ public class PlotFactory
             // UNDONE: Share this rootStatsMap
             Map<String, MathStat> rootStatsMap = new HashMap<>();
             min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
-            min = field.getScalingFunction().translate(min);
 
             max = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Max, field.getName()), rootStatsMap);
-            max = field.getScalingFunction().translate(max);
         }
         boolean logarithmic = displayLogarithmic(subset, field);
         boolean simpleLog = logarithmic && field.isSimpleLogAxis();
