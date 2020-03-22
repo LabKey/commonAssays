@@ -22,15 +22,17 @@
 <labkey:form method="post">
     <table width="75%">
         <tr>
-            <td>This upgrade will inspect all existing MS2 runs in the system. It will attach mspicture result files that are
-                sitting next to the pep.xml and prop.xml files on disk. This is safe to run multiple times - only newly
-                discovered files will be added.
-                The upgrade task may be long running but will be
-                invoked as a pipeline job; you will be able to monitor progress and view log information from
-                the <a href="<%=urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
-    </tr>
-    <tr><td>&nbsp;</td></tr>
-    <tr><td><%= button("Attach Files").submit(true) %></td></tr>
-</table>
+            <td>
+                This upgrade will inspect all existing MS2 runs in the system. It will attach mspicture result files that
+                are sitting next to the pep.xml and prop.xml files on disk. This is safe to run multiple times - only
+                newly discovered files will be added.
+                The upgrade task may be long running but will be invoked as a pipeline job; you will be able to monitor
+                progress and view log information from the
+                <a href="<%=urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status</a> page.
+            </td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td><%= button("Attach Files").submit(true) %></td></tr>
+    </table>
 </labkey:form>
 

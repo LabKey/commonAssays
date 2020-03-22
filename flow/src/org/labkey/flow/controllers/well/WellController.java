@@ -40,7 +40,6 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.util.DOM;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
 import org.labkey.api.util.PageFlowUtil;
@@ -92,7 +91,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.labkey.api.util.DOM.*;
+import static org.labkey.api.util.DOM.Attribute;
+import static org.labkey.api.util.DOM.BR;
+import static org.labkey.api.util.DOM.SPAN;
+import static org.labkey.api.util.DOM.at;
 
 public class WellController extends BaseFlowController
 {
@@ -108,11 +110,13 @@ public class WellController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(new ActionURL(FlowController.BeginAction.class, getContainer()));
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
@@ -155,6 +159,7 @@ public class WellController extends BaseFlowController
     protected String[] getKeywordIntersection(List<FlowWell> wells, boolean filterHiddenKeywords)
     {
         Set<String> intersection = new HashSet<>(wells.get(0).getKeywords().keySet());
+
         for (FlowWell well : wells)
         {
             Set<String> c = well.getKeywords().keySet();
@@ -186,40 +191,43 @@ public class WellController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class ShowWellAction extends SimpleViewAction
     {
-        FlowWell well;
+        private FlowWell _well;
 
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             Page page = getPage("/org/labkey/flow/controllers/well/showWell.jsp");
-            well = page.getWell();
+            _well = page.getWell();
             JspView v = new JspView(page);
             v.setClientDependencies(page.getClientDependencies());
             return v;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            String label = well != null ? null : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, well, label);
+            String label = _well != null ? null : "Well not found";
+            return appendFlowNavTrail(getPageConfig(), root, _well, label);
         }
     }
 
     @RequiresPermission(UpdatePermission.class)
     public class EditWellAction extends FormViewAction<EditWellForm>
     {
-        List<FlowWell> wells;
-        boolean isBulkEdit;
-        boolean isUpdate;
-        String returnURL;
+        private List<FlowWell> _wells;
+        private boolean _isBulkEdit;
+        private boolean _isUpdate;
+
         @Override
         public void validateCommand(EditWellForm form, Errors errors)
         {
-            wells = getWells(form.ff_isBulkEdit);
-            form.setWells(wells, form.ff_isBulkEdit);
+            _wells = getWells(form.ff_isBulkEdit);
+            form.setWells(_wells, form.ff_isBulkEdit);
 
             if (form.ff_keywordName != null)
             {
                 Set<String> keywords = new HashSet<>();
+
                 for (int i = 0; i < form.ff_keywordName.length; i ++)
                 {
                     String name = form.ff_keywordName[i];
@@ -257,32 +265,35 @@ public class WellController extends BaseFlowController
         {
             String returnUrl = getRequest().getParameter("editWellReturnUrl");
             form.editWellReturnUrl = returnUrl;
+
             if (returnUrl != null)
             {
-                form.editWellReturnUrl = returnUrl.toString();
+                form.editWellReturnUrl = returnUrl;
             }
-            isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
-            if(!isUpdate)
+
+            _isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
+
+            if(!_isUpdate)
             {
-                if (wells == null)
+                if (_wells == null)
                 {
-                    wells = getWells(form.ff_isBulkEdit);
+                    _wells = getWells(form.ff_isBulkEdit);
                 }
-                if (wells == null || wells.size() == 0)
+                if (_wells == null || _wells.size() == 0)
                 {
                     Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, false);
-                    wells = new ArrayList<>();
+                    _wells = new ArrayList<>();
 
                     for (String wellId : selected)
                     {
-                        wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
+                        _wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
                     }
                     DataRegionSelection.clearAll(form.getViewContext());
                 }
-                form.setWells(wells, form.ff_isBulkEdit);
-                if (form.ff_isBulkEdit && !isUpdate)
+                form.setWells(_wells, form.ff_isBulkEdit);
+                if (form.ff_isBulkEdit && !_isUpdate)
                 {
-                    form.ff_keywordName = getKeywordIntersection(wells, true);
+                    form.ff_keywordName = getKeywordIntersection(_wells, true);
                 }
             }
             return FormPage.getView("/org/labkey/flow/controllers/well/editWell.jsp", form, errors);
@@ -291,19 +302,18 @@ public class WellController extends BaseFlowController
         @Override
         public boolean handlePost(EditWellForm form, BindException errors) throws Exception
         {
-            isBulkEdit = form.ff_isBulkEdit;
+            _isBulkEdit = form.ff_isBulkEdit;
             form.editWellReturnUrl = getRequest().getParameter("editWellReturnUrl");
-            returnURL = form.editWellReturnUrl;
-            isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
+            _isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
 
-            if (!isUpdate)
+            if (!_isUpdate)
             {
                 return false;
             }
 
-            wells = getWells(form.ff_isBulkEdit);
+            _wells = getWells(form.ff_isBulkEdit);
 
-            for (FlowWell well : wells)
+            for (FlowWell well : _wells)
             {
                 if (!form.ff_isBulkEdit)
                 {
@@ -330,6 +340,7 @@ public class WellController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(EditWellForm form)
         {
             if (form.ff_isBulkEdit)
@@ -339,38 +350,40 @@ public class WellController extends BaseFlowController
             return form.getWells().get(0).urlFor(ShowWellAction.class);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            if (isBulkEdit)
+            if (_isBulkEdit)
             {
                 ActionURL urlFcsFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
                 root.addChild(new NavTree("FSC Files",urlFcsFiles));
                 root.addChild(new NavTree("Edit Keywords"));
                 return root;
             }
-            String label = wells != null && !wells.isEmpty() ? "Edit " + wells.get(0).getLabel() : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, wells.get(0), label);
+            String label = _wells != null && !_wells.isEmpty() ? "Edit " + _wells.get(0).getLabel() : "Well not found";
+            return appendFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
         }
     }
 
     @RequiresPermission(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
-        FlowWell well;
+        private FlowWell _well;
 
+        @Override
         public ModelAndView getView(ChooseGraphForm form, BindException errors)
         {
-            well = form.getWell();
-            if (null == well)
+            _well = form.getWell();
+            if (null == _well)
             {
                 throw new NotFoundException();
             }
 
-            URI fileURI = well.getFCSURI();
+            URI fileURI = _well.getFCSURI();
             if (fileURI == null)
                 return new HtmlView("<span class='labkey-error'>There is no file on disk for this well.</span>");
 
-            PipeRoot r = PipelineService.get().findPipelineRoot(well.getContainer());
+            PipeRoot r = PipelineService.get().findPipelineRoot(_well.getContainer());
             if (r == null)
                 return new HtmlView("<span class='labkey-error'>Pipeline not configured</span>");
 
@@ -387,13 +400,13 @@ public class WellController extends BaseFlowController
             if (!canRead)
                 return new HtmlView("<span class='labkey-error'>The original FCS file is no longer available or is not readable" + (rel == null ? "." : ": " + PageFlowUtil.filter(rel.getPath())) + "</span>");
 
-            FormPage page = FormPage.get("/org/labkey/flow/controllers/well/chooseGraph.jsp", form);
-            return new JspView(page);
+            return new JspView<>("/org/labkey/flow/controllers/well/chooseGraph.jsp", form);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, well, "Choose Graph");
+            return appendFlowNavTrail(getPageConfig(), root, _well, "Choose Graph");
         }
     }
 
@@ -401,13 +414,12 @@ public class WellController extends BaseFlowController
     @ContextualRoles(GraphContextualRoles.class)
     public class ShowGraphAction extends SimpleViewAction
     {
-        FlowWell well;
-
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             Pair<Integer, String> objectId_graph = parseObjectIdGraph();
 
-            well = getWell();
+            FlowWell well = getWell();
             if (well == null)
             {
                 int objectId = getIntParam(FlowParam.objectId);
@@ -458,6 +470,7 @@ public class WellController extends BaseFlowController
             return GraphColumn.parseObjectIdGraph(param);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
@@ -475,6 +488,7 @@ public class WellController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class GenerateGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
+        @Override
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws IOException
         {
             FlowWell well = form.getWell();
@@ -486,7 +500,7 @@ public class WellController extends BaseFlowController
                 throw new NotFoundException("Graph spec required");
 
             GraphSpec graphSpec = new GraphSpec(graph);
-            FCSAnalyzer.GraphResult res = null;
+            FCSAnalyzer.GraphResult res;
             try
             {
                 res = FlowAnalyzer.generateGraph(form.getWell(), form.getScript(), FlowProtocolStep.fromActionSequence(form.getActionSequence()), form.getCompensationMatrix(), graphSpec);
@@ -514,6 +528,7 @@ public class WellController extends BaseFlowController
             return null;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
@@ -522,6 +537,7 @@ public class WellController extends BaseFlowController
 
     abstract class FCSAction extends SimpleViewAction<Object>
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             FlowWell well = getWell();
@@ -574,6 +590,7 @@ public class WellController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class KeywordsAction extends FCSAction
     {
+        @Override
         protected ModelAndView internalGetView(FlowWell well) throws Exception
         {
             // convert to use the same Ext control as ShowWellAction
@@ -583,6 +600,7 @@ public class WellController extends BaseFlowController
             return null;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
@@ -594,6 +612,7 @@ public class WellController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class ShowFCSAction extends FCSAction
     {
+        @Override
         public ModelAndView internalGetView(FlowWell well) throws Exception
         {
             String mode = getActionURL().getParameter("mode");
@@ -633,6 +652,7 @@ public class WellController extends BaseFlowController
             return null;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return root;
@@ -643,9 +663,9 @@ public class WellController extends BaseFlowController
     @RequiresPermission(AdminPermission.class)
     public class BulkUpdateKeywordsAction extends FormViewAction<UpdateKeywordsForm>
     {
-        Integer keywordid = null;
-        int updated = -1;
+        private Integer _keywordid = null;
 
+        @Override
         public void validateCommand(UpdateKeywordsForm form, Errors errors)
         {
             if (null == form.keyword)
@@ -670,21 +690,24 @@ public class WellController extends BaseFlowController
             }
 
             SQLFragment sql = new SQLFragment("SELECT RowId FROM flow.KeywordAttr WHERE Container = ? AND Name = ?", getContainer(), form.keyword);
-            keywordid = new SqlSelector(FlowManager.get().getSchema(), sql).getObject(Integer.class);
-            if (null == keywordid)
+            _keywordid = new SqlSelector(FlowManager.get().getSchema(), sql).getObject(Integer.class);
+            if (null == _keywordid)
                 errors.rejectValue("keyword", ERROR_MSG, "keyword not found: " + form.keyword);
         }
 
+        @Override
         public ModelAndView getView(UpdateKeywordsForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/flow/controllers/well/bulkUpdate.jsp", form, errors);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return root;
         }
 
+        @Override
         public boolean handlePost(UpdateKeywordsForm form, BindException errors)
         {
             SQLFragment update = new SQLFragment();
@@ -702,8 +725,8 @@ public class WellController extends BaseFlowController
             update.append("WHERE objectid IN (SELECT O.rowid from flow.object O where O.container=? and O.typeid=?) AND keywordid=?");
             update.add(getContainer());
             update.add(ObjectType.fcsKeywords.getTypeId());
-            update.add(keywordid);
-            update.append("  AND value IN (");
+            update.add(_keywordid);
+            update.append(" AND value IN (");
             String param = "?";
             for (int i=0 ; i<form.from.length ; i++)
             {
@@ -716,18 +739,20 @@ public class WellController extends BaseFlowController
             }
             update.append(")");
 
-            updated = new SqlExecutor(FlowManager.get().getSchema()).execute(update);
+            int updated = new SqlExecutor(FlowManager.get().getSchema()).execute(update);
 
             form.message = "" + updated + " values updated";
             // CONSIDER handle nulls (requires INSERT and DELETE)
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(UpdateKeywordsForm form)
         {
             return null;
         }
 
+        @Override
         public ModelAndView getSuccessView(UpdateKeywordsForm form)
         {
             return new MessageView(form.message, new ActionURL(WellController.BulkUpdateKeywordsAction.class, getContainer()));
@@ -802,9 +827,9 @@ public class WellController extends BaseFlowController
     {
         private FlowRun _run;
         private FlowWell _well;
-        Map<String, String> _keywords;
-        Map<StatisticSpec, Double> _statistics;
-        GraphSpec[] _graphs;
+        private Map<String, String> _keywords;
+        private Map<StatisticSpec, Double> _statistics;
+        private GraphSpec[] _graphs;
 
         public void setWell(FlowWell well)
         {
@@ -846,7 +871,7 @@ public class WellController extends BaseFlowController
     public class SetFileDateAction extends MutatingApiAction<Object>
     {
         @Override
-        public Object execute(Object o, BindException errors) throws Exception
+        public Object execute(Object o, BindException errors)
         {
             if (getContainer().isRoot())
             {
@@ -860,5 +885,4 @@ public class WellController extends BaseFlowController
             return null;
         }
     }
-
 }

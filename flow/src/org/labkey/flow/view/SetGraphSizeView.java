@@ -7,6 +7,6 @@ public class SetGraphSizeView extends JspView
 {
     public SetGraphSizeView()
     {
-        super(JspLoader.createPage((String)null, "/org/labkey/flow/view/setGraphSize.jsp"));
+        super(JspLoader.createPage("/org/labkey/flow/view/setGraphSize.jsp"));
     }
 }
