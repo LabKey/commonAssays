@@ -52,7 +52,7 @@ public abstract class BaseFlowController extends SpringActionController
 
     protected JspBase getFlowPage(String jspPath)
     {
-        return (JspBase)JspLoader.createPage((String)null, jspPath);
+        return (JspBase)JspLoader.createPage(jspPath);
     }
 
     protected FlowScript getScript()

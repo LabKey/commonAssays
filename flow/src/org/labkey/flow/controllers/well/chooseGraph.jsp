@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
 <%@ page import="org.labkey.flow.analysis.web.ScriptAnalyzer" %>
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
@@ -34,16 +35,16 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
-<%@ page extends="org.labkey.api.jsp.FormPage" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ChooseGraphForm form = (ChooseGraphForm) __form;
+    HttpView<ChooseGraphForm> me = (HttpView<ChooseGraphForm>) HttpView.currentView();
+    ChooseGraphForm form = me.getModelBean();
 
     boolean hasScripts = false;
     boolean hasComps = false;
     FlowWell well = form.getWell();
-    Map<Integer, String> scriptOptions = new LinkedHashMap();
+    Map<Integer, String> scriptOptions = new LinkedHashMap<>();
     if (form.getScript() == null)
     {
         scriptOptions.put(0, "None");
@@ -69,7 +70,7 @@
         }
     }
 
-    Map<Integer, String> compOptions = new LinkedHashMap();
+    Map<Integer, String> compOptions = new LinkedHashMap<>();
     if (form.getCompensationMatrix() == null)
     {
         compOptions.put(0, "None");
@@ -93,7 +94,7 @@
     FlowCompensationMatrix matrix = form.getCompensationMatrix();
 
     FlowProtocolStep step = FlowProtocolStep.fromActionSequence(form.getActionSequence());
-    List<FlowProtocolStep> steps = new ArrayList();
+    List<FlowProtocolStep> steps = new ArrayList<>();
     if (script != null)
     {
         if (script.hasStep(FlowProtocolStep.calculateCompensation))
