@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.Container;
@@ -115,11 +115,11 @@ public class MS2Manager
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
-    private static final StringKeyCache<MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
+    private static final Cache<String, MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
     private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
-    private static final StringKeyCache<PeptideProphetSummary> PEPTIDE_PROPHET_SUMMARY_CACHE = CacheManager.getSharedCache();
+    private static final Cache<String, PeptideProphetSummary> PEPTIDE_PROPHET_SUMMARY_CACHE = CacheManager.getSharedCache();
     private static final String RUN_CACHE_PREFIX = "MS2Run/";
-    private static final StringKeyCache<MS2Run> RUN_CACHE = CacheManager.getSharedCache();
+    private static final Cache<String, MS2Run> RUN_CACHE = CacheManager.getSharedCache();
 
     public static DbSchema getSchema()
     {
@@ -1289,7 +1289,7 @@ public class MS2Manager
     }
 
 
-    private static class PeptideIndexCache extends DatabaseCache<long[]>
+    private static class PeptideIndexCache extends DatabaseCache<String, long[]>
     {
         private static int CACHE_SIZE = 10;
 
