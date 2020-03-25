@@ -25,7 +25,6 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.jsp.FormPage;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -616,10 +615,12 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetupClusterSequenceDBAction extends FormViewAction<SequenceDBRootForm>
     {
+        @Override
         public void validateCommand(SequenceDBRootForm form, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(SequenceDBRootForm form, BindException errors) throws Exception
         {
             boolean success = true;
@@ -661,28 +662,33 @@ public class PipelineController extends SpringActionController
             return success;
         }
 
+        @Override
         public ActionURL getSuccessURL(SequenceDBRootForm form)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
 
+        @Override
         public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors)
         {
-            ConfigureSequenceDB page = (ConfigureSequenceDB) FormPage.get("/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp", form);
-
             File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer(), false);
+            final String localPathRoot;
+
             if (fileRoot == null)
-                page.setLocalPathRoot("");
+            {
+                localPathRoot = "";
+            }
             else
             {
                 if (!NetworkDrive.exists(fileRoot))
                     errors.reject(ERROR_MSG, "FASTA root \"" + fileRoot + "\" does not exist.");
-                page.setLocalPathRoot(fileRoot.toString());
+                localPathRoot = fileRoot.toString();
             }
 
-            return page.createView(errors);
+            return new JspView<>("/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp", localPathRoot, errors);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return root.addChild("Configure FASTA Root");
