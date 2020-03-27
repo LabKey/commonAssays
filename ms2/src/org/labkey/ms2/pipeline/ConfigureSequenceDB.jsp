@@ -16,10 +16,14 @@
  */
 %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.pipeline.PipelineController" %>
-<%@ page extends="org.labkey.ms2.pipeline.ConfigureSequenceDB" %>
+<%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-
+<%
+    HttpView<String> me = (HttpView<String>) HttpView.currentView();
+    String localPathRoot = me.getModelBean();
+%>
 <labkey:form method="POST" name="updateClusterSequenceDB" action="<%=urlFor(PipelineController.SetupClusterSequenceDBAction.class)%>">
     <labkey:errors />
     <table>
@@ -27,7 +31,7 @@
             <td>Path on the web server for FASTA files to be used for MS2 searches:</td>
         </tr>
         <tr>
-            <td><input type="text" name="localPathRoot" size="80" value="<%= h(getLocalPathRoot()) %>"></td>
+            <td><input type="text" name="localPathRoot" size="80" value="<%= h(localPathRoot) %>"></td>
         </tr>
         <tr>
             <td><%= button("Save").submit(true) %> <%= button("Cancel").href(urlProvider(PipelineUrls.class).urlSetup(getContainer())) %></td>
