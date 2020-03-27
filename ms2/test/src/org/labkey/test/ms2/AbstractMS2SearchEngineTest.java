@@ -19,8 +19,6 @@ package org.labkey.test.ms2;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.pages.ReactAssayDesignerPage;
-import org.labkey.test.params.FieldDefinition;
 import org.openqa.selenium.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
@@ -151,8 +149,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         beginAt(dataHref); // Clicking this is unreliable. Possibly because the image is so large. Just navigate.
         assertTextPresent(
                 "bov_sample/" + SAMPLE_BASE_NAME,
-                "Data CAexample_mini.mzXML",
-                "AutomatedTestAssay");
+                "Data CAexample_mini.mzXML");
 
         navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
