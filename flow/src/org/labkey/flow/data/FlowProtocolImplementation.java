@@ -21,9 +21,14 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ProtocolImplementation;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 import java.util.List;
 
@@ -65,5 +70,11 @@ public class FlowProtocolImplementation extends ProtocolImplementation
         sql.append(")\n");
 
         new SqlExecutor(ExperimentService.get().getSchema()).execute(sql);
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference(ExpProtocol protocol, ExpRun run)
+    {
+        return new QueryRowReference(run.getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.Runs.name(), FieldKey.fromParts("rowId"), run.getRowId());
     }
 }

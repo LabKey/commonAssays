@@ -24,6 +24,9 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.flow.persist.AttrObject;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
@@ -283,4 +286,9 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return AttributeSetHelper.fromData(getData(), includeGraphBytes);
     }
 
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), ExpSchema.SCHEMA_EXP, ExpSchema.TableType.Data.name(), FieldKey.fromParts("RowId"), getRowId());
+    }
 }

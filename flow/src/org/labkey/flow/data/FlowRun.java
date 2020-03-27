@@ -31,6 +31,8 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
@@ -333,6 +335,12 @@ public class FlowRun extends FlowObject<ExpRun>
     public ActionURL urlDownload()
     {
         return urlFor(RunController.DownloadAction.class);
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.Runs.name(), FieldKey.fromParts("RowId"), getRunId());
     }
 
     public String getLabel()

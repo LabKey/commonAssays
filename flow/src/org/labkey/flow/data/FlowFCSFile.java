@@ -18,7 +18,11 @@ package org.labkey.flow.data;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -98,4 +102,9 @@ public class FlowFCSFile extends FlowWell
         setProperty(user, FlowProperty.FileDate.getPropertyDescriptor(), date);
     }
 
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId"), getRowId());
+    }
 }
