@@ -30,8 +30,6 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 {
     protected boolean _useOnlyOneFasta = false;
-    protected static final String TEST_ASSAY_NAME = "AutomatedTestAssay";
-    private static final String ANNOTATION_RUN_NAME = "Automated Test Annotation Run";
 
     abstract protected void doCleanup(boolean afterTest) throws TestTimeoutException;
 
@@ -50,45 +48,6 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 
         log("Start analysis running.");
         navigateToFolder(FOLDER_NAME);
-        clickButton("Process and Import Data");
-        _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Create New Mass Spec Metadata Assay Design");
-
-        log("Create a new MS2 sample prep assay definition.");
-        ReactAssayDesignerPage assayDesigner = new ReactAssayDesignerPage(getDriver());
-        assayDesigner.setName(TEST_ASSAY_NAME);
-
-        assayDesigner.goToRunFields()
-                .addField(new FieldDefinition("IntegerField").setType(FieldDefinition.ColumnType.Integer))
-                .addField(new FieldDefinition("TextField").setType(FieldDefinition.ColumnType.String))
-                .addField(new FieldDefinition("BooleanField").setType(FieldDefinition.ColumnType.Boolean));
-        assayDesigner.clickFinish();
-
-        navigateToFolder(FOLDER_NAME);
-        clickButton("Process and Import Data");
-        _fileBrowserHelper.importFile("bov_sample/CAexample_mini.mzXML", "Use " + TEST_ASSAY_NAME);
-
-        log("Describe MS2 run.");
-        clickButton("Next");
-        setFormElement(Locator.name("name"), ANNOTATION_RUN_NAME);
-        setFormElement(Locator.name("integerField"), "10");
-        setFormElement(Locator.name("textField"), "Text value");
-        click(Locator.checkboxByName("booleanField"));
-
-        int seconds = 0;
-        while (!isTextPresent("<None>") && seconds < 20)
-        {
-            seconds++;
-            sleep(1000);
-        }
-        selectOptionByText(Locator.id("sampleSetListBox0"), "<None>");
-        setFormElement(Locator.id("sampleTextBox0"), "verify:001");
-
-        clickButton("Save and Finish");
-
-        log("Return to search page");
-        navigateToFolder(FOLDER_NAME);
-
-        assertElementPresent(Locator.linkWithText(ANNOTATION_RUN_NAME));
 
         clickButton("Process and Import Data");
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/");
@@ -173,7 +132,6 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         clickAndWait(Locator.tagWithAttribute("a", "title", "Experiment run graph"));
 
         log("Verify msPicture");
-        assertElementPresent(Locator.imageMapLinkByTitle("graphmap", ANNOTATION_RUN_NAME));
         pushLocation();
         clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: " + SAMPLE_BASE_NAME + ".mzXML.image..itms.png (Run Output)"));
         assertElementPresent(Locator.linkWithText("msPicture"), 2);
@@ -195,11 +153,6 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
                 "bov_sample/" + SAMPLE_BASE_NAME,
                 "Data CAexample_mini.mzXML",
                 "AutomatedTestAssay");
-
-        clickAndWait(Locator.linkWithText(ANNOTATION_RUN_NAME));
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Material: verify:001"));
-
-        assertTextPresent("verify:001", "Not a member of a sample set");
 
         navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));

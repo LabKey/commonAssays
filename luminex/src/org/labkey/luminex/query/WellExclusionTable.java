@@ -75,7 +75,7 @@ public class WellExclusionTable extends AbstractExclusionTable
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, cf, filter);
 
         getMutableColumn("DataId").setLabel("Data File");
-        getMutableColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey());
+        getMutableColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey(cf));
 
         getMutableColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "WellExclusionId", null)
         {

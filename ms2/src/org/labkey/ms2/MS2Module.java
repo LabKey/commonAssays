@@ -23,8 +23,6 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.files.FileContentService;
@@ -54,9 +52,6 @@ import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixAssayProvider;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixExperimentListener;
-import org.labkey.ms2.metadata.MassSpecFractionsDomainKind;
-import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
-import org.labkey.ms2.metadata.MassSpecMetadataController;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
@@ -110,31 +105,17 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
+ * Module that supports mass-spectrometry based protein database searches. Can convert raw intrument files to mzXML
+ * and then analyze using a variety of search engines like XTandem or Comet, load the results, and show reports.
  * User: migra
  * Date: Jul 18, 2005
- * Time: 3:25:52 PM
  */
 public class MS2Module extends SpringModule implements ProteomicsModule
 {
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
 
     public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
-    private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
-    {
-        @Override
-        public Priority getPriority(ExpProtocol protocol)
-        {
-            Lsid lsid = new Lsid(protocol.getLSID());
-            String objectId = lsid.getObjectId();
-            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX) || lsid.getNamespacePrefix().startsWith(MassSpecMetadataAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX))
-            {
-                return Priority.HIGH;
-            }
-            return null;
-        }
-    };
 
-    public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
     public static final String MS2_RUNS_NAME = "MS2 Runs";
     public static final String MS2_MODULE_NAME = "MS2";
 
@@ -169,16 +150,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
         return new ArrayList<>(Arrays.asList(
                 runsFactory,
-                new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
-                {
-                    @Override
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SAMPLE_PREP_RUN_TYPE);
-                        result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
-                        return result;
-                    }
-                },
                 new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)
                 {
                     @Override
@@ -230,7 +201,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     protected void init()
     {
         addController("ms2", MS2Controller.class);
-        addController("xarassay", MassSpecMetadataController.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
 
@@ -241,7 +211,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         MS2Service.setInstance(new MS2ServiceImpl());
 
         ProteinService.setInstance(new ProteinServiceImpl());
-        PropertyService.get().registerDomainKind(new MassSpecFractionsDomainKind());
     }
 
     @Override
@@ -258,7 +227,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<>();
-        runTypes.add(SAMPLE_PREP_RUN_TYPE);
         runTypes.add(SEARCH_RUN_TYPE);
         runTypes.add(new MS2SearchExperimentRunType("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("X!Tandem Searches", MS2Schema.TableType.XTandemSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
@@ -293,10 +261,9 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
         AssayService svc = AssayService.get();
 
-        // Study module might not be present, #29772
+        // Assay module might not be present, #29772
         if (null != svc)
         {
-            svc.registerAssayProvider(new MassSpecMetadataAssayProvider());
             svc.registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
         }
 
