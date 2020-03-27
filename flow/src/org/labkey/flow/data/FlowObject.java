@@ -16,15 +16,18 @@
 
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
+import org.labkey.api.exp.Identifiable;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.property.SystemProperty;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -45,7 +48,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>, Serializable
+abstract public class FlowObject<T extends ExpObject> implements Comparable<Object>, Serializable, Identifiable
 {
     protected T _expObject;
     protected String _entityId;
@@ -67,6 +70,14 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     abstract public void addParams(Map<FlowParam, Object> map);
     abstract public ActionURL urlShow();
     abstract public ActionURL urlDownload();
+
+    @Override
+    public @Nullable ActionURL detailsURL()
+    {
+        return urlShow();
+    }
+
+    abstract public QueryRowReference getQueryRowReference();
 
     public String getLSID()
     {

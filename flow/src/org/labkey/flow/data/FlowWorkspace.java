@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -127,4 +128,10 @@ public class FlowWorkspace extends FlowDataObject
         return url;
     }
 
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        // UNDONE: Need a query table for the imported workspaces?
+        return super.getQueryRowReference();
+    }
 }

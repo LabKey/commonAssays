@@ -17,6 +17,10 @@
 package org.labkey.flow.data;
 
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 public class FlowCompensationControl extends FlowWell
 {
@@ -26,5 +30,11 @@ public class FlowCompensationControl extends FlowWell
     public FlowCompensationControl(ExpData data)
     {
         super(data);
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.CompensationControls.name(), FieldKey.fromParts("RowId"), getRowId());
     }
 }
