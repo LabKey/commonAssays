@@ -117,6 +117,7 @@ import java.util.function.Supplier;
 public class FlowSchema extends UserSchema
 {
     static public final String SCHEMANAME = "flow";
+    static public final SchemaKey SCHEMAKEY = SchemaKey.fromParts("flow");
     static public final String SCHEMA_DESCR = "Contains data about flow cytometry experiment runs";
 
     // Column name constants
@@ -911,7 +912,7 @@ public class FlowSchema extends UserSchema
             //DetailsURL detailsURL = DetailsURL.fromString("/flow/download.view?dataId=${rowId}", getContainer());
             PropertyDescriptor pd = new PropertyDescriptor();
             pd.setURL(detailsURL);
-            ret.setDisplayColumnFactory(new FileLinkDisplayColumn.Factory(pd, getContainer(), SchemaKey.fromParts(FlowSchema.SCHEMANAME), FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId")));
+            ret.setDisplayColumnFactory(new FileLinkDisplayColumn.Factory(pd, getContainer(), SCHEMAKEY, FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId")));
             ret.setURL(detailsURL);
             ret.setHidden(true);
             addColumn(ret);

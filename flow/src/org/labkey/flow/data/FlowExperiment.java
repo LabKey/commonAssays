@@ -22,11 +22,14 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -239,6 +242,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     public ActionURL urlDownload()
     {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.Analyses.name(), FieldKey.fromParts("RowId"), getExperimentId());
     }
 
     public boolean hasRun(File filePath, @Nullable FlowProtocolStep step)

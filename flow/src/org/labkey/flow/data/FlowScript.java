@@ -26,6 +26,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.analysis.model.PopulationSet;
@@ -39,12 +40,13 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.web.servlet.mvc.Controller;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -209,6 +211,12 @@ public class FlowScript extends FlowDataObject
     public ActionURL urlDownload()
     {
         return urlFor(ScriptController.DownloadAction.class);
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.AnalysisScripts.name(), FieldKey.fromParts("RowId"), getRowId());
     }
 
     public String getLabel()
