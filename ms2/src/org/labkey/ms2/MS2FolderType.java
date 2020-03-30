@@ -55,7 +55,6 @@ public class MS2FolderType extends MultiPortalFolderType
     {
         List<Portal.WebPart> webParts = new ArrayList<>(Arrays.asList(
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
-                Portal.getPortalPart(MS2Module.MS2_SAMPLE_PREPARATION_RUNS_NAME).createWebPart(),
                 Portal.getPortalPart("Run Groups").createWebPart(),
                 Portal.getPortalPart("Run Types").createWebPart(),
                 Portal.getPortalPart("Sample Sets").createWebPart(),
