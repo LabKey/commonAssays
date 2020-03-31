@@ -575,7 +575,7 @@ UPDATE luminex.datarow SET SinglePointControlId =
     WHERE pa.runid = s.runid AND d.sourceapplicationid = pa.rowid AND dataid = d.rowid AND description = s.name)
 WHERE SinglePointControlId IS NULL;
 
-/* luminex-14.30-14.31.sql */
+/* luminex-14.30-15.10.sql */
 
 ALTER TABLE luminex.GuideSet ADD EC504PLEnabled BIT;
 ALTER TABLE luminex.GuideSet ADD EC505PLEnabled BIT;
@@ -588,19 +588,13 @@ ALTER TABLE luminex.GuideSet ALTER COLUMN EC505PLEnabled BIT NOT NULL;
 ALTER TABLE luminex.GuideSet ALTER COLUMN AUCEnabled BIT NOT NULL;
 ALTER TABLE luminex.GuideSet ALTER COLUMN MaxFIEnabled BIT NOT NULL;
 
-/* luminex-14.31-14.32.sql */
-
 ALTER TABLE luminex.GuideSet ADD CONSTRAINT DF_EC504PLEnabled DEFAULT 1 FOR EC504PLEnabled;
 ALTER TABLE luminex.GuideSet ADD CONSTRAINT DF_EC505PLEnabled DEFAULT 1 FOR EC505PLEnabled;
 ALTER TABLE luminex.GuideSet ADD CONSTRAINT DF_AUCEnabled DEFAULT 1 FOR AUCEnabled;
 ALTER TABLE luminex.GuideSet ADD CONSTRAINT DF_MaxFIEnabled DEFAULT 1 FOR MaxFIEnabled;
 
-/* luminex-14.32-14.33.sql */
-
 CREATE INDEX IX_LuminexSinglePointControl_RunId ON luminex.SinglePointControl(RunId);
 CREATE INDEX IDX_AnalyteSinglePointControl_AnalyteId ON luminex.AnalyteSinglePointControl(AnalyteId);
-
-/* luminex-14.33-14.34.sql */
 
 ALTER TABLE luminex.GuideSet ADD IsTitration BIT;
 GO
@@ -650,11 +644,11 @@ UPDATE luminex.GuideSet SET AnalyteName = RTRIM(LTRIM(AnalyteName));
 
 /* luminex-16.30-17.10.sql */
 
-/* luminex-16.30-16.31.sql */
-
 ALTER TABLE luminex.WellExclusion ADD Dilution REAL;
-
-/* luminex-16.31-16.32.sql */
 
 DROP INDEX UQ_WellExclusion ON luminex.WellExclusion;
 CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Dilution, Type, DataId);
+
+/* luminex-17.30-18.10.sql */
+
+ALTER TABLE luminex.WellExclusion ADD Well NVARCHAR(50);
