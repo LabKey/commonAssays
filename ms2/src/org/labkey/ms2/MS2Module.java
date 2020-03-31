@@ -90,7 +90,6 @@ import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator;
-import org.labkey.ms2.reader.RandomAccessPwizMSDataIterator;
 import org.labkey.ms2.reader.SequestLogDocumentParser;
 import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
@@ -365,7 +364,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             Protein.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,
             RandomAccessJrapMzxmlIterator.TestCase.class,
-            RandomAccessPwizMSDataIterator.TestCase.class,
             RealNumberParamsValidator.TestCase.class,
             SequestSearchTask.TestCase.class,
             TPPTask.TestCase.class
