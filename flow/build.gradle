@@ -11,7 +11,7 @@ sourceSets {
 dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "engineImplementation", depProjectPath: BuildUtils.getApiProjectPath(project.gradle))
     BuildUtils.addLabKeyDependency(project: project, config: "engineImplementation", depProjectPath: BuildUtils.getInternalProjectPath(project.gradle))
-    engineImplementation "org.labkey:labkey-client-api:${project.version}"
+    engineImplementation "org.labkey.api:labkey-client-api:${labkeyClientApiVersion}"
     engineImplementation "org.apache.tomcat:tomcat-jasper:${apacheTomcatVersion}"
     engineImplementation "org.apache.tomcat:tomcat-jsp-api:${apacheTomcatVersion}"
     engineImplementation project.files(project.tasks.schemasCompile)

@@ -404,8 +404,6 @@ flow/src/org/labkey/flow/webparts/OverviewWebPart.java -text
 flow/webapp/WEB-INF/flow/flowContext.xml -text
 luminex/module.properties -text
 luminex/resources/reports/schemas/CurveComparisonPlot.r -text
-luminex/resources/schemas/dbscripts/postgresql/luminex-17.30-18.10.sql -text
-luminex/resources/schemas/dbscripts/sqlserver/luminex-17.30-18.10.sql -text
 luminex/resources/schemas/luminex.xml -text
 luminex/resources/transformscripts/description_parsing_example.pl -text
 luminex/resources/transformscripts/labkey_luminex_transform.R -text
@@ -723,18 +721,6 @@ ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixDataHandler.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixExperimentListener.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinExpressionMatrixProtocolSchema.java -text
 ms2/src/org/labkey/ms2/matrix/ProteinSequenceDataTable.java -text
-ms2/src/org/labkey/ms2/metadata/FractionsDisplayColumn.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecBulkPropertiesTemplateAction.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecFractionsDomainKind.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayForm.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataAssayProvider.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataController.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataDataCollector.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataProtocolSchema.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecMetadataUploadAction.java -text
-ms2/src/org/labkey/ms2/metadata/MassSpecRunCreator.java -text
-ms2/src/org/labkey/ms2/metadata/MsFractionPropertyHelper.java -text
-ms2/src/org/labkey/ms2/metadata/fractionsInput.jsp -text
 ms2/src/org/labkey/ms2/ms2Admin.jsp -text
 ms2/src/org/labkey/ms2/peptideChart.jsp -text
 ms2/src/org/labkey/ms2/peptideview/AbstractMS2RunView.java -text
@@ -963,7 +949,6 @@ ms2/src/org/labkey/ms2/query/SpectraCountTableInfo.java -text
 ms2/src/org/labkey/ms2/query/UniquePeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/reader/AbstractMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/AbstractQuantAnalysisResult.java -text
-ms2/src/org/labkey/ms2/reader/AbstractRandomAccessMzxmlParser.java -text
 ms2/src/org/labkey/ms2/reader/DatDocumentParser.java -text
 ms2/src/org/labkey/ms2/reader/ITraqProteinQuantitation.java -text
 ms2/src/org/labkey/ms2/reader/LibraQuantHandler.java -text
@@ -987,7 +972,6 @@ ms2/src/org/labkey/ms2/reader/Q3Handler.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessJrapMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIterator.java -text
 ms2/src/org/labkey/ms2/reader/RandomAccessMzxmlIteratorFactory.java -text
-ms2/src/org/labkey/ms2/reader/RandomAccessPwizMSDataIterator.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisResult.java -text
 ms2/src/org/labkey/ms2/reader/RelativeQuantAnalysisSummary.java -text
 ms2/src/org/labkey/ms2/reader/Rounder.java -text
