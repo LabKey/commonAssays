@@ -19,8 +19,13 @@ package org.labkey.test.ms2;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
+import org.labkey.test.components.experiment.LineageGraph;
 import org.openqa.selenium.NoSuchElementException;
 
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -129,9 +134,23 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 
         clickAndWait(Locator.tagWithAttribute("a", "title", "Experiment run graph"));
 
-        log("Verify msPicture");
+        log("Verify graph view");
         pushLocation();
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: " + SAMPLE_BASE_NAME + ".mzXML.image..itms.png (Run Output)"));
+        Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
+                .click();
+        LineageGraph graphComponent = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
+        List<String> actualParents = graphComponent.getDetails("Data Parents")
+                .getItemNames();
+        List<String> actualChildren = graphComponent.getDetails("Data Children")
+                .getItemNames();
+        assertThat(actualParents, hasItems("Bovine_mini1.fasta", "comet.xml", "CAexample_mini.mzXML"));
+        assertThat(actualChildren, hasItems("CAexample_mini.prot.xml", "CAexample_mini.pep.xml",
+                "CAexample_mini.mzXML.image..itms.png"));
+
+        // navigate to the details page for CAexample_mini.mzXML.image..itms.png
+        graphComponent.getDetails("Data Children")
+                .getItem("CAexample_mini.mzXML.image..itms.png")
+                .clickOverViewLink();
         assertElementPresent(Locator.linkWithText("msPicture"), 2);
         beginAt(getAttribute(Locator.xpath("//img[contains(@src, 'showFile.view')]"), "src"));
         // Firefox sets the title of the page when we view an image separately from an HTML page, so use that to verify

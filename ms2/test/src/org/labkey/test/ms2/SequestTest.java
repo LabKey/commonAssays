@@ -26,6 +26,7 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Disabled;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.Sequest;
+import org.labkey.test.pages.core.admin.ShowAdminPage;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
@@ -57,7 +58,7 @@ public class SequestTest extends AbstractMS2SearchEngineTest
     @Test
     public void testSteps()
     {
-
+        ShowAdminPage.beginAt(this);
         beginAt("/admin/showCustomizeSite.view");
         if (null == getAttribute(Locator.name("sequestServer"), "value") || "".equals(getAttribute(Locator.name("sequestServer"), "value")))
         {
