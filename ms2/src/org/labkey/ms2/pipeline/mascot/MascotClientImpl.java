@@ -17,6 +17,7 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.beanutils.converters.BooleanConverter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -1514,18 +1515,33 @@ public class MascotClientImpl implements SearchClient
         return null;
     }
 
-    // This test requires file access to MascotDefaults.xml, so it will run on a development machine, but not on TeamCity.
+    /**
+     * This test requires the MockMascotServlet to be running.
+     */
     public static class TestCase extends Assert
     {
         @Test
-        public void testMockMascotServer()
+        public void testMockMascotServer() throws IOException
         {
             MascotClientImpl client = new MascotClientImpl(ActionURL.getBaseServerURL() + "/mockmascot/cgi/", _log);
             String version = client.getMascotVersion().trim();
             Assert.assertEquals("Hello - Server: LabKey MockMascotServer 1.0", version);
 
+            // We need to POST an absolute file path to MascotDefaults.xml. First look for it in source.
+            String mascotDefaultsPath = MascotSearchProtocolFactory.get().getDefaultParametersResource();
+            String paramFile = ModuleLoader.getInstance().getModule("MS2").getSourcePath() + "/src/" + mascotDefaultsPath;
+
+            // Not found in source? Fine, create a temp file and use that.
+            if (new File(paramFile).exists())
+            {
+                InputStream is = getClass().getClassLoader().getResourceAsStream(mascotDefaultsPath);
+                File file = File.createTempFile("MascotDefaults", ".xml");
+                file.deleteOnExit();
+                FileUtils.copyInputStreamToFile(is, file);
+                paramFile = file.getAbsolutePath();
+            }
+
             String mascotSessionId = client.startSession();
-            String paramFile = ModuleLoader.getInstance().getModule("MS2").getSourcePath() + "/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml";
             Assert.assertTrue(client.submitFile(mascotSessionId, "5678", "submit.pl", paramFile, paramFile));
         }
     }
