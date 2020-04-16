@@ -26,11 +26,15 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.SearchFormUtil;
@@ -68,7 +72,7 @@ import java.util.Properties;
 
 public class MascotClientImpl implements SearchClient
 {
-    private static Logger _log = Logger.getLogger(MascotClientImpl.class);
+    private static final Logger _log = Logger.getLogger(MascotClientImpl.class);
     
     private Logger _instanceLogger;
 
@@ -1509,5 +1513,19 @@ public class MascotClientImpl implements SearchClient
         return null;
     }
 
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testMockMascotServer()
+        {
+            MascotClientImpl client = new MascotClientImpl(ActionURL.getBaseServerURL() + "/mockmascot/cgi/", _log);
+            String version = client.getMascotVersion().trim();
+            Assert.assertEquals("Hello - Server: LabKey MockMascotServer 1.0", version);
+
+            String mascotSessionId = client.startSession();
+            String paramFile = ModuleLoader.getInstance().getModule("MS2").getSourcePath() + "/src/org/labkey/ms2/pipeline/mascot/MascotDefaults.xml";
+            Assert.assertTrue(client.submitFile(mascotSessionId, "5678", "submit.pl", paramFile, paramFile));
+        }
+    }
 }
 
