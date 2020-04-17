@@ -20,6 +20,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.DailyB;
+import org.labkey.test.components.experiment.LineageGraph;
 
 import java.io.File;
 
@@ -83,7 +84,10 @@ public class QuantitationTest extends AbstractXTandemTest
         // Jump to the flow chart view
         clickAndWait(Locator.tagWithAttribute("a", "title", "Experiment run graph"));
 
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "Data: " + SAMPLE_BASE_NAME + ".libra.tsv (Run Output)"));
+        Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
+                .click();
+        LineageGraph graph = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
+        graph.getDetails("Data Children").getItem("CAexample_mini.libra.tsv").clickOverViewLink();
         assertElementPresent(Locator.linkWithText("libra Protein Quantitation"));
 
         clickAndWait(Locator.linkWithText("Lineage for " + SAMPLE_BASE_NAME + ".libra.tsv"));
