@@ -336,7 +336,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         return Set.of(
             Comet2014ParamsBuilder.FullParseTestCase.class,
             Comet2015ParamsBuilder.FullParseTestCase.class,
-            MascotClientImpl.TestCase.class,
+//            MascotClientImpl.TestCase.class,
             MS2Controller.TestCase.class,
             ThermoSequestParamsBuilder.TestCase.class
         );
