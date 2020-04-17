@@ -95,6 +95,7 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             if (getContainer().getFolderType() instanceof FlowFolderType)
@@ -107,6 +108,7 @@ public class FlowController extends BaseFlowController
             return new OverviewWebPart(getViewContext());
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return getFlowNavStart(getPageConfig(), getViewContext());
@@ -117,16 +119,11 @@ public class FlowController extends BaseFlowController
     // HACK: FlowPropertySet can be very slow the first time, let's attempt to precache
     public static void initFlow(final Container c)
     {
-        Runnable r = new Runnable()
-        {
-            public void run()
-            {
-                AttributeCache.STATS.byContainer(c);
-                AttributeCache.GRAPHS.byContainer(c);
-                AttributeCache.KEYWORDS.byContainer(c);
-            }
-        };
-        JobRunner.getDefault().execute(r);
+        JobRunner.getDefault().execute(() -> {
+            AttributeCache.STATS.byContainer(c);
+            AttributeCache.GRAPHS.byContainer(c);
+            AttributeCache.KEYWORDS.byContainer(c);
+        });
     }
 
 
@@ -137,6 +134,7 @@ public class FlowController extends BaseFlowController
         FlowExperiment experiment;
         FlowRun run;
 
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             FlowQuerySettings settings = new FlowQuerySettings(getViewContext().getBindPropertyValues(), "query");
@@ -180,6 +178,7 @@ public class FlowController extends BaseFlowController
             return view;
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             if (experiment == null)
@@ -198,6 +197,7 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
     {
+        @Override
         public void validate(StatusJobForm form, BindException errors)
         {
             String statusFile = form.getStatusFile();
@@ -207,6 +207,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
+        @Override
         public ModelAndView getView(StatusJobForm form, BindException errors)
         {
             if (errors.hasErrors())
@@ -215,7 +216,7 @@ public class FlowController extends BaseFlowController
             }
             else
             {
-                PipelineStatusFile psf = PipelineService.get().getStatusFile(new File(form.getStatusFile()));
+                PipelineStatusFile psf = PipelineService.get().getStatusFile(getContainer(), new File(form.getStatusFile()).toPath());
                 if (psf == null)
                 {
                     errors.rejectValue("statusFile", ERROR_MSG, "Status not found.");
@@ -243,7 +244,7 @@ public class FlowController extends BaseFlowController
                         if (form.getRedirect() == null)
                             refresh = 30;
                         else
-                            refresh = 1;
+                            refresh = 5;
                     }
                     else
                     {
@@ -260,6 +261,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("Status File", new ActionURL(ShowStatusJobAction.class, getContainer()));
@@ -325,6 +327,7 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class CancelJobAction extends SimpleViewAction<CancelJobForm>
     {
+        @Override
         public ModelAndView getView(CancelJobForm form, BindException errors)
         {
             if (form.getStatusFile() == null)
@@ -358,6 +361,7 @@ public class FlowController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             ActionURL jobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer());
@@ -386,6 +390,7 @@ public class FlowController extends BaseFlowController
     {
         Container destContainer;
 
+        @Override
         public void validateCommand(NewFolderForm form, Errors errors)
         {
         }
@@ -402,6 +407,7 @@ public class FlowController extends BaseFlowController
             }
         }
 
+        @Override
         public ModelAndView getView(NewFolderForm form, boolean reshow, BindException errors)
         {
             checkPerms();
@@ -409,6 +415,7 @@ public class FlowController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/newFolder.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(NewFolderForm form, BindException errors) throws Exception
         {
             checkPerms();
@@ -467,11 +474,13 @@ public class FlowController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(NewFolderForm newFolderForm)
         {
             return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(destContainer);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("New Folder", new ActionURL(NewFolderAction.class, getContainer()));
@@ -483,16 +492,19 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(AdminOperationsPermission.class)
     public class FlowAdminAction extends FormViewAction<FlowAdminForm>
     {
+        @Override
         public void validateCommand(FlowAdminForm form, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(FlowAdminForm form, boolean reshow, BindException errors)
         {
             getPageConfig().setFocusId("workingDirectory");
             return new JspView<>("/org/labkey/flow/controllers/flowAdmin.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(FlowAdminForm form, BindException errors)
         {
             if (form.getWorkingDirectory() != null)
@@ -523,11 +535,13 @@ public class FlowController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(FlowAdminForm flowAdminForm)
         {
             return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("Flow Module Settings");
@@ -538,6 +552,7 @@ public class FlowController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class SavePerferencesAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             FlowPreference.update(getRequest());
@@ -545,6 +560,7 @@ public class FlowController extends BaseFlowController
             return HttpView.redirect(uri.toString());
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             return null;
