@@ -1532,7 +1532,7 @@ public class MascotClientImpl implements SearchClient
             String paramFile = ModuleLoader.getInstance().getModule("MS2").getSourcePath() + "/src/" + mascotDefaultsPath;
 
             // Not found in source? Fine, create a temp file and use that.
-            if (new File(paramFile).exists())
+            if (!new File(paramFile).exists())
             {
                 InputStream is = getClass().getClassLoader().getResourceAsStream(mascotDefaultsPath);
                 File file = File.createTempFile("MascotDefaults", ".xml");
