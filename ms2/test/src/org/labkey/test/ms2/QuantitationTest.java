@@ -87,7 +87,8 @@ public class QuantitationTest extends AbstractXTandemTest
         Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
                 .click();
         LineageGraph graph = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
-        graph.getDetails("Data Children").getItem("CAexample_mini.libra.tsv").clickOverViewLink();
+
+        graph.getDetailGroup("Data Children").getItem("CAexample_mini.libra.tsv").clickOverViewLink(true);
         assertElementPresent(Locator.linkWithText("libra Protein Quantitation"));
 
         clickAndWait(Locator.linkWithText("Lineage for " + SAMPLE_BASE_NAME + ".libra.tsv"));

@@ -139,18 +139,18 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
                 .click();
         LineageGraph graphComponent = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
-        List<String> actualParents = graphComponent.getDetails("Data Parents")
+        List<String> actualParents = graphComponent.getDetailGroup("Data Parents")
                 .getItemNames();
-        List<String> actualChildren = graphComponent.getDetails("Data Children")
+        List<String> actualChildren = graphComponent.getDetailGroup("Data Children")
                 .getItemNames();
         assertThat(actualParents, hasItems("Bovine_mini1.fasta", "comet.xml", "CAexample_mini.mzXML"));
         assertThat(actualChildren, hasItems("CAexample_mini.prot.xml", "CAexample_mini.pep.xml",
                 "CAexample_mini.mzXML.image..itms.png"));
 
         // navigate to the details page for CAexample_mini.mzXML.image..itms.png
-        graphComponent.getDetails("Data Children")
+        graphComponent.getDetailGroup("Data Children")
                 .getItem("CAexample_mini.mzXML.image..itms.png")
-                .clickOverViewLink();
+                .clickOverViewLink(true);
         assertElementPresent(Locator.linkWithText("msPicture"), 2);
         beginAt(getAttribute(Locator.xpath("//img[contains(@src, 'showFile.view')]"), "src"));
         // Firefox sets the title of the page when we view an image separately from an HTML page, so use that to verify
