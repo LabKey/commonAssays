@@ -24,7 +24,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.FolderTypeManager;
@@ -61,6 +60,7 @@ import org.labkey.ms2.pipeline.comet.Comet2014ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.Comet2015ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
@@ -336,6 +336,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         return Set.of(
             Comet2014ParamsBuilder.FullParseTestCase.class,
             Comet2015ParamsBuilder.FullParseTestCase.class,
+            MascotClientImpl.TestCase.class,
             MS2Controller.TestCase.class,
             ThermoSequestParamsBuilder.TestCase.class
         );

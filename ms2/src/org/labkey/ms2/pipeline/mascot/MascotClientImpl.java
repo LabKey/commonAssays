@@ -17,20 +17,24 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.apache.commons.beanutils.converters.BooleanConverter;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.multipart.FilePart;
-import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
-import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.SearchFormUtil;
@@ -50,12 +54,17 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,9 +77,9 @@ import java.util.Properties;
 
 public class MascotClientImpl implements SearchClient
 {
-    private static Logger _log = Logger.getLogger(MascotClientImpl.class);
+    private static final Logger _log = Logger.getLogger(MascotClientImpl.class);
     
-    private Logger _instanceLogger;
+    private final Logger _instanceLogger;
 
     private String _url;
     private String _userAccount;
@@ -560,26 +569,27 @@ public class MascotClientImpl implements SearchClient
             mascotRequestURL = urlSB.toString();
         }
 
-        GetMethod get=new GetMethod(mascotRequestURL);
-        HttpClient client = new HttpClient();
-        String result="Sorry, unable to get Mascot version";
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create(mascotRequestURL)).build();
+        String result = "Sorry, unable to get Mascot version";
         try
         {
-            int statusCode = client.executeMethod(get);
-            if (statusCode == -1) {
-                result=result+" "+get.getResponseBodyAsString();
-            } else {
-                result=get.getResponseBodyAsString()
-                        +" - "+get.getResponseHeader("Server");
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == -1)
+            {
+                result = result + " " + response.body();
             }
-        } catch (IOException e)
+            else
+            {
+                result = response.body() + " - Server: " + response.headers().firstValue("Server").orElse("<No Server Header>");
+            }
+        }
+        catch (IOException | InterruptedException e)
         {
             getLogger().warn("Failed to get Mascot server information via '" + mascotRequestURL + "'", e);
-        } finally {
-            get.releaseConnection();
         }
 
-        result=result.replaceAll("[\r\n]"," ");
+        result = result.replaceAll("[\r\n]"," ");
         return result;
     }
 
@@ -1072,7 +1082,9 @@ public class MascotClientImpl implements SearchClient
                 {"ltol", "mascot, ltol", "default, ltol"},
                 {"showallmods", "mascot, showallmods", "default, showallmods"}
         };
-        List<Part> parts = new ArrayList<>();
+
+        Map<String, String> parts = new LinkedHashMap<>();
+
         for (String [] keys : submitFields)
         {
             int j;
@@ -1089,13 +1101,12 @@ public class MascotClientImpl implements SearchClient
             {
                 for (String db : AbstractMS2SearchProtocolFactory.splitSequenceFiles(formFieldValue))
                 {
-                    parts.add(new StringPart(formFieldKey, db));
-
+                    parts.put(formFieldKey, db);
                 }
             }
             else
             {
-                parts.add(new StringPart(formFieldKey, (null == formFieldValue) ? "" : formFieldValue));
+                parts.put(formFieldKey, null == formFieldValue ? "" : formFieldValue);
             }
         }
 
@@ -1118,41 +1129,30 @@ public class MascotClientImpl implements SearchClient
         }
         else
             parentMassError = parser.getInputParameter("search, tol");
-        parts.add(new StringPart("TOL", (null==parentMassError)?"":parentMassError));
+        parts.put("TOL", null==parentMassError ? "" : parentMassError);
 
         String massType = parser.getInputParameter("spectrum, fragment mass type");
         if (massType == null)
             massType = parser.getInputParameter("search, mass");
-        parts.add(new StringPart("MASS", (null==massType)?"":massType));
+        parts.put("MASS", null == massType ? "" : massType);
         boolean isMonoisoptopicMass = "monoisotopic".equalsIgnoreCase(massType);
         String fragmentMassError = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error" : "spectrum, fragment mass error");
         if (fragmentMassError == null)
         {
             fragmentMassError = parser.getInputParameter("search, itol");
         }
-        parts.add(new StringPart("ITOL", (null==fragmentMassError)?"":fragmentMassError));
+        parts.put("ITOL", null == fragmentMassError ? "" : fragmentMassError);
 
         String fragmentMassErrorUnits = parser.getInputParameter(isMonoisoptopicMass ? "spectrum, fragment monoisotopic mass error units" : "spectrum, fragment mass error units");
         if (fragmentMassErrorUnits == null)
             fragmentMassErrorUnits = parser.getInputParameter("search, itolu");
-        parts.add(new StringPart("ITOLU", (null==fragmentMassErrorUnits)?"":fragmentMassErrorUnits));
+        parts.put("ITOLU", null == fragmentMassErrorUnits ? "" : fragmentMassErrorUnits);
 
         // Decoy controlled by "mascot, decoy", submitted as "1" or nothing at all
         String decoyValue = parser.getInputParameter("mascot, decoy");
         if (decoyValue != null && ((Boolean)new BooleanConverter().convert(Boolean.class, decoyValue)).booleanValue())
         {
-            parts.add(new StringPart("DECOY", "1"));
-        }
-
-        File queryFile = new File(analysisFile);
-        getLogger().info("Submitting query file, size="+queryFile.length());
-        try {
-            parts.add(new FilePart("FILE", queryFile));
-        }
-        catch (FileNotFoundException err)
-        {
-            getLogger().error("Failed to find Mascot query file '" + queryFile.getPath () + "'.\n");
-            return false;
+            parts.put("DECOY", "1");
         }
 
         String mascotRequestURL;
@@ -1173,87 +1173,93 @@ public class MascotClientImpl implements SearchClient
             mascotRequestURL = urlSB.toString();
         }
 
-        PostMethod post = new PostMethod(mascotRequestURL);
-        post.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[0]), post.getParams()) );
-        HttpClient client = new HttpClient();
-
-        int statusCode = -1;
-        int attempt = 0;
-        // We will retry up to 3 times.
-        final int maxAttempt = 3;
-        while (statusCode == -1 && attempt < maxAttempt)
+        try (CloseableHttpClient httpclient = HttpClients.createDefault())
         {
-            try
-            {
-                // TODO: wch - we should extend StringPart and FilePart
-                //       so that we may write to log on the amount of data transmitted
-                statusCode = client.executeMethod(post);
-            }
-            catch (IOException err)
-            {
-                getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
-                        queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-                        (attempt + 1) + ".\n", err);
-                attempt = maxAttempt;
-            }
-            attempt++;
-        }
-        // Check that we didn't run out of retries.
-        if (statusCode == -1) {
-            post.releaseConnection();
-            getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
-                queryFile.getPath() + " with parameters " + queryParamFile.getPath() + "." +
-                " Tried " + maxAttempt + " times.");
-            return false;
-        }
+            HttpPost post = new HttpPost(mascotRequestURL);
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            parts.forEach(builder::addTextBody);
 
-        boolean uploadFinished = false;
-        try
-        {
-            // handle response.
-            // check for "Finished uploading search details..."
-            //for Mascot version earlier than 2.2.03
-            //final String endOfUploadMarker = "Finished uploading search details...";
-            //for Mascot version 2.2.03
-            //final String endOfUploadMarker = "Finished uploading search details and file...";
-            final String endOfUploadMarker = "Finished uploading search details";
-            StringBuilder response = new StringBuilder();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(post.getResponseBodyAsStream())))
+            File queryFile = new File(analysisFile);
+            getLogger().info("Submitting query file, size="+queryFile.length());
+            builder.addPart("FILE", new FileBody(queryFile));
+
+            post.setEntity(builder.build());
+
+            int attempt = 0;
+            // We will retry up to 3 times.
+            final int maxAttempt = 3;
+
+            while (attempt < maxAttempt)
             {
-                String str;
-                while ((str = in.readLine()) != null)
+                try (CloseableHttpResponse response = httpclient.execute(post))
                 {
-                    response.append(str);
-                    response.append('\n');
-                    //getLogger().info("Mascot Server: "+str);
-                    if (str.contains(endOfUploadMarker))
+                    if (-1 == response.getStatusLine().getStatusCode())
+                        continue;
+
+                    boolean uploadFinished = false;
+                    try
                     {
-                        uploadFinished = true;
-                        getLogger().info("Mascot search task status: query upload completed");
-                        // Need to continue waiting for Mascot server to close the connection or it will cause the
-                        // search to error - see issue 29773
+                        // handle response.
+                        // check for "Finished uploading search details..."
+                        //for Mascot version earlier than 2.2.03
+                        //final String endOfUploadMarker = "Finished uploading search details...";
+                        //for Mascot version 2.2.03
+                        //final String endOfUploadMarker = "Finished uploading search details and file...";
+                        final String endOfUploadMarker = "Finished uploading search details";
+                        StringBuilder sb = new StringBuilder();
+                        try (BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent())))
+                        {
+                            String str;
+                            while ((str = in.readLine()) != null)
+                            {
+                                sb.append(str);
+                                sb.append('\n');
+                                //getLogger().info("Mascot Server: "+str);
+                                if (str.contains(endOfUploadMarker))
+                                {
+                                    uploadFinished = true;
+                                    getLogger().info("Mascot search task status: query upload completed");
+                                    // Need to continue waiting for Mascot server to close the connection or it will cause the
+                                    // search to error - see issue 29773
+                                }
+                            }
+                        }
+                        if (!uploadFinished)
+                        {
+                            getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
+                                    queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
+                                    (attempt + 1) + ".\n" + "Mascot output: " + sb.toString());
+                        }
                     }
+                    catch (IOException err)
+                    {
+                        getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
+                                queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
+                                (attempt + 1) + ".\n", err);
+                    }
+                    return uploadFinished;
                 }
+                catch (IOException err)
+                {
+                    getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
+                            queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
+                            (attempt + 1) + ".\n", err);
+                    attempt = maxAttempt;
+                }
+                attempt++;
             }
-            if (!uploadFinished)
-            {
-            	getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
-            			queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-                        (attempt + 1) + ".\n" + "Mascot output: " + response.toString());
-            }
+
+            // We ran out of retries!
+            getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
+                    queryFile.getPath() + " with parameters " + queryParamFile.getPath() + "." +
+                    " Tried " + maxAttempt + " times.");
         }
-        catch (IOException err)
+        catch (IOException e)
         {
-            getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
-                    queryFile.getPath() + " with parameters " + queryParamFile.getPath () + " on attempt#" +
-                    (attempt + 1) + ".\n",err);
-        }
-        finally
-        {
-            post.releaseConnection();
+            getLogger().error("Failed to create CloseableHttpClient", e);
         }
 
-        return uploadFinished;
+        return false;
     }
 
     protected boolean getResultFile (String sessionID, String taskID, String resultFile)
@@ -1509,5 +1515,36 @@ public class MascotClientImpl implements SearchClient
         return null;
     }
 
+    /**
+     * This test requires the MockMascotServlet to be running. It was used during the migration from commons HttpClient 3.1,
+     * but it doesn't need to run regularly now. If needed again, it can be registered in MS2Module.java.
+     */
+    public static class TestCase extends Assert
+    {
+        @Test
+        public void testMockMascotServer() throws IOException
+        {
+            MascotClientImpl client = new MascotClientImpl(ActionURL.getBaseServerURL() + "/mockmascot/cgi/", _log);
+            String version = client.getMascotVersion().trim();
+            Assert.assertEquals("Hello - Server: LabKey MockMascotServer 1.0", version);
+
+            // We need to POST an absolute file path to MascotDefaults.xml. First look for it in source.
+            String mascotDefaultsPath = MascotSearchProtocolFactory.get().getDefaultParametersResource();
+            String paramFile = ModuleLoader.getInstance().getModule("MS2").getSourcePath() + "/src/" + mascotDefaultsPath;
+
+            // Not found in source? Fine, create a temp file and use that.
+            if (!new File(paramFile).exists())
+            {
+                InputStream is = getClass().getClassLoader().getResourceAsStream(mascotDefaultsPath);
+                File file = File.createTempFile("MascotDefaults", ".xml");
+                file.deleteOnExit();
+                FileUtils.copyInputStreamToFile(is, file);
+                paramFile = file.getAbsolutePath();
+            }
+
+            String mascotSessionId = client.startSession();
+            Assert.assertTrue(client.submitFile(mascotSessionId, "5678", "submit.pl", paramFile, paramFile));
+        }
+    }
 }
 
