@@ -24,8 +24,6 @@ import org.openqa.selenium.NoSuchElementException;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -143,13 +141,10 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
                 .getItemNames();
         List<String> actualChildren = graphComponent.getDetailGroup("Data Children")
                 .getItemNames();
-        assertThat(actualParents, hasItems("Bovine_mini1.fasta", "comet.xml", "CAexample_mini.mzXML"));
-        assertThat(actualChildren, hasItems("CAexample_mini.prot.xml", "CAexample_mini.pep.xml",
-                "CAexample_mini.mzXML.image..itms.png"));
 
         // navigate to the details page for CAexample_mini.mzXML.image..itms.png
         graphComponent.getDetailGroup("Data Children")
-                .getItem("CAexample_mini.mzXML.image..itms.png")
+                .getItem(SAMPLE_BASE_NAME + ".mzXML.image..itms.png")
                 .clickOverViewLink(true);
         assertElementPresent(Locator.linkWithText("msPicture"), 2);
         beginAt(getAttribute(Locator.xpath("//img[contains(@src, 'showFile.view')]"), "src"));
