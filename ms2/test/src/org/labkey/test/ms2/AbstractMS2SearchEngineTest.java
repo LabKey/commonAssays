@@ -137,10 +137,6 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
                 .click();
         LineageGraph graphComponent = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
-        List<String> actualParents = graphComponent.getDetailGroup("Data Parents")
-                .getItemNames();
-        List<String> actualChildren = graphComponent.getDetailGroup("Data Children")
-                .getItemNames();
 
         // navigate to the details page for CAexample_mini.mzXML.image..itms.png
         graphComponent.getDetailGroup("Data Children")
