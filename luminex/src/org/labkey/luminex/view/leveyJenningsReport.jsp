@@ -32,7 +32,7 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("luminexLeveyJennings");
-        dependencies.add("Experiment/QCFlagToggleWindow.js");
+        dependencies.add("experiment/QCFlagToggleWindow.js");
         dependencies.add("fileAddRemoveIcon.css");
     }
 %>
