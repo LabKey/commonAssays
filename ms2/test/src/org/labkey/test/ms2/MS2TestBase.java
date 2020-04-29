@@ -51,12 +51,10 @@ abstract public class MS2TestBase extends BaseWebDriverTest
             "  <note label=\"pipeline quantitation, algorithm\" type=\"input\">xpress</note> \n" +
         "</bioml>";
 
-    public final static String PIPELINE_PATH = TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe";
+    public static final String PIPELINE_PATH = TestFileUtils.getSampleData("xarfiles/ms2pipe").getAbsolutePath();
 
     protected static final String REGION_NAME_PEPTIDES = "MS2Peptides";
-    protected static final String REGION_NAME_PROTEINS = "MS2Proteins";
     protected static final String REGION_NAME_PROTEINGROUPS = "ProteinGroups";
-    protected static final String REGION_NAME_QUANTITATION = "ProteinGroupsWithQuantitation";
     protected static final String REGION_NAME_SEARCH_RUNS = "MS2SearchRuns";
 
     public List<String> getAssociatedModules()
@@ -93,45 +91,6 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
         log("Set good pipeline root.");
         setPipelineRoot(PIPELINE_PATH);
-    }
-
-    protected void deleteViews(String... viewNames)
-    {
-        navigateToFolder(FOLDER_NAME);
-        if (isElementPresent(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif")))
-        {
-            clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/MS2/images/runIcon.gif"));
-            clickButton("Manage Views");
-            for (String viewName : viewNames)
-            {
-                log("Deleting View " + viewName);
-                if (isTextPresent(viewName))
-                {
-                    checkCheckbox(Locator.checkboxByNameAndValue("viewsToDelete", viewName));
-                }
-            }
-            clickButton("OK");
-        }
-    }
-
-    protected void deleteRuns()
-    {
-        log("Delete runs.");
-        navigateToFolder(FOLDER_NAME);
-
-        clickAndWait(Locator.linkWithText("MS2 Runs"));
-        doAndWaitForPageToLoad(() -> selectOptionByText(Locator.name("experimentRunFilter"), "All Runs"));
-        if (!isTextPresent("No data to show"))
-        {
-            checkCheckbox(Locator.checkboxByName(".toggle"));
-            clickButton("Delete");
-
-            log("Confirm deletion");
-            clickButton("Confirm Delete");
-        }
-
-        log("Make sure all the data got deleted");
-        assertTextNotPresent(SAMPLE_BASE_NAME);
     }
 
     protected void delete(File file)

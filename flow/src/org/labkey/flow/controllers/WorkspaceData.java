@@ -24,7 +24,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.SessionHelper;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.ISampleInfo;
@@ -51,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
@@ -61,6 +64,7 @@ public class WorkspaceData implements Serializable
     String path;
     String name;
     String originalPath;
+    String token;
     IWorkspace _object;
     // UNDONE: Placeholder for when analysis archives (or ACS archives) include FCS files during import.
     boolean _includesFCSFiles;
@@ -104,9 +108,24 @@ public class WorkspaceData implements Serializable
         return this.name;
     }
 
-    public void setObject(String object) throws Exception
+    // On form POST, get the workspace from session using the token
+    public void setToken(String token) throws Exception
     {
-        _object = (IWorkspace) PageFlowUtil.decodeObject(object);
+        this.token = token;
+        if (token != null)
+        {
+            var request = HttpView.currentRequest();
+            if (request != null)
+            {
+                _object = (IWorkspace)SessionHelper.getStashedAttribute(request, token);
+            }
+        }
+    }
+
+    public void clearStashedWorkspace(HttpServletRequest request)
+    {
+        if (token != null)
+            SessionHelper.clearStashedAttribute(request, token);
     }
 
     public IWorkspace getWorkspaceObject()
@@ -410,34 +429,25 @@ public class WorkspaceData implements Serializable
         }
     }
 
-    public Map<String, String> getHiddenFields()
+    public Map<String, String> getHiddenFields(ViewContext context)
     {
+        Map<String, String> ret = new HashMap<>();
         if (path != null)
         {
-            Map<String, String> ret = new HashMap<>();
             ret.put("path", path);
             if (originalPath != null)
                 ret.put("originalPath", originalPath);
-            return ret;
         }
-        else
-        {
-            Map<String, String> ret = new HashMap<>();
-            if (_object != null)
-            {
-                try
-                {
-                    ret.put("object", PageFlowUtil.encodeObject(_object));
-                }
-                catch (IOException e)
-                {
-                    throw UnexpectedException.wrap(e);
-                }
-                ret.put("name", name);
 
-            }
-            return ret;
+        if (_object != null && token == null)
+        {
+            // Stash the workspace in session and reference it via a token
+            this.token = SessionHelper.stashAttribute(context.getRequest(), _object, TimeUnit.MINUTES.toMillis(10));
+            ret.put("token", token);
+            ret.put("name", name);
         }
+
+        return ret;
     }
 
     public static class WorkspaceValidationException extends Exception

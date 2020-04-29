@@ -110,7 +110,7 @@
                 width : 580,
                 labelWidth: 125,
                 name: 'name',
-                value: "<%=text(name) == null ? "" : text(name)%>",
+                value: <%=PageFlowUtil.jsString(name)%>,
                 fieldLabel: 'Name',
                 allowBlank: false
             }, {
@@ -118,7 +118,7 @@
                 width : 580,
                 labelWidth: 125,
                 name: 'vendor',
-                value: "<%=text(vendor) == null ? "" : text(vendor)%>",
+                value: <%=PageFlowUtil.jsString(vendor)%>,
                 fieldLabel: 'Vendor',
                 allowBlank: false
             }, {
@@ -126,7 +126,7 @@
                 width: 580,
                 labelWidth: 125,
                 name: 'description',
-                value: "<%=text(description) == null ? "" : text(description)%>",
+                value: <%=PageFlowUtil.jsString(description)%>,
                 fieldLabel: 'Description',
                 allowBlank: true
             }, {
@@ -134,7 +134,7 @@
                 width: 580,
                 labelWidth: 125,
                 name: 'comment',
-                value: "<%=text(comment) == null ? "" : text(comment)%>",
+                value: <%=PageFlowUtil.jsString(comment)%>,
                 fieldLabel: 'Comment',
                 allowBlank: true
             }, {

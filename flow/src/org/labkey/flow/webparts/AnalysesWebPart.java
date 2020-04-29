@@ -45,6 +45,8 @@ public class AnalysesWebPart extends FlowQueryView
         setSettings(settings);
         
         setTitle("Flow Analyses");
+        // Use default delete button, but without showing the confirmation text -- DeleteSelectedExperimentsAction will show a confirmation page.
+        setShowDeleteButtonConfirmationText(false);
         setShowExportButtons(false);
         setShowPagination(false);
         // Workaround for "Issue 18903: can't change query on showRuns.view" -- for now, just don't display the [details] link which includes the returnURL parameter.
@@ -83,15 +85,4 @@ public class AnalysesWebPart extends FlowQueryView
         }
     }
 
-    @Override
-    public ActionButton createDeleteButton()
-    {
-        // Use default delete button, but without showing the confirmation text -- DeleteSelectedExperimentsAction will show a confirmation page.
-        ActionButton button = super.createDeleteButton();
-        if (button != null)
-        {
-            button.setRequiresSelection(true);
-        }
-        return button;
-    }
 }

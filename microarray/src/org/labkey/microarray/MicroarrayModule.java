@@ -17,6 +17,7 @@
 package org.labkey.microarray;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -59,9 +60,9 @@ public class MicroarrayModule extends SpringModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 19.30;
+        return 20.000;
     }
 
     @Override

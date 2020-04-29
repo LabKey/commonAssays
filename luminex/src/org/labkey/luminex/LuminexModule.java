@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayDefaultFlagHandler;
 import org.labkey.api.assay.AssayFlagHandler;
 import org.labkey.api.assay.AssayQCFlagColumn;
@@ -43,9 +44,9 @@ public class LuminexModule extends DefaultModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 19.30;
+        return 20.000;
     }
 
     @Override
@@ -96,12 +97,12 @@ public class LuminexModule extends DefaultModule
     @Override
     public Set<Class> getUnitTests()
     {
-        return PageFlowUtil.set(
-                LuminexDataHandler.TestCase.class,
-                LuminexExcelParser.TestCase.class,
-                AssayQCFlagColumn.TestCase.class,
-                LuminexRunAsyncContext.TestCase.class,
-                LuminexSaveExclusionsForm.TestCase.class
+        return Set.of(
+            AssayQCFlagColumn.TestCase.class,
+            LuminexDataHandler.TestCase.class,
+            LuminexExcelParser.TestCase.class,
+            LuminexRunAsyncContext.TestCase.class,
+            LuminexSaveExclusionsForm.TestCase.class
         );
     }
 }

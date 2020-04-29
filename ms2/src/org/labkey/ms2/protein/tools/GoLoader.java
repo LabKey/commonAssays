@@ -299,7 +299,7 @@ public abstract class GoLoader
         _status.insert(0, "Loading GO annotations failed with the following exception:<br>");
 
         logStatus("Loading GO annotations failed with the following exception:");
-        logStatus(ExceptionUtil.renderException(e));
+        logStatus(ExceptionUtil.renderException(e).toString());
         ExceptionUtil.logExceptionToMothership(null, e);
     }
 

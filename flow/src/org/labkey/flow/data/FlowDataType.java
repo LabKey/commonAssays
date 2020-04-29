@@ -16,16 +16,20 @@
 
 package org.labkey.flow.data;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.query.QueryRowReference;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.persist.ObjectType;
 
@@ -47,33 +51,37 @@ abstract public class FlowDataType extends AssayDataType
         _objType = objType;
         _requireAttrObject = requireAttrObject;
 
-        LsidManager.get().registerHandler(getNamespacePrefix(), new LsidManager.ExpObjectLsidHandler()
+        LsidManager.get().registerHandler(getNamespacePrefix(), new FlowDataObjectLsidHandler());
+    }
+
+    static final class FlowDataObjectLsidHandler implements LsidManager.LsidHandler<FlowDataObject>
+    {
+        @Override
+        public FlowDataObject getObject(Lsid lsid)
         {
-            @Override
-            public ExpData getObject(Lsid lsid)
-            {
-                FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
-                if (fdo != null)
-                    return fdo.getData();
+            return FlowDataObject.fromLSID(lsid.toString());
+        }
 
-                return null;
-            }
+        @Override
+        public @Nullable ActionURL getDisplayURL(Lsid lsid)
+        {
+            FlowDataObject fdo = getObject(lsid);
+            return fdo != null ? fdo.urlShow() : null;
+        }
 
-            @Nullable
-            @Override
-            public ActionURL getDisplayURL(Lsid lsid)
-            {
-                FlowDataObject fdo = FlowDataObject.fromLSID(lsid.toString());
-                if (fdo != null)
-                {
-                    ActionURL url = fdo.urlShow();
-                    if (url != null)
-                        return url;
-                }
+        @Override
+        public Container getContainer(Lsid lsid)
+        {
+            FlowDataObject fdo = getObject(lsid);
+            return fdo != null ? fdo.getContainer() : null;
+        }
 
-                return null;
-            }
-        });
+        @Override
+        public boolean hasPermission(Lsid lsid, @NotNull User user, @NotNull Class<? extends Permission> perm)
+        {
+            FlowDataObject fdo = getObject(lsid);
+            return fdo != null ? fdo.getContainer().hasPermission(user, perm) : null;
+        }
     }
 
     static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords, true)
@@ -146,7 +154,7 @@ abstract public class FlowDataType extends AssayDataType
     }
 
     @Override
-    public URLHelper getDetailsURL(ExpData dataObject)
+    public ActionURL getDetailsURL(ExpData dataObject)
     {
         FlowDataObject fdo = FlowDataObject.fromData(dataObject);
         if (fdo != null)
@@ -160,6 +168,16 @@ abstract public class FlowDataType extends AssayDataType
         FlowDataObject fdo = FlowDataObject.fromData(dataObject);
         if (fdo != null)
             return fdo.urlDownload();
+
+        return null;
+    }
+
+    @Override
+    public @Nullable QueryRowReference getQueryRowReference(ExpData dataObject)
+    {
+        FlowDataObject fdo = FlowDataObject.fromData(dataObject);
+        if (fdo != null)
+            return fdo.getQueryRowReference();
 
         return null;
     }

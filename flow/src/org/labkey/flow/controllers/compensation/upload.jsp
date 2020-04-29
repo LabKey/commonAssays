@@ -27,7 +27,7 @@
         label="Compensation Matrix Name"
         contextContent="Give your new compensation matrix a name."
         name="ff_compensationMatrixName"
-        value="<%=h(form.ff_compensationMatrixName)%>"
+        value="<%=form.ff_compensationMatrixName%>"
     />
     <labkey:input type="file"
         label="Compensation Matrix File"

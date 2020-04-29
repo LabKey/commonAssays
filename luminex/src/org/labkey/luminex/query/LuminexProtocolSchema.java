@@ -448,7 +448,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_TITRATION_QC_FLAG_TABLE_NAME, this, cf);
         result.populate();
-        result.setAssayProtocol(getProtocol());
+        result.setAssayProtocol(getProvider(), getProtocol());
 
         var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));
@@ -472,7 +472,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ANALYTE_SINGLE_POONT_CONTROL_QC_FLAG_TABLE_NAME, this, cf);
         result.populate();
-        result.setAssayProtocol(getProtocol());
+        result.setAssayProtocol(getProvider(), getProtocol());
 
         var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));
@@ -496,7 +496,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     {
         ExpQCFlagTable result = ExperimentService.get().createQCFlagsTable(ExpSchema.TableType.QCFlags.toString(), this, cf);
         result.populate();
-        result.setAssayProtocol(getProtocol());
+        result.setAssayProtocol(getProvider(), getProtocol());
 
         var analyteColumn = result.addColumn("Analyte", ExpQCFlagTable.Column.IntKey1);
         analyteColumn.setFk(new AnalyteForeignKey(this, cf));

@@ -17,15 +17,13 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
-import org.labkey.api.exp.Lsid;
-import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.FolderTypeManager;
@@ -40,7 +38,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
@@ -54,9 +51,6 @@ import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixAssayProvider;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixExperimentListener;
-import org.labkey.ms2.metadata.MassSpecFractionsDomainKind;
-import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
-import org.labkey.ms2.metadata.MassSpecMetadataController;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
@@ -66,6 +60,7 @@ import org.labkey.ms2.pipeline.comet.Comet2014ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.Comet2015ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
+import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
@@ -79,12 +74,13 @@ import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
-import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomProteinListView;
+import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
+import org.labkey.ms2.protein.fasta.PeptideTestCase;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
 import org.labkey.ms2.query.MS2Schema;
@@ -93,64 +89,54 @@ import org.labkey.ms2.reader.MGFDocumentParser;
 import org.labkey.ms2.reader.MzMLDocumentParser;
 import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator;
 import org.labkey.ms2.reader.SequestLogDocumentParser;
 import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
 /**
+ * Module that supports mass-spectrometry based protein database searches. Can convert raw intrument files to mzXML
+ * and then analyze using a variety of search engines like XTandem or Comet, load the results, and show reports.
  * User: migra
  * Date: Jul 18, 2005
- * Time: 3:25:52 PM
  */
-public class MS2Module extends SpringModule implements ContainerManager.ContainerListener, SearchService.DocumentProvider, ProteomicsModule
+public class MS2Module extends SpringModule implements ProteomicsModule
 {
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
 
     public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
-    private static final ExperimentRunType SAMPLE_PREP_RUN_TYPE = new ExperimentRunType("MS2 Sample Preparation", MS2Schema.SCHEMA_NAME, MS2Schema.TableType.SamplePrepRuns.toString())
-    {
-        public Priority getPriority(ExpProtocol protocol)
-        {
-            Lsid lsid = new Lsid(protocol.getLSID());
-            String objectId = lsid.getObjectId();
-            if (objectId.startsWith(MS2Schema.SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX) || lsid.getNamespacePrefix().startsWith(MassSpecMetadataAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX))
-            {
-                return Priority.HIGH;
-            }
-            return null;
-        }
-    };
 
-    public static final String MS2_SAMPLE_PREPARATION_RUNS_NAME = "MS2 Sample Preparation Runs";
     public static final String MS2_RUNS_NAME = "MS2 Runs";
     public static final String MS2_MODULE_NAME = "MS2";
 
+    @Override
     public String getName()
     {
         return MS2_MODULE_NAME;
     }
 
-    public double getVersion()
+    @Override
+    public @Nullable Double getSchemaVersion()
     {
-        return 19.30;
+        return 20.000;
     }
 
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
         BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_RUNS_NAME)
         {
+            @Override
             public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
             {
                 QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
@@ -163,17 +149,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         return new ArrayList<>(Arrays.asList(
                 runsFactory,
-                new BaseWebPartFactory(MS2_SAMPLE_PREPARATION_RUNS_NAME)
-                {
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        WebPartView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SAMPLE_PREP_RUN_TYPE);
-                        result.setTitle(MS2_SAMPLE_PREPARATION_RUNS_NAME);
-                        return result;
-                    }
-                },
                 new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)
                 {
+                    @Override
                     public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                     {
                         return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
@@ -181,6 +159,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 },
                 new BaseWebPartFactory(CustomProteinListView.NAME)
                 {
+                    @Override
                     public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                     {
                         CustomProteinListView result = new CustomProteinListView(portalCtx, false);
@@ -192,6 +171,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 },
                 new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
                 {
+                    @Override
                     public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                     {
                         return new MSSearchWebpart();
@@ -199,6 +179,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
                 },
                 new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
                 {
+                    @Override
                     public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                     {
                         PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
@@ -215,10 +196,10 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return true;
     }
 
+    @Override
     protected void init()
     {
         addController("ms2", MS2Controller.class);
-        addController("xarassay", MassSpecMetadataController.class);
         addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
 
@@ -229,20 +210,11 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         MS2Service.setInstance(new MS2ServiceImpl());
 
         ProteinService.setInstance(new ProteinServiceImpl());
-        PropertyService.get().registerDomainKind(new MassSpecFractionsDomainKind());
     }
 
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
-        final ModuleContext finalModuleContext = moduleContext;
-//        SearchService ss = SearchService.get());
-//        if (null != ss)
-//        {
-//            ss.addSearchCategory(ProteinManager.proteinCategory);
-//            ss.addDocumentProvider(this);
-//        }
-
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
@@ -251,11 +223,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         service.registerPipelineProvider(new SequestPipelineProvider(this));
         service.registerPipelineProvider(new CometPipelineProvider(this), "Comet");
         service.registerPipelineProvider(new FractionRollupPipelineProvider(this));
-
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<>();
-        runTypes.add(SAMPLE_PREP_RUN_TYPE);
         runTypes.add(SEARCH_RUN_TYPE);
         runTypes.add(new MS2SearchExperimentRunType("Imported Searches", MS2Schema.TableType.ImportedSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("X!Tandem Searches", MS2Schema.TableType.XTandemSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX));
@@ -266,7 +236,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().registerExperimentRunTypeSource(container ->
         {
-            if (container == null || container.getActiveModules(finalModuleContext.getUpgradeUser()).contains(MS2Module.this))
+            if (container == null || container.getActiveModules(moduleContext.getUpgradeUser()).contains(MS2Module.this))
             {
                 return runTypes;
             }
@@ -280,8 +250,7 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         ExperimentService.get().addExperimentListener(new ProteinExpressionMatrixExperimentListener());
 
-        //We are the first creator of this...
-        ContainerManager.addContainerListener(this);
+        ContainerManager.addContainerListener(new MS2ContainerListener());
         FolderTypeManager.get().registerFolderType(this, new MS2FolderType(this));
 
         ReportService.get().registerReport(new SpectraCountRReport());
@@ -291,10 +260,9 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
 
         AssayService svc = AssayService.get();
 
-        // Study module might not be present, #29772
+        // Assay module might not be present, #29772
         if (null != svc)
         {
-            svc.registerAssayProvider(new MassSpecMetadataAssayProvider());
             svc.registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
         }
 
@@ -354,41 +322,6 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
         return list;
     }
 
-    //
-    // ContainerListener
-    //
-    public void containerCreated(Container c, User user)
-    {
-    }
-
-
-    public void containerDeleted(Container c, User user)
-    {
-        MS2Manager.markAsDeleted(c, user);
-        MS2Manager.deleteExpressionData(c);
-
-        for (CustomAnnotationSet set : ProteinManager.getCustomAnnotationSets(c, false).values())
-        {
-            ProteinManager.deleteCustomAnnotationSet(set);
-        }
-    }
-
-    public void containerMoved(Container c, Container oldParent, User user)
-    {        
-    }
-
-    @NotNull
-    @Override
-    public Collection<String> canMove(Container c, Container newParent, User user)
-    {
-        return Collections.emptyList();
-    }
-
-    public void propertyChange(PropertyChangeEvent evt)
-    {
-    }
-
-
     @Override
     @NotNull
     public Set<String> getSchemaNames()
@@ -400,53 +333,41 @@ public class MS2Module extends SpringModule implements ContainerManager.Containe
     @NotNull
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<>(Arrays.asList(
-            ThermoSequestParamsBuilder.TestCase.class,
+        return Set.of(
             Comet2014ParamsBuilder.FullParseTestCase.class,
             Comet2015ParamsBuilder.FullParseTestCase.class,
-            MS2Controller.TestCase.class
-        ));
+            MascotClientImpl.TestCase.class,
+            MS2Controller.TestCase.class,
+            ThermoSequestParamsBuilder.TestCase.class
+        );
     }
 
     @Override
     @NotNull
     public Set<Class> getUnitTests()
     {
-        return new HashSet<>(Arrays.asList(
-            PeptideProphetSummary.TestCase.class,
-            MS2Modification.MS2ModificationTest.class,
-            org.labkey.ms2.protein.fasta.PeptideTestCase.class,
-            org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator.TestCase.class,
-            org.labkey.ms2.reader.RandomAccessPwizMSDataIterator.TestCase.class,
-            org.labkey.ms2.protein.FastaDbLoader.TestCase.class,
-            ListParamsValidator.TestCase.class,
-            NonNegativeIntegerParamsValidator.TestCase.class,
+        return Set.of(
+            BibliospecSpectrumRenderer.TestCase.class,
             BooleanParamsValidator.TestCase.class,
-            RealNumberParamsValidator.TestCase.class,
-            PositiveDoubleParamsValidator.TestCase.class,
-            NaturalNumberParamsValidator.TestCase.class,
-            MultipleIntegerParamsValidator.TestCase.class,
-            MultipleDoubleParamsValidator.TestCase.class,
-            ProteinCoverageMapBuilder.TestCase.class,
             Comet2014ParamsBuilder.LimitedParseTestCase.class,
             Comet2015ParamsBuilder.LimitedParseTestCase.class,
-            TPPTask.TestCase.class,
+            FastaDbLoader.TestCase.class,
+            ListParamsValidator.TestCase.class,
+            MS2Modification.MS2ModificationTest.class,
+            MS2RunType.TestCase.class,
+            MultipleDoubleParamsValidator.TestCase.class,
+            MultipleIntegerParamsValidator.TestCase.class,
+            NaturalNumberParamsValidator.TestCase.class,
+            NonNegativeIntegerParamsValidator.TestCase.class,
+            PeptideProphetSummary.TestCase.class,
+            PeptideTestCase.class,
+            PositiveDoubleParamsValidator.TestCase.class,
             Protein.TestCase.class,
+            ProteinCoverageMapBuilder.TestCase.class,
+            RandomAccessJrapMzxmlIterator.TestCase.class,
+            RealNumberParamsValidator.TestCase.class,
             SequestSearchTask.TestCase.class,
-            BibliospecSpectrumRenderer.TestCase.class,
-            MS2RunType.TestCase.class
-        ));
-    }
-
-    public void enumerateDocuments(@NotNull SearchService.IndexTask task, @NotNull Container c, Date modifiedSince)
-    {
-        if (c == ContainerManager.getSharedContainer())
-        {
-            ProteinManager.indexProteins(task, modifiedSince);
-        }
-    }
-
-    public void indexDeleted()
-    {
+            TPPTask.TestCase.class
+        );
     }
 }

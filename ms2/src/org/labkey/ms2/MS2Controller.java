@@ -39,8 +39,8 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.*;
@@ -4748,6 +4748,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(AdminOperationsPermission.class)
     public class MascotTestAction extends SimpleViewAction<TestMascotForm>
     {
+        @Override
         public ModelAndView getView(TestMascotForm form, BindException errors)
         {
             String originalMascotServer = form.getMascotServer();
@@ -4772,8 +4773,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                message = "Test failed.";
-                message = message + "<br>" + mascotClient.getErrorString();
+                message = "Test failed. " + mascotClient.getErrorString();
             }
 
             form.setMessage(message);
@@ -4784,9 +4784,11 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/testMascot.jsp", form);
         }
 
+        @Override
         public NavTree appendNavTrail(NavTree root)
         {
             root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+            root.addChild("Test Mascot Settings");
             return root;
         }
     }
@@ -4999,7 +5001,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private static final StringKeyCache<PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
+    private static final Cache<String, PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
 
     @RequiresPermission(ReadPermission.class)
     public class DoOnePeptideChartAction extends ExportAction

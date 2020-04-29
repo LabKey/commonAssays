@@ -112,9 +112,9 @@ public class FlowModule extends SpringModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 19.30;
+        return 20.000;
     }
 
     @Override
@@ -326,27 +326,27 @@ public class FlowModule extends SpringModule
     @NotNull
     public Set<Class> getUnitTests()
     {
-        return new HashSet<>(Arrays.asList(
-                PopulationName.NameTests.class,
-                SubsetParser.TestLexer.class,
-                SubsetTests.class,
-                StatisticSpec.TestCase.class,
-                FlowJoWorkspace.LoadTests.class,
-                AnalysisSerializer.TestCase.class,
-                CompensationMatrix.TestFCS.class,
-                ExportAnalysisManifest.TestCase.class
-                ));
+        return Set.of(
+            AnalysisSerializer.TestCase.class,
+            CompensationMatrix.TestFCS.class,
+            ExportAnalysisManifest.TestCase.class,
+            FlowJoWorkspace.LoadTests.class,
+            PopulationName.NameTests.class,
+            StatisticSpec.TestCase.class,
+            SubsetParser.TestLexer.class,
+            SubsetTests.class
+        );
     }
 
     @NotNull
     @Override
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<>(Arrays.asList(
-                PersistTests.class,
-                FlowProtocol.TestCase.class,
-                FlowController.TestCase.class
-        ));
+        return Set.of(
+            FlowController.TestCase.class,
+            FlowProtocol.TestCase.class,
+            PersistTests.class
+        );
     }
 
     public static String getShortProductName()

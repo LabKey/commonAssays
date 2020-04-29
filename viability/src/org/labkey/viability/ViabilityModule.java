@@ -17,17 +17,16 @@
 package org.labkey.viability;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.study.SpecimenService;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.view.WebPartFactory;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 public class ViabilityModule extends DefaultModule
@@ -41,9 +40,9 @@ public class ViabilityModule extends DefaultModule
     }
 
     @Override
-    public double getVersion()
+    public @Nullable Double getSchemaVersion()
     {
-        return 19.30;
+        return 20.000;
     }
 
     @Override
@@ -85,9 +84,9 @@ public class ViabilityModule extends DefaultModule
     @NotNull
     public Set<Class> getIntegrationTests()
     {
-        return new HashSet<>(Arrays.asList(
-                ViabilityManager.TestCase.class,
-                ViabilityAssayDataHandler.TestCase.class
-        ));
+        return Set.of(
+            ViabilityAssayDataHandler.TestCase.class,
+            ViabilityManager.TestCase.class
+        );
     }
 }

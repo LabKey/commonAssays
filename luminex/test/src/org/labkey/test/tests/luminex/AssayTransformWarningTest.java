@@ -45,6 +45,7 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
 {
     public static final File JAVA_TRANSFORM_SCRIPT = TestFileUtils.getSampleData("qc/transformWarning.jar");
     public static final File R_TRANSFORM_SCRIPT = TestFileUtils.getSampleData("qc/assayTransformWarning.R");
+    public static final File R_TRANSFORM_ERROR_SCRIPT = TestFileUtils.getSampleData("qc/assayTransformError.R");
 
     @Override
     public List<String> getAssociatedModules()
@@ -180,5 +181,33 @@ public final class AssayTransformWarningTest extends BaseWebDriverTest
         DataRegionTable table = new DataRegionTable("Data", this);
         assertEquals(1, table.getDataRowCount());
         assertTextPresent("RWarned");
+    }
+
+    @Test
+    public void testRTransformError()
+    {
+        String assayName = "transformErrorR";
+        String importData = "ParticipantId\nRError";
+        String runName = "R transform run";
+
+        ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("General", assayName)
+                .addTransformScript(R_TRANSFORM_ERROR_SCRIPT);
+        assayDesignerPage.goToRunFields()
+                .addField("myFile")
+                .setLabel("My File")
+                .setType(FieldDefinition.ColumnType.File);
+        assayDesignerPage.clickFinish();
+
+        clickAndWait(Locator.linkWithText(assayName));
+        clickButton("Import Data");
+        clickButton("Next");
+        setFormElement(Locator.name("name"), runName);
+
+        setFormElement(Locator.name("TextAreaDataCollector.textArea"), importData);
+
+        clickButton("Save and Finish");
+        assertTextPresent("There are errors in the input file");
+        assertElementPresent(Locator.tag("td").containing("Col1"));
+        assertElementPresent(Locator.tag("td").containing("test2"));
     }
 }

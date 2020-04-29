@@ -21,8 +21,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.categories.BVT;
-import org.labkey.test.categories.FileBrowser;
+import org.labkey.test.categories.DailyB;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.ms2.MS2PipelineFolder;
 import org.labkey.test.ms2.params.MS2EmailSuccessParams;
@@ -38,7 +37,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Category({BVT.class, FileBrowser.class})
+@Category({DailyB.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 15)
 public class PipelineTest extends PipelineWebTestBase
 {
@@ -52,7 +51,7 @@ public class PipelineTest extends PipelineWebTestBase
         super("Pipeline BVT");
 
         MS2PipelineFolder folder = new MS2PipelineFolder(this, "pipe1",
-                TestFileUtils.getLabKeyRoot() + "/sampledata/xarfiles/ms2pipe");
+                TestFileUtils.getSampleData("xarfiles/ms2pipe"));
         folder.setFolderType("None");
         folder.setTabs("Pipeline", "MS2", "Dumbster");
         folder.setWebParts("Data Pipeline", "MS2 Runs", "Mail Record");

@@ -21,7 +21,7 @@ import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.cache.BlockingStringKeyCache;
+import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -293,7 +293,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
     }
 
-    private final BlockingStringKeyCache<Attributes<A, E>> _cache;
+    private final BlockingCache<String, Attributes<A, E>> _cache;
     private final AttributeType _type;
 
     public AttributeCache(AttributeType type)

@@ -20,6 +20,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowSettings;
@@ -30,6 +32,8 @@ import org.labkey.flow.controllers.compensation.CompensationController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
+import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -139,6 +143,12 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
     public ActionURL urlDownload()
     {
         return urlFor(CompensationController.DownloadAction.class);
+    }
+
+    @Override
+    public QueryRowReference getQueryRowReference()
+    {
+        return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.CompensationMatrices.name(), FieldKey.fromParts("RowId"), getRowId());
     }
 
     public void addParams(Map<FlowParam, Object> map)

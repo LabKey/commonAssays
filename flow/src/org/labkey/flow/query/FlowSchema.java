@@ -19,8 +19,8 @@ package org.labkey.flow.query;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.StringKeyCache;
 import org.labkey.api.data.*;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -117,6 +117,7 @@ import java.util.function.Supplier;
 public class FlowSchema extends UserSchema
 {
     static public final String SCHEMANAME = "flow";
+    static public final SchemaKey SCHEMAKEY = SchemaKey.fromParts("flow");
     static public final String SCHEMA_DESCR = "Contains data about flow cytometry experiment runs";
 
     // Column name constants
@@ -911,7 +912,7 @@ public class FlowSchema extends UserSchema
             //DetailsURL detailsURL = DetailsURL.fromString("/flow/download.view?dataId=${rowId}", getContainer());
             PropertyDescriptor pd = new PropertyDescriptor();
             pd.setURL(detailsURL);
-            ret.setDisplayColumnFactory(new FileLinkDisplayColumn.Factory(pd, getContainer(), SchemaKey.fromParts(FlowSchema.SCHEMANAME), FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId")));
+            ret.setDisplayColumnFactory(new FileLinkDisplayColumn.Factory(pd, getContainer(), SCHEMAKEY, FlowTableType.FCSFiles.name(), FieldKey.fromParts("RowId")));
             ret.setURL(detailsURL);
             ret.setHidden(true);
             addColumn(ret);
@@ -1972,14 +1973,14 @@ public class FlowSchema extends UserSchema
 //            return eldest.getValue().lastUsed + CacheManager.MINUTE < HeartBeat.currentTimeMillis();
 //        }
 //    };
-    private static final StringKeyCache<MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(CacheManager.UNLIMITED,CacheManager.HOUR, "fast flow objects");
+    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(CacheManager.UNLIMITED,CacheManager.HOUR, "fast flow objects");
 
     private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
     {
         @Override
         public void containerDeleted(Container c, User user)
         {
-            fastflowCache.removeUsingPrefix(c.getId() + "/");
+            fastflowCache.removeUsingFilter(new Cache.StringPrefixFilter(c.getId() + "/"));
         }
 
         @Override public void containerCreated(Container c, User user) { }

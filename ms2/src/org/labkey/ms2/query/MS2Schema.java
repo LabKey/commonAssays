@@ -53,7 +53,6 @@ import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
-import org.labkey.ms2.metadata.MassSpecMetadataAssayProvider;
 import org.labkey.ms2.protein.ProteinManager;
 
 import javax.servlet.http.HttpServletRequest;
@@ -127,6 +126,7 @@ public class MS2Schema extends UserSchema
                 return false;
             }
 
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 return new MS2Schema(schema.getUser(), schema.getContainer());
@@ -141,20 +141,9 @@ public class MS2Schema extends UserSchema
 
     public enum TableType
     {
-        SamplePrepRuns
-        {
-            public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
-            {
-                ExpRunTable result = ExperimentService.get().createRunTable(SamplePrepRuns.toString(), ms2Schema, cf);
-                result.populate();
-                // Include the old XAR-based and the new assay-based
-                result.setDescription("Contains one row per experimental metadata attached to source spectra files.");
-                result.setProtocolPatterns(PROTOCOL_PATTERN_PREFIX + SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX + "%", "urn:lsid:%:" + MassSpecMetadataAssayProvider.PROTOCOL_LSID_NAMESPACE_PREFIX + ".Folder-%:%");
-                return result;
-            }
-        },
         ImportedSearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(ImportedSearchRuns.toString(), cf, IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
@@ -164,6 +153,7 @@ public class MS2Schema extends UserSchema
         },
         XTandemSearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(XTandemSearchRuns.toString(), cf, XTANDEM_PROTOCOL_OBJECT_PREFIX);
@@ -173,6 +163,7 @@ public class MS2Schema extends UserSchema
         },
         MascotSearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(MascotSearchRuns.toString(), cf, MASCOT_PROTOCOL_OBJECT_PREFIX);
@@ -182,6 +173,7 @@ public class MS2Schema extends UserSchema
         },
         CometSearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(CometSearchRuns.toString(), cf, COMET_PROTOCOL_OBJECT_PREFIX);
@@ -191,6 +183,7 @@ public class MS2Schema extends UserSchema
         },
         SequestSearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(SequestSearchRuns.toString(), cf, SEQUEST_PROTOCOL_OBJECT_PREFIX);
@@ -200,6 +193,7 @@ public class MS2Schema extends UserSchema
         },
         FractionRollupsRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable searchTable = ms2Schema.createSearchTable(FractionRollupsRuns.toString(), cf, FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
@@ -209,6 +203,7 @@ public class MS2Schema extends UserSchema
         },
         MS2SearchRuns
         {
+            @Override
             public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ExpRunTable runsTable = ms2Schema.createRunsTable(MS2SearchRuns.toString(), cf);
@@ -218,9 +213,10 @@ public class MS2Schema extends UserSchema
         },
         MS2RunDetails
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2, ContainerFilter cf)
             {
-                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), ms2, cf);
+                FilteredTable<?> result = new FilteredTable<>(MS2Manager.getTableInfoRuns(), ms2, cf);
                 result.setName(MS2RunDetails.name());
                 result.addWrapColumn(result.getRealTable().getColumn("Run"));
                 result.addWrapColumn(result.getRealTable().getColumn("Description"));
@@ -258,13 +254,9 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("DistillerRawFile"));
 
                 var iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
-                iconColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-                {
-                    public DisplayColumn createRenderer(ColumnInfo colInfo)
-                    {
-                        ActionURL linkURL = MS2Controller.getShowRunURL(ms2.getUser(), ms2.getContainer());
-                        return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
-                    }
+                iconColumn.setDisplayColumnFactory(colInfo -> {
+                    ActionURL linkURL = MS2Controller.getShowRunURL(ms2.getUser(), ms2.getContainer());
+                    return new IconDisplayColumn(colInfo, 18, 18, linkURL, "run", AppProps.getInstance().getContextPath() + "/MS2/images/runIcon.gif");
                 });
                 result.addColumn(iconColumn);
                 return result;
@@ -285,6 +277,7 @@ public class MS2Schema extends UserSchema
         },
         Peptides
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createPeptidesTable(cf, MS2RunType.values());
@@ -292,6 +285,7 @@ public class MS2Schema extends UserSchema
         },
         Fractions
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createFractionsTable(cf);
@@ -299,6 +293,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinGroups
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(ms2Schema, cf);
@@ -308,6 +303,7 @@ public class MS2Schema extends UserSchema
         },
         Sequences
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
 
@@ -316,6 +312,7 @@ public class MS2Schema extends UserSchema
         },
         FastaRunMapping
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createFastaRunMappingTable(cf);
@@ -329,6 +326,7 @@ public class MS2Schema extends UserSchema
     {
         PeptidesFilter
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 PeptidesTableInfo peptidesTable = (PeptidesTableInfo)ms2Schema.createPeptidesTable(cf, MS2RunType.values());
@@ -338,6 +336,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinGroupsFilter
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createProteinGroupsForRunTable(cf, null);
@@ -345,6 +344,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinGroupsForSearch
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createProteinGroupsForSearchTable(cf);
@@ -352,6 +352,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinGroupsForRun
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createProteinGroupsForRunTable(cf, false);
@@ -359,6 +360,7 @@ public class MS2Schema extends UserSchema
         },
         CompareProteinProphet
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createProteinProphetCompareTable(null, null);
@@ -366,6 +368,7 @@ public class MS2Schema extends UserSchema
         },
         ComparePeptides
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createPeptidesCompareTable(false, null, null);
@@ -373,6 +376,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinProphetCrosstab
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createProteinProphetCrosstabTable(null, null);
@@ -380,6 +384,7 @@ public class MS2Schema extends UserSchema
         },
         ProteinProphetNormalizedCrosstab
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createNormalizedProteinProphetComparisonTable(null, null);
@@ -387,6 +392,7 @@ public class MS2Schema extends UserSchema
         },
         PeptideCrosstab
         {
+            @Override
             public TableInfo createTable(MS2Schema ms2Schema, ContainerFilter cf)
             {
                 return ms2Schema.createPeptideCrosstabTable(null, null);
@@ -397,6 +403,7 @@ public class MS2Schema extends UserSchema
 
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         return TABLE_NAMES;
@@ -407,6 +414,7 @@ public class MS2Schema extends UserSchema
         return _proteinGroupProteins;
     }
 
+    @Override
     public TableInfo createTable(String name, ContainerFilter cf)
     {
         for (TableType tableType : TableType.values())
@@ -507,13 +515,14 @@ public class MS2Schema extends UserSchema
         return result;
     }
 
-    protected FilteredTable createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context, boolean filterByRuns)
+    protected FilteredTable<?> createProteinGroupMembershipTable(final MS2Controller.PeptideFilteringComparisonForm form, final ViewContext context, boolean filterByRuns)
     {
-        FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoProteinGroupMemberships(), this);
+        FilteredTable<?> result = new FilteredTable<>(MS2Manager.getTableInfoProteinGroupMemberships(), this);
         result.wrapAllColumns(true);
 
         result.getMutableColumn("ProteinGroupId").setFk(new LookupForeignKey(result.getContainerFilter(), "RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ProteinGroupTableInfo result = createProteinGroupsForRunTable(getLookupContainerFilter(), null);
@@ -598,6 +607,7 @@ public class MS2Schema extends UserSchema
         var peptideMembershipsColumn = result.wrapColumn("PeptideMemberships", result.getRealTable().getColumn("ProteinGroupId"));
         peptideMembershipsColumn.setFk(new LookupForeignKey(result.getContainerFilter(), "ProteinGroupId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return createPeptideMembershipsTable(getLookupContainerFilter());
@@ -651,6 +661,7 @@ public class MS2Schema extends UserSchema
 
         LookupForeignKey fk = new LookupForeignKey(cf, "RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ProteinGroupTableInfo result = new ProteinGroupTableInfo(MS2Schema.this, getLookupContainerFilter());
@@ -666,6 +677,7 @@ public class MS2Schema extends UserSchema
         result.getMutableColumn("PeptideId").setHidden(true);
         result.getMutableColumn("PeptideId").setFk(new LookupForeignKey("RowId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return createPeptidesTable(ContainerFilter.EVERYTHING, MS2RunType.values());
@@ -678,7 +690,7 @@ public class MS2Schema extends UserSchema
     protected TableInfo createFractionsTable(ContainerFilter cf)
     {
         SqlDialect dialect = MS2Manager.getSqlDialect();
-        FilteredTable result = new FilteredTable<MS2Schema>(MS2Manager.getTableInfoFractions(), this, cf)
+        FilteredTable<?> result = new FilteredTable<>(MS2Manager.getTableInfoFractions(), this, cf)
         {
             @Override
             protected void applyContainerFilter(ContainerFilter filter)
@@ -717,12 +729,13 @@ public class MS2Schema extends UserSchema
                 new SQLFragment("(SELECT MIN(d.RowId) FROM " + ExperimentService.get().getTinfoData() + " d, " +
                         MS2Manager.getTableInfoRuns() + " r WHERE d.Container = r.Container AND r.Run = " +
                         ExprColumn.STR_TABLE_ALIAS + ".Run AND d.DataFileURL = " + ExprColumn.STR_TABLE_ALIAS + ".mzxmlURL)"), JdbcType.INTEGER);
-        dataColumn.setFk(new ExpSchema(getUser(), getContainer()).getDataIdForeignKey());
+        dataColumn.setFk(new ExpSchema(getUser(), getContainer()).getDataIdForeignKey(cf));
         result.addColumn(dataColumn);
 
         ActionURL url = MS2Controller.getShowRunURL(getUser(), getContainer());
         result.getMutableColumn("Run").setFk(new LookupForeignKey(url, "run", "Run", "Description")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return new RunTableInfo(MS2Schema.this);
@@ -771,6 +784,7 @@ public class MS2Schema extends UserSchema
 
         result.getMutableColumn(ExpRunTable.Column.Name).setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 return new DataColumn(colInfo)
@@ -793,6 +807,7 @@ public class MS2Schema extends UserSchema
                         }
                     }
 
+                    @Override
                     public void addQueryColumns(Set<ColumnInfo> columns)
                     {
                         super.addQueryColumns(columns);
@@ -925,6 +940,7 @@ public class MS2Schema extends UserSchema
         var proteinGroupIdCol = new BaseColumnInfo("ProteinGroupId", JdbcType.INTEGER);
         proteinGroupIdCol.setFk(new LookupForeignKey((ContainerFilter)null, "RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return new ProteinGroupTableInfo(MS2Schema.this, getLookupContainerFilter(), true);
@@ -975,6 +991,7 @@ public class MS2Schema extends UserSchema
         var peptideMembershipsColumn = baseTable.wrapColumn("PeptideMemberships", rawTable.getColumn("ProteinGroupId"));
         peptideMembershipsColumn.setFk(new LookupForeignKey((ContainerFilter)null, "ProteinGroupId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return createPeptideMembershipsTable(getLookupContainerFilter());
@@ -993,6 +1010,7 @@ public class MS2Schema extends UserSchema
         baseTable.addColumn(proteinsCol);
         LookupForeignKey proteinsFK = new LookupForeignKey("NormalizedId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 // Create a junction query that connects normalized group ids with protein identifications
@@ -1010,6 +1028,7 @@ public class MS2Schema extends UserSchema
                 var seqIdCol = new BaseColumnInfo("SeqId", result, JdbcType.INTEGER);
                 LookupForeignKey seqFK = new LookupForeignKey("SeqId")
                 {
+                    @Override
                     public TableInfo getLookupTableInfo()
                     {
                         return MS2Schema.this.createSequencesTable(getLookupContainerFilter());
@@ -1220,6 +1239,7 @@ public class MS2Schema extends UserSchema
         rowDim.setUrl(showProteinURL.getLocalURIString() + "&seqId=${SeqId}");
         ((BaseColumnInfo)rowDim.getSourceColumn()).setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 DisplayColumn dc = new DataColumn(colInfo);
@@ -1398,6 +1418,7 @@ public class MS2Schema extends UserSchema
         parameters.put(MS2Manager.getDataRegionNamePeptides() + ".Peptide~eq", FieldKey.fromParts("peptide"));
         scansMeasure.setUrl(new DetailsURL(new ActionURL(MS2Controller.ShowPeptidePopupAction.class, getContainer()), parameters));
         ((BaseColumnInfo)scansMeasure.getSourceColumn()).setDisplayColumnFactory(new DisplayColumnFactory(){
+                @Override
                 public DisplayColumn createRenderer(ColumnInfo colInfo)
                 {
                     DisplayColumn dc = new DataColumn(colInfo);
@@ -1471,6 +1492,7 @@ public class MS2Schema extends UserSchema
     {
         return new LookupForeignKey("SeqId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 SequencesTableInfo result = createSequencesTable(getLookupContainerFilter());

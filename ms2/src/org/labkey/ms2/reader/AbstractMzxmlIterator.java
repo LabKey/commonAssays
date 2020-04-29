@@ -44,13 +44,6 @@ public abstract class AbstractMzxmlIterator implements SimpleScanIterator
 
     public static AbstractMzxmlIterator createParser(File file, int scanLevelFilter) throws IOException, XMLStreamException
     {
-        if (massSpecDataFileType.isMZmlAvailable())
-        {
-            return new RandomAccessPwizMSDataIterator(file, scanLevelFilter);
-        }
-        else
-        {
-            return new SequentialMzxmlIterator(file, scanLevelFilter);
-        }
+        return new SequentialMzxmlIterator(file, scanLevelFilter);
     }
 }
