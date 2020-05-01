@@ -37,6 +37,7 @@ import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
+import org.labkey.api.query.SchemaKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
@@ -76,6 +77,7 @@ import java.util.Set;
 public class MS2Schema extends UserSchema
 {
     public static final String SCHEMA_NAME = "ms2";
+    public static final SchemaKey SCHEMA_KEY = SchemaKey.fromParts("ms2");
     public static final String SCHEMA_DESCR = "Contains data about MS2 runs, including detected peptides and proteins";
 
     private static final String PROTOCOL_PATTERN_PREFIX = "urn:lsid:%:Protocol.%:";
@@ -136,7 +138,7 @@ public class MS2Schema extends UserSchema
 
     public MS2Schema(User user, Container container)
     {
-        super(SCHEMA_NAME, SCHEMA_DESCR, user, container, ExperimentService.get().getSchema());
+        super(SCHEMA_KEY, SCHEMA_DESCR, user, container, ExperimentService.get().getSchema(), null);
     }
 
     public enum TableType

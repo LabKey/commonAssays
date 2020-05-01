@@ -40,7 +40,7 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
 
     public MS2SearchExperimentRunType(String name, String tableName, Priority priority, String... protocolPrefixes)
     {
-        super(name, MS2Schema.SCHEMA_NAME, tableName);
+        super(name, MS2Schema.SCHEMA_KEY, tableName);
         _priority = priority;
         _protocolPrefixes = protocolPrefixes;
     }
