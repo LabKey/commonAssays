@@ -18,7 +18,6 @@ package org.labkey.flow.query;
 
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.flow.analysis.web.SubsetSpec;

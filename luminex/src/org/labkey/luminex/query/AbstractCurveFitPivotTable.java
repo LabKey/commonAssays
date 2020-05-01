@@ -15,9 +15,9 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.LookupForeignKey;
 
@@ -56,7 +56,7 @@ public abstract class AbstractCurveFitPivotTable extends AbstractLuminexTable
         }
     }
 
-    private BaseColumnInfo createCurveTypeColumn(final String curveType)
+    private MutableColumnInfo createCurveTypeColumn(final String curveType)
     {
         var curveFitColumn = wrapColumn(curveType + "CurveFit", getRealTable().getColumn(_primaryCurveFitJoinColumn));
 

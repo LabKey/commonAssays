@@ -194,6 +194,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         setDefaultVisibleColumns(defaultCols);
     }
 
+    @Override
     protected LookupForeignKey createCurveFitFK(ContainerFilter cf, final String curveType)
     {
         LookupForeignKey fk = new LookupForeignKey(cf,"AnalyteId", null)

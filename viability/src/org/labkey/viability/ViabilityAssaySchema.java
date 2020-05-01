@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayResultTable;
-import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -30,6 +29,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MVDisplayColumnFactory;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -99,6 +99,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         return getSchema().getSqlDialect();
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();
@@ -156,7 +157,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             setPublicSchemaName(ViabilityAssaySchema.this.getSchemaName());
         }
 
-        protected BaseColumnInfo addVisible(BaseColumnInfo col)
+        protected MutableColumnInfo addVisible(MutableColumnInfo col)
         {
             var ret = addColumn(col);
             addDefaultVisible(col.getName());
@@ -185,7 +186,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         }
     }
 
-    protected static BaseColumnInfo copyProperties(BaseColumnInfo column, DomainProperty dp)
+    protected static MutableColumnInfo copyProperties(MutableColumnInfo column, DomainProperty dp)
     {
         if (dp != null)
         {
@@ -235,7 +236,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             var objectIdCol = wrapColumn(_rootTable.getColumn("ObjectId"));
             for (DomainProperty dp : resultDomainProperties)
             {
-                BaseColumnInfo col;
+                MutableColumnInfo col;
 
                 // UNDONE: OOR columns?
 
@@ -363,7 +364,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             return result;
         }
 
-        private BaseColumnInfo createTargetStudyCol()
+        private MutableColumnInfo createTargetStudyCol()
         {
             var col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
             fixupRenderers(col, col);
