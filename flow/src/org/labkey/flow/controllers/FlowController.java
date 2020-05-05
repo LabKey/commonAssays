@@ -205,6 +205,7 @@ public class FlowController extends BaseFlowController
             if (statusFile == null)
             {
                 errors.rejectValue("statusFile", ERROR_MSG, "Status file not specified.");
+                return;
             }
             try
             {
