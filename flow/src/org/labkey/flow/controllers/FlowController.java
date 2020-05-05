@@ -75,6 +75,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.InvalidPathException;
 
 public class FlowController extends BaseFlowController
 {
@@ -204,6 +205,14 @@ public class FlowController extends BaseFlowController
             if (statusFile == null)
             {
                 errors.rejectValue("statusFile", ERROR_MSG, "Status file not specified.");
+            }
+            try
+            {
+                new File(statusFile).toPath();
+            }
+            catch (InvalidPathException x)
+            {
+                throw new NotFoundException();
             }
         }
 
