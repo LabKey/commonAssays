@@ -88,6 +88,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
 
         ProjectSharedContainerFilterWrapper(ContainerFilter cf)
         {
+            super(null, null);
             _inner = cf;
         }
     }
