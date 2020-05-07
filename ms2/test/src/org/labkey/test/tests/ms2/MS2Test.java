@@ -803,7 +803,7 @@ public class MS2Test extends AbstractMS2ImportTest
     {
         log("Test creating run groups");
         navigateToFolder(FOLDER_NAME);
-        clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/Experiment/images/graphIcon.gif"));
+        clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/experiment/images/graphIcon.gif"));
         clickAndWait(Locator.id("expandCollapse-experimentRunGroup"), 0);
         clickButton("Create new group");
         setFormElement(Locator.name("name"), RUN_GROUP1_NAME1);
