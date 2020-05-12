@@ -44,7 +44,7 @@ public class MS2ServiceImpl implements MS2Service
 
     public TableInfo createPeptidesTableInfo(User user, Container container)
     {
-        return createPeptidesTableInfo(user, container, true, ContainerFilter.CURRENT, null, null);
+        return createPeptidesTableInfo(user, container, true, ContainerFilter.current(container), null, null);
     }
 
     public TableInfo createSequencesTableInfo(User user, Container container)

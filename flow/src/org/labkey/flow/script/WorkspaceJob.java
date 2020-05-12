@@ -204,7 +204,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
             User user = User.getSearchUser();
             Container c = flowProtocol.getContainer();
-            TableInfo fcsFilesTable = new FlowSchema(user, c).getTable(FlowTableType.FCSFiles, ContainerFilter.CURRENT);
+            TableInfo fcsFilesTable = new FlowSchema(user, c).getTable(FlowTableType.FCSFiles, ContainerFilter.current(c));
 
             List<String> filteredSampleIDs = new ArrayList<>(sampleIDs.size());
             for (String sampleID : sampleIDs)

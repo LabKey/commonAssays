@@ -36,7 +36,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
     @Override
     protected ContainerFilter getDefaultContainerFilter()
     {
-        return new ContainerFilter.CurrentPlusProjectAndShared(getUserSchema().getUser());
+        return ContainerFilter.Type.CurrentPlusProjectAndShared.create(getUserSchema());
     }
 
     FeatureAnnotationSetTable(MicroarrayUserSchema s, TableInfo t, ContainerFilter cf)
@@ -61,9 +61,9 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
         final ContainerFilter _inner;
 
         @Override
-        public String getCacheKey(Container c)
+        public String getCacheKey()
         {
-            return getDefaultCacheKey(c);
+            return getDefaultCacheKey(_container, _user) + _inner.getCacheKey();
         }
 
         @Override

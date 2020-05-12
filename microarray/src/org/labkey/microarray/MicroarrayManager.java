@@ -195,8 +195,8 @@ public class MicroarrayManager
         filter.addCondition(FieldKey.fromParts("Name"), featureSetName);
 
         // The container filter matches the assay's featureSet run property lookup
-        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(user);
-        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container"), c));
+        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(c, user);
+        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container")));
 
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
@@ -217,8 +217,8 @@ public class MicroarrayManager
         filter.addCondition(FieldKey.fromParts("RowId"), id);
 
         // The container filter matches the assay's featureSet run property lookup
-        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(user);
-        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container"), c));
+        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(c, user);
+        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container")));
 
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);

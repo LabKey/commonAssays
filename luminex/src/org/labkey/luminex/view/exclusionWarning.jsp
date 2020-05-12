@@ -48,7 +48,7 @@
         <br/>
     </div>
     <br/><%
-        ActionURL url = LuminexAssayProvider.getExcludedReportUrl(bean.getContainer(), bean.getProtocol(), ContainerFilter.CURRENT, bean.getReRunId().toString());
+        ActionURL url = LuminexAssayProvider.getExcludedReportUrl(bean.getContainer(), bean.getProtocol(), ContainerFilter.Type.Current, bean.getReRunId().toString());
     %>Please review the <%=link("exclusions report", url).target("_blank")%>for more information.
 </span>
 

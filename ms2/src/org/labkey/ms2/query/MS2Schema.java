@@ -437,7 +437,7 @@ public class MS2Schema extends UserSchema
         {
             if (runType.getPeptideTableName().equalsIgnoreCase(name))
             {
-                return createPeptidesTable(ContainerFilter.CURRENT, runType);
+                return createPeptidesTable(ContainerFilter.current(getContainer()), runType);
             }
         }
 
