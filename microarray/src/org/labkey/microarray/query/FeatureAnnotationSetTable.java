@@ -67,14 +67,14 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
         }
 
         @Override
-        public @Nullable Collection<GUID> getIds(Container currentContainer)
+        public @Nullable Collection<GUID> getIds()
         {
             Set<GUID> ret = new HashSet<>();
-            Collection<GUID> ids = _inner.getIds(currentContainer);
+            Collection<GUID> ids = _inner.getIds();
             if (null != ids)
                 ret.addAll(ids);
             ret.add(ContainerManager.getSharedContainer().getEntityId());
-            Container project = currentContainer.getProject();
+            Container project = _container.getProject();
             if (null != project)
                 ret.add(project.getEntityId());
             return ret;
