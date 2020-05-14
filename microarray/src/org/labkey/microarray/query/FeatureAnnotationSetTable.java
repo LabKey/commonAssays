@@ -53,7 +53,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
     @Override
     protected void applyContainerFilter(ContainerFilter filter)
     {
-        super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(filter));
+        super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(getContainer(), filter));
     }
 
     class ProjectSharedContainerFilterWrapper extends ContainerFilter
@@ -86,9 +86,9 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
             return _inner.getType();
         }
 
-        ProjectSharedContainerFilterWrapper(ContainerFilter cf)
+        ProjectSharedContainerFilterWrapper(Container c, ContainerFilter cf)
         {
-            super(null, null);
+            super(c, null);
             _inner = cf;
         }
     }
