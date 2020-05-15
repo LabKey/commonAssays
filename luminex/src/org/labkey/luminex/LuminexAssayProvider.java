@@ -421,14 +421,19 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public static ActionURL getExcludedReportUrl(Container container, ExpProtocol protocol, ContainerFilter containerFilter, String currentRunId)
     {
+        return getExcludedReportUrl(container, protocol, null==containerFilter ? null : containerFilter.getType(), currentRunId);
+    }
+
+    public static ActionURL getExcludedReportUrl(Container container, ExpProtocol protocol, ContainerFilter.Type containerFilterType, String currentRunId)
+    {
         // add header link for the Excluded Data Report
         ActionURL url = PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexController.ExcludedDataAction.class);
-        if (containerFilter != null && containerFilter.getType() != null)
+        if (containerFilterType != null)
         {
-            url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-            url.addParameter(protocol.getName() + " SinglepointUnknownExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
-            url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilter.getType().name());
+            url.addParameter(protocol.getName() + " RunExclusion." + QueryParam.containerFilterName, containerFilterType.name());
+            url.addParameter(protocol.getName() + " WellExclusion." + QueryParam.containerFilterName, containerFilterType.name());
+            url.addParameter(protocol.getName() + " SinglepointUnknownExclusion." + QueryParam.containerFilterName, containerFilterType.name());
+            url.addParameter(protocol.getName() + " TitrationExclusion." + QueryParam.containerFilterName, containerFilterType.name());
         }
         if (null != currentRunId)
         {

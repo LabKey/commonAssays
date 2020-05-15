@@ -66,7 +66,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), ContainerFilter.CURRENT, MS2RunType.values(), false);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), ContainerFilter.current(schema.getContainer()), MS2RunType.values(), false);
     }
 
     public PeptidesTableInfo(MS2Schema schema, ContainerFilter containerFilter, MS2RunType[] runTypes)
@@ -318,7 +318,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
         sql.append(" AND ");
 
-        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), _userSchema.getContainer(), true));
+        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), true));
         if (_userSchema.getRuns() != null)
         {
             sql.append(" AND Run IN ");

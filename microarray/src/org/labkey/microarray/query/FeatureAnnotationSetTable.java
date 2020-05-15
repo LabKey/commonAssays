@@ -36,7 +36,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
     @Override
     protected ContainerFilter getDefaultContainerFilter()
     {
-        return new ContainerFilter.CurrentPlusProjectAndShared(getUserSchema().getUser());
+        return ContainerFilter.Type.CurrentPlusProjectAndShared.create(getUserSchema());
     }
 
     FeatureAnnotationSetTable(MicroarrayUserSchema s, TableInfo t, ContainerFilter cf)
@@ -53,7 +53,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
     @Override
     protected void applyContainerFilter(ContainerFilter filter)
     {
-        super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(filter));
+        super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(getContainer(), filter));
     }
 
     class ProjectSharedContainerFilterWrapper extends ContainerFilter
@@ -61,20 +61,20 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
         final ContainerFilter _inner;
 
         @Override
-        public String getCacheKey(Container c)
+        public String getCacheKey()
         {
-            return getDefaultCacheKey(c);
+            return getDefaultCacheKey(_container, _user) + _inner.getCacheKey();
         }
 
         @Override
-        public @Nullable Collection<GUID> getIds(Container currentContainer)
+        public @Nullable Collection<GUID> getIds()
         {
             Set<GUID> ret = new HashSet<>();
-            Collection<GUID> ids = _inner.getIds(currentContainer);
+            Collection<GUID> ids = _inner.getIds();
             if (null != ids)
                 ret.addAll(ids);
             ret.add(ContainerManager.getSharedContainer().getEntityId());
-            Container project = currentContainer.getProject();
+            Container project = _container.getProject();
             if (null != project)
                 ret.add(project.getEntityId());
             return ret;
@@ -86,8 +86,9 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
             return _inner.getType();
         }
 
-        ProjectSharedContainerFilterWrapper(ContainerFilter cf)
+        ProjectSharedContainerFilterWrapper(Container c, ContainerFilter cf)
         {
+            super(c, null);
             _inner = cf;
         }
     }

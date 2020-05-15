@@ -33,12 +33,14 @@ import org.labkey.api.assay.AssaySchema;
 public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> implements ContainerFilterable
 {
     private final String _curveType;
-    private @NotNull ContainerFilter _containerFilter = ContainerFilter.CURRENT;
+    private @NotNull ContainerFilter _containerFilter = null;
 
     /** @param curveType the type of curve to filter the results to. Null means don't filter */
     public GuideSetCurveFitTable(LuminexProtocolSchema schema, ContainerFilter cf, String curveType)
     {
         super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema, cf);
+        if (null== cf)
+            _containerFilter = ContainerFilter.current(schema.getContainer());
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
