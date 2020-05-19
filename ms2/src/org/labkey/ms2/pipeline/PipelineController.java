@@ -605,10 +605,10 @@ public class PipelineController extends SpringActionController
             return errorString.toString();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("File List", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer()));
-            return root.addChild("Search MS2 Data");
+            root.addChild("Search MS2 Data");
         }
     }
 
@@ -689,9 +689,9 @@ public class PipelineController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Configure FASTA Root");
+            root.addChild("Configure FASTA Root");
         }
     }
 
@@ -713,9 +713,9 @@ public class PipelineController extends SpringActionController
             return PipelineController.getHelpTopic("MS2-Pipeline/setTandemDefaults");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Set X! Tandem Defaults");
+            root.addChild("Set X! Tandem Defaults");
         }
     }
 
@@ -737,9 +737,9 @@ public class PipelineController extends SpringActionController
             return PipelineController.getHelpTopic("MS2-Pipeline/setMascotDefaults");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Set Mascot Defaults");
+            root.addChild("Set Mascot Defaults");
         }
     }
 
@@ -761,9 +761,9 @@ public class PipelineController extends SpringActionController
             return PipelineController.getHelpTopic("pipelineSequest");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Set Sequest Defaults");
+            root.addChild("Set Sequest Defaults");
         }
     }
 
@@ -785,9 +785,9 @@ public class PipelineController extends SpringActionController
             return PipelineController.getHelpTopic("pipelineComet");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Set Comet Defaults");
+            root.addChild("Set Comet Defaults");
         }
     }
 

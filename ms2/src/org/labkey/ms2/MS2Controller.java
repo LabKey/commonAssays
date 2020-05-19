@@ -218,17 +218,16 @@ public class MS2Controller extends SpringActionController
         AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
-    private NavTree appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
+    private void appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
         root.addChild("MS2 Runs", getShowListURL(getContainer()));
         if (null != title)
             root.addChild(title);
-        return root;
     }
 
 
-    private NavTree appendRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
+    private void appendRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
     {
         appendRootNavTrail(root, null, page, helpTopic);
 
@@ -242,23 +241,21 @@ public class MS2Controller extends SpringActionController
 
         if (null != title)
             root.addChild(title);
-        return root;
     }
 
 
-    private NavTree appendAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
+    private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
         root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
-        return root;
     }
 
 
-    private NavTree appendProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
+    private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        return appendAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
+        addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
 
 
@@ -312,9 +309,9 @@ public class MS2Controller extends SpringActionController
             return new VBox(searchView, gridView);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, "MS2 Runs", getPageConfig(), "ms2RunsList");
+            appendRootNavTrail(root, "MS2 Runs", getPageConfig(), "ms2RunsList");
         }
     }
 
@@ -441,14 +438,14 @@ public class MS2Controller extends SpringActionController
             return vBox;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String pageTitle = (null != getPageConfig().getTitle() ? getPageConfig().getTitle() : "Run Summary");
 
             if (null != _run)
                 appendRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
 
-            return root.addChild(pageTitle);
+            root.addChild(pageTitle);
         }
     }
 
@@ -784,9 +781,9 @@ public class MS2Controller extends SpringActionController
             return form.getReturnURLHelper();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
+            appendRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
         }
     }
 
@@ -921,9 +918,8 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -965,11 +961,10 @@ public class MS2Controller extends SpringActionController
             return new GoView();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
             setHelpTopic(new HelpTopic("annotations"));
-            return null;  // TODO: Admin navtrail
         }
 
         public boolean handlePost(Object o, BindException errors) throws Exception
@@ -1040,11 +1035,10 @@ public class MS2Controller extends SpringActionController
             return GoLoader.getCurrentStatus(form.getMessage());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             setTitle("GO Load Status");
             setHelpTopic(new HelpTopic("annotations"));
-            return null;
         }
     }
 
@@ -1121,11 +1115,11 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/peptideChart.jsp", bean);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer(), _run.getRun());
 
-            return appendRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
+            appendRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
         }
     }
 
@@ -1158,9 +1152,8 @@ public class MS2Controller extends SpringActionController
             return peptideView.getPeptideViewForProteinGrouping(form.getProteinGroupingId(), form.getColumns());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -1253,9 +1246,9 @@ public class MS2Controller extends SpringActionController
             return view;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
+            appendRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
         }
 
         public boolean handlePost(ManageViewsForm form, BindException errors)
@@ -1398,9 +1391,9 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Compare Search Engine Protein Setup");
+            root.addChild("Compare Search Engine Protein Setup");
         }
     }
 
@@ -1455,10 +1448,10 @@ public class MS2Controller extends SpringActionController
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             setHelpTopic("compareProteinProphet");
-            return root.addChild("Compare ProteinProphet Options");
+            root.addChild("Compare ProteinProphet Options");
         }
     }
 
@@ -1497,9 +1490,9 @@ public class MS2Controller extends SpringActionController
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Compare Peptides Options");
+            root.addChild("Compare Peptides Options");
         }
     }
 
@@ -1612,10 +1605,9 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Disambiguate Protein");
-            return root;
         }
     }
 
@@ -1946,7 +1938,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (_form != null)
             {
@@ -1969,7 +1961,7 @@ public class MS2Controller extends SpringActionController
                 root.addChild("Setup Compare ProteinProphet", setupURL); // GET the setup view -- no use going through POST, since we don't have a run list
             }
             setHelpTopic("compareProteinProphet");
-            return root.addChild("Compare ProteinProphet");
+            root.addChild("Compare ProteinProphet");
         }
     }
 
@@ -2025,7 +2017,7 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (_form != null)
             {
@@ -2041,9 +2033,10 @@ public class MS2Controller extends SpringActionController
                 root.addChild("Setup Compare Peptides", setupURL); // GET the setup view -- no use going through POST, since we don't have a run list
                 StringBuilder title = new StringBuilder("Compare Peptides: ");
                 _form.appendPeptideFilterDescription(title, getViewContext());
-                return root.addChild(title.toString());
+                root.addChild(title.toString());
+                return;
             }
-            return root.addChild("Compare Peptides");
+            root.addChild("Compare Peptides");
         }
     }
 
@@ -2086,9 +2079,9 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, "Export Runs", getPageConfig(), "exportRuns");
+            appendRootNavTrail(root, "Export Runs", getPageConfig(), "exportRuns");
         }
     }
 
@@ -2130,9 +2123,9 @@ public class MS2Controller extends SpringActionController
             return compareRuns(form.getRunList(), false, _title, form.getColumn(), errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRootNavTrail(root, _title.toString(), getPageConfig(), "compareRuns");
+            appendRootNavTrail(root, _title.toString(), getPageConfig(), "compareRuns");
         }
     }
 
@@ -2332,9 +2325,9 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Spectra Count Options");
+            root.addChild("Spectra Count Options");
         }
     }
 
@@ -2407,9 +2400,9 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            root = appendRootNavTrail(root, null, getPageConfig(), "spectraCount");
+            appendRootNavTrail(root, null, getPageConfig(), "spectraCount");
             if (_form != null)
             {
                 ActionURL setupURL = new ActionURL(SpectraCountSetupAction.class, getContainer());
@@ -2434,7 +2427,6 @@ public class MS2Controller extends SpringActionController
                 _form.appendPeptideFilterDescription(title, getViewContext());
                 root.addChild(title.toString());
             }
-            return root;
         }
     }
 
@@ -2646,10 +2638,9 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/testFastaParsing.jsp", form);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            appendProteinAdminNavTrail(root, "Test FASTA header parsing", getPageConfig(), null);
-            return root;
+            addProteinAdminNavTrail(root, "Test FASTA header parsing", getPageConfig(), null);
         }
     }
 
@@ -2813,10 +2804,9 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             PageFlowUtil.urlProvider(AdminUrls.class).appendAdminNavTrail(root, "Protein Database Admin", null);
-            return root;
         }
     }
 
@@ -3121,12 +3111,11 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String helpTopic = "proteinSearch";
             getPageConfig().setHelpTopic(new HelpTopic(helpTopic));
             root.addChild("Protein Search Results");
-            return root;
         }
     }
 
@@ -3460,9 +3449,8 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -3516,9 +3504,8 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -3583,10 +3570,9 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             PageFlowUtil.urlProvider(AdminUrls.class).appendAdminNavTrail(root, "MS2 Admin", null);
-            return root;
         }
     }
 
@@ -3686,9 +3672,9 @@ public class MS2Controller extends SpringActionController
             return gridView;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;  // TODO: admin navtrail
+            // TODO: admin navtrail
         }
     }
 
@@ -3759,9 +3745,9 @@ public class MS2Controller extends SpringActionController
             return form.getReturnURLHelper();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
+            appendRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
         }
     }
 
@@ -3854,9 +3840,8 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
@@ -3967,7 +3952,7 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (getViewContext().getContainer().isRoot())
             {
@@ -3977,7 +3962,7 @@ public class MS2Controller extends SpringActionController
             {
                 root.addChild("Pipeline Settings", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
             }
-            return root.addChild("Mascot Server Configuration");
+            root.addChild("Mascot Server Configuration");
         }
     }
 
@@ -4051,9 +4036,9 @@ public class MS2Controller extends SpringActionController
             return new ProteinsView(currentURL, _run, form, Collections.singletonList(_protein), null, peptideQueryView);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild(getProteinTitle(_protein, true));
+            root.addChild(getProteinTitle(_protein, true));
         }
     }
 
@@ -4091,9 +4076,8 @@ public class MS2Controller extends SpringActionController
             return new VBox(summary, view);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -4156,9 +4140,8 @@ public class MS2Controller extends SpringActionController
             return new VBox(summaryView, view);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -4366,9 +4349,8 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -4511,9 +4493,8 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -4563,10 +4544,9 @@ public class MS2Controller extends SpringActionController
             return vBox;
         }
 
-        public NavTree appendNavTrail(NavTree root)
-    {
-        return null;
-    }
+        public void addNavTrail(NavTree root)
+        {
+        }
     }
 
     public static class PieSliceSectionForm
@@ -4636,9 +4616,9 @@ public class MS2Controller extends SpringActionController
             return vbox;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Pieslice Details for: " + _form.getSliceTitle());
+            root.addChild("Pieslice Details for: " + _form.getSliceTitle());
         }
     }
 
@@ -4785,11 +4765,10 @@ public class MS2Controller extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
             root.addChild("Test Mascot Settings");
-            return root;
         }
     }
 
@@ -5477,10 +5456,9 @@ public class MS2Controller extends SpringActionController
             return MS2UrlsImpl.get().getShowProteinAdminUrl("Annotation load queued. Monitor its progress using the job list at the bottom of this page.");
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            appendProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
-            return root;
+            addProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
         }
     }
 
@@ -5611,10 +5589,9 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            appendProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
-            return null;
+            addProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
         }
     }
 
@@ -6025,9 +6002,9 @@ public class MS2Controller extends SpringActionController
             return url;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Edit Elution Profile");
+            root.addChild("Edit Elution Profile");
         }
     }
 
@@ -6170,13 +6147,11 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Peptide Search Results");
+            root.addChild("Peptide Search Results");
         }
     } //PepSearchAction
-
-
 
     public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>
     {
@@ -6253,9 +6228,9 @@ public class MS2Controller extends SpringActionController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Attach mspicture Files to Existing MS2 Runs");
+            root.addChild("Attach mspicture Files to Existing MS2 Runs");
         }
     }
 
@@ -6291,9 +6266,9 @@ public class MS2Controller extends SpringActionController
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Load MS scan counts");
+            root.addChild("Load MS scan counts");
         }
     }
 

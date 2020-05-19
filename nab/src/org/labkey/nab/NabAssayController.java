@@ -191,7 +191,7 @@ public class NabAssayController extends SpringActionController
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
         }
@@ -233,7 +233,7 @@ public class NabAssayController extends SpringActionController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException("Not Yet Implemented");
         }
@@ -318,16 +318,14 @@ public class NabAssayController extends SpringActionController
             return _getNabAssayRun(run, fit, user);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (null != _protocol)
             {
                 ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
                 root.addChild(_protocol.getName() + " Data", runDataURL);
                 root.addChild("Run " + _runRowId + " Details");
-                return root;
             }
-            return null;
         }
     }
 
@@ -442,7 +440,7 @@ public class NabAssayController extends SpringActionController
             throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException("Expected redirect did not occur.");
         }
@@ -488,7 +486,7 @@ public class NabAssayController extends SpringActionController
             return _getNabAssayRun(run, fit, user);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
         }
@@ -813,12 +811,11 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             ActionURL detailsURL = new ActionURL(DetailsAction.class, getContainer()).addParameter("rowId", _runId);
             root.addChild("Run " + _runId + " Details", detailsURL);
             root.addChild(_editMode ? "QC NAb Data" : "Excluded Data");
-            return root;
         }
     }
 

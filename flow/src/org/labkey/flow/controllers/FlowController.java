@@ -110,9 +110,9 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return getFlowNavStart(getPageConfig(), getViewContext());
+            getFlowNavStart(getPageConfig(), getViewContext());
         }
     }
 
@@ -180,7 +180,7 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (experiment == null)
                 root.addChild("All Analysis Folders", getActionURL());
@@ -191,7 +191,6 @@ public class FlowController extends BaseFlowController
                 root.addChild(run.getLabel(), run.urlShow());
 
             root.addChild(query);
-            return root;
         }
     }
 
@@ -272,12 +271,10 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Status File", new ActionURL(ShowStatusJobAction.class, getContainer()));
-            return root;
         }
-
     }
 
     public static class StatusJobForm
@@ -372,11 +369,10 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             ActionURL jobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer());
             root.addChild("Error Cancelling Job", jobsURL);
-            return root;
         }
     }
 
@@ -491,10 +487,9 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("New Folder", new ActionURL(NewFolderAction.class, getContainer()));
-            return root;
         }
     }
 
@@ -552,10 +547,9 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Flow Module Settings");
-            return root;
         }
     }
 
@@ -571,9 +565,8 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -594,9 +587,8 @@ public class FlowController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 

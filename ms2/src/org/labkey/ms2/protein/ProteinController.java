@@ -63,9 +63,9 @@ public class ProteinController extends SpringActionController
             return new CustomProteinListView(getViewContext(), true);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Custom Protein Lists");
+            root.addChild("Custom Protein Lists");
         }
     }
 
@@ -140,12 +140,11 @@ public class ProteinController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
             root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
             root.addChild("Custom Protein List: " + _setName);
-            return root;
         }
     }
 
@@ -355,12 +354,11 @@ public class ProteinController extends SpringActionController
             return getBeginURL(getContainer());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
             root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
             root.addChild("Upload Custom Protein List");
-            return root;
         }
     }
 

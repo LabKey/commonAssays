@@ -74,10 +74,9 @@ public class CompensationController extends BaseFlowController
             return new CompensationListView(settings);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
-            return root;
         }
     }
 
@@ -142,9 +141,9 @@ public class CompensationController extends BaseFlowController
             return _flowComp.urlShow();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
+            appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
         }
     }
 
@@ -178,9 +177,8 @@ public class CompensationController extends BaseFlowController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -196,19 +194,19 @@ public class CompensationController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/compensation/showCompensation.jsp", form);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            if (null == _comp)
-                return root;
-            // show run this compensation was derived from
-            if (_comp.getParent() != null)
-                return appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
-            // fall back on showing compensation query
-            else
+            if (null != _comp)
             {
-                root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
-                root.addChild(_comp.getLabel(), _comp.urlShow());
-                return root;
+                // show run this compensation was derived from
+                if (_comp.getParent() != null)
+                    appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
+                    // fall back on showing compensation query
+                else
+                {
+                    root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
+                    root.addChild(_comp.getLabel(), _comp.urlShow());
+                }
             }
         }
     }
