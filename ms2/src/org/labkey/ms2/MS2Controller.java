@@ -190,6 +190,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
+
+import static org.labkey.api.util.DOM.STRONG;
+import static org.labkey.api.util.DOM.TABLE;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
 
 /**
  * User: adam
@@ -671,43 +678,25 @@ public class MS2Controller extends SpringActionController
         }
 
         StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', ");
-        List<DOM.Renderable> rows = new ArrayList<>();
-
-        if (0 == (var.size() + fixed.size()))
-            rows.add(DOM.TR(
-                    DOM.TD(DOM.at(DOM.Attribute.colspan, 2), DOM.STRONG("None"))));
-
-        if (0 != fixed.size())
-        {
-            appendMods(rows, fixed, "Fixed");
-        }
-
-        if (0 != var.size())
-        {
-            if (0 != fixed.size())
-                rows.add(DOM.TR(DOM.TD(HtmlString.NBSP)));
-
-            appendMods(rows, var, "Variable");
-        }
-
-        onClick.append(PageFlowUtil.jsString(DOM.createHtml(DOM.TABLE(rows.toArray(new Object[0])))));
+        onClick.append(PageFlowUtil.jsString(
+                DOM.createHtml(TABLE(
+                        var.isEmpty() && fixed.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG("None"))) : null,
+                        appendMods(fixed, "Fixed"),
+                        !var.isEmpty() && !fixed.isEmpty() ? TR(TD(HtmlString.NBSP)) : null,
+                        appendMods(var, "Variable")))));
 
         onClick.append(", 100); return false;");
 
         return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
     }
 
-    private void appendMods(List<DOM.Renderable> rows, Map<String, String> mods, String heading)
+    private DOM.Renderable appendMods(Map<String, String> mods, String heading)
     {
-        rows.add(DOM.TR(
-                DOM.TD(DOM.at(DOM.Attribute.colspan, 2), DOM.STRONG(heading))));
-
-        for (Map.Entry<String, String> entry : mods.entrySet())
-        {
-            rows.add(DOM.TR(
-                    DOM.TD(DOM.at(DOM.cl("labkey-form-label")), entry.getKey()),
-                    DOM.TD(DOM.at(DOM.Attribute.align, "right"), entry.getValue())));
-        }
+        return DOM.createHtmlFragment(
+                !mods.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG(heading))) : null,
+                mods.entrySet().stream().map(entry -> TR(
+                    TD(at(DOM.cl("labkey-form-label")), entry.getKey()),
+                    TD(at(DOM.Attribute.align, "right"), entry.getValue()))));
     }
 
 
