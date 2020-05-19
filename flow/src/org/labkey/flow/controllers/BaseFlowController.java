@@ -96,13 +96,13 @@ public abstract class BaseFlowController extends SpringActionController
 
     // override to append root nav to all paths
     @Override
-    protected void appendNavTrail(Controller action, NavTree root)
+    protected void addNavTrail(Controller action, NavTree root)
     {
         PageConfig page = null;
         if (action instanceof HasPageConfig)
             page = ((HasPageConfig)action).getPageConfig();
         root.addChild(getFlowNavStart(page, getViewContext()));
-        super.appendNavTrail(action, root);
+        super.addNavTrail(action, root);
     }
 
     public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
