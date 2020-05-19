@@ -87,10 +87,12 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -668,49 +670,44 @@ public class MS2Controller extends SpringActionController
                 fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
         }
 
-        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', '");
-        StringBuilder html = new StringBuilder("<table>");
+        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', ");
+        List<DOM.Renderable> rows = new ArrayList<>();
 
         if (0 == (var.size() + fixed.size()))
-            html.append("<tr><td colspan=2><b>None</b></td></tr>");
+            rows.add(DOM.TR(
+                    DOM.TD(DOM.at(DOM.Attribute.colspan, 2), DOM.STRONG("None"))));
 
         if (0 != fixed.size())
         {
-            html.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
-
-            for (Map.Entry<String, String> entry : fixed.entrySet())
-            {
-                html.append("<tr><td class=labkey-form-label>");
-                html.append(PageFlowUtil.filter(entry.getKey()));
-                html.append("</td><td align=right>");
-                html.append(PageFlowUtil.filter(entry.getValue()));
-                html.append("</td></tr>");
-            }
+            appendMods(rows, fixed, "Fixed");
         }
 
         if (0 != var.size())
         {
             if (0 != fixed.size())
-                html.append("<tr><td colspan=2>&nbsp;</td></tr>");
+                rows.add(DOM.TR(DOM.TD(HtmlString.NBSP)));
 
-            html.append("<tr><td colspan=2><b>Variable</b></td></tr>");
-
-            for (Map.Entry<String, String> entry : var.entrySet())
-            {
-                html.append("<tr><td class=labkey-form-label>");
-                html.append(PageFlowUtil.filter(entry.getKey()));
-                html.append("</td><td align=right>");
-                html.append(PageFlowUtil.filter(entry.getValue()));
-                html.append("</td></tr>");
-            }
+            appendMods(rows, var, "Variable");
         }
 
-        html.append("</table>");
-        onClick.append(PageFlowUtil.filter(html.toString()).replace("'", "\\'"));
+        onClick.append(PageFlowUtil.jsString(DOM.createHtml(DOM.TABLE(rows.toArray(new Object[0])))));
 
-        onClick.append("', 100); return false;");
+        onClick.append(", 100); return false;");
 
         return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
+    }
+
+    private void appendMods(List<DOM.Renderable> rows, Map<String, String> mods, String heading)
+    {
+        rows.add(DOM.TR(
+                DOM.TD(DOM.at(DOM.Attribute.colspan, 2), DOM.STRONG(heading))));
+
+        for (Map.Entry<String, String> entry : mods.entrySet())
+        {
+            rows.add(DOM.TR(
+                    DOM.TD(DOM.at(DOM.cl("labkey-form-label")), entry.getKey()),
+                    DOM.TD(DOM.at(DOM.Attribute.align, "right"), entry.getValue())));
+        }
     }
 
 
