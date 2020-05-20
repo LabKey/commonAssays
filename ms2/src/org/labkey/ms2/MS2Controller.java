@@ -87,10 +87,12 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -188,6 +190,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
+
+import static org.labkey.api.util.DOM.STRONG;
+import static org.labkey.api.util.DOM.TABLE;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
 
 /**
  * User: adam
@@ -668,49 +677,26 @@ public class MS2Controller extends SpringActionController
                 fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
         }
 
-        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', '");
-        StringBuilder html = new StringBuilder("<table>");
+        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', ");
+        onClick.append(PageFlowUtil.jsString(
+                DOM.createHtml(TABLE(
+                        var.isEmpty() && fixed.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG("None"))) : null,
+                        appendMods(fixed, "Fixed"),
+                        !var.isEmpty() && !fixed.isEmpty() ? TR(TD(HtmlString.NBSP)) : null,
+                        appendMods(var, "Variable")))));
 
-        if (0 == (var.size() + fixed.size()))
-            html.append("<tr><td colspan=2><b>None</b></td></tr>");
-
-        if (0 != fixed.size())
-        {
-            html.append("<tr><td colspan=2><b>Fixed</b></td></tr>");
-
-            for (Map.Entry<String, String> entry : fixed.entrySet())
-            {
-                html.append("<tr><td class=labkey-form-label>");
-                html.append(PageFlowUtil.filter(entry.getKey()));
-                html.append("</td><td align=right>");
-                html.append(PageFlowUtil.filter(entry.getValue()));
-                html.append("</td></tr>");
-            }
-        }
-
-        if (0 != var.size())
-        {
-            if (0 != fixed.size())
-                html.append("<tr><td colspan=2>&nbsp;</td></tr>");
-
-            html.append("<tr><td colspan=2><b>Variable</b></td></tr>");
-
-            for (Map.Entry<String, String> entry : var.entrySet())
-            {
-                html.append("<tr><td class=labkey-form-label>");
-                html.append(PageFlowUtil.filter(entry.getKey()));
-                html.append("</td><td align=right>");
-                html.append(PageFlowUtil.filter(entry.getValue()));
-                html.append("</td></tr>");
-            }
-        }
-
-        html.append("</table>");
-        onClick.append(PageFlowUtil.filter(html.toString()).replace("'", "\\'"));
-
-        onClick.append("', 100); return false;");
+        onClick.append(", 100); return false;");
 
         return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
+    }
+
+    private DOM.Renderable appendMods(Map<String, String> mods, String heading)
+    {
+        return DOM.createHtmlFragment(
+                !mods.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG(heading))) : null,
+                mods.entrySet().stream().map(entry -> TR(
+                    TD(at(DOM.cl("labkey-form-label")), entry.getKey()),
+                    TD(at(DOM.Attribute.align, "right"), entry.getValue()))));
     }
 
 
