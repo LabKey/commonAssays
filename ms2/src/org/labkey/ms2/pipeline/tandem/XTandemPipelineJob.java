@@ -39,6 +39,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     private static final Logger LOG = getJobLogger(XTandemPipelineJob.class);
     protected static final TaskId TASK_ID = new TaskId(XTandemPipelineJob.class);
 
+    @Override
     public Logger getClassLogger()
     {
         return LOG;
@@ -69,11 +70,13 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         super(job, fileFraction);        
     }
 
+    @Override
     public TaskId getTaskPipelineId()
     {
         return TASK_ID;
     }
 
+    @Override
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new XTandemPipelineJob(this, file);

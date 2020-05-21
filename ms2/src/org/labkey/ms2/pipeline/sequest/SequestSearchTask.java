@@ -111,6 +111,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         super(factory, job);
     }
 
+    @Override
     public SequestPipelineJob getJob()
     {
         return (SequestPipelineJob)super.getJob();

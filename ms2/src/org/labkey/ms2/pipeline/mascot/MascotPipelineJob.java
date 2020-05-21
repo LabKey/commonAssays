@@ -99,11 +99,13 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         return _mascotUserPassword;
     }
 
+    @Override
     public TaskId getTaskPipelineId()
     {
         return TASK_ID;
     }
 
+    @Override
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new MascotPipelineJob(this, file);

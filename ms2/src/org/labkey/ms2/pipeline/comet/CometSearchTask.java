@@ -71,6 +71,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
         super(factory, job);
     }
 
+    @Override
     public CometPipelineJob getJob()
     {
         return (CometPipelineJob)super.getJob();

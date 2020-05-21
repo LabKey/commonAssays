@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public abstract class FlowJob extends PipelineJob
 {
-    private static Logger _log = getJobLogger(FlowJob.class);
+    private static final Logger _log = getJobLogger(FlowJob.class);
 
     private volatile Date _start;
     private volatile Date _end;
@@ -63,6 +63,7 @@ public abstract class FlowJob extends PipelineJob
 
     abstract protected void doRun() throws Throwable;
 
+    @Override
     public void run()
     {
         _start = new Date();
@@ -124,6 +125,7 @@ public abstract class FlowJob extends PipelineJob
         return getErrors() > 0;
     }
 
+    @Override
     public void error(String message, Throwable t)
     {
         super.error(message, t);
@@ -135,11 +137,13 @@ public abstract class FlowJob extends PipelineJob
         return _end != null;
     }
 
+    @Override
     protected boolean canInterrupt()
     {
         return true;
     }
 
+    @Override
     public synchronized boolean interrupt()
     {
         addStatus("Job Interrupted");
@@ -165,6 +169,7 @@ public abstract class FlowJob extends PipelineJob
         return "Running";
     }
 
+    @Override
     public ActionURL getStatusHref()
     {
         ActionURL ret = urlRedirect();

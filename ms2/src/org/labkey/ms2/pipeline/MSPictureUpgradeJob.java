@@ -66,6 +66,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         setLogFile(logFile);
     }
 
+    @Override
     public ActionURL getStatusHref()
     {
         return null;

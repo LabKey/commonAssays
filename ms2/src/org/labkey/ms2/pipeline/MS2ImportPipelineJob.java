@@ -83,6 +83,7 @@ public class MS2ImportPipelineJob extends PipelineJob
             setProvider(sf.getProvider());
     }
 
+    @Override
     public ActionURL getStatusHref()
     {
         return MS2Controller.getShowRunURL(getUser(), getContainer(), _runInfo.getRunId());

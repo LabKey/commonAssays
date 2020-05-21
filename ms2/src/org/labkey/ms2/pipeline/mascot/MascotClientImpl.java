@@ -1516,8 +1516,7 @@ public class MascotClientImpl implements SearchClient
     }
 
     /**
-     * This test requires the MockMascotServlet to be running. It was used during the migration from commons HttpClient 3.1,
-     * but it doesn't need to run regularly now. If needed again, it can be registered in MS2Module.java.
+     * This test requires the MockMascotServlet to be running.
      */
     public static class TestCase extends Assert
     {

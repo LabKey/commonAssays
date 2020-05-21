@@ -74,6 +74,7 @@ public class AnalyzeJob extends ScriptJob
         }
     }
 
+    @Override
     public void doRun()
     {
         for (int runId : _runIds)
