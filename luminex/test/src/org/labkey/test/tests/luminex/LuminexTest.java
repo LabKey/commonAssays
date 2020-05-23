@@ -28,7 +28,6 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.components.PropertiesEditor;
 import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
@@ -57,7 +56,6 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.labkey.test.components.PropertiesEditor.PropertiesEditor;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
@@ -565,13 +563,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public void goToTestAssayHome()
     {
         goToTestAssayHome(TEST_ASSAY_LUM);
-    }
-
-    private void setFormat(String where, int index, String formatStr)
-    {
-        PropertiesEditor propertiesEditor = PropertiesEditor(getDriver()).withTitleContaining(where).find();
-        propertiesEditor.selectField(index);
-        propertiesEditor.fieldProperties().selectFormatTab().setPropertyFormat(formatStr);
     }
 
     public void importLuminexRunPageTwo(String name, String isotype, String conjugate, String stndCurveFitInput,
