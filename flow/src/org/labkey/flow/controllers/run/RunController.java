@@ -135,9 +135,8 @@ public class RunController extends BaseFlowController
             return HttpView.redirect(urlFor(RunController.ShowRunAction.class));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -161,10 +160,10 @@ public class RunController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String label = run != null ? null : "Run not found";
-            return appendFlowNavTrail(getPageConfig(), root, run, label);
+            appendFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 
@@ -186,7 +185,7 @@ public class RunController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (experiment == null)
                 root.addChild("All Analysis Folders", new ActionURL(ShowRunsAction.class, getContainer()));
@@ -197,7 +196,6 @@ public class RunController extends BaseFlowController
 //                root.addChild(script.getLabel(), script.urlShow());
 
             root.addChild("Runs");
-            return root;
         }
     }
 
@@ -261,10 +259,9 @@ public class RunController extends BaseFlowController
             }
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Download Run");
-            return root;
         }
     }
 
@@ -707,11 +704,10 @@ public class RunController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
+            appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
         }
-
     }
 
     private static class ExportToScriptJob extends PipelineJob

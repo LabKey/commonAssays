@@ -78,9 +78,8 @@ public class ProtocolController extends BaseFlowController
             return HttpView.redirect(urlFor(ProtocolController.ShowProtocolAction.class));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -95,9 +94,9 @@ public class ProtocolController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/protocol/showProtocol.jsp", form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
+            appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
         }
     }
 
@@ -112,9 +111,9 @@ public class ProtocolController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/protocol/showSamples2.jsp", form, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
+            appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
         }
     }
 
@@ -155,9 +154,9 @@ public class ProtocolController extends BaseFlowController
             return getProtocol().urlFor(UpdateSamplesAction.class).addParameter("fileCount", _fileCount);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
+            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
         }
     }
 
@@ -172,9 +171,9 @@ public class ProtocolController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/protocol/updateSamples.jsp", form);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
+            appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
         }
     }
 
@@ -203,9 +202,9 @@ public class ProtocolController extends BaseFlowController
             return getProtocol().urlShow();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
+            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
         }
     }
 
@@ -233,9 +232,9 @@ public class ProtocolController extends BaseFlowController
             return getProtocol().urlShow();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
+            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
         }
     }
 
@@ -295,9 +294,9 @@ public class ProtocolController extends BaseFlowController
             return url;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");
+            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");
         }
     }
 }

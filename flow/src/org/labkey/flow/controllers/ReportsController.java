@@ -106,10 +106,10 @@ public class ReportsController extends BaseFlowController
             return new BeginView();
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
             root.addChild("Reports", new ActionURL(BeginAction.class, getContainer()));
-            return root;
         }
     }
 
@@ -189,12 +189,11 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            new BeginAction(getViewContext()).appendNavTrail(root);
+            new BeginAction(getViewContext()).addNavTrail(root);
             if (r != null)
                 root.addChild("Create new report: " + r.getTypeDescription());
-            return root;
         }
     }
     
@@ -207,12 +206,12 @@ public class ReportsController extends BaseFlowController
             r = getReport(getViewContext(), form);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        @Override
+        public void addNavTrail(NavTree root)
         {
-            new BeginAction(getViewContext()).appendNavTrail(root);
+            new BeginAction(getViewContext()).addNavTrail(root);
             if (r != null)
                 root.addChild("Edit report: " + r.getDescriptor().getReportName());
-            return root;
         }
     }
 
@@ -295,12 +294,11 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            new BeginAction(getViewContext()).appendNavTrail(root);
+            new BeginAction(getViewContext()).addNavTrail(root);
             if (r != null)
             root.addChild("Copy report: " + r.getDescriptor().getReportName());
-            return root;
         }
     }
 
@@ -409,11 +407,10 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            new BeginAction(getViewContext()).appendNavTrail(root);
+            new BeginAction(getViewContext()).addNavTrail(root);
             root.addChild("View report: " + r.getDescriptor().getReportName());
-            return root;
         }
     }
 
