@@ -106,9 +106,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root.addChild("Manage Feature Annotation Sets");
+            root.addChild("Manage Feature Annotation Sets");
         }
     }
 
@@ -150,7 +150,7 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
         }
@@ -262,13 +262,12 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             setHelpTopic("featureAnnotationSets");
             ActionURL url = new ActionURL(ManageAction.class, getContainer());
             root.addChild("Feature Annotation Sets", url);
             root.addChild("Upload Annotation Set");
-            return root;
         }
     }
 
@@ -330,13 +329,12 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             setHelpTopic("featureAnnotationSets");
             ActionURL url = new ActionURL(ManageAction.class, getContainer());
             root.addChild("Feature Annotation Sets", url);
             root.addChild("Feature Annotation Set");
-            return root;
         }
     }
 

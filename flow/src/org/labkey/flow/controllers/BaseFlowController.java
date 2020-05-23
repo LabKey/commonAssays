@@ -96,16 +96,16 @@ public abstract class BaseFlowController extends SpringActionController
 
     // override to append root nav to all paths
     @Override
-    protected void appendNavTrail(Controller action, NavTree root)
+    protected void addNavTrail(Controller action, NavTree root)
     {
         PageConfig page = null;
         if (action instanceof HasPageConfig)
             page = ((HasPageConfig)action).getPageConfig();
         root.addChild(getFlowNavStart(page, getViewContext()));
-        super.appendNavTrail(action, root);
+        super.addNavTrail(action, root);
     }
 
-    public NavTree appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
+    public void appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
     {
         ArrayList<NavTree> children = new ArrayList<>();
         while (object != null)
@@ -120,8 +120,6 @@ public abstract class BaseFlowController extends SpringActionController
 
         if (page.getHelpTopic() == HelpTopic.DEFAULT_HELP_TOPIC)
             page.setHelpTopic(getHelpTopic());
-
-        return root;
     }
 
 
@@ -156,9 +154,9 @@ public abstract class BaseFlowController extends SpringActionController
         protected abstract String getPageTitle();
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+            appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
         }
     }
 
@@ -175,9 +173,9 @@ public abstract class BaseFlowController extends SpringActionController
         protected abstract String getPageTitle();
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+            appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
         }
     }
 

@@ -117,9 +117,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -204,10 +203,10 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String label = _well != null ? null : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, _well, label);
+            appendFlowNavTrail(getPageConfig(), root, _well, label);
         }
     }
 
@@ -351,17 +350,17 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             if (_isBulkEdit)
             {
                 ActionURL urlFcsFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
                 root.addChild(new NavTree("FSC Files",urlFcsFiles));
                 root.addChild(new NavTree("Edit Keywords"));
-                return root;
+                return;
             }
             String label = _wells != null && !_wells.isEmpty() ? "Edit " + _wells.get(0).getLabel() : "Well not found";
-            return appendFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
+            appendFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
         }
     }
 
@@ -404,9 +403,9 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, _well, "Choose Graph");
+            appendFlowNavTrail(getPageConfig(), root, _well, "Choose Graph");
         }
     }
 
@@ -471,9 +470,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -529,9 +527,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -581,9 +578,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
     
@@ -601,9 +597,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -653,9 +648,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
@@ -702,9 +696,8 @@ public class WellController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
 
         @Override

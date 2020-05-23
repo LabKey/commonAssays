@@ -129,9 +129,9 @@ public class AnalysisScriptController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/executescript/showScript.jsp", script, errors);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, script, null);
+            appendFlowNavTrail(getPageConfig(), root, script, null);
         }
     }
 
@@ -176,9 +176,9 @@ public class AnalysisScriptController extends BaseFlowController
             return HttpView.redirect(executeScript(job));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, script, nav.first);
+            appendFlowNavTrail(getPageConfig(), root, script, nav.first);
         }
     }
 
@@ -375,9 +375,9 @@ public class AnalysisScriptController extends BaseFlowController
             return HttpView.redirect(executeScript(job));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
+            appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
         }
     }
 
@@ -525,9 +525,8 @@ public class AnalysisScriptController extends BaseFlowController
             return new HttpPostRedirectView(url.getLocalURIString(), inputs);
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -1386,12 +1385,11 @@ public class AnalysisScriptController extends BaseFlowController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String display = "Import Analysis";
             if (title != null)
                 display += ": " + title;
-            return root.addChild(display);
         }
     }
 
@@ -1461,7 +1459,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
 
         @Override
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             return root.addChild("Import Analysis");
         }

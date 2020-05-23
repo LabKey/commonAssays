@@ -118,9 +118,8 @@ public class ScriptController extends BaseFlowController
             return HttpView.redirect(script.urlShow());
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -142,9 +141,8 @@ public class ScriptController extends BaseFlowController
             return null;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return null;
         }
     }
 
@@ -240,10 +238,9 @@ public class ScriptController extends BaseFlowController
             return page;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             root.addChild("New Analysis Script", new ActionURL(NewProtocolAction.class, getContainer()));
-            return root;
         }
 
         protected ActionURL createScript(NewProtocolForm form, BindException errors)

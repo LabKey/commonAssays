@@ -96,9 +96,8 @@ public class ElispotController extends SpringActionController
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
-            return root;
         }
     }
 
@@ -184,7 +183,7 @@ public class ElispotController extends SpringActionController
             return false;
         }
 
-        public NavTree appendNavTrail(NavTree root)
+        public void addNavTrail(NavTree root)
         {
             String title;
 
@@ -201,8 +200,6 @@ public class ElispotController extends SpringActionController
             root.addChild(_protocol.getName() + " Runs", runListURL);
             root.addChild(_protocol.getName() + " Data", runDataURL);
             root.addChild(title);
-
-            return root;
         }
     }
 
