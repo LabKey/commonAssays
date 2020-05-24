@@ -51,6 +51,7 @@ public class ProtocolController extends BaseFlowController
     {
         private FlowProtocol protocol;
 
+        @Override
         public ModelAndView handleRequest(FORM form, BindException errors) throws Exception
         {
             try
@@ -96,7 +97,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
+            addFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
         }
     }
 
@@ -113,7 +114,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
+            addFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
         }
     }
 
@@ -156,7 +157,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
+            addFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
         }
     }
 
@@ -173,7 +174,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
+            addFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
         }
     }
 
@@ -204,7 +205,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
+            addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
         }
     }
 
@@ -234,7 +235,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
+            addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
         }
     }
 
@@ -296,7 +297,7 @@ public class ProtocolController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");
+            addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");
         }
     }
 }

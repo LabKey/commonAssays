@@ -163,7 +163,7 @@ public class RunController extends BaseFlowController
         public void addNavTrail(NavTree root)
         {
             String label = run != null ? null : "Run not found";
-            appendFlowNavTrail(getPageConfig(), root, run, label);
+            addFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 
@@ -706,7 +706,7 @@ public class RunController extends BaseFlowController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
+            addFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
         }
     }
 

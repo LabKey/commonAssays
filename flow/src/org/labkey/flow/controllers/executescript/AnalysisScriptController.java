@@ -40,7 +40,6 @@ import org.labkey.api.study.StudyService;
 import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.SessionHelper;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -131,7 +130,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, script, null);
+            addFlowNavTrail(getPageConfig(), root, script, null);
         }
     }
 
@@ -178,7 +177,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, script, nav.first);
+            addFlowNavTrail(getPageConfig(), root, script, nav.first);
         }
     }
 
@@ -377,7 +376,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
+            addFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
         }
     }
 
@@ -1390,6 +1389,7 @@ public class AnalysisScriptController extends BaseFlowController
             String display = "Import Analysis";
             if (title != null)
                 display += ": " + title;
+            root.addChild(display);
         }
     }
 

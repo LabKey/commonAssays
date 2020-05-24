@@ -283,6 +283,6 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     @Override
     public LuminexExcelParser getParser()
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }

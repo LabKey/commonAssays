@@ -132,7 +132,7 @@ public class AttributeController extends BaseFlowController
     public void appendAttributeNavTrail(PageConfig pageConfig, NavTree root, AttributeType type, String title)
     {
         FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
-        appendFlowNavTrail(pageConfig, root, protocol, null);
+        addFlowNavTrail(pageConfig, root, protocol, null);
 
         if (type != null)
         {

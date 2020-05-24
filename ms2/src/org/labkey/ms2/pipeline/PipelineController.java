@@ -314,6 +314,7 @@ public class PipelineController extends SpringActionController
         }
 
 
+        @Override
         public ModelAndView handleRequest(MS2SearchForm form, BindException errors) throws Exception
         {
             _root = PipelineService.get().findPipelineRoot(getContainer());
@@ -815,6 +816,7 @@ public class PipelineController extends SpringActionController
         public abstract HelpTopic getHelpTopic();
         public abstract ModelAndView getJspView(SetDefaultsForm form, BindException errors);
 
+        @Override
         public ModelAndView handleRequest(SetDefaultsForm setDefaultsForm, BindException errors) throws Exception
         {
             _root = PipelineService.get().getPipelineRootSetting(getContainer());

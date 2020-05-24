@@ -143,7 +143,7 @@ public class CompensationController extends BaseFlowController
 
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
+            addFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
         }
     }
 
@@ -200,7 +200,7 @@ public class CompensationController extends BaseFlowController
             {
                 // show run this compensation was derived from
                 if (_comp.getParent() != null)
-                    appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
+                    addFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
                     // fall back on showing compensation query
                 else
                 {
