@@ -129,7 +129,7 @@ public class AttributeController extends BaseFlowController
         }
     }
 
-    public void appendAttributeNavTrail(PageConfig pageConfig, NavTree root, AttributeType type, String title)
+    public void addAttributeNavTrail(PageConfig pageConfig, NavTree root, AttributeType type, String title)
     {
         FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
         addFlowNavTrail(pageConfig, root, protocol, null);
@@ -158,7 +158,7 @@ public class AttributeController extends BaseFlowController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendAttributeNavTrail(getPageConfig(), root, _type, null);
+            addAttributeNavTrail(getPageConfig(), root, _type, null);
         }
     }
 
@@ -182,7 +182,7 @@ public class AttributeController extends BaseFlowController
         {
             AttributeType type = _entry == null ? null : _entry.getType();
             String title = _entry == null ? null : (_entry.getName() + " Details");
-            appendAttributeNavTrail(getPageConfig(), root, type, title);
+            addAttributeNavTrail(getPageConfig(), root, type, title);
         }
     }
 
@@ -278,7 +278,7 @@ public class AttributeController extends BaseFlowController
         {
             AttributeType type = _entry == null ? null : _entry.getType();
             String title = _entry == null ? null : ("Edit " + _entry.getName());
-            appendAttributeNavTrail(getPageConfig(), root, type, title);
+            addAttributeNavTrail(getPageConfig(), root, type, title);
         }
     }
 
@@ -372,7 +372,7 @@ public class AttributeController extends BaseFlowController
         {
             AttributeType type = _entry == null ? null : _entry.getType();
             String title = _entry == null ? null : ("Create Alias for " + _entry.getName());
-            appendAttributeNavTrail(getPageConfig(), root, type, title);
+            addAttributeNavTrail(getPageConfig(), root, type, title);
         }
     }
 

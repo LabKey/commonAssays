@@ -75,7 +75,7 @@ public abstract class BaseFlowController extends SpringActionController
         }
     }
 
-    protected ActionURL executeScript(FlowJob job) throws Exception, PipelineValidationException
+    protected ActionURL executeScript(FlowJob job) throws Exception
     {
         try (var ignore = SpringActionController.ignoreSqlUpdates())
         {

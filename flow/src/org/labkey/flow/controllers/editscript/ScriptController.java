@@ -190,6 +190,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(page, form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Source Editor";
@@ -312,6 +313,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editAnalysis.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Choose statistics and graphs";
@@ -504,6 +506,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(page, form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Upload FlowJo Analysis";
@@ -577,11 +580,11 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/uploadCompensationCalculation.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Upload FlowJo Workspace compensation";
         }
-
     }
 
     @RequiresPermission(UpdatePermission.class)
@@ -649,6 +652,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(page, form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Compensation Calculation Editor";
@@ -799,11 +803,11 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editGateTree.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Population Names Editor";
         }
-
 
         private boolean renamePopulations(Population pop, PopulationSet newParent, SubsetSpec subsetParent, Map<SubsetSpec, String> newNames, BindException errors)
         {
@@ -881,6 +885,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/copy.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Make a copy of '" + scriptName + "'";
@@ -952,6 +957,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editProperties.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Edit Properties";
@@ -994,6 +1000,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/editSettings.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Edit Settings";
@@ -1112,6 +1119,7 @@ public class ScriptController extends BaseFlowController
             return new JspView<>(getPage("/org/labkey/flow/controllers/editscript/delete.jsp", form), form, errors);
         }
 
+        @Override
         public String getPageTitle()
         {
             return "Confirm Delete";

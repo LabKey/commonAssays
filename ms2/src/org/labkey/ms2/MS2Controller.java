@@ -190,7 +190,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 import static org.labkey.api.util.DOM.STRONG;
 import static org.labkey.api.util.DOM.TABLE;
@@ -227,7 +226,7 @@ public class MS2Controller extends SpringActionController
         AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
-    private void appendRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
+    private void addRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
         root.addChild("MS2 Runs", getShowListURL(getContainer()));
@@ -236,9 +235,9 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private void appendRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
+    private void addRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
     {
-        appendRootNavTrail(root, null, page, helpTopic);
+        addRootNavTrail(root, null, page, helpTopic);
 
         if (null != run)
         {
@@ -320,7 +319,7 @@ public class MS2Controller extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
-            appendRootNavTrail(root, "MS2 Runs", getPageConfig(), "ms2RunsList");
+            addRootNavTrail(root, "MS2 Runs", getPageConfig(), "ms2RunsList");
         }
     }
 
@@ -452,7 +451,7 @@ public class MS2Controller extends SpringActionController
             String pageTitle = (null != getPageConfig().getTitle() ? getPageConfig().getTitle() : "Run Summary");
 
             if (null != _run)
-                appendRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
+                addRunNavTrail(root, _run, null, null, getPageConfig(), "viewRuns");
 
             root.addChild(pageTitle);
         }
@@ -769,7 +768,7 @@ public class MS2Controller extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
+            addRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
         }
     }
 
@@ -1105,7 +1104,7 @@ public class MS2Controller extends SpringActionController
         {
             ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer(), _run.getRun());
 
-            appendRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
+            addRunNavTrail(root, _run, runURL, "GO " + _goChartType + " Chart", getPageConfig(), "viewingGeneOntologyData");
         }
     }
 
@@ -1234,7 +1233,7 @@ public class MS2Controller extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
+            addRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
         }
 
         public boolean handlePost(ManageViewsForm form, BindException errors)
@@ -2067,7 +2066,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendRootNavTrail(root, "Export Runs", getPageConfig(), "exportRuns");
+            addRootNavTrail(root, "Export Runs", getPageConfig(), "exportRuns");
         }
     }
 
@@ -2111,7 +2110,7 @@ public class MS2Controller extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
-            appendRootNavTrail(root, _title.toString(), getPageConfig(), "compareRuns");
+            addRootNavTrail(root, _title.toString(), getPageConfig(), "compareRuns");
         }
     }
 
@@ -2388,7 +2387,8 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendRootNavTrail(root, null, getPageConfig(), "spectraCount");
+            addRootNavTrail(root, null, getPageConfig(), "spectraCount");
+
             if (_form != null)
             {
                 ActionURL setupURL = new ActionURL(SpectraCountSetupAction.class, getContainer());
@@ -3733,7 +3733,7 @@ public class MS2Controller extends SpringActionController
 
         public void addNavTrail(NavTree root)
         {
-            appendRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
+            addRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
         }
     }
 
