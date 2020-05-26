@@ -86,16 +86,19 @@ public class ProteinCompareQuery extends CompareQuery
         setHeader(header.toString());
     }
 
+    @Override
     public String getComparisonDescription()
     {
         return COMPARISON_DESCRIPTION;
     }
 
+    @Override
     protected String getLabelColumn()
     {
         return "BestName";
     }
 
+    @Override
     protected void selectColumns(BindException errors)
     {
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
@@ -110,6 +113,7 @@ public class ProteinCompareQuery extends CompareQuery
         super.selectColumns(errors);
     }
 
+    @Override
     protected String getFromClause()
     {
         return MS2Manager.getTableInfoPeptides() + " p LEFT OUTER JOIN " +
@@ -117,6 +121,7 @@ public class ProteinCompareQuery extends CompareQuery
             "p.SeqId = s.SeqSeqId ";
     }
 
+    @Override
     protected void selectRows(BindException errors)
     {
         super.selectRows(errors);
@@ -144,6 +149,7 @@ public class ProteinCompareQuery extends CompareQuery
         append(proteinHaving);
     }
 
+    @Override
     protected void addWhereClauses(SimpleFilter filter)
     {
         SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, _user);
@@ -151,6 +157,7 @@ public class ProteinCompareQuery extends CompareQuery
         filter.addAllClauses(peptideFilter);
     }
 
+    @Override
     protected void groupByCompareColumn(BindException errors)
     {
         super.groupByCompareColumn(errors);
@@ -162,22 +169,26 @@ public class ProteinCompareQuery extends CompareQuery
         append(" ON grouped.SeqId = seq.SeqId");
     }
 
+    @Override
     protected String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix)
     {
         linkURL.setAction(MS2Controller.ShowProteinAction.class);   // Could target the "prot" window instead of using the main window
         return "protein=${Protein}&seqId=${SeqId}";
     }
 
+    @Override
     protected String getComparisonColumnLinkTarget()
     {
         return "prot";
     }
 
+    @Override
     protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
     {
         return ti.getColumn("Protein");
     }
 
+    @Override
     public List<Pair<String, String>> getSQLSummaries(User user)
     {
         List<Pair<String, String>> result = new ArrayList<>();

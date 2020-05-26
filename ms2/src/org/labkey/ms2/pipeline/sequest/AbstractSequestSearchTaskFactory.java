@@ -42,6 +42,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         super(namespaceClass);
     }
 
+    @Override
     public boolean isJobComplete(PipelineJob job)
     {
         AbstractMS2SearchPipelineJob support = (AbstractMS2SearchPipelineJob) job;
@@ -55,6 +56,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
                NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
     }
 
+    @Override
     public String getGroupParameterName()
     {
         return "sequest";
@@ -104,6 +106,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         }
     }
 
+    @Override
     public void afterPropertiesSet()
     {
         PipelineJobService.RemoteServerProperties props = PipelineJobService.get().getRemoteServerProperties();

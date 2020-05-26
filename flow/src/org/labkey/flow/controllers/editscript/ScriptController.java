@@ -108,6 +108,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<EditScriptForm>
     {
+        @Override
         public ModelAndView getView(EditScriptForm form, BindException errors)
         {
             FlowScript script = form.getFlowScript();
@@ -118,6 +119,7 @@ public class ScriptController extends BaseFlowController
             return HttpView.redirect(script.urlShow());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -126,6 +128,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<EditScriptForm>
     {
+        @Override
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
         {
             FlowScript script = form.getFlowScript();
@@ -141,6 +144,7 @@ public class ScriptController extends BaseFlowController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -239,6 +243,7 @@ public class ScriptController extends BaseFlowController
             return page;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("New Analysis Script", new ActionURL(NewProtocolAction.class, getContainer()));
@@ -571,6 +576,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class UploadCompensationCalculationAction extends FlowAction<EditCompensationCalculationForm>
     {
+        @Override
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
         {
             if (isPost())
@@ -590,6 +596,7 @@ public class ScriptController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class ChooseCompensationRunAction extends FlowAction<EditCompensationCalculationForm>
     {
+        @Override
         public ModelAndView getView(EditCompensationCalculationForm form, BindException errors)
         {
             if (isPost())

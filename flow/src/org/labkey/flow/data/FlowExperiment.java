@@ -217,11 +217,13 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return getExperiment().getRowId();
     }
 
+    @Override
     public void addParams(Map<FlowParam,Object> map)
     {
         map.put(FlowParam.experimentId, getExperimentId());
     }
 
+    @Override
     public FlowObject getParent()
     {
         return null;
@@ -234,11 +236,13 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return ret;
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return addParams(urlFor(RunController.ShowRunsAction.class));
     }
 
+    @Override
     public ActionURL urlDownload()
     {
         throw new UnsupportedOperationException();

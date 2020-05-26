@@ -146,13 +146,15 @@ public final class SAX2ScanHandler extends DefaultHandler
 	//
 
 	/** Start document. */
-	public void startDocument()
+	@Override
+    public void startDocument()
     {
 		// Nothing to do
 	} // startDocument()
 
 	/** Start element. */
-	public void startElement(
+	@Override
+    public void startElement(
 		String uri,
 		String local,
 		String raw,
@@ -212,7 +214,8 @@ public final class SAX2ScanHandler extends DefaultHandler
 		}
 	} // startElement(String,String,StringAttributes)
 
-	public void endElement(String uri, String local, String raw)
+	@Override
+    public void endElement(String uri, String local, String raw)
 		throws SAXException
 	{
 		if (raw.equals("peaks"))
@@ -244,7 +247,8 @@ public final class SAX2ScanHandler extends DefaultHandler
 	} // endElement()
 
 	/** Characters. */
-	public void characters(char ch[], int start, int length)
+	@Override
+    public void characters(char ch[], int start, int length)
     {
 		if (inPeak)
 		{
@@ -256,13 +260,15 @@ public final class SAX2ScanHandler extends DefaultHandler
 	} // characters(char[],int,int);
 
 	/** Ignorable whitespace. */
-	public void ignorableWhitespace(char ch[], int start, int length)
+	@Override
+    public void ignorableWhitespace(char ch[], int start, int length)
     {
 		// Do nothing
 	} // ignorableWhitespace(char[],int,int);
 
 	/** Processing instruction. */
-	public void processingInstruction(String target, String data)
+	@Override
+    public void processingInstruction(String target, String data)
     {
 		// Do nothing
 	} // processingInstruction(String,String)
@@ -272,21 +278,24 @@ public final class SAX2ScanHandler extends DefaultHandler
 	//
 
 	/** Warning. */
-	public void warning(SAXParseException ex)
+	@Override
+    public void warning(SAXParseException ex)
     {
 		// Do nothing
 		//printError("Warning", ex);
 	} // warning(SAXParseException)
 
 	/** Error. */
-	public void error(SAXParseException ex)
+	@Override
+    public void error(SAXParseException ex)
     {
 		// Do nothing
 		//printError("Error", ex);
 	} // error(SAXParseException)
 
 	/** Fatal error. */
-	public void fatalError(SAXParseException ex)
+	@Override
+    public void fatalError(SAXParseException ex)
     {
 		// Do nothing
 		//printError("Fatal Error", ex);

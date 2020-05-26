@@ -210,6 +210,7 @@ public class XMLProteinHandler extends DefaultHandler
     /* info about parse state, passed to content handlers */
     private ParseContext _parseContext;
 
+    @Override
     public void endDocument()
     {
         _loader.handleThreadStateChangeRequests();
@@ -220,6 +221,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Start element.
      */
+    @Override
     public void startElement(String uri, String local, String qname, Attributes attrs) throws SAXException
     {
         _loader.handleThreadStateChangeRequests();
@@ -243,6 +245,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * end element
      */
+    @Override
     public void endElement(String uri, String local, String qname) throws SAXException
     {
         _loader.handleThreadStateChangeRequests();
@@ -267,6 +270,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Characters.
      */
+    @Override
     public void characters(char ch[], int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
@@ -283,6 +287,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Ignorable whitespace.
      */
+    @Override
     public void ignorableWhitespace(char ch[], int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
@@ -291,6 +296,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Processing instruction.
      */
+    @Override
     public void processingInstruction(String target, String data)
     {
         _loader.handleThreadStateChangeRequests();
@@ -304,6 +310,7 @@ public class XMLProteinHandler extends DefaultHandler
     /**
      * Start document.
      */
+    @Override
     public void startDocument()
     {
         _loader.handleThreadStateChangeRequests();

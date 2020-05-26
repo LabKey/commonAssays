@@ -29,6 +29,7 @@ import java.sql.SQLException;
  */
 public class NabContainerListener extends ContainerManager.AbstractContainerListener
 {
+    @Override
     public void containerDeleted(Container c, User user)
     {
         NabManager.get().deleteContainerData(c);

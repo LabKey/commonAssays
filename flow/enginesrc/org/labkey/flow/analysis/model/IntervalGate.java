@@ -41,6 +41,7 @@ public class IntervalGate extends RegionGate
     }
 
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet ret = new BitSet(data.getRowCount());
@@ -56,17 +57,20 @@ public class IntervalGate extends RegionGate
     }
 
 
+    @Override
     public String getXAxis()
     {
         return _axis;
     }
 
 
+    @Override
     public String getYAxis()
     {
         return null;
     }
 
+    @Override
     public List<String> getAxes()
     {
         return Collections.singletonList(_axis);
@@ -109,6 +113,7 @@ public class IntervalGate extends RegionGate
     }
 
 
+    @Override
     public void getPolygons(List<Polygon> polys, String xAxis, String yAxis)
     {
         double[] X = null;
@@ -137,6 +142,7 @@ public class IntervalGate extends RegionGate
     }
 
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         return CompensationMatrix.isParamCompensated(_axis);

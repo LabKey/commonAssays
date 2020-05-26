@@ -57,6 +57,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
     private class IsFlowJoWorkspaceFilter extends FileEntryFilter
     {
+        @Override
         public boolean accept(File pathname)
         {
             return WorkspaceParser.isFlowJoWorkspace(pathname);
@@ -64,6 +65,7 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
+    @Override
     public void updateFileProperties(ViewContext context, final PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -83,6 +85,7 @@ public class FlowPipelineProvider extends PipelineProvider
         // UNDONE: walk directory once instead of multiple times
         File[] dirs = directory.listFiles(new FileFilter()
         {
+            @Override
             public boolean accept(File dir)
             {
                 if (!dir.isDirectory())
@@ -187,6 +190,7 @@ public class FlowPipelineProvider extends PipelineProvider
     }
 
 
+    @Override
     public boolean suppressOverlappingRootsWarning(ViewContext context)
     {
         if (!hasFlowModule(context))

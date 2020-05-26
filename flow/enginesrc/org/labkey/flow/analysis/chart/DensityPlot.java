@@ -102,6 +102,7 @@ public class DensityPlot extends ContourPlot
     }
 
 
+    @Override
     public void render(Graphics2D g2, Rectangle2D dataArea, PlotRenderingInfo info, CrosshairState crosshairState)
     {
         super.render(g2, dataArea, info, crosshairState);
@@ -138,6 +139,7 @@ public class DensityPlot extends ContourPlot
         return ret;
     }
 
+    @Override
     public Range getDataRange(ValueAxis axis)
     {
         double[] values;
@@ -167,6 +169,7 @@ public class DensityPlot extends ContourPlot
      * @param contourData    the dataset.
      * @param crosshairState information about crosshairs on a plot.
      */
+    @Override
     public void contourRenderer(Graphics2D g2,
                                 Rectangle2D dataArea,
                                 PlotRenderingInfo info,

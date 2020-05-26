@@ -28,6 +28,7 @@ public class MS2EmailSuccessParams extends MS2TestParams
         super(test, dataPath, protocolName, sampleNames);
     }
 
+    @Override
     public void validate()
     {
         validateEmailSuccess();

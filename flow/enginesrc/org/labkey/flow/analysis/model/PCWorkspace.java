@@ -308,6 +308,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return subpops;
     }
 
+    @Override
     protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();
@@ -336,6 +337,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return ret;
     }
 
+    @Override
     protected void readSamples(Element elDoc)
     {
         for (Element elSampleList : getElementsByTagName(elDoc, "SampleList"))
@@ -378,6 +380,7 @@ public class PCWorkspace extends FlowJoWorkspace
         return analysis;
     }
 
+    @Override
     protected void readGroups(Element elDoc)
     {
         for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
@@ -394,6 +397,7 @@ public class PCWorkspace extends FlowJoWorkspace
         }
     }
 
+    @Override
     protected void readCompensationMatrices(Element elDoc)
     {
         // FlowJo v7.2.5

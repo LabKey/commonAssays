@@ -50,6 +50,7 @@ public class GeneDataPipelineProvider extends PipelineProvider
         super(NAME, module);
     }
 
+    @Override
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), ReadPermission.class))

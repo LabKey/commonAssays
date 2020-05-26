@@ -256,6 +256,7 @@ public abstract class MS2Run implements Serializable
                 add(arrayColumnName.trim());
         }
 
+        @Override
         public boolean add(String o)
         {
             return super.add(o.toLowerCase());
@@ -266,6 +267,7 @@ public abstract class MS2Run implements Serializable
             super(20);
         }
 
+        @Override
         public boolean contains(Object elem)
         {
             if (elem instanceof String)

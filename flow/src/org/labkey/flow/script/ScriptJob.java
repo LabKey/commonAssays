@@ -231,6 +231,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         return compRun.getCompensationMatrix();
     }
 
+    @Override
     public String getDescription()
     {
         if (_runAnalysisScript != null)
@@ -440,6 +441,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         _runData._startingDataInputs.put(name, new StartingInput(lsid, name, file, role));
     }
 
+    @Override
     public boolean allowMultipleSimultaneousJobs()
     {
         return true;

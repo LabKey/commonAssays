@@ -260,6 +260,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             }
 
 
+            @Override
             protected void validate(AnalyteTitration bean, GuideSet guideSet, Analyte analyte) throws ValidationException
             {
                 Titration titration = bean.getTitrationFromId();

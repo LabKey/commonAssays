@@ -1656,12 +1656,17 @@ public class AnalysisSerializer
             List<String> _warn = new ArrayList<>();
             List<String> _error = new ArrayList<>();
 
+            @Override
             public void info(String msg) { _info.add(msg); }
+            @Override
             public void info(String msg, Throwable t) { _info.add(msg); }
 
+            @Override
             public void warn(String msg) { _warn.add(msg); }
 
+            @Override
             public void error(String msg) { _error.add(msg); }
+            @Override
             public void error(String msg, Throwable t) { _error.add(msg); }
         }
 

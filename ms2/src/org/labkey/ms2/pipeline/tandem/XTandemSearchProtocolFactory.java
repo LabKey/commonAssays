@@ -40,31 +40,37 @@ public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
         // Use the get() function.
     }
 
+    @Override
     public String getName()
     {
         return "xtandem";
     }
 
+    @Override
     public String getParametersFileName()
     {
         return "tandem.xml";
     }
 
+    @Override
     public String getLegacyDefaultParametersFileName()
     {
         return "default_input.xml";
     }
 
+    @Override
     public String getDefaultParametersResource()
     {
         return "org/labkey/ms2/pipeline/tandem/XTandemDefaults.xml";
     }
 
+    @Override
     public XTandemSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
         return new XTandemSearchProtocol(name, description, xml);
     }
 
+    @Override
     protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         parser.removeInputParameter("protein, taxon");

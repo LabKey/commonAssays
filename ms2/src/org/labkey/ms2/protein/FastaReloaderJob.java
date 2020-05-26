@@ -56,6 +56,7 @@ public class FastaReloaderJob extends PipelineJob
         return "FASTA reload of " + _fastaIds.length + " files";
     }
 
+    @Override
     public void run()
     {
         info("Starting to reload FASTAs");

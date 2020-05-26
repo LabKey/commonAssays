@@ -37,11 +37,13 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
         super(name, description, xml);
     }
 
+    @Override
     public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return MascotSearchProtocolFactory.get();
     }
 
+    @Override
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                PipeRoot root, List<File> filesInput,
                                                File fileParameters, @Nullable Map<String, String> variableMap

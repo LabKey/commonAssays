@@ -27,6 +27,7 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_dbReference extends ParseActions
 {
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())

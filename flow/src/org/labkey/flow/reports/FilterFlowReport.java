@@ -394,6 +394,7 @@ public abstract class FilterFlowReport extends FlowReport
     /** Add any additional columns to the query select list. */
     abstract void addSelectList(ViewContext context, String tableName, StringBuilder query);
 
+    @Override
     public HttpView renderReport(ViewContext context) throws Exception
     {
         RReport r = getInnerReport();

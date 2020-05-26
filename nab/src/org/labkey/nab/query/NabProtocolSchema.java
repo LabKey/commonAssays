@@ -89,6 +89,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
         nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
@@ -208,6 +209,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         return new CutoffValueTable(this, cf);
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();

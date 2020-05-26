@@ -63,6 +63,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
         super(NAB_DATA_ROW_LSID_PREFIX);
     }
 
+    @Override
     public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();

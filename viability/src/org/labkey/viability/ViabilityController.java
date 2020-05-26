@@ -47,6 +47,7 @@ public class ViabilityController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
+        @Override
         public ActionURL getRedirectURL(Object o)
         {
             return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());

@@ -34,6 +34,7 @@ public class AIDPlateReader extends TextPlateReader
 {
     public static final String TYPE = "aid_txt";
 
+    @Override
     public String getType()
     {
         return TYPE;

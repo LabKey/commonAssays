@@ -77,6 +77,7 @@ public class uniprot extends ParseActions
         }
     }
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         _startTime = System.currentTimeMillis();
@@ -119,6 +120,7 @@ public class uniprot extends ParseActions
         }
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         try

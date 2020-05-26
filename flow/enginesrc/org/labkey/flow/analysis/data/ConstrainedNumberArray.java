@@ -29,11 +29,13 @@ public class ConstrainedNumberArray implements NumberArray
     }
 
 
+    @Override
     public Number get(int index)
     {
         return getDouble(index);
     }
 
+    @Override
     public double getDouble(int index)
     {
         double ret = _array.getDouble(index);
@@ -44,31 +46,37 @@ public class ConstrainedNumberArray implements NumberArray
         return ret;
     }
 
+    @Override
     public float getFloat(int index)
     {
         return (float) getDouble(index);
     }
 
+    @Override
     public int getInt(int index)
     {
         return (int) getDouble(index);
     }
 
+    @Override
     public void set(int index, double value)
     {
         _array.set(index, value);
     }
 
+    @Override
     public void set(int index, float value)
     {
         _array.set(index, value);
     }
 
+    @Override
     public void set(int index, int value)
     {
         _array.set(index, value);
     }
 
+    @Override
     public int size()
     {
         return _array.size();

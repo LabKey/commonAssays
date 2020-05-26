@@ -340,6 +340,7 @@ public class SimpleXMLEventRewriter
          * Create an event for this element
          * @return XMLEvent for this StartElement
          */
+        @Override
         public XMLEvent getEvent()
         {
             return eventFactory.createStartElement("", "", name, attrs.iterator(), null);
@@ -365,6 +366,7 @@ public class SimpleXMLEventRewriter
          * Create an event for this element
          * @return XMLEvent for this StartElement
          */
+        @Override
         public XMLEvent getEvent()
         {
             return eventFactory.createEndElement("", "", name);
@@ -383,6 +385,7 @@ public class SimpleXMLEventRewriter
             this.content = content;
         }
 
+        @Override
         public XMLEvent getEvent()
         {
             return eventFactory.createSpace(content);

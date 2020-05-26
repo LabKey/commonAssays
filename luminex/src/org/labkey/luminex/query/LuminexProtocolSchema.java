@@ -104,6 +104,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return (LuminexAssayProvider)super.getProvider();
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         Set<String> result = super.getTableNames();
@@ -411,6 +412,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         {
             runCol.setFk(new LookupForeignKey(ret.getContainerFilter(),"RowId", null)
             {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     ExpRunTable result = AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container, null);

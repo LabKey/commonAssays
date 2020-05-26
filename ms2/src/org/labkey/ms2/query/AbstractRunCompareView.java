@@ -118,6 +118,7 @@ public abstract class AbstractRunCompareView extends QueryView
         return getSchema().getSettings(context, "Compare", tableName);
     }
 
+    @Override
     public MS2Schema getSchema()
     {
         return (MS2Schema)super.getSchema();
@@ -196,6 +197,7 @@ public abstract class AbstractRunCompareView extends QueryView
         }
     }
     
+    @Override
     public DataView createDataView()
     {
         DataView result = super.createDataView();
@@ -281,6 +283,7 @@ public abstract class AbstractRunCompareView extends QueryView
         return rgn;
     }
 
+    @Override
     public List<DisplayColumn> getDisplayColumns()
     {
         List<DisplayColumn> ret = new ArrayList<>();

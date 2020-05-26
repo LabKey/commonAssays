@@ -26,5 +26,6 @@ import java.util.Iterator;
  */
 public interface SpectrumIterator extends Iterator<Spectrum>, AutoCloseable
 {
+    @Override
     void close();
 }

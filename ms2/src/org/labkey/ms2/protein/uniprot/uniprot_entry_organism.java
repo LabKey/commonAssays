@@ -20,6 +20,7 @@ import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_organism extends ParseActions
 {
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -29,6 +30,7 @@ public class uniprot_entry_organism extends ParseActions
         context.setCurrentOrganism(new UniprotOrganism());
     }
 
+    @Override
     public void endElement(ParseContext context)
     {
         if (context.isIgnorable())

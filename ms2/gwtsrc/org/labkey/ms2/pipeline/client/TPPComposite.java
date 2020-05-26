@@ -223,17 +223,20 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         return true;
     }
 
+    @Override
     public void setName(String name)
     {
 
     }
 
+    @Override
     public String getName()
     {
         return null;
     }
 
     /** Callback from requesting info on the pipeline tasks and potential execution locations */
+    @Override
     public void setPipelineConfig(GWTPipelineConfig result)
     {
         for (GWTPipelineTask task : result.getTasks())
@@ -358,6 +361,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         return validate();
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
@@ -392,6 +396,7 @@ public class TPPComposite extends SearchFormComposite implements PipelineConfigC
         _quantitationAlgorithmListBox.addChangeHandler(handler);
         _quantitationAlgorithmListBox.addChangeHandler(new ChangeHandler()
         {
+            @Override
             public void onChange(ChangeEvent event)
             {
                 setQuantitationVisibility();

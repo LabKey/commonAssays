@@ -47,6 +47,7 @@ public class QueryResultSetSpectrumIterator extends ResultSetSpectrumIterator
             _iter = runs.iterator();
         }
 
+        @Override
         ResultSet getNextResultSet()
         {
             MS2Run ms2Run = _iter.next();

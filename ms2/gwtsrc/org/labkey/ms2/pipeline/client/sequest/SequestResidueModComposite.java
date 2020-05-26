@@ -55,12 +55,14 @@ public class SequestResidueModComposite extends ResidueModComposite
         instance.setWidget(modTabPanel);
     }
 
+        @Override
         public void update(Map<String, String> mod0Map, Map<String, String> mod1Map)
     {
         setListBoxMods(mod0Map, modStaticListBox);
         setListBoxMods(mod1Map, modDynamicListBox);
     }
 
+    @Override
     public Map<String, String> getModMap(int modType)
     {
         if(modType == STATIC)
@@ -70,6 +72,7 @@ public class SequestResidueModComposite extends ResidueModComposite
         return null;
     }
     
+    @Override
     protected String validate(ListBox box, int modType)
     {
         Map<String, String> modMap = getListBoxMap(box);

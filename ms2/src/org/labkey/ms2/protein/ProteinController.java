@@ -58,11 +58,13 @@ public class ProteinController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return new CustomProteinListView(getViewContext(), true);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Custom Protein Lists");
@@ -160,10 +162,12 @@ public class ProteinController extends SpringActionController
     @RequiresPermission(DeletePermission.class)
     public class DeleteCustomAnnotationSetsAction extends FormHandlerAction
     {
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors)
         {
             Set<Integer> setIds = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
@@ -178,6 +182,7 @@ public class ProteinController extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return getBeginURL(getContainer());
@@ -192,15 +197,18 @@ public class ProteinController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class UploadCustomProteinAnnotations extends FormViewAction<UploadAnnotationsForm>
     {
+        @Override
         public void validateCommand(UploadAnnotationsForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(UploadAnnotationsForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(UploadAnnotationsForm form, BindException errors) throws Exception
         {
             if (form.getName().length() == 0)
@@ -349,11 +357,13 @@ public class ProteinController extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(UploadAnnotationsForm uploadAnnotationsForm)
         {
             return getBeginURL(getContainer());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));

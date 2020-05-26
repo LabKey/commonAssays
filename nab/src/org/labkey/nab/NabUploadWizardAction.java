@@ -80,6 +80,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         return parent;
     }
 
+    @Override
     protected NabRunStepHandler getRunStepHandler()
     {
         return new NabRunStepHandler();

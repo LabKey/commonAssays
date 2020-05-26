@@ -97,6 +97,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
         return null;
     }
 
+    @Override
     public void addNavTrail(NavTree root)
     {
         throw new UnsupportedOperationException();

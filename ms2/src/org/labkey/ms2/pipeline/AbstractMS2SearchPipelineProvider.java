@@ -54,6 +54,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
         return AbstractMS2SearchTaskFactory.findFactory(_factoryClass);
     }
 
+    @Override
     public final void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (isEnabled() && context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -90,6 +91,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
         return true;
     }
 
+    @Override
     public void initSystemDirectory(Path rootDir, Path systemDir)
     {
         AbstractMS2SearchProtocolFactory factory = getProtocolFactory();

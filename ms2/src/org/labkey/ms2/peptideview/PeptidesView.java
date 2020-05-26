@@ -73,6 +73,7 @@ public class PeptidesView extends QueryView
         _pepFilter = pepFilter;
     }
 
+    @Override
     protected TableInfo createTable()
     {
         SimpleFilter filter = new SimpleFilter();
@@ -111,6 +112,7 @@ public class PeptidesView extends QueryView
                 getViewContext().getContainer(), false, containerFilter, filter, defCols);
     }
 
+    @Override
     public DataView createDataView()
     {
         DataView view = super.createDataView();

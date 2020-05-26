@@ -48,6 +48,7 @@ public class LogAxisFunction implements RangeFunction, IsSerializable, Serializa
         adjust = intersect - log10(logLinSwitch);
     }
 
+    @Override
     public double compute(double val)
     {
         if (logLinSwitch < 0) throw new IllegalStateException("logLinSwitch not set");
@@ -59,6 +60,7 @@ public class LogAxisFunction implements RangeFunction, IsSerializable, Serializa
             return sign * (log10(val) + adjust);   // (logLinSwitch:x)->(log(10):...
     }
 
+    @Override
     public double invert(double val)
     {
         if (logLinSwitch < 0) throw new IllegalStateException("logLinSwitch not set");

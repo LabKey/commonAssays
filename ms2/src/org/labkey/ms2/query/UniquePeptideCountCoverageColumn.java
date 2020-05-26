@@ -34,11 +34,13 @@ public class UniquePeptideCountCoverageColumn extends PeptideAggregrationDisplay
         super(colInfo, peptideColumn, caption);
     }
 
+    @Override
     protected Object calculateValue(RenderContext ctx, List<String> peptides)
     {
         return new HashSet<>(peptides).size();
     }
 
+    @Override
     public Class getValueClass()
     {
         return Integer.class;

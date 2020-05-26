@@ -71,6 +71,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
         return "SinglePlateDilutionNAb";
     }
 
+    @Override
     public String getDescription()
     {
         return "Imports a specially formatted CSV or XLS file that contains data from multiple plates.  This high-throughput NAb " +
@@ -83,6 +84,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
                         "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
     }
 
+    @Override
     public DilutionDataHandler getDataHandler()
     {
         return new SinglePlateDilutionNabDataHandler();

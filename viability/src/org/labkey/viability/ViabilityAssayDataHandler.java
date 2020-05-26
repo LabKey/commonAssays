@@ -234,16 +234,19 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         return OLD_DATA_TYPE;
     }
 
+    @Override
     protected boolean allowEmptyData()
     {
         return true;
     }
 
+    @Override
     protected boolean shouldAddInputMaterials()
     {
         return false;
     }
 
+    @Override
     public ActionURL getContentURL(ExpData data)
     {
         return null;

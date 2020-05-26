@@ -40,6 +40,7 @@ public class PolygonGate extends RegionGate
         _poly = poly;
     }
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet ret = new BitSet(data.getRowCount());
@@ -62,11 +63,13 @@ public class PolygonGate extends RegionGate
         return ret;
     }
 
+    @Override
     public String getXAxis()
     {
         return _strX;
     }
 
+    @Override
     public String getYAxis()
     {
         return _strY;
@@ -125,6 +128,7 @@ public class PolygonGate extends RegionGate
     }
 
 
+    @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         double[] X = null;
@@ -145,6 +149,7 @@ public class PolygonGate extends RegionGate
     }
 
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         return CompensationMatrix.isParamCompensated(_strX) || CompensationMatrix.isParamCompensated(_strY);

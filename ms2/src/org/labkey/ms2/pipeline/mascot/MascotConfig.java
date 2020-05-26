@@ -97,6 +97,7 @@ public class MascotConfig extends AbstractWriteableSettingsGroup
         storeStringValue(MASCOT_HTTPPROXY_PROP, mascotHTTPProxy);
     }
 
+    @Override
     public void save()
     {
         super.save();

@@ -58,6 +58,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         }
     }
 
+    @Override
     public void close()
     {
         if (_in != null)
@@ -86,6 +87,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         }
     }
 
+    @Override
     public boolean hasNext()
     {
         if (_parser == null)
@@ -178,6 +180,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         return _parser.getAttributeValue(null, attributeName);
     }
 
+    @Override
     public SimpleScan next()
     {
         if (_currentScan == null && !hasNext())
@@ -204,16 +207,19 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             _msLevel = msLevel;
         }
 
+        @Override
         public int getScan()
         {
             return _scan;
         }
 
+        @Override
         public int getMSLevel()
         {
             return _msLevel;
         }
 
+        @Override
         public Double getRetentionTime()
         {
             if (_retentionTime == null)
@@ -225,6 +231,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             return ret.getHour() * 60 * 60 + ret.getMinute() * 60 + ret.getSecond() + ret.getFraction().doubleValue();
         }
 
+        @Override
         public float[][] getData()
         {
             return _data;

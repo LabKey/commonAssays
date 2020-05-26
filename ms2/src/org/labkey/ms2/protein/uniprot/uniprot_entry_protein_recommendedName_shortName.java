@@ -26,6 +26,7 @@ import org.xml.sax.Attributes;
 
 public class uniprot_entry_protein_recommendedName_shortName extends CharactersParseActions
 {
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -35,6 +36,7 @@ public class uniprot_entry_protein_recommendedName_shortName extends CharactersP
         _accumulated = "";
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (context.isIgnorable())

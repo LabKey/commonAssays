@@ -115,6 +115,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         initWidget(instance);
     }
 
+    @Override
     public void setWidth(String width)
     {
         StringBuffer num = new StringBuffer();
@@ -160,6 +161,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         {}
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label("Residue modifications");
@@ -174,6 +176,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         return panel;
     }
 
+    @Override
     public String validate()
     {
         String error = validate(staticListBox, STATIC);
@@ -208,11 +211,13 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
     
 
+    @Override
     public void setName(String s)
     {
         //not yet
     }
 
+    @Override
     public String getName()
     {
         return null;  //Not yet
@@ -277,6 +282,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             this.tabIndex = tabIndex;
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             ListBox tabBox = getTabListBox(tabIndex);
@@ -310,6 +316,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             this.tabIndex = tabIndex;
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             new NewModDialogBox(tabIndex);
@@ -325,6 +332,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             this.tabIndex = tabIndex;
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             ListBox box = getTabListBox(tabIndex);
@@ -368,6 +376,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
             table.setWidget(1, 0, new Label("Weight"));
             table.setWidget(1, 1, molWt);
             table.setWidget(2, 0, new ImageButton("Enter"){
+                @Override
                 public void onClick(Widget sender)
                 {
                     String error = "";
@@ -405,6 +414,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
                 }
             });
             table.setWidget(2, 1, new ImageButton("Cancel") {
+                @Override
                 public void onClick(Widget sender)
                 {
                     dialog.hide();
@@ -485,6 +495,7 @@ public abstract class ResidueModComposite extends SearchFormComposite
         return -1;
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);

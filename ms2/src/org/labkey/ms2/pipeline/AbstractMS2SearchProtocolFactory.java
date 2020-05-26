@@ -44,6 +44,7 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
         return StringUtils.join(databases, SEQUENCE_FILE_SEPARATOR);
     }
 
+    @Override
     protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         // Get the pipeline specific parameters.
@@ -74,6 +75,7 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 
     public abstract String getDefaultParametersResource();
 
+    @Override
     public String getDefaultParametersXML(PipeRoot root) throws IOException
     {
         String xml = super.getDefaultParametersXML(root);
@@ -84,6 +86,7 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
 
     protected class ResourceDefaultsReader extends DefaultsReader
     {
+        @Override
         public Reader createReader()
         {
             String resourceStream = getDefaultParametersResource();

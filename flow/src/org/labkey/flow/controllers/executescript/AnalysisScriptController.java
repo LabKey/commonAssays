@@ -117,6 +117,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         FlowScript script;
 
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             script = FlowScript.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
@@ -128,6 +129,7 @@ public class AnalysisScriptController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/executescript/showScript.jsp", script, errors);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, script, null);
@@ -175,6 +177,7 @@ public class AnalysisScriptController extends BaseFlowController
             return HttpView.redirect(executeScript(job));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, script, nav.first);
@@ -186,6 +189,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         FlowScript script;
 
+        @Override
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             script = form.getProtocol();
@@ -196,6 +200,7 @@ public class AnalysisScriptController extends BaseFlowController
     @RequiresPermission(InsertPermission.class)
     public class AnalyzeSelectedRunsAction extends BaseAnalyzeRunsAction
     {
+        @Override
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
         {
             script = form.getProtocol();
@@ -374,6 +379,7 @@ public class AnalysisScriptController extends BaseFlowController
             return HttpView.redirect(executeScript(job));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
@@ -383,6 +389,7 @@ public class AnalysisScriptController extends BaseFlowController
     @RequiresPermission(InsertPermission.class)
     public class ConfirmImportRunsAction extends ImportRunsBaseAction
     {
+        @Override
         public ModelAndView getView(ImportRunsForm form, BindException errors)
         {
             return confirmRuns(form, errors);
@@ -392,6 +399,7 @@ public class AnalysisScriptController extends BaseFlowController
     @RequiresPermission(InsertPermission.class)
     public class ImportRunsAction extends ImportRunsBaseAction
     {
+        @Override
         public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
         {
             return uploadRuns(form, errors);
@@ -524,6 +532,7 @@ public class AnalysisScriptController extends BaseFlowController
             return new HttpPostRedirectView(url.getLocalURIString(), inputs);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -536,6 +545,7 @@ public class AnalysisScriptController extends BaseFlowController
         PipeRoot root;
         boolean foundRoot;
 
+        @Override
         public void validateCommand(ImportAnalysisForm form, Errors errors)
         {
             getWorkspace(form, errors);
@@ -543,6 +553,7 @@ public class AnalysisScriptController extends BaseFlowController
                 form.setWizardStep(ImportAnalysisStep.SELECT_ANALYSIS);
         }
 
+        @Override
         public ModelAndView getView(ImportAnalysisForm form, boolean reshow, BindException errors)
         {
             // When entering the wizard from the pipeline browser "Import Workspace" button,
@@ -554,6 +565,7 @@ public class AnalysisScriptController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/executescript/importAnalysis.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(ImportAnalysisForm form, BindException errors) throws Exception
         {
             if (form.getWizardStep() == null)
@@ -1379,11 +1391,13 @@ public class AnalysisScriptController extends BaseFlowController
             throw new RedirectException(executeScript(job));
         }
 
+        @Override
         public ActionURL getSuccessURL(ImportAnalysisForm form)
         {
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             String display = "Import Analysis";

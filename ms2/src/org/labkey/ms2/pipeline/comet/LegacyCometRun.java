@@ -26,33 +26,39 @@ import org.labkey.ms2.MS2RunType;
  */
 public class LegacyCometRun extends MS2Run
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.LegacyComet;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return "comet.def";
     }
 
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "RawScore";
     }
 
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "rawScore";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-PeptideProphet, -ZScore, -DiffScore, -DiffScore * RawScore, -RawScore";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[]{"cmt", "dta"};

@@ -59,33 +59,39 @@ public class MascotRun extends MS2Run
             map.put("ionscore", map.get("Ions Score"));
     }
 
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.Mascot;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return "mascot.xml";
     }
 
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "Ion";
     }
 
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "ion";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-Identity";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[]{"out", "dta"};
@@ -166,11 +172,13 @@ public class MascotRun extends MS2Run
             setCaption("Current View");
         }
 
+        @Override
         public void renderDetailsCellContents(RenderContext ctx, Writer out) throws IOException
         {
             renderGridCellContents(ctx, out);
         }
 
+        @Override
         public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
         {
             if (_currentPeptideId.equals(ctx.getRow().get("rowId")))

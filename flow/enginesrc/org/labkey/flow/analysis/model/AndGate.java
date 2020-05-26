@@ -36,6 +36,7 @@ public class AndGate extends GateList implements SubsetExpressionGate
         super(gates);
     }
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = null;
@@ -57,6 +58,7 @@ public class AndGate extends GateList implements SubsetExpressionGate
         return ret;
     }
 
+    @Override
     public SubsetExpression.AndTerm createTerm()
     {
         if (_gates.size() < 2)

@@ -39,6 +39,7 @@ public class GOPieURLGenerator extends StandardPieURLGenerator
         _url = url;
     }
 
+    @Override
     public String generateURL(PieDataset dataset, Comparable key, int pieIndex)
     {
         Map<String, Set<Integer>> extra = ((ProteinPieDataset) dataset).getExtraInfo();

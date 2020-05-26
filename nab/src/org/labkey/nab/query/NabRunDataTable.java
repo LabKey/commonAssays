@@ -247,6 +247,7 @@ public class NabRunDataTable extends NabBaseTable
                     result.setLabel("Specimen");
                     result.setFk(new LookupForeignKey(NabRunDataTable.this.getContainerFilter(), "LSID", null)
                     {
+                        @Override
                         public TableInfo getLookupTableInfo()
                         {
                             ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());

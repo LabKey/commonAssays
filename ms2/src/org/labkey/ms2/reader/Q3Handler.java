@@ -33,6 +33,7 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
 
     static Logger _log = Logger.getLogger(PepXmlAnalysisResult.class);
 
+    @Override
     protected Q3Result getResult(SimpleXMLStreamReader parser) throws XMLStreamException
     {
         parser.skipToStart("q3ratio_result");
@@ -57,6 +58,7 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
         return Float.parseFloat(s);
     }
 
+    @Override
     public String getAnalysisType()
     {
         return ANALYSIS_TYPE;
@@ -64,6 +66,7 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
 
     public static class Q3Result extends RelativeQuantAnalysisResult
     {
+        @Override
         public String getAnalysisType()
         {
             return ANALYSIS_TYPE;

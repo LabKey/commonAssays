@@ -57,6 +57,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         super(name, owningModule, SequestSearchTask.Factory.class);
     }
 
+    @Override
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         return "sequest.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
@@ -72,6 +73,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         return sequestFactory != null && (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null);
     }
 
+    @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
@@ -90,6 +92,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
+    @Override
     @NotNull
     public HttpView createSetupWebPart(Container container)
     {
@@ -119,63 +122,75 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         }
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return SequestSearchProtocolFactory.get();
     }
 
+    @Override
     public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
     }
 
+    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
+    @Override
     public List<String> getTaxonomyList(Container container)
     {
         //"Sequest does not support Mascot style taxonomy.
         return null;
     }
 
+    @Override
     public Map<String, List<String>> getEnzymes(Container container)
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }
 
+    @Override
     public Map<String, String> getResidue0Mods(Container container)
     {
         return SearchFormUtil.getDefaultStaticMods();
     }
 
+    @Override
     public Map<String, String> getResidue1Mods(Container container)
     {
         return SearchFormUtil.getDefaultDynamicMods();
     }
 
+    @Override
     public String getHelpTopic()
     {
         return "pipelineSequest";
     }
 
+    @Override
     public void ensureEnabled(Container container) throws PipelineValidationException
     {
         if (!isEnabled())
             throw new PipelineValidationException("Sequest server has not been specified in ms2Config.xml file.");
     }
 
+    @Override
     public boolean supportsDirectories()
     {
         return true;
     }
 
+    @Override
     public boolean remembersDirectories()
     {
         return false;
     }
 
+    @Override
     public boolean hasRemoteDirectories()
     {
         return false;

@@ -367,6 +367,7 @@ public class MS2Manager
             Map<ExpData, String> outputDatas = new HashMap<>();
             XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
             {
+                @Override
                 public File getLogFile()
                 {
                     throw new UnsupportedOperationException();
@@ -912,6 +913,7 @@ public class MS2Manager
             setPurgeStatus(0, _runIds.length);
         }
 
+        @Override
         public void run()
         {
             try

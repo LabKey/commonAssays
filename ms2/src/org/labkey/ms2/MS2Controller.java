@@ -290,6 +290,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
+        @Override
         public ActionURL getRedirectURL(Object o)
         {
             return getShowListURL(getContainer());
@@ -306,6 +307,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowListAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             ProteinSearchWebPart searchView = new ProteinSearchWebPart(true, ProbabilityProteinSearchForm.createDefault());
@@ -317,6 +319,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(searchView, gridView);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addRootNavTrail(root, "MS2 Runs", getPageConfig(), "ms2RunsList");
@@ -384,6 +387,7 @@ public class MS2Controller extends SpringActionController
     {
         private MS2Run _run;
 
+        @Override
         public ModelAndView getView(RunForm form, BindException errors)
         {
             if (errors.hasErrors())
@@ -446,6 +450,7 @@ public class MS2Controller extends SpringActionController
             return vBox;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             String pageTitle = (null != getPageConfig().getTitle() ? getPageConfig().getTitle() : "Run Summary");
@@ -727,10 +732,12 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private URLHelper _returnURL;
 
+        @Override
         public void validateCommand(RenameForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
@@ -754,6 +761,7 @@ public class MS2Controller extends SpringActionController
             return jview;
         }
 
+        @Override
         public boolean handlePost(RenameForm form, BindException errors)
         {
             _run = form.validateRun();
@@ -761,11 +769,13 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public URLHelper getSuccessURL(RenameForm form)
         {
             return form.getReturnURLHelper();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
@@ -783,6 +793,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideAction extends SimpleViewAction<DetailsForm>
     {
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             long peptideId = form.getPeptideId();
@@ -903,6 +914,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -937,21 +949,25 @@ public class MS2Controller extends SpringActionController
     {
         private String _message = null;
 
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new GoView();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
             setHelpTopic(new HelpTopic("annotations"));
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             GoLoader loader;
@@ -980,6 +996,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return getGoStatusURL(_message);
@@ -987,11 +1004,13 @@ public class MS2Controller extends SpringActionController
 
         private class GoView extends TabStripView
         {
+            @Override
             public List<NavTree> getTabList()
             {
                 return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
             }
 
+            @Override
             public HttpView getTabView(String tabId)
             {
                 if ("manual".equals(tabId))
@@ -1015,11 +1034,13 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class GoStatusAction extends SimpleViewAction<GoForm>
     {
+        @Override
         public ModelAndView getView(GoForm form, BindException errors)
         {
             return GoLoader.getCurrentStatus(form.getMessage());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             setTitle("GO Load Status");
@@ -1050,6 +1071,7 @@ public class MS2Controller extends SpringActionController
         private ProteinDictionaryHelpers.GoTypes _goChartType;
         private MS2Run _run;
 
+        @Override
         public ModelAndView getView(ChartForm form, BindException errors) throws Exception
         {
             ViewContext ctx = getViewContext();
@@ -1100,6 +1122,7 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/peptideChart.jsp", bean);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             ActionURL runURL = MS2Controller.getShowRunURL(getUser(), getContainer(), _run.getRun());
@@ -1127,6 +1150,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class GetProteinGroupingPeptidesAction extends SimpleViewAction<RunForm>
     {
+        @Override
         public ModelAndView getView(RunForm form, BindException errors) throws Exception
         {
             MS2Run run = form.validateRun();
@@ -1137,6 +1161,7 @@ public class MS2Controller extends SpringActionController
             return peptideView.getPeptideViewForProteinGrouping(form.getProteinGroupingId(), form.getColumns());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -1195,10 +1220,12 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private ActionURL _returnURL;
 
+        @Override
         public void validateCommand(ManageViewsForm form, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(ManageViewsForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
@@ -1231,11 +1258,13 @@ public class MS2Controller extends SpringActionController
             return view;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
         }
 
+        @Override
         public boolean handlePost(ManageViewsForm form, BindException errors)
         {
             String[] viewNames = form.getViewsToDelete();
@@ -1286,6 +1315,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(ManageViewsForm runForm)
         {
             return runForm.getReturnActionURL();
@@ -1426,6 +1456,7 @@ public class MS2Controller extends SpringActionController
             return form;
         }
 
+        @Override
         public ModelAndView getSetupView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
@@ -1433,6 +1464,7 @@ public class MS2Controller extends SpringActionController
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             setHelpTopic("compareProteinProphet");
@@ -1468,6 +1500,7 @@ public class MS2Controller extends SpringActionController
             return form;
         }
 
+        @Override
         public ModelAndView getSetupView(PeptideFilteringComparisonForm form, BindException errors, int runListId)
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
@@ -1475,6 +1508,7 @@ public class MS2Controller extends SpringActionController
             return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Compare Peptides Options");
@@ -1735,6 +1769,7 @@ public class MS2Controller extends SpringActionController
             _defaultPeptideCustomView = defaultPeptideCustomView;
         }
 
+        @Override
         public String getPeptideCustomViewName(ViewContext context)
         {
             String result = context.getRequest().getParameter(PEPTIDES_FILTER_VIEW_NAME);
@@ -1876,6 +1911,7 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilteringComparisonForm.class);
         }
 
+        @Override
         protected ModelAndView getHtmlView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             ComparisonCrosstabView gridView = createInitializedQueryView(form, errors, false, null);
@@ -1908,6 +1944,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(gwtView, gridView);
         }
 
+        @Override
         protected ComparisonCrosstabView createQueryView(PeptideFilteringComparisonForm form, BindException errors, boolean forExport, String dataRegion) throws Exception
         {
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
@@ -1923,6 +1960,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             if (_form != null)
@@ -2074,6 +2112,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportRunsAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             List<MS2Run> runs;
@@ -2103,11 +2142,13 @@ public class MS2Controller extends SpringActionController
     {
         private StringBuilder _title = new StringBuilder();
 
+        @Override
         public ModelAndView getView(ExportForm form, BindException errors)
         {
             return compareRuns(form.getRunList(), false, _title, form.getColumn(), errors);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addRootNavTrail(root, _title.toString(), getPageConfig(), "compareRuns");
@@ -2118,6 +2159,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportCompareToExcel extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             ModelAndView view = compareRuns(form.getRunList(), true, null, form.getColumn(), errors);
@@ -2357,6 +2399,7 @@ public class MS2Controller extends SpringActionController
             super(SpectraCountForm.class);
         }
 
+        @Override
         protected QueryView createQueryView(SpectraCountForm form, BindException errors, boolean forExport, String dataRegion)
         {
             _form = form;
@@ -2514,6 +2557,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class CompareServiceAction extends GWTServiceAction
     {
+        @Override
         protected BaseRemoteService createService()
         {
             return new CompareServiceImpl(getViewContext());
@@ -2524,10 +2568,12 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ReloadFastaAction extends FormHandlerAction
     {
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
@@ -2539,6 +2585,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return MS2UrlsImpl.get().getShowProteinAdminUrl("FASTA reload queued. Monitor its progress using the job list at the bottom of this page.");
@@ -2551,10 +2598,12 @@ public class MS2Controller extends SpringActionController
     {
         private String _message;
 
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors)
         {
             Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
@@ -2590,6 +2639,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return MS2UrlsImpl.get().getShowProteinAdminUrl(_message);
@@ -2619,11 +2669,13 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
     {
+        @Override
         public ModelAndView getView(FastaParsingForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/testFastaParsing.jsp", form);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addProteinAdminNavTrail(root, "Test FASTA header parsing", getPageConfig(), null);
@@ -2790,6 +2842,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", null);
@@ -2822,10 +2875,12 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
     {
+        @Override
         public void validateCommand(SetBestNameForm form, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(SetBestNameForm form, BindException errors)
         {
             int[] fastaIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
@@ -2834,6 +2889,7 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(SetBestNameForm form)
         {
             return MS2UrlsImpl.get().getShowProteinAdminUrl();
@@ -2844,6 +2900,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedProteinGroupsAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             ViewContext ctx = getViewContext();
@@ -2861,6 +2918,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportProteinGroupsAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Run run = form.validateRun();
@@ -2875,6 +2933,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportAllProteinsAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Run run = form.validateRun();
@@ -2889,6 +2948,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedProteinsAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -2916,6 +2976,7 @@ public class MS2Controller extends SpringActionController
             super(ProbabilityProteinSearchForm.class);
         }
 
+        @Override
         protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
         {
             if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
@@ -2985,6 +3046,7 @@ public class MS2Controller extends SpringActionController
             QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
             QueryView groupsView = new QueryView(schema, groupsSettings, errors)
             {
+                @Override
                 protected TableInfo createTable()
                 {
                     ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
@@ -3012,6 +3074,7 @@ public class MS2Controller extends SpringActionController
             return groupsView;
         }
 
+        @Override
         protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors) throws Exception
         {
             HttpServletRequest request = getViewContext().getRequest();
@@ -3097,6 +3160,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             String helpTopic = "proteinSearch";
@@ -3112,11 +3176,13 @@ public class MS2Controller extends SpringActionController
         private ViewContext _context;
         private int[] _seqId;
 
+        @Override
         public void setViewContext(ViewContext context)
         {
             _context = context;
         }
 
+        @Override
         public ViewContext getViewContext()
         {
             return _context;
@@ -3206,6 +3272,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportAllPeptidesAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             exportPeptides(form, false);
@@ -3216,6 +3283,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedPeptidesAction extends ExportAction<ExportForm>
     {
+        @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             exportPeptides(form, true);
@@ -3225,6 +3293,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class SelectAllAction extends MutatingApiAction<ExportForm>
     {
+        @Override
         public ApiResponse execute(final ExportForm form, BindException errors) throws Exception
         {
             MS2Run run = form.validateRun();
@@ -3331,6 +3400,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetDistributionPlotAction extends ExportAction<PeptideProphetForm>
     {
+        @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -3349,6 +3419,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetObservedVsModelPlotAction extends ExportAction<PeptideProphetForm>
     {
+        @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -3366,6 +3437,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetObservedVsPPScorePlotAction extends ExportAction<PeptideProphetForm>
     {
+        @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -3378,6 +3450,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetSensitivityPlotAction extends ExportAction<PeptideProphetForm>
     {
+        @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -3419,6 +3492,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
+        @Override
         public ModelAndView getView(RunForm form, BindException errors)
         {
             MS2Run run = form.validateRun();
@@ -3435,6 +3509,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -3461,6 +3536,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
     {
+        @Override
         public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             form.validateRun();
@@ -3475,6 +3551,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
     {
+        @Override
         public ModelAndView getView(RunForm form, BindException errors)
         {
             MS2Run run = form.validateRun();
@@ -3490,6 +3567,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -3538,6 +3616,7 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ShowMS2AdminAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             MS2AdminBean bean = new MS2AdminBean();
@@ -3556,6 +3635,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", null);
@@ -3614,6 +3694,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowAllRunsAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             DataRegion rgn = new DataRegion();
@@ -3624,6 +3705,7 @@ public class MS2Controller extends SpringActionController
             rgn.addDisplayColumn(cdc);
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
+                @Override
                 public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
                     if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
@@ -3658,6 +3740,7 @@ public class MS2Controller extends SpringActionController
             return gridView;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             // TODO: admin navtrail
@@ -3687,10 +3770,12 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private ActionURL _returnURL;
 
+        @Override
         public void validateCommand(MS2ViewForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(MS2ViewForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
@@ -3709,6 +3794,7 @@ public class MS2Controller extends SpringActionController
             return saveView;
         }
 
+        @Override
         public boolean handlePost(MS2ViewForm form, BindException errors)
         {
             String viewParams = (null == form.getViewParams() ? "" : form.getViewParams());
@@ -3726,11 +3812,13 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public URLHelper getSuccessURL(MS2ViewForm form)
         {
             return form.getReturnURLHelper();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
@@ -3826,6 +3914,7 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -3958,6 +4047,7 @@ public class MS2Controller extends SpringActionController
         private MS2Run _run;
         private Protein _protein;
 
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
             int runId;
@@ -4022,6 +4112,7 @@ public class MS2Controller extends SpringActionController
             return new ProteinsView(currentURL, _run, form, Collections.singletonList(_protein), null, peptideQueryView);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild(getProteinTitle(_protein, true));
@@ -4036,6 +4127,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowAllProteinsAction extends SimpleViewAction<DetailsForm>
     {
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
@@ -4062,6 +4154,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(summary, view);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -4071,6 +4164,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
     {
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
             // May have a runId, a group number, and an indistinguishableGroupId, or might just have a
@@ -4126,6 +4220,7 @@ public class MS2Controller extends SpringActionController
             return new VBox(summaryView, view);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -4300,6 +4395,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportProteinCoverageMapAction extends SimpleViewAction<DetailsForm>
     {
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
@@ -4335,6 +4431,7 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -4347,6 +4444,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ExportComparisonProteinCoverageMapAction extends SimpleViewAction<PeptideFilteringComparisonForm>
     {
+        @Override
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
         {
             ViewContext context = getViewContext();
@@ -4479,6 +4577,7 @@ public class MS2Controller extends SpringActionController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -4517,6 +4616,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptidePopupAction extends SimpleViewAction<DetailsForm>
     {
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
             MS2Run ms2Run;
@@ -4530,6 +4630,7 @@ public class MS2Controller extends SpringActionController
             return vBox;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -4566,6 +4667,7 @@ public class MS2Controller extends SpringActionController
     {
         private PieSliceSectionForm _form;
 
+        @Override
         public ModelAndView getView(PieSliceSectionForm form, BindException errors)
         {
             _form = form;
@@ -4602,6 +4704,7 @@ public class MS2Controller extends SpringActionController
             return vbox;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Pieslice Details for: " + _form.getSliceTitle());
@@ -4685,6 +4788,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowLightElutionGraphAction extends ExportAction<DetailsForm>
     {
+        @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, true, false);
@@ -4695,6 +4799,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowHeavyElutionGraphAction extends ExportAction<DetailsForm>
     {
+        @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, false, true);
@@ -4705,6 +4810,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowCombinedElutionGraphAction extends ExportAction<DetailsForm>
     {
+        @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, true, true);
@@ -4898,6 +5004,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyRunViewAction extends SimpleRedirectAction<MS2ViewForm>
     {
+        @Override
         public ActionURL getRedirectURL(MS2ViewForm form)
         {
             // Redirect to have Spring fill in the form and ensure that the DataRegion JavaScript sees the showRun action
@@ -4909,6 +5016,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyExportRunsViewAction extends SimpleForwardAction<MS2ViewForm>
     {
+        @Override
         public ActionURL getForwardURL(MS2ViewForm form)
         {
             // Forward without redirect: this lets Spring fill in the form but preserves the post data
@@ -4920,6 +5028,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ApplyCompareViewAction extends SimpleRedirectAction<MS2ViewForm>
     {
+        @Override
         public ActionURL getRedirectURL(MS2ViewForm form)
         {
             ActionURL redirectURL = getApplyViewForwardURL(form, ShowCompareAction.class);
@@ -4971,6 +5080,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class DoOnePeptideChartAction extends ExportAction
     {
+        @Override
         public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
         {
             HttpServletRequest req = getViewContext().getRequest();
@@ -5007,6 +5117,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class AddExtraFilterAction extends SimpleRedirectAction
     {
+        @Override
         public ActionURL getRedirectURL(Object o)
         {
             ViewContext ctx = getViewContext();
@@ -5281,6 +5392,7 @@ public class MS2Controller extends SpringActionController
             this.proteinGroupingId = proteinGroupingId;
         }
 
+        @Override
         public ActionURL getReturnActionURL()
         {
             ActionURL result;
@@ -5384,15 +5496,18 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class InsertAnnotsAction extends FormViewAction<LoadAnnotForm>
     {
+        @Override
         public void validateCommand(LoadAnnotForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
         {
             String fname = form.getFileName();
@@ -5437,11 +5552,13 @@ public class MS2Controller extends SpringActionController
             }
         }
 
+        @Override
         public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
         {
             return MS2UrlsImpl.get().getShowProteinAdminUrl("Annotation load queued. Monitor its progress using the job list at the bottom of this page.");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
@@ -5568,6 +5685,7 @@ public class MS2Controller extends SpringActionController
     {
         private AnnotationInsertion _insertion;
 
+        @Override
         public ModelAndView getView(AnnotationInsertionForm form, BindException errors)
         {
             _insertion = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
@@ -5575,6 +5693,7 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
@@ -5585,6 +5704,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowParamsFileAction extends ExportAction<DetailsForm>
     {
+        @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Run run = form.validateRun();
@@ -5629,6 +5749,7 @@ public class MS2Controller extends SpringActionController
     @RequiresNoPermission
     public class UpdateShowPeptideAction extends SimpleRedirectAction
     {
+        @Override
         public ActionURL getRedirectURL(Object o)
         {
             ViewContext ctx = getViewContext();
@@ -5658,6 +5779,7 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowGZFileAction extends ExportAction<DetailsForm>
     {
+        @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
@@ -5929,10 +6051,12 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(UpdatePermission.class)
     public class EditElutionGraphAction extends FormViewAction<ElutionProfileForm>
     {
+        @Override
         public void validateCommand(ElutionProfileForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(ElutionProfileForm form, boolean reshow, BindException errors) throws Exception
         {
             long peptideId = form.getPeptideId();
@@ -5951,6 +6075,7 @@ public class MS2Controller extends SpringActionController
             return new JspView<>("/org/labkey/ms2/editElution.jsp", ctx, errors);
         }
 
+        @Override
         public boolean handlePost(ElutionProfileForm form, BindException errors) throws Exception
         {
             MS2Peptide peptide = MS2Manager.getPeptide(form.getPeptideId());
@@ -5981,6 +6106,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
+        @Override
         public ActionURL getSuccessURL(ElutionProfileForm detailsForm)
         {
             ActionURL url = getViewContext().getActionURL().clone();
@@ -5988,6 +6114,7 @@ public class MS2Controller extends SpringActionController
             return url;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Edit Elution Profile");
@@ -5997,6 +6124,7 @@ public class MS2Controller extends SpringActionController
 
     public static class MS2UrlsImpl implements MS2Urls
     {
+        @Override
         public ActionURL getShowPeptideUrl(Container container)
         {
             return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
@@ -6007,11 +6135,13 @@ public class MS2Controller extends SpringActionController
             return getShowRunURL(user, run.getContainer(), run.getRun());
         }
 
+        @Override
         public ActionURL getShowListUrl(Container container)
         {
             return new ActionURL(ShowListAction.class, container);
         }
 
+        @Override
         public ActionURL getProteinSearchUrl(Container container)
         {
             return new ActionURL(DoProteinSearchAction.class, container);
@@ -6032,11 +6162,13 @@ public class MS2Controller extends SpringActionController
             return url;
         }
 
+        @Override
         public ActionURL getPepSearchUrl(Container container)
         {
             return getPepSearchUrl(container, null);
         }
 
+        @Override
         public ActionURL getPepSearchUrl(Container container, String sequence)
         {
             ActionURL url = new ActionURL(PepSearchAction.class, container);
@@ -6069,6 +6201,7 @@ public class MS2Controller extends SpringActionController
             super(PeptideFilterSearchForm.class);
         }
 
+        @Override
         protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion)
         {
             if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
@@ -6099,6 +6232,7 @@ public class MS2Controller extends SpringActionController
             return pepView;
         }
 
+        @Override
         public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors) throws Exception
         {
             //create the search view
@@ -6133,6 +6267,7 @@ public class MS2Controller extends SpringActionController
             return result;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Peptide Search Results");
@@ -6185,15 +6320,18 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class AttachFilesUpgradeAction extends FormViewAction
     {
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new JspView("/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp");
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
@@ -6209,11 +6347,13 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Attach mspicture Files to Existing MS2 Runs");
@@ -6223,15 +6363,18 @@ public class MS2Controller extends SpringActionController
     @RequiresSiteAdmin
     public class ImportMSScanCountsUpgradeAction extends FormViewAction
     {
+        @Override
         public void validateCommand(Object target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
             return new JspView("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
         }
 
+        @Override
         public boolean handlePost(Object o, BindException errors) throws Exception
         {
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
@@ -6247,11 +6390,13 @@ public class MS2Controller extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(Object o)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Load MS scan counts");

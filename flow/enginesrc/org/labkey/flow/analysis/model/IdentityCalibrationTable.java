@@ -25,21 +25,25 @@ public class IdentityCalibrationTable implements CalibrationTable
     }
 
 
+    @Override
     public double fromIndex(double index)
     {
         return index;
     }
 
+    @Override
     public double getRange()
     {
         return range;
     }
 
+    @Override
     public double indexOf(double value)
     {
         return value;
     }
 
+    @Override
     public boolean isLinear()
     {
         return true;

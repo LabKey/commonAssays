@@ -40,14 +40,16 @@ public class FractionRollupProtocol extends AbstractMS2SearchProtocol<FractionRo
         super(name, description, xml);
     }
 
+    @Override
     public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return FractionRollupProtocolFactory.get();
     }
 
+    @Override
     public FractionRollupPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                PipeRoot root, List<File> filesInput,
-                                                File fileParameters, @Nullable Map<String, String> variableMap
+                                                       PipeRoot root, List<File> filesInput,
+                                                       File fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
         return new FractionRollupPipelineJob(this, info, root, getName(),

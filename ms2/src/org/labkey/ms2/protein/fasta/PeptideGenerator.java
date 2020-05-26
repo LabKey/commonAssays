@@ -221,6 +221,7 @@ public class PeptideGenerator implements Runnable
         return null;
     }
 
+    @Override
     public void run()
     {
         ProteinFastaLoader loader = null;
@@ -761,6 +762,7 @@ public class PeptideGenerator implements Runnable
             out = System.out;
         }
 
+        @Override
         public void handlePeptide(Peptide peptide)
         {
             double m = 0;
@@ -802,6 +804,7 @@ public class PeptideGenerator implements Runnable
             }
         }
 
+        @Override
         public void handleDone()
         {
 

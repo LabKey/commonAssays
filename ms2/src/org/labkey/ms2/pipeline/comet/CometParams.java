@@ -28,6 +28,7 @@ public class CometParams extends AbstractSequestParams
         super(Variant.comet);
     }
 
+    @Override
     protected String getCommentPrefix()
     {
         return "#";

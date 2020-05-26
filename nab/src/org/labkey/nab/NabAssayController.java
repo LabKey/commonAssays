@@ -186,11 +186,13 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
@@ -213,6 +215,7 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class DownloadDatafileAction extends SimpleViewAction<RenderAssayForm>
     {
+        @Override
         public ModelAndView getView(RenderAssayForm form, BindException errors) throws Exception
         {
             if (form.getRowId() < 0)
@@ -233,6 +236,7 @@ public class NabAssayController extends SpringActionController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException("Not Yet Implemented");
@@ -318,6 +322,7 @@ public class NabAssayController extends SpringActionController
             return _getNabAssayRun(run, fit, user);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             if (null != _protocol)
@@ -344,6 +349,7 @@ public class NabAssayController extends SpringActionController
             QuerySettings settings = schema.getSettings(_context, AssayProtocolSchema.DATA_TABLE_NAME, AssayProtocolSchema.DATA_TABLE_NAME);
             QueryView dataView = new NabProtocolSchema.NabResultsQueryView(_protocol, _context, settings)
             {
+                @Override
                 public DataView createDataView()
                 {
                     DataView view = super.createDataView();
@@ -410,6 +416,7 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(DeletePermission.class)
     public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
     {
+        @Override
         public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors)
         {
             if (deleteRunForm.getRowId() == 0)
@@ -440,6 +447,7 @@ public class NabAssayController extends SpringActionController
             throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException("Expected redirect did not occur.");
@@ -486,6 +494,7 @@ public class NabAssayController extends SpringActionController
             return _getNabAssayRun(run, fit, user);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();
@@ -822,6 +831,7 @@ public class NabAssayController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class GetQCControlInfoAction extends ReadOnlyApiAction<NabQCForm>
     {
+        @Override
         public ApiResponse execute(NabQCForm form, BindException errors) throws Exception
         {
             ApiSimpleResponse response = new ApiSimpleResponse();

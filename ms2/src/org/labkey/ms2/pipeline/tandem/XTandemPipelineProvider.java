@@ -54,12 +54,14 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<X
         super(name, owningModule, XTandemSearchTask.Factory.class);
     }
 
+    @Override
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         String nameParameters = XTandemSearchProtocolFactory.get().getParametersFileName();
         return nameParameters.equals(name) || super.isStatusViewableFile(container, name, basename);
     }
 
+    @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
@@ -78,6 +80,7 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<X
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
+    @Override
     @NotNull
     public HttpView createSetupWebPart(Container container)
     {
@@ -107,61 +110,73 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<X
         }
     }
 
+    @Override
     public boolean supportsDirectories()
     {
         return true;
     }
 
+    @Override
     public boolean remembersDirectories()
     {
         return true;
     }
 
+    @Override
     public boolean hasRemoteDirectories()
     {
         return false;
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return XTandemSearchProtocolFactory.get();
     }
 
+    @Override
     public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
     }
 
+    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
+    @Override
     public List<String> getTaxonomyList(Container container)
     {
         //"X! Tandem does not support Mascot style taxonomy.
         return null;
     }
 
+    @Override
     public Map<String, List<String>> getEnzymes(Container container)
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }
 
+    @Override
     public Map<String, String> getResidue0Mods(Container container)
     {
         return SearchFormUtil.getDefaultStaticMods();
     }
 
+    @Override
     public Map<String, String> getResidue1Mods(Container container)
     {
         return SearchFormUtil.getDefaultDynamicMods();
     }
+    @Override
     public String getHelpTopic()
     {
         return "pipelineXTandem";
     }
 
+    @Override
     public void ensureEnabled(Container container)
     {
         // Always enabled.

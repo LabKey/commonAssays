@@ -39,11 +39,13 @@ public class MS2PipelineProvider extends PipelineProvider
         super(name, owningModule);
     }
 
+    @Override
     public HttpView getSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
+    @Override
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))

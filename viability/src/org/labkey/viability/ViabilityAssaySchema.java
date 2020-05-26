@@ -224,6 +224,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             dataColumn.setHidden(true);
             dataColumn.setFk(new LookupForeignKey("RowId")
             {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     ExpDataTable dataTable = ViabilityAssaySchema.this.createDataFileTable();
@@ -297,6 +298,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             runColumn.setHidden(true);
             runColumn.setFk(new LookupForeignKey(cf, "RowId", null)
             {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider,
@@ -448,6 +450,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
 
     public class MissingSpecimenPopupFactory implements DisplayColumnFactory
     {
+        @Override
         public DisplayColumn createRenderer(ColumnInfo colInfo)
         {
             final FieldKey specimenIDs = FieldKey.fromParts("SpecimenIDs");
@@ -512,6 +515,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             resultIDCol.setKeyField(true);
             resultIDCol.setFk(new LookupForeignKey(cf, "RowID", null)
             {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     ResultsTable results = new ResultsTable(getLookupContainerFilter());

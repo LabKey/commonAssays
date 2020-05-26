@@ -30,6 +30,7 @@ public class PklSpectrumRenderer extends AbstractTextSpectrumRenderer
         super(form, filenamePrefix, extension);
     }
 
+    @Override
     public void renderFirstLine(Spectrum spectrum)
     {
         _out.println(df4.format(spectrum.getMZ()) + " 1 " + spectrum.getCharge());

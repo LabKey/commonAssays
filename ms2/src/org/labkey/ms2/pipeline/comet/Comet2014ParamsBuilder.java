@@ -77,6 +77,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         super(sequestInputParams, sequenceRoot, SequestParams.Variant.comet);
     }
 
+    @Override
     protected AbstractSequestParams createSequestParams(AbstractSequestParams.Variant variant)
     {
         return new CometParams();
@@ -88,6 +89,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         return Collections.emptyList();
     }
 
+    @Override
     protected void initSubclass()
     {
         _params.initUWSequestAndCometProperties();
@@ -543,6 +545,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
      * e.g. 79.966331 STY 0 3
      * @return any errors
      */
+    @Override
     public List<String> initDynamicMods()
     {
         ArrayList<ResidueMod> workList = new ArrayList<>();
@@ -582,6 +585,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         return parserError;
     }
 
+    @Override
     public String getSequestParamsText() throws SequestParamsException
     {
         String result = super.getSequestParamsText();

@@ -35,6 +35,7 @@ public class SetBestNameRunnable implements Runnable
         _nameType = nameType;
     }
 
+    @Override
     public void run()
     {
         for (int fastaId : _fastaIds)

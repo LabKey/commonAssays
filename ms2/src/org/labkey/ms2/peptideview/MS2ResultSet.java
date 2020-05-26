@@ -112,6 +112,7 @@ public abstract class MS2ResultSet extends ResultSetWrapper
 
     abstract ResultSet getNextResultSet();
 
+    @Override
     public boolean next() throws SQLException
     {
         // Will be null first time through... initialize now (doing so in constructor would be too early)

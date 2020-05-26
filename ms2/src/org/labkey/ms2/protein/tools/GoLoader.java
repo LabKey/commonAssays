@@ -385,6 +385,7 @@ public abstract class GoLoader
         private final static String PATH = "godatabase/archive/latest-full";
         private final static String FILENAME = "go_monthly-termdb-tables.tar.gz";
 
+        @Override
         protected InputStream getInputStream() throws IOException, ServletException
         {
             logStatus("Searching for the latest GO annotation files at " + SERVER);
@@ -408,6 +409,7 @@ public abstract class GoLoader
             _is = is;
         }
 
+        @Override
         protected InputStream getInputStream()
         {
             return _is;

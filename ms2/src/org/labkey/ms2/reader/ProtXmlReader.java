@@ -71,6 +71,7 @@ public class ProtXmlReader
             catch (XMLStreamException ignored) {}
         }
 
+        @Override
         public boolean hasNext()
         {
             try
@@ -116,6 +117,7 @@ public class ProtXmlReader
 
 
 
+        @Override
         public ProteinGroup next()
         {
             ProteinGroup currentProteinGroup = _nextProteinGroup;
@@ -124,6 +126,7 @@ public class ProtXmlReader
         }
 
 
+        @Override
         public void remove()
         {
             throw new UnsupportedOperationException();
@@ -336,6 +339,7 @@ public class ProtXmlReader
             }
         }
 
+        @Override
         public Protein clone()
         {
             try

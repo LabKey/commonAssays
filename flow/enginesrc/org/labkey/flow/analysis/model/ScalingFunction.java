@@ -154,11 +154,13 @@ public abstract class ScalingFunction implements Cloneable
 
     static abstract class SimpleFunction extends ScalingFunction
     {
+        @Override
         public boolean isLogarithmic()
         {
             return false;
         }
 
+        @Override
         public double dither(double value)
         {
             return value;
@@ -177,12 +179,14 @@ public abstract class ScalingFunction implements Cloneable
 		{
 		}
 
-		public final double translate(double value)
+		@Override
+        public final double translate(double value)
 		{
 			return value;
 		}
 
-		public NumberArray translate(NumberArray from)
+		@Override
+        public NumberArray translate(NumberArray from)
 		{
 			return new ConstrainedNumberArray(from, getMinValue(), getMaxValue());
 		}
@@ -198,7 +202,8 @@ public abstract class ScalingFunction implements Cloneable
 			_scale = scale == 0 ? 1 : scale;
 		}
 		
-		public final double translate(double value)
+		@Override
+        public final double translate(double value)
 		{
 			return _scale * value;
 		}
@@ -220,17 +225,20 @@ public abstract class ScalingFunction implements Cloneable
 				_exp = Math.log(Math.pow(10, _decade)) / _range;
 		}
 
+        @Override
         public boolean isLogarithmic()
         {
             return true;
         }
 
-		public final double translate(double value)
+		@Override
+        public final double translate(double value)
 		{
 			return _scale * Math.exp(value * _exp);
 		}
 
-		public final double dither(double value)
+		@Override
+        public final double dither(double value)
 		{
 			return value * Math.exp((Math.random() - .5) * _exp);
 		}

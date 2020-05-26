@@ -38,23 +38,27 @@ public class SimpleSequenceDbComposite extends SequenceDbComposite
         super(search, false);
     }
 
+    @Override
     public void setTaxonomyListBoxContents(List taxonomyList)
     {
         //No Mascot style taxonomy in Sequest
     }
 
+    @Override
     public String getSelectedTaxonomy()
     {
         //No Mascot style taxonomy in Sequest
         return null;
     }
 
+    @Override
     public String setDefaultTaxonomy(String name)
     {
         //No Mascot style taxonomy in Sequest
         return null;
     }
 
+    @Override
     public void addTaxonomyChangeHandler(ChangeHandler handler) {
        //No Mascot style taxonomy in Sequest
     }

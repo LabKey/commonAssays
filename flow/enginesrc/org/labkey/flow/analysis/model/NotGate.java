@@ -70,11 +70,13 @@ public class NotGate extends Gate implements SubsetExpressionGate
         return _gate.isSimilar(notGate._gate);
     }
 
+    @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         _gate.getPolygons(list, xAxis, yAxis);
     }
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = _gate.apply(populations, data);
@@ -82,6 +84,7 @@ public class NotGate extends Gate implements SubsetExpressionGate
         return bits;
     }
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         return _gate.requiresCompensationMatrix();
@@ -94,6 +97,7 @@ public class NotGate extends Gate implements SubsetExpressionGate
         return ret;
     }
 
+    @Override
     public SubsetExpression.NotTerm createTerm()
     {
         if (!(_gate instanceof SubsetExpressionGate))

@@ -29,6 +29,7 @@ import org.junit.Test;
  */
 public class BooleanParamsValidator implements IParamsValidator
 {
+    @Override
     public String validate(Param spp)
     {
         String parserError = "";

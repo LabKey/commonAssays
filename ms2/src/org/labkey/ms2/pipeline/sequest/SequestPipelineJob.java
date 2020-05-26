@@ -63,21 +63,25 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         super(job, fileFraction);
     }
 
+    @Override
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new SequestPipelineJob(this, file);
     }
 
+    @Override
     public TaskId getTaskPipelineId()
     {
         return TASK_ID;
     }
 
+    @Override
     public boolean isRefreshRequired()
     {
         return true;
     }
 
+    @Override
     public File getSearchNativeOutputFile()
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());

@@ -46,11 +46,13 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         return AttributeType.statistic;
     }
 
+    @Override
     protected Collection<AttributeCache.StatisticEntry> getAttributes()
     {
         return _fps.getStatistics();
     }
 
+    @Override
     protected StatisticSpec attributeFromString(String field)
     {
         try
@@ -63,6 +65,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         }
     }
 
+    @Override
     protected void initColumn(StatisticSpec stat, String preferredName, BaseColumnInfo column)
     {
         SubsetSpec subset = _fps.simplifySubset(stat.getSubset());
@@ -88,6 +91,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         column.setDimension(false);
     }
 
+    @Override
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic WHERE flow.Statistic.ObjectId = ");

@@ -26,31 +26,37 @@ import org.labkey.ms2.MS2RunType;
  */
 public class CometRun extends MS2Run
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.Comet;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return CometSearchTask.COMET_PARAMS;
     }
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "XCorr";
     }
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "xCorr";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-SpRank, -DeltaCn, -XCorr";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return EMPTY_STRING_ARRAY;

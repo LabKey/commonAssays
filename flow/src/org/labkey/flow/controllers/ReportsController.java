@@ -101,6 +101,7 @@ public class ReportsController extends BaseFlowController
             setViewContext(context);
         }
         
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return new BeginView();
@@ -235,6 +236,7 @@ public class ReportsController extends BaseFlowController
     {
         FlowReport r;
 
+        @Override
         public void validateCommand(CopyForm form, Errors errors)
         {
             FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
@@ -275,6 +277,7 @@ public class ReportsController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/copyReport.jsp", Pair.of(form, r), errors);
         }
 
+        @Override
         public boolean handlePost(CopyForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
@@ -285,6 +288,7 @@ public class ReportsController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(CopyForm idForm)
         {
             ActionURL url = new ActionURL(UpdateAction.class, getContainer()).addParameter("reportId", r.getReportId().toString());
@@ -309,6 +313,7 @@ public class ReportsController extends BaseFlowController
         IdForm _form;
         FlowReport r;
 
+        @Override
         public ModelAndView getConfirmView(IdForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
@@ -322,6 +327,7 @@ public class ReportsController extends BaseFlowController
             return new HtmlView(sb.toString());
         }
 
+        @Override
         public void validateCommand(IdForm idForm, Errors errors)
         {
             _form = idForm;
@@ -333,11 +339,13 @@ public class ReportsController extends BaseFlowController
             return _form.getReturnURLHelper(new ActionURL(BeginAction.class, getContainer()));
         }
 
+        @Override
         public ActionURL getSuccessURL(IdForm form)
         {
             return form.getReturnActionURL(new ActionURL(BeginAction.class, getContainer()));
         }
 
+        @Override
         public boolean handlePost(IdForm form, BindException errors)
         {
             r = getReport(getViewContext(), form);
@@ -433,11 +441,13 @@ public class ReportsController extends BaseFlowController
 
         ViewContext _context = null;
 
+        @Override
         public void setViewContext(ViewContext context)
         {
             _context = context;
         }
 
+        @Override
         public ViewContext getViewContext()
         {
             return _context;

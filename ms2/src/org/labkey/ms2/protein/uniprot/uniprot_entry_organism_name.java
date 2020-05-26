@@ -30,6 +30,7 @@ public class uniprot_entry_organism_name extends CharactersParseActions
         _log = log;
     }
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())
@@ -46,6 +47,7 @@ public class uniprot_entry_organism_name extends CharactersParseActions
         _accumulated = "";
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (context.isIgnorable())

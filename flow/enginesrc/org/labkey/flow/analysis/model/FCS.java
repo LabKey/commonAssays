@@ -44,6 +44,7 @@ public class FCS extends FCSHeader
         load(f);
     }
 
+    @Override
     protected void load(InputStream is) throws IOException
     {
         super.load(is);
@@ -333,6 +334,7 @@ public class FCS extends FCSHeader
     {
         private FcsFileFilter() {}
 
+        @Override
         public boolean accept(File file)
         {
             int i;
@@ -355,6 +357,7 @@ public class FCS extends FCSHeader
 			return isFCSFile(file);
         }
 
+        @Override
         public boolean accept(File dir, String name)
         {
             int i;

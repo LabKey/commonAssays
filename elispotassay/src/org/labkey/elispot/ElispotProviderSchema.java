@@ -60,6 +60,7 @@ public class ElispotProviderSchema extends AssayProviderSchema
         {
             EnumTableInfo<ElispotAssayProvider.PlateReaderType> result = new EnumTableInfo<>(ElispotAssayProvider.PlateReaderType.class, this, new EnumTableInfo.EnumValueGetter<ElispotAssayProvider.PlateReaderType>()
             {
+                @Override
                 public String getValue(ElispotAssayProvider.PlateReaderType e)
                 {
                     return e.getLabel();

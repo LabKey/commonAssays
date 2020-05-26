@@ -38,16 +38,19 @@ public class SequestSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
         // Use the get() function.
     }
 
+    @Override
     public String getName()
     {
         return "sequest";
     }
 
+    @Override
     public String getDefaultParametersResource()
     {
         return "org/labkey/ms2/pipeline/sequest/SequestDefaults.xml";
     }
 
+    @Override
     public AbstractMS2SearchProtocol createProtocolInstance(String name, String description, String xml)
     {
         return new SequestSearchProtocol(name, description, xml);

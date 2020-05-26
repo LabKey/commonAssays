@@ -252,15 +252,18 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         sequenceDbPathListBox.addChangeHandler(changeHandler);
     }
 
+    @Override
     public void setName(String name) {
         sequenceDbListBox.setName(name);
         sequenceDbPathListBox.setName(name + "Path");
     }
 
+    @Override
     public String getName() {
         return sequenceDbListBox.getName();
     }
 
+    @Override
     public void setWidth(String width)
     {
         instance.setWidth(width);
@@ -283,6 +286,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         sequenceDbListBox.addClickHandler(handler);
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
@@ -326,6 +330,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         }
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label("Protein database");
@@ -336,6 +341,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
         return panel;
     }
 
+    @Override
     public String validate()
     {
         if(getSelectedDb().equals("") || getSelectedDb().equals("None found.") )
@@ -383,11 +389,13 @@ public abstract class SequenceDbComposite extends SearchFormComposite
             super("Refresh");
         }
 
+        @Override
         public void onClick(Widget sender)
         {
         }
     }
 
+    @Override
     public String syncXmlToForm(ParamParser params)
     {
         String sequenceDb = params.getInputParameter(ParameterNames.SEQUENCE_DB);

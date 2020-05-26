@@ -56,6 +56,7 @@ public class RunsForm extends FlowQueryForm
         _scriptId = scriptId;
     }
 
+    @Override
     protected FlowSchema createSchema()
     {
         FlowSchema ret = (FlowSchema)super.createSchema();
@@ -78,6 +79,7 @@ public class RunsForm extends FlowQueryForm
         return _script;
     }
 
+    @Override
     public QuerySettings createQuerySettings(UserSchema schema)
     {
         QuerySettings ret = super.createQuerySettings(schema);

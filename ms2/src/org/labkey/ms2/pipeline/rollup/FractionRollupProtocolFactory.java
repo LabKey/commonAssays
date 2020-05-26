@@ -40,11 +40,13 @@ public class FractionRollupProtocolFactory extends AbstractMS2SearchProtocolFact
         return "org/labkey/ms2/pipeline/rollup/FractionRollupDefaults.xml";
     }
 
+    @Override
     public String getName()
     {
         return "rollup";
     }
 
+    @Override
     public FractionRollupProtocol createProtocolInstance(String name, String description, String xml)
     {
         return new FractionRollupProtocol(name, description, xml);

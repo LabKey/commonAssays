@@ -27,11 +27,13 @@ public enum CustomAnnotationType
 {
     IPI("IPI", IdentifierType.IPI)
     {
+        @Override
         protected String getIdentifierSelectSQL()
         {
             return ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12");
         }
 
+        @Override
         public String validateUserLookupString(String lookupString)
         {
             if (!lookupString.startsWith("IPI"))

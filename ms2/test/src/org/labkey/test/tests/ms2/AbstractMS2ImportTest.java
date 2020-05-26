@@ -57,6 +57,7 @@ public abstract class AbstractMS2ImportTest extends MS2TestBase
     protected static final String ENZYME = "trypsin";
     protected static final String MASS_SPEC = "ThermoFinnigan";
 
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(SEARCH_TYPE);

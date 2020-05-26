@@ -63,6 +63,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     }
 
 
+    @Override
     public boolean hasNext()
     {
         if (null == _parser)
@@ -85,6 +86,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     }
 
 
+    @Override
     public SimpleScan next()
     {
         if (null == _nextSimpleScan)
@@ -95,6 +97,7 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
     }
 
 
+    @Override
     public void close()
     {
         // apparently _parser does not need to be closed
@@ -121,11 +124,13 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             _scanHeader = scanHeader;
         }
 
+        @Override
         public int getScan()
         {
             return _scanHeader.getNum();
         }
 
+        @Override
         public Double getRetentionTime()
         {
             if (_scanHeader.getRetentionTime() == null)
@@ -137,11 +142,13 @@ public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
             return ret.getHour() * 60 * 60 + ret.getMinute() * 60 + ret.getSecond() + ret.getFraction().doubleValue();
         }
 
+        @Override
         public int getMSLevel()
         {
             return _scanHeader.getMsLevel();
         }
 
+        @Override
         public float[][] getData() throws IOException
         {
             if (null == _scan)

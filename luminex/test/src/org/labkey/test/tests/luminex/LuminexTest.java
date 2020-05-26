@@ -114,6 +114,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         setDefaultWaitForPage(60000);
     }
 
+    @Override
     public List<String> getAssociatedModules()
     {
         return Arrays.asList("luminex");
@@ -542,6 +543,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
      * Cleanup entry point.
      * @param afterTest
      */
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         _containerHelper.deleteProject(getProjectName(), afterTest);

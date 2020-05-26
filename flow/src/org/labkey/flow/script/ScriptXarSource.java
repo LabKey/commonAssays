@@ -63,31 +63,37 @@ public class ScriptXarSource extends XarSource
         }
     }
 
+    @Override
     public String canonicalizeDataFileURL(String dataFileURL)
     {
         return FileUtil.getAbsoluteCaseSensitivePathString(getXarContext().getContainer(), FileUtil.createUri(dataFileURL));   //new File(dataFileURL).toURI().toString();
     }
 
+    @Override
     public File getRoot()
     {
         return _root;
     }
 
+    @Override
     public Path getRootPath()
     {
         return null != getRoot() ? getRoot().toPath() : null;
     }
 
+    @Override
     public boolean shouldIgnoreDataFiles()
     {
         return false;
     }
 
+    @Override
     public ExperimentArchiveDocument getDocument()
     {
         return _doc;
     }
 
+    @Override
     public File getLogFile()
     {
         return _logFile;

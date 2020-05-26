@@ -103,6 +103,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
         var col = new ExprColumn(this, "Protein", sql, JdbcType.INTEGER);
         col.setFk(new LookupForeignKey("SeqId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 MS2Schema schema = new MS2Schema(_userSchema.getUser(), _userSchema.getContainer());

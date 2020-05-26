@@ -73,6 +73,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
         return _fractionColInfo;
     }
 
+    @Override
     public Object getValue(RenderContext ctx)
     {
         Integer fractionId = (Integer)getColumnValue(ctx, _fractionColInfo, "Fraction", "Fraction$Fraction");
@@ -105,6 +106,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
     }
 
 
+    @Override
     public Class getValueClass()
     {
         return Double.class;
@@ -176,6 +178,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
     }
 
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         set.add(_fractionColInfo);

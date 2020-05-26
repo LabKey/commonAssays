@@ -49,6 +49,7 @@ public class MoveRunFromWorkspaceJob extends ScriptJob
     }
 
 
+    @Override
     protected void doRun() throws Throwable
     {
         getAnalysisHandler()._getScriptFromWells = true;

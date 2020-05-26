@@ -36,29 +36,34 @@ public class DataFrameXYDataset extends AbstractXYDataset
         _yAxis = yAxis;
     }
 
+    @Override
     public int getSeriesCount()
     {
         return 1;
     }
 
+    @Override
     public String getSeriesKey(int series)
     {
         assert series == 0;
         return "First series";
     }
 
+    @Override
     public int getItemCount(int series)
     {
         assert series == 0;
         return _data.getRowCount();
     }
 
+    @Override
     public Number getX(int series, int x)
     {
         assert series == 0;
         return Double.valueOf(_data.getColumn(_xAxis).getDouble(x));
     }
 
+    @Override
     public Number getY(int series, int y)
     {
         assert series == 0;

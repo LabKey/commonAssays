@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
  */
 public class MS2ServiceImpl implements MS2Service
 {
+    @Override
     public SearchClient createSearchClient(String server, String url, Logger instanceLogger, String userAccount, String userPassword)
     {
         if(server.equalsIgnoreCase(MS2RunType.Mascot.name()))
@@ -42,21 +43,25 @@ public class MS2ServiceImpl implements MS2Service
         return null;
     }
 
+    @Override
     public TableInfo createPeptidesTableInfo(User user, Container container)
     {
         return createPeptidesTableInfo(user, container, true, ContainerFilter.current(container), null, null);
     }
 
+    @Override
     public TableInfo createSequencesTableInfo(User user, Container container)
     {
         return new MS2Schema(user, container).getTable(MS2Schema.TableType.Sequences.toString());
     }
 
+    @Override
     public MS2Schema createSchema(User user, Container container)
     {
         return new MS2Schema(user, container);
     }
 
+    @Override
     public TableInfo createPeptidesTableInfo(User user, Container container, boolean includeFeatureFk, ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns)
     {
         // Go through the schema so we get metadata applied correctly

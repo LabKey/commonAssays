@@ -51,6 +51,7 @@ public class ControlsQCReport extends FilterFlowReport
         return url;
     }
 
+    @Override
     public String getType()
     {
         return TYPE;

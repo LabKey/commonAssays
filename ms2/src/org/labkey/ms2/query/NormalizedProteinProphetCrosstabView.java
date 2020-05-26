@@ -37,11 +37,13 @@ public class NormalizedProteinProphetCrosstabView extends AbstractQueryCrosstabV
         super(schema, form, viewContext, MS2Schema.HiddenTableType.ProteinProphetNormalizedCrosstab);
     }
 
+    @Override
     protected TableInfo createTable()
     {
         return _schema.createNormalizedProteinProphetComparisonTable(_form, getViewContext());
     }
 
+    @Override
     protected FieldKey getComparisonColumn()
     {
         return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_ProteinGroupId");

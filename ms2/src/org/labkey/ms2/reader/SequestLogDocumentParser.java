@@ -36,11 +36,13 @@ public class SequestLogDocumentParser extends AbstractDocumentParser
         // Intentionally no-op as the content isn't very interesting for full text search
     }
 
+    @Override
     public String getMediaType()
     {
         return "text/plain";
     }
 
+    @Override
     public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         return SequestSearchTask.SEQUEST_LOG_FILE_TYPE.isType(resource.getName());

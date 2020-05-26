@@ -110,26 +110,31 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
             super(KeywordsTask.class);
         }
 
+        @Override
         public List<FileType> getInputTypes()
         {
             return Collections.emptyList();
         }
 
+        @Override
         public String getStatusName()
         {
             return "FCS KEYWORDS";
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Collections.emptyList();
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new KeywordsTask(this, job);
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             return false;

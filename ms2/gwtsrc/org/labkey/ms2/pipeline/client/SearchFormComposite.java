@@ -47,6 +47,7 @@ public abstract class SearchFormComposite extends Composite implements HasName
          this.readOnly = readOnly;
      }
 
+    @Override
     abstract public void setWidth(String width);
 
     abstract public Widget getLabel();

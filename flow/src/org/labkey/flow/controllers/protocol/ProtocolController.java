@@ -74,11 +74,13 @@ public class ProtocolController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<ProtocolForm>
     {
+        @Override
         public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             return HttpView.redirect(urlFor(ProtocolController.ShowProtocolAction.class));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -89,12 +91,14 @@ public class ProtocolController extends BaseFlowController
     {
         FlowProtocol protocol = null;
 
+        @Override
         public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/showProtocol.jsp", form, errors);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, protocol, "Protocol");
@@ -106,12 +110,14 @@ public class ProtocolController extends BaseFlowController
     {
         FlowProtocol protocol;
 
+        @Override
         public ModelAndView getView(ProtocolForm form, BindException errors)
         {
             protocol = form.getProtocol();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/showSamples2.jsp", form, errors);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, protocol, "Show Samples");
@@ -123,16 +129,19 @@ public class ProtocolController extends BaseFlowController
     {
         private int _fileCount;
 
+        @Override
         public void validateCommand(JoinSampleSetForm form, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/joinSampleSet.jsp", form);
         }
 
+        @Override
         public boolean handlePost(JoinSampleSetForm form, BindException errors) throws Exception
         {
             Map<String, FieldKey> fields = new LinkedHashMap();
@@ -150,11 +159,13 @@ public class ProtocolController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(JoinSampleSetForm form)
         {
             return getProtocol().urlFor(UpdateSamplesAction.class).addParameter("fileCount", _fileCount);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, getProtocol(), "Join Samples");
@@ -166,12 +177,14 @@ public class ProtocolController extends BaseFlowController
     {
         FlowProtocol protocol;
 
+        @Override
         public ModelAndView getView(UpdateSamplesForm form, BindException errors) throws Exception
         {
             protocol = form.getProtocol();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/updateSamples.jsp", form);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, protocol, "Update Samples");
@@ -181,16 +194,19 @@ public class ProtocolController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditFCSAnalysisNameAction extends ProtocolViewAction<EditFCSAnalysisNameForm>
     {
+        @Override
         public void validateCommand(EditFCSAnalysisNameForm form, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(EditFCSAnalysisNameForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/editFCSAnalysisName.jsp", form);
         }
 
+        @Override
         public boolean handlePost(EditFCSAnalysisNameForm form, BindException errors) throws Exception
         {
             getProtocol().setFCSAnalysisNameExpr(getUser(), form.getFieldSubstitution());
@@ -198,11 +214,13 @@ public class ProtocolController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(EditFCSAnalysisNameForm form)
         {
             return getProtocol().urlShow();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Name");
@@ -212,27 +230,32 @@ public class ProtocolController extends BaseFlowController
     @RequiresPermission(UpdatePermission.class)
     public class EditFCSAnalysisFilterAction extends ProtocolViewAction<EditFCSAnalysisFilterForm>
     {
+        @Override
         public void validateCommand(EditFCSAnalysisFilterForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(EditFCSAnalysisFilterForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/editFCSAnalysisFilter.jsp", form);
         }
 
+        @Override
         public boolean handlePost(EditFCSAnalysisFilterForm form, BindException errors) throws Exception
         {
             getProtocol().setFCSAnalysisFilter(getUser(), form.getFilterValue());
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(EditFCSAnalysisFilterForm form)
         {
             return getProtocol().urlShow();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit FCS Analysis Filter");
@@ -244,10 +267,12 @@ public class ProtocolController extends BaseFlowController
     {
         ICSMetadata metadata;
 
+        @Override
         public void validateCommand(EditICSMetadataForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(EditICSMetadataForm form, boolean reshow, BindException errors)
         {
             if (metadata == null)
@@ -257,6 +282,7 @@ public class ProtocolController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/protocol/editICSMetadata.jsp", form, errors);
         }
 
+        @Override
         public boolean handlePost(EditICSMetadataForm form, BindException errors) throws Exception
         {
             // Populate a new ICSMetadata from the form posted values.
@@ -287,6 +313,7 @@ public class ProtocolController extends BaseFlowController
             }
         }
 
+        @Override
         public ActionURL getSuccessURL(EditICSMetadataForm form)
         {
             ActionURL url = form.getReturnActionURL();
@@ -295,6 +322,7 @@ public class ProtocolController extends BaseFlowController
             return url;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             addFlowNavTrail(getPageConfig(), root, getProtocol(), "Edit Metadata");

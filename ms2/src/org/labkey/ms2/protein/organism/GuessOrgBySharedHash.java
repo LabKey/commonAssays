@@ -51,6 +51,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         HASHCMD = sql;
     }
 
+    @Override
     public String guess(ProteinPlus p)
     {
         startTimer();
@@ -68,6 +69,7 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         return retVal;
     }
 
+    @Override
     public void close()
     {
     }

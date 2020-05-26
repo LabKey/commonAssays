@@ -26,6 +26,7 @@ import org.xml.sax.Attributes;
 
 public class uniprot_entry_protein_name extends CharactersParseActions
 {
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -37,6 +38,7 @@ public class uniprot_entry_protein_name extends CharactersParseActions
     }
 
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (context.isIgnorable())

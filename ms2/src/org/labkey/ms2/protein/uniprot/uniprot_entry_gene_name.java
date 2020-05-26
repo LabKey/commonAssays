@@ -23,6 +23,7 @@ public class uniprot_entry_gene_name extends CharactersParseActions
 
     private String curType = null;
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())
@@ -39,6 +40,7 @@ public class uniprot_entry_gene_name extends CharactersParseActions
         _accumulated = "";
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (context.isIgnorable())

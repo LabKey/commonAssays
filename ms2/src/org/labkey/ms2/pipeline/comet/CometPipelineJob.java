@@ -63,16 +63,19 @@ public class CometPipelineJob extends AbstractMS2SearchPipelineJob
         super(job, fileFraction);
     }
 
+    @Override
     public AbstractFileAnalysisJob createSingleFileJob(File file)
     {
         return new CometPipelineJob(this, file);
     }
 
+    @Override
     public TaskId getTaskPipelineId()
     {
         return TASK_ID;
     }
 
+    @Override
     public File getSearchNativeOutputFile()
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());

@@ -35,6 +35,7 @@ public class KeywordMethod extends AbstractTableMethodInfo
         _objectIdColumn = objectIdColumn;
     }
 
+    @Override
     public SQLFragment getSQL(String tableAlias, DbSchema schema, SQLFragment[] arguments)
     {
         if (arguments.length != 1)

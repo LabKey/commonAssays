@@ -95,11 +95,13 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             super(SequestSearchTask.class);
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new SequestSearchTask(this, job);
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(MAKEDB_ACTION_NAME, MZXML2SEARCH_ACTION_NAME, SEQUEST_ACTION_NAME);
@@ -111,6 +113,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         super(factory, job);
     }
 
+    @Override
     public SequestPipelineJob getJob()
     {
         return (SequestPipelineJob)super.getJob();
@@ -243,6 +246,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return Collections.singletonList(indexFile);
     }
 
+    @Override
     @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {
@@ -488,6 +492,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     {
         File[] dtaFiles = dirOutputDta.listFiles(new FilenameFilter()
         {
+            @Override
             public boolean accept(File dir, String name)
             {
                 return name.toLowerCase().endsWith(".dta");

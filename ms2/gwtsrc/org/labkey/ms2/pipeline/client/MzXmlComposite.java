@@ -77,21 +77,25 @@ public class MzXmlComposite extends SearchFormComposite
         }
     }
 
+    @Override
     public String getName()
     {
         return null;  //Not needed. Just Labels.
     }
 
+    @Override
     public void setName(String s)
     {
         //Not needed. Just Labels.
     }
 
+    @Override
     public void setWidth(String width)
     {
         //defaults are okay for now
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label("Input file(s)");
@@ -99,6 +103,7 @@ public class MzXmlComposite extends SearchFormComposite
         return label;
     }
 
+    @Override
     public String validate()
     {
         return null;  //No need for now.

@@ -46,6 +46,7 @@ public class ProteinSearchBean implements PeptideFilter
         return _peptideView;
     }
     
+    @Override
     public String getPeptideCustomViewName(ViewContext context)
     {
         return _form.getCustomViewName(context);

@@ -44,6 +44,7 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
         refreshPanel.add(refreshButton);
     }
 
+    @Override
     public void setWidth(String width)
     {
         super.setWidth(width);
@@ -77,6 +78,7 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
         {}
     }
 
+    @Override
     public void addClickHandler(ClickHandler handler)
     {
         if(GWT.getTypeName(handler).equals("org.labkey.ms2.pipeline.client.Search$RefreshSequenceDbPathsClickListener"))
@@ -85,23 +87,27 @@ public class XtandemSequenceDbComposite extends SequenceDbComposite
             super.addClickHandler(handler);
     }
 
+    @Override
     public void setTaxonomyListBoxContents(List taxonomyList)
     {
         //No Mascot style taxonomy in X! Tandem
     }
 
+    @Override
     public String getSelectedTaxonomy()
     {
         //No Mascot style taxonomy in X! Tandem
         return null;
     }
 
+    @Override
     public String setDefaultTaxonomy(String name)
     {
         //No Mascot style taxonomy in X! Tandem
         return null;
     }
 
+    @Override
     public void addTaxonomyChangeHandler(ChangeHandler handler) {
         ///No Mascot style taxonomy in X! Tandem
     }

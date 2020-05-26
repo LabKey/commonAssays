@@ -402,11 +402,13 @@ public class FCSHeader
     //
     public static SearchService.DocumentParser documentParser = new AbstractDocumentParser()
     {
+        @Override
         public String getMediaType()
         {
             return "application/fcs";
         }
 
+        @Override
         public boolean detect(WebdavResource resource, String contentType, byte[] buf)
         {
             if (contentType != null)
@@ -441,6 +443,7 @@ public class FCSHeader
             }
         }
 
+        @Override
         public void parseContent(InputStream stream, ContentHandler h) throws IOException, SAXException
         {
             StringBuilder sb = new StringBuilder(1000);

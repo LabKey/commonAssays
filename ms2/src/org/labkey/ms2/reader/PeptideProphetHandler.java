@@ -28,6 +28,7 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
 {
     public final static String analysisType = "peptideprophet";
 
+    @Override
     protected PeptideProphetResult getResult(SimpleXMLStreamReader parser) throws XMLStreamException
     {
         PeptideProphetResult result = new PeptideProphetResult();
@@ -82,6 +83,7 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
     }
 
 
+    @Override
     protected String getAnalysisType()
     {
         return analysisType;
@@ -111,6 +113,7 @@ public class PeptideProphetHandler extends PepXmlAnalysisResultHandler
             _probability = probability;
         }
 
+        @Override
         public String getAnalysisType()
         {
             return "peptideprophet";

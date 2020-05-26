@@ -32,6 +32,7 @@ public class MascotDatExperimentDataHandler extends PepXmlExperimentDataHandler
         return context.getJob() == null || !"false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_DAT_RESULTS));
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         if (data != null && data.getFile() != null && FilenameUtils.isExtension(data.getFile().getName(), "dat"))
