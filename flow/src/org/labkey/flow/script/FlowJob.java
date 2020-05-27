@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public abstract class FlowJob extends PipelineJob
 {
-    private static Logger _log = getJobLogger(FlowJob.class);
+    private static final Logger _log = getJobLogger(FlowJob.class);
 
     private volatile Date _start;
     private volatile Date _end;

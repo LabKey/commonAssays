@@ -601,7 +601,6 @@ ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemInputXmlComposite.java -
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemResidueModComposite.java -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/client/tandem/XtandemSequenceDbComposite.java -text
 ms2/module.properties -text
-ms2/resources/credits/jars.txt -text
 ms2/resources/credits/scripts.txt -text
 ms2/resources/queries/ms2/CometPeptides/ProteinProphet.qview.xml -text
 ms2/resources/queries/ms2/CometPeptides/SearchEngineProtein.qview.xml -text
@@ -1005,7 +1004,6 @@ ms2/test/src/org/labkey/test/ms2/AbstractXTandemTest.java -text
 ms2/test/src/org/labkey/test/ms2/MS2PipelineFolder.java -text
 ms2/test/src/org/labkey/test/ms2/MS2TestBase.java -text
 ms2/test/src/org/labkey/test/ms2/QuantitationTest.java -text
-ms2/test/src/org/labkey/test/ms2/SequestTest.java -text
 ms2/test/src/org/labkey/test/ms2/params/MS2EmailSuccessParams.java -text
 ms2/test/src/org/labkey/test/ms2/params/MS2TestParams.java -text
 ms2/test/src/org/labkey/test/pages/ms2/MascotConfigPage.java -text
