@@ -34,11 +34,13 @@ public class DensityColorBar extends ColorBar
         super(label);
         }
 
+    @Override
     public AxisSpace reserveSpace(Graphics2D g2, Plot plot, Rectangle2D plotArea, Rectangle2D dataArea, RectangleEdge edge, AxisSpace space)
         {
         return new AxisSpace();
         }
 
+        @Override
         public double draw(Graphics2D g2, double cursor, Rectangle2D plotArea, Rectangle2D dataArea, Rectangle2D reservedArea, RectangleEdge edge)
         {
             // no-op

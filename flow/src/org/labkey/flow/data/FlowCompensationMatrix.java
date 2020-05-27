@@ -135,11 +135,13 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return ret;
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return urlFor(CompensationController.ShowCompensationAction.class);
     }
 
+    @Override
     public ActionURL urlDownload()
     {
         return urlFor(CompensationController.DownloadAction.class);
@@ -151,12 +153,14 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.CompensationMatrices.name(), FieldKey.fromParts("RowId"), getRowId());
     }
 
+    @Override
     public void addParams(Map<FlowParam, Object> map)
     {
         map.put(FlowParam.compId, getCompId());
     }
 
 
+    @Override
     public String getLabel()
     {
         return getLabel(false);

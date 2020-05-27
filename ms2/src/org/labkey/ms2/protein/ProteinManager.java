@@ -805,6 +805,7 @@ public class ProteinManager
             return "(StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%[KR][^P]' OR StrippedPeptide " + dialect.getCharClassLikeOperator() + " '%-')";
         }
 
+        @Override
         public List<FieldKey> getFieldKeys()
         {
             return Arrays.asList(FieldKey.fromParts("StrippedPeptide"));
@@ -1050,6 +1051,7 @@ public class ProteinManager
             return sqlf;
         }
 
+        @Override
         public List<FieldKey> getFieldKeys()
         {
             return Arrays.asList(FieldKey.fromParts("TrimmedPeptide"));
@@ -1101,6 +1103,7 @@ public class ProteinManager
             return sqlf;
         }
 
+        @Override
         public List<FieldKey> getFieldKeys()
         {
             return Arrays.asList(FieldKey.fromParts("RowId"));

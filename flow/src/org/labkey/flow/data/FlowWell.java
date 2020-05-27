@@ -242,6 +242,7 @@ public class FlowWell extends FlowDataObject
         return FlowManager.get().getGraphBytes(getData(), graph);
     }
 
+    @Override
     public String getLabel()
     {
         String prefix;
@@ -270,16 +271,19 @@ public class FlowWell extends FlowDataObject
         return getRowId();
     }
 
+    @Override
     public void addParams(Map<FlowParam,Object> map)
     {
         map.put(FlowParam.wellId, getWellId());
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return urlFor(WellController.ShowWellAction.class);
     }
 
+    @Override
     public ActionURL urlDownload()
     {
         return urlFor(WellController.DownloadAction.class);

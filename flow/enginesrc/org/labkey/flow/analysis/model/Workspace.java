@@ -182,6 +182,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
             final long[] len = new long[1];
             OutputStream counterStream = new OutputStream()
             {
+                @Override
                 public void write(int i)
                 {
                     len[0] += 4;
@@ -335,6 +336,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     }
 
     /** Get the sample list from the "All Samples" group or get all the samples in the workspace. */
+    @Override
     public List<SampleInfo> getSamples()
     {
         GroupInfo allSamplesGroup = getAllSamplesGroup();
@@ -351,6 +353,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     }
 
     /** Get the sample ID list from the "All Samples" group or get all the samples in the workspace. */
+    @Override
     public List<String> getSampleIds()
     {
         List<SampleInfo> allSamples = getSamples();
@@ -365,6 +368,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     }
 
     /** Get the sample label list from the "All Samples" group or get all the samples in the workspace. */
+    @Override
     public List<String> getSampleLabels()
     {
         List<SampleInfo> allSamples = getSamples();
@@ -388,6 +392,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
      * @param sampleIdOrLabel Sample ID or FCS filename.
      * @return SampleInfo
      */
+    @Override
     public SampleInfo getSample(String sampleIdOrLabel)
     {
         SampleInfo sample = findSample(_sampleInfos, sampleIdOrLabel);
@@ -523,11 +528,13 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
             _compensationId = id;
         }
 
+        @Override
         public Analysis getAnalysis()
         {
             return getSampleAnalysis(this);
         }
 
+        @Override
         public AttributeSet getAnalysisResults()
         {
             return getSampleAnalysisResults(this);
@@ -553,6 +560,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
         }
 
         /** Returns the spill matrix or FlowJo applied comp matrix. */
+        @Override
         public CompensationMatrix getCompensationMatrix()
         {
             if (_compensationId == null)

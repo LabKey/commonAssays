@@ -51,6 +51,7 @@ public class Population extends PopulationSet
         return _gates.equals(pop._gates);
     }
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         if (super.requiresCompensationMatrix())

@@ -32,6 +32,7 @@ public class XPressHandler extends PepXmlAnalysisResultHandler
 {
     public final static String analysisType = "xpress";
 
+    @Override
     protected XPressResult getResult(SimpleXMLStreamReader parser) throws XMLStreamException
     {
         parser.skipToStart("xpressratio_result");
@@ -63,6 +64,7 @@ public class XPressHandler extends PepXmlAnalysisResultHandler
         return Float.parseFloat(stringValue);
     }
 
+    @Override
     protected String getAnalysisType()
     {
         return analysisType;
@@ -93,6 +95,7 @@ public class XPressHandler extends PepXmlAnalysisResultHandler
             this.heavy2lightRatio = heavy2lightRatio;
         }
 
+        @Override
         public String getAnalysisType()
         {
             return "xpress";

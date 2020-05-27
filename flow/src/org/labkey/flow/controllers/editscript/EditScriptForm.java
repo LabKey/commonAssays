@@ -278,6 +278,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         return ret;
     }
 
+    @Override
     public ActionURL urlFor(Class<? extends Controller> actionClass)
     {
         ActionURL url = super.urlFor(actionClass);

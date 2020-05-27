@@ -124,6 +124,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         }
     }
 
+    @Override
     public File findInputFile(String name)
     {
         for (File fileInput : getInputFiles())
@@ -148,6 +149,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return analysisFile;
     }
 
+    @Override
     public File findOutputFile(String name)
     {
         // Look through all of the tasks in this pipeline
@@ -177,6 +179,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
      * Override to turn off PeptideProphet and ProteinProphet analysis.
      * @return true if Prophets should run.
      */
+    @Override
     public boolean isProphetEnabled()
     {
         return true;
@@ -186,11 +189,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
      * Override to turn on RefreshParser during TPP analysis.
      * @return true if RefreshParser should run.
      */
+    @Override
     public boolean isRefreshRequired()
     {
         return false;
     }
 
+    @Override
     public List<File> getInteractInputFiles()
     {
         List<File> files = new ArrayList<>();
@@ -203,6 +208,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return files;
     }
 
+    @Override
     public List<File> getInteractSpectraFiles()
     {
         // Default to looking for just mzXML files
@@ -238,16 +244,19 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return files;
     }
 
+    @Override
     public File getSearchNativeSpectraFile()
     {
         return null;    // No spectra conversion by default.
     }
 
+    @Override
     public File getSequenceRootDirectory()
     {
         return _dirSequenceRoot;
     }
 
+    @Override
     public File[] getSequenceFiles()
     {
         ArrayList<File> arrFiles = new ArrayList<>();
@@ -263,11 +272,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         return arrFiles.toArray(new File[arrFiles.size()]);
     }
 
+    @Override
     public boolean isFractions()
     {
         return _fractions;
     }
 
+    @Override
     public boolean isSamples()
     {
         return !_fractions || DATATYPE_BOTH.equalsIgnoreCase(getParameters().get("pipeline, data type"));

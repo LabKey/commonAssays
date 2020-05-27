@@ -193,6 +193,7 @@ public class FlowScript extends FlowDataObject
         return well;
     }
 
+    @Override
     public void addParams(Map<FlowParam, Object> map)
     {
         map.put(FlowParam.scriptId, getScriptId());
@@ -203,11 +204,13 @@ public class FlowScript extends FlowDataObject
         return getData().getRunId() != null;
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return urlFor(AnalysisScriptController.BeginAction.class);
     }
 
+    @Override
     public ActionURL urlDownload()
     {
         return urlFor(ScriptController.DownloadAction.class);
@@ -219,11 +222,13 @@ public class FlowScript extends FlowDataObject
         return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.AnalysisScripts.name(), FieldKey.fromParts("RowId"), getRowId());
     }
 
+    @Override
     public String getLabel()
     {
         return "Script '" + getName() + "'";
     }
 
+    @Override
     public FlowObject getParent()
     {
         return null;

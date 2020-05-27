@@ -24,6 +24,7 @@ import org.labkey.api.util.DateUtil;
 
 public class uniprot_entry_sequence extends CharactersParseActions
 {
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())
@@ -54,6 +55,7 @@ public class uniprot_entry_sequence extends CharactersParseActions
         }
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (context.isIgnorable())

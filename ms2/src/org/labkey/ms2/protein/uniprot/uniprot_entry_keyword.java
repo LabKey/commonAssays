@@ -22,6 +22,7 @@ public class uniprot_entry_keyword extends CharactersParseActions
 {
     private UniprotIdentifier _currentIdentifier;
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs) throws SAXException
     {
         if (context.isIgnorable())
@@ -39,6 +40,7 @@ public class uniprot_entry_keyword extends CharactersParseActions
         context.getIdentifiers().add(_currentIdentifier);
     }
 
+    @Override
     public void endElement(ParseContext context)
     {
         if (context.isIgnorable())

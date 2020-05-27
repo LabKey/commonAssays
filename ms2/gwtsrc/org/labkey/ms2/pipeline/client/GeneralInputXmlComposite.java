@@ -37,6 +37,7 @@ public class GeneralInputXmlComposite extends InputXmlComposite
         _helpTopic = helpTopic;
     }
 
+    @Override
     public String update(String text)
     {
         if(params == null)
@@ -44,6 +45,7 @@ public class GeneralInputXmlComposite extends InputXmlComposite
         return super.update(text);
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label(_description);

@@ -106,6 +106,7 @@ public class GraphColumn extends DataColumn
         return _showGraphs;
     }
 
+    @Override
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         renderGraph(ctx, out);

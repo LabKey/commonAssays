@@ -130,6 +130,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
         return PopulationName.fromString(_raw + suffix);
     }
 
+    @Override
     public String toString(boolean escape, boolean withinExpression)
     {
         if (!escape)

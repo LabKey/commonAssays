@@ -53,6 +53,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         return DATA_TYPE;
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
@@ -70,6 +71,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         return null;
     }
 
+    @Override
     public Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
     {
         return new Parser(runDomain, resultsDomain, dataFile);
@@ -82,6 +84,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
             super(runDomain, resultsDomain, dataFile);
         }
 
+        @Override
         protected void _parse() throws IOException
         {
             TabLoader tl = new TabLoader(_dataFile, true);
@@ -95,6 +98,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
                     // parses a comma separated list as List<String>
                     cd.converter = new Converter()
                     {
+                        @Override
                         public Object convert(Class type, Object value)
                         {
                             Converter c = new StringArrayConverter();
@@ -128,6 +132,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         assert dataFile.getName().endsWith(".tsv") || dataFile.getName().endsWith(".TSV");

@@ -24,5 +24,6 @@ import java.util.Iterator;
  */
 public interface SimpleScanIterator extends Iterator<SimpleScan>, AutoCloseable
 {
+    @Override
     void close();
 }

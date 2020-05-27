@@ -28,6 +28,7 @@ public class Mac2Workspace extends MacWorkspace
        super(name, path, elDoc);
     }
 
+    @Override
     protected void readSamples(Element elDoc)
     {
         String samplesTagName = "SampleList";
@@ -48,6 +49,7 @@ public class Mac2Workspace extends MacWorkspace
         }
     }
 
+    @Override
     protected SampleInfo readSample(Element elSample)
     {
         SampleInfo ret = new SampleInfo();
@@ -71,6 +73,7 @@ public class Mac2Workspace extends MacWorkspace
         return ret;
     }
 
+    @Override
     protected void readGroups(Element elDoc)
     {
         for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
@@ -91,6 +94,7 @@ public class Mac2Workspace extends MacWorkspace
         }
     }
 
+    @Override
     protected GroupInfo readGroup(Element elGroup)
     {
         GroupInfo ret = new GroupInfo();
@@ -110,11 +114,13 @@ public class Mac2Workspace extends MacWorkspace
         return ret;
     }
     
+    @Override
     protected void readSampleAnalyses(Element elDoc)
     {
         assert false : "readSampleAnalysis() now called form readSamples()";
     }
 
+    @Override
     protected void readGroupAnalyses(Element elDoc)
     {
         assert false : "readGroupAnalysis() now called form readGroups()";

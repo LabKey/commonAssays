@@ -97,6 +97,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         addStepHandler(new AnalyteStepHandler());
     }
 
+    @Override
     protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -664,6 +665,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return names.toArray(new String[names.size()]);
     }
 
+    @Override
     protected void addSampleInputColumns(LuminexRunUploadForm form, InsertView insertView)
     {
         // Don't add any columns - they're part of the uploaded spreadsheet
@@ -862,6 +864,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 return null;
         }
 
+        @Override
         public String getName()
         {
             return NAME;

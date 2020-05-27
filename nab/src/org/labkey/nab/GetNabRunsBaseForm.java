@@ -30,11 +30,13 @@ public abstract class GetNabRunsBaseForm implements HasViewContext
     private boolean _includeFitParameters = true;
     private boolean _calculateNeut = true;
 
+    @Override
     public ViewContext getViewContext()
     {
         return _viewContext;
     }
 
+    @Override
     public void setViewContext(ViewContext viewContext)
     {
         _viewContext = viewContext;

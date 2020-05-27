@@ -42,7 +42,9 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
         super(protocolLSIDPrefix, runLSIDPrefix, resultLSIDPrefix, dataType);
     }
 
+    @Override
     public abstract String getName();
+    @Override
     public abstract String getResourceName();
 
     @Override
@@ -51,6 +53,7 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
         return new HtmlView("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");
     }
 
+    @Override
     public abstract DilutionDataHandler getDataHandler();
 
     @Override
@@ -59,6 +62,7 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
         // add no extra properties
     }
 
+    @Override
     public void registerLsidHandler()
     {
         // don't register parent's handler

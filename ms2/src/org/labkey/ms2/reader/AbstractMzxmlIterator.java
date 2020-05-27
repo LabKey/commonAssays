@@ -37,6 +37,7 @@ public abstract class AbstractMzxmlIterator implements SimpleScanIterator
         _msLevelFilter = msLevelFilter;
     }
 
+    @Override
     public void remove()
     {
         throw new UnsupportedOperationException();

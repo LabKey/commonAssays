@@ -33,21 +33,25 @@ public class CompareProteinsView extends AbstractRunCompareView
         super(context, runListIndex, forExport, MS2Schema.HiddenTableType.CompareProteinProphet.toString());
     }
 
+    @Override
     protected String getGroupingColumnName()
     {
         return "SeqId";
     }
 
+    @Override
     protected String getGroupHeader()
     {
         return "Protein Information";
     }
 
+    @Override
     public String getComparisonName()
     {
         return "Proteins";
     }
 
+    @Override
     protected TableInfo createTable()
     {
         return getSchema().createProteinProphetCompareTable(getViewContext().getRequest(), getViewContext().getRequest().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME));

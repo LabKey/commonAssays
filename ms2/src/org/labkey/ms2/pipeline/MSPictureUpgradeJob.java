@@ -72,6 +72,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
         return null;
     }
 
+    @Override
     public String getDescription()
     {
         return "mspicture attach files upgrade job";
@@ -155,6 +156,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                         // Grab all the files that are related based on naming convention
                         File[] relatedFiles = run.getFilePathRoot().listFiles(new FileFilter()
                         {
+                            @Override
                             public boolean accept(File pathname)
                             {
                                 String name = pathname.getName();

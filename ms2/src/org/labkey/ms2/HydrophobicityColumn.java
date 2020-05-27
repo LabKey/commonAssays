@@ -47,6 +47,7 @@ public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
         return _colInfo;
     }
 
+    @Override
     public Object getValue(RenderContext ctx)
     {
         String peptide = (String) getColumnValue(ctx, _colInfo, "Peptide");
@@ -56,6 +57,7 @@ public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
             return 0;
     }
 
+    @Override
     public Class getValueClass()
     {
         return Double.class;
@@ -66,6 +68,7 @@ public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
         return MS2Peptide.getHydrophobicityAlgorithm();
     }
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         set.add(_colInfo);

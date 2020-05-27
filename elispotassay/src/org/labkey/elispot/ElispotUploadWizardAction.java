@@ -78,6 +78,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         addStepHandler(new AnalyteStepHandler());
     }
 
+    @Override
     protected InsertView createRunInsertView(ElispotRunUploadForm newRunForm, boolean errorReshow, BindException errors) throws ExperimentException
     {
         InsertView view = super.createRunInsertView(newRunForm, errorReshow, errors);
@@ -165,6 +166,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         return new PlateAnalytePropertyHelper(form, form.getProvider().getAnalyteDomain(form.getProtocol()).getProperties());
     }
 
+    @Override
     protected void addRunActionButtons(ElispotRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
@@ -279,6 +281,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             view.getDataRegion().addHiddenFormField("comments", form.getComments());
     }
 
+    @Override
     protected ElispotRunStepHandler getRunStepHandler()
     {
         return new ElispotRunStepHandler();
@@ -421,6 +424,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 return getAnalyteView(form, false, errors);
         }
 
+        @Override
         public String getName()
         {
             return NAME;
@@ -480,6 +484,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 return null;
         }
 
+        @Override
         public String getName()
         {
             return NAME;

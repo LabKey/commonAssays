@@ -53,6 +53,7 @@ public class CustomAnnotationSetsTable extends VirtualTable<CustomAnnotationSche
                 addColumn(setColumn);
                 setColumn.setFk(new LookupForeignKey("CustomAnnotationSetId", "CustomAnnotationSetId")
                 {
+                    @Override
                     public TableInfo getLookupTableInfo()
                     {
                         return new CustomAnnotationTable(annotationSet, _userSchema);

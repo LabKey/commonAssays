@@ -40,6 +40,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
         super(NAME, owningModule);
     }
 
+    @Override
     public void updateFileProperties(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -55,6 +56,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
 
     private static class ProteinProphetFilenameFilter extends FileEntryFilter
     {
+        @Override
         public boolean accept(File f)
         {
             FileType fileType = TPPTask.getProtXMLFileType(f);

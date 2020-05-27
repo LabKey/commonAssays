@@ -79,21 +79,25 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         _mascotUserPassword = job._mascotUserPassword;
     }
 
+    @Override
     public String getMascotServer()
     {
         return _mascotServer;
     }
 
+    @Override
     public String getMascotHTTPProxy()
     {
         return _mascotHTTPProxy;
     }
 
+    @Override
     public String getMascotUserAccount()
     {
         return _mascotUserAccount;
     }
 
+    @Override
     public String getMascotUserPassword()
     {
         return _mascotUserPassword;
@@ -111,11 +115,13 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         return new MascotPipelineJob(this, file);
     }
 
+    @Override
     public File getSearchNativeSpectraFile()
     {
         return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getBaseName());
     }
 
+    @Override
     public File getSearchNativeOutputFile()
     {
         return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());

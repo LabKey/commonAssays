@@ -33,6 +33,7 @@ public class SimpleLogAxisFunction implements RangeFunction, IsSerializable, Ser
     {
     }
 
+    @Override
     public double compute(double val)
     {
         double sign = signum(val);
@@ -43,6 +44,7 @@ public class SimpleLogAxisFunction implements RangeFunction, IsSerializable, Ser
         return l < 0 ? 0 : sign * l;
     }
 
+    @Override
     public double invert(double val)
     {
         if (val == 0)

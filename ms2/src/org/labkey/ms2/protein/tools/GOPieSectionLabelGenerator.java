@@ -23,11 +23,13 @@ import java.text.AttributedString;
 
 public class GOPieSectionLabelGenerator implements PieSectionLabelGenerator
 {
+    @Override
     public AttributedString generateAttributedSectionLabel(PieDataset pieDataset, Comparable comparable)
     {
         return new AttributedString(generateSectionLabel(pieDataset, comparable));
     }
 
+    @Override
     public String generateSectionLabel(PieDataset p, Comparable key)
     {
         String retVal = key.toString();

@@ -50,6 +50,7 @@ public class ProteinDisplayColumnFactory implements DisplayColumnFactory
         _url = url;
     }
 
+    @Override
     public DisplayColumn createRenderer(ColumnInfo colInfo)
     {
         ActionURL detailsURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, _container);

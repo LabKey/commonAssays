@@ -24,6 +24,7 @@ package org.labkey.ms2.pipeline.sequest;
 public class SequestHeaderConverter implements IInputXMLConverter
 {
 
+    @Override
     public String convert(Param sequestParam, String commentPrefix)
     {
         return sequestParam.getValue();

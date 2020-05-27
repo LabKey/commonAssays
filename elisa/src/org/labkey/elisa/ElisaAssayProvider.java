@@ -165,6 +165,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return NAME;
     }
 
+    @Override
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
@@ -195,6 +196,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return result;
     }
 
+    @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
@@ -243,6 +245,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return new ElisaProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
+    @Override
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
@@ -269,6 +272,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return domainMap;
     }
 
+    @Override
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new StudyParticipantVisitResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
@@ -290,6 +294,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         return "Imports raw data files from BioTek ELISA Microplate reader.";
     }
 
+    @Override
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ElisaUploadWizardAction.class);

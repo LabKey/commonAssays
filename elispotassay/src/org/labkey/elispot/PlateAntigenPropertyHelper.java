@@ -75,12 +75,14 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
         throw new IndexOutOfBoundsException("Requested #" + index + " but there were only " + i + " well group templates");
     }
 
+    @Override
     protected boolean isCopyable(DomainProperty pd)
     {
         return !AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(pd.getName()) && !AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME.equals(pd.getName());
     }
 
 
+    @Override
     public List<String> getSampleNames()
     {
         return _antigenNames;

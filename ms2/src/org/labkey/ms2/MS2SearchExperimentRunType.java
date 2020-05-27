@@ -66,6 +66,7 @@ public class MS2SearchExperimentRunType extends ExperimentRunType
         bar.add(exportRuns);
     }
 
+    @Override
     public Priority getPriority(ExpProtocol protocol)
     {
         Lsid lsid = new Lsid(protocol.getLSID());

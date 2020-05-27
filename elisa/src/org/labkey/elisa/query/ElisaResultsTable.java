@@ -64,6 +64,7 @@ public class ElisaResultsTable extends AssayResultTable
         BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
         specimenColumn.setFk(new LookupForeignKey("LSID")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, cf);

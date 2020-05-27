@@ -336,6 +336,7 @@ public class PepXmlLoader extends MS2XmlLoader
             mapToIncrement.put(charToIncrement, ++integerToIncrement);
         }
 
+        @Override
         public boolean hasNext()
         {
             try
@@ -399,12 +400,14 @@ public class PepXmlLoader extends MS2XmlLoader
         }
 
 
+        @Override
         public PepXmlPeptide next()
         {
             return _peptide;
         }
 
 
+        @Override
         public void remove()
         {
             throw new UnsupportedOperationException();

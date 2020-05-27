@@ -317,11 +317,13 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
         return ret;
     }
 
+    @Override
     public String getDataRegionSelectionKey()
     {
         return _dataRegionSelectionKey;
     }
 
+    @Override
     public void setDataRegionSelectionKey(String key)
     {
         _dataRegionSelectionKey = key;

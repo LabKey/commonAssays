@@ -36,6 +36,7 @@ public class Titration extends AbstractLuminexControl
         setName("Standard");
     }
 
+    @Override
     public void setName(String name)
     {
         name = name == null || name.trim().isEmpty() ? "Standard" : name;

@@ -90,6 +90,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         }
     }
 
+    @Override
     protected void addPropertyColumns(final AssaySchema schema, final ExpProtocol protocol, final AssayProvider provider, List<FieldKey> visibleColumns)
     {
         // get all the properties from this plated-based protocol:

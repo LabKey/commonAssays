@@ -75,11 +75,13 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         return TASK_ID;
     }
 
+    @Override
     public boolean isRefreshRequired()
     {
         return true;
     }
 
+    @Override
     public File getSearchNativeOutputFile()
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());

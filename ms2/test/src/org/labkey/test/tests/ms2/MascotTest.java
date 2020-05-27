@@ -411,12 +411,14 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         drt.clearSort("Ion");
     }
 
+    @Override
     protected void setupEngine()
     {
         log("Analyze " + SEARCH_NAME + " sample data.");
         _fileBrowserHelper.selectImportDataAction(SEARCH_BUTTON + " Peptide Search");
     }
 
+    @Override
     protected void basicChecks()
     {
         navigateToFolder(FOLDER_NAME);
@@ -494,6 +496,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         assertTextPresent("No data to show");
     }
 
+    @Override
     protected void cleanPipe(String search_type)
     {
         super.cleanPipe(search_type);

@@ -130,11 +130,13 @@ public class RunController extends BaseFlowController
     @RequiresNoPermission
     public class BeginAction extends SimpleViewAction<RunForm>
     {
+        @Override
         public ModelAndView getView(RunForm runForm, BindException errors)
         {
             return HttpView.redirect(urlFor(RunController.ShowRunAction.class));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -163,7 +165,7 @@ public class RunController extends BaseFlowController
         public void addNavTrail(NavTree root)
         {
             String label = run != null ? null : "Run not found";
-            appendFlowNavTrail(getPageConfig(), root, run, label);
+            addFlowNavTrail(getPageConfig(), root, run, label);
         }
     }
 
@@ -241,6 +243,7 @@ public class RunController extends BaseFlowController
             }
         }
 
+        @Override
         public ModelAndView getView(DownloadRunForm form, BindException errors) throws Exception
         {
             if (errors.hasErrors())
@@ -259,6 +262,7 @@ public class RunController extends BaseFlowController
             }
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Download Run");
@@ -706,7 +710,7 @@ public class RunController extends BaseFlowController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
+            addFlowNavTrail(getPageConfig(), root, null, "Export Analysis");
         }
     }
 

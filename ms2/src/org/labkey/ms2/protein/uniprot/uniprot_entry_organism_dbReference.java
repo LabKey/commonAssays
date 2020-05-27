@@ -21,6 +21,7 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_organism_dbReference extends ParseActions
 {
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())

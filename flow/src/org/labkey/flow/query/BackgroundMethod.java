@@ -37,6 +37,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
         _objectIdColumn = objectIdColumn;
     }
 
+    @Override
     public BaseColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
     {
         var ret = super.createColumnInfo(parentTable, arguments, alias);
@@ -44,6 +45,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
         return ret;
     }
 
+    @Override
     public SQLFragment getSQL(String tableAlias, DbSchema schema, SQLFragment[] arguments)
     {
         if (arguments.length != 1)

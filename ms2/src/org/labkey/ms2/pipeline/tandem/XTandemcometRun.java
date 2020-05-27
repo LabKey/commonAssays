@@ -27,6 +27,7 @@ import org.labkey.ms2.MS2RunType;
  */
 public class XTandemcometRun extends XCometRun
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.XTandemcomet;

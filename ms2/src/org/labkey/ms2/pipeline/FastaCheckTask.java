@@ -55,11 +55,13 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             setJoin(true);  // Do this once per file-set.
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new FastaCheckTask(this, job);
         }
 
+        @Override
         public List<FileType> getInputTypes()
         {
             // CONSIDER: Not really the input type, but the input type for the search.
@@ -83,22 +85,26 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             }
         }
 
+        @Override
         public String getStatusName()
         {
             return "CHECK FASTA";
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Collections.singletonList(ACTION_NAME);
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             // No way of knowing.
             return false;
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "fasta check";
@@ -115,6 +121,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return getJob().getJobSupport(MS2SearchJobSupport.class);
     }
 
+    @Override
     @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {

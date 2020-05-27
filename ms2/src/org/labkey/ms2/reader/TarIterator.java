@@ -73,12 +73,14 @@ public class TarIterator implements SimpleScanIterator
 
     private static final int BUFFER_SIZE = 128 * 1024;
 
+    @Override
     public void remove()
     {
         throw new UnsupportedOperationException();
     }
 
 
+    @Override
     public boolean hasNext()
     {
         if (null == _tis)
@@ -109,6 +111,7 @@ public class TarIterator implements SimpleScanIterator
     }
 
 
+    @Override
     public SimpleScan next()
     {
         if (_checkNext || !_hasNext)
@@ -119,6 +122,7 @@ public class TarIterator implements SimpleScanIterator
     }
 
 
+    @Override
     public void close()
     {
         if (null != _tis)
@@ -161,6 +165,7 @@ public class TarIterator implements SimpleScanIterator
         }
     }
 
+    @Override
     protected void finalize() throws Throwable
     {
         super.finalize();
@@ -191,6 +196,7 @@ public class TarIterator implements SimpleScanIterator
         }
 
 
+        @Override
         public int getScan()
         {
             String fileName = _te.getName();
@@ -201,16 +207,19 @@ public class TarIterator implements SimpleScanIterator
 
 
         // DTA doesn't convey retention time
+        @Override
         public Double getRetentionTime()
         {
             return null;
         }
 
+        @Override
         public int getMSLevel()
         {
             return 2;
         }
 
+        @Override
         public float[][] getData() throws IOException
         {
             int length = _tis.available();

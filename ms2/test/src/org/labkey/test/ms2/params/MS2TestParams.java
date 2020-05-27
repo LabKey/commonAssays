@@ -38,11 +38,13 @@ public class MS2TestParams extends AbstractPipelineTestParams
         }
     }
 
+    @Override
     public String getExperimentRunTableName()
     {
         return "MS2SearchRuns";
     }
 
+    @Override
     public void clickActionButton()
     {
         _test.log("X! Tandem Search");

@@ -50,6 +50,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
     private Map<Pair<Integer, Integer>, Pair<float[], float[]>> _lruCache = new LinkedHashMap<Pair<Integer, Integer>, Pair<float[], float[]>>()
     {
         /** This method is called just after a new entry has been added */
+        @Override
         public boolean removeEldestEntry(Map.Entry eldest)
         {
             return size() > 100;
@@ -65,6 +66,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         _rs = new SpectrumResultSet(runs, filter, sort);
     }
 
+    @Override
     public boolean hasNext()
     {
         try
@@ -82,16 +84,19 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         }
     }
 
+    @Override
     public Spectrum next()
     {
         return new ResultSetSpectrum();
     }
 
+    @Override
     public void remove()
     {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void close()
     {
         ResultSetUtil.close(_rs);
@@ -102,6 +107,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
     {
         Pair<float[], float[]> _pair = null;
 
+        @Override
         public float[] getX()
         {
             if (null == _pair)
@@ -110,6 +116,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             return _pair.first;
         }
 
+        @Override
         public float[] getY()
         {
             if (null == _pair)
@@ -151,6 +158,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public int getCharge()
         {
             try
@@ -163,6 +171,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public String getTrimmedSequence()
         {
             try
@@ -175,6 +184,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public int getFraction()
         {
             try
@@ -187,6 +197,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public int getRun()
         {
             try
@@ -199,6 +210,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public String getSequence()
         {
             try
@@ -211,6 +223,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public String getNextAA()
         {
             try
@@ -223,6 +236,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public String getPrevAA()
         {
             try
@@ -235,6 +249,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public double getMZ()
         {
             try
@@ -274,6 +289,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             }
         }
 
+        @Override
         public double getPrecursorMass()
         {
             try
@@ -295,6 +311,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             super(runs, filter, sort);
         }
 
+        @Override
         public ResultSet getNextResultSet()
         {
             ProteinManager.replaceRunCondition(_filter, null, _iter.next());

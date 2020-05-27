@@ -77,8 +77,10 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return urlShow();
     }
 
+    @Override
     abstract public QueryRowReference getQueryRowReference();
 
+    @Override
     public String getLSID()
     {
         return _expObject.getLSID();
@@ -89,6 +91,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return _expObject.getContainer().getPath();
     }
 
+    @Override
     public Container getContainer()
     {
         return _expObject.getContainer();
@@ -245,6 +248,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         }
     }
 
+    @Override
     public String getName()
     {
         return _expObject.getName();
@@ -270,6 +274,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         return ContainerManager.getForId(getContainerId());
     }
 
+    @Override
     public int compareTo(Object o)
     {
         if (!(o instanceof FlowObject))

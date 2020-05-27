@@ -78,6 +78,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
     public abstract ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context);
 
+    @Override
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun run = data.getRun();
@@ -201,6 +202,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         return prop;
     }
 
+    @Override
     public ActionURL getContentURL(ExpData data)
     {
         ExpRun run = data.getRun();

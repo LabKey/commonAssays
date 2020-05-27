@@ -53,6 +53,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
 
     SPROTload sprotLoadStatus = SPROTload.not_tried_yet;
 
+    @Override
     public String guess(ProteinPlus p)
     {
         //Is the first token on the defn line an identifier.  If
@@ -114,6 +115,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
         return retVal;
     }
 
+    @Override
     public void close()
     {
     }

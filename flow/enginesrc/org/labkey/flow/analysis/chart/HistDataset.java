@@ -36,31 +36,37 @@ public class HistDataset extends AbstractIntervalXYDataset
         }
     }
 
+    @Override
     public int getSeriesCount()
     {
         return 1;
     }
 
+    @Override
     public Comparable getSeriesKey(int series)
     {
         return "Series";
     }
 
+    @Override
     public int getItemCount(int series)
     {
         return _xValues.length;
     }
 
+    @Override
     public Double getX(int series, int item)
     {
         return _xValues[item];
     }
 
+    @Override
     public Integer getY(int series, int item)
     {
         return _yValues[item];
     }
 
+    @Override
     public Double getStartX(int series, int item)
     {
         if (item > 0)
@@ -70,6 +76,7 @@ public class HistDataset extends AbstractIntervalXYDataset
         return _xValues[0];
     }
 
+    @Override
     public Double getEndX(int series, int item)
     {
         if (item < _xValues.length - 1)
@@ -79,11 +86,13 @@ public class HistDataset extends AbstractIntervalXYDataset
         return _xValues[item];
     }
 
+    @Override
     public Number getEndY(int series, int item)
     {
         return getY(series, item) + 1;
     }
 
+    @Override
     public Number getStartY(int series, int item)
     {
         return getY(series, item) - 1;

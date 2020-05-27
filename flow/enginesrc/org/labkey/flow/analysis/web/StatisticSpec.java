@@ -437,6 +437,7 @@ public class StatisticSpec implements SpecBase<StatisticSpec>
 
     public static class CaseInsensitiveComparator implements Comparator<StatisticSpec>, Serializable
     {
+        @Override
         public int compare(StatisticSpec o1, StatisticSpec o2)
         {
             return Objects.compare(

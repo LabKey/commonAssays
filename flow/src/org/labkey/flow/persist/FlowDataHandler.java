@@ -56,11 +56,13 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
+    @Override
     public void beforeDeleteData(List<ExpData> datas, User user)
     {
         FlowManager.get().deleteData(datas);
     }
 
+    @Override
     public void exportFile(ExpData data, File dataFile, User user, OutputStream out)
     {
         try
@@ -83,6 +85,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
+    @Override
     public ActionURL getContentURL(ExpData data)
     {
         if (data == null)
@@ -102,6 +105,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         //http://localhost:8080/labkey/flow-run/DRT/Flow%20Verify%20Project/FlowTest/showRun.view?runId=15
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         String url = data.getDataFileUrl();
@@ -110,6 +114,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         return null;
     }
 
+    @Override
     public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         try
@@ -146,6 +151,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
         }
     }
 
+    @Override
     public void deleteData(ExpData data, Container container, User user)
     {
         data.delete(user);

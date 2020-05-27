@@ -35,6 +35,7 @@ public class FastaCheckTaskFactorySettings extends AbstractTaskFactorySettings
         super(FastaCheckTask.class, name);
     }
 
+    @Override
     public TaskId getCloneId()
     {
         return new TaskId(FastaCheckTask.class, _cloneName);

@@ -36,11 +36,13 @@ public abstract class AbstractSequestParams extends Params
         makedb("[MAKEDB]", "sequest", "database_name"),
         comet("[COMET]", "comet", "database_name")
         {
+            @Override
             public String getAAStaticModParamName(String letter, String name)
             {
                 return "add_" + letter + "_" + name.toLowerCase();
             }
 
+            @Override
             public String getCommentPrefix()
             {
                 return "#";

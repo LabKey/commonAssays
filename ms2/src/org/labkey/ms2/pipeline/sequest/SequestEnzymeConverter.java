@@ -24,6 +24,7 @@ package org.labkey.ms2.pipeline.sequest;
 public class SequestEnzymeConverter implements IInputXMLConverter
 {
 
+    @Override
     public String convert(Param param, String commentPrefix)
     {
         SequestParam sequestParam = (SequestParam) param;

@@ -46,6 +46,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         _typeToIconMap.put(SingleMS2RunRReport.TYPE, "/reports/r_logo.svg");
     }
 
+    @Override
     public List<ReportService.DesignerInfo> getDesignerInfo(ViewContext context, QuerySettings settings)
     {
         List<ReportService.DesignerInfo> reportDesigners = new ArrayList<>();
@@ -65,6 +66,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
         return reportDesigners;
     }
 
+    @Override
     public String getIconPath(Report report)
     {
         return report != null ? _typeToIconMap.get(report.getType()) : null;

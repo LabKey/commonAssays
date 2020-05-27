@@ -38,11 +38,13 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
         super(name, description, xml);
     }
 
+    @Override
     public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return CometSearchProtocolFactory.get();
     }
 
+    @Override
     public CometPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                               PipeRoot root, List<File> filesInput,
                                               File fileParameters, @Nullable Map<String, String> variableMap
@@ -52,6 +54,7 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
                 filesInput, fileParameters);
     }
 
+    @Override
     public void validate(PipeRoot root) throws PipelineValidationException
     {
         String[] dbNames = getDbNames();

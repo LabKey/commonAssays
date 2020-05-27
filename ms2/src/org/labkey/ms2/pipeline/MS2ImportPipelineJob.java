@@ -89,11 +89,13 @@ public class MS2ImportPipelineJob extends PipelineJob
         return MS2Controller.getShowRunURL(getUser(), getContainer(), _runInfo.getRunId());
     }
 
+    @Override
     public String getDescription()
     {
         return _description;
     }
 
+    @Override
     public void run()
     {
         if (!setStatus("LOADING"))

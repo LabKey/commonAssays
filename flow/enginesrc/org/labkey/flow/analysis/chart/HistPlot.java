@@ -108,6 +108,7 @@ public class HistPlot extends XYPlot
         return true;
     }
 
+    @Override
     public boolean render(Graphics2D g2, Rectangle2D dataArea, int series, PlotRenderingInfo info, CrosshairState crosshairState)
     {
         renderSeries(g2, dataArea, series, info, crosshairState);

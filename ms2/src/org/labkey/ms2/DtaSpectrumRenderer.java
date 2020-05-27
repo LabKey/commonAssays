@@ -30,6 +30,7 @@ public class DtaSpectrumRenderer extends AbstractTextSpectrumRenderer
         super(form, filenamePrefix, extension);
     }
 
+    @Override
     public void renderFirstLine(Spectrum spectrum)
     {
         _out.println(df4.format(spectrum.getPrecursorMass()) + " " + spectrum.getCharge());

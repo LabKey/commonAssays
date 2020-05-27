@@ -32,6 +32,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 {
     protected boolean _useOnlyOneFasta = false;
 
+    @Override
     abstract protected void doCleanup(boolean afterTest) throws TestTimeoutException;
 
     abstract protected void setupEngine();

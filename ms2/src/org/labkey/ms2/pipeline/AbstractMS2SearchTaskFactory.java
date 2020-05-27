@@ -52,6 +52,7 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         return null;
     }
 
+    @Override
     public FactoryType cloneAndConfigure(AbstractTaskFactorySettings settings) throws CloneNotSupportedException
     {
         FactoryType result = super.cloneAndConfigure(settings);
@@ -79,6 +80,7 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         _inputTypes = inputTypes;
     }
 
+    @Override
     public List<FileType> getInputTypes()
     {
         if (_inputTypes == null)
@@ -88,6 +90,7 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         return _inputTypes;
     }
 
+    @Override
     public String getStatusName()
     {
         return "SEARCH";

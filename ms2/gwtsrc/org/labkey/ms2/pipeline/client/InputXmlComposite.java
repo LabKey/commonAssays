@@ -63,6 +63,7 @@ public abstract class InputXmlComposite extends SearchFormComposite
         return validate();
     }
 
+    @Override
     public void setReadOnly(boolean readOnly) {
         super.setReadOnly(readOnly);
         if(readOnly)
@@ -84,16 +85,19 @@ public abstract class InputXmlComposite extends SearchFormComposite
 
     }
 
+    @Override
     public String getName()
     {
         return inputXmlTextArea.getName();
     }
 
+    @Override
     public void setName(String name)
     {
         inputXmlTextArea.setName(name);
     }
 
+    @Override
     public void setWidth(String width)
     {
         instance.setWidth(width);
@@ -101,6 +105,7 @@ public abstract class InputXmlComposite extends SearchFormComposite
         inputXmlHtml.setWidth(width);
     }
 
+    @Override
     public String validate()
     {
         return params.validate();

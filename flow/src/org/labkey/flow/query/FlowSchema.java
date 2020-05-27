@@ -418,6 +418,7 @@ public class FlowSchema extends UserSchema
             colAnalysisScript.setFk(new LookupForeignKey(cf, new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                     FlowParam.scriptId.toString(),
                     "RowId", "Name"){
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createAnalysisScriptTable("Lookup", getLookupContainerFilter(), true);
@@ -439,6 +440,7 @@ public class FlowSchema extends UserSchema
             var colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
             colCompensationMatrix.setFk(new LookupForeignKey(cf,
                     "RowId", "Name") {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createCompensationMatrixTable("Lookup", getLookupContainerFilter());
@@ -578,6 +580,7 @@ public class FlowSchema extends UserSchema
         }
 
         /* TableInfo */
+        @Override
         @NotNull
         public SQLFragment getFromSQL()
         {
@@ -1007,6 +1010,7 @@ public class FlowSchema extends UserSchema
         }
 
         /* TableInfo */
+        @Override
         @NotNull
         public SQLFragment getFromSQL()
         {
@@ -1392,6 +1396,7 @@ public class FlowSchema extends UserSchema
         var colRun = ret.addColumn(ExpDataTable.Column.Run);
         colRun.setFk(new LookupForeignKey(cf, new ActionURL(RunController.ShowRunAction.class, getContainer()), FlowParam.runId, "RowId", "Name")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return detach().createRunTable("run", getLookupContainerFilter(), type);
@@ -1421,6 +1426,7 @@ public class FlowSchema extends UserSchema
             _colKeyword = colKeyword;
         }
 
+        @Override
         public Iterator<FieldKey> iterator()
         {
             List<FieldKey> ret = QueryService.get().getDefaultVisibleColumns(_table.getColumns());
@@ -1452,6 +1458,7 @@ public class FlowSchema extends UserSchema
             _colGraph = colGraph;
         }
 
+        @Override
         public Iterator<FieldKey> iterator()
         {
             Collection<FieldKey> ret = new LinkedHashSet<>();
@@ -1627,6 +1634,7 @@ public class FlowSchema extends UserSchema
                 FlowParam.wellId.toString(),
                 "RowId", "Name")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return detach().createFCSFileTable("FCSFile", getLookupContainerFilter());
@@ -1660,6 +1668,7 @@ public class FlowSchema extends UserSchema
         ret.addColumn(colAnalysisScript);
         colAnalysisScript.setFk(new LookupForeignKey(cf, new ActionURL(AnalysisScriptController.BeginAction.class, getContainer()),
                 FlowParam.scriptId.toString(), "RowId", "Name"){
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return detach().createAnalysisScriptTable("Lookup", getLookupContainerFilter(), true);
@@ -1670,6 +1679,7 @@ public class FlowSchema extends UserSchema
         ret.addColumn(colCompensationMatrix);
         colCompensationMatrix.setFk(new LookupForeignKey(cf, new ActionURL(CompensationController.ShowCompensationAction.class, getContainer()), FlowParam.compId.toString(),
                 "RowId", "Name"){
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return detach().createCompensationMatrixTable("Lookup", getLookupContainerFilter());
@@ -1695,6 +1705,7 @@ public class FlowSchema extends UserSchema
         colFCSFile.setFk(new LookupForeignKey(cf, new ActionURL(WellController.ShowWellAction.class, getContainer()),
                 FlowParam.wellId.toString(),
                 "RowId", "Name") {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     return detach().createFCSFileTable("FCSFile", getLookupContainerFilter(),false);
@@ -1856,11 +1867,13 @@ public class FlowSchema extends UserSchema
     }
 
 
+    @Override
     protected QuerySettings createQuerySettings(String dataRegionName, String queryName, String viewName)
     {
         return new FlowQuerySettings(dataRegionName);
     }
 
+    @Override
     public QueryDefinition getQueryDefForTable(String name)
     {
         QueryDefinition ret = super.getQueryDefForTable(name);

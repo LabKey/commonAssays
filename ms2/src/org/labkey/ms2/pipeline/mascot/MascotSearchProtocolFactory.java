@@ -37,21 +37,25 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
         // Use the get() function.
     }
 
+    @Override
     public String getName()
     {
         return "mascot";
     }
 
+    @Override
     public String getDefaultParametersResource()
     {
         return "org/labkey/ms2/pipeline/mascot/MascotDefaults.xml";
     }
 
+    @Override
     public MascotSearchProtocol createProtocolInstance(String name, String description, String xml)
     {
         return new MascotSearchProtocol(name, description, xml);
     }
 
+    @Override
     protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
     {
         parser.removeInputParameter("pipeline, mascot server");

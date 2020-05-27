@@ -64,6 +64,7 @@ public class CometTest extends AbstractMS2SearchEngineTest
         _fileBrowserHelper.selectImportDataAction(SEARCH_BUTTON +  " Peptide Search");
     }
 
+    @Override
     protected void basicChecks()
     {
         goToModule("Query");

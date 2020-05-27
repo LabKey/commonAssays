@@ -43,6 +43,7 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         _localURI = localURI;
     }
 
+    @Override
     public String eval(Map ctx)
     {
         Integer seqId = (Integer)ctx.get("SeqId");
@@ -51,21 +52,25 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         return _localURI + (null != seqId ? "&seqId=" + seqId : "") + "&protein=" + PageFlowUtil.encode((String)ctx.get("Protein"));
     }
 
+    @Override
     public String getSource()
     {
         return _localURI + "&seqId={$SeqId}";
     }
 
+    @Override
     public void render(Writer out, Map ctx) throws IOException
     {
         out.write(eval(ctx));
     }
 
+    @Override
     public boolean canRender(Set<FieldKey> fieldKeys)
     {
         return fieldKeys.contains(FieldKey.fromParts("SeqId"));
     }
 
+    @Override
     public ProteinStringExpression copy()
     {
         return clone();

@@ -135,6 +135,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             super(Sqt2PinTask.class, name);
         }
 
+        @Override
         public TaskId getCloneId()
         {
             return new TaskId(Sqt2PinTask.class, _cloneName);
@@ -158,11 +159,13 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             super(Sqt2PinTask.class);
         }
 
+        @Override
         public String getStatusName()
         {
             return "SQT2PIN";
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new Sqt2PinTask(this, job);
@@ -174,16 +177,19 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             return true;
         }
 
+        @Override
         public List<FileType> getInputTypes()
         {
             return Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             return false;
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Collections.singletonList(getStatusName());

@@ -26,6 +26,7 @@ import org.labkey.api.security.User;
  */
 public class MicroarrayContainerListener extends ContainerManager.AbstractContainerListener
 {
+    @Override
     public void containerDeleted(Container c, User user)
     {
         MicroarrayManager.get().delete(c);

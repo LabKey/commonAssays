@@ -64,6 +64,7 @@ public class AnalyteTable extends AbstractLuminexTable
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
         addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey(cf,"RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return _userSchema.createDataFileTable(getLookupContainerFilter());

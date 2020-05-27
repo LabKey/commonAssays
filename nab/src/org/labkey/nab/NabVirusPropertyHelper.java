@@ -48,6 +48,7 @@ public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
         _metadataInputFormat = metadataInputFormat;
     }
 
+    @Override
     public Map<String, Map<DomainProperty, String>> getSampleProperties(HttpServletRequest request) throws ExperimentException
     {
         if (hasMultipleViruses())

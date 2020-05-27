@@ -63,46 +63,55 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         }
     }
 
+    @Override
     public int getSeriesCount()
     {
         return 1;
     }
 
+    @Override
     public String getSeriesKey(int series)
     {
         return "First series";
     }
 
+    @Override
     public int getItemCount(int series)
     {
         return _xValues.length * _yValues.length;
     }
 
+    @Override
     public Number getX(int series, int item)
     {
         return Double.valueOf(_xValues[item / _yValues.length]);
     }
 
+    @Override
     public Number getY(int series, int item)
     {
         return Double.valueOf(_yValues[item % _yValues.length]);
     }
 
+    @Override
     public double getZValue(int series, int item)
     {
         return _values[item / _yValues.length][item % _yValues.length];
     }
 
+    @Override
     public double getXValue(int series, int item)
     {
         return _xValues[item / _yValues.length];
     }
 
+    @Override
     public double getYValue(int series, int item)
     {
         return _yValues[item % _yValues.length];
     }
 
+    @Override
     public Number getZ(int series, int item)
     {
         double Z = getZValue(series, item);
@@ -111,16 +120,19 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return Double.valueOf(Z);
     }
 
+    @Override
     public double getMinZValue()
     {
         return (double) 0;
     }
 
+    @Override
     public double getMaxZValue()
     {
         return (double) _zMax;
     }
 
+    @Override
     public Number[] getYValues()
     {
         Number[] ret = new Number[_xValues.length * _yValues.length];
@@ -131,6 +143,7 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return ret;
     }
 
+    @Override
     public Number[] getXValues()
     {
         Number[] ret = new Number[_xValues.length * _yValues.length];
@@ -141,6 +154,7 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return ret;
     }
 
+    @Override
     public Number[] getZValues()
     {
         Number[] ret = new Number[_xValues.length * _yValues.length];
@@ -151,6 +165,7 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return ret;
     }
 
+    @Override
     public int[] getXIndices()
     {
         int[] ret = new int[_xValues.length];
@@ -161,6 +176,7 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return ret;
     }
 
+    @Override
     public int[] indexX()
     {
         int[] ret = new int[_xValues.length * _yValues.length];
@@ -171,11 +187,13 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
         return ret;
     }
 
+    @Override
     public boolean isDateAxis(int axisNumber)
     {
         return false;
     }
 
+    @Override
     public Range getZValueRange(Range xRange, Range yRange)
     {
         int xMin = findBucket(_xValues, xRange.getLowerBound());

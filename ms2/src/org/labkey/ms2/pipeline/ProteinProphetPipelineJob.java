@@ -61,11 +61,13 @@ public class ProteinProphetPipelineJob extends PipelineJob
         return null;
     }
 
+    @Override
     public String getDescription()
     {
         return _file.getName();
     }
 
+    @Override
     public void run()
     {
         if (!setStatus("LOADING"))

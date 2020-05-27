@@ -128,6 +128,7 @@ public class Search implements EntryPoint
     }
 
 
+    @Override
     public void onModuleLoad()
     {
         spacer = new HTML("&nbsp;");
@@ -219,6 +220,7 @@ public class Search implements EntryPoint
 
         getPipelineService().getLocationOptions(pipelineId, new ErrorDialogAsyncCallback<GWTPipelineConfig>()
         {
+            @Override
             public void onSuccess(GWTPipelineConfig result)
             {
                 for (SearchFormComposite input : inputs)
@@ -522,6 +524,7 @@ public class Search implements EntryPoint
             super("Search");
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             clearErrors();
@@ -560,6 +563,7 @@ public class Search implements EntryPoint
             super("Copy & Edit");
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             copyAndEdit();
@@ -573,6 +577,7 @@ public class Search implements EntryPoint
             super("Cancel");
         }
 
+        @Override
         public void onClick(Widget sender)
         {
             cancelForm();
@@ -594,6 +599,7 @@ public class Search implements EntryPoint
             vPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER );
             vPanel.add(label);
             ImageButton okButton = new ImageButton("OK") {
+                @Override
                 public void onClick(Widget sender)
                 {
                     dialog.hide();
@@ -608,6 +614,7 @@ public class Search implements EntryPoint
     }    
     private class SearchFormHandler implements FormPanel.SubmitCompleteHandler, FormPanel.SubmitHandler
     {
+        @Override
         public void onSubmit(FormPanel.SubmitEvent event)
         {
             clearErrors();
@@ -623,6 +630,7 @@ public class Search implements EntryPoint
             }
         }
 
+        @Override
         public void onSubmitComplete(FormPanel.SubmitCompleteEvent event)
         {
             String results = event.getResults();
@@ -672,6 +680,7 @@ public class Search implements EntryPoint
 
     private class SequenceDbServiceCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
+        @Override
         public void reportFailure(String message, Throwable caught)
         {
             if(caught.getMessage().contains("User does not have permission"))
@@ -685,6 +694,7 @@ public class Search implements EntryPoint
             }
         }
 
+        @Override
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             databaseCache.put(gwtResult.getCurrentPath(), gwtResult);
@@ -748,6 +758,7 @@ public class Search implements EntryPoint
 
     private class ProtocolServiceAsyncCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
+        @Override
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             clearErrors();
@@ -774,6 +785,7 @@ public class Search implements EntryPoint
 
     private class SearchServiceAsyncCallback extends ErrorDialogAsyncCallback<GWTSearchServiceResult>
     {
+        @Override
         public void onSuccess(GWTSearchServiceResult gwtResult)
         {
             setError(PropertyUtil.getServerProperty("errors"));
@@ -811,6 +823,7 @@ public class Search implements EntryPoint
 
     private class SequenceDbChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent e)
         {
             String dbDirectory = sequenceDbComposite.getSelectedDbPath();
@@ -838,6 +851,7 @@ public class Search implements EntryPoint
 
     private class ProtocolChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent e)
         {
             clearErrors();
@@ -854,6 +868,7 @@ public class Search implements EntryPoint
 
     private class SequenceDbClickListener implements ClickHandler
     {
+        @Override
         public void onClick(ClickEvent e)
         {
             String db = sequenceDbComposite.getSelectedDb();
@@ -877,6 +892,7 @@ public class Search implements EntryPoint
 
     private class TaxonomyChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent e)
         {
             String tax = sequenceDbComposite.getSelectedTaxonomy();
@@ -900,6 +916,7 @@ public class Search implements EntryPoint
 
     private class LocationChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent event)
         {
             syncForm2Xml();
@@ -908,6 +925,7 @@ public class Search implements EntryPoint
 
     private class EnzymeChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent e)
         {
             String enz = enzymeComposite.getSelectedEnzyme();
@@ -931,6 +949,7 @@ public class Search implements EntryPoint
 
     private class RefreshSequenceDbPathsClickListener implements ClickHandler
     {
+        @Override
         public void onClick(ClickEvent e)
         {
             databaseCache.clear();
@@ -944,6 +963,7 @@ public class Search implements EntryPoint
 
     private class InputXmlChangeListener implements ChangeHandler
     {
+        @Override
         public void onChange(ChangeEvent e)
         {
             String error = inputXmlComposite.validate();

@@ -45,11 +45,13 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         return AttributeType.graph;
     }
 
+    @Override
     protected Collection<AttributeCache.GraphEntry> getAttributes()
     {
         return _fps.getGraphProperties();
     }
 
+    @Override
     protected GraphSpec attributeFromString(String field)
     {
         try
@@ -62,6 +64,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         }
     }
 
+    @Override
     protected void initColumn(final GraphSpec spec, String preferredName, BaseColumnInfo column)
     {
         column.setSqlTypeName("VARCHAR");
@@ -75,6 +78,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
 
     // Select the string concatenated value of objectId+'~~~'+graphSpec
     // When rendering the image URL, we will split the values apart again.
+    @Override
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)
     {
         final SqlDialect dialect = objectIdColumn.getSqlDialect();

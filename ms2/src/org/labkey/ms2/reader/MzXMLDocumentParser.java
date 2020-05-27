@@ -28,11 +28,13 @@ import java.io.IOException;
  */
 public class MzXMLDocumentParser extends AbstractXMLDocumentParser
 {
+    @Override
     public String getMediaType()
     {
         return "application/mzxml";
     }
 
+    @Override
     public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         if (resource.getName().toLowerCase().endsWith(".mzxml") || getMediaType().equals(resource.getContentType()))

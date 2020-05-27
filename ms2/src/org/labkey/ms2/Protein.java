@@ -797,6 +797,7 @@ public class Protein
             this.length = length;
             this.pepcounts = counts;
         }
+        @Override
         public int compareTo(Object o)
         {
             if (start < ((Range) o).start) return -1;

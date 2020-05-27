@@ -63,6 +63,7 @@ public class ProteinServiceImpl implements ProteinService
         return _strategies;
     }
 
+    @Override
     public int ensureProtein(String sequence, String organism, String name, String description)
     {
         organism = guessOrganism(sequence, organism, name, description);
@@ -70,6 +71,7 @@ public class ProteinServiceImpl implements ProteinService
         return ProteinManager.ensureProtein(sequence, organism, name, description);
     }
 
+    @Override
     public int ensureProtein(String sequence, int orgId, String name, String description)
     {
         return ProteinManager.ensureProtein(sequence, orgId, name, description);
@@ -97,11 +99,13 @@ public class ProteinServiceImpl implements ProteinService
         return organism;
     }
 
+    @Override
     public void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
         ProteinManager.ensureIdentifiers(seqId, typeAndIdentifiers);
     }
 
+    @Override
     public Map<String, Set<String>> getIdentifiers(String description, String... names)
     {
         String combinedNames = StringUtils.join(names, "|");
@@ -115,26 +119,31 @@ public class ProteinServiceImpl implements ProteinService
                                   : description;
     }
 
+    @Override
     public void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider)
     {
         _proteinSearchViewProviders.add(provider);
     }
 
+    @Override
     public void registerPeptideSearchView(QueryViewProvider<PeptideSearchForm> provider)
     {
         _peptideSearchViewProviders.add(provider);
     }
 
+    @Override
     public void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider)
     {
         _proteinSearchFormViewProviders.add(provider);
     }
 
+    @Override
     public List<QueryViewProvider<PeptideSearchForm>> getPeptideSearchViews()
     {
         return Collections.unmodifiableList(_peptideSearchViewProviders);
     }
 
+    @Override
     public WebPartView getProteinCoverageView(int seqId, String[] peptides, int aaRowWidth, boolean showEntireFragmentInCoverage)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
@@ -145,12 +154,14 @@ public class ProteinServiceImpl implements ProteinService
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 
+    @Override
     public WebPartView getAnnotationsView(int seqId)
     {
         org.labkey.ms2.Protein protein = ProteinManager.getProtein(seqId);
         return new AnnotationView(protein);
     }
 
+    @Override
     public String getProteinSequence(int seqId)
     {
         return ProteinManager.getProteinSequence(seqId);

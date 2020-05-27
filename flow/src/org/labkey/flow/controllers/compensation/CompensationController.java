@@ -68,12 +68,14 @@ public class CompensationController extends BaseFlowController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction<QueryForm>
     {
+        @Override
         public ModelAndView getView(QueryForm form, BindException errors)
         {
             QuerySettings settings = getFlowSchema().getSettings(getViewContext(), "comp");
             return new CompensationListView(settings);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Compensation Matrices", new ActionURL(BeginAction.class, getContainer()));
@@ -86,16 +88,19 @@ public class CompensationController extends BaseFlowController
     {
         FlowCompensationMatrix _flowComp = null;
 
+        @Override
         public void validateCommand(UploadCompensationForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getView(UploadCompensationForm form, boolean reshow, BindException errors)
         {
             return FormPage.getView("/org/labkey/flow/controllers/compensation/upload.jsp", form, errors);
         }
 
 
+        @Override
         public boolean handlePost(UploadCompensationForm form, BindException errors) throws Exception
         {
             boolean hasErrors = false;
@@ -136,14 +141,16 @@ public class CompensationController extends BaseFlowController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(UploadCompensationForm uploadCompensationForm)
         {
             return _flowComp.urlShow();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
+            addFlowNavTrail(getPageConfig(), root, null, "Upload a new compensation matrix");
         }
     }
 
@@ -152,6 +159,7 @@ public class CompensationController extends BaseFlowController
     {
         FlowCompensationMatrix _comp;
 
+        @Override
         public ModelAndView getView(ViewForm form, BindException errors) throws Exception
         {
             _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
@@ -177,6 +185,7 @@ public class CompensationController extends BaseFlowController
             return null;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -188,19 +197,21 @@ public class CompensationController extends BaseFlowController
     {
         FlowCompensationMatrix _comp;
 
+        @Override
         public ModelAndView getView(ViewForm form, BindException errors)
         {
             _comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
             return FormPage.getView("/org/labkey/flow/controllers/compensation/showCompensation.jsp", form);
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             if (null != _comp)
             {
                 // show run this compensation was derived from
                 if (_comp.getParent() != null)
-                    appendFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
+                    addFlowNavTrail(getPageConfig(), root, _comp, "Show Compensation " + _comp.getName());
                     // fall back on showing compensation query
                 else
                 {
@@ -216,10 +227,12 @@ public class CompensationController extends BaseFlowController
     @RequiresPermission(DeletePermission.class)
     public class DeleteAction extends ConfirmAction<ViewForm>
     {
+        @Override
         public void validateCommand(ViewForm target, Errors errors)
         {
         }
 
+        @Override
         public ModelAndView getConfirmView(ViewForm form, BindException errors)
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
@@ -230,6 +243,7 @@ public class CompensationController extends BaseFlowController
             return FormPage.getView("/org/labkey/flow/controllers/compensation/delete.jsp", form);
         }
 
+        @Override
         public boolean handlePost(ViewForm viewForm, BindException errors)
         {
             FlowCompensationMatrix comp = FlowCompensationMatrix.fromURL(getActionURL(), getRequest(), getContainer(), getUser());
@@ -264,11 +278,13 @@ public class CompensationController extends BaseFlowController
         }
 
 
+        @Override
         public ActionURL getFailURL(ViewForm viewForm, BindException errors)
         {
             return urlFor(BeginAction.class);
         }
 
+        @Override
         public ActionURL getSuccessURL(ViewForm viewForm)
         {
             return urlFor(BeginAction.class);

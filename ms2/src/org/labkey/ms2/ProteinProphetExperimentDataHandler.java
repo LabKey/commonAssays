@@ -42,11 +42,13 @@ import static org.labkey.ms2.PepXmlExperimentDataHandler.IMPORT_PROPHET_RESULTS;
  */
 public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataHandler
 {
+    @Override
     public DataType getDataType()
     {
         return null;
     }
 
+    @Override
     public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         if (context.getJob() != null && "false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_PROPHET_RESULTS)))
@@ -74,6 +76,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         }
     }
 
+    @Override
     public ActionURL getContentURL(ExpData data)
     {
         File dataFile = data.getFile();
@@ -94,11 +97,13 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         return result;
     }
 
+    @Override
     public void deleteData(ExpData data, Container container, User user)
     {
         // For now, let the PepXML file control when the data is deleted
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         File f = data.getFile();

@@ -72,6 +72,7 @@ public class AnalysisHandler extends BaseHandler
         return ret;
     }
 
+    @Override
     public void processRun(FlowRun run, ExperimentRunType runElement, File workingDirectory) throws Exception
     {
         FlowCompensationMatrix flowComp;
@@ -214,6 +215,7 @@ public class AnalysisHandler extends BaseHandler
             return attrSet;
         }
 
+        @Override
         public void run()
         {
             try
@@ -251,6 +253,7 @@ public class AnalysisHandler extends BaseHandler
         }
     }
 
+    @Override
     public String getRunName(FlowRun srcRun)
     {
         return srcRun.getName() + " analysis";

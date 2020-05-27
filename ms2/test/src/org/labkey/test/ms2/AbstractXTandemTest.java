@@ -29,12 +29,14 @@ public abstract class AbstractXTandemTest extends AbstractMS2SearchEngineTest
     protected static final String PEPTIDE5 = "K.LHRIEAGVMPR.N";
     protected static final String PROTEIN = "gi|18311790|phosphoribosylfor";
     
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(SEARCH_TYPE);
         _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
+    @Override
     protected void setupEngine()
     {
         log("Analyze " + SEARCH_BUTTON + " sample data.");

@@ -36,16 +36,19 @@ public class CometSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
         // Use the get() function.
     }
 
+    @Override
     public String getName()
     {
         return "comet";
     }
 
+    @Override
     public String getDefaultParametersResource()
     {
         return "org/labkey/ms2/pipeline/comet/CometDefaults.xml";
     }
 
+    @Override
     public AbstractMS2SearchProtocol createProtocolInstance(String name, String description, String xml)
     {
         return new CometSearchProtocol(name, description, xml);

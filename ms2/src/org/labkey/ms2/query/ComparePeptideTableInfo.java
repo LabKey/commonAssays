@@ -71,6 +71,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
                 runColumns.add(peptideIdColumn);
                 LookupForeignKey fk = new LookupForeignKey("RowId")
                 {
+                    @Override
                     public TableInfo getLookupTableInfo()
                     {
                         return new PeptidesTableInfo(_userSchema);
@@ -92,6 +93,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
         defaultCols.add(FieldKey.fromParts("Run", "PeptideProphet"));
         peptideIdColumn.setFk(new LookupForeignKey("RowId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return new PeptidesTableInfo(_userSchema);

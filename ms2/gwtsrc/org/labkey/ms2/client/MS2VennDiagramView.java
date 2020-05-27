@@ -37,6 +37,7 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
     public static final String PEPTIDES_VIEW_PARAMETER_NAME = "PeptidesFilter.viewName";
     public static final String PROTEIN_GROUPS_VIEW_PARAMETER_NAME = "ProteinGroupsFilter.viewName";
 
+    @Override
     public void onModuleLoad()
     {
         RootPanel panel = RootPanel.get("org.labkey.ms2.MS2VennDiagramView-Root");
@@ -64,6 +65,7 @@ public class MS2VennDiagramView extends VennDiagramView implements EntryPoint
         return _service;
     }
     
+    @Override
     protected void requestComparison(String originalURL, String comparisonGroup, AsyncCallback<GWTComparisonResult> callbackHandler)
     {
         if ("Proteins".equalsIgnoreCase(comparisonGroup))

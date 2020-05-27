@@ -30,6 +30,7 @@ public class Out2XmlParams extends Params
         initProperties();
     }
 
+    @Override
     public void initProperties()
     {
         _params.clear();

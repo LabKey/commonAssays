@@ -68,6 +68,7 @@ public abstract class PeptideImporter extends MS2Importer
         super(context, user, c, description, fullFileName, log);
     }
 
+    @Override
     public String getType()
     {
         return _run != null ? _run.getType() : null;
@@ -176,6 +177,7 @@ public abstract class PeptideImporter extends MS2Importer
     }
 
 
+    @Override
     protected String getTableColumnNames()
     {
         StringBuilder columnNames = new StringBuilder();

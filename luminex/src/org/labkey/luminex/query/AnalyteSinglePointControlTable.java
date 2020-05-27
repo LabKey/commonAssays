@@ -232,6 +232,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                 return new TableSelector(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), filter, null).getObject(AnalyteSinglePointControl.class);
             }
 
+            @Override
             protected void validate(AnalyteSinglePointControl bean, GuideSet guideSet, Analyte analyte) throws ValidationException
             {
                 SinglePointControl control = bean.getSinglePointControlFromId();

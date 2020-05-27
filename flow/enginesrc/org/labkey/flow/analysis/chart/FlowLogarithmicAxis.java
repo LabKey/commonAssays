@@ -38,16 +38,19 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     private class TickFormat extends NumberFormat
     {
+        @Override
         public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
         {
             return toAppendTo.append(makeTickLabel(number));
         }
 
+        @Override
         public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
         {
             return format((double) number, toAppendTo, pos);
         }
 
+        @Override
         public Number parse(String source, ParsePosition parsePosition)
         {
             throw new UnsupportedOperationException();
@@ -156,6 +159,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
      *
      * @return The Java2D coordinate.
      */
+    @Override
     public double valueToJava2D(double value, Rectangle2D plotArea,
                                 RectangleEdge edge) {
 
@@ -198,6 +202,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
      *
      * @return The data value.
      */
+    @Override
     public double java2DToValue(double java2DValue, Rectangle2D plotArea,
                                 RectangleEdge edge) {
 

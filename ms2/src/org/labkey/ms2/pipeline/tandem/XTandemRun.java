@@ -26,31 +26,37 @@ import org.labkey.ms2.MS2RunType;
  */
 public class XTandemRun extends MS2Run
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.XTandem;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return "tandem.xml";
     }
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "Hyper";
     }
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "hyper";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-PeptideProphet, Expect, Next - Hyper, (Next/Hyper) - 1, -Hyper";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return EMPTY_STRING_ARRAY;

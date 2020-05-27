@@ -64,6 +64,7 @@ public class EnzymeComposite extends SearchFormComposite
     }
 
 
+    @Override
     public void setWidth(String width)
     {
         instance.setWidth(width);
@@ -71,6 +72,7 @@ public class EnzymeComposite extends SearchFormComposite
         enzymeReadOnly.setWidth(width);
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label("Enzyme");
@@ -81,16 +83,19 @@ public class EnzymeComposite extends SearchFormComposite
         return panel;
     }
 
+    @Override
     public String validate()
     {
         return "";
     }
 
+    @Override
     public void setName(String s)
     {
         enzymeListBox.setName(s);
     }
 
+    @Override
     public String getName()
     {
         return enzymeListBox.getName();
@@ -175,6 +180,7 @@ public class EnzymeComposite extends SearchFormComposite
         return "";
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);

@@ -137,6 +137,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
         runColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema, getLookupContainerFilter());
@@ -190,6 +191,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         addColumn(proteinColumn);
         proteinColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return _userSchema.createSequencesTable(getLookupContainerFilter());

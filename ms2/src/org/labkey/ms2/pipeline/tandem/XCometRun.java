@@ -25,33 +25,39 @@ import org.labkey.ms2.MS2RunType;
  */
 public class XCometRun extends MS2Run
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.XComet;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return "tandem.xml";
     }
 
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "RawScore";
     }
 
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "rawScore";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-PeptideProphet, Expect, -DiffScore * RawScore, -DiffScore, -RawScore";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[]{};

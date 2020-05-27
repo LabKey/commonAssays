@@ -57,6 +57,7 @@ public class MS2PipelineManager
 
     public static class UploadFileFilter extends PipelineProvider.FileEntryFilter
     {
+        @Override
         public boolean accept(File file)
         {
             if (MascotSearchTask.isNativeOutputFile(file))
@@ -76,6 +77,7 @@ public class MS2PipelineManager
 
     public static class XtanXmlFileFilter extends PipelineProvider.FileEntryFilter
     {
+        @Override
         public boolean accept(File file)
         {
             return XTandemSearchTask.getNativeFileType(FileType.gzSupportLevel.SUPPORT_GZ).isType(file);
@@ -95,6 +97,7 @@ public class MS2PipelineManager
 
         return new PipelineProvider.FileEntryFilter()
             {
+                @Override
                 public boolean accept(File f)
                 {
                     return isMzXMLFile(f);
@@ -236,6 +239,7 @@ public class MS2PipelineManager
 
     private static class SequenceDbFileFilter implements FileFilter
     {
+        @Override
         public boolean accept(File f)
         {
             final String name = f.getName();

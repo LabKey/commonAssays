@@ -26,32 +26,38 @@ import org.labkey.ms2.MS2RunType;
  */
 public class SequestRun extends MS2Run
 {
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.Sequest;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return SequestSearchTask.SEQUEST_PARAMS;
     }
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "XCorr";
     }
 
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "xCorr";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return "-SpRank, -DeltaCn, -XCorr";
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[]{"out", "dta"};

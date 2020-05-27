@@ -46,6 +46,7 @@ public class RunListException extends Exception
         return _messages;
     }
 
+    @Override
     public String getMessage()
     {
         return StringUtils.join(_messages, '\n');

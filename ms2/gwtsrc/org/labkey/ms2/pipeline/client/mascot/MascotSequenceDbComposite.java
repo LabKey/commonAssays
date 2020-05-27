@@ -78,12 +78,14 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         }
     }
 
+    @Override
     public void update(List<String> files, List<String> directories, String defaultDb, List<String> taxonomy)
     {
         super.update(files, directories, defaultDb, taxonomy);
         setTaxonomyListBoxContents(taxonomy);
     }
 
+    @Override
     public void setTaxonomyListBoxContents(List<String> taxonomy)
     {
         if(taxonomy == null) return;
@@ -93,6 +95,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         }
     }
 
+    @Override
     public Widget getLabel()
     {
         setLabelStyle();
@@ -110,12 +113,14 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         }
     }
 
+    @Override
     public void setWidth(String width)
     {
         super.setWidth(width);
         taxonomyListBox.setWidth(width);
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
@@ -167,11 +172,13 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         initLabel(readOnly);
     }
 
+    @Override
     public String getSelectedDbPath()
     {
         return "";
     }
 
+    @Override
     public String getSelectedTaxonomy()
     {
         int index = taxonomyListBox.getSelectedIndex();
@@ -186,6 +193,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         params.setInputParameter(ParameterNames.TAXONOMY, getSelectedTaxonomy());
     }
 
+    @Override
     public String setDefaultTaxonomy(String tax)
     {
         int taxCount = taxonomyListBox.getItemCount();
@@ -203,6 +211,7 @@ public class MascotSequenceDbComposite extends SequenceDbComposite
         return "";
     }
 
+    @Override
     public void addTaxonomyChangeHandler(ChangeHandler handler) {
         taxonomyListBox.addChangeHandler(handler);
     }

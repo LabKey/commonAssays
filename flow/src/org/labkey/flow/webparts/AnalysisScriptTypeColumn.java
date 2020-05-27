@@ -30,11 +30,13 @@ public class AnalysisScriptTypeColumn extends DataColumn
         super(column);
     }
 
+    @Override
     public boolean isSortable()
     {
         return false;
     }
 
+    @Override
     public boolean isFilterable()
     {
         return false;

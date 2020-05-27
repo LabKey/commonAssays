@@ -231,6 +231,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         return compRun.getCompensationMatrix();
     }
 
+    @Override
     public String getDescription()
     {
         if (_runAnalysisScript != null)

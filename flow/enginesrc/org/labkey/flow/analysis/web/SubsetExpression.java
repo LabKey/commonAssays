@@ -58,6 +58,7 @@ abstract public class SubsetExpression implements SubsetPart
         return toString(true, false);
     }
 
+    @Override
     public String toString(boolean escape, boolean withinExpression)
     {
         assert !withinExpression : "Nested boolean expression not supported";
@@ -139,6 +140,7 @@ abstract public class SubsetExpression implements SubsetPart
             super(left, right, grouped);
         }
 
+        @Override
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
             BitSet left = _left.apply(subset, populationSet);
@@ -172,6 +174,7 @@ abstract public class SubsetExpression implements SubsetPart
             super(left, right, grouped);
         }
 
+        @Override
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
             BitSet left = _left.apply(subset, populationSet);
@@ -206,6 +209,7 @@ abstract public class SubsetExpression implements SubsetPart
             _term = term;
             _grouped = grouped;
         }
+        @Override
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
             BitSet set = _term.apply(subset, populationSet);
@@ -276,6 +280,7 @@ abstract public class SubsetExpression implements SubsetPart
             return transformer.subset(this);
         }
 
+        @Override
         public BitSet apply(Subset subset, PopulationSet populationSet)
         {
             SubsetPart[] terms = _spec.getSubsets();

@@ -101,6 +101,7 @@ public class PipelineController extends SpringActionController
         setActionResolver(_resolver);
     }
 
+    @Override
     public PageConfig defaultPageConfig()
     {
         PageConfig p = super.defaultPageConfig();
@@ -116,6 +117,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleRedirectAction
     {
+        @Override
         public ActionURL getRedirectURL(Object o)
         {
             return MS2Controller.getBeginURL(getContainer());
@@ -199,6 +201,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
+        @Override
         public ActionURL getSuccessURL(PipelinePathForm form)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
@@ -208,6 +211,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class SearchXTandemAction extends SearchAction
     {
+        @Override
         public String getProviderName()
         {
            return XTandemPipelineProvider.name;
@@ -223,6 +227,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class FractionRollupAction extends SearchAction
     {
+        @Override
         public String getProviderName()
         {
            return FractionRollupPipelineProvider.NAME;
@@ -238,6 +243,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class SearchMascotAction extends SearchAction
     {
+        @Override
         public String getProviderName()
         {
             return MascotCPipelineProvider.name;
@@ -253,6 +259,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class SearchSequestAction extends SearchAction
     {
+        @Override
         public String getProviderName()
         {
             return SequestPipelineProvider.name;
@@ -269,6 +276,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(InsertPermission.class)
     public class SearchCometAction extends SearchAction
     {
+        @Override
         public String getProviderName()
         {
             return CometPipelineProvider.NAME;
@@ -285,6 +293,7 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class SearchServiceAction extends GWTServiceAction
     {
+        @Override
         protected BaseRemoteService createService()
         {
             return new SearchServiceImpl(getViewContext());
@@ -308,12 +317,14 @@ public class PipelineController extends SpringActionController
             return this.getClass();
         }
 
+        @Override
         public ActionURL getSuccessURL(MS2SearchForm form)
         {
             return urlProjectStart(getContainer());
         }
 
 
+        @Override
         public ModelAndView handleRequest(MS2SearchForm form, BindException errors) throws Exception
         {
             _root = PipelineService.get().findPipelineRoot(getContainer());
@@ -418,10 +429,12 @@ public class PipelineController extends SpringActionController
             return getView(form, getReshow(), errors);
         }
 
+        @Override
         public void validateCommand(MS2SearchForm form, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(MS2SearchForm form, BindException errors) throws Exception
         {
 
@@ -564,6 +577,7 @@ public class PipelineController extends SpringActionController
             return true;      
         }
 
+        @Override
         public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors)
         {
             if (!reshow || "".equals(form.getProtocol()))
@@ -605,6 +619,7 @@ public class PipelineController extends SpringActionController
             return errorString.toString();
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("File List", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer()));
@@ -698,21 +713,25 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetTandemDefaultsAction extends SetDefaultsActionBase
     {
+        @Override
         public String getProviderName()
         {
             return XTandemPipelineProvider.name;
         }
 
+        @Override
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp", form, errors);
         }
 
+        @Override
         public HelpTopic getHelpTopic()
         {
             return PipelineController.getHelpTopic("MS2-Pipeline/setTandemDefaults");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Set X! Tandem Defaults");
@@ -722,21 +741,25 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetMascotDefaultsAction extends SetDefaultsActionBase
     {
+        @Override
         public String getProviderName()
         {
             return MascotCPipelineProvider.name;
         }
 
+        @Override
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp", form, errors);
         }
 
+        @Override
         public HelpTopic getHelpTopic()
         {
             return PipelineController.getHelpTopic("MS2-Pipeline/setMascotDefaults");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Set Mascot Defaults");
@@ -746,21 +769,25 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetSequestDefaultsAction extends SetDefaultsActionBase
     {
+        @Override
         public String getProviderName()
         {
             return SequestPipelineProvider.name;
         }
 
+        @Override
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/pipeline/sequest/setSequestDefaults.jsp", form, errors);
         }
 
+        @Override
         public HelpTopic getHelpTopic()
         {
             return PipelineController.getHelpTopic("pipelineSequest");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Set Sequest Defaults");
@@ -770,21 +797,25 @@ public class PipelineController extends SpringActionController
     @RequiresPermission(AdminPermission.class)
     public class SetCometDefaultsAction extends SetDefaultsActionBase
     {
+        @Override
         public String getProviderName()
         {
             return CometPipelineProvider.NAME;
         }
 
+        @Override
         public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
         {
             return new JspView<>("/org/labkey/ms2/pipeline/comet/setCometDefaults.jsp", form, errors);
         }
 
+        @Override
         public HelpTopic getHelpTopic()
         {
             return PipelineController.getHelpTopic("pipelineComet");
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             root.addChild("Set Comet Defaults");
@@ -815,6 +846,7 @@ public class PipelineController extends SpringActionController
         public abstract HelpTopic getHelpTopic();
         public abstract ModelAndView getJspView(SetDefaultsForm form, BindException errors);
 
+        @Override
         public ModelAndView handleRequest(SetDefaultsForm setDefaultsForm, BindException errors) throws Exception
         {
             _root = PipelineService.get().getPipelineRootSetting(getContainer());
@@ -827,10 +859,12 @@ public class PipelineController extends SpringActionController
             return super.handleRequest(setDefaultsForm, errors);
         }
 
+        @Override
         public void validateCommand(SetDefaultsForm form, Errors errors)
         {
         }
 
+        @Override
         public boolean handlePost(SetDefaultsForm form, BindException errors)
         {
             try
@@ -859,6 +893,7 @@ public class PipelineController extends SpringActionController
             return true;
         }
 
+        @Override
         public ModelAndView getView(SetDefaultsForm form, boolean reshow, BindException errors) throws Exception
         {
             setHelpTopic(getHelpTopic());
@@ -867,6 +902,7 @@ public class PipelineController extends SpringActionController
             return getJspView(form, errors);
         }
 
+        @Override
         public ActionURL getSuccessURL(SetDefaultsForm form)
         {
             return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());

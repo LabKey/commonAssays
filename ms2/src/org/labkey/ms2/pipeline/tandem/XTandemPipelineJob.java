@@ -83,6 +83,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     }
 
     /** Currently prophet analysis enabled for native, comet, and k-store algorithms */
+    @Override
     public boolean isProphetEnabled()
     {
         String paramScore = getParameters().get("scoring, algorithm");
@@ -95,6 +96,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     }
 
     // if fire does not exist, will append .gz if config indicates preference for gzipped outputs
+    @Override
     public File getSearchNativeOutputFile()
     {
         return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());

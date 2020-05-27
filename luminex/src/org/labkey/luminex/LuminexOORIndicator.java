@@ -28,14 +28,17 @@ public enum LuminexOORIndicator
 {
     IN_RANGE
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return null;
         }
+        @Override
         public Double getValue(String value)
         {
             return LuminexDataHandler.parseDouble(value);
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return getValue(value);
@@ -43,14 +46,17 @@ public enum LuminexOORIndicator
     },
     NOT_AVAILABLE
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return "***";
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return null;
@@ -58,14 +64,17 @@ public enum LuminexOORIndicator
     },
     OUT_OF_RANGE_ABOVE
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return ">>";
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return LuminexDataHandler.getValidStandard(dataRows, getter, false, analyte);
@@ -73,14 +82,17 @@ public enum LuminexOORIndicator
     },
     OUT_OF_RANGE_BELOW
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return "<<";
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return LuminexDataHandler.getValidStandard(dataRows, getter, true, analyte);
@@ -88,6 +100,7 @@ public enum LuminexOORIndicator
     },
     BEYOND_RANGE
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             int lowerCount = 0;
@@ -121,10 +134,12 @@ public enum LuminexOORIndicator
                 return "?";
             }
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             String oorIndicator = getOORIndicator(value, dataRows, getter);
@@ -161,14 +176,17 @@ public enum LuminexOORIndicator
     },
     ERROR
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return "ParseError";
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return null;
@@ -176,14 +194,17 @@ public enum LuminexOORIndicator
     },
     OUTLIER
     {
+        @Override
         public String getOORIndicator(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter)
         {
             return "---";
         }
+        @Override
         public Double getValue(String value)
         {
             return null;
         }
+        @Override
         public Double getValue(String value, List<LuminexDataRow> dataRows, LuminexDataHandler.Getter getter, Analyte analyte)
         {
             return null;
