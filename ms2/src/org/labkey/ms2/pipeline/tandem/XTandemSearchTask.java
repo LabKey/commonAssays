@@ -84,11 +84,13 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             super(XTandemSearchTask.class);
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new XTandemSearchTask(this, job);
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = (JobSupport) job;
@@ -107,11 +109,13 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                    NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(X_TANDEM_ACTION_NAME, TANDEM2_XML_ACTION_NAME);
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "xtandem";
@@ -128,6 +132,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @Override
     @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {

@@ -81,6 +81,7 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
         return new String(trimmed, 0, len);
     }
 
+    @Override
     public List<FieldKey> getFieldKeys()
     {
         if(_exact)

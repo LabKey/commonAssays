@@ -56,11 +56,13 @@ public class GroupNumberDisplayColumn extends DataColumn
         setWidth("50");
     }
 
+    @Override
     public Object getDisplayValue(RenderContext ctx)
     {
         return getFormattedValue(ctx);
     }
 
+    @Override
     public Class getDisplayValueClass()
     {
         return String.class;
@@ -128,6 +130,7 @@ public class GroupNumberDisplayColumn extends DataColumn
         return sb.toString();
     }
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> columns)
     {
         super.addQueryColumns(columns);

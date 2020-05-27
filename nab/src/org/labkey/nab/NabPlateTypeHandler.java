@@ -46,11 +46,13 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     public static final String SCREENING_20SAMPLE_4VIRUS_PLATE_TYPE = "screening : 20 samples, 4 virus plate";
     public static final String SCREENING_240SAMPLE_1VIRUS_PLATE_TYPE = "screening : 240 samples, 1 virus plate";
 
+    @Override
     public String getAssayType()
     {
         return "NAb";
     }
 
+    @Override
     public List<String> getTemplateTypes(Pair<Integer, Integer> size)
     {
         List<String> names = new ArrayList<>();
@@ -76,6 +78,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return sizes;
     }
 
+    @Override
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
@@ -264,6 +267,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
+    @Override
     public List<WellGroup.Type> getWellGroupTypes()
     {
         return Arrays.asList(

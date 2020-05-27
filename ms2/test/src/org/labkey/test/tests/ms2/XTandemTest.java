@@ -64,6 +64,7 @@ public class XTandemTest extends AbstractXTandemTest
         basicMS2Check();
     }
 
+    @Override
     protected void basicChecks()
     {
         goToSchemaBrowser();

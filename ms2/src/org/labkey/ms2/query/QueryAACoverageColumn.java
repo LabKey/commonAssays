@@ -48,16 +48,19 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
     }
 
 
+    @Override
     public ColumnInfo getColumnInfo()
     {
         return _sequenceColumn;
     }
 
+    @Override
     public Class getValueClass()
     {
         return Double.class;
     }
 
+    @Override
     protected Object calculateValue(RenderContext ctx, List<String> peptides)
             throws SQLException
     {
@@ -68,6 +71,7 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
     }
 
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);

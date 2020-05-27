@@ -55,11 +55,13 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
             super(CometSearchTask.class);
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new CometSearchTask(this, job);
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(COMET_ACTION_NAME);
@@ -71,6 +73,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
         super(factory, job);
     }
 
+    @Override
     public CometPipelineJob getJob()
     {
         return (CometPipelineJob)super.getJob();

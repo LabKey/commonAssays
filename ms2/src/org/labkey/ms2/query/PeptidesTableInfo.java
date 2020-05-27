@@ -128,6 +128,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         quantitation.setIsUnselectable(true);
         quantitation.setFk(new LookupForeignKey("PeptideId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoQuantitation(), getUserSchema());
@@ -145,6 +146,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         iTraqQuantitation.setIsUnselectable(true);
         iTraqQuantitation.setFk(new LookupForeignKey("PeptideId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoITraqPeptideQuantitation(), getUserSchema());
@@ -189,6 +191,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         proteinGroup.setIsUnselectable(true);
         proteinGroup.setFk(new LookupForeignKey("PeptideId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return _userSchema.createPeptideMembershipsTable(getLookupContainerFilter());
@@ -201,6 +204,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         peptideProphetData.setIsUnselectable(true);
         peptideProphetData.setFk(new LookupForeignKey("PeptideId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoPeptideProphetData(), getUserSchema());
@@ -226,6 +230,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";
         DisplayColumnFactory factory = new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 DataColumn dataColumn = new DataColumn(colInfo);
@@ -242,6 +247,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
         getMutableColumn("Fraction").setFk(new LookupForeignKey("Fraction")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return _userSchema.createFractionsTable(getLookupContainerFilter());
@@ -384,6 +390,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
     {
         LookupForeignKey fk = new LookupForeignKey("SeqId")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _userSchema);
@@ -562,6 +569,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         var hColumn = table.wrapColumn("H", table.getRealTable().getColumn("Peptide"));
         hColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 return new HydrophobicityColumn(colInfo);
@@ -572,6 +580,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         var deltaScanColumn = table.wrapColumn("DeltaScan", table.getRealTable().getColumn("Fraction"));
         deltaScanColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 return new DeltaScanColumn(colInfo);

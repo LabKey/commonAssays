@@ -32,11 +32,13 @@ public class PeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
         super(colInfo, peptideColumn, caption);
     }
 
+    @Override
     public Class getValueClass()
     {
         return Integer.class;
     }
 
+    @Override
     protected Object calculateValue(RenderContext ctx, List<String> peptides)
     {
         return peptides.size();

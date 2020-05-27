@@ -89,6 +89,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
                 runColumns.add(proteinGroupIdColumn);
                 LookupForeignKey fk = new LookupForeignKey("RowId")
                 {
+                    @Override
                     public TableInfo getLookupTableInfo()
                     {
                          return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);
@@ -109,6 +110,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
             proteinGroupIdColumn.setIsUnselectable(true);
             proteinGroupIdColumn.setFk(new LookupForeignKey("RowId")
             {
+                @Override
                 public TableInfo getLookupTableInfo()
                 {
                     return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);

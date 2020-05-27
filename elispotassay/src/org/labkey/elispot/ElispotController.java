@@ -91,11 +91,13 @@ public class ElispotController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
         }
@@ -108,6 +110,7 @@ public class ElispotController extends SpringActionController
         private ExpRun _run;
         private boolean _hasRunFilter;
 
+        @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
             _run = ExperimentService.get().getExpRun(form.getRowId());
@@ -183,6 +186,7 @@ public class ElispotController extends SpringActionController
             return false;
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             String title;
@@ -273,6 +277,7 @@ public class ElispotController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class RunDetailRedirectAction extends SimpleRedirectAction<DetailsForm>
     {
+        @Override
         public ActionURL getRedirectURL(DetailsForm form)
         {
             ExpRun run = ExperimentService.get().getExpRun(form.getRowId());

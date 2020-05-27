@@ -35,6 +35,7 @@ public class ProteinProphetCrosstabView extends AbstractQueryCrosstabView
         super(schema, form, viewContext, MS2Schema.HiddenTableType.ProteinProphetCrosstab);
     }
 
+    @Override
     protected TableInfo createTable()
     {
         return _schema.createProteinProphetCrosstabTable(_form, getViewContext());
@@ -46,6 +47,7 @@ public class ProteinProphetCrosstabView extends AbstractQueryCrosstabView
         return new Sort(CrosstabTable.getDefaultSortString() + ",SeqId/BestName");
     }
 
+    @Override
     protected FieldKey getComparisonColumn()
     {
         return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "MIN_ProteinGroupId", "Group");

@@ -171,6 +171,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         super("ElispotAssayProtocol", "ElispotAssayRun", null, (AssayDataType) ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE), ModuleLoader.getInstance().getModule(ElispotModule.class));
     }
 
+    @Override
     public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
     {
         if (!(dataRowId instanceof Integer))
@@ -196,6 +197,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
     }
 
+    @Override
     public String getName()
     {
         return NAME;
@@ -215,11 +217,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
                 null);
     }
 
+    @Override
     public Domain getResultsDomain(ExpProtocol protocol)
     {
         return null;
     }
 
+    @Override
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);
@@ -229,11 +233,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return result;
     }
     
+    @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView("The data file is the output file from the plate reader that has been selected.");
     }
 
+    @Override
     protected Pair<Domain, Map<DomainProperty, Object>> createSampleWellGroupDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
@@ -283,6 +289,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return new Pair<>(analyteWellGroupDomain, Collections.emptyMap());
     }
 
+    @Override
     protected Pair<Domain,Map<DomainProperty,Object>> createRunDomain(Container c, User user)
     {
         Pair<Domain, Map<DomainProperty, Object>> result =  super.createRunDomain(c, user);
@@ -304,6 +311,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return result;
     }
 
+    @Override
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
@@ -324,11 +332,13 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return domainMap;
     }
 
+    @Override
     public List<ParticipantVisitResolverType> getParticipantVisitResolverTypes()
     {
         return Arrays.asList(new ParticipantVisitLookupResolverType(), new SpecimenIDLookupResolverType(), new ParticipantDateLookupResolverType(), new ThawListResolverType());
     }
 
+    @Override
     public ActionURL getImportURL(Container container, ExpProtocol protocol)
     {
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, ElispotUploadWizardAction.class);
@@ -344,6 +354,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE);
     }
 
+    @Override
     public String getDescription()
     {
         return "Imports raw data files from CTL and AID instruments.";
@@ -367,6 +378,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         return new ElispotProtocolSchema(user, container, this, protocol, targetStudy);
     }
 
+    @Override
     public PipelineProvider getPipelineProvider()
     {
         return new AssayPipelineProvider(ElispotModule.class,

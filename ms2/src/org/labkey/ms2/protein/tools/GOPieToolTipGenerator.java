@@ -27,6 +27,7 @@ import org.jfree.data.general.PieDataset;
 public class GOPieToolTipGenerator implements PieToolTipGenerator
 {
 
+    @Override
     public String generateToolTip(PieDataset pieDataset, Comparable comparable)
     {
         String skey = (String) comparable;

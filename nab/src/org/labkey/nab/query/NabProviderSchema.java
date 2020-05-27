@@ -50,6 +50,7 @@ public class NabProviderSchema extends DilutionProviderSchema
     {
         DefaultSchema.registerProvider(SCHEMA_NAME, new DefaultSchema.SchemaProvider(module)
         {
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 // Nab top-level schema for backwards compatibility <12.3.  Moved to assay schema.

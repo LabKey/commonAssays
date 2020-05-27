@@ -53,6 +53,7 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
         return lookup.toString().trim();
     }
 
+    @Override
     public String beforeImportObject(Map<String, Object> map) throws SQLException
     {
         String lookupString = convertLookup(map.get(_lookupStringColumnName));
@@ -72,10 +73,12 @@ public class CustomAnnotationImportHelper implements OntologyManager.ImportHelpe
         return lsid;
     }
 
+    @Override
     public void afterBatchInsert(int currentRow)
     {
     }
 
+    @Override
     public void updateStatistics(int currentRow)
     {
     }

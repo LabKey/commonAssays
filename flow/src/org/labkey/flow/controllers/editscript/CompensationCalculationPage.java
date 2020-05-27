@@ -82,6 +82,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
     public Map<String,Map<String, List<String>>> keywordValueSampleMap;
 
+    @Override
     public void setForm(EditCompensationCalculationForm form)
     {
         super.setForm(form);

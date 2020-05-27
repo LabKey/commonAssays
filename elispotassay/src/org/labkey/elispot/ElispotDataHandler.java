@@ -100,6 +100,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             _context = context;
         }
 
+        @Override
         public List<Map<String, Object>> getResults() throws ExperimentException
         {
             ExpRun run = _data.getRun();
@@ -204,16 +205,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         }
     }
 
+    @Override
     public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
     {
         return new ElispotFileParser(data, dataFile, info, log, context);
     }
 
+    @Override
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
         importData(data, run, context.getProtocol(), dataMap);
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);

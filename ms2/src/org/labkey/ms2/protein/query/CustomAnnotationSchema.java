@@ -44,6 +44,7 @@ public class CustomAnnotationSchema extends UserSchema
     public static void register(Module module)
     {
         DefaultSchema.registerProvider(SCHEMA_WITHOUT_SEQUENCES_NAME, new DefaultSchema.SchemaProvider(module) {
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), false);
@@ -51,6 +52,7 @@ public class CustomAnnotationSchema extends UserSchema
         });
 
         DefaultSchema.registerProvider(SCHEMA_WITH_SEQUENCES_NAME, new DefaultSchema.SchemaProvider(module) {
+            @Override
             public QuerySchema createSchema(DefaultSchema schema, Module module)
             {
                 return new CustomAnnotationSchema(schema.getUser(), schema.getContainer(), true);
@@ -72,11 +74,13 @@ public class CustomAnnotationSchema extends UserSchema
         return _annotationSets;
     }
 
+    @Override
     public Set<String> getTableNames()
     {
         return getAnnotationSets().keySet();
     }
     
+    @Override
     public TableInfo createTable(String name, ContainerFilter cf)
     {
         CustomAnnotationSet annotationSet = getAnnotationSets().get(name);

@@ -36,6 +36,7 @@ public class MultipleIntegerParamsValidator extends AbstractMultipleValueParamsV
         _maxValue = maxValue;
     }
 
+    @Override
     protected String getValueDescription()
     {
         return "All values must be integers between " + _minValue + " and " + _maxValue + ", inclusive";

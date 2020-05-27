@@ -131,6 +131,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         oos.close();
     }
 
+    @Override
     public String getDescription()
     {
         return "Import FlowJo Workspace '" + _workspaceName + "'";
@@ -143,6 +144,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         _workspaceFile.delete();
     }
 
+    @Override
     protected FlowRun createExperimentRun() throws Exception
     {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(_workspaceFile)))

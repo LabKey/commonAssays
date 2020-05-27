@@ -45,6 +45,7 @@ public class FlowFolderType extends MultiPortalFolderType
         defaultModule = module;
     }
 
+    @Override
     public ActionURL getStartURL(Container c, User user)
     {
         ActionURL ret = super.getStartURL(c, user);

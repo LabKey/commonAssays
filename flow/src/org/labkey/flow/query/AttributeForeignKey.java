@@ -34,6 +34,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
 {
     protected static final Logger LOG = Logger.getLogger(AttributeForeignKey.class);
 
+    @Override
     public StringExpression getURL(ColumnInfo parent)
     {
         return null;
@@ -52,6 +53,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
     {
         VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null)
         {
+            @Override
             protected boolean isCaseSensitive()
             {
                 return true;

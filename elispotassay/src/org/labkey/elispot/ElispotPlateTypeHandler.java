@@ -52,11 +52,13 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     public static final String MEAN_STAT = "mean";
     public static final String MEDIAN_STAT = "median";
 
+    @Override
     public String getAssayType()
     {
         return "ELISpot";
     }
 
+    @Override
     public List<String> getTemplateTypes(Pair<Integer, Integer> size)
     {
         List<String> names = new ArrayList<>();
@@ -71,6 +73,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         return Collections.singletonList(new Pair<>(8, 12));
     }
 
+    @Override
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
@@ -113,6 +116,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
+    @Override
     public List<WellGroup.Type> getWellGroupTypes()
     {
         return Arrays.asList(WellGroup.Type.SPECIMEN, WellGroup.Type.ANTIGEN, WellGroup.Type.CONTROL);

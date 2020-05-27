@@ -66,6 +66,7 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
 
     protected abstract Sort getBaseSort();
 
+    @Override
     public DataView createDataView()
     {
         DataView view = super.createDataView();
@@ -74,6 +75,7 @@ public abstract class AbstractQueryCrosstabView extends ComparisonCrosstabView
         return view;
     }
 
+    @Override
     protected GWTComparisonResult createComparisonResult(boolean[][] hits, CrosstabTableInfo table)
     {
         List<MS2Run> runs = _schema.getRuns();

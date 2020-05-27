@@ -24,31 +24,37 @@ import org.labkey.ms2.MS2RunType;
  */
 public class UnknownMS2Run extends MS2Run
 {
+    @Override
     public String getChargeFilterColumnName()
     {
         return null;
     }
 
+    @Override
     public String getChargeFilterParamName()
     {
         return null;
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return null;
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[0];
     }
 
+    @Override
     public String getParamsFileName()
     {
         return null;
     }
 
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.Unknown;

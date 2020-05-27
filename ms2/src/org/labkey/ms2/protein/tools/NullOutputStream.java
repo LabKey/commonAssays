@@ -29,6 +29,7 @@ public class NullOutputStream extends ByteArrayOutputStream
         super(1);
     }
 
+    @Override
     public void write(int i)
     {
     }

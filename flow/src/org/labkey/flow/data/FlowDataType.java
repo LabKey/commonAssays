@@ -86,6 +86,7 @@ abstract public class FlowDataType extends AssayDataType
 
     static final public FlowDataType FCSFile = new FlowDataType("FCSFile", "FCS File", ObjectType.fcsKeywords, true)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSFile(data);
@@ -93,6 +94,7 @@ abstract public class FlowDataType extends AssayDataType
     };
     static final public FlowDataType FCSAnalysis = new FlowDataType("FCSAnalysis", "FCS Analysis", ObjectType.fcsAnalysis, true)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowFCSAnalysis(data);
@@ -100,6 +102,7 @@ abstract public class FlowDataType extends AssayDataType
     };
     static final public FlowDataType CompensationControl = new FlowDataType("CompensationControl", "Comp. Control", ObjectType.compensationControl, true)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationControl(data);
@@ -107,6 +110,7 @@ abstract public class FlowDataType extends AssayDataType
     };
     static final public FlowDataType CompensationMatrix = new FlowDataType("CompensationMatrix", "Comp. Matrix", ObjectType.compensationMatrix, true)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowCompensationMatrix(data);
@@ -114,6 +118,7 @@ abstract public class FlowDataType extends AssayDataType
     };
     static final public FlowDataType Script = new FlowDataType("AnalysisScript", "Script", ObjectType.script, true)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowScript(data);
@@ -121,6 +126,7 @@ abstract public class FlowDataType extends AssayDataType
     };
     static final public FlowDataType Workspace = new FlowDataType("Workspace", "Workspace", ObjectType.workspace, false)
     {
+        @Override
         public FlowDataObject newInstance(ExpData data)
         {
             return new FlowWorkspace(data);
@@ -195,6 +201,7 @@ abstract public class FlowDataType extends AssayDataType
         return _requireAttrObject;
     }
 
+    @Override
     public String urlFlag(boolean flagged)
     {
         StringBuilder ret = new StringBuilder();

@@ -321,17 +321,20 @@ public class FlowRun extends FlowObject<ExpRun>
         return workspace.urlDownload();
     }
 
+    @Override
     public void addParams(Map<FlowParam,Object> map)
     {
         map.put(FlowParam.runId, getRunId());
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return urlFor(RunController.ShowRunAction.class);
     }
 
     // NOTE: This action downloads the FCS files associated with a run and not the external analysis archive zip.
+    @Override
     public ActionURL urlDownload()
     {
         return urlFor(RunController.DownloadAction.class);
@@ -343,11 +346,13 @@ public class FlowRun extends FlowObject<ExpRun>
         return new QueryRowReference(getContainer(), FlowSchema.SCHEMAKEY, FlowTableType.Runs.name(), FieldKey.fromParts("RowId"), getRunId());
     }
 
+    @Override
     public String getLabel()
     {
         return getName();
     }
 
+    @Override
     public FlowObject getParent()
     {
         return getExperiment();

@@ -47,17 +47,20 @@ public abstract class BaseWorkspace implements IWorkspace, Serializable
         return _name;
     }
 
+    @Override
     public String getPath()
     {
         return _path;
     }
 
+    @Override
     public List<String> getWarnings()
     {
         return _warnings;
     }
 
     // NOTE: case-insensitive
+    @Override
     public Set<String> getKeywords()
     {
         return Collections.unmodifiableSet(_keywords);

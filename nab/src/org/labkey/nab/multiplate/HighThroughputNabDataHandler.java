@@ -140,6 +140,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         return plates;
     }
 
+    @Override
     protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate)
     {
         throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
@@ -227,6 +228,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         applyDilution(wells, sampleInput, properties, reverseDirection);
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);

@@ -160,6 +160,7 @@ public class WorkspaceParser
     {
         boolean _isWorkspace = false;
 
+        @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
         {
             _isWorkspace = "Workspace".equals(qName);
@@ -340,16 +341,19 @@ public class WorkspaceParser
 
     static class FJErrorHandler implements ErrorHandler
     {
+        @Override
         public void warning(SAXParseException exception)
         {
             // ignore
         }
 
+        @Override
         public void error(SAXParseException exception) throws SAXException
         {
             throw exception;
         }
 
+        @Override
         public void fatalError(SAXParseException exception) throws SAXException
         {
             String msg = exception.getLocalizedMessage();
@@ -369,6 +373,7 @@ public class WorkspaceParser
         SymbolTable fSymbolTable = new SymbolTable();
         Set<String> rejected = new HashSet<>();
 
+        @Override
         public short startElement(Element element)
         {
             String localName = element.getLocalName();
@@ -384,6 +389,7 @@ public class WorkspaceParser
             return filter;
         }
 
+        @Override
         public short acceptNode(Node node)
         {
             if (node instanceof Text)
@@ -406,6 +412,7 @@ public class WorkspaceParser
             return FILTER_ACCEPT;
         }
 
+        @Override
         public int getWhatToShow()
         {
             return NodeFilter.SHOW_ALL;

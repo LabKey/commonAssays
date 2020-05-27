@@ -28,6 +28,7 @@ import java.util.*;
 public class uniprot_entry_dbReference_property extends ParseActions
 {
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())

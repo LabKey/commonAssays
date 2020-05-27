@@ -29,6 +29,7 @@ public class GraphSpec implements SpecBase<GraphSpec>
 {
     public static class CaseInsensitiveComparator implements Comparator<GraphSpec>, Serializable
     {
+        @Override
         public int compare(GraphSpec o1, GraphSpec o2)
         {
             return Objects.compare(

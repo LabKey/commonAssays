@@ -52,41 +52,49 @@ public class IntArray implements NumberArray
         }
     }
 
+    @Override
     public Number get(int index)
     {
         return Integer.valueOf(_array[index]);
     }
 
+    @Override
     public double getDouble(int index)
     {
         return _array[index];
     }
 
+    @Override
     public float getFloat(int index)
     {
         return _array[index];
     }
 
+    @Override
     public int getInt(int index)
     {
         return _array[index];
     }
 
+    @Override
     public void set(int index, double value)
     {
         _array[index] = (int) value;
     }
 
+    @Override
     public void set(int index, float value)
     {
         _array[index] = (int) value;
     }
 
+    @Override
     public void set(int index, int value)
     {
         _array[index] = value;
     }
 
+    @Override
     public int size()
     {
         return _array.length;

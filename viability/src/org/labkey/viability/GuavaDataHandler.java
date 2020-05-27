@@ -64,6 +64,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         return DATA_TYPE;
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
@@ -81,6 +82,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         return null;
     }
 
+    @Override
     public Parser getParser(Domain runDomain, Domain resultsDomain, File dataFile)
     {
         return new Parser(runDomain, resultsDomain, dataFile);
@@ -101,6 +103,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             return shouldSplitPoolID;
         }
 
+        @Override
         protected void _parse() throws IOException, ExperimentException
         {
             _runData = new HashMap<>();
@@ -255,6 +258,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                     cd.clazz = Double.class;
                     cd.converter = new Converter()
                     {
+                        @Override
                         public Object convert(Class type, Object value)
                         {
                             Double d = (Double) ConvertUtils.convert((String)value, Double.class);
@@ -379,6 +383,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         Map<DataType, List<Map<String, Object>>> result = new HashMap<>();

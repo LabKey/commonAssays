@@ -49,6 +49,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         super(info, file, description, runInfo, root);
     }
 
+    @Override
     public void run()
     {
         // Clear out any previous errors

@@ -47,6 +47,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
         super(context);
     }
 
+    @Override
     public GWTComparisonResult getProteinProphetComparison(String originalURL)
     {
         try
@@ -67,6 +68,7 @@ public class CompareServiceImpl extends BaseRemoteService implements CompareServ
     }
 
     // This method supports venn diagrams for both proteins and peptides
+    @Override
     public GWTComparisonResult getQueryCrosstabComparison(String originalURL, String comparisonGroup)
     {
         try

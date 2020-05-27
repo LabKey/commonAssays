@@ -148,6 +148,7 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         return fieldKeys;
     }
 
+    @Override
     public Sort getDefaultSort()
     {
         return new Sort("+" + "RunId" + ",+" + "WellgroupName");

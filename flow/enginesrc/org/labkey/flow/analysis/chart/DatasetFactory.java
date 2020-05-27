@@ -41,26 +41,31 @@ public class DatasetFactory
             _yValues = yValues;
         }
 
+        @Override
         public String getSeriesKey(int series)
         {
             return "First Series";
         }
 
+        @Override
         public int getSeriesCount()
         {
             return 1;
         }
 
+        @Override
         public int getItemCount(int series)
         {
             return _xValues.size();
         }
 
+        @Override
         public Number getX(int series, int item)
         {
             return Double.valueOf(_xValues.getDouble(item));
         }
 
+        @Override
         public Number getY(int series, int item)
         {
             return Double.valueOf(_yValues.getDouble(item));

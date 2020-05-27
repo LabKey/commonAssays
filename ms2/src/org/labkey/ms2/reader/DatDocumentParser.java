@@ -36,11 +36,13 @@ public class DatDocumentParser extends AbstractDocumentParser
         // Intentionally no-op as the content isn't very interesting for full text search
     }
 
+    @Override
     public String getMediaType()
     {
         return "application/dat";
     }
 
+    @Override
     public boolean detect(WebdavResource resource, String contentType, byte[] buf)
     {
         if (resource.getName().toLowerCase().endsWith(".dat") || getMediaType().equals(resource.getContentType()))

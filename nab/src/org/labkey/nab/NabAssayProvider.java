@@ -136,6 +136,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
                 new SpecimenIDLookupResolverType(), new ThawListResolverType());
     }
 
+    @Override
     public void registerLsidHandler()
     {
         LsidManager.get().registerHandler(_runLSIDPrefix, new LsidManager.ExpRunLsidHandler()
@@ -317,6 +318,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
                     run.getContainer()).addParameter("rowId", run.getRowId()).addParameter("newRun", "true");
     }
 
+    @Override
     public List<Pair<Domain, Map<DomainProperty, Object>>> createDefaultDomains(Container c, User user)
     {
         List<Pair<Domain, Map<DomainProperty, Object>>> result = super.createDefaultDomains(c, user);

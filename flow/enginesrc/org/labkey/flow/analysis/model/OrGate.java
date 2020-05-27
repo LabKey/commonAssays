@@ -36,6 +36,7 @@ public class OrGate extends GateList implements SubsetExpressionGate
         super(gates);
     }
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         BitSet bits = null;
@@ -57,6 +58,7 @@ public class OrGate extends GateList implements SubsetExpressionGate
         return ret;
     }
 
+    @Override
     public SubsetExpression.OrTerm createTerm()
     {
         if (_gates.size() < 2)

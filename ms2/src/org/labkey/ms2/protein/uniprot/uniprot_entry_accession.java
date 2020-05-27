@@ -22,6 +22,7 @@ import org.labkey.ms2.protein.*;
 public class uniprot_entry_accession extends CharactersParseActions
 {
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -32,6 +33,7 @@ public class uniprot_entry_accession extends CharactersParseActions
         _accumulated = "";
     }
 
+    @Override
     public void endElement(ParseContext context)
     {
         if (context.isIgnorable())

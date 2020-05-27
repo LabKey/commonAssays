@@ -141,6 +141,7 @@ public abstract class Param implements Comparable<Param>
         return converter.convert(this, commentPrefix);
     }
 
+    @Override
     public int compareTo(Param o)
     {
         if (o.getSortOrder() > this.getSortOrder()) return -1;

@@ -75,7 +75,7 @@ public abstract class BaseFlowController extends SpringActionController
         }
     }
 
-    protected ActionURL executeScript(FlowJob job) throws Exception, PipelineValidationException
+    protected ActionURL executeScript(FlowJob job) throws Exception
     {
         try (var ignore = SpringActionController.ignoreSqlUpdates())
         {
@@ -105,7 +105,7 @@ public abstract class BaseFlowController extends SpringActionController
         super.addNavTrail(action, root);
     }
 
-    public void appendFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
+    public void addFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
     {
         ArrayList<NavTree> children = new ArrayList<>();
         while (object != null)
@@ -156,7 +156,7 @@ public abstract class BaseFlowController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+            addFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
         }
     }
 
@@ -175,7 +175,7 @@ public abstract class BaseFlowController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
+            addFlowNavTrail(getPageConfig(), root, _form.getFlowObject(), getPageTitle());
         }
     }
 

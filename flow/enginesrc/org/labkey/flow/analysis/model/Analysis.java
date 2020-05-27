@@ -58,6 +58,7 @@ public class Analysis extends ScriptComponent
         return _graphs;
     }
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         if (super.requiresCompensationMatrix())

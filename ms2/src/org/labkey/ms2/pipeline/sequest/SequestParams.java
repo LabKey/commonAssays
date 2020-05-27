@@ -31,6 +31,7 @@ public class SequestParams extends AbstractSequestParams
         super(variant);
     }
 
+    @Override
     protected void initProperties()
     {
         super.initProperties();

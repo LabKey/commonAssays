@@ -157,6 +157,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return LUMINEX_DATA_TYPE;
     }
 
+    @Override
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         if (!dataFile.exists())
@@ -1636,15 +1637,18 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         excelRunPropsList.add(excelRunPropsByPropertyId);
         OntologyManager.insertTabDelimited(container, user, objectId, new OntologyManager.ImportHelper()
         {
+            @Override
             public String beforeImportObject(Map<String, Object> map)
             {
                 return data.getLSID();
             }
 
+            @Override
             public void afterBatchInsert(int currentRow)
             {
             }
 
+            @Override
             public void updateStatistics(int currentRow)
             {
             }
@@ -1655,6 +1659,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     {
         Getter fiGetter = new Getter()
         {
+            @Override
             public Double getValue(LuminexDataRow dataRow)
             {
                 if (determineOutOfRange(dataRow.getFiString()) == LuminexOORIndicator.IN_RANGE)
@@ -1666,6 +1671,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         };
         Getter fiBackgroundGetter = new Getter()
         {
+            @Override
             public Double getValue(LuminexDataRow dataRow)
             {
                 if (determineOutOfRange(dataRow.getFiBackgroundString()) == LuminexOORIndicator.IN_RANGE)
@@ -1677,6 +1683,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         };
         Getter stdDevGetter = new Getter()
         {
+            @Override
             public Double getValue(LuminexDataRow dataRow)
             {
                 if (determineOutOfRange(dataRow.getStdDevString()) == LuminexOORIndicator.IN_RANGE)
@@ -1688,6 +1695,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         };
         Getter obsConcGetter = new Getter()
         {
+            @Override
             public Double getValue(LuminexDataRow dataRow)
             {
                 if (determineOutOfRange(dataRow.getObsConcString()) == LuminexOORIndicator.IN_RANGE)
@@ -1699,6 +1707,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         };
         Getter concInRangeGetter = new Getter()
         {
+            @Override
             public Double getValue(LuminexDataRow dataRow)
             {
                 if (determineOutOfRange(dataRow.getConcInRangeString()) == LuminexOORIndicator.IN_RANGE)
@@ -1938,6 +1947,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return resolver.resolve(specimenID, participantId, visitId, date, null);
     }
 
+    @Override
     public ActionURL getContentURL(ExpData data)
     {
         ExpRun run = data.getRun();
@@ -1950,6 +1960,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return null;
     }
 
+    @Override
     public void beforeDeleteData(List<ExpData> data, User user)
     {
         List<Integer> ids = new ArrayList<>();
@@ -2037,11 +2048,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                         " d WHERE pa.RowId = d.SourceApplicationId AND d.RowId ").append(idSQL).append(")"));
     }
 
+    @Override
     public void deleteData(ExpData data, Container container, User user)
     {
         deleteDatas(Collections.singletonList(data.getRowId()));
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
@@ -2085,6 +2098,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return datas;
     }
 
+    @Override
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMaps) throws ExperimentException
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
@@ -2121,6 +2135,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form, false);
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());

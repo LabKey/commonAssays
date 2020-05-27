@@ -76,6 +76,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
         runColumn.setFk(new LookupForeignKey("RowID")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpRunTable expRunTable = AssayService.get().createRunTable(protocol, provider, schema.getUser(), schema.getContainer(), PlateBasedAssayRunDataTable.this.getContainerFilter());
@@ -96,6 +97,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         materialColumn.setHidden(true);
         materialColumn.setFk(new LookupForeignKey(cf,"LSID", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());

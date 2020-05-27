@@ -120,11 +120,13 @@ public class LuminexController extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class BeginAction extends SimpleViewAction
     {
+        @Override
         public ModelAndView getView(Object o, BindException errors)
         {
             return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
+        @Override
         public void addNavTrail(NavTree root)
         {
             throw new UnsupportedOperationException();

@@ -197,6 +197,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return getExpObject();
     }
 
+    @Override
     public void addParams(Map<FlowParam, Object> map)
     {
         switch (getProtocol().getApplicationType())
@@ -212,16 +213,19 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
     }
 
+    @Override
     public FlowObject getParent()
     {
         return null;
     }
 
+    @Override
     public ActionURL urlShow()
     {
         return urlFor(ProtocolController.ShowProtocolAction.class);
     }
 
+    @Override
     public ActionURL urlDownload()
     {
         throw new UnsupportedOperationException();
@@ -805,6 +809,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret.toString();
     }
 
+    @Override
     public String getLabel()
     {
         return "Protocol '" + getName() + "'";
@@ -941,9 +946,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         private int sumInteralMaterialInputs(FlowRun run)
         {
             return run
-                    .getExperimentRun()
-                    .getProtocolApplications()
-                    .stream().mapToInt(p -> p.getMaterialInputs().size()).sum();
+                .getExperimentRun()
+                .getProtocolApplications()
+                .stream().mapToInt(p -> p.getMaterialInputs().size()).sum();
         }
     }
 }

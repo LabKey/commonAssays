@@ -89,6 +89,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return _exclusionCount;
     }
 
+    @Override
     public String[] getAnalyteNames()
     {
         return _analyteNames;
@@ -114,6 +115,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return properties;
     }
 
+    @Override
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
         Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -121,6 +123,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
 
+    @Override
     public Map<ColumnInfo, String> getAnalyteColumnProperties(String analyteName)
     {
         Map<ColumnInfo, String> properties = new HashMap<>();
@@ -231,6 +234,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         }
     }
 
+    @Override
     public LuminexExcelParser getParser() throws ExperimentException
     {
         if (_parser == null)
@@ -240,6 +244,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return _parser;
     }
 
+    @Override
     public Set<String> getTitrationsForAnalyte(String analyteName) throws ExperimentException
     {
         Set<String> result = new HashSet<>();
@@ -253,6 +258,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return result;
     }
 
+    @Override
     public List<Titration> getTitrations() throws ExperimentException
     {
         List<Titration> result = new ArrayList<>();
@@ -279,6 +285,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         return result;
     }
 
+    @Override
     public List<SinglePointControl> getSinglePointControls() throws ExperimentException
     {
         List<SinglePointControl> result = new ArrayList<>();

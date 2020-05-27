@@ -55,6 +55,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         super(NAME, owningModule, CometSearchTask.Factory.class);
     }
 
+    @Override
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         return "comet.xml".equals(name) || super.isStatusViewableFile(container, name, basename);
@@ -79,6 +80,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
+    @Override
     @NotNull
     public HttpView createSetupWebPart(Container container)
     {
@@ -108,61 +110,73 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         }
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return CometSearchProtocolFactory.get();
     }
 
+    @Override
     public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<>());
     }
 
+    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
     }
 
+    @Override
     public List<String> getTaxonomyList(Container container)
     {
         //Comet does not support Mascot style taxonomy.
         return null;
     }
 
+    @Override
     public Map<String, List<String>> getEnzymes(Container container)
     {
         return SearchFormUtil.getDefaultEnzymeMap();
     }
 
+    @Override
     public Map<String, String> getResidue0Mods(Container container)
     {
         return SearchFormUtil.getDefaultStaticMods();
     }
 
+    @Override
     public Map<String, String> getResidue1Mods(Container container)
     {
         return SearchFormUtil.getDefaultDynamicMods();
     }
 
+    @Override
     public String getHelpTopic()
     {
         return "pipelineComet";
     }
 
+    @Override
     public void ensureEnabled(Container container)
     {
     }
 
+    @Override
     public boolean supportsDirectories()
     {
         return true;
     }
 
+    @Override
     public boolean remembersDirectories()
     {
         return false;
     }
 
+    @Override
     public boolean hasRemoteDirectories()
     {
         return false;

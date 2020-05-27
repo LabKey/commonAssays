@@ -25,6 +25,7 @@ import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_feature_location_end extends ParseActions
 {
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())

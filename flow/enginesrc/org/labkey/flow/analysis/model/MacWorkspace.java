@@ -50,6 +50,7 @@ public class MacWorkspace extends FlowJoWorkspace
         return "FlowJo Mac Workspace";
     }
 
+    @Override
     protected void readAll(Element elDoc)
     {
         readAutoCompensationScripts(elDoc);
@@ -57,6 +58,7 @@ public class MacWorkspace extends FlowJoWorkspace
         super.readAll(elDoc);
     }
 
+    @Override
     protected void readSamples(Element elDoc)
     {
         for (Element elSamples : getElementsByTagName(elDoc, "Samples"))
@@ -70,6 +72,7 @@ public class MacWorkspace extends FlowJoWorkspace
         readSampleAnalyses(elDoc);
     }
 
+    @Override
     protected void readGroups(Element elDoc)
     {
         for (Element elGroups : getElementsByTagName(elDoc, "Groups"))
@@ -95,6 +98,7 @@ public class MacWorkspace extends FlowJoWorkspace
         }
     }
 
+    @Override
     public void readCompensationMatrices(Element elDoc)
     {
         for (Element elCompensationMatrices : getElementsByTagName(elDoc, "CompensationMatrices"))
@@ -362,6 +366,7 @@ public class MacWorkspace extends FlowJoWorkspace
     }
 
 
+    @Override
     protected Analysis readAnalysis(Element elAnalysis, @Nullable AttributeSet results, String sampleId, boolean warnOnMissingStats)
     {
         Analysis ret = new Analysis();

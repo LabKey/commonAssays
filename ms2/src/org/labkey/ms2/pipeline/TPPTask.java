@@ -185,26 +185,31 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             super(TPPTask.class, name);    
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new TPPTask(this, job);
         }
 
+        @Override
         public List<FileType> getInputTypes()
         {
             return Collections.singletonList(FT_PEP_XML);
         }
 
+        @Override
         public String getStatusName()
         {
             return "ANALYSIS";
         }
 
+        @Override
         public boolean isParticipant(PipelineJob job)
         {
             return job.getJobSupport(JobSupport.class).isSamples();
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = job.getJobSupport(JobSupport.class);
@@ -217,11 +222,13 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             return !support.isProphetEnabled() || NetworkDrive.exists(getProtXMLFile(dirAnalysis, baseName));
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(PEPTIDE_PROPHET_ACTION_NAME, PEPTIDE_QUANITATION_ACTION_NAME, PROTEIN_PROPHET_ACTION_NAME, PROTEIN_QUANITATION_ACTION_NAME);
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "tpp";
@@ -247,11 +254,13 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             setJoin(true);
         }
 
+        @Override
         public boolean isParticipant(PipelineJob job)
         {
             return job.getJobSupport(JobSupport.class).isFractions();
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "tpp fractions";
@@ -268,6 +277,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @Override
     @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {

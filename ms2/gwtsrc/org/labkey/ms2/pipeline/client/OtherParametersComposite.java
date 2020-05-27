@@ -60,6 +60,7 @@ public class OtherParametersComposite extends SearchFormComposite
         _inputXmlComposite = inputXmlComposite;
         _newParameterNameTextBox.addBlurHandler(new BlurHandler()
         {
+            @Override
             public void onBlur(BlurEvent event)
             {
                 if (_newParameterNameTextBox.getText().trim().isEmpty())
@@ -72,6 +73,7 @@ public class OtherParametersComposite extends SearchFormComposite
 
         _newParameterButton.addClickHandler(new ClickHandler()
         {
+            @Override
             public void onClick(ClickEvent event)
             {
                 addParameter();
@@ -79,6 +81,7 @@ public class OtherParametersComposite extends SearchFormComposite
         });
         _newParameterNameTextBox.addKeyPressHandler(new KeyPressHandler()
         {
+            @Override
             public void onKeyPress(KeyPressEvent event)
             {
                 if (KeyCodes.KEY_ENTER == event.getNativeEvent().getKeyCode())
@@ -90,6 +93,7 @@ public class OtherParametersComposite extends SearchFormComposite
 
         _newParameterNameTextBox.addFocusHandler(new FocusHandler()
         {
+            @Override
             public void onFocus(FocusEvent event)
             {
                 if (BLANK_PARAMETER_NAME_PROMPT.equals(_newParameterNameTextBox.getText()))
@@ -265,11 +269,13 @@ public class OtherParametersComposite extends SearchFormComposite
         return button;
     }
 
+    @Override
     public void setName(String name)
     {
 
     }
 
+    @Override
     public String getName()
     {
         return null;

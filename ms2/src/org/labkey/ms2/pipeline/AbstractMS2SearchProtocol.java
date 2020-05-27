@@ -85,6 +85,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         _dbNames = dbNames;
     }
 
+    @Override
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
                                           PipeRoot root,
                                           List<File> filesInput,
@@ -109,6 +110,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         super.save(file, addParams, instanceParams);        
     }
 
+    @Override
     public List<FileType> getInputTypes()
     {
         TaskFactory taskFactory = PipelineJobService.get().getTaskFactory(MS2PipelineManager.MZXML_CONVERTER_TASK_ID);
@@ -119,6 +121,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         return Collections.singletonList(FT_MZXML);
     }
 
+    @Override
     public void validate(PipeRoot root) throws PipelineValidationException
     {
         super.validate(root);

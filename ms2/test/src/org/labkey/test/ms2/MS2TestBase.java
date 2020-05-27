@@ -57,6 +57,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
     protected static final String REGION_NAME_PROTEINGROUPS = "ProteinGroups";
     protected static final String REGION_NAME_SEARCH_RUNS = "MS2SearchRuns";
 
+    @Override
     public List<String> getAssociatedModules()
     {
         return Arrays.asList("ms2");
@@ -74,6 +75,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
         return BrowserType.CHROME;
     }
 
+    @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         cleanPipe(PIPELINE_PATH);

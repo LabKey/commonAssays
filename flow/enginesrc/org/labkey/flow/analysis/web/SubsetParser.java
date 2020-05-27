@@ -365,6 +365,7 @@ public class SubsetParser
             _token = new Token(Tok.name, text());
         }
 
+        @Override
         public boolean hasNext()
         {
             if (_token != null)
@@ -375,6 +376,7 @@ public class SubsetParser
             return true;
         }
 
+        @Override
         public Token next()
         {
             if (hasNext())
@@ -386,6 +388,7 @@ public class SubsetParser
             return EOF;
         }
 
+        @Override
         public void remove()
         {
             throw new UnsupportedOperationException();

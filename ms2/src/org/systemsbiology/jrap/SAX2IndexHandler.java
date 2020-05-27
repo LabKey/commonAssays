@@ -100,14 +100,16 @@ public final class SAX2IndexHandler extends DefaultHandler
     //
 
     /** Start document. */
+    @Override
     public void startDocument()
     {
         // Nothing to do
     } // startDocument()
 
     /** Start element. */
+    @Override
     public void startElement(String uri, String local, String raw,
-            Attributes attrs)
+                             Attributes attrs)
     {
         if (raw.equals("indexOffset"))
         {
@@ -143,6 +145,7 @@ public final class SAX2IndexHandler extends DefaultHandler
         return _maxScan;
     }
 
+    @Override
     public void endElement(String uri, String local, String raw)
             throws SAXException
     {
@@ -179,6 +182,7 @@ public final class SAX2IndexHandler extends DefaultHandler
     } // endElement()
 
     /** Characters. */
+    @Override
     public void characters(char ch[], int start, int length)
     {
         if (foundIdxOffset || foundScanOffset)
@@ -188,12 +192,14 @@ public final class SAX2IndexHandler extends DefaultHandler
     } // characters(char[],int,int);
 
     /** Ignorable whitespace. */
+    @Override
     public void ignorableWhitespace(char ch[], int start, int length)
     {
         // Do nothing
     } // ignorableWhitespace(char[],int,int);
 
     /** Processing instruction. */
+    @Override
     public void processingInstruction(String target, String data)
     {
         System.out.println("instr? " + target + " --- " + data);
@@ -205,6 +211,7 @@ public final class SAX2IndexHandler extends DefaultHandler
     //
 
     /** Warning. */
+    @Override
     public void warning(SAXParseException ex)
     {
         // Do nothing
@@ -212,6 +219,7 @@ public final class SAX2IndexHandler extends DefaultHandler
     } // warning(SAXParseException)
 
     /** Error. */
+    @Override
     public void error(SAXParseException ex)
     {
         // Do nothing
@@ -219,6 +227,7 @@ public final class SAX2IndexHandler extends DefaultHandler
     } // error(SAXParseException)
 
     /** Fatal error. */
+    @Override
     public void fatalError(SAXParseException ex)
     {
         // Do nothing

@@ -28,6 +28,7 @@ import org.labkey.ms2.pipeline.client.EnzymeComposite;
  */
 public class MascotEnzymeComposite extends EnzymeComposite
 {
+    @Override
     public String setSelectedEnzyme(String enzymeSignature)
     {
         if(enzymeSignature == null) return "Cut site is equal to null.";

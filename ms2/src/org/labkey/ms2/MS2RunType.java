@@ -77,6 +77,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             new ScoreInfo("DeltaStar", "deltastar"),
             new ScoreInfo("Expect", "expect"))
     {
+        @Override
         public boolean isPeptideTableHidden()
         {
             return true;
@@ -107,6 +108,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             new ScoreInfo("DeltaStar", "deltastar"),
             new ScoreInfo("Expect", "expect"))
     {
+        @Override
         public boolean isPeptideTableHidden()
         {
             return true;
@@ -114,6 +116,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
     },
     Unknown(UnknownMS2Run.class)
     {
+        @Override
         public boolean isPeptideTableHidden()
         {
             return true;

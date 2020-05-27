@@ -206,7 +206,7 @@ public class WellController extends BaseFlowController
         public void addNavTrail(NavTree root)
         {
             String label = _well != null ? null : "Well not found";
-            appendFlowNavTrail(getPageConfig(), root, _well, label);
+            addFlowNavTrail(getPageConfig(), root, _well, label);
         }
     }
 
@@ -360,7 +360,7 @@ public class WellController extends BaseFlowController
                 return;
             }
             String label = _wells != null && !_wells.isEmpty() ? "Edit " + _wells.get(0).getLabel() : "Well not found";
-            appendFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
+            addFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
         }
     }
 
@@ -405,7 +405,7 @@ public class WellController extends BaseFlowController
         @Override
         public void addNavTrail(NavTree root)
         {
-            appendFlowNavTrail(getPageConfig(), root, _well, "Choose Graph");
+            addFlowNavTrail(getPageConfig(), root, _well, "Choose Graph");
         }
     }
 

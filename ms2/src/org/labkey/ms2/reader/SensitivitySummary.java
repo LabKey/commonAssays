@@ -140,6 +140,7 @@ public class SensitivitySummary
             _error = error;
         }
 
+        @Override
         public int compareTo(Object o)
         {
             ProbabilityInfo p = (ProbabilityInfo)o;

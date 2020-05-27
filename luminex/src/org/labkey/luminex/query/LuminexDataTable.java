@@ -105,6 +105,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         var dataColumn = addColumn(wrapColumn("Data", getRealTable().getColumn("DataId")));
         dataColumn.setFk(new LookupForeignKey(cf, "RowId", null)
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpDataTable result = _userSchema.createDataFileTable(getLookupContainerFilter());

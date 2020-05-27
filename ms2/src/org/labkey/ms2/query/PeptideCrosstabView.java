@@ -50,6 +50,7 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
         _form = form;
     }
 
+    @Override
     protected TableInfo createTable()
     {
         return _schema.createPeptideCrosstabTable(_form, getViewContext());
@@ -61,6 +62,7 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
         return new Sort(CrosstabTable.getDefaultSortString() + ",Peptide");
     }
 
+    @Override
     protected FieldKey getComparisonColumn()
     {
         return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_RowId");

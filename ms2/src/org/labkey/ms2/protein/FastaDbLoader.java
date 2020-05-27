@@ -90,6 +90,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         return "FASTA import - " + _file;
     }
 
+    @Override
     public void validate() throws IOException
     {
         super.validate();

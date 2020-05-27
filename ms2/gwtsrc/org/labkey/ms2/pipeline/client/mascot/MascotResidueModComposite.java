@@ -52,6 +52,7 @@ public class MascotResidueModComposite extends ResidueModComposite
         instance.setWidget(modTabPanel);
     }
 
+        @Override
         public String validate()
     {
         String error = validate(staticListBox);
@@ -71,11 +72,13 @@ public class MascotResidueModComposite extends ResidueModComposite
         return "";
     }
 
+    @Override
     public Map<String, String> getModMap(int modType)
     {
         return getListBoxMap(modStaticListBox);
     }
 
+    @Override
     public void update(Map<String, String> mod0Map, Map<String, String> mod1Map)
     {
         setListBoxMods(mod0Map, modStaticListBox);
@@ -83,6 +86,7 @@ public class MascotResidueModComposite extends ResidueModComposite
         setListBoxMods(mod0Map, modDynamicListBox);
     }
 
+    @Override
     protected String validate(ListBox box, int modType)
     {
         Map<String, String> modMap = getListBoxMap(box);

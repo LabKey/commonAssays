@@ -55,6 +55,7 @@ public class SpectraCountQueryView extends QueryView
         _form = form;
 
         setViewItemFilter(new ReportService.ItemFilter() {
+            @Override
             public boolean accept(String type, String label)
             {
                 return SpectraCountRReport.TYPE.equals(type);
@@ -62,6 +63,7 @@ public class SpectraCountQueryView extends QueryView
         });
     }
 
+    @Override
     protected TableInfo createTable()
     {
         return _schema.createSpectraCountTable(_config, getViewContext(), _form);

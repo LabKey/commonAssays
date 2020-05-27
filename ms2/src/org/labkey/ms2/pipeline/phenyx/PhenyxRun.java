@@ -35,31 +35,37 @@ public class PhenyxRun extends MS2Run
             map.put("bogus", "87");  // TODO: Get rid of this
     }
 
+    @Override
     public MS2RunType getRunType()
     {
         return MS2RunType.Phenyx;
     }
 
+    @Override
     public String getParamsFileName()
     {
         return "phenyx.xml";
     }
 
+    @Override
     public String getChargeFilterColumnName()
     {
         return "ZScore";
     }
 
+    @Override
     public String getChargeFilterParamName()
     {
         return "zScore";
     }
 
+    @Override
     public String getDiscriminateExpressions()
     {
         return null;
     }
 
+    @Override
     public String[] getGZFileExtensions()
     {
         return new String[0];

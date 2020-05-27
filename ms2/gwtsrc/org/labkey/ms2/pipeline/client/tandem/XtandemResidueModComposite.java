@@ -56,12 +56,14 @@ public class XtandemResidueModComposite extends ResidueModComposite
         instance.setWidget(modTabPanel);
     }
 
+    @Override
     public void update(Map mod0Map, Map mod1Map)
     {
         setListBoxMods(mod0Map, modStaticListBox);
         setListBoxMods(mod1Map, modDynamicListBox);
     }
 
+    @Override
     public Map getModMap(int modType)
     {
         if(modType == STATIC)
@@ -71,6 +73,7 @@ public class XtandemResidueModComposite extends ResidueModComposite
         return null;
     }
 
+    @Override
     protected String validate(ListBox box, int modType)
     {
         Map<String, String> modMap = getListBoxMap(box);

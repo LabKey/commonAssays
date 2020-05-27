@@ -40,11 +40,13 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
         super(name, description, xml);
     }
 
+    @Override
     public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return SequestSearchProtocolFactory.get();
     }
 
+    @Override
     public SequestPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                 PipeRoot root, List<File> filesInput,
                                                 File fileParameters, @Nullable Map<String, String> variableMap
@@ -54,6 +56,7 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
                 filesInput, fileParameters);
     }
 
+    @Override
     public void validate(PipeRoot root) throws PipelineValidationException
     {
         String[] dbNames = getDbNames();

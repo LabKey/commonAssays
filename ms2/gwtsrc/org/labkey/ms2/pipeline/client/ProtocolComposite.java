@@ -75,6 +75,7 @@ public class ProtocolComposite extends SearchFormComposite
     }
 
 
+    @Override
     public Widget getLabel()
     {
         Label listBoxLabel = new Label("Analysis protocol");
@@ -87,6 +88,7 @@ public class ProtocolComposite extends SearchFormComposite
         protocolListBox.addChangeHandler(handler);
     }
 
+    @Override
     public void setName(String name)
     {
         protocolListBox.setName(name);
@@ -94,11 +96,13 @@ public class ProtocolComposite extends SearchFormComposite
         protocolDescTextArea.setName(name + "Description");
     }
 
+    @Override
     public String getName()
     {
         return protocolListBox.getName();
     }
 
+    @Override
     public void setWidth(String width)
     {
         instance.setWidth(width);
@@ -180,6 +184,7 @@ public class ProtocolComposite extends SearchFormComposite
         }
     }
 
+    @Override
     public void setReadOnly(boolean readOnly)
     {
         super.setReadOnly(readOnly);
@@ -266,6 +271,7 @@ public class ProtocolComposite extends SearchFormComposite
 
     }
 
+    @Override
     public String validate()
     {
         if(protocolNameTextBox.getText().equalsIgnoreCase("default"))

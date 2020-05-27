@@ -57,6 +57,7 @@ public class RunTableInfo extends FilteredTable<MS2Schema>
         erLSIDColumn.setLabel("Experiment Run");
         erLSIDColumn.setFk(new LookupForeignKey("LSID")
         {
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 ExpSchema schema = new ExpSchema(_userSchema.getUser(), _userSchema.getContainer());

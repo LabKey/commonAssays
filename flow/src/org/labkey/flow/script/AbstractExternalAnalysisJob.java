@@ -192,6 +192,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         return _failOnError;
     }
 
+    @Override
     protected void doRun() throws Throwable
     {
         if (!setStatus("LOADING"))

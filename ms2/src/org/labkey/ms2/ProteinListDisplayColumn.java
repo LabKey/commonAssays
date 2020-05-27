@@ -82,6 +82,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         },
         Description
         {
+            @Override
             public Object getValue(ProteinSummary summary)
             {
                 return summary.getDescription();
@@ -169,11 +170,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         setTextAlign(_sequenceColumn.getTextAlign());
     }
 
+    @Override
     public ColumnInfo getColumnInfo()
     {
         return _columnInfo;
     }
 
+    @Override
     public Object getValue(RenderContext ctx)
     {
         Map row = ctx.getRow();
@@ -217,6 +220,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         return sb.toString();
     }
 
+    @Override
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         Map row = ctx.getRow();
@@ -252,6 +256,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     }
 
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         set.add(_columnInfo);

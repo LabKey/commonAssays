@@ -68,6 +68,7 @@ public class Q3AnalysisSummary extends RelativeQuantAnalysisSummary
     /**
      * Disallowed; can't change analysis type
      */
+    @Override
     public void setAnalysisType(String analysisType)
     {
         throw new UnsupportedOperationException("Can not change analysis type of an Q3 summary");

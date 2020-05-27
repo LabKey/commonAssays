@@ -35,6 +35,7 @@ import org.labkey.ms2.pipeline.client.ParamParser;
 public class XtandemInputXmlComposite extends InputXmlComposite
 {
 
+    @Override
     public String update(String text)
     {
         if(params == null)
@@ -42,6 +43,7 @@ public class XtandemInputXmlComposite extends InputXmlComposite
         return super.update(text);
     }
 
+    @Override
     public Widget getLabel()
     {
         Label label = new Label("X! Tandem XML");

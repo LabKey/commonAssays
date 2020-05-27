@@ -32,6 +32,7 @@ public abstract class MS2XmlLoader extends MS2Loader
     protected InputStream _fIn;
     protected SimpleXMLStreamReader _parser;
 
+    @Override
     protected void init(File f, Logger log) throws FileNotFoundException, XMLStreamException
     {
         super.init(f, log);
@@ -45,6 +46,7 @@ public abstract class MS2XmlLoader extends MS2Loader
     }
 
 
+    @Override
     public void close()
     {
         try

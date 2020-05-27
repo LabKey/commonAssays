@@ -46,11 +46,13 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         setCaption(caption);
     }
 
+    @Override
     public ColumnInfo getColumnInfo()
     {
         return _groupingColumn;
     }
 
+    @Override
     public Object getValue(RenderContext ctx)
     {
         if (_peptideColumn == null || _groupingColumn == null)
@@ -145,16 +147,19 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
             throws SQLException;
 
 
+    @Override
     public boolean isFilterable()
     {
         return false;
     }
 
+    @Override
     public boolean isSortable()
     {
         return false;
     }
 
+    @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
         super.addQueryColumns(set);
@@ -168,5 +173,6 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         }
     }
 
+    @Override
     public abstract Class getValueClass();
 }

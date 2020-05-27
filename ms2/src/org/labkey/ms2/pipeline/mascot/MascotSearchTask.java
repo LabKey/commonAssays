@@ -115,16 +115,19 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             super(MascotSearchTask.class);
         }
 
+        @Override
         public PipelineJob.Task createTask(PipelineJob job)
         {
             return new MascotSearchTask(this, job);
         }
 
+        @Override
         public String getGroupParameterName()
         {
             return "mascot";
         }
 
+        @Override
         public boolean isJobComplete(PipelineJob job)
         {
             JobSupport support = (JobSupport) job;
@@ -144,6 +147,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                    NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
         }
 
+        @Override
         public List<String> getProtocolActionNames()
         {
             return Arrays.asList(MZXML2SEARCH_ACTION_NAME, MASCOT_ACTION_NAME, MASCOT2XML_ACTION_NAME);
@@ -160,6 +164,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         return getJob().getJobSupport(JobSupport.class);
     }
 
+    @Override
     @NotNull
     public RecordedActionSet run() throws PipelineJobException
     {

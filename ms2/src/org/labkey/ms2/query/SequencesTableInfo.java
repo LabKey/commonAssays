@@ -101,11 +101,13 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         annotationColumn.setIsUnselectable(true);
         annotationColumn.setFk(new AbstractForeignKey(schema, cf)
         {
+            @Override
             public StringExpression getURL(ColumnInfo parent)
             {
                 return null;
             }
 
+            @Override
             public ColumnInfo createLookupColumn(ColumnInfo parent, String displayField)
             {
                 if (displayField == null)
@@ -129,6 +131,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                         ret.setLabel(annotationSet.getName());
                         ret.setFk(new LookupForeignKey("CustomAnnotationId")
                         {
+                            @Override
                             public TableInfo getLookupTableInfo()
                             {
                                 // TODO ContainerFilter
@@ -142,6 +145,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                 return null;
             }
 
+            @Override
             public TableInfo getLookupTableInfo()
             {
                 return new CustomAnnotationSetsTable(SequencesTableInfo.this, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
@@ -201,6 +205,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         var aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));
         aaColumn.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
@@ -213,6 +218,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         var totalCount = wrapColumn("Peptides", getRealTable().getColumn("SeqId"));
         totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
@@ -224,6 +230,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         var uniqueCount = wrapColumn("UniquePeptides", getRealTable().getColumn("SeqId"));
         uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
         {
+            @Override
             public DisplayColumn createRenderer(ColumnInfo colInfo)
             {
                 ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");

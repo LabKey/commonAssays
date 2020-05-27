@@ -45,6 +45,7 @@ public class FixedCalibrationTable implements CalibrationTable
         }
     }
 
+    @Override
     public double indexOf(double value)
     {
         if (value < values[0])
@@ -74,6 +75,7 @@ public class FixedCalibrationTable implements CalibrationTable
         return index - 1 + (value - prev) / (next - prev);
     }
 
+    @Override
     public double fromIndex(double index)
     {
         if (index <= 0)
@@ -91,11 +93,13 @@ public class FixedCalibrationTable implements CalibrationTable
         return (nextIndex - index) * values[prevIndex] + (index - prevIndex) * values[nextIndex];
     }
 
+    @Override
     public double getRange()
     {
         return values.length;
     }
 
+    @Override
     public boolean isLinear()
     {
         return false;

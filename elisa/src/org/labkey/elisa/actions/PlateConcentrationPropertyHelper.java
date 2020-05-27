@@ -92,11 +92,13 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
         throw new IndexOutOfBoundsException("Requested #" + index + " but there were only " + i + " well group templates");
     }
 
+    @Override
     protected boolean isCopyable(DomainProperty pd)
     {
         return false;
     }
 
+    @Override
     public List<String> getSampleNames()
     {
         return Arrays.asList(_controlNames.toArray(new String[_controlNames.size()]));

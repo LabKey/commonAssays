@@ -176,6 +176,7 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
         return runs;
     }
 
+    @Override
     public ApiResponse execute(GetNabRunsForm form, BindException errors) throws Exception
     {
         if (form.getAssayName() == null)

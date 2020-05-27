@@ -66,6 +66,7 @@ public class KeywordsJob extends ScriptJob
         _targetStudy = targetStudy;
     }
 
+    @Override
     public void doRun()
     {
         go();

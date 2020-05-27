@@ -81,6 +81,7 @@ abstract public class GateList extends Gate
         return true;
     }
 
+    @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         for (Gate gate : _gates)
@@ -89,6 +90,7 @@ abstract public class GateList extends Gate
         }
     }
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         for (Gate gate : _gates)

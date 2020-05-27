@@ -43,11 +43,13 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
         super(name, description, xml);
     }
 
+    @Override
     public AbstractFileAnalysisProtocolFactory getFactory()
     {
         return XTandemSearchProtocolFactory.get();
     }
 
+    @Override
     public XTandemPipelineJob createPipelineJob(ViewBackgroundInfo info,
                                                 PipeRoot root, List<File> filesInput,
                                                 File fileParameters, @Nullable Map<String, String> variableMap

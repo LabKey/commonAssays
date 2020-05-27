@@ -55,16 +55,19 @@ public class ProteinProphetPipelineJob extends PipelineJob
         setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));
     }
 
+    @Override
     public ActionURL getStatusHref()
     {
         return null;
     }
 
+    @Override
     public String getDescription()
     {
         return _file.getName();
     }
 
+    @Override
     public void run()
     {
         if (!setStatus("LOADING"))

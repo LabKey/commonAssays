@@ -47,6 +47,7 @@ public class CompensationCalculationHandler extends BaseHandler
         _compensationCalculationElement = calc;
     }
 
+    @Override
     public void processRun(FlowRun run, ExperimentRunType runElement, File outputDirectory) throws Exception
     {
         _job.addStatus("Calculating compensation matrix for " + run.getName());
@@ -94,6 +95,7 @@ public class CompensationCalculationHandler extends BaseHandler
     }
 
 
+    @Override
     public String getRunName(FlowRun srcRun)
     {
         return srcRun.getName() + " comp";

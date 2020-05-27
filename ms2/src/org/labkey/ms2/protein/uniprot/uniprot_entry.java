@@ -34,6 +34,7 @@ public class uniprot_entry extends ParseActions
 {
     public static final int BATCH_SIZE = 5000;
 
+    @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {
         if (context.isIgnorable())
@@ -52,6 +53,7 @@ public class uniprot_entry extends ParseActions
             curSeq.setSourceChangeDate(new Timestamp(DateUtil.parseDateTime(attrs.getValue("modified"))));
     }
 
+    @Override
     public void endElement(ParseContext context) throws SAXException
     {
         if (!context.unBumpSkip())

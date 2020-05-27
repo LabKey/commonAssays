@@ -29,41 +29,49 @@ public class SubsetNumberArray implements NumberArray
         _subset = subset;
         }
 
+    @Override
     public Number get(int index)
         {
         return _array.get(_subset.getInt(index));
         }
 
+    @Override
     public double getDouble(int index)
         {
         return _array.getDouble(_subset.getInt(index));
         }
 
+    @Override
     public float getFloat(int index)
         {
         return _array.getFloat(_subset.getInt(index));
         }
 
+    @Override
     public int getInt(int index)
         {
         return _array.getInt(_subset.getInt(index));
         }
 
+    @Override
     public void set(int index, double value)
         {
         throw new UnsupportedOperationException();
         }
 
+    @Override
     public void set(int index, float value)
         {
         throw new UnsupportedOperationException();
         }
 
+    @Override
     public void set(int index, int value)
         {
         throw new UnsupportedOperationException();
         }
 
+    @Override
     public int size()
         {
         return _subset.size();

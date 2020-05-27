@@ -38,6 +38,7 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
         _namePropertyURI = namePropertyURI;
     }
 
+    @Override
     public String beforeImportObject(Map<String, Object> map)
     {
         String name = (String)map.get(_namePropertyURI);
@@ -51,11 +52,13 @@ public class AnalyteImportHelper implements OntologyManager.ImportHelper
         throw new IllegalStateException("Could not find LSID for Analyte with name " + name);
     }
 
+    @Override
     public void afterBatchInsert(int currentRow)
     {
 
     }
 
+    @Override
     public void updateStatistics(int currentRow)
     {
     }

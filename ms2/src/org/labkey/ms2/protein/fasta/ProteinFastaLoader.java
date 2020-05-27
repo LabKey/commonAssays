@@ -30,6 +30,7 @@ public class ProteinFastaLoader extends FastaLoader<Protein> implements Iterable
     public ProteinFastaLoader(File fastaFile)
     {
         super(fastaFile, new FastaIteratorElementFactory<Protein>() {
+            @Override
             public Protein createNext(String header, byte[] body)
             {
                 return new Protein(header, body);

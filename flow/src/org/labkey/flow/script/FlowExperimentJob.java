@@ -74,6 +74,7 @@ public abstract class FlowExperimentJob extends FlowJob
         setLogFile(logFile);
     }
 
+    @Override
     public Logger getClassLogger()
     {
         return _log;
@@ -84,6 +85,7 @@ public abstract class FlowExperimentJob extends FlowJob
         return FlowExperiment.fromLSID(_experimentLSID);
     }
 
+    @Override
     public ActionURL urlData()
     {
         FlowExperiment experiment = getExperiment();
@@ -111,6 +113,7 @@ public abstract class FlowExperimentJob extends FlowJob
         return PageFlowUtil.getFileContentsAsString(getLogFile());
     }
 
+    @Override
     public void error(String message, Throwable t)
     {
         super.error(message, t);

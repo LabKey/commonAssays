@@ -102,6 +102,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
     }
 
+    @Override
     protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
     {
         final int expectedRows = nabTemplate.getRows();
@@ -318,11 +319,13 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             applyDilution(wells, sampleInput, properties, reverseDirection);
     }
 
+    @Override
     public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
     {
         importRows(data, run, context.getProtocol(), dataMap, context.getUser());
     }
 
+    @Override
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
@@ -333,6 +336,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         return datas;
     }
 
+    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());

@@ -58,6 +58,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         super(name, owningModule, MascotSearchTask.Factory.class);
     }
 
+    @Override
     public boolean isStatusViewableFile(Container container, String name, String basename)
     {
         if ("mascot.xml".equals(name))
@@ -66,6 +67,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return super.isStatusViewableFile(container, name, basename);
     }
 
+    @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
         if (!MascotConfig.findMascotConfig(context.getContainer()).hasMascotServer())
@@ -87,6 +89,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
     }
 
+    @Override
     @NotNull
     public HttpView createSetupWebPart(Container container)
     {
@@ -121,11 +124,13 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         }
     }
 
+    @Override
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return MascotSearchProtocolFactory.get();
     }
 
+    @Override
     public List<String> getSequenceDbPaths(File sequenceRoot)
     {
         return null;//No directories for Mascot databases.
@@ -137,6 +142,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return new CaseInsensitiveHashSet(getSequenceDbDirList(container, sequenceRoot)).contains(db);
     }
 
+    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
     {
         MascotConfig config = ensureMascotConfig(container);
@@ -155,6 +161,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return sequenceDBs;
     }
 
+    @Override
     public List<String> getTaxonomyList(Container container) throws IOException
     {
         MascotConfig config = ensureMascotConfig(container);
@@ -235,6 +242,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
 //        return mock;
     }
 
+    @Override
     public Map<String, List<String>> getEnzymes(Container container) throws IOException
     {
         MascotConfig config = ensureMascotConfig(container);
@@ -259,6 +267,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return config;
     }
 
+    @Override
     public Map<String, String> getResidue0Mods(Container container) throws IOException
     {
         MascotConfig config = ensureMascotConfig(container);
@@ -276,31 +285,37 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return mods;
     }
 
+    @Override
     public Map<String, String> getResidue1Mods(Container container)
     {
         return null;  //no difference between static and dynamic mods in mascot 
     }
 
+    @Override
     public String getHelpTopic()
     {
         return "pipelineMascot";
     }
 
+    @Override
     public boolean supportsDirectories()
     {
         return false;
     }
 
+    @Override
     public boolean remembersDirectories()
     {
         return false;
     }
 
+    @Override
     public boolean hasRemoteDirectories()
     {
         return false;
     }
 
+    @Override
     public void ensureEnabled(Container container) throws PipelineValidationException
     {
         MascotConfig config = MascotConfig.findMascotConfig(container);

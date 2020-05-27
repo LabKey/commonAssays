@@ -43,6 +43,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         super(sequestInputParams, sequenceRoot, variant, databaseFiles);
     }
 
+    @Override
     protected void initSubclass()
     {
         _params.addProperty(new SequestParam(

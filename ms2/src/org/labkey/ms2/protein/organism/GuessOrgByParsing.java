@@ -57,6 +57,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
     }
 
 
+    @Override
     public String guess(ProteinPlus p)
     {
         //First check for Tax_id=nnnnn.  If we don't find it, check for
@@ -161,6 +162,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
         }
     }
 
+    @Override
     public void close()
     {
     }

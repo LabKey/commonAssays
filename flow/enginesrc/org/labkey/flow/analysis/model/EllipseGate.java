@@ -59,22 +59,26 @@ public class EllipseGate extends RegionGate
         return foci;
     }
 
+    @Override
     public String getXAxis()
     {
         return xAxis;
     }
 
+    @Override
     public String getYAxis()
     {
         return yAxis;
     }
 
+    @Override
     public List<String> getAxes()
     {
         return Arrays.asList(yAxis, yAxis);
     }
 
 
+    @Override
     public BitSet apply(PopulationSet populations, DataFrame data)
     {
         // quick compute bounding rect (could even draw it in closer with a bit more math)
@@ -109,6 +113,7 @@ public class EllipseGate extends RegionGate
 
 
 
+    @Override
     public boolean requiresCompensationMatrix()
     {
         return CompensationMatrix.isParamCompensated(xAxis) || CompensationMatrix.isParamCompensated(yAxis);
@@ -130,6 +135,7 @@ public class EllipseGate extends RegionGate
     }
 
 
+    @Override
     public void getPolygons(List<Polygon> list, String xAxis, String yAxis)
     {
         if (!(xAxis.equals(getXAxis()) && yAxis.equals(getYAxis()) ||

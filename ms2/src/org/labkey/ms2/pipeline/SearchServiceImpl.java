@@ -58,6 +58,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         super(context);
     }
 
+    @Override
     public GWTSearchServiceResult getSearchServiceResult(String searchEngine, String path, String[] fileNames)
     {
         AbstractMS2PipelineProvider baseProvider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
@@ -93,6 +94,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return MS2PipelineManager.getSequenceDatabaseRoot(pipeRoot.getContainer(), true);
     }
 
+    @Override
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
     {
         AbstractMS2PipelineProvider provider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
@@ -188,6 +190,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
+    @Override
     public GWTSearchServiceResult getMascotTaxonomy(String searchEngine)
     {
         if(provider == null)
@@ -209,6 +212,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         return results;
     }
 
+    @Override
     public GWTSearchServiceResult getEnzymes(String searchEngine)
     {
         if(provider == null)
@@ -311,6 +315,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         results.setSequenceDbPaths(sequenceDbPaths);
     }
 
+    @Override
     public GWTSearchServiceResult getSequenceDbs(String defaultDb, String searchEngine, boolean refresh)
     {
         if(defaultDb == null) defaultDb = "";

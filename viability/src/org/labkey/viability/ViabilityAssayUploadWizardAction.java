@@ -286,6 +286,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         return view;
     }
 
+    @Override
     protected void addHiddenRunProperties(ViabilityAssayRunUploadForm form, InsertView insertView) throws ExperimentException
     {
         Map<DomainProperty, String> runProperties = new HashMap<>();
