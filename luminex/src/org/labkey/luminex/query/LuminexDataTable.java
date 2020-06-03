@@ -326,10 +326,6 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         SQLFragment protocolIDFilter = new SQLFragment("ProtocolID = ?");
         protocolIDFilter.add(_userSchema.getProtocol().getRowId());
         addCondition(protocolIDFilter, FieldKey.fromParts("ProtocolID"));
-
-        SQLFragment containerFilter = new SQLFragment("Container = ?");
-        containerFilter.add(_userSchema.getContainer().getId());
-        addCondition(containerFilter, FieldKey.fromParts("Container"));
     }
 
     private SQLFragment getExclusionsUnionSQL()
