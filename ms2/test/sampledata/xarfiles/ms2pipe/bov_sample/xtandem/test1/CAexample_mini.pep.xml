@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE msms_pipeline_analysis SYSTEM "msms_analysis3.dtd">
+<?xml-stylesheet type="text/xsl" href="pepXML_std.xsl"?>
+<msms_pipeline_analysis date="2005:11:03:14:13:53" summary_xml="CAexample_mini.pep.xml" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /data3/search/akeller/bin/pepXML_v15.xsd">
+   <msms_run_summary base_name="CAexample_mini.pep" search_engine="X!Tandem" msManufacturer="ThermoFinnigan" msModel="LCQ" msIonization="ESI" msMassAnalyzer="Ion Trap" msDetector="EMT" raw_data_type="raw" raw_data=".mzXML">
+      <sample_enzyme name="trypsin">
+<specificity cut="KR" no_cut="P" sense="C"/>
+</sample_enzyme>
+<search_summary base_name="CAexample_mini.pep" search_engine="X!Tandem" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" search_id="1">
+         <search_database local_path="../../../databases/Bovine_mini1.fasta" type="AA"/>
+         <search_database local_path="../../../databases/Bovine_mini2.fasta" type="AA"/>
+         <search_database local_path="../../../databases/Bovine_mini3.fasta" type="AA"/>
+         <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="2" min_number_termini="2" />
+         
+         <!-- Input parameters -->
+         <parameter name="list path, default parameters" value="../../../default_input.xml"/>
+         <parameter name="list path, taxonomy information" value="taxonomy.xml"/>
+         <parameter name="output, histogram column width" value="30"/>
+         <parameter name="output, histograms" value="no"/>
+         <parameter name="output, maximum valid expectation value" value="0.1"/>
+         <parameter name="output, one sequence copy" value="yes"/>
+         <parameter name="output, parameters" value="yes"/>
+         <parameter name="output, path" value="output.xml"/>
+         <parameter name="output, path hashing" value="yes"/>
+         <parameter name="output, performance" value="yes"/>
+         <parameter name="output, proteins" value="yes"/>
+         <parameter name="output, results" value="all"/>
+         <parameter name="output, sequences" value="yes"/>
+         <parameter name="output, sort results by" value="spectrum"/>
+         <parameter name="output, spectra" value="yes"/>
+         <parameter name="output, xsl path" value="tandem-style.xsl"/>
+         <parameter name="protein, C-terminal residue modification mass" value="0.0"/>
+         <parameter name="protein, N-terminal residue modification mass" value="0.0"/>
+         <parameter name="protein, cleavage site" value="[RK]|{P}"/>
+         <parameter name="protein, taxon" value="sequences"/>
+         <parameter name="refine" value="no"/>
+         <parameter name="refine, maximum valid expectation value" value="0.1"/>
+         <parameter name="refine, spectrum synthesis" value="yes"/>
+         <parameter name="scoring, b ions" value="yes"/>
+         <parameter name="scoring, maximum missed cleavage sites" value="2"/>
+         <parameter name="scoring, minimum ion count" value="4"/>
+         <parameter name="scoring, y ions" value="yes"/>
+         <parameter name="spectrum, dynamic range" value="100.0"/>
+         <parameter name="spectrum, minimum fragment mz" value="140.0"/>
+         <parameter name="spectrum, minimum parent m+h" value="500.0"/>
+         <parameter name="spectrum, minimum peaks" value="10"/>
+         <parameter name="spectrum, parent monoisotopic mass error minus" value="2.0"/>
+         <parameter name="spectrum, parent monoisotopic mass error plus" value="2.0"/>
+         <parameter name="spectrum, parent monoisotopic mass error units" value="Daltons"/>
+         <parameter name="spectrum, parent monoisotopic mass isotope error" value="no"/>
+         <parameter name="spectrum, path" value="../../CAexample_mini.mzXML"/>
+         <parameter name="spectrum, threads" value="1"/>
+         <parameter name="spectrum, total peaks" value="50"/>
+         <parameter name="spectrum, use noise suppression" value="no"/>
+         <!-- Unused input parameters -->
+         <parameter name="pipeline, protocol description" value="This is a test protocol using X!Tandem defaults."/>
+         <parameter name="pipeline, protocol name" value="test1"/>
+         <parameter name="refine, point mutations" value="no"/>
+         <parameter name="refine, potential N-terminus modifications" value="+42.0@["/>
+         <parameter name="refine, unanticipated cleavage" value="yes"/>
+         <parameter name="refine, use potential modifications for full refinement" value="no"/>
+         <parameter name="spectrum, fragment monoisotopic mass error" value="0.5"/>
+         <parameter name="spectrum, fragment monoisotopic mass error units" value="Daltons"/>
+         <!-- Performance parameters -->
+         <parameter name="list path, sequence source #1" value="../../../databases/Bovine_mini1.fasta"/>
+         <parameter name="list path, sequence source #1" value="../../../databases/Bovine_mini2.fasta"/>
+         <parameter name="list path, sequence source #1" value="../../../databases/Bovine_mini3.fasta"/>
+         <parameter name="modelling, total peptides used" value="56038"/>
+         <parameter name="modelling, total proteins used" value="4308"/>
+         <parameter name="modelling, total spectra used" value="110"/>
+         <parameter name="process, start time" value="2005:11:03:14:13:53"/>
+         <parameter name="process, version" value="x! tandem 2005.10.01.2"/>
+         <parameter name="refining, # input models" value="0"/>
+         <parameter name="refining, # input spectra" value="0"/>
+         <parameter name="refining, # partial cleavage" value="0"/>
+         <parameter name="refining, # point mutations" value="0"/>
+         <parameter name="refining, # potential C-terminii" value="0"/>
+         <parameter name="refining, # potential N-terminii" value="0"/>
+         <parameter name="refining, # unanticipated cleavage" value="0"/>
+         <parameter name="timing, initial modelling total (sec)" value="8.28"/>
+         <parameter name="timing, initial modelling/spectrum (sec)" value="0.075"/>
+         <parameter name="timing, load sequence models (sec)" value="0.06"/>
+         <parameter name="timing, refinement/spectrum (sec)" value="-57067623292765390000000000000000000000000000000000000000000000000.000"/>
+      </search_summary>
+      
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 4 (charge 2)" start_scan="4" end_scan="4" precursor_neutral_mass="847.0498" assumed_charge="2" index="4">
+      <search_result>
+         <search_hit hit_rank="1" peptide="LNTEQSR" peptide_prev_aa="R" peptide_next_aa="E" protein="gi|27679410|similar_to_riboso" protein_descr="gi|27679410|ref|XP_219268.1| similar to ribosomal protein..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="12" calc_neutral_pep_mass="846.4197" massdiff="0.630" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="14.3"/>
+            <search_score name="nextscore" value="13.1"/>
+            <search_score name="bscore" value="9.5"/>
+            <search_score name="yscore" value="7.4"/>
+            <search_score name="expect" value="7.8"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 4 (charge 3)" start_scan="4" end_scan="4" precursor_neutral_mass="1270.5747" assumed_charge="3" index="4">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QYALHVDGVGTK" peptide_prev_aa="R" peptide_next_aa="A" protein="gi|18311790|phosphoribosylfor" protein_descr="gi|18311790|ref|NP_558457.1| phosphoribosylformylglycinamidine..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="44" calc_neutral_pep_mass="1269.6357" massdiff="0.939" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="14.8"/>
+            <search_score name="nextscore" value="13.0"/>
+            <search_score name="bscore" value="10.9"/>
+            <search_score name="yscore" value="10"/>
+            <search_score name="expect" value="4"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 6 (charge 3)" start_scan="6" end_scan="6" precursor_neutral_mass="1332.0047" assumed_charge="3" index="6">
+      <search_result>
+         <search_hit hit_rank="1" peptide="FANIGDVIVASVK" peptide_prev_aa="K" peptide_next_aa="Q" protein="gi|15900155|ribosomal_protein" protein_descr="gi|15900155|ref|NP_344759.1| ribosomal protein L14..." num_tot_proteins="1" num_matched_ions="6" tot_num_ions="48" calc_neutral_pep_mass="1331.7447" massdiff="0.260" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="15.2"/>
+            <search_score name="nextscore" value="13.1"/>
+            <search_score name="bscore" value="5.8"/>
+            <search_score name="yscore" value="10.8"/>
+            <search_score name="expect" value="4.7"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 8 (charge 3)" start_scan="8" end_scan="8" precursor_neutral_mass="1386.8540" assumed_charge="3" index="8">
+      <search_result>
+         <search_hit hit_rank="1" peptide="GDTDISPAAMKKR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|6325139|Mitochondrial_Ribo" protein_descr="gi|6325139|ref|NP_015207.1| Mitochondrial Ribosomal..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="48" calc_neutral_pep_mass="1388.7077" massdiff="-1.854" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="11.9"/>
+            <search_score name="nextscore" value="10.4"/>
+            <search_score name="bscore" value="5.3"/>
+            <search_score name="yscore" value="8.5"/>
+            <search_score name="expect" value="16"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 10 (charge 2)" start_scan="10" end_scan="10" precursor_neutral_mass="883.4781" assumed_charge="2" index="10">
+      <search_result>
+         <search_hit hit_rank="1" peptide="MSYISGAR" peptide_prev_aa="-" peptide_next_aa="L" protein="gi|9838401|ribosomal_protein_" protein_descr="gi|9838401|ref|NP_064014.1| ribosomal protein S13 [Beta..." num_tot_proteins="4" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="883.4217" massdiff="0.056" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <alternative_protein protein="gi|30141205|ribosomal_protein" protein_descr="gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium..."/>
+            <alternative_protein protein="gi|24636941|AF314105_1_riboso" protein_descr="gi|24636941|gb|AAN63483.1|AF314105_1 ribosomal protein..."/>
+            <alternative_protein protein="gi|11830845|ribosomal_protein" protein_descr="gi|11830845|emb|CAA89892.1| ribosomal protein S13 [Magnolia..."/>
+            <search_score name="hyperscore" value="11.0"/>
+            <search_score name="nextscore" value="10.7"/>
+            <search_score name="bscore" value="7.2"/>
+            <search_score name="yscore" value="7.6"/>
+            <search_score name="expect" value="33"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 10 (charge 3)" start_scan="10" end_scan="10" precursor_neutral_mass="1325.2172" assumed_charge="3" index="10">
+      <search_result>
+         <search_hit hit_rank="1" peptide="TFQCLLMLTKK" peptide_prev_aa="K" peptide_next_aa="R" protein="gi|13095586|DNA_polymerase" protein_descr="gi|13095586|ref|NP_076501.1| DNA polymerase [Bovine herpesvirus..." num_tot_proteins="1" num_matched_ions="7" tot_num_ions="40" calc_neutral_pep_mass="1324.7247" massdiff="0.492" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="18.6"/>
+            <search_score name="nextscore" value="16.9"/>
+            <search_score name="bscore" value="9.3"/>
+            <search_score name="yscore" value="7.9"/>
+            <search_score name="expect" value="1.2"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 12 (charge 3)" start_scan="12" end_scan="12" precursor_neutral_mass="1553.1674" assumed_charge="3" index="12">
+      <search_result>
+         <search_hit hit_rank="1" peptide="SPYQEHTDFLSTK" peptide_prev_aa="R" peptide_next_aa="A" protein="gi|18406325|40S_ribosomal_pro" protein_descr="gi|18406325|ref|NP_564737.1| 40S ribosomal protein,..." num_tot_proteins="1" num_matched_ions="6" tot_num_ions="48" calc_neutral_pep_mass="1551.7207" massdiff="1.447" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="15.4"/>
+            <search_score name="nextscore" value="14.9"/>
+            <search_score name="bscore" value="7.8"/>
+            <search_score name="yscore" value="10.8"/>
+            <search_score name="expect" value="4.8"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 16 (charge 3)" start_scan="16" end_scan="16" precursor_neutral_mass="1283.2229" assumed_charge="3" index="16">
+      <search_result>
+         <search_hit hit_rank="1" peptide="APPSTQESESPR" peptide_prev_aa="R" peptide_next_aa="Q" protein="gi|2262205|neuroendocrine_sec" protein_descr="gi|2262205|gb|AAC48752.1| neuroendocrine secretory..." num_tot_proteins="1" num_matched_ions="7" tot_num_ions="44" calc_neutral_pep_mass="1284.5947" massdiff="-1.372" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="16.8"/>
+            <search_score name="nextscore" value="13.9"/>
+            <search_score name="bscore" value="4.6"/>
+            <search_score name="yscore" value="10"/>
+            <search_score name="expect" value="1.7"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 18 (charge 2)" start_scan="18" end_scan="18" precursor_neutral_mass="820.8226" assumed_charge="2" index="18">
+      <search_result>
+         <search_hit hit_rank="1" peptide="SDNEGSSK" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|2950379|capacitative_calci" protein_descr="gi|2950379|emb|CAA12161.1| capacitative calcium entry..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="822.3357" massdiff="-1.513" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="14.9"/>
+            <search_score name="nextscore" value="13.8"/>
+            <search_score name="bscore" value="5.7"/>
+            <search_score name="yscore" value="11.8"/>
+            <search_score name="expect" value="2"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 18 (charge 3)" start_scan="18" end_scan="18" precursor_neutral_mass="1231.2339" assumed_charge="3" index="18">
+      <search_result>
+         <search_hit hit_rank="1" peptide="ISSTKMDGIGPK" peptide_prev_aa="R" peptide_next_aa="K" protein="gi|30141205|ribosomal_protein" protein_descr="gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium..." num_tot_proteins="1" num_matched_ions="8" tot_num_ions="44" calc_neutral_pep_mass="1232.6437" massdiff="-1.410" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="20.0"/>
+            <search_score name="nextscore" value="19.6"/>
+            <search_score name="bscore" value="5.9"/>
+            <search_score name="yscore" value="11.3"/>
+            <search_score name="expect" value="1.7"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 24 (charge 3)" start_scan="24" end_scan="24" precursor_neutral_mass="1564.1409" assumed_charge="3" index="24">
+      <search_result>
+         <search_hit hit_rank="1" peptide="DRTILLHPKGEMR" peptide_prev_aa="R" peptide_next_aa="K" protein="gi|16082591|Uncharacterized_c" protein_descr="gi|16082591|ref|NP_394583.1| Uncharacterized conserved..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="48" calc_neutral_pep_mass="1564.8507" massdiff="-0.710" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="14.3"/>
+            <search_score name="nextscore" value="13.6"/>
+            <search_score name="bscore" value="10.9"/>
+            <search_score name="yscore" value="8.1"/>
+            <search_score name="expect" value="10"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 30 (charge 3)" start_scan="30" end_scan="30" precursor_neutral_mass="1571.2831" assumed_charge="3" index="30">
+      <search_result>
+         <search_hit hit_rank="1" peptide="EEEFNLYFIEIK" peptide_prev_aa="K" peptide_next_aa="M" protein="gi|32491316|rpsD" protein_descr="gi|32491316|ref|NP_871570.1| rpsD [Wigglesworthia glossinidia endosymbiont..." num_tot_proteins="1" num_matched_ions="7" tot_num_ions="44" calc_neutral_pep_mass="1572.7707" massdiff="-1.488" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="17.9"/>
+            <search_score name="nextscore" value="14.7"/>
+            <search_score name="bscore" value="11.2"/>
+            <search_score name="yscore" value="9.3"/>
+            <search_score name="expect" value="0.57"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 32 (charge 2)" start_scan="32" end_scan="32" precursor_neutral_mass="860.0644" assumed_charge="2" index="32">
+      <search_result>
+         <search_hit hit_rank="1" peptide="MAAVNIIK" peptide_prev_aa="-" peptide_next_aa="K" protein="gi|19115094|60s_ribosomal_pro" protein_descr="gi|19115094|ref|NP_594182.1| 60s ribosomal protein..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="858.4997" massdiff="1.565" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="11.0"/>
+            <search_score name="nextscore" value="10.8"/>
+            <search_score name="bscore" value="7.6"/>
+            <search_score name="yscore" value="7"/>
+            <search_score name="expect" value="16"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 32 (charge 3)" start_scan="32" end_scan="32" precursor_neutral_mass="1290.0966" assumed_charge="3" index="32">
+      <search_result>
+         <search_hit hit_rank="1" peptide="GSDSLSDGPACKR" peptide_prev_aa="K" peptide_next_aa="S" protein="gi|13442951|MAIL" protein_descr="gi|13442951|dbj|BAB39767.1| MAIL [Bos taurus] [MASS=78248]" num_tot_proteins="1" num_matched_ions="8" tot_num_ions="48" calc_neutral_pep_mass="1291.5827" massdiff="-1.486" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="16.9"/>
+            <search_score name="nextscore" value="16.7"/>
+            <search_score name="bscore" value="10.9"/>
+            <search_score name="yscore" value="8.8"/>
+            <search_score name="expect" value="0.18"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 38 (charge 3)" start_scan="38" end_scan="38" precursor_neutral_mass="1319.1502" assumed_charge="3" index="38">
+      <search_result>
+         <search_hit hit_rank="1" peptide="HLKVILETGALK" peptide_prev_aa="R" peptide_next_aa="T" protein="gi|29348672|putative_deoxyrib" protein_descr="gi|29348672|ref|NP_812175.1| putative deoxyribose-phosphate..." num_tot_proteins="1" num_matched_ions="7" tot_num_ions="44" calc_neutral_pep_mass="1320.8127" massdiff="-1.663" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="15.5"/>
+            <search_score name="nextscore" value="14.0"/>
+            <search_score name="bscore" value="7.8"/>
+            <search_score name="yscore" value="9.5"/>
+            <search_score name="expect" value="2.2"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 40 (charge 2)" start_scan="40" end_scan="40" precursor_neutral_mass="1107.8746" assumed_charge="2" index="40">
+      <search_result>
+         <search_hit hit_rank="1" peptide="KLITPNYMK" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|30519569|B18R_protein" protein_descr="gi|30519569|emb|CAD90744.1| B18R protein [Cowpox virus]..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="1106.6157" massdiff="1.259" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="11.5"/>
+            <search_score name="nextscore" value="8.0"/>
+            <search_score name="bscore" value="7.2"/>
+            <search_score name="yscore" value="7.2"/>
+            <search_score name="expect" value="27"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 40 (charge 3)" start_scan="40" end_scan="40" precursor_neutral_mass="1661.8119" assumed_charge="3" index="40">
+      <search_result>
+         <search_hit hit_rank="1" peptide="ITSYKFESVNFDSK" peptide_prev_aa="K" peptide_next_aa="I" protein="gi|30519558|B7R_protein" protein_descr="gi|30519558|emb|CAD90733.1| B7R protein [Cowpox virus] [MASS=31016]" num_tot_proteins="1" num_matched_ions="7" tot_num_ions="52" calc_neutral_pep_mass="1663.8097" massdiff="-1.998" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="14.8"/>
+            <search_score name="nextscore" value="11.9"/>
+            <search_score name="bscore" value="6.8"/>
+            <search_score name="yscore" value="7.8"/>
+            <search_score name="expect" value="2.3"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 42 (charge 3)" start_scan="42" end_scan="42" precursor_neutral_mass="1248.9371" assumed_charge="3" index="42">
+      <search_result>
+         <search_hit hit_rank="1" peptide="KKVAIVPEPLR" peptide_prev_aa="R" peptide_next_aa="K" protein="gi|27684893|similar_to_60S_RI" protein_descr="gi|27684893|ref|XP_237285.1| similar to 60S RIBOSOMAL..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="40" calc_neutral_pep_mass="1248.7917" massdiff="0.145" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="15.6"/>
+            <search_score name="nextscore" value="15.6"/>
+            <search_score name="bscore" value="13"/>
+            <search_score name="yscore" value="9.3"/>
+            <search_score name="expect" value="4.3"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 44 (charge 2)" start_scan="44" end_scan="44" precursor_neutral_mass="1091.3521" assumed_charge="2" index="44">
+      <search_result>
+         <search_hit hit_rank="1" peptide="FVKKSNDVR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|22711977|hypothetical_chlo" protein_descr="gi|22711977|ref|NP_683861.1| hypothetical chloroplast..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="16" calc_neutral_pep_mass="1091.6087" massdiff="-0.257" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="17.3"/>
+            <search_score name="nextscore" value="16.4"/>
+            <search_score name="bscore" value="8"/>
+            <search_score name="yscore" value="11.5"/>
+            <search_score name="expect" value="0.2"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 44 (charge 3)" start_scan="44" end_scan="44" precursor_neutral_mass="1637.0282" assumed_charge="3" index="44">
+      <search_result>
+         <search_hit hit_rank="1" peptide="RDYLHYLPKYNR" peptide_prev_aa="R" peptide_next_aa="F" protein="gi|14318169|AF379640_1_riboso" protein_descr="gi|14318169|gb|AAK59928.1|AF379640_1 ribosomal protein..." num_tot_proteins="1" num_matched_ions="6" tot_num_ions="44" calc_neutral_pep_mass="1636.8477" massdiff="0.180" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="17.1"/>
+            <search_score name="nextscore" value="16.9"/>
+            <search_score name="bscore" value="11.1"/>
+            <search_score name="yscore" value="8.8"/>
+            <search_score name="expect" value="3.3"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 46 (charge 1)" start_scan="46" end_scan="46" precursor_neutral_mass="661.6941" assumed_charge="1" index="46">
+      <search_result>
+         <search_hit hit_rank="1" peptide="ADAAGTR" peptide_prev_aa="K" peptide_next_aa="E" protein="gi|6324780|NucleOlar_Complex_" protein_descr="gi|6324780|ref|NP_014849.1| NucleOlar Complex 2; involved..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="660.3187" massdiff="1.375" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="14.2"/>
+            <search_score name="nextscore" value="10.1"/>
+            <search_score name="bscore" value="7.3"/>
+            <search_score name="yscore" value="11.6"/>
+            <search_score name="expect" value="11"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 48 (charge 3)" start_scan="48" end_scan="48" precursor_neutral_mass="1277.8178" assumed_charge="3" index="48">
+      <search_result>
+         <search_hit hit_rank="1" peptide="LHRIEAGVMPR" peptide_prev_aa="K" peptide_next_aa="N" protein="gi|16078254|similar_to_riboso" protein_descr="gi|16078254|ref|NP_389071.1| similar to ribosomal-protein-alanine..." num_tot_proteins="1" num_matched_ions="8" tot_num_ions="40" calc_neutral_pep_mass="1277.7027" massdiff="0.115" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="18.0"/>
+            <search_score name="nextscore" value="13.5"/>
+            <search_score name="bscore" value="8.8"/>
+            <search_score name="yscore" value="9.7"/>
+            <search_score name="expect" value="0.28"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 50 (charge 2)" start_scan="50" end_scan="50" precursor_neutral_mass="1152.4059" assumed_charge="2" index="50">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QRQQYTDSK" peptide_prev_aa="R" peptide_next_aa="T" protein="gi|20178384|CPXV016_protein" protein_descr="gi|20178384|ref|NP_619805.1| CPXV016 protein [Cowpox..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="1152.5527" massdiff="-0.147" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="11.6"/>
+            <search_score name="nextscore" value="10.6"/>
+            <search_score name="bscore" value="7.7"/>
+            <search_score name="yscore" value="8.3"/>
+            <search_score name="expect" value="15"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 50 (charge 3)" start_scan="50" end_scan="50" precursor_neutral_mass="1728.6088" assumed_charge="3" index="50">
+      <search_result>
+         <search_hit hit_rank="1" peptide="RWNIRNMVETAAIR" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|19113765|40s_ribosomal_pro" protein_descr="gi|19113765|ref|NP_592853.1| 40s ribosomal protein..." num_tot_proteins="1" num_matched_ions="8" tot_num_ions="52" calc_neutral_pep_mass="1728.9207" massdiff="-0.312" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="19.2"/>
+            <search_score name="nextscore" value="19.0"/>
+            <search_score name="bscore" value="6.9"/>
+            <search_score name="yscore" value="9.3"/>
+            <search_score name="expect" value="3.9"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 52 (charge 1)" start_scan="52" end_scan="52" precursor_neutral_mass="652.4925" assumed_charge="1" index="52">
+      <search_result>
+         <search_hit hit_rank="1" peptide="KLHQK" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|27806859|limbin" protein_descr="gi|27806859|ref|NP_776352.1| limbin [Bos taurus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="8" calc_neutral_pep_mass="652.4017" massdiff="0.091" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="10.7"/>
+            <search_score name="nextscore" value="10.3"/>
+            <search_score name="bscore" value="7.5"/>
+            <search_score name="yscore" value="2.6"/>
+            <search_score name="expect" value="8.1"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 54 (charge 1)" start_scan="54" end_scan="54" precursor_neutral_mass="642.2459" assumed_charge="1" index="54">
+      <search_result>
+         <search_hit hit_rank="1" peptide="GKRPGK" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|166869|ribosomal_protein_S" protein_descr="gi|166869|gb|AAA32867.1| ribosomal protein S11 [MASS=17738]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="10" calc_neutral_pep_mass="641.3977" massdiff="0.848" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="11.9"/>
+            <search_score name="nextscore" value="8.0"/>
+            <search_score name="bscore" value="4.6"/>
+            <search_score name="yscore" value="9.4"/>
+            <search_score name="expect" value="4.9"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 56 (charge 2)" start_scan="56" end_scan="56" precursor_neutral_mass="948.7203" assumed_charge="2" index="56">
+      <search_result>
+         <search_hit hit_rank="1" peptide="SSVEVGDTR" peptide_prev_aa="R" peptide_next_aa="S" protein="gi|108682|B39272_gamma-aminob" protein_descr="gi|108682|pir||B39272 gamma-aminobutyric acid receptor..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="16" calc_neutral_pep_mass="948.4517" massdiff="0.269" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="14.8"/>
+            <search_score name="nextscore" value="13.4"/>
+            <search_score name="bscore" value="9.1"/>
+            <search_score name="yscore" value="9.4"/>
+            <search_score name="expect" value="3.4"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 56 (charge 3)" start_scan="56" end_scan="56" precursor_neutral_mass="1423.0805" assumed_charge="3" index="56">
+      <search_result>
+         <search_hit hit_rank="1" peptide="TQMPAASICVNYK" peptide_prev_aa="R" peptide_next_aa="G" protein="gi|30089158|low_density_lipop" protein_descr="gi|30089158|emb|CAD89505.1| low density lipoprotein..." num_tot_proteins="1" num_matched_ions="12" tot_num_ions="48" calc_neutral_pep_mass="1424.6787" massdiff="-1.598" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="24.8"/>
+            <search_score name="nextscore" value="19.7"/>
+            <search_score name="bscore" value="8.9"/>
+            <search_score name="yscore" value="8"/>
+            <search_score name="expect" value="0.16"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 64 (charge 3)" start_scan="64" end_scan="64" precursor_neutral_mass="1391.8469" assumed_charge="3" index="64">
+      <search_result>
+         <search_hit hit_rank="1" peptide="TKDYEGMQVPVK" peptide_prev_aa="K" peptide_next_aa="V" protein="gi|15668549|LSU_ribosomal_pro" protein_descr="gi|15668549|ref|NP_247347.1| LSU ribosomal protein..." num_tot_proteins="1" num_matched_ions="8" tot_num_ions="44" calc_neutral_pep_mass="1393.6907" massdiff="-1.844" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="15.0"/>
+            <search_score name="nextscore" value="13.2"/>
+            <search_score name="bscore" value="4.8"/>
+            <search_score name="yscore" value="5.4"/>
+            <search_score name="expect" value="1.8"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 70 (charge 3)" start_scan="70" end_scan="70" precursor_neutral_mass="1332.3334" assumed_charge="3" index="70">
+      <search_result>
+         <search_hit hit_rank="1" peptide="IEEQSQSEKVR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|11967329|AF232933_1_Goodpa" protein_descr="gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="40" calc_neutral_pep_mass="1331.6677" massdiff="0.666" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="12.6"/>
+            <search_score name="nextscore" value="12.4"/>
+            <search_score name="bscore" value="9.3"/>
+            <search_score name="yscore" value="5"/>
+            <search_score name="expect" value="9.7"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 72 (charge 2)" start_scan="72" end_scan="72" precursor_neutral_mass="856.4660" assumed_charge="2" index="72">
+      <search_result>
+         <search_hit hit_rank="1" peptide="KRGPNSNS" peptide_prev_aa="K" peptide_next_aa="-" protein="gi|17563246|ribosomal_Protein" protein_descr="gi|17563246|ref|NP_505007.1| ribosomal Protein, Small..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="858.4307" massdiff="-1.965" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="9.0"/>
+            <search_score name="nextscore" value="9.0"/>
+            <search_score name="bscore" value="5.8"/>
+            <search_score name="yscore" value="1.8"/>
+            <search_score name="expect" value="28"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 72 (charge 3)" start_scan="72" end_scan="72" precursor_neutral_mass="1284.6991" assumed_charge="3" index="72">
+      <search_result>
+         <search_hit hit_rank="1" peptide="REVSVSGLDPAR" peptide_prev_aa="R" peptide_next_aa="R" protein="gi|27807269|tenascin_X" protein_descr="gi|27807269|ref|NP_777128.1| tenascin X [Bos taurus]" num_tot_proteins="1" num_matched_ions="8" tot_num_ions="44" calc_neutral_pep_mass="1284.6787" massdiff="0.020" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="15.9"/>
+            <search_score name="nextscore" value="15.2"/>
+            <search_score name="bscore" value="5.6"/>
+            <search_score name="yscore" value="6.4"/>
+            <search_score name="expect" value="4.3"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 78 (charge 2)" start_scan="78" end_scan="78" precursor_neutral_mass="1017.2994" assumed_charge="2" index="78">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QPNSGPYKK" peptide_prev_aa="R" peptide_next_aa="Q" protein="gi|125696|K6B1_RAT_Ribosomal_" protein_descr="gi|125696|sp|P21425|K6B1_RAT Ribosomal protein S6 kinase..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="1017.5247" massdiff="-0.225" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="12.9"/>
+            <search_score name="nextscore" value="8.0"/>
+            <search_score name="bscore" value="10.1"/>
+            <search_score name="yscore" value="7.4"/>
+            <search_score name="expect" value="8"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 78 (charge 3)" start_scan="78" end_scan="78" precursor_neutral_mass="1525.9491" assumed_charge="3" index="78">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QQEELRPSLAAMR" peptide_prev_aa="K" peptide_next_aa="K" protein="gi|27477455|similar_to_riboso" protein_descr="gi|27477455|ref|XP_210525.1| similar to ribosomal protein..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="48" calc_neutral_pep_mass="1527.7827" massdiff="-1.834" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="13.7"/>
+            <search_score name="nextscore" value="13.2"/>
+            <search_score name="bscore" value="9"/>
+            <search_score name="yscore" value="9.6"/>
+            <search_score name="expect" value="6.3"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 80 (charge 2)" start_scan="80" end_scan="80" precursor_neutral_mass="1002.6480" assumed_charge="2" index="80">
+      <search_result>
+         <search_hit hit_rank="1" peptide="RLLRSMVK" peptide_prev_aa="K" peptide_next_aa="F" protein="gi|27674517|similar_to_riboso" protein_descr="gi|27674517|ref|XP_220755.1| similar to ribosomal protein..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="1001.6167" massdiff="1.031" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="12.4"/>
+            <search_score name="nextscore" value="11.3"/>
+            <search_score name="bscore" value="9.9"/>
+            <search_score name="yscore" value="4.9"/>
+            <search_score name="expect" value="21"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 80 (charge 3)" start_scan="80" end_scan="80" precursor_neutral_mass="1503.9721" assumed_charge="3" index="80">
+      <search_result>
+         <search_hit hit_rank="1" peptide="VKLVVQAAAFTASAK" peptide_prev_aa="K" peptide_next_aa="T" protein="gi|33241144|Ribosomal_protein" protein_descr="gi|33241144|ref|NP_876086.1| Ribosomal protein L15..." num_tot_proteins="1" num_matched_ions="9" tot_num_ions="56" calc_neutral_pep_mass="1502.8817" massdiff="1.090" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="18.7"/>
+            <search_score name="nextscore" value="18.3"/>
+            <search_score name="bscore" value="8.6"/>
+            <search_score name="yscore" value="9.1"/>
+            <search_score name="expect" value="3.7"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 82 (charge 3)" start_scan="82" end_scan="82" precursor_neutral_mass="1384.9597" assumed_charge="3" index="82">
+      <search_result>
+         <search_hit hit_rank="1" peptide="DLELEVTSLLQK" peptide_prev_aa="K" peptide_next_aa="H" protein="gi|30794356|RPGR-interacting_" protein_descr="gi|30794356|ref|NP_851377.1| RPGR-interacting protein..." num_tot_proteins="1" num_matched_ions="8" tot_num_ions="44" calc_neutral_pep_mass="1386.7607" massdiff="-1.801" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="15.8"/>
+            <search_score name="nextscore" value="15.1"/>
+            <search_score name="bscore" value="7.2"/>
+            <search_score name="yscore" value="4.3"/>
+            <search_score name="expect" value="3.9"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 86 (charge 3)" start_scan="86" end_scan="86" precursor_neutral_mass="1265.8308" assumed_charge="3" index="86">
+      <search_result>
+         <search_hit hit_rank="1" peptide="HVSGKIIGFFY" peptide_prev_aa="K" peptide_next_aa="-" protein="gi|32411611|40S_RIBOSOMAL_PRO" protein_descr="gi|32411611|ref|XP_326286.1| 40S RIBOSOMAL PROTEIN..." num_tot_proteins="1" num_matched_ions="6" tot_num_ions="40" calc_neutral_pep_mass="1266.6757" massdiff="-0.845" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="12.6"/>
+            <search_score name="nextscore" value="11.1"/>
+            <search_score name="bscore" value="8"/>
+            <search_score name="yscore" value="5"/>
+            <search_score name="expect" value="4.9"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 88 (charge 3)" start_scan="88" end_scan="88" precursor_neutral_mass="1434.1662" assumed_charge="3" index="88">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QPRAAAAAAQPDQR" peptide_prev_aa="R" peptide_next_aa="Q" protein="gi|27671250|similar_to_a_disi" protein_descr="gi|27671250|ref|XP_221699.1| similar to a disintegrin-like..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="52" calc_neutral_pep_mass="1432.7167" massdiff="1.449" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="13.3"/>
+            <search_score name="nextscore" value="12.8"/>
+            <search_score name="bscore" value="10.5"/>
+            <search_score name="yscore" value="8.1"/>
+            <search_score name="expect" value="7.6"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 94 (charge 3)" start_scan="94" end_scan="94" precursor_neutral_mass="1835.3472" assumed_charge="3" index="94">
+      <search_result>
+         <search_hit hit_rank="1" peptide="GCVAKISGGNNKQGFPMK" peptide_prev_aa="K" peptide_next_aa="Q" protein="gi|27688373|similar_to_riboso" protein_descr="gi|27688373|ref|XP_225551.1| similar to ribosomal protein..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="68" calc_neutral_pep_mass="1834.9177" massdiff="0.429" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="13.3"/>
+            <search_score name="nextscore" value="13.3"/>
+            <search_score name="bscore" value="8.4"/>
+            <search_score name="yscore" value="9.5"/>
+            <search_score name="expect" value="4.1"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 98 (charge 3)" start_scan="98" end_scan="98" precursor_neutral_mass="2357.0736" assumed_charge="3" index="98">
+      <search_result>
+         <search_hit hit_rank="1" peptide="NCQTTTGNGNPMECSQPESSFK" peptide_prev_aa="K" peptide_next_aa="M" protein="gi|27806653|dopamine_receptor" protein_descr="gi|27806653|ref|NP_776467.1| dopamine receptor D1 [Bos..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="84" calc_neutral_pep_mass="2358.9517" massdiff="-1.878" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <search_score name="hyperscore" value="11.2"/>
+            <search_score name="nextscore" value="9.3"/>
+            <search_score name="bscore" value="8.8"/>
+            <search_score name="yscore" value="10.8"/>
+            <search_score name="expect" value="30"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 100 (charge 3)" start_scan="100" end_scan="100" precursor_neutral_mass="1402.5957" assumed_charge="3" index="100">
+      <search_result>
+         <search_hit hit_rank="1" peptide="HAREVLAANPGLR" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|29829740|putative_non-ribo" protein_descr="gi|29829740|ref|NP_824374.1| putative non-ribosomal..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="48" calc_neutral_pep_mass="1402.7797" massdiff="-0.184" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="12.6"/>
+            <search_score name="nextscore" value="11.9"/>
+            <search_score name="bscore" value="9"/>
+            <search_score name="yscore" value="9"/>
+            <search_score name="expect" value="13"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 108 (charge 3)" start_scan="108" end_scan="108" precursor_neutral_mass="1905.0957" assumed_charge="3" index="108">
+      <search_result>
+         <search_hit hit_rank="1" peptide="CQPAPPREAHFVRTNGK" peptide_prev_aa="K" peptide_next_aa="E" protein="gi|22050542|similar_to_60S_ri" protein_descr="gi|22050542|ref|XP_171196.1| similar to 60S ribosomal..." num_tot_proteins="3" num_matched_ions="4" tot_num_ions="64" calc_neutral_pep_mass="1906.9587" massdiff="-1.863" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <alternative_protein protein="gi|20837041|similar_to_60S_ri" protein_descr="gi|20837041|ref|XP_123814.1| similar to 60S ribosomal..."/>
+            <alternative_protein protein="gi|20885398|similar_to_60S_ri" protein_descr="gi|20885398|ref|XP_125085.1| similar to 60S ribosomal..."/>
+            <search_score name="hyperscore" value="10.3"/>
+            <search_score name="nextscore" value="8.2"/>
+            <search_score name="bscore" value="9.1"/>
+            <search_score name="yscore" value="3.4"/>
+            <search_score name="expect" value="8.4"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 120 (charge 3)" start_scan="120" end_scan="120" precursor_neutral_mass="2032.0336" assumed_charge="3" index="120">
+      <search_result>
+         <search_hit hit_rank="1" peptide="DLVLGCWVAHGEGRFAFR" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|7438074|T13363_phosphoribo" protein_descr="gi|7438074|pir||T13363 phosphoribosylformylglycinamidine..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="68" calc_neutral_pep_mass="2032.0097" massdiff="0.024" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="9.6"/>
+            <search_score name="nextscore" value="9.4"/>
+            <search_score name="bscore" value="8.4"/>
+            <search_score name="yscore" value="2.1"/>
+            <search_score name="expect" value="59"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 130 (charge 3)" start_scan="130" end_scan="130" precursor_neutral_mass="1557.7003" assumed_charge="3" index="130">
+      <search_result>
+         <search_hit hit_rank="1" peptide="DKGRTGEVIQVMPK" peptide_prev_aa="K" peptide_next_aa="E" protein="gi|15965120|PROBABLE_50S_RIBO" protein_descr="gi|15965120|ref|NP_385473.1| PROBABLE 50S RIBOSOMAL..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="52" calc_neutral_pep_mass="1556.8347" massdiff="0.866" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="11.4"/>
+            <search_score name="nextscore" value="11.3"/>
+            <search_score name="bscore" value="5.3"/>
+            <search_score name="yscore" value="6.4"/>
+            <search_score name="expect" value="21"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 148 (charge 3)" start_scan="148" end_scan="148" precursor_neutral_mass="2218.4610" assumed_charge="3" index="148">
+      <search_result>
+         <search_hit hit_rank="1" peptide="EIRQRQGDDLDGLSFAELR" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|4883902|APETALA3_homolog_R" protein_descr="gi|4883902|gb|AAD31697.1| APETALA3 homolog RbAP3-2..." num_tot_proteins="1" num_matched_ions="5" tot_num_ions="72" calc_neutral_pep_mass="2217.1137" massdiff="1.347" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="12.5"/>
+            <search_score name="nextscore" value="8.0"/>
+            <search_score name="bscore" value="11"/>
+            <search_score name="yscore" value="7.9"/>
+            <search_score name="expect" value="18"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 156 (charge 3)" start_scan="156" end_scan="156" precursor_neutral_mass="2109.9834" assumed_charge="3" index="156">
+      <search_result>
+         <search_hit hit_rank="1" peptide="AGCVAAPRVLLTLTCLGPEVK" peptide_prev_aa="R" peptide_next_aa="K" protein="gi|30156614|similar_to_60S_RI" protein_descr="gi|30156614|ref|XP_295973.2| similar to 60S RIBOSOMAL..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="80" calc_neutral_pep_mass="2110.1647" massdiff="-0.181" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="12.9"/>
+            <search_score name="nextscore" value="12.8"/>
+            <search_score name="bscore" value="8.6"/>
+            <search_score name="yscore" value="8.6"/>
+            <search_score name="expect" value="10"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 178 (charge 3)" start_scan="178" end_scan="178" precursor_neutral_mass="1703.8683" assumed_charge="3" index="178">
+      <search_result>
+         <search_hit hit_rank="1" peptide="QDKIEEQSQSEKVR" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|11967329|AF232933_1_Goodpa" protein_descr="gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="52" calc_neutral_pep_mass="1702.8487" massdiff="1.020" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+            <search_score name="hyperscore" value="12.0"/>
+            <search_score name="nextscore" value="11.9"/>
+            <search_score name="bscore" value="9.1"/>
+            <search_score name="yscore" value="10"/>
+            <search_score name="expect" value="17"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 194 (charge 1)" start_scan="194" end_scan="194" precursor_neutral_mass="563.2820" assumed_charge="1" index="194">
+      <search_result>
+         <search_hit hit_rank="1" peptide="SSTLR" peptide_prev_aa="R" peptide_next_aa="S" protein="gi|287435|VP4" protein_descr="gi|287435|dbj|BAA03284.1| VP4 [Bovine rotavirus] [MASS=86724]" num_tot_proteins="2" num_matched_ions="5" tot_num_ions="8" calc_neutral_pep_mass="562.3077" massdiff="0.974" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+            <alternative_protein protein="gi|549415|VP4_ROTBA_Outer_cap" protein_descr="gi|549415|sp|P36307|VP4_ROTBA Outer capsid protein..."/>
+            <search_score name="hyperscore" value="12.4"/>
+            <search_score name="nextscore" value="8.0"/>
+            <search_score name="bscore" value="6.6"/>
+            <search_score name="yscore" value="7.1"/>
+            <search_score name="expect" value="19"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+      <spectrum_query spectrum="CAexample_mini.mzXML scan 200 (charge 3)" start_scan="200" end_scan="200" precursor_neutral_mass="1374.0774" assumed_charge="3" index="200">
+      <search_result>
+         <search_hit hit_rank="1" peptide="FIDLGGIRELIK" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|9838465|ribosomal_protein_" protein_descr="gi|9838465|ref|NP_064078.1| ribosomal protein S3 [Beta..." num_tot_proteins="1" num_matched_ions="4" tot_num_ions="44" calc_neutral_pep_mass="1372.8077" massdiff="1.270" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+            <search_score name="hyperscore" value="13.5"/>
+            <search_score name="nextscore" value="13.4"/>
+            <search_score name="bscore" value="8.3"/>
+            <search_score name="yscore" value="9.8"/>
+            <search_score name="expect" value="5.2"/>
+         </search_hit>
+      </search_result>
+      </spectrum_query>
+   </msms_run_summary>
+</msms_pipeline_analysis>

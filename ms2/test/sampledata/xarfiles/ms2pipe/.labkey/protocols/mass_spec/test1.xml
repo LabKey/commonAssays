@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline-protocol-props type="org.fhcrc.cpas.ms2.protocol.MassSpecProtocol">
+  <property name="descriptionLcms">Test</property>
+  <property name="descriptionSamplePrep">Test</property>
+  <property name="name">test1</property>
+</pipeline-protocol-props>

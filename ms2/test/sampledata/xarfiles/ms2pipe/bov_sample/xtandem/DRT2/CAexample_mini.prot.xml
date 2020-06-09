@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protein_summary xmlns="http://regis-web.systemsbiology.net/protXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sashimi.sourceforge.net/schema_revision/protXML/protXML_v3.xsd" summary_xml="CAexample_mini.pep-prot.xml">
+<protein_summary_header reference_database="..\..\..\databases\Bovine_mini1.fasta" residue_substitution_list="I -> L" source_files="CAexample_mini.pep.xml" source_files_alt="CAexample_mini.pep.xml" min_peptide_probability="0.20" min_peptide_weight="0.50" num_predicted_correct_prots="2.7" num_input_1_spectra="0" num_input_2_spectra="0" num_input_3_spectra="3" num_input_4_spectra="0" num_input_5_spectra="0" initial_min_peptide_prob="0.05" total_no_spectrum_ids="2.7" sample_enzyme="trypsin">
+<program_details analysis="proteinprophet" time="Mon Jun 25 11:48:28 200" version=" Insilicos_LabKey_C++ (TPP v3.0 SQUALL rev.2, Build 200705070941(Win32))">
+<proteinprophet_details  occam_flag="Y" groups_flag="Y" degen_flag="Y" nsp_flag="Y" initial_peptide_wt_iters="1" nsp_distribution_iters="1" final_peptide_wt_iters="0" run_options="XML NOPLOT">
+      <nsp_information neighboring_bin_smoothing="Y">
+         <nsp_distribution bin_no="0" nsp_lower_bound_incl="0.00" nsp_upper_bound_excl="0.10" pos_freq="0.223" neg_freq="0.223" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="1" nsp_lower_bound_incl="0.10" nsp_upper_bound_excl="0.25" pos_freq="0.132" neg_freq="0.132" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="2" nsp_lower_bound_incl="0.25" nsp_upper_bound_excl="0.50" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="3" nsp_lower_bound_incl="0.50" nsp_upper_bound_excl="1.00" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="4" nsp_lower_bound_incl="1.00" nsp_upper_bound_excl="2.00" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="5" nsp_lower_bound_incl="2.00" nsp_upper_bound_excl="5.00" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="6" nsp_lower_bound_incl="5.00" nsp_upper_bound_excl="15.00" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="7" nsp_lower_bound_incl="15.00" nsp_upper_bound_excl="inf" pos_freq="0.108" neg_freq="0.108" pos_to_neg_ratio="1.00"/>
+      </nsp_information>      <protein_summary_data_filter min_probability="0.00" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.10" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.20" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.30" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.40" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.50" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.60" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.70" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.80" sensitivity="1.000" false_positive_error_rate="0.107" predicted_num_correct="3" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.90" sensitivity="0.701" false_positive_error_rate="0.060" predicted_num_correct="2" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.95" sensitivity="0.354" false_positive_error_rate="0.050" predicted_num_correct="1" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.96" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.97" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.98" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.99" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="1.00" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+</proteinprophet_details>
+</program_details>
+</protein_summary_header>
+<dataset_derivation generation_no="0">
+</dataset_derivation>
+<protein_group group_number="1" probability="0.95">
+      <protein protein_name="gi|34849400|ribosomal_protein" n_indistinguishable_proteins="1" probability="0.95" unique_stripped_peptides="KAKIEQMMAEQQAAK" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="35.50">
+         <annotation protein_description="gi|34849400|gb|AAP58899.1| ribosomal protein L29 [Spiroplasma kunkelii] [MASS=36436]"/>
+         <peptide peptide_sequence="KAKIEQMMAEQQAAK" charge="3" initial_probability="0.95" nsp_adjusted_probability="0.95" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" is_contributing_evidence="Y" calc_neutral_pep_mass="1703.8698">
+         </peptide>
+      </protein>
+</protein_group>
+<protein_group group_number="2" probability="0.93">
+      <protein protein_name="gi|15828808|RIBOSOMAL_LARGE_S" n_indistinguishable_proteins="1" probability="0.93" unique_stripped_peptides="EYYLLHKPPKTISSTK" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="34.55">
+         <annotation protein_description="gi|15828808|ref|NP_326168.1| RIBOSOMAL LARGE SUBUNIT PSEUDOURIDINE SYNTHASE B (PSEUDOURIDYLATE SYNTHASE) (URACIL HYDROLYASE) [Mycoplasma pulmonis]"/>
+         <peptide peptide_sequence="EYYLLHKPPKTISSTK" charge="3" initial_probability="0.93" nsp_adjusted_probability="0.93" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" is_contributing_evidence="Y" calc_neutral_pep_mass="1904.0407">
+         </peptide>
+      </protein>
+</protein_group>
+<protein_group group_number="3" probability="0.80">
+      <protein protein_name="gi|13470573|30S_ribosomal_pro" n_indistinguishable_proteins="2" probability="0.80" unique_stripped_peptides="MARIAGVNIPTNK" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="29.95">
+         <annotation protein_description="gi|13470573|ref|NP_102142.1| 30S ribosomal protein S13 [Mesorhizobium loti]"/>
+         <indistinguishable_protein protein_name="gi|16125519|ribosomal_protein">
+            <annotation protein_description="gi|16125519|ref|NP_420083.1| ribosomal protein S13 [Caulobacter crescentus CB15]"/>
+         </indistinguishable_protein>
+         <peptide peptide_sequence="MARIAGVNIPTNK" charge="3" initial_probability="0.80" nsp_adjusted_probability="0.80" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" is_contributing_evidence="Y" calc_neutral_pep_mass="1383.7657">
+         </peptide>
+      </protein>
+</protein_group>
+</protein_summary>

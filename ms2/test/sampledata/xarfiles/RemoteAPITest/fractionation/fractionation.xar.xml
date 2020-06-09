@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exp:ExperimentArchive xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://www.labkey.org/download/XarSchema/V2.2/expTypes.xsd">
+	<exp:Experiment rdf:about="urn:lsid:cpas.fhcrc.org:Experiment.RemoteAPITest:Experiment:001">
+		<exp:Name>RemoteAPI test</exp:Name>
+	</exp:Experiment>
+	<exp:Experiment rdf:about="urn:lsid:cpas.fhcrc.org:Experiment.RemoteAPITest:Experiment:002">
+		<exp:Name>Other experiment</exp:Name>
+		<exp:Hypothesis>This should work</exp:Hypothesis>
+		<exp:ExperimentDescriptionURL>http://nowhere.com</exp:ExperimentDescriptionURL>
+		<exp:Comments>Some comments</exp:Comments>
+		<exp:Contact>
+			<exp:ContactId>None</exp:ContactId>
+			<exp:Email>me@nowhere.com</exp:Email>
+			<exp:FirstName>Some</exp:FirstName>
+			<exp:LastName>Guy</exp:LastName>
+		</exp:Contact>	
+		<exp:Properties>
+			<exp:SimpleVal Name="StringProperty" OntologyEntryURI="StringPropertyOntologyEntryURI" ValueType="String">A nice property value</exp:SimpleVal>
+			<exp:SimpleVal Name="IntegerProperty" OntologyEntryURI="IntegerPropertyOntologyEntryURI" ValueType="Integer">158</exp:SimpleVal>
+			<exp:SimpleVal Name="FileLinkProperty" OntologyEntryURI="FileLinkPropertyOntologyEntryURI" ValueType="FileLink">/path/to/propertyFile</exp:SimpleVal>
+			<exp:SimpleVal Name="DateTimeProperty" OntologyEntryURI="DateTimePropertyOntologyEntryURI" ValueType="DateTime">2006-10-12</exp:SimpleVal>
+			<exp:SimpleVal Name="DoubleProperty" OntologyEntryURI="DoublePropertyOntologyEntryURI" ValueType="Double">453.718</exp:SimpleVal>
+			<exp:PropertyObject>
+				<exp:PropertyObjectDeclaration Name="FirstChildProperty" OntologyEntryURI="FirstChildPropertyOntologyEntryURI" ValueType="PropertyURI" />
+				<exp:ChildProperties>
+					<exp:SimpleVal Name="FirstChildStringProperty" OntologyEntryURI="FirstChildStringPropertyOntologyEntryURI" ValueType="String">A nice first child property value</exp:SimpleVal>
+					<exp:PropertyObject>
+						<exp:PropertyObjectDeclaration Name="SecondChildProperty" OntologyEntryURI="SecondChildPropertyOntologyEntryURI" ValueType="PropertyURI" />
+						<exp:ChildProperties>
+							<exp:SimpleVal Name="SecondChildStringProperty" OntologyEntryURI="SecondChildStringPropertyOntologyEntryURI" ValueType="String">A nice second child property value</exp:SimpleVal>
+						</exp:ChildProperties>
+					</exp:PropertyObject>
+				</exp:ChildProperties>
+			</exp:PropertyObject>
+		</exp:Properties>
+	</exp:Experiment>
+	<exp:ProtocolDefinitions>
+		<exp:Protocol rdf:about="urn:lsid:cpas.fhcrc.org:Protocol.RemoteAPITest:QueryTestProtocol">
+			<exp:Name>Sample MAGIC_STRING Protocol</exp:Name>
+			<exp:ProtocolDescription>Query test protocol</exp:ProtocolDescription>
+			<exp:ApplicationType>QueryTestType</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>500</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>501</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>502</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>503</exp:OutputDataPerInstance>
+			<exp:OutputMaterialType>QueryTestMaterialType</exp:OutputMaterialType>
+			<exp:OutputDataType>QueryTestDataType</exp:OutputDataType>
+			<exp:Instrument>QueryTestInstrument</exp:Instrument>
+			<exp:Software>QueryTestSoftware</exp:Software>
+			<exp:Contact>
+				<exp:ContactId>ProtocolContactId</exp:ContactId>
+				<exp:Email>protocol@nowhere.com</exp:Email>
+				<exp:FirstName>FirstNameProtocol</exp:FirstName>
+				<exp:LastName>LastNameProtocol</exp:LastName>
+			</exp:Contact>	
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="StringParamDec" OntologyEntryURI="StringOntologyEntryURI" ValueType="String">A nice value</exp:SimpleVal>
+				<exp:SimpleVal Name="IntegerParamDec" OntologyEntryURI="IntegerOntologyEntryURI" ValueType="Integer">10</exp:SimpleVal>
+				<exp:SimpleVal Name="FileLinkParamDec" OntologyEntryURI="FileLinkOntologyEntryURI" ValueType="FileLink">/path/to/file</exp:SimpleVal>
+				<exp:SimpleVal Name="DateTimeParamDec" OntologyEntryURI="DateTimeOntologyEntryURI" ValueType="DateTime">2006-10-11</exp:SimpleVal>
+				<exp:SimpleVal Name="DoubleParamDec" OntologyEntryURI="DoubleOntologyEntryURI" ValueType="Double">3.78</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:RemoteAPIFractionation_Protocol">
+			<exp:Name>Example 6 (MS2 with pooling, fractionation)</exp:Name>
+			<exp:ProtocolDescription>A diGel experiment</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance xsi:nil="true"/>
+			<exp:OutputDataPerInstance xsi:nil="true"/>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoRemoteAPIFractionation_Protocol</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">MS2 with Pooling and Fractionation</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:TaggingTreatment.Cy5">
+			<exp:Name>Label with Cy5</exp:Name>
+			<exp:ProtocolDescription>Tag sample with Amersham CY5 dye</exp:ProtocolDescription>
+			<exp:ApplicationType/>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:TT.Cy5</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Tag with Cy5</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialLSID" ValueType="String">${RunLSIDBase}:${InputLSID.objectid}.Cy5</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialName" ValueType="String">${InputName} Tagged Cy5</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:TaggingTreatment.Cy3">
+			<exp:Name>Label with Cy3</exp:Name>
+			<exp:ProtocolDescription>Parameters for tagging with Cy3</exp:ProtocolDescription>
+			<exp:ApplicationType/>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:TT.Cy3</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Tag with Cy3</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialLSID" ValueType="String">${RunLSIDBase}:${InputLSID.objectid}.Cy3</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialName" ValueType="String">${InputName} Tagged Cy3</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:PoolingTreatment">
+			<exp:Name>Combine tagged samples</exp:Name>
+			<exp:ProtocolDescription/>
+			<exp:ApplicationType/>
+			<exp:MaxInputMaterialPerInstance>2</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:OutputMaterialType>Material</exp:OutputMaterialType>
+			<exp:OutputDataType/>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoPooling</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Combine tagged samples</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialLSID" ValueType="String">${RunLSIDBase}:Pooled_sample</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialName" ValueType="String">Pooled sample</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+			<exp:Properties/>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:ColumnSeparation.IonExch">
+			<exp:Name>Column Separation using Ion Exchagne</exp:Name>
+			<exp:ProtocolDescription>use gas Chromatography to separate samples into fractions</exp:ProtocolDescription>
+			<exp:ApplicationType/>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>5</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoIonExchange</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">IonExchange column</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialLSID" ValueType="String">${RunLSIDBase}:Fraction.${OutputInstance}</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialName" ValueType="String">Ion Exchange Fraction ${OutputInstance}</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:IX${InputInstance}.Chrm.ASC</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">Chromatogram file</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataDirTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataDir" ValueType="String">\IONEXCH</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">chromatogram.ASC</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+			<exp:Properties>
+				<exp:SimpleVal Name="LoopSize ml" OntologyEntryURI="urn:lsid:${LSIDAuthority}:SampleSet.Folder-${Container.RowId}:DoIonExchange#LoopSize.ml" ValueType="Double">25</exp:SimpleVal>
+				<exp:SimpleVal Name="FlowRate ml min" OntologyEntryURI="urn:lsid:${LSIDAuthority}:SampleSet.Folder-${Container.RowId}:DoIonExchange#FlowRate.ml.min" ValueType="Double">2</exp:SimpleVal>
+				<exp:SimpleVal Name="FractionTime min" OntologyEntryURI="urn:lsid:${LSIDAuthority}:SampleSet.Folder-${Container.RowId}:DoIonExchange#FractionTime.min" ValueType="Double">1.54</exp:SimpleVal>
+				<exp:SimpleVal Name="SampleRate hz" OntologyEntryURI="urn:lsid:${LSIDAuthority}:SampleSet.Folder-${Container.RowId}:DoIonExchange#SampleRate.hz" ValueType="Double">1</exp:SimpleVal>
+			</exp:Properties>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:LCMS2.n">
+			<exp:Name>Analyze sample using LCMS2</exp:Name>
+			<exp:ProtocolDescription>Describe MS2 machine settings, on-board fractionation, etc.</exp:ProtocolDescription>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoLCMS2.${InputInstance}</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Do MS2 scan (Fraction ${InputInstance})</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}.rawfile:MS2Out${InputInstance}</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">raw file (${InputInstance})</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:ConvertToMzXML.n">
+			<exp:Name>Convert to mzXML</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>1</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">${InputLSID.objectid}.mzXml</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:${InputLSID.objectid}.ToMzXML</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Do conversion to MzXML (${InputInstance})</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${AutoFileLSID}</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">MzXML file (${InputInstance})</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MarkRunOutput">
+			<exp:Name>Mark run outputs</exp:Name>
+			<exp:ProtocolDescription>Mark the output data or materials for the run.  Any and all inputs to an application of this type are considered outputs of the run.</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRunOutput</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoMarkRunOutput</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Run output</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+	</exp:ProtocolDefinitions>
+	<exp:ProtocolActionDefinitions>
+		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:RemoteAPIFractionation_Protocol">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:RemoteAPIFractionation_Protocol" ActionSequence="1">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:TaggingTreatment.Cy5" ActionSequence="10">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:TaggingTreatment.Cy3" ActionSequence="11">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:PoolingTreatment" ActionSequence="15">
+				<exp:PredecessorAction ActionSequenceRef="10"/>
+				<exp:PredecessorAction ActionSequenceRef="11"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:ColumnSeparation.IonExch" ActionSequence="18">
+				<exp:PredecessorAction ActionSequenceRef="15"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:LCMS2.n" ActionSequence="20">
+				<exp:PredecessorAction ActionSequenceRef="18"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:ConvertToMzXML.n" ActionSequence="30">
+				<exp:PredecessorAction ActionSequenceRef="20"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MarkRunOutput" ActionSequence="1000">
+				<exp:PredecessorAction ActionSequenceRef="30"/>
+			</exp:ProtocolAction>
+		</exp:ProtocolActionSet>
+	</exp:ProtocolActionDefinitions>
+	<exp:StartingInputDefinitions>
+		<exp:Material rdf:about="${FolderLSIDBase}:Case">
+			<exp:Name>Case</exp:Name>
+		</exp:Material>
+		<exp:Material rdf:about="${FolderLSIDBase}:Control">
+			<exp:Name>Control</exp:Name>
+		</exp:Material>
+	</exp:StartingInputDefinitions>
+	<exp:ExperimentRuns>
+		<exp:ExperimentRun rdf:about="${FolderLSIDBase}:FractionationRun">
+			<exp:Name>RemoteAPI Fractionation</exp:Name>
+			<exp:ProtocolLSID>${FolderLSIDBase}:RemoteAPIFractionation_Protocol</exp:ProtocolLSID>
+			<exp:Comments/>
+			<exp:ExperimentLSID>urn:lsid:cpas.fhcrc.org:Experiment.RemoteAPITest:Experiment:001</exp:ExperimentLSID>
+			<exp:Properties/>
+			<exp:ExperimentLog>
+				<exp:ExperimentLogEntry ActionSequenceRef="1"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="10">
+					<exp:ApplicationInstanceCollection>
+						<exp:InstanceDetails>
+							<exp:InstanceInputs>
+								<exp:MaterialLSID>${FolderLSIDBase}:Case</exp:MaterialLSID>
+							</exp:InstanceInputs>
+						</exp:InstanceDetails>
+					</exp:ApplicationInstanceCollection>
+				</exp:ExperimentLogEntry>
+				<exp:ExperimentLogEntry ActionSequenceRef="11">
+					<exp:ApplicationInstanceCollection>
+						<exp:InstanceDetails>
+							<exp:InstanceInputs>
+								<exp:MaterialLSID>${FolderLSIDBase}:Control</exp:MaterialLSID>
+							</exp:InstanceInputs>
+						</exp:InstanceDetails>
+					</exp:ApplicationInstanceCollection>
+				</exp:ExperimentLogEntry>
+				<exp:ExperimentLogEntry ActionSequenceRef="15"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="18"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="20"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="30"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="1000"/>
+			</exp:ExperimentLog>
+			<exp:ProtocolApplications/>
+		</exp:ExperimentRun>
+	</exp:ExperimentRuns>
+</exp:ExperimentArchive>

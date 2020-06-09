@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bioml>
+  <note label="msinstpect findpeptides, minimum m/z" type="input">800</note>
+  <note label="msinstpect findpeptides, maximum m/z" type="input">2000</note>
+  <note label="pipeline, protocol name" type="input">find1</note>
+  <note label="pipeline, protocol description" type="input"/>
+  <note label="pipeline, peakaboo enabled" type="input">false</note>
+
+</bioml>

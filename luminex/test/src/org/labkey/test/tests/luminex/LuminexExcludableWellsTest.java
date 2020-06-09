@@ -47,7 +47,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     private String excludedWellDescription = null;
     private String excludedWellType = null;
     private Set<String> excludedWells = null;
-    private static final File SINGLEPOINT_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
+    private static final File SINGLEPOINT_RUN_FILE = TestFileUtils.getSampleData("luminex/01-11A12-IgA-Biotin.xls");
 
     @BeforeClass
     public static void updateAssayDefinition()

@@ -198,7 +198,7 @@ public class LuminexSinglePointTest extends LuminexTest
 
         importLuminexRunPageTwo(filename, isotype, conjugate, "", "", "Notebook"+runNumber,
                 "Experimental", "TECH", df.format(testDate.getTime()),
-                TestFileUtils.getSampleData("Luminex/" + filename), 1);
+                TestFileUtils.getSampleData("luminex/" + filename), 1);
 
          switch(runNumber){
              case 1 :

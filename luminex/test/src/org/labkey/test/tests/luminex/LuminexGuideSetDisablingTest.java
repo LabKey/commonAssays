@@ -54,10 +54,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 {
     private LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     private static final File[] GUIDE_SET_FILES = {
-            TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls"),
-            TestFileUtils.getSampleData("Luminex/02-14A22-IgA-Biotin.xls"),
-            TestFileUtils.getSampleData("Luminex/03-31A82-IgA-Biotin.xls"),
-            TestFileUtils.getSampleData("Luminex/04-17A32-IgA-Biotin.xls")
+            TestFileUtils.getSampleData("luminex/01-11A12-IgA-Biotin.xls"),
+            TestFileUtils.getSampleData("luminex/02-14A22-IgA-Biotin.xls"),
+            TestFileUtils.getSampleData("luminex/03-31A82-IgA-Biotin.xls"),
+            TestFileUtils.getSampleData("luminex/04-17A32-IgA-Biotin.xls")
     };
     private static final String GUIDE_SET_WINDOW_NAME = "Guide Set Parameter Details";
     private static final String RUN_BASED_ANALYTE = "ENV1";
@@ -194,7 +194,7 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         waitForElementToDisappear(Locator.checkboxByName("EC504PLCheckBox"), 500);
         resumeJsErrorChecker();
 
-        _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, TestFileUtils.getSampleData("Luminex/plate 3_IgA-Biot (Standard1).xls"));
+        _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls"));
 
         // go back to LJ plot
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, CONTROL_NAME);

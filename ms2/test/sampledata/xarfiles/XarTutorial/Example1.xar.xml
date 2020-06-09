@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exp:ExperimentArchive xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://www.labkey.org/download/XarSchema/V2.2/expTypes.xsd">
+	<exp:Experiment rdf:about="${FolderLSIDBase}:Tutorial">
+		<exp:Name>Tutorial Examples</exp:Name>
+		<exp:Comments>Examples of xar.xml files.</exp:Comments>
+	</exp:Experiment>
+	<exp:ProtocolDefinitions>
+		<exp:Protocol rdf:about="urn:lsid:localhost:Protocol:MinimalRunProtocol.FixedLSID">
+			<exp:Name>Example 1 Protocol</exp:Name>
+			<exp:ProtocolDescription>This protocol is the "parent" protocol of the run.  Its inputs are the starting materials and starting data for the run.</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance xsi:nil="true"/>
+			<exp:OutputDataPerInstance xsi:nil="true"/>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:localhost:Protocol:SamplePrep">
+			<exp:Name>Sample Prep Protocol</exp:Name>
+			<exp:ProtocolDescription>Describes sample handling and preparation steps</exp:ProtocolDescription>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:localhost:Protocol:Analyze">
+			<exp:Name>Example analysis protocol</exp:Name>
+			<exp:ProtocolDescription>Describes analysis procedures and settings</exp:ProtocolDescription>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="urn:lsid:localhost:Protocol:MarkRunOutput">
+			<exp:Name>Mark run outputs</exp:Name>
+			<exp:ProtocolDescription>Mark the output data or materials for the run.  Any and all inputs to an application of this type are considered outputs of the run.</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRunOutput</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+		</exp:Protocol>
+	</exp:ProtocolDefinitions>
+	<exp:ProtocolActionDefinitions>
+		<exp:ProtocolActionSet ParentProtocolLSID="urn:lsid:localhost:Protocol:MinimalRunProtocol.FixedLSID">
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:localhost:Protocol:MinimalRunProtocol.FixedLSID" ActionSequence="1">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:localhost:Protocol:SamplePrep" ActionSequence="10">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:localhost:Protocol:Analyze" ActionSequence="20">
+				<exp:PredecessorAction ActionSequenceRef="10"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="urn:lsid:localhost:Protocol:MarkRunOutput" ActionSequence="30">
+				<exp:PredecessorAction ActionSequenceRef="20"/>
+			</exp:ProtocolAction>
+		</exp:ProtocolActionSet>
+	</exp:ProtocolActionDefinitions>
+	<exp:StartingInputDefinitions>
+		<exp:Material rdf:about="urn:lsid:localhost:Material:Starting_Sample">
+			<exp:Name>Starting Sample</exp:Name>
+			<exp:Properties/>
+		</exp:Material>
+	</exp:StartingInputDefinitions>
+	<exp:ExperimentRuns>
+		<exp:ExperimentRun rdf:about="urn:lsid:localhost:ExperimentRun:MinimalExperimentRun.FixedLSID" CreateNewIfDuplicate="false" GenerateDataFromStepRecord="false">
+			<exp:Name>Example 1 (using export format)</exp:Name>
+			<exp:ProtocolLSID>urn:lsid:localhost:Protocol:MinimalRunProtocol.FixedLSID</exp:ProtocolLSID>
+			<exp:ExperimentLog/>
+			<exp:ProtocolApplications>
+				<exp:ProtocolApplication rdf:about="urn:lsid:localhost:ProtocolApplication:DoMinimalRunProtocol.FixedLSID">
+					<exp:Name>Application of MinimalRunProtocol.FixedLSID</exp:Name>
+					<exp:CpasType>ExperimentRun</exp:CpasType>
+					<exp:ProtocolLSID>urn:lsid:localhost:Protocol:MinimalRunProtocol.FixedLSID</exp:ProtocolLSID>
+					<exp:ActionSequence>1</exp:ActionSequence>
+					<exp:ActivityDate>2005-11-16-08:00</exp:ActivityDate>
+					<exp:Comments/>
+					<exp:InputRefs>
+						<exp:MaterialLSID>urn:lsid:localhost:Material:Starting_Sample</exp:MaterialLSID>
+					</exp:InputRefs>
+					<exp:ProtocolApplicationParameters/>
+					<exp:OutputMaterials/>
+					<exp:OutputDataObjects/>
+				</exp:ProtocolApplication>
+				<exp:ProtocolApplication rdf:about="urn:lsid:localhost:ProtocolApplication:DoSamplePrep">
+					<exp:Name>Prepare sample</exp:Name>
+					<exp:CpasType>ProtocolApplication</exp:CpasType>
+					<exp:ProtocolLSID>urn:lsid:localhost:Protocol:SamplePrep</exp:ProtocolLSID>
+					<exp:ActionSequence>10</exp:ActionSequence>
+					<exp:ActivityDate>2005-11-16-08:00</exp:ActivityDate>
+					<exp:Comments/>
+					<exp:InputRefs>
+						<exp:MaterialLSID>urn:lsid:localhost:Material:Starting_Sample</exp:MaterialLSID>
+					</exp:InputRefs>
+					<exp:ProtocolApplicationParameters/>
+					<exp:OutputMaterials>
+						<exp:Material rdf:about="urn:lsid:localhost:Material:PreparedSample" xsi:type="exp:MaterialType">
+							<exp:Name>Prepared sample</exp:Name>
+							<exp:CpasType>Material</exp:CpasType>
+							<exp:Properties/>
+						</exp:Material>
+					</exp:OutputMaterials>
+					<exp:OutputDataObjects/>
+					<exp:Properties/>
+				</exp:ProtocolApplication>
+				<exp:ProtocolApplication rdf:about="urn:lsid:localhost:ProtocolApplication:DoAnalysis">
+					<exp:Name>Analyze sample</exp:Name>
+					<exp:CpasType>ProtocolApplication</exp:CpasType>
+					<exp:ProtocolLSID>urn:lsid:localhost:Protocol:Analyze</exp:ProtocolLSID>
+					<exp:ActionSequence>20</exp:ActionSequence>
+					<exp:ActivityDate>2005-11-16-08:00</exp:ActivityDate>
+					<exp:Comments/>
+					<exp:InputRefs>
+						<exp:MaterialLSID>urn:lsid:localhost:Material:PreparedSample</exp:MaterialLSID>
+					</exp:InputRefs>
+					<exp:ProtocolApplicationParameters/>
+					<exp:OutputMaterials/>
+					<exp:OutputDataObjects>
+						<exp:Data rdf:about="urn:lsid:localhost:Data:AnalysisResult" xsi:type="exp:DataType">
+							<exp:Name>Analysis results</exp:Name>
+							<exp:CpasType>Data</exp:CpasType>
+							<exp:DataFileUrl/>
+							<exp:Properties/>
+						</exp:Data>
+					</exp:OutputDataObjects>
+					<exp:Properties/>
+				</exp:ProtocolApplication>
+				<exp:ProtocolApplication rdf:about="urn:lsid:localhost:ProtocolApplication:DoMarkRunOutput">
+					<exp:Name>Run output</exp:Name>
+					<exp:CpasType>ExperimentRunOutput</exp:CpasType>
+					<exp:ProtocolLSID>urn:lsid:localhost:Protocol:MarkRunOutput</exp:ProtocolLSID>
+					<exp:ActionSequence>30</exp:ActionSequence>
+					<exp:ActivityDate>2005-11-16-08:00</exp:ActivityDate>
+					<exp:Comments/>
+					<exp:InputRefs>
+						<exp:DataLSID DataFileUrl="">urn:lsid:localhost:Data:AnalysisResult</exp:DataLSID>
+					</exp:InputRefs>
+					<exp:ProtocolApplicationParameters/>
+					<exp:OutputMaterials/>
+					<exp:OutputDataObjects/>
+					<exp:Properties/>
+				</exp:ProtocolApplication>
+			</exp:ProtocolApplications>
+		</exp:ExperimentRun>
+	</exp:ExperimentRuns>
+</exp:ExperimentArchive>

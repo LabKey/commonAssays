@@ -1,0 +1,1723 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="CAexample_mini.pep.xsl"?>
+<msms_pipeline_analysis date="2007-06-25T11:48:28" summary_xml="CAexample_mini.pep.xml" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sashimi.sourceforge.net/schema_revision/pepXML/pepXML_v18.xsd">
+<analysis_summary analysis="peptideprophet" time="2007-06-25T11:48:28">
+<peptideprophet_summary version="PeptideProphet v3.0 April 1, 2004 (TPP v3.0 SQUALL rev.2, Build 200705070941(Win32))" author="AKeller@ISB" min_prob="0.00" options=" EXTRAITRS=20 MINPROB=0 " est_tot_num_correct="2.7">
+<inputfile name="CAexample_mini"/>
+<roc_data_point min_prob="0.99" sensitivity="0.0000" error="0" num_corr="0" num_incorr="0"/>
+<roc_data_point min_prob="0.98" sensitivity="0.0000" error="0" num_corr="0" num_incorr="0"/>
+<roc_data_point min_prob="0.95" sensitivity="0.3546" error="0.0465" num_corr="1" num_incorr="0"/>
+<roc_data_point min_prob="0.90" sensitivity="0.6998" error="0.0591" num_corr="2" num_incorr="0"/>
+<roc_data_point min_prob="0.85" sensitivity="0.6998" error="0.0591" num_corr="2" num_incorr="0"/>
+<roc_data_point min_prob="0.80" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.75" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.70" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.65" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.60" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.55" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.50" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.45" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.40" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.35" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.30" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.25" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.20" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.15" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.10" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.05" sensitivity="0.9990" error="0.1046" num_corr="3" num_incorr="0"/>
+<roc_data_point min_prob="0.00" sensitivity="1.0000" error="0.9232" num_corr="3" num_incorr="32"/>
+<error_point error="0.000" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.010" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.020" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.025" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.030" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.040" min_prob="0.95" num_corr="2" num_incorr="0"/>
+<error_point error="0.050" min_prob="0.93" num_corr="3" num_incorr="0"/>
+<error_point error="0.075" min_prob="0.80" num_corr="3" num_incorr="1"/>
+<error_point error="0.100" min_prob="0.80" num_corr="3" num_incorr="1"/>
+<distribution_point fvalue="-4.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-4.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-4.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-4.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.02" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-4.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.07" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-3.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.15" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-3.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.28" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-3.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.48" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-3.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.73" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-3.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="1.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-2.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.30" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-2.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.56" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-2.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="4" model_3_pos_distr="0.00" model_3_neg_distr="1.77" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-2.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.93" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-2.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="2.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-1.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="2.03" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-1.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="2" model_3_pos_distr="0.00" model_3_neg_distr="1.99" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-1.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.90" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-1.30" obs_1_distr="1" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="3" model_3_pos_distr="0.00" model_3_neg_distr="1.79" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-1.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.65" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-0.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="1.50" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-0.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="3" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="2" model_3_pos_distr="0.00" model_3_neg_distr="1.35" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-0.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="4" model_3_pos_distr="0.00" model_3_neg_distr="1.20" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-0.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="1.06" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="-0.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.93" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="0.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.81" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="0.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.70" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="0.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.00" model_3_neg_distr="0.61" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="0.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="2" model_3_pos_distr="0.00" model_3_neg_distr="0.52" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="0.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.45" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="1.10" obs_1_distr="1" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.38" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="1.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.33" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="1.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.28" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="1.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.24" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="1.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.20" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="2.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.01" model_3_neg_distr="0.17" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="2.30" obs_1_distr="1" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.02" model_3_neg_distr="0.14" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="2.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.03" model_3_neg_distr="0.12" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="2.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.05" model_3_neg_distr="0.10" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="2.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.08" model_3_neg_distr="0.09" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="3.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.12" model_3_neg_distr="0.07" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="3.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.17" model_3_neg_distr="0.06" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="3.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.22" model_3_neg_distr="0.05" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="3.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.26" model_3_neg_distr="0.04" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="3.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.29" model_3_neg_distr="0.04" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="4.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.30" model_3_neg_distr="0.03" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="4.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.28" model_3_neg_distr="0.03" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="4.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.25" model_3_neg_distr="0.02" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="4.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.20" model_3_neg_distr="0.02" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="4.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="1" model_3_pos_distr="0.15" model_3_neg_distr="0.02" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="5.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.10" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="5.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.07" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="5.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.04" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="5.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.02" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="5.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.01" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="6.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.01" model_3_neg_distr="0.01" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="6.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="6.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="6.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="6.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="7.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="7.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="7.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="7.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="7.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="8.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="8.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="8.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="8.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="8.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="9.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="9.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="9.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="9.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<distribution_point fvalue="9.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="0" model_2_pos_distr="0.00" model_2_neg_distr="0.00" obs_3_distr="0" model_3_pos_distr="0.00" model_3_neg_distr="0.00" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00"/>
+<mixture_model precursor_ion_charge="1" comments="using 3+ positive distributions to identify candidates ('-1') above background ('0')" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="3" num_iterations="1">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -1.31">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="1.87"/>
+<parameter name="stdev" value="1.15"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.24"/>
+<parameter name="stdev" value="0.96"/>
+<parameter name="mu" value="-0.67"/>
+<parameter name="beta" value="0.75"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.107"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.893"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="var offset mass diff [massd] (offset: 0.000000)">
+<posmodel_distribution>
+<parameter name="massd=0.000000" value="0.442518136"/>
+<parameter name="massd=1.000000" value="0.146118770"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="massd=0.000000" value="0.090909091"/>
+<parameter name="massd=1.000000" value="0.090909091"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="2" comments="using 3+ positive distributions to identify candidates ('-2') above background ('0')" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="21" num_iterations="1">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -1.84">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.46"/>
+<parameter name="stdev" value="2.08"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-1.84"/>
+<parameter name="stdev" value="1.73"/>
+<parameter name="mu" value="-2.62"/>
+<parameter name="beta" value="1.35"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.107"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.893"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="var offset mass diff [massd] (offset: 0.000000)">
+<posmodel_distribution>
+<parameter name="massd=-2.000000" value="0.097412783"/>
+<parameter name="massd=-1.000000" value="0.300581786"/>
+<parameter name="massd=0.000000" value="0.442518136"/>
+<parameter name="massd=1.000000" value="0.146118770"/>
+<parameter name="massd=2.000000" value="0.012176564"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="massd=-2.000000" value="0.090909091"/>
+<parameter name="massd=-1.000000" value="0.090909091"/>
+<parameter name="massd=0.000000" value="0.090909091"/>
+<parameter name="massd=1.000000" value="0.090909091"/>
+<parameter name="massd=2.000000" value="0.090909091"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="3" comments="using training data negative distributions" prior_probability="0.077" est_tot_correct="2.7" tot_num_spectra="35" num_iterations="4">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -1.44">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.05"/>
+<parameter name="stdev" value="0.72"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-1.27"/>
+<parameter name="stdev" value="1.50"/>
+<parameter name="mu" value="-1.94"/>
+<parameter name="beta" value="1.17"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.107"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.893"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.278"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.722"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="var offset mass diff [massd] (offset: 1.000000)">
+<posmodel_distribution>
+<parameter name="massd=-3.000000" value="0.001191960"/>
+<parameter name="massd=-2.000000" value="0.097412783"/>
+<parameter name="massd=-1.000000" value="0.300581786"/>
+<parameter name="massd=0.000000" value="0.442518136"/>
+<parameter name="massd=1.000000" value="0.146118770"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="massd=-3.000000" value="0.232356741"/>
+<parameter name="massd=-2.000000" value="0.246899201"/>
+<parameter name="massd=-1.000000" value="0.160659592"/>
+<parameter name="massd=0.000000" value="0.309203198"/>
+<parameter name="massd=1.000000" value="0.049213030"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="4" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="1">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="var offset mass diff [massd] (offset: 0.000000)">
+<posmodel_distribution>
+</posmodel_distribution>
+<negmodel_distribution>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="5" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="1">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="var offset mass diff [massd] (offset: 0.000000)">
+<posmodel_distribution>
+</posmodel_distribution>
+<negmodel_distribution>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+</peptideprophet_summary>
+</analysis_summary>
+<analysis_summary analysis="interact" time="2007-06-25T11:48:28">
+<interact_summary filename="CAexample_mini.pep.xml" directory=".">
+<inputfile name="CAexample_mini-raw.pep.xml"/>
+</interact_summary>
+</analysis_summary>
+<dataset_derivation generation_no="0"/>
+<msms_run_summary base_name="CAexample_mini" search_engine="X! Tandem (k-score)" msManufacturer="ThermoFinnigan" msModel="LCQ" msIonization="ESI" msMassAnalyzer="Ion Trap" msDetector="EMT" raw_data_type="raw" raw_data=".mzXML">
+<sample_enzyme name="trypsin">
+<specificity cut="KR" no_cut="P" sense="C"/>
+</sample_enzyme>
+<search_summary base_name="CAexample_mini" search_engine="X! Tandem (k-score)" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" search_id="1">
+<search_database local_path="../../../databases/Bovine_mini1.fasta" type="AA"/>
+<search_database local_path="../../../databases/Bovine_mini2.fasta" type="AA"/>
+<search_database local_path="../../../databases/Bovine_mini3.fasta" type="AA"/>
+<enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="2" min_number_termini="2"/>
+<aminoacid_modification aminoacid="E" massdiff="-18.0106" mass="111.0320" variable="Y" symbol="^"/>
+<!--X! Tandem n-terminal AA variable modification-->
+<aminoacid_modification aminoacid="Q" massdiff="-17.0265" mass="111.0321" variable="Y" symbol="^"/>
+<!--X! Tandem n-terminal AA variable modification-->
+<!-- Input parameters -->
+<parameter name="list path, default parameters" value="../../../default_input.xml"/>
+<parameter name="list path, taxonomy information" value="taxonomy.xml"/>
+<parameter name="output, histogram column width" value="30"/>
+<parameter name="output, histograms" value="no"/>
+<parameter name="output, maximum valid expectation value" value="0.1"/>
+<parameter name="output, one sequence copy" value="yes"/>
+<parameter name="output, parameters" value="yes"/>
+<parameter name="output, path" value="output.xml"/>
+<parameter name="output, path hashing" value="yes"/>
+<parameter name="output, performance" value="yes"/>
+<parameter name="output, proteins" value="yes"/>
+<parameter name="output, results" value="all"/>
+<parameter name="output, sequences" value="yes"/>
+<parameter name="output, sort results by" value="spectrum"/>
+<parameter name="output, spectra" value="yes"/>
+<parameter name="output, xsl path" value="tandem-style.xsl"/>
+<parameter name="protein, C-terminal residue modification mass" value="0.0"/>
+<parameter name="protein, N-terminal residue modification mass" value="0.0"/>
+<parameter name="protein, cleavage site" value="[RK]|{P}"/>
+<parameter name="protein, taxon" value="sequences"/>
+<parameter name="refine" value="no"/>
+<parameter name="refine, maximum valid expectation value" value="0.1"/>
+<parameter name="refine, spectrum synthesis" value="yes"/>
+<parameter name="residue, modification mass" value=""/>
+<parameter name="residue, potential modification mass" value=""/>
+<parameter name="residue, potential modification motif" value=""/>
+<parameter name="scoring, algorithm" value="k-score"/>
+<parameter name="scoring, b ions" value="yes"/>
+<parameter name="scoring, maximum missed cleavage sites" value="2"/>
+<parameter name="scoring, minimum ion count" value="4"/>
+<parameter name="scoring, y ions" value="yes"/>
+<parameter name="spectrum, dynamic range" value="100.0"/>
+<parameter name="spectrum, fragment monoisotopic mass error" value="0.5"/>
+<parameter name="spectrum, fragment monoisotopic mass error units" value="Daltons"/>
+<parameter name="spectrum, minimum fragment mz" value="140.0"/>
+<parameter name="spectrum, minimum parent m+h" value="500.0"/>
+<parameter name="spectrum, minimum peaks" value="10"/>
+<parameter name="spectrum, parent monoisotopic mass error minus" value="2.0"/>
+<parameter name="spectrum, parent monoisotopic mass error plus" value="2.0"/>
+<parameter name="spectrum, parent monoisotopic mass error units" value="Daltons"/>
+<parameter name="spectrum, parent monoisotopic mass isotope error" value="no"/>
+<parameter name="spectrum, path" value="../../CAexample_mini.mzXML"/>
+<parameter name="spectrum, threads" value="1"/>
+<parameter name="spectrum, total peaks" value="50"/>
+<parameter name="spectrum, use conditioning" value="no"/>
+<parameter name="spectrum, use noise suppression" value="no"/>
+<!-- Unused input parameters -->
+<parameter name="pipeline prophet, min probability" value="0"/>
+<parameter name="pipeline, load folder" value="/upload/drt"/>
+<parameter name="pipeline, protocol description" value=""/>
+<parameter name="pipeline, protocol name" value="DRT2"/>
+<parameter name="refine, point mutations" value="no"/>
+<parameter name="refine, potential C-terminus modifications" value=""/>
+<parameter name="refine, potential N-terminus modifications" value="+42.0@["/>
+<parameter name="refine, potential modification mass" value=""/>
+<parameter name="refine, potential modification motif" value=""/>
+<parameter name="refine, unanticipated cleavage" value="yes"/>
+<parameter name="refine, use potential modifications for full refinement" value="no"/>
+<parameter name="scoring, pluggable scoring" value="yes"/>
+<!-- Performance parameters -->
+<parameter name="list path, sequence source #1" value="../../../databases/Bovine_mini1.fasta"/>
+<parameter name="list path, sequence source #2" value="../../../databases/Bovine_mini2.fasta"/>
+<parameter name="list path, sequence source #3" value="../../../databases/Bovine_mini3.fasta"/>
+<parameter name="modelling, total peptides used" value="61380"/>
+<parameter name="modelling, total proteins used" value="4308"/>
+<parameter name="modelling, total spectra used" value="104"/>
+<parameter name="process, start time" value="2007:06:25:11:48:27"/>
+<parameter name="process, version" value="x! tandem 2007.01.01.1"/>
+<parameter name="quality values" value="6 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"/>
+<parameter name="refining, # input models" value="0"/>
+<parameter name="refining, # input spectra" value="0"/>
+<parameter name="refining, # partial cleavage" value="0"/>
+<parameter name="refining, # point mutations" value="0"/>
+<parameter name="refining, # potential C-terminii" value="0"/>
+<parameter name="refining, # potential N-terminii" value="0"/>
+<parameter name="refining, # unanticipated cleavage" value="0"/>
+<parameter name="timing, initial modelling total (sec)" value="0.42"/>
+<parameter name="timing, initial modelling/spectrum (sec)" value="0.004"/>
+<parameter name="timing, load sequence models (sec)" value="0.04"/>
+<parameter name="timing, refinement/spectrum (sec)" value="0.000"/>
+</search_summary>
+<analysis_timestamp analysis="peptideprophet" time="2007-06-25T11:48:28" id="1"/>
+<spectrum_query spectrum="CAexample_mini.00004.00004.2" start_scan="4" end_scan="4" precursor_neutral_mass="847.0498" assumed_charge="2" index="1" retention_time_sec="4.82">
+<search_result>
+<search_hit hit_rank="1" peptide="SYRPLGR" peptide_prev_aa="R" peptide_next_aa="G" protein="gi|27807269|tenascin_X" protein_descr="gi|27807269|ref|NP_777128.1| tenascin X [Bos taurus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="847.4667" massdiff="-0.417" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="199"/>
+<search_score name="nextscore" value="159"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="4.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.5305"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.417"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00004.00004.3" start_scan="4" end_scan="4" precursor_neutral_mass="1270.5747" assumed_charge="3" index="2" retention_time_sec="4.82">
+<search_result>
+<search_hit hit_rank="1" peptide="MSKIRQVIAAR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|15811132|AF308663_2_hypoth" protein_descr="gi|15811132|gb|AAL08814.1|AF308663_2 hypothetical dihydrolipoamide acetyltransferase component [Cowdria ruminantium] [MASS=44415]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="40" calc_neutral_pep_mass="1271.7497" massdiff="-1.175" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="350"/>
+<search_score name="nextscore" value="308"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="0.2780"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.175"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00006.00006.2" start_scan="6" end_scan="6" precursor_neutral_mass="888.0031" assumed_charge="2" index="3" retention_time_sec="7.85">
+<search_result>
+<search_hit hit_rank="1" peptide="SRIATWR" peptide_prev_aa="K" peptide_next_aa="K" protein="gi|32307556|ribosomal_protein" protein_descr="gi|32307556|gb|AAP79183.1| ribosomal protein rpS20 [Bigelowiella natans] [MASS=21450]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="888.4927" massdiff="-0.490" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="242"/>
+<search_score name="nextscore" value="211"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="6.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="-2" all_ntt_prob="(-2,-2,-2)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.3633"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.490"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00006.00006.3" start_scan="6" end_scan="6" precursor_neutral_mass="1332.0047" assumed_charge="3" index="4" retention_time_sec="7.85">
+<search_result>
+<search_hit hit_rank="1" peptide="EDMGTIDKDLGR" peptide_prev_aa="K" peptide_next_aa="N" protein="gi|28211276|ribosomal_large_s" protein_descr="gi|28211276|ref|NP_782220.1| ribosomal large subunit pseudouridine synthase D [Clostridium tetani E88]" num_tot_proteins="1" num_matched_ions="7" tot_num_ions="44" calc_neutral_pep_mass="1330.6187" massdiff="1.386" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="E[111]DMGTIDKDLGR">
+<mod_aminoacid_mass position="1" mass="111.0320"/>
+</modification_info>
+<search_score name="hyperscore" value="326"/>
+<search_score name="nextscore" value="320"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="5.2"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.9139"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.386"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00008.00008.3" start_scan="8" end_scan="8" precursor_neutral_mass="1386.8540" assumed_charge="3" index="5" retention_time_sec="10.88">
+<search_result>
+<search_hit hit_rank="1" peptide="NKIAGYVIHLMK" peptide_prev_aa="R" peptide_next_aa="Q" protein="gi|27701248|similar_to_40S_RI" protein_descr="gi|27701248|ref|XP_212769.1| similar to 40S RIBOSOMAL PROTEIN S17 [Rattus norvegicus] [MASS=15325]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="44" calc_neutral_pep_mass="1385.7857" massdiff="1.068" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="263"/>
+<search_score name="nextscore" value="252"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.5603"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.068"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00010.00010.2" start_scan="10" end_scan="10" precursor_neutral_mass="883.4781" assumed_charge="2" index="6" retention_time_sec="13.91">
+<search_result>
+<search_hit hit_rank="1" peptide="RPVAATIR" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|15237029|ribosomal_protein" protein_descr="gi|15237029|ref|NP_195274.1| ribosomal protein L11p family [Arabidopsis thaliana]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="882.5397" massdiff="0.938" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="206"/>
+<search_score name="nextscore" value="172"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="3.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.7521"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.938"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00010.00010.3" start_scan="10" end_scan="10" precursor_neutral_mass="1325.2172" assumed_charge="3" index="7" retention_time_sec="13.91">
+<search_result>
+<search_hit hit_rank="1" peptide="ELHLFKITRGN" peptide_prev_aa="R" peptide_next_aa="-" protein="gi|28189789|similar_to_ubiqui" protein_descr="gi|28189789|dbj|BAC56509.1| similar to ubiquinol-cytrochrome-c reductase (subunit II) [Bos taurus] [MASS=11715]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="40" calc_neutral_pep_mass="1326.7407" massdiff="-1.524" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="267"/>
+<search_score name="nextscore" value="249"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.0221"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.524"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00012.00012.2" start_scan="12" end_scan="12" precursor_neutral_mass="1035.4449" assumed_charge="2" index="8" retention_time_sec="16.95">
+<search_result>
+<search_hit hit_rank="1" peptide="KLYNEELK" peptide_prev_aa="K" peptide_next_aa="A" protein="gi|34558016|50S_RIBOSOMAL_PRO" protein_descr="gi|34558016|ref|NP_907831.1| 50S RIBOSOMAL PROTEIN L5 [Wolinella succinogenes]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="1035.5597" massdiff="-0.115" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="184"/>
+<search_score name="nextscore" value="144"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="5.8"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.7370"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.115"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00012.00012.3" start_scan="12" end_scan="12" precursor_neutral_mass="1553.1674" assumed_charge="3" index="9" retention_time_sec="16.95">
+<search_result>
+<search_hit hit_rank="1" peptide="QELELSVKKELEK" peptide_prev_aa="R" peptide_next_aa="I" protein="gi|731049|UDP2_BOVIN_UTP--GLU" protein_descr="gi|731049|sp|Q07130|UDP2_BOVIN UTP--GLUCOSE-1-PHOSPHATE URIDYLYLTRANSFERASE 2 (UDP-GLUCOSE PYROPHOSPHORYLASE 2) (UDPGP 2) (UGPASE 2)" num_tot_proteins="1" num_matched_ions="7" tot_num_ions="48" calc_neutral_pep_mass="1554.8507" massdiff="-1.683" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="Q[111]ELELSVKKELEK">
+<mod_aminoacid_mass position="1" mass="111.0321"/>
+</modification_info>
+<search_score name="hyperscore" value="312"/>
+<search_score name="nextscore" value="299"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="5.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.7118"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.683"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00016.00016.2" start_scan="16" end_scan="16" precursor_neutral_mass="855.4819" assumed_charge="2" index="10" retention_time_sec="23.2">
+<search_result>
+<search_hit hit_rank="1" peptide="GLEKAIVK" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|23098201|amidophosphoribos" protein_descr="gi|23098201|ref|NP_691667.1| amidophosphoribosyltransferase [Oceanobacillus iheyensis HTE831]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="14" calc_neutral_pep_mass="856.5377" massdiff="-1.056" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="235"/>
+<search_score name="nextscore" value="192"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.8"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="-2" all_ntt_prob="(-2,-2,-2)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="0.0897"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.056"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00016.00016.3" start_scan="16" end_scan="16" precursor_neutral_mass="1283.2229" assumed_charge="3" index="11" retention_time_sec="23.2">
+<search_result>
+<search_hit hit_rank="1" peptide="IIGGPASQLLASR" peptide_prev_aa="K" peptide_next_aa="T" protein="gi|20090033|ribose-phosphate_" protein_descr="gi|20090033|ref|NP_616108.1| ribose-phosphate pyrophosphokinase [Methanosarcina acetivorans str. C2A]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="48" calc_neutral_pep_mass="1281.7407" massdiff="1.482" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="364"/>
+<search_score name="nextscore" value="314"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="0.7875"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="1.482"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00018.00018.2" start_scan="18" end_scan="18" precursor_neutral_mass="820.8226" assumed_charge="2" index="12" retention_time_sec="26.26">
+<search_result>
+<search_hit hit_rank="1" peptide="ISNNFVK" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|13812230|putative_ribosome" protein_descr="gi|13812230|ref|NP_113361.1| putative ribosome biogenesis protein [Guillardia theta]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="820.4447" massdiff="0.378" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="191"/>
+<search_score name="nextscore" value="185"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="2.7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-2.5775"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.378"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00018.00018.3" start_scan="18" end_scan="18" precursor_neutral_mass="1231.2339" assumed_charge="3" index="13" retention_time_sec="26.26">
+<search_result>
+<search_hit hit_rank="1" peptide="ITSGSKTPGKGAK" peptide_prev_aa="K" peptide_next_aa="V" protein="gi|15889254|AGR_C_3575p" protein_descr="gi|15889254|ref|NP_354935.1| AGR_C_3575p [Agrobacterium tumefaciens]" num_tot_proteins="1" num_matched_ions="8" tot_num_ions="48" calc_neutral_pep_mass="1230.6927" massdiff="0.541" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="271"/>
+<search_score name="nextscore" value="268"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="4.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.9674"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.541"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00024.00024.2" start_scan="24" end_scan="24" precursor_neutral_mass="1042.7606" assumed_charge="2" index="14" retention_time_sec="35.8">
+<search_result>
+<search_hit hit_rank="1" peptide="VKLKAMQLSNPNEIKKAR" peptide_prev_aa="R" peptide_next_aa="N" protein="gi|15645924|ribosomal_protein" protein_descr="gi|15645924|ref|NP_208103.1| ribosomal protein L29 (rpL29) [Helicobacter pylori 26695]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="1043.4927" massdiff="-0.732" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="179"/>
+<search_score name="nextscore" value="138"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="3.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.7454"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.732"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00024.00024.3" start_scan="24" end_scan="24" precursor_neutral_mass="1564.1409" assumed_charge="3" index="15" retention_time_sec="35.8">
+<search_result>
+<search_hit hit_rank="1" peptide="GLQFQLLDEGVDCK" peptide_prev_aa="K" peptide_next_aa="I" protein="gi|139011|VNST_CVBQ_32_kDa_no" protein_descr="gi|139011|sp|P18517|VNST_CVBQ 32 kDa nonstructural protein" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="52" calc_neutral_pep_mass="1563.7607" massdiff="0.380" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="355"/>
+<search_score name="nextscore" value="306"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="0.6748"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.380"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00030.00030.3" start_scan="30" end_scan="30" precursor_neutral_mass="1571.2831" assumed_charge="3" index="16" retention_time_sec="45.15">
+<search_result>
+<search_hit hit_rank="1" peptide="EFTGLGNCITKIFK" peptide_prev_aa="R" peptide_next_aa="S" protein="gi|32189340|solute_carrier_fa" protein_descr="gi|32189340|ref|NP_777083.1| solute carrier family 25 member 4; adenine nucleotide translocator 1 (skeletal muscle); ADP/ATP translocase T1 [Bos taurus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="52" calc_neutral_pep_mass="1569.8227" massdiff="1.460" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="271"/>
+<search_score name="nextscore" value="261"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="7.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.5001"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.460"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00032.00032.2" start_scan="32" end_scan="32" precursor_neutral_mass="860.0644" assumed_charge="2" index="17" retention_time_sec="48.3">
+<search_result>
+<search_hit hit_rank="1" peptide="KGGWAGRK" peptide_prev_aa="R" peptide_next_aa="I" protein="gi|21265070|mitochondrial_rib" protein_descr="gi|21265070|ref|NP_057034.2| mitochondrial ribosomal protein L2 [Homo sapiens]" num_tot_proteins="2" num_matched_ions="5" tot_num_ions="14" calc_neutral_pep_mass="858.4827" massdiff="1.582" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<alternative_protein protein="gi|13384660|mitochondrial_rib" protein_descr="gi|13384660|ref|NP_079578.1| mitochondrial ribosomal protein L2; ribosomal protein, mitochondrial, L14 [Mus musculus]" num_tol_term="2"/>
+<search_score name="hyperscore" value="260"/>
+<search_score name="nextscore" value="220"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="0.78"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="0.2691"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="1.582"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00032.00032.3" start_scan="32" end_scan="32" precursor_neutral_mass="1290.0966" assumed_charge="3" index="18" retention_time_sec="48.3">
+<search_result>
+<search_hit hit_rank="1" peptide="KSGRSSDLTSVR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|30794364|diazepam_binding_" protein_descr="gi|30794364|ref|NP_851381.1| diazepam binding inhibitor [Bos taurus]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="44" calc_neutral_pep_mass="1291.6847" massdiff="-1.588" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="319"/>
+<search_score name="nextscore" value="317"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="5.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.2416"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.588"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00038.00038.2" start_scan="38" end_scan="38" precursor_neutral_mass="879.4334" assumed_charge="2" index="19" retention_time_sec="57.78">
+<search_result>
+<search_hit hit_rank="1" peptide="QGTTRYR" peptide_prev_aa="K" peptide_next_aa="V" protein="gi|133740|R19E_HALMA_30S_RIBO" protein_descr="gi|133740|sp|P19952|R19E_HALMA 30S RIBOSOMAL PROTEIN S19E (HS12) (E1.3)" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="880.4517" massdiff="-1.018" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="153"/>
+<search_score name="nextscore" value="125"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="4.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-2.0171"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.018"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00038.00038.3" start_scan="38" end_scan="38" precursor_neutral_mass="1319.1502" assumed_charge="3" index="20" retention_time_sec="57.78">
+<search_result>
+<search_hit hit_rank="1" peptide="EAEAGPPEARVGR" peptide_prev_aa="K" peptide_next_aa="R" protein="gi|27702243|similar_to_riboso" protein_descr="gi|27702243|ref|XP_230295.1| similar to ribosomal protein L31 [Rattus norvegicus] [MASS=60313]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="48" calc_neutral_pep_mass="1319.6577" massdiff="-0.508" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="E[111]AEAGPPEARVGR">
+<mod_aminoacid_mass position="1" mass="111.0320"/>
+</modification_info>
+<search_score name="hyperscore" value="311"/>
+<search_score name="nextscore" value="296"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="5.7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.6091"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.508"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00040.00040.3" start_scan="40" end_scan="40" precursor_neutral_mass="1661.8119" assumed_charge="3" index="21" retention_time_sec="60.89">
+<search_result>
+<search_hit hit_rank="1" peptide="VFFTPFRPDLIRR" peptide_prev_aa="K" peptide_next_aa="A" protein="gi|14520557|LSU_ribosomal_pro" protein_descr="gi|14520557|ref|NP_126032.1| LSU ribosomal protein L4P [Pyrococcus abyssi]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="48" calc_neutral_pep_mass="1662.9357" massdiff="-1.124" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="287"/>
+<search_score name="nextscore" value="282"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="5.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.5666"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-1.124"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00042.00042.2" start_scan="42" end_scan="42" precursor_neutral_mass="832.6247" assumed_charge="2" index="22" retention_time_sec="64.11">
+<search_result>
+<search_hit hit_rank="1" peptide="RYVKLR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|400992|RK28_TOBAC_50S_RIBO" protein_descr="gi|400992|sp|P30956|RK28_TOBAC 50S RIBOSOMAL PROTEIN L28, CHLOROPLAST PRECURSOR (CL28)" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="10" calc_neutral_pep_mass="833.5237" massdiff="-0.899" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="132"/>
+<search_score name="nextscore" value="132"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="22"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-4.7334"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.899"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00042.00042.3" start_scan="42" end_scan="42" precursor_neutral_mass="1248.9371" assumed_charge="3" index="23" retention_time_sec="64.11">
+<search_result>
+<search_hit hit_rank="1" peptide="ELVGQFATEVR" peptide_prev_aa="K" peptide_next_aa="K" protein="gi|13507919|ribosomal_protein" protein_descr="gi|13507919|ref|NP_109868.1| ribosomal protein L6 [Mycoplasma pneumoniae]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="40" calc_neutral_pep_mass="1247.6507" massdiff="1.286" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="312"/>
+<search_score name="nextscore" value="282"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="4.6"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.7261"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="1.286"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00044.00044.2" start_scan="44" end_scan="44" precursor_neutral_mass="1091.3521" assumed_charge="2" index="24" retention_time_sec="67.15">
+<search_result>
+<search_hit hit_rank="1" peptide="FVAMPLEQR" peptide_prev_aa="R" peptide_next_aa="R" protein="gi|26990912|non-ribosomal_pep" protein_descr="gi|26990912|ref|NP_746337.1| non-ribosomal peptide synthetase domain protein, putative [Pseudomonas putida KT2440]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="16" calc_neutral_pep_mass="1089.5637" massdiff="1.788" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="237"/>
+<search_score name="nextscore" value="235"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="4.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-1.7680"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="1.788"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00044.00044.3" start_scan="44" end_scan="44" precursor_neutral_mass="1637.0282" assumed_charge="3" index="25" retention_time_sec="67.15">
+<search_result>
+<search_hit hit_rank="1" peptide="TLPMFNDALSFVER" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|26988323|ribosomal_protein" protein_descr="gi|26988323|ref|NP_743748.1| ribosomal protein S2 [Pseudomonas putida KT2440]" num_tot_proteins="1" num_matched_ions="7" tot_num_ions="52" calc_neutral_pep_mass="1638.8077" massdiff="-1.780" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="358"/>
+<search_score name="nextscore" value="333"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.5170"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-1.780"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00048.00048.3" start_scan="48" end_scan="48" precursor_neutral_mass="1277.8178" assumed_charge="3" index="26" retention_time_sec="73.58">
+<search_result>
+<search_hit hit_rank="1" peptide="RRNTTGTGQMR" peptide_prev_aa="K" peptide_next_aa="H" protein="gi|25054155|similar_to_riboso" protein_descr="gi|25054155|ref|XP_139851.2| similar to ribosomal protein L37, cytosolic [validated] - rat [Mus musculus] [MASS=39335]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="40" calc_neutral_pep_mass="1276.6417" massdiff="1.176" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="353"/>
+<search_score name="nextscore" value="326"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="2.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.4667"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.176"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00050.00050.2" start_scan="50" end_scan="50" precursor_neutral_mass="1152.4059" assumed_charge="2" index="27" retention_time_sec="76.58">
+<search_result>
+<search_hit hit_rank="1" peptide="KHGGPKDEER" peptide_prev_aa="K" peptide_next_aa="H" protein="gi|442754|A_Chain_A,_Superoxi" protein_descr="gi|442754|pdb|1COB|A Chain A, Superoxide Dismutase (Co Substituted) (E.C.1.15.1.1)" num_tot_proteins="1" num_matched_ions="8" tot_num_ions="18" calc_neutral_pep_mass="1151.5687" massdiff="0.837" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="217"/>
+<search_score name="nextscore" value="180"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="0.74"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-0.4372"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.837"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00050.00050.3" start_scan="50" end_scan="50" precursor_neutral_mass="1728.6088" assumed_charge="3" index="28" retention_time_sec="76.58">
+<search_result>
+<search_hit hit_rank="1" peptide="CAKEVATAIRGAIILAK" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|23593432|similar_to_40S_ri" protein_descr="gi|23593432|ref|XP_145024.2| similar to 40S ribosomal protein S2 [Mus musculus] [MASS=24241]" num_tot_proteins="1" num_matched_ions="11" tot_num_ions="64" calc_neutral_pep_mass="1727.0127" massdiff="1.596" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="345"/>
+<search_score name="nextscore" value="317"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="2.9"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.4964"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.596"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00052.00052.1" start_scan="52" end_scan="52" precursor_neutral_mass="652.4925" assumed_charge="1" index="29" retention_time_sec="79.68">
+<search_result>
+<search_hit hit_rank="1" peptide="YTELK" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|15612296|50S_RIBOSOMAL_PRO" protein_descr="gi|15612296|ref|NP_223949.1| 50S RIBOSOMAL PROTEIN L29 [Helicobacter pylori J99]" num_tot_proteins="2" num_matched_ions="4" tot_num_ions="8" calc_neutral_pep_mass="652.3427" massdiff="0.150" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<alternative_protein protein="gi|15645924|ribosomal_protein" protein_descr="gi|15645924|ref|NP_208103.1| ribosomal protein L29 (rpL29) [Helicobacter pylori 26695]" num_tol_term="2"/>
+<search_score name="hyperscore" value="202"/>
+<search_score name="nextscore" value="202"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="9.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-1.3115"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.150"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00054.00054.1" start_scan="54" end_scan="54" precursor_neutral_mass="642.2459" assumed_charge="1" index="30" retention_time_sec="82.25">
+<search_result>
+<search_hit hit_rank="1" peptide="GKRPGK" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|166869|ribosomal_protein_S" protein_descr="gi|166869|gb|AAA32867.1| ribosomal protein S11 [MASS=17738]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="10" calc_neutral_pep_mass="641.3977" massdiff="0.848" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="198"/>
+<search_score name="nextscore" value="148"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="0.82"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="-1" all_ntt_prob="(-1,-1,-1)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="2.2661"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.848"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00056.00056.2" start_scan="56" end_scan="56" precursor_neutral_mass="948.7203" assumed_charge="2" index="31" retention_time_sec="85.15">
+<search_result>
+<search_hit hit_rank="1" peptide="FKAFVAIR" peptide_prev_aa="R" peptide_next_aa="D" protein="gi|17449614|similar_to_riboso" protein_descr="gi|17449614|ref|XP_070917.1| similar to ribosomal protein S2 [Homo sapiens] [MASS=21721]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="950.5697" massdiff="-1.849" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="257"/>
+<search_score name="nextscore" value="247"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="2.9"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-1.0386"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.849"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00056.00056.3" start_scan="56" end_scan="56" precursor_neutral_mass="1423.0805" assumed_charge="3" index="32" retention_time_sec="85.15">
+<search_result>
+<search_hit hit_rank="1" peptide="TQMPAASICVNYK" peptide_prev_aa="R" peptide_next_aa="G" protein="gi|30089158|low_density_lipop" protein_descr="gi|30089158|emb|CAD89505.1| low density lipoprotein receptor-related protein 8 [Bos taurus] [MASS=16201]" num_tot_proteins="1" num_matched_ions="8" tot_num_ions="48" calc_neutral_pep_mass="1424.6787" massdiff="-1.598" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="381"/>
+<search_score name="nextscore" value="366"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.9"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.7578"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-1.598"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00064.00064.2" start_scan="64" end_scan="64" precursor_neutral_mass="927.8979" assumed_charge="2" index="33" retention_time_sec="96.31">
+<search_result>
+<search_hit hit_rank="1" peptide="WPRTPSGK" peptide_prev_aa="R" peptide_next_aa="I" protein="gi|23058297|COG3319:_Thioeste" protein_descr="gi|23058297|ref|ZP_00083375.1| COG3319: Thioesterase domains of type I polyketide synthases or non-ribosomal peptide synthetases [Pseudomonas fluorescens PfO-1] [MASS=332825]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="927.4927" massdiff="0.405" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="111"/>
+<search_score name="nextscore" value="111"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="33"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-5.5842"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.405"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00064.00064.3" start_scan="64" end_scan="64" precursor_neutral_mass="1391.8469" assumed_charge="3" index="34" retention_time_sec="96.31">
+<search_result>
+<search_hit hit_rank="1" peptide="QCSLAYKSYTCK" peptide_prev_aa="K" peptide_next_aa="N" protein="gi|30157401|similar_to_60S_ri" protein_descr="gi|30157401|ref|XP_301385.1| similar to 60S ribosomal protein L10 (QM protein) (Tumor suppressor QM) (Laminin receptor homolog) [Homo sapiens] [MASS=64229]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="44" calc_neutral_pep_mass="1393.6367" massdiff="-1.790" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="308"/>
+<search_score name="nextscore" value="285"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="3.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.1790"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.790"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00070.00070.2" start_scan="70" end_scan="70" precursor_neutral_mass="888.2223" assumed_charge="2" index="35" retention_time_sec="105.76">
+<search_result>
+<search_hit hit_rank="1" peptide="KRGSIVCK" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|11968140|phosphoribosylpyr" protein_descr="gi|11968140|ref|NP_071990.1| phosphoribosylpyrophosphate synthetase-associated protein (39 kD [Rattus norvegicus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="889.5167" massdiff="-1.294" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="180"/>
+<search_score name="nextscore" value="180"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="5.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-3.2106"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.294"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00070.00070.3" start_scan="70" end_scan="70" precursor_neutral_mass="1332.3334" assumed_charge="3" index="36" retention_time_sec="105.76">
+<search_result>
+<search_hit hit_rank="1" peptide="DEIAAAVEELFK" peptide_prev_aa="K" peptide_next_aa="V" protein="gi|16125499|ribosomal_protein" protein_descr="gi|16125499|ref|NP_420063.1| ribosomal protein L23 [Caulobacter crescentus CB15]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="44" calc_neutral_pep_mass="1333.6767" massdiff="-1.343" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="284"/>
+<search_score name="nextscore" value="259"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.3416"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-1.343"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00072.00072.2" start_scan="72" end_scan="72" precursor_neutral_mass="856.4660" assumed_charge="2" index="37" retention_time_sec="108.91">
+<search_result>
+<search_hit hit_rank="1" peptide="EVLNVER" peptide_prev_aa="R" peptide_next_aa="V" protein="gi|15597620|probable_non-ribo" protein_descr="gi|15597620|ref|NP_251114.1| probable non-ribosomal peptide synthetase [Pseudomonas aeruginosa PA01]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="12" calc_neutral_pep_mass="857.4607" massdiff="-0.995" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="200"/>
+<search_score name="nextscore" value="193"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="9.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-2.3124"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.995"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00072.00072.3" start_scan="72" end_scan="72" precursor_neutral_mass="1284.6991" assumed_charge="3" index="38" retention_time_sec="108.91">
+<search_result>
+<search_hit hit_rank="1" peptide="VEKALLDNAGVR" peptide_prev_aa="R" peptide_next_aa="N" protein="gi|28899811|phosphoribosylami" protein_descr="gi|28899811|ref|NP_799416.1| phosphoribosylaminoimidazole carboxylase, ATPase subunit [Vibrio parahaemolyticus RIMD 2210633]" num_tot_proteins="1" num_matched_ions="7" tot_num_ions="44" calc_neutral_pep_mass="1283.7197" massdiff="0.979" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="346"/>
+<search_score name="nextscore" value="334"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.3228"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.979"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00076.00076.1" start_scan="76" end_scan="76" precursor_neutral_mass="654.2420" assumed_charge="1" index="39" retention_time_sec="115.58">
+<search_result>
+<search_hit hit_rank="1" peptide="GGTPVPK" peptide_prev_aa="K" peptide_next_aa="T" protein="gi|18312189|ribosomal_protein" protein_descr="gi|18312189|ref|NP_558856.1| ribosomal protein L2 [Pyrobaculum aerophilum]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="12" calc_neutral_pep_mass="654.3697" massdiff="-0.128" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="223"/>
+<search_score name="nextscore" value="188"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="8.9"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="1.1632"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.128"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00078.00078.2" start_scan="78" end_scan="78" precursor_neutral_mass="1017.2994" assumed_charge="2" index="40" retention_time_sec="118.75">
+<search_result>
+<search_hit hit_rank="1" peptide="EKNEKGALK" peptide_prev_aa="K" peptide_next_aa="R" protein="gi|28461287|hepatoma-derived_" protein_descr="gi|28461287|ref|NP_787026.1| hepatoma-derived growth factor (high-mobility group protein 1-like) [Bos taurus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="1015.5657" massdiff="1.734" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="126"/>
+<search_score name="nextscore" value="126"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="33"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-4.9619"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.734"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00078.00078.3" start_scan="78" end_scan="78" precursor_neutral_mass="1525.9491" assumed_charge="3" index="41" retention_time_sec="118.75">
+<search_result>
+<search_hit hit_rank="1" peptide="EPVSPWGTPAKGYR" peptide_prev_aa="R" peptide_next_aa="T" protein="gi|15676072|50S_ribosomal_pro" protein_descr="gi|15676072|ref|NP_273203.1| 50S ribosomal protein L2 [Neisseria meningitidis MC58]" num_tot_proteins="2" num_matched_ions="4" tot_num_ions="52" calc_neutral_pep_mass="1525.7677" massdiff="0.181" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<alternative_protein protein="gi|15793154|50S_ribosomal_pro" protein_descr="gi|15793154|ref|NP_282976.1| 50S ribosomal protein L2 [Neisseria meningitidis Z2491]" num_tol_term="2"/>
+<modification_info modified_peptide="E[111]PVSPWGTPAKGYR">
+<mod_aminoacid_mass position="1" mass="111.0320"/>
+</modification_info>
+<search_score name="hyperscore" value="325"/>
+<search_score name="nextscore" value="313"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="1.8"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.5942"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.181"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00080.00080.2" start_scan="80" end_scan="80" precursor_neutral_mass="1002.6480" assumed_charge="2" index="42" retention_time_sec="121.93">
+<search_result>
+<search_hit hit_rank="1" peptide="RLNTEQSR" peptide_prev_aa="K" peptide_next_aa="E" protein="gi|27679410|similar_to_riboso" protein_descr="gi|27679410|ref|XP_219268.1| similar to ribosomal protein L36 [Rattus norvegicus] [MASS=11600]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="14" calc_neutral_pep_mass="1002.5207" massdiff="0.127" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="193"/>
+<search_score name="nextscore" value="180"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="2.7"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-2.1352"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.127"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00080.00080.3" start_scan="80" end_scan="80" precursor_neutral_mass="1503.9721" assumed_charge="3" index="43" retention_time_sec="121.93">
+<search_result>
+<search_hit hit_rank="1" peptide="EGVSEDEANDMKAK" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|28377498|ribosomal_protein" protein_descr="gi|28377498|ref|NP_784390.1| ribosomal protein L12/L7 [Lactobacillus plantarum WCFS1]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="52" calc_neutral_pep_mass="1503.6507" massdiff="0.321" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="E[111]GVSEDEANDMKAK">
+<mod_aminoacid_mass position="1" mass="111.0320"/>
+</modification_info>
+<search_score name="hyperscore" value="340"/>
+<search_score name="nextscore" value="307"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="2.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.2815"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.321"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00082.00082.3" start_scan="82" end_scan="82" precursor_neutral_mass="1384.9597" assumed_charge="3" index="44" retention_time_sec="125.1">
+<search_result>
+<search_hit hit_rank="1" peptide="MARIAGVNIPTNK" peptide_prev_aa="-" peptide_next_aa="R" protein="gi|16125519|ribosomal_protein" protein_descr="gi|16125519|ref|NP_420083.1| ribosomal protein S13 [Caulobacter crescentus CB15]" num_tot_proteins="2" num_matched_ions="8" tot_num_ions="48" calc_neutral_pep_mass="1383.7657" massdiff="1.194" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<alternative_protein protein="gi|13470573|30S_ribosomal_pro" protein_descr="gi|13470573|ref|NP_102142.1| 30S ribosomal protein S13 [Mesorhizobium loti]" num_tol_term="2"/>
+<search_score name="hyperscore" value="413"/>
+<search_score name="nextscore" value="315"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="0.57"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.8045" all_ntt_prob="(0.0000,0.0000,0.8045)">
+<search_score_summary>
+<parameter name="fval" value="3.2246"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.194"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00086.00086.2" start_scan="86" end_scan="86" precursor_neutral_mass="843.8872" assumed_charge="2" index="45" retention_time_sec="131.51">
+<search_result>
+<search_hit hit_rank="1" peptide="TLLIGGDR" peptide_prev_aa="R" peptide_next_aa="L" protein="gi|28870014|non-ribosomal_pep" protein_descr="gi|28870014|ref|NP_792633.1| non-ribosomal peptide synthetase [Pseudomonas syringae pv. tomato str. DC3000]" num_tot_proteins="2" num_matched_ions="4" tot_num_ions="14" calc_neutral_pep_mass="843.4817" massdiff="0.405" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="151"/>
+<search_score name="nextscore" value="151"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="7.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-4.0732"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="0.405"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00086.00086.3" start_scan="86" end_scan="86" precursor_neutral_mass="1265.8308" assumed_charge="3" index="46" retention_time_sec="131.51">
+<search_result>
+<search_hit hit_rank="1" peptide="TLKYALTFGVR" peptide_prev_aa="K" peptide_next_aa="Q" protein="gi|27807317|ATPase,_aminophos" protein_descr="gi|27807317|ref|NP_777263.1| ATPase, aminophospholipid transporter (APLT), Class I, type 8A, member 1 [Bos taurus]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="40" calc_neutral_pep_mass="1267.7287" massdiff="-1.898" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="252"/>
+<search_score name="nextscore" value="241"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="6.8"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.7402"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.898"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00088.00088.3" start_scan="88" end_scan="88" precursor_neutral_mass="1434.1662" assumed_charge="3" index="47" retention_time_sec="134.57">
+<search_result>
+<search_hit hit_rank="1" peptide="MAVASAAPGSIFWK" peptide_prev_aa="-" peptide_next_aa="Q" protein="gi|27881408|desmocollin_3" protein_descr="gi|27881408|ref|NP_776469.1| desmocollin 3 [Bos taurus]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="52" calc_neutral_pep_mass="1434.7327" massdiff="-0.567" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="314"/>
+<search_score name="nextscore" value="281"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="3.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.5325"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.567"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00094.00094.3" start_scan="94" end_scan="94" precursor_neutral_mass="1835.3472" assumed_charge="3" index="48" retention_time_sec="144.57">
+<search_result>
+<search_hit hit_rank="1" peptide="GRRNGPRPVHPTSHNR" peptide_prev_aa="R" peptide_next_aa="Q" protein="gi|9629877|UL0.5_protein" protein_descr="gi|9629877|ref|NP_045361.1| UL0.5 protein [Bovine herpesvirus 1]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="60" calc_neutral_pep_mass="1836.9677" massdiff="-1.621" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="358"/>
+<search_score name="nextscore" value="270"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="0.94"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0028" all_ntt_prob="(0.0000,0.0000,0.0028)">
+<search_score_summary>
+<parameter name="fval" value="2.6666"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.621"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00100.00100.3" start_scan="100" end_scan="100" precursor_neutral_mass="1402.5957" assumed_charge="3" index="49" retention_time_sec="154.94">
+<search_result>
+<search_hit hit_rank="1" peptide="QLDSIHVTILHK" peptide_prev_aa="K" peptide_next_aa="E" protein="gi|5002198|AF143203_1_interle" protein_descr="gi|5002198|gb|AAD37356.1|AF143203_1 interleukin-16 [Bos indicus] [MASS=40227]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="44" calc_neutral_pep_mass="1402.7937" massdiff="-0.198" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<search_score name="hyperscore" value="264"/>
+<search_score name="nextscore" value="264"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="5.5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-3.2980"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.198"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00108.00108.3" start_scan="108" end_scan="108" precursor_neutral_mass="1905.0957" assumed_charge="3" index="50" retention_time_sec="168.09">
+<search_result>
+<search_hit hit_rank="1" peptide="EYYLLHKPPKTISSTK" peptide_prev_aa="K" peptide_next_aa="D" protein="gi|15828808|RIBOSOMAL_LARGE_S" protein_descr="gi|15828808|ref|NP_326168.1| RIBOSOMAL LARGE SUBUNIT PSEUDOURIDINE SYNTHASE B (PSEUDOURIDYLATE SYNTHASE) (URACIL HYDROLYASE) [Mycoplasma pulmonis]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="60" calc_neutral_pep_mass="1904.0407" massdiff="1.055" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="351"/>
+<search_score name="nextscore" value="240"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.9282" all_ntt_prob="(0.0000,0.0000,0.9282)">
+<search_score_summary>
+<parameter name="fval" value="3.8424"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.055"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00120.00120.3" start_scan="120" end_scan="120" precursor_neutral_mass="2032.0336" assumed_charge="3" index="51" retention_time_sec="187.98">
+<search_result>
+<search_hit hit_rank="1" peptide="EIVGMMDASEKTNYTCCR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|5052730|AF145968_1_polypro" protein_descr="gi|5052730|gb|AAD38684.1|AF145968_1 polyprotein [Bovine viral diarrhea virus genotype 2] [MASS=130291]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="68" calc_neutral_pep_mass="2031.8527" massdiff="0.181" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="E[111]IVGMMDASEKTNYTCCR">
+<mod_aminoacid_mass position="1" mass="111.0320"/>
+</modification_info>
+<search_score name="hyperscore" value="242"/>
+<search_score name="nextscore" value="242"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="9.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-3.7316"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.181"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00130.00130.3" start_scan="130" end_scan="130" precursor_neutral_mass="1557.7003" assumed_charge="3" index="52" retention_time_sec="204.69">
+<search_result>
+<search_hit hit_rank="1" peptide="MQRSPLEKASVVSK" peptide_prev_aa="-" peptide_next_aa="V" protein="gi|27806695|cystic_fibrosis_t" protein_descr="gi|27806695|ref|NP_776443.1| cystic fibrosis transmembrane conductance regulator [Bos taurus]" num_tot_proteins="1" num_matched_ions="6" tot_num_ions="52" calc_neutral_pep_mass="1558.8497" massdiff="-1.149" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="409"/>
+<search_score name="nextscore" value="373"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="0.83"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="0.4757"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-1.149"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00148.00148.3" start_scan="148" end_scan="148" precursor_neutral_mass="2218.4610" assumed_charge="3" index="53" retention_time_sec="235.74">
+<search_result>
+<search_hit hit_rank="1" peptide="EIRQRQGDDLDGLSFAELR" peptide_prev_aa="K" peptide_next_aa="G" protein="gi|4883902|APETALA3_homolog_R" protein_descr="gi|4883902|gb|AAD31697.1| APETALA3 homolog RbAP3-2 [Ranunculus bulbosus] [MASS=22484]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="72" calc_neutral_pep_mass="2217.1137" massdiff="1.347" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="287"/>
+<search_score name="nextscore" value="261"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="3.4"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-1.2429"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="1.347"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00156.00156.3" start_scan="156" end_scan="156" precursor_neutral_mass="2109.9834" assumed_charge="3" index="54" retention_time_sec="249.33">
+<search_result>
+<search_hit hit_rank="1" peptide="NIKHRGNITFDEIVNIAR" peptide_prev_aa="K" peptide_next_aa="Q" protein="gi|14749869|similar_to_60S_RI" protein_descr="gi|14749869|ref|XP_017914.2| similar to 60S RIBOSOMAL PROTEIN L12 [Homo sapiens] [MASS=17958]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="68" calc_neutral_pep_mass="2109.1447" massdiff="0.839" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="254"/>
+<search_score name="nextscore" value="207"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="4.4"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-0.1429"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.839"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00168.00168.2" start_scan="168" end_scan="168" precursor_neutral_mass="2235.3399" assumed_charge="2" index="55" retention_time_sec="269.67">
+<search_result>
+<search_hit hit_rank="1" peptide="RNGIWYNLSKTLAEDAAWK" peptide_prev_aa="K" peptide_next_aa="F" protein="gi|7431406|T11610_probable_ci" protein_descr="gi|7431406|pir||T11610 probable cinnamyl-alcohol dehydrogenase (EC 1.1.1.195) CPRD14 - cowpea" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="36" calc_neutral_pep_mass="2235.1437" massdiff="0.196" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="234"/>
+<search_score name="nextscore" value="186"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="0.31"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="-2" all_ntt_prob="(-2,-2,-2)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="0.3098"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.196"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00168.00168.3" start_scan="168" end_scan="168" precursor_neutral_mass="3353.0099" assumed_charge="3" index="56" retention_time_sec="269.67">
+<search_result>
+<search_hit hit_rank="1" peptide="ISNFIANNDCRYYIDAEHQKIISDEINR" peptide_prev_aa="K" peptide_next_aa="Q" protein="gi|30519530|A38R_protein" protein_descr="gi|30519530|emb|CAD90705.1| A38R protein [Cowpox virus] [MASS=30475]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="108" calc_neutral_pep_mass="3353.6097" massdiff="-0.600" num_tol_term="2" num_missed_cleavages="2" is_rejected="0">
+<search_score name="hyperscore" value="230"/>
+<search_score name="nextscore" value="230"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="12"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-3.9851"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.600"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00178.00178.3" start_scan="178" end_scan="178" precursor_neutral_mass="1703.8683" assumed_charge="3" index="57" retention_time_sec="286.38">
+<search_result>
+<search_hit hit_rank="1" peptide="KAKIEQMMAEQQAAK" peptide_prev_aa="R" peptide_next_aa="E" protein="gi|34849400|ribosomal_protein" protein_descr="gi|34849400|gb|AAP58899.1| ribosomal protein L29 [Spiroplasma kunkelii] [MASS=36436]" num_tot_proteins="1" num_matched_ions="5" tot_num_ions="56" calc_neutral_pep_mass="1703.8698" massdiff="-0.002" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="375"/>
+<search_score name="nextscore" value="240"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="1.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.9535" all_ntt_prob="(0.0000,0.0000,0.9535)">
+<search_score_summary>
+<parameter name="fval" value="4.9636"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.002"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00200.00200.2" start_scan="200" end_scan="200" precursor_neutral_mass="916.0516" assumed_charge="2" index="58" retention_time_sec="324.17">
+<search_result>
+<search_hit hit_rank="1" peptide="SGEKGVPDK" peptide_prev_aa="K" peptide_next_aa="K" protein="gi|3914699|RL4_PIG_60S_RIBOSO" protein_descr="gi|3914699|sp|Q29187|RL4_PIG 60S RIBOSOMAL PROTEIN L4 (L1) [MASS=11115]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="16" calc_neutral_pep_mass="915.4657" massdiff="0.586" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="175"/>
+<search_score name="nextscore" value="144"/>
+<search_score name="bscore" value="0"/>
+<search_score name="yscore" value="0"/>
+<search_score name="expect" value="5.4"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0" all_ntt_prob="(0,0,0)" analysis="incomplete">
+<search_score_summary>
+<parameter name="fval" value="-1.4212"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="0.586"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="CAexample_mini.00200.00200.3" start_scan="200" end_scan="200" precursor_neutral_mass="1374.0774" assumed_charge="3" index="59" retention_time_sec="324.17">
+<search_result>
+<search_hit hit_rank="1" peptide="LKRTIQQDMSR" peptide_prev_aa="K" peptide_next_aa="L" protein="gi|6066162|AF110138_12_riboso" protein_descr="gi|6066162|gb|AAF03180.1|AF110138_12 ribosomal protein S13 [Nephroselmis olivacea] [MASS=14275]" num_tot_proteins="1" num_matched_ions="4" tot_num_ions="40" calc_neutral_pep_mass="1374.7397" massdiff="-0.662" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<search_score name="hyperscore" value="310"/>
+<search_score name="nextscore" value="310"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="expect" value="5"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.0000" all_ntt_prob="(0.0000,0.0000,0.0000)">
+<search_score_summary>
+<parameter name="fval" value="-2.4977"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.662"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+</msms_run_summary>
+</msms_pipeline_analysis>

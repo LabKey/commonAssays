@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bioml>
+  <!--  <note label="residue, potential modification mass" type="input">9.0@C</note>
+  <note label="pipeline quantitation, algorithm" type="input">xpress</note>
+  <note label="pipeline quantitation, residue label mass" type="input">9.0@C</note>-->
+  <note label="pipeline prophet, min probability" type="input">0</note>
+  <note label="scoring, algorithm" type="input">k-score</note>
+  <note label="spectrum, use conditioning" type="input">no</note>
+  <note label="pipeline, protocol name" type="input">DRT3</note>
+  <note label="pipeline, protocol description" type="input"/>
+  <note label="pipeline, database" type="input">Bovine_mini1.fasta</note>
+  <note label="pipeline, database" type="input">Bovine_mini2.fasta</note>
+  <note label="pipeline, database" type="input">Bovine_mini3.fasta</note>
+  <note label="pipeline, email address" type="input">jeckels@labkey.com</note>
+  <note label="pipeline, load folder" type="input">/upload/drt</note>
+  <note lable="pipeline, gzip outputs" type="input">yes</note>
+</bioml>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="F:\home\bioadmin\pipewch\bov_sample\mascot\test1\CAexample_mini.work/CAexample_mini.pep-prot.xsl"?>
+<protein_summary xmlns="http://regis-web.systemsbiology.net/protXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/protXML F:\CPASRepository\tor\stedi\trunk\external\bin/../schema/protXML_v4.xsd" summary_xml="F:\home\bioadmin\pipewch\bov_sample\mascot\test1\CAexample_mini.work/CAexample_mini.pep-prot.xml">
+<protein_summary_header reference_database="f:\home\bioadmin\pipewch\databases\mascot\Bovine_mini.fasta\Bovine_mini.fasta" residue_substitution_list="I -> L" source_files="F:\home\bioadmin\pipewch\bov_sample\mascot\test1\CAexample_mini.work/CAexample_mini.pep.xml" source_files_alt="F:\home\bioadmin\pipewch\bov_sample\mascot\test1\CAexample_mini.work/CAexample_mini.pep.xml" min_peptide_probability="0.20" min_peptide_weight="0.50" num_predicted_correct_prots="0.0" num_input_1_spectra="0" num_input_2_spectra="0" num_input_3_spectra="0" initial_min_peptide_prob="0.05" total_no_spectrum_ids="0.0" sample_enzyme="trypsin">
+<program_details analysis="proteinprophet" time="2006-11-19T15:32:09" version="4.0(TPP v2.8 THAW rev.2, Build 200606081248)">
+<proteinprophet_details  occam_flag="Y" groups_flag="Y" degen_flag="Y" nsp_flag="Y" initial_peptide_wt_iters="1" nsp_distribution_iters="0" final_peptide_wt_iters="0" run_options="XML_INPUT NOPLOT">
+      <nsp_information neighboring_bin_smoothing="Y">
+         <nsp_distribution bin_no="0" nsp_lower_bound_incl="0.00" nsp_upper_bound_excl="0.10" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="1" nsp_lower_bound_incl="0.10" nsp_upper_bound_excl="0.25" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="2" nsp_lower_bound_incl="0.25" nsp_upper_bound_excl="0.50" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="3" nsp_lower_bound_incl="0.50" nsp_upper_bound_excl="1.00" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="4" nsp_lower_bound_incl="1.00" nsp_upper_bound_excl="2.00" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="5" nsp_lower_bound_incl="2.00" nsp_upper_bound_excl="5.00" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="6" nsp_lower_bound_incl="5.00" nsp_upper_bound_excl="15.00" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+         <nsp_distribution bin_no="7" nsp_lower_bound_incl="15.00" nsp_upper_bound_excl="inf" pos_freq="0.125" neg_freq="0.125" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+      </nsp_information>      <protein_summary_data_filter min_probability="0.00" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.10" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.20" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.30" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.40" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.50" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.60" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.70" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.80" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.90" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.95" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.96" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.97" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.98" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="0.99" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+      <protein_summary_data_filter min_probability="1.00" sensitivity="1.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0" />
+</proteinprophet_details>
+</program_details>
+</protein_summary_header>
+<dataset_derivation generation_no="0">
+</dataset_derivation>
+</protein_summary>

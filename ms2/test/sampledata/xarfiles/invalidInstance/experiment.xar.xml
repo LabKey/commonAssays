@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by Peter Hussey (LabKey) -->
+<exp:ExperimentArchive rdf:about="urn:lsid:cpas.fhcrc.org:test.cpas1:TypeLoader" 
+	xmlns:unk2="http://some.lab.org/exp/unk2/xml" 
+	xmlns:unk="http://some.lab.org/exp/unk/xml" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003" 
+	xmlns:gel="http://cpas.fhcrc.org/exp/gel/xml" xmlns:exp="http://cpas.fhcrc.org/exp/xml" 
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml /cpas/trunk/webapps/Schemas/expTypes.xsd http://some.lab.org/exp/unk/xml ./extensions/xsd/Unknown.xsd" >
+	<exp:Name>Test Dynamic Types</exp:Name>
+	<exp:Hypothesis>Starting Materials demonstrate various options</exp:Hypothesis>
+	<exp:Experimenter>phussey@fhcrc.org</exp:Experimenter>
+	<exp:ExperimentDescriptionURL>http://cpas.fhcrc.org/exp/gel/xml/begin.view</exp:ExperimentDescriptionURL>
+    <exp:Contact>
+      <exp:ContactId>phussey</exp:ContactId>
+      <exp:Email>phussey@fhcrc.org</exp:Email>
+      <exp:FirstName>Peter</exp:FirstName>
+      <exp:LastName>Hussey</exp:LastName>
+      <exp:Properties/>
+    </exp:Contact>
+    <exp:Properties>
+      <exp:SimpleVal Name="FHCRC Department" OntologyEntryURI="terms.fhcrc.org#DepartmentShortName" ValueType="String">TOR</exp:SimpleVal>
+      <exp:SimpleVal Name="LSIDAuthority" OntologyEntryURI="terms.fhcrc.org#XarTemplate.LSIDAuthority" ValueType="String">cpas.fhcrc.org</exp:SimpleVal>
+      <exp:SimpleVal Name="LSIDNamespaceSuffix" OntologyEntryURI="terms.fhcrc.org#XarTemplate.LSIDNamespaceSuffix" ValueType="String">Run${ExperimentRun.RowId}</exp:SimpleVal>
+    </exp:Properties>
+	<exp:ProtocolDefinitions>
+	
+	</exp:ProtocolDefinitions>
+	<exp:ProtocolActionDefinitions>
+	</exp:ProtocolActionDefinitions>
+	<exp:StartingInputDefinitions>
+		<exp:Material rdf:about="urn:lsdi:cpas.fhcrc.org:test.cpas1:Material.B1" xsi:type="exp:MaterialType">
+			<exp:Name>S5</exp:Name>
+			<exp:CpasType>Material</exp:CpasType>
+			<exp:Properties>
+				<exp:SimpleVal ValueType="String" Name="Location" OntologyEntryURI="fhcrc:LocationCode">B1 loc</exp:SimpleVal>
+			</exp:Properties>
+			<unk:RandomProperty1>Mouse B</unk:RandomProperty1>
+			<unk:RandomProperty2>2005-04-29</unk:RandomProperty2>
+		</exp:Material>
+		<exp:Material rdf:about="urn:lsdi:cpas.fhcrc.org:test.cpas1:Material.B2" xsi:type="exp:MaterialType">
+			<exp:Name>S6 </exp:Name>
+			<exp:CpasType>Material</exp:CpasType>
+			<exp:Properties>
+				<exp:SimpleVal ValueType="String" Name="StringValue" OntologyEntryURI="test:StringType">some string</exp:SimpleVal>
+				<exp:SimpleVal ValueType="Double" Name="DoubleProperty" OntologyEntryURI="fhcrc:DoubleType">28.3</exp:SimpleVal>
+				<exp:SimpleVal ValueType="DateTime" Name="DateTimeProperty" OntologyEntryURI="test:DateTime">2005-03-12T23:45:00</exp:SimpleVal>
+				<exp:SimpleVal ValueType="Integer" Name="IntegerProperty" OntologyEntryURI="test:Integer">3328</exp:SimpleVal>
+				<exp:SimpleVal ValueType="FileLink" Name="FileLinkInternal" OntologyEntryURI="test:FileLink">/attachments/somedir/someFile.html</exp:SimpleVal>
+				<exp:SimpleVal ValueType="FileLink" Name="FileLinkExternal" OntologyEntryURI="test:FileLink">www.google.com</exp:SimpleVal>
+			</exp:Properties>
+		</exp:Material>
+		<exp:Material rdf:about="urn:lsdi:cpas.fhcrc.org:test.cpas1:Material.F1" xsi:type="gel:FractionType">
+			<exp:Name>F1</exp:Name>
+			<exp:Properties>
+				<exp:SimpleVal ValueType="String" Name="Location" OntologyEntryURI="fhcrc:LocationCode">Fraction loc</exp:SimpleVal>
+				<exp:SimpleVal ValueType="double" Name="StartPoint" OntologyEntryURI="org.fhcrc.exp.Fraction#StartPoint">20A</exp:SimpleVal>
+				<exp:SimpleVal ValueType="double" Name="EndPoint" OntologyEntryURI="org.fhcrc.exp.Fraction#EndPoint">40</exp:SimpleVal>
+				<exp:SimpleVal ValueType="double" Name="ProteinAssay" OntologyEntryURI="org.fhcrc.exp.Fraction#ProteinAssay">123.32</exp:SimpleVal>
+			</exp:Properties>
+			<unk:RandomProperty3>val 3</unk:RandomProperty3>
+			<unk:RandomProperty4>2005-04-29</unk:RandomProperty4>
+		</exp:Material>
+
+		<exp:Material rdf:about="urn:lsdi:cpas.fhcrc.org:test.cpas1:NewType.N1" xsi:type="unk:NewDerivedType">
+			<exp:Name>No table def for this type</exp:Name>
+			<exp:CpasType>NewDerivedType</exp:CpasType>
+			<exp:Properties>
+			</exp:Properties>
+			<unk:NewProperty1>44.43333333</unk:NewProperty1>
+			<unk:NewProperty2>some string</unk:NewProperty2>
+			<unk:NestedProperty>
+				<unk:subPropertyA>123</unk:subPropertyA>
+				<unk:subPropertyB>2005-03-12T23:45:00</unk:subPropertyB>
+			</unk:NestedProperty>
+			<unk:ElementWithAttribute myattribute="hello">some element text</unk:ElementWithAttribute>
+		</exp:Material>
+
+		<exp:Material rdf:about="urn:lsdi:cpas.fhcrc.org:test.cpas1:WildType.W1" xsi:type="exp:MaterialType">
+			<exp:Name>No table def for this type</exp:Name>
+			<exp:CpasType>NewDerivedType</exp:CpasType>
+			<exp:Properties>
+			</exp:Properties>
+			<unk2:NewProperty1>44.43333333</unk2:NewProperty1>
+			<unk2:NewProperty2>some string</unk2:NewProperty2>
+			<unk2:NestedProperty>
+				<unk2:subPropertyA>123</unk2:subPropertyA>
+				<unk2:subPropertyB>2005-03-12T23:45:00</unk2:subPropertyB>
+			</unk2:NestedProperty>
+			<unk2:ElementWithAttribute myattribute="hello">some element text</unk2:ElementWithAttribute>
+		</exp:Material>
+	</exp:StartingInputDefinitions>
+	<exp:Assays>
+	
+	</exp:Assays>
+</exp:ExperimentArchive>

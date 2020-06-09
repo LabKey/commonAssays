@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bioml>
+  <note label="pipeline, protocol name" type="input">test_fract</note>
+  <note label="pipeline, protocol description" type="input">This is a test protocol using X!Tandem defaults.</note>
+  <note label="pipeline, database" type="input">Bovine_mini1.fasta</note>
+  <note label="pipeline, data type" type="input">Fractions</note>
+</bioml>
