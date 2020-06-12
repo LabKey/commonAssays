@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bioml>
+    <note label="residue, potential modification mass" type="input">15.994915@M</note>
+    <note label="residue, modification mass" type="input">304.2@K,304.2@[,57.021464@C</note>
+    <note label="protein, cleavage site" type="input">[KR]|{P}</note>
+    
+    <note label="scoring, algorithm" type="input">k-score</note>
+    <note label="spectrum, use conditioning" type="input">no</note>
+    <note label="scoring, minimum ion count" type="input">1</note>
+    <note label="pipeline, data type" type="input">both</note>
+    <note label="spectrum, threads" type="input">8</note>
+    <note label="pipeline prophet, PPErrorRate" type="input">0.05</note>
+    <note label="pipeline quantitation, algorithm" type="input">libra</note>
+    <note label="pipeline quantitation, libra config name" type="input">libraprotocol1</note>
+    <note label="pipeline quantitation, libra normalization channel" type="input">7</note>
+    <!--      Override default parameters here.      -->
+
+  
+  
+<note label="pipeline, protocol name" type="input">Libra</note>
+  <note label="pipeline, protocol description" type="input"/>
+  <note label="pipeline, database" type="input">Bovine_mini1.fasta</note>
+  <note label="pipeline, database" type="input">Bovine_mini2.fasta</note>
+  <note label="pipeline, database" type="input">Bovine_mini3.fasta</note>
+  <note label="pipeline, email address" type="input">nobody@labkey.test</note>
+</bioml>

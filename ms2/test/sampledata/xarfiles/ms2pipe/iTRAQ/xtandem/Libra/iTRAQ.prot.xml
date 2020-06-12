@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="c:/temp/remoteTempDir/iTRAQ6310151218903190538.work/iTRAQ.prot.xsl"?>
+<protein_summary xmlns="http://regis-web.systemsbiology.net/protXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sashimi.sourceforge.net/schema_revision/protXML/protXML_v6.xsd" summary_xml="c:/temp/remoteTempDir/iTRAQ6310151218903190538.work/iTRAQ.prot.xml">
+<protein_summary_header reference_database="..\..\..\databases\Bovine_mini1.fasta" residue_substitution_list="I -> L" source_files="c:/temp/remoteTempDir/iTRAQ6310151218903190538.work/iTRAQ.pep.xml" source_files_alt="c:/temp/remoteTempDir/iTRAQ6310151218903190538.work/iTRAQ.pep.xml" min_peptide_probability="0.20" min_peptide_weight="0.50" num_predicted_correct_prots="6.8" num_input_1_spectra="0" num_input_2_spectra="27" num_input_3_spectra="0" num_input_4_spectra="0" num_input_5_spectra="0" initial_min_peptide_prob="0.05" total_no_spectrum_ids="8.4" sample_enzyme="trypsin">
+<program_details analysis="proteinprophet" time="2011-08-22T13:02:08" version=" Insilicos_LabKey_C++ (TPP v4.3 JETSTREAM rev 1, Build 200909211148 (MSVC))">
+<proteinprophet_details occam_flag="Y" groups_flag="Y" degen_flag="Y" nsp_flag="Y" initial_peptide_wt_iters="1" nsp_distribution_iters="1" final_peptide_wt_iters="0" run_options="XML NOPLOT">
+<nsp_information neighboring_bin_smoothing="Y">
+<nsp_distribution bin_no="0" nsp_lower_bound_incl="0.00" nsp_upper_bound_excl="0.10" pos_freq="0.361" neg_freq="0.361" pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="1" nsp_lower_bound_incl="0.10" nsp_upper_bound_excl="0.25" pos_freq="0.141" neg_freq="0.141" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="2" nsp_lower_bound_incl="0.25" nsp_upper_bound_excl="0.50" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="3" nsp_lower_bound_incl="0.50" nsp_upper_bound_excl="1.00" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="4" nsp_lower_bound_incl="1.00" nsp_upper_bound_excl="2.00" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="5" nsp_lower_bound_incl="2.00" nsp_upper_bound_excl="5.00" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="6" nsp_lower_bound_incl="5.00" nsp_upper_bound_excl="15.00" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+<nsp_distribution bin_no="7" nsp_lower_bound_incl="15.00" nsp_upper_bound_excl="inf" pos_freq="0.083" neg_freq="0.083" pos_to_neg_ratio="1.00" alt_pos_to_neg_ratio="1.00"/>
+</nsp_information>
+<ni_information>
+</ni_information>
+<protein_summary_data_filter min_probability="0.00" sensitivity="1.000" false_positive_error_rate="0.747" predicted_num_correct="7" predicted_num_incorrect="20"/>
+<protein_summary_data_filter min_probability="0.10" sensitivity="1.000" false_positive_error_rate="0.475" predicted_num_correct="7" predicted_num_incorrect="6"/>
+<protein_summary_data_filter min_probability="0.20" sensitivity="1.000" false_positive_error_rate="0.475" predicted_num_correct="7" predicted_num_incorrect="6"/>
+<protein_summary_data_filter min_probability="0.30" sensitivity="0.860" false_positive_error_rate="0.348" predicted_num_correct="6" predicted_num_incorrect="3"/>
+<protein_summary_data_filter min_probability="0.40" sensitivity="0.746" false_positive_error_rate="0.273" predicted_num_correct="5" predicted_num_incorrect="2"/>
+<protein_summary_data_filter min_probability="0.50" sensitivity="0.678" false_positive_error_rate="0.230" predicted_num_correct="5" predicted_num_incorrect="1"/>
+<protein_summary_data_filter min_probability="0.60" sensitivity="0.678" false_positive_error_rate="0.230" predicted_num_correct="5" predicted_num_incorrect="1"/>
+<protein_summary_data_filter min_probability="0.70" sensitivity="0.395" false_positive_error_rate="0.101" predicted_num_correct="3" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.80" sensitivity="0.395" false_positive_error_rate="0.101" predicted_num_correct="3" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.90" sensitivity="0.269" false_positive_error_rate="0.082" predicted_num_correct="2" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.95" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.96" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.97" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.98" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="0.99" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+<protein_summary_data_filter min_probability="1.00" sensitivity="0.000" false_positive_error_rate="0.000" predicted_num_correct="0" predicted_num_incorrect="0"/>
+</proteinprophet_details>
+</program_details>
+</protein_summary_header>
+<analysis_summary analysis="libra" time="2011-08-22T13:02:08" id="1">
+<libra_summary mass_tolerance="0.200" centroiding_preference="0" normalization="7" output_type="1" channel_code="113114115116117118119" min_pep_prob="0.5" min_pep_wt="0.5" min_prot_prob="0.2">
+<fragment_masses channel="1" mz="113"/>
+<fragment_masses channel="2" mz="114"/>
+<fragment_masses channel="3" mz="115"/>
+<fragment_masses channel="4" mz="116"/>
+<fragment_masses channel="5" mz="117"/>
+<fragment_masses channel="6" mz="118"/>
+<fragment_masses channel="7" mz="119"/>
+<isotopic_contributions>
+<contributing_channel channel="1">
+<affected_channel channel="2" correction="0.069"/>
+<affected_channel channel="3" correction="0.002"/>
+<affected_channel channel="4" correction="0.000"/>
+<affected_channel channel="5" correction="0.000"/>
+<affected_channel channel="6" correction="0.000"/>
+<affected_channel channel="7" correction="0.000"/>
+</contributing_channel>
+<contributing_channel channel="2">
+<affected_channel channel="1" correction="0.009"/>
+<affected_channel channel="3" correction="0.059"/>
+<affected_channel channel="4" correction="0.002"/>
+<affected_channel channel="5" correction="0.000"/>
+<affected_channel channel="6" correction="0.000"/>
+<affected_channel channel="7" correction="0.000"/>
+</contributing_channel>
+<contributing_channel channel="3">
+<affected_channel channel="1" correction="0.000"/>
+<affected_channel channel="2" correction="0.019"/>
+<affected_channel channel="4" correction="0.049"/>
+<affected_channel channel="5" correction="0.001"/>
+<affected_channel channel="6" correction="0.000"/>
+<affected_channel channel="7" correction="0.000"/>
+</contributing_channel>
+<contributing_channel channel="4">
+<affected_channel channel="1" correction="0.000"/>
+<affected_channel channel="2" correction="0.000"/>
+<affected_channel channel="3" correction="0.028"/>
+<affected_channel channel="5" correction="0.039"/>
+<affected_channel channel="6" correction="0.001"/>
+<affected_channel channel="7" correction="0.000"/>
+</contributing_channel>
+<contributing_channel channel="5">
+<affected_channel channel="1" correction="0.000"/>
+<affected_channel channel="2" correction="0.000"/>
+<affected_channel channel="3" correction="0.001"/>
+<affected_channel channel="4" correction="0.038"/>
+<affected_channel channel="6" correction="0.030"/>
+<affected_channel channel="7" correction="0.000"/>
+</contributing_channel>
+<contributing_channel channel="6">
+<affected_channel channel="1" correction="0.000"/>
+<affected_channel channel="2" correction="0.000"/>
+<affected_channel channel="3" correction="0.000"/>
+<affected_channel channel="4" correction="0.001"/>
+<affected_channel channel="5" correction="0.047"/>
+<affected_channel channel="7" correction="0.019"/>
+</contributing_channel>
+<contributing_channel channel="7">
+<affected_channel channel="1" correction="0.000"/>
+<affected_channel channel="2" correction="0.000"/>
+<affected_channel channel="3" correction="0.000"/>
+<affected_channel channel="4" correction="0.000"/>
+<affected_channel channel="5" correction="0.001"/>
+<affected_channel channel="6" correction="0.057"/>
+</contributing_channel>
+</isotopic_contributions>
+</libra_summary>
+</analysis_summary>
+<dataset_derivation generation_no="0">
+</dataset_derivation>
+<protein_group group_number="1" probability="0.9229">
+<protein protein_name="gi|14579260|AF321456_1_polypr" n_indistinguishable_proteins="12" probability="0.9229" percent_coverage="7.9" unique_stripped_peptides="EGIPPDQQR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="11.00" confidence="0.39">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.71" error="99.99"/>
+<intensity mz="114.0" ratio="0.92" error="99.99"/>
+<intensity mz="115.0" ratio="0.86" error="99.99"/>
+<intensity mz="116.0" ratio="0.85" error="99.99"/>
+<intensity mz="117.0" ratio="1.07" error="99.99"/>
+<intensity mz="118.0" ratio="1.06" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="566"/>
+<annotation protein_description="gi 14579260 gb AAK69181.1 AF321456_1 polyprotein [Bovine viral diarrhea virus-1] [MASS=62687]"/>
+<indistinguishable_protein protein_name="gi|17136574|Ribosomal_protein">
+<annotation protein_description="gi 17136574 ref NP_476778.1  Ribosomal protein S27A CG5271-PA [Drosophila melanogaster]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|20330759|AC103891_2_Putati">
+<annotation protein_description="gi 20330759 gb AAM19122.1 AC103891_2 Putative ubiquitin / ribosomal protein CEP52 [Oryza sativa (japonica cultivar-group)] [MASS=19624]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|2144275|JC5226_ubiquitin_/">
+<annotation protein_description="gi 2144275 pir  JC5226 ubiquitin / ribosomal protein CEP52 - Acropora millepora"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|28189228|similar_to_polyub">
+<annotation protein_description="gi 28189228 dbj BAC56305.1  similar to polyubiquitin [Bos taurus] [MASS=12905]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|3885463|polyprotein">
+<annotation protein_description="gi 3885463 gb AAC77906.1  polyprotein [bovine viral diarrhea virus strain Rit 4350] [MASS=112518]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|4507761|ubiquitin_and_ribo">
+<annotation protein_description="gi 4507761 ref NP_003324.1  ubiquitin and ribosomal protein L40 precursor; ubiquitin-52 amino acid fusion protein; ubiquitin carboxyl extension protein 52; 60S ribosomal protein L40; ubiquitin-CEP52 [Homo sapiens]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|477815|B48470_ubiquitin_/_">
+<annotation protein_description="gi 477815 pir  B48470 ubiquitin / ribosomal protein CEP52 - Eimeria bovis [MASS=14645]"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|539404|C48111_ubiquitin_/_">
+<annotation protein_description="gi 539404 pir  C48111 ubiquitin / ribosomal protein CEP52 - Trypanosoma brucei"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|541953|S40239_ubiquitin/ri">
+<annotation protein_description="gi 541953 pir  S40239 ubiquitin/ribosomal protein S27a fusion protein - white lupine"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|541954|S40240_ubiquitin/ri">
+<annotation protein_description="gi 541954 pir  S40240 ubiquitin/ribosomal protein S27a fusion protein - white lupine"/>
+</indistinguishable_protein>
+<indistinguishable_protein protein_name="gi|82733|JS0657_ubiquitin_/_r">
+<annotation protein_description="gi 82733 pir  JS0657 ubiquitin / ribosomal protein S27a - maize"/>
+</indistinguishable_protein>
+<peptide peptide_sequence="EGIPPDQQR" charge="2" initial_probability="0.9229" nsp_adjusted_probability="0.9229" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.92" is_contributing_evidence="Y" calc_neutral_pep_mass="1342.7094">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="EGIPPDQQR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="2" probability="0.9129">
+<protein protein_name="gi|8163900|AF227253_1_polypro" n_indistinguishable_proteins="1" probability="0.9129" percent_coverage="4.1" unique_stripped_peptides="EGIPPQQQR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="10.88" confidence="0.24">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.74" error="99.99"/>
+<intensity mz="114.0" ratio="0.84" error="99.99"/>
+<intensity mz="115.0" ratio="0.80" error="99.99"/>
+<intensity mz="116.0" ratio="0.92" error="99.99"/>
+<intensity mz="117.0" ratio="0.83" error="99.99"/>
+<intensity mz="118.0" ratio="0.71" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="218"/>
+<annotation protein_description="gi 8163900 gb AAF73908.1 AF227253_1 polyprotein [bovine viral diarrhea virus-1 strain CP821] [MASS=24109]"/>
+<peptide peptide_sequence="EGIPPQQQR" charge="2" initial_probability="0.9129" nsp_adjusted_probability="0.9129" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.91" is_contributing_evidence="Y" calc_neutral_pep_mass="1355.7410">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="EGIPPQQQR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="3" probability="0.8607">
+<protein protein_name="gi|34392343|90-kDa_heat_shock" n_indistinguishable_proteins="1" probability="0.8607" percent_coverage="1.2" unique_stripped_peptides="TDTGEPMGR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="10.26" confidence="0.06">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.77" error="99.99"/>
+<intensity mz="114.0" ratio="0.85" error="99.99"/>
+<intensity mz="115.0" ratio="0.91" error="99.99"/>
+<intensity mz="116.0" ratio="1.04" error="99.99"/>
+<intensity mz="117.0" ratio="1.00" error="99.99"/>
+<intensity mz="118.0" ratio="0.93" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="733"/>
+<annotation protein_description="gi 34392343 dbj BAC82487.1  90-kDa heat shock protein alpha [Bos taurus] [MASS=84731]"/>
+<peptide peptide_sequence="TDTGEPMGR" charge="2" initial_probability="0.8607" nsp_adjusted_probability="0.8607" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.86" is_contributing_evidence="Y" calc_neutral_pep_mass="1282.6076">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="TDTGEPM[147]GR">
+<mod_aminoacid_mass position="7" mass="147.035400"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="4" probability="0.6471">
+<protein protein_name="gi|27806665|nuclear_DNA_helic" n_indistinguishable_proteins="1" probability="0.6471" percent_coverage="0.7" unique_stripped_peptides="MGGEEAEIR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="7.71" confidence="0.01">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.70" error="99.99"/>
+<intensity mz="114.0" ratio="0.86" error="99.99"/>
+<intensity mz="115.0" ratio="0.81" error="99.99"/>
+<intensity mz="116.0" ratio="0.97" error="99.99"/>
+<intensity mz="117.0" ratio="0.94" error="99.99"/>
+<intensity mz="118.0" ratio="0.87" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="1287"/>
+<annotation protein_description="gi 27806665 ref NP_776461.1  nuclear DNA helicase II [Bos taurus]"/>
+<peptide peptide_sequence="MGGEEAEIR" charge="2" initial_probability="0.6471" nsp_adjusted_probability="0.6471" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.65" is_contributing_evidence="Y" calc_neutral_pep_mass="1310.6389">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="M[147]GGEEAEIR">
+<mod_aminoacid_mass position="1" mass="147.035400"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="5" probability="0.6441">
+<protein protein_name="gi|15598940|30S_ribosomal_pro" n_indistinguishable_proteins="2" probability="0.6441" percent_coverage="8.4" unique_stripped_peptides="DGRFVER" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="7.67" confidence="0.10">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.82" error="99.99"/>
+<intensity mz="114.0" ratio="0.86" error="99.99"/>
+<intensity mz="115.0" ratio="0.73" error="99.99"/>
+<intensity mz="116.0" ratio="0.99" error="99.99"/>
+<intensity mz="117.0" ratio="0.93" error="99.99"/>
+<intensity mz="118.0" ratio="0.75" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="83"/>
+<annotation protein_description="gi 15598940 ref NP_252434.1  30S ribosomal protein S16 [Pseudomonas aeruginosa PA01]"/>
+<indistinguishable_protein protein_name="gi|33597423|30S_ribosomal_pro">
+<annotation protein_description="gi 33597423 ref NP_885066.1  30S ribosomal protein S16 [Bordetella parapertussis]"/>
+</indistinguishable_protein>
+<peptide peptide_sequence="DGRFVER" charge="2" initial_probability="0.6441" nsp_adjusted_probability="0.6441" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.64" is_contributing_evidence="Y" calc_neutral_pep_mass="1181.6407">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="DGRFVER">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="6" probability="0.6348">
+<protein protein_name="gi|16565376|AF313602_1_small_" n_indistinguishable_proteins="1" probability="0.6348" percent_coverage="6.3" unique_stripped_peptides="QRLRFNYGSTER" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="7.56" confidence="0.05">
+<analysis_result analysis="libra">
+<libra_result number="1">
+<intensity mz="113.0" ratio="0.69" error="99.99"/>
+<intensity mz="114.0" ratio="0.81" error="99.99"/>
+<intensity mz="115.0" ratio="0.79" error="99.99"/>
+<intensity mz="116.0" ratio="0.72" error="99.99"/>
+<intensity mz="117.0" ratio="1.00" error="99.99"/>
+<intensity mz="118.0" ratio="0.77" error="99.99"/>
+<intensity mz="119.0" ratio="1.00" error="99.99"/>
+</libra_result>
+</analysis_result>
+<parameter name="prot_length" value="190"/>
+<annotation protein_description="gi 16565376 gb AAL26203.1 AF313602_1 small ribosomal protein 4 [Osmunda banksiifolia] [MASS=21619]"/>
+<peptide peptide_sequence="QRLRFNYGSTER" charge="2" initial_probability="0.6348" nsp_adjusted_probability="0.6348" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.63" is_contributing_evidence="Y" calc_neutral_pep_mass="1812.9487">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="Q[111]RLRFNYGSTER">
+<mod_aminoacid_mass position="1" mass="111.032100"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="7" probability="0.4675">
+<protein protein_name="gi|17986308|L-SORBOSONE_DEHYD" n_indistinguishable_proteins="1" probability="0.4675" percent_coverage="1.6" unique_stripped_peptides="AADLIEAR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="5.57" confidence="0.01">
+<parameter name="prot_length" value="506"/>
+<annotation protein_description="gi 17986308 ref NP_538942.1  L-SORBOSONE DEHYDROGENASE, NAD(P) DEPENDENT [Brucella melitensis]"/>
+<peptide peptide_sequence="AADLIEAR" charge="2" initial_probability="0.4675" nsp_adjusted_probability="0.4675" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.47" is_contributing_evidence="Y" calc_neutral_pep_mass="1161.6607">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="AADLIEAR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="8" probability="0.3962">
+<protein protein_name="gi|6093994|RL10_PINTA_60S_rib" n_indistinguishable_proteins="1" probability="0.3962" percent_coverage="3.9" unique_stripped_peptides="MLSCAGADR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="4.72" confidence="0.01">
+<parameter name="prot_length" value="228"/>
+<annotation protein_description="gi 6093994 sp O22431 RL10_PINTA 60S ribosomal protein L10 (Wilm's tumor suppressor homolog)"/>
+<peptide peptide_sequence="MLSCAGADR" charge="2" initial_probability="0.3962" nsp_adjusted_probability="0.3962" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.40" is_contributing_evidence="Y" calc_neutral_pep_mass="1299.6164">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="M[147]LSCAGADR">
+<mod_aminoacid_mass position="1" mass="147.035400"/>
+<mod_aminoacid_mass position="4" mass="160.030600"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="9" probability="0.3802">
+<protein protein_name="gi|20429121|ribosome_recyclin" n_indistinguishable_proteins="1" probability="0.3802" percent_coverage="3.7" unique_stripped_peptides="AEFASLR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="4.53" confidence="0.01">
+<parameter name="prot_length" value="187"/>
+<annotation protein_description="gi 20429121 emb CAD24430.1  ribosome recycling factor [Paracoccus zeaxanthinifaciens] [MASS=20878]"/>
+<peptide peptide_sequence="AEFASLR" charge="2" initial_probability="0.3802" nsp_adjusted_probability="0.3802" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.38" is_contributing_evidence="Y" calc_neutral_pep_mass="1096.6127">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="AEFASLR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="10" probability="0.2807">
+<protein protein_name="gi|15892059|50S_ribosomal_pro" n_indistinguishable_proteins="1" probability="0.2807" percent_coverage="11.3" unique_stripped_peptides="ADDNVLSSNAR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="3.34" confidence="0.01">
+<parameter name="prot_length" value="97"/>
+<annotation protein_description="gi 15892059 ref NP_359773.1  50S ribosomal protein L28 [Rickettsia conorii]"/>
+<peptide peptide_sequence="ADDNVLSSNAR" charge="2" initial_probability="0.2807" nsp_adjusted_probability="0.2807" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.28" is_contributing_evidence="Y" calc_neutral_pep_mass="1464.7422">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="ADDNVLSSNAR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="11" probability="0.2519">
+<protein protein_name="gi|118502|DHAM_BOVIN_Aldehyde" n_indistinguishable_proteins="2" probability="0.2519" percent_coverage="2.8" unique_stripped_peptides="AARAAFQLGSPWRR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="3.00" confidence="0.00">
+<parameter name="prot_length" value="520"/>
+<annotation protein_description="gi 118502 sp P20000 DHAM_BOVIN Aldehyde dehydrogenase, mitochondrial precursor (ALDH class 2) (ALDHI) (ALDH-E2)"/>
+<indistinguishable_protein protein_name="gi|2624886|A_Chain_A,_Aldehyd">
+<annotation protein_description="gi 2624886 pdb 1AG8 A Chain A, Aldehyde Dehydrogenase From Bovine Mitochondria"/>
+</indistinguishable_protein>
+<peptide peptide_sequence="AARAAFQLGSPWRR" charge="2" initial_probability="0.2519" nsp_adjusted_probability="0.2519" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.25" is_contributing_evidence="Y" calc_neutral_pep_mass="1890.0587">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="AARAAFQLGSPWRR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="12" probability="0.2145">
+<protein protein_name="gi|15594828|ribosomal_protein" n_indistinguishable_proteins="1" probability="0.2145" percent_coverage="5.8" unique_stripped_peptides="ADRLVNR" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="2.56" confidence="0.00">
+<parameter name="prot_length" value="120"/>
+<annotation protein_description="gi 15594828 ref NP_212617.1  ribosomal protein L22 (rplV) [Borrelia burgdorferi]"/>
+<peptide peptide_sequence="ADRLVNR" charge="2" initial_probability="0.2145" nsp_adjusted_probability="0.2145" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.21" is_contributing_evidence="Y" calc_neutral_pep_mass="1146.6722">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="ADRLVNR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="13" probability="0.2078">
+<protein protein_name="gi|23119508|COG1020:_Non-ribo" n_indistinguishable_proteins="1" probability="0.2078" percent_coverage="2.6" unique_stripped_peptides="ILEKSGSPER" group_sibling_id="a" total_number_peptides="1" pct_spectrum_ids="2.48" confidence="0.00">
+<parameter name="prot_length" value="392"/>
+<annotation protein_description="gi 23119508 ref ZP_00102567.1  COG1020: Non-ribosomal peptide synthetase modules and related proteins [Desulfitobacterium hafniense] [MASS=42728]"/>
+<peptide peptide_sequence="ILEKSGSPER" charge="2" initial_probability="0.2078" nsp_adjusted_probability="0.2078" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.21" is_contributing_evidence="Y" calc_neutral_pep_mass="1722.9987">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="ILEKSGSPER">
+<mod_aminoacid_mass position="4" mass="432.295000"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="14" probability="0.0000">
+<protein protein_name="gi|14520552|SSU_ribosomal_pro" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="IAQALER" group_sibling_id="a" total_number_peptides="0" confidence="0.0022">
+<parameter name="prot_length" value="210"/>
+<annotation protein_description="gi 14520552 ref NP_126027.1  SSU ribosomal protein S3P [Pyrococcus abyssi]"/>
+<peptide peptide_sequence="IAQALER" charge="2" initial_probability="0.1107" nsp_adjusted_probability="0.1107" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.11" is_contributing_evidence="N" calc_neutral_pep_mass="1103.6547">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="IAQALER">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="15" probability="0.0000">
+<protein protein_name="gi|15236185|amidophosphoribos" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="VVVVDDSIVR" group_sibling_id="a" total_number_peptides="0" confidence="0.0023">
+<parameter name="prot_length" value="561"/>
+<annotation protein_description="gi 15236185 ref NP_195200.1  amidophosphoribosyltransferase 2 precursor [Arabidopsis thaliana]"/>
+<peptide peptide_sequence="VVVVDDSIVR" charge="2" initial_probability="0.1728" nsp_adjusted_probability="0.1728" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.17" is_contributing_evidence="N" calc_neutral_pep_mass="1403.8237">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="VVVVDDSIVR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="16" probability="0.0000">
+<protein protein_name="gi|15793009|50S_ribosomal_pro" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="GRGGARAGSTR" group_sibling_id="a" total_number_peptides="0" confidence="0.0020">
+<parameter name="prot_length" value="204"/>
+<annotation protein_description="gi 15793009 ref NP_282832.1  50S ribosomal protein L4 [Campylobacter jejuni]"/>
+<peptide peptide_sequence="GRGGARAGSTR" charge="2" initial_probability="0.0936" nsp_adjusted_probability="0.0936" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.09" is_contributing_evidence="N" calc_neutral_pep_mass="1348.7537">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="GRGGARAGSTR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="17" probability="0.0000">
+<protein protein_name="gi|15803707|30S_ribosomal_sub" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="GLLRMVSQR" group_sibling_id="a" total_number_peptides="0" confidence="0.0020">
+<parameter name="prot_length" value="89"/>
+<annotation protein_description="gi 15803707 ref NP_289741.1  30S ribosomal subunit protein S15 [Escherichia coli O157:H7 EDL933]"/>
+<peptide peptide_sequence="GLLRMVSQR" charge="2" initial_probability="0.0676" nsp_adjusted_probability="0.0676" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.07" is_contributing_evidence="N" calc_neutral_pep_mass="1362.8017">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="GLLRMVSQR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="18" probability="0.0000">
+<protein protein_name="gi|16761478|phosphoribosylfor" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="MMEILRGSPALSAFR" group_sibling_id="a" total_number_peptides="0" confidence="0.0017">
+<parameter name="prot_length" value="1295"/>
+<annotation protein_description="gi 16761478 ref NP_457095.1  phosphoribosylformylglycineamide synthetase [Salmonella enterica subsp. enterica serovar Typhi]"/>
+<peptide peptide_sequence="MMEILRGSPALSAFR" charge="2" initial_probability="0.1721" nsp_adjusted_probability="0.1721" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.17" is_contributing_evidence="N" calc_neutral_pep_mass="1998.0647">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="MM[147]EILRGSPALSAFR">
+<mod_aminoacid_mass position="2" mass="147.035400"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="19" probability="0.0000">
+<protein protein_name="gi|17367681|RR7_GINBI_Chlorop" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="NPLSVSR" group_sibling_id="a" total_number_peptides="0" confidence="0.0018">
+<parameter name="prot_length" value="155"/>
+<annotation protein_description="gi 17367681 sp Q9GFL3 RR7_GINBI Chloroplast 30S ribosomal protein S7"/>
+<peptide peptide_sequence="NPLSVSR" charge="2" initial_probability="0.0648" nsp_adjusted_probability="0.0648" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.06" is_contributing_evidence="N" calc_neutral_pep_mass="1075.6239">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="NPLSVSR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="20" probability="0.0000">
+<protein protein_name="gi|18312092|ribosomal_protein" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="ANSASIWR" group_sibling_id="a" total_number_peptides="0" confidence="0.0029">
+<parameter name="prot_length" value="122"/>
+<annotation protein_description="gi 18312092 ref NP_558759.1  ribosomal protein L18 [Pyrobaculum aerophilum]"/>
+<peptide peptide_sequence="ANSASIWR" charge="2" initial_probability="0.1363" nsp_adjusted_probability="0.1363" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.14" is_contributing_evidence="N" calc_neutral_pep_mass="1207.6567">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="ANSASIWR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="21" probability="0.0000">
+<protein protein_name="gi|20822981|similar_to_riboso" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="EEFDITR" group_sibling_id="a" total_number_peptides="0" confidence="0.0014">
+<parameter name="prot_length" value="695"/>
+<annotation protein_description="gi 20822981 ref XP_144762.1  similar to ribosomal protein L30 [Mus musculus] [MASS=77400]"/>
+<peptide peptide_sequence="EEFDITR" charge="2" initial_probability="0.0865" nsp_adjusted_probability="0.0865" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.09" is_contributing_evidence="N" calc_neutral_pep_mass="1212.6237">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="EEFDITR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="22" probability="0.0000">
+<protein protein_name="gi|27661508|similar_to_40S_ri" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="IVATTER" group_sibling_id="a" total_number_peptides="0" confidence="0.0018">
+<parameter name="prot_length" value="141"/>
+<annotation protein_description="gi 27661508 ref XP_232916.1  similar to 40S ribosomal protein SA (P40) (34/67 kDa laminin receptor) [Rattus norvegicus] [MASS=15784]"/>
+<peptide peptide_sequence="IVATTER" charge="2" initial_probability="0.0655" nsp_adjusted_probability="0.0655" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.07" is_contributing_evidence="N" calc_neutral_pep_mass="1092.6387">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="IVATTER">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="23" probability="0.0000">
+<protein protein_name="gi|28143942|poly_ADP-ribose_m" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="EFDSRGRR" group_sibling_id="a" total_number_peptides="0" confidence="0.0020">
+<parameter name="prot_length" value="781"/>
+<annotation protein_description="gi 28143942 gb AAO26316.1  poly ADP-ribose metabolism enzyme-3 long form [Caenorhabditis elegans]"/>
+<peptide peptide_sequence="EFDSRGRR" charge="2" initial_probability="0.1707" nsp_adjusted_probability="0.1707" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.17" is_contributing_evidence="N" calc_neutral_pep_mass="1307.6948">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="E[111]FDSRGRR">
+<mod_aminoacid_mass position="1" mass="111.032000"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="24" probability="0.0000">
+<protein protein_name="gi|28603814|cytochrome_c_oxid" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="AEGTFPGK" group_sibling_id="a" total_number_peptides="0" confidence="0.0029">
+<parameter name="prot_length" value="86"/>
+<annotation protein_description="gi 28603814 ref NP_788848.1  cytochrome c oxidase subunit VIb [Bos taurus]"/>
+<peptide peptide_sequence="AEGTFPGK" charge="2" initial_probability="0.1208" nsp_adjusted_probability="0.1208" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.12" is_contributing_evidence="N" calc_neutral_pep_mass="1413.7967">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="AEGTFPGK">
+<mod_aminoacid_mass position="8" mass="432.295000"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="25" probability="0.0000">
+<protein protein_name="gi|287435|VP4" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="QLDEMRK" group_sibling_id="a" total_number_peptides="0" confidence="0.0012">
+<parameter name="prot_length" value="772"/>
+<annotation protein_description="gi 287435 dbj BAA03284.1  VP4 [Bovine rotavirus] [MASS=86724]"/>
+<peptide peptide_sequence="QLDEMRK" charge="2" initial_probability="0.0629" nsp_adjusted_probability="0.0629" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.06" is_contributing_evidence="N" calc_neutral_pep_mass="1526.8597">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="QLDEMRK">
+<mod_aminoacid_mass position="7" mass="432.295000"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="26" probability="0.0000">
+<protein protein_name="gi|6323769|Homology_to_rat_L1" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="QSDVLRFLQR" group_sibling_id="a" total_number_peptides="0" confidence="0.0034">
+<parameter name="prot_length" value="204"/>
+<annotation protein_description="gi 6323769 ref NP_013840.1  Homology to rat L15; Rpl15bp [Saccharomyces cerevisiae]"/>
+<peptide peptide_sequence="QSDVLRFLQR" charge="2" initial_probability="0.1864" nsp_adjusted_probability="0.1864" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.19" is_contributing_evidence="N" calc_neutral_pep_mass="1564.8937">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="QSDVLRFLQR">
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+<protein_group group_number="27" probability="0.0000">
+<protein protein_name="gi|6716565|AF174416_1_voltage" n_indistinguishable_proteins="1" probability="0.0000" unique_stripped_peptides="QALAQLEK" group_sibling_id="a" total_number_peptides="0" confidence="0.0014">
+<parameter name="prot_length" value="478"/>
+<annotation protein_description="gi 6716565 gb AAF26680.1 AF174416_1 voltage-dependent calcium channel beta1C subunit [Bos taurus] [MASS=53092]"/>
+<peptide peptide_sequence="QALAQLEK" charge="2" initial_probability="0.0608" nsp_adjusted_probability="0.0608" weight="1.00" is_nondegenerate_evidence="Y" n_enzymatic_termini="2" n_sibling_peptides="0.00" n_sibling_peptides_bin="0" n_instances="1" exp_tot_instances="0.06" is_contributing_evidence="N" calc_neutral_pep_mass="1507.9077">
+<modification_info mod_nterm_mass="305.2078" modified_peptide="QALAQLEK">
+<mod_aminoacid_mass position="8" mass="432.295000"/>
+</modification_info>
+</peptide>
+</protein>
+</protein_group>
+</protein_summary>
