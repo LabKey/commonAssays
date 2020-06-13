@@ -21,6 +21,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleSetService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
@@ -50,7 +51,7 @@ public class ElisaResultsTable extends AssayResultTable
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleSet sampleSet = SampleSetService.get().getSampleSet(sampleDomainURI);
         if (sampleSet != null)
         {
             for (DomainProperty pd : sampleSet.getDomain().getProperties())

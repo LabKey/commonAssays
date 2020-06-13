@@ -93,7 +93,7 @@
 
 <% if (ss == null) { %>
     No samples have been imported in this folder.<br>
-    <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create sample set" /><br>
+    <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create sample type" /><br>
 <% } else { %>
 <p>
 There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
@@ -213,7 +213,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
     </table>
 
     <p>
-        <labkey:link href="<%=ss.detailsURL()%>" text="Show sample set"/><br>
+        <labkey:link href="<%=ss.detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
         <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>

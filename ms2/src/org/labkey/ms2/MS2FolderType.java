@@ -57,7 +57,7 @@ public class MS2FolderType extends MultiPortalFolderType
                 Portal.getPortalPart(ProteinSearchWebPart.NAME).createWebPart(),
                 Portal.getPortalPart("Run Groups").createWebPart(),
                 Portal.getPortalPart("Run Types").createWebPart(),
-                Portal.getPortalPart("Sample Sets").createWebPart(),
+                Portal.getPortalPart("Sample Types").createWebPart(),
                 Portal.getPortalPart("Protocols").createWebPart()
         ));
         WebPartFactory assayList = Portal.getPortalPart("Assay List");

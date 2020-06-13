@@ -244,7 +244,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ExpSampleSet getSampleSet()
     {
-        return ExperimentService.get().getSampleSet(getContainer(), SAMPLESET_NAME);
+        return SampleSetService.get().getSampleSet(getContainer(), SAMPLESET_NAME);
     }
 
     public Map<String, FieldKey> getSampleSetJoinFields()
@@ -766,7 +766,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         List<String> parts = new ArrayList<>();
         if (getSampleSetJoinFields().size() != 0)
         {
-            parts.add("Sample set join fields");
+            parts.add("Sample type join fields");
         }
         if (getFCSAnalysisFilterString() != null)
         {
@@ -856,7 +856,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     "WellId", FieldKey.fromParts("Keyword", "WELL ID")
             ));
 
-            // create sample set
+            // create sample type
             assertNull(protocol.getSampleSet());
             String sampleSetLSID = protocol.getSampleSetLSID();
             assertNull(SampleSetService.get().getSampleSet(sampleSetLSID));

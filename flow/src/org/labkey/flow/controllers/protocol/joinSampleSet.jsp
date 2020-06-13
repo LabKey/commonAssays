@@ -28,7 +28,7 @@
     if (form.getProtocol().getSampleSet() == null)
     {
         %>
-        <p>You must first upload a sample set before specifying how to match samples to FCS files.</p>
+        <p>You must first upload a sample type before specifying how to match samples to FCS files.</p>
         <%=link("Upload Sample Descriptions", form.getProtocol().urlCreateSampleSet())%>
         <%
     }

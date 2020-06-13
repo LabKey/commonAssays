@@ -25,6 +25,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleSetService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
@@ -91,7 +92,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
 //        PropertyDescriptor materialProperty = antigenDomain.getPropertyByName("SpecimenLsid").getPropertyDescriptor();
         final boolean hasMaterialSpecimenPropertyColumnDecorator = hasMaterialSpecimenPropertyColumnDecorator();
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleSet sampleSet = SampleSetService.get().getSampleSet(sampleDomainURI);
         var materialColumn = getMutableColumn("SpecimenLsid"); //  new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), false);
         materialColumn.setLabel("Specimen");
         materialColumn.setHidden(true);

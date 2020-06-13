@@ -24,6 +24,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpSampleSet;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleSetService;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
@@ -60,7 +61,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
     {
         final AssayProvider provider = AssayService.get().getProvider(_protocol);
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleSet sampleSet = SampleSetService.get().getSampleSet(sampleDomainURI);
 
         var specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
         specimenColumn.setLabel("Specimen");
