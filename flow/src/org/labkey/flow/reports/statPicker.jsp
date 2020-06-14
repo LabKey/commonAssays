@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -65,7 +65,7 @@
 
     Collection<String> sampleSetProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-    ExpSampleSet sampleSet = protocol.getSampleSet();
+    ExpSampleType sampleSet = protocol.getSampleSet();
     if (sampleSet != null)
     {
         for (DomainProperty dp : sampleSet.getDomain().getProperties())

@@ -18,7 +18,7 @@
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineStatusUrls" %>
@@ -76,7 +76,7 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
+    ExpSampleType _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
     List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples(_sampleSet.getContainer());
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);

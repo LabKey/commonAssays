@@ -125,24 +125,24 @@ public class ProtocolController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleSetForm>
+    public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleTypeForm>
     {
         private int _fileCount;
 
         @Override
-        public void validateCommand(JoinSampleSetForm form, Errors errors)
+        public void validateCommand(JoinSampleTypeForm form, Errors errors)
         {
         }
 
         @Override
-        public ModelAndView getView(JoinSampleSetForm form, boolean reshow, BindException errors)
+        public ModelAndView getView(JoinSampleTypeForm form, boolean reshow, BindException errors)
         {
             form.init();
             return FormPage.getView("/org/labkey/flow/controllers/protocol/joinSampleSet.jsp", form);
         }
 
         @Override
-        public boolean handlePost(JoinSampleSetForm form, BindException errors) throws Exception
+        public boolean handlePost(JoinSampleTypeForm form, BindException errors) throws Exception
         {
             Map<String, FieldKey> fields = new LinkedHashMap();
             for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
@@ -160,7 +160,7 @@ public class ProtocolController extends BaseFlowController
         }
 
         @Override
-        public ActionURL getSuccessURL(JoinSampleSetForm form)
+        public ActionURL getSuccessURL(JoinSampleTypeForm form)
         {
             return getProtocol().urlFor(UpdateSamplesAction.class).addParameter("fileCount", _fileCount);
         }

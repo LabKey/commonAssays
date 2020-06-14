@@ -406,7 +406,7 @@ if (matrix != null)
 
 for (ExpMaterial sample : well.getSamples())
 {
-    %><tr><td><%=h(sample.getSampleSet().getName())%></td>
+    %><tr><td><%=h(sample.getSampleType().getName())%></td>
         <td><a href="<%=h(sample.detailsURL())%>"><%=h(sample.getName())%></a></td>
     </tr><%
 }

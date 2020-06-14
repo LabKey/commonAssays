@@ -17,13 +17,13 @@
 %>
 <%@ page import="org.labkey.api.query.FieldKey"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
-<%@ page import="org.labkey.flow.controllers.protocol.JoinSampleSetForm"%>
+<%@ page import="org.labkey.flow.controllers.protocol.JoinSampleTypeForm"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    JoinSampleSetForm form = (JoinSampleSetForm) __form;
+    JoinSampleTypeForm form = (JoinSampleTypeForm) __form;
 
     if (form.getProtocol().getSampleSet() == null)
     {

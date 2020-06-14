@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet"%>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType"%>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
@@ -37,7 +37,7 @@
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
-    ExpSampleSet ss = protocol.getSampleSet();
+    ExpSampleType ss = protocol.getSampleSet();
 
     ExperimentUrls expUrls = urlProvider(ExperimentUrls.class);
 
@@ -98,7 +98,7 @@
 <p>
 There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
-<% if (protocol.getSampleSetJoinFields().size() == 0) { %>
+<% if (protocol.getSampleTypeJoinFields().size() == 0) { %>
 <p>
     <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
@@ -215,7 +215,7 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
     <p>
         <labkey:link href="<%=ss.detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
-        <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
+        <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
         <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
         <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>

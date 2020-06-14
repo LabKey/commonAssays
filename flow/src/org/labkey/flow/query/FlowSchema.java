@@ -29,7 +29,7 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpMaterialRunInput;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -668,7 +668,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleSet)
         {
             ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
             return addExpColumn(col);
@@ -1123,7 +1123,7 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleSet)
         {
             checkLocked();
             var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
@@ -1524,7 +1524,7 @@ public class FlowSchema extends UserSchema
         ret.getMutableColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
-        ExpSampleSet ss = null;
+        ExpSampleType ss = null;
         if (_protocol != null)
         {
             ss = _protocol.getSampleSet();

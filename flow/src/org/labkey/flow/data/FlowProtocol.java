@@ -37,10 +37,10 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.exp.api.SampleSetService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -242,12 +242,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return FlowProtocolStep.fromLSID(getContainer(), getLSID());
     }
 
-    public ExpSampleSet getSampleSet()
+    public ExpSampleType getSampleSet()
     {
-        return SampleSetService.get().getSampleSet(getContainer(), SAMPLESET_NAME);
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLESET_NAME);
     }
 
-    public Map<String, FieldKey> getSampleSetJoinFields()
+    public Map<String, FieldKey> getSampleTypeJoinFields()
     {
         String prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
 
@@ -274,7 +274,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (propValue != null)
             return propValue;
 
-        return ExperimentService.get().generateLSID(getContainer(), ExpSampleSet.class, SAMPLESET_NAME);
+        return ExperimentService.get().generateLSID(getContainer(), ExpSampleType.class, SAMPLESET_NAME);
     }
 
     public void setSampleSetJoinFields(User user, Map<String, FieldKey> values) throws Exception
@@ -292,7 +292,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ActionURL urlCreateSampleSet()
     {
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleSetURL(getContainer());
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleTypeURL(getContainer());
         url.addParameter("name", SAMPLESET_NAME);
         url.addParameter("nameReadOnly", true);
         return url;
@@ -310,10 +310,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
-        ExpSampleSet ss = getSampleSet();
+        ExpSampleType ss = getSampleSet();
         if (ss == null)
             return Collections.emptyMap();
-        Set<String> propertyNames = getSampleSetJoinFields().keySet();
+        Set<String> propertyNames = getSampleTypeJoinFields().keySet();
         if (propertyNames.size() == 0)
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
@@ -369,13 +369,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         _log.info("updateSampleIds: protocol=" + this.getName() + ", folder=" + this.getContainerPath());
 
         ExperimentService svc = ExperimentService.get();
-        Map<String, FieldKey> joinFields = getSampleSetJoinFields();
+        Map<String, FieldKey> joinFields = getSampleTypeJoinFields();
         _log.debug("joinFields: " + joinFields);
 
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         _log.debug("sampleMap=" + sampleMap.size());
 
-        ExpSampleSet ss = getSampleSet();
+        ExpSampleType ss = getSampleSet();
         _log.debug("sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", lsid=" + (ss == null ? "<none>" : ss.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
@@ -557,7 +557,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public SampleKey makeSampleKey(String runName, String fileName, AttributeSet attrs)
     {
-        Collection<FieldKey> fields = getSampleSetJoinFields().values();
+        Collection<FieldKey> fields = getSampleTypeJoinFields().values();
         if (fields.size() == 0)
             return null;
         FieldKey tableRun = FieldKey.fromParts("Run");
@@ -764,7 +764,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public String getProtocolSettingsDescription()
     {
         List<String> parts = new ArrayList<>();
-        if (getSampleSetJoinFields().size() != 0)
+        if (getSampleTypeJoinFields().size() != 0)
         {
             parts.add("Sample type join fields");
         }
@@ -850,7 +850,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertEquals(0, fcsFiles[1].getSamples().size());
 
             // add join fields
-            assertEquals(0, protocol.getSampleSetJoinFields().size());
+            assertEquals(0, protocol.getSampleTypeJoinFields().size());
             protocol.setSampleSetJoinFields(user, Map.of(
                     "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
                     "WellId", FieldKey.fromParts("Keyword", "WELL ID")
@@ -859,7 +859,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             // create sample type
             assertNull(protocol.getSampleSet());
             String sampleSetLSID = protocol.getSampleSetLSID();
-            assertNull(SampleSetService.get().getSampleSet(sampleSetLSID));
+            assertNull(SampleTypeService.get().getSampleType(sampleSetLSID));
 
             List<GWTPropertyDescriptor> props = List.of(
                     new GWTPropertyDescriptor("Name", "string"),
@@ -867,7 +867,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     new GWTPropertyDescriptor("WellId", "string"),
                     new GWTPropertyDescriptor("PTID", "string")
             );
-            ExpSampleSet ss = SampleSetService.get().createSampleSet(c, user, SAMPLESET_NAME, null,
+            ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLESET_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
             assertNotNull(protocol.getSampleSet());
 
@@ -896,9 +896,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 throw errors;
 
             // verify - FCSFile linked to sample
-            DomainProperty exprNameProp = ss.getDomain().getPropertyByName("ExprName");
-            DomainProperty wellIdProp = ss.getDomain().getPropertyByName("WellId");
-            DomainProperty ptidProp = ss.getDomain().getPropertyByName("PTID");
+            DomainProperty exprNameProp = st.getDomain().getPropertyByName("ExprName");
+            DomainProperty wellIdProp = st.getDomain().getPropertyByName("WellId");
+            DomainProperty ptidProp = st.getDomain().getPropertyByName("PTID");
 
             ExpMaterial toBeDeleted = null;
             FlowRun afterSampleImportRun = FlowRun.fromRunId(runId);

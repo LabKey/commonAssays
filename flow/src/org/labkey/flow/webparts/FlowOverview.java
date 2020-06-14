@@ -17,7 +17,7 @@
 package org.labkey.flow.webparts;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusUrls;
@@ -413,7 +413,7 @@ public class FlowOverview extends Overview
         Step ret = new Step("Assign additional meanings to keywords", status);
         if (protocol != null)
         {
-            ExpSampleSet ss = protocol.getSampleSet();
+            ExpSampleType ss = protocol.getSampleSet();
             if (ss != null)
             {
                 StringBuilder sb = new StringBuilder();
@@ -426,7 +426,7 @@ public class FlowOverview extends Overview
                     Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples());
                     ret.addAction(uploadAction);
                     
-                    if (protocol.getSampleSetJoinFields().size() != 0)
+                    if (protocol.getSampleTypeJoinFields().size() != 0)
                     {
                         Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
                         action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");

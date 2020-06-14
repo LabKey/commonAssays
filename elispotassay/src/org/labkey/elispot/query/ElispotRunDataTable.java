@@ -26,9 +26,8 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpSampleSet;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.SampleSetService;
+import org.labkey.api.exp.api.ExpSampleType;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.query.FieldKey;
@@ -108,7 +107,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = SampleSetService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleType sampleSet = SampleTypeService.get().getSampleType(sampleDomainURI);
         if (sampleSet != null)
         {
             for (DomainProperty pd : sampleSet.getDomain().getProperties())

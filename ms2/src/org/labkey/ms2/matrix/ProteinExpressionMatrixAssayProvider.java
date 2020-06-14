@@ -157,7 +157,7 @@ public class ProteinExpressionMatrixAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
         result.add(new NavTree("manage protein annotations", new ActionURL(MS2Controller.InsertAnnotsAction.class, viewContext.getContainer())));
-        result.add(new NavTree("manage samples", PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleSetListURL(viewContext.getContainer())));
+        result.add(new NavTree("manage samples", PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleTypeListURL(viewContext.getContainer())));
         return result;
     }
 
