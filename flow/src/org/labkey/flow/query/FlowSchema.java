@@ -1524,13 +1524,13 @@ public class FlowSchema extends UserSchema
         ret.getMutableColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
-        ExpSampleType ss = null;
+        ExpSampleType st = null;
         if (_protocol != null)
         {
-            ss = _protocol.getSampleSet();
+            st = _protocol.getSampleType();
         }
-        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, ss);
-        if (ss == null)
+        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, st);
+        if (st == null)
         {
             colMaterialInput.setHidden(true);
         }

@@ -31,11 +31,11 @@
 </p>
 <p><b>Samples</b><br>
     Upload sample information and match samples with FCSFiles.<br>
-    <% if (protocol.getSampleSet() == null) { %>
+    <% if (protocol.getSampleType() == null) { %>
         No samples have been uploaded in this folder.<br>
         <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create new sample type" /><br>
     <% } else { %>
-        <labkey:link href="<%=protocol.getSampleSet().detailsURL()%>" text="Show sample type"/><br>
+        <labkey:link href="<%=protocol.getSampleType().detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlShowSamples()%>" text="Show samples joined to FCS Files" /><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>

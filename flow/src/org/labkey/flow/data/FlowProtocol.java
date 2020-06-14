@@ -242,7 +242,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return FlowProtocolStep.fromLSID(getContainer(), getLSID());
     }
 
-    public ExpSampleType getSampleSet()
+    public ExpSampleType getSampleType()
     {
         return SampleTypeService.get().getSampleType(getContainer(), SAMPLESET_NAME);
     }
@@ -310,15 +310,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
-        ExpSampleType ss = getSampleSet();
-        if (ss == null)
+        ExpSampleType st = getSampleType();
+        if (st == null)
             return Collections.emptyMap();
         Set<String> propertyNames = getSampleTypeJoinFields().keySet();
         if (propertyNames.size() == 0)
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
 
-        ExpMaterialTable sampleTable = schema.getSampleTable(ss, null);
+        ExpMaterialTable sampleTable = schema.getSampleTable(st, null);
         List<ColumnInfo> selectedColumns = new ArrayList<>();
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
@@ -332,7 +332,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
 
         Map<Integer, ExpMaterial> materialMap = new HashMap<>();
-        List<? extends ExpMaterial> materials = ss.getSamples(getContainer());
+        List<? extends ExpMaterial> materials = st.getSamples(getContainer());
         for (ExpMaterial material : materials)
         {
             materialMap.put(material.getRowId(), material);
@@ -375,8 +375,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         _log.debug("sampleMap=" + sampleMap.size());
 
-        ExpSampleType ss = getSampleSet();
-        _log.debug("sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", lsid=" + (ss == null ? "<none>" : ss.getLSID()));
+        ExpSampleType st = getSampleType();
+        _log.debug("sampleType=" + (st == null ? "<none>" : st.getName()) + ", lsid=" + (st == null ? "<none>" : st.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
@@ -455,7 +455,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 boolean found = false;
                 for (ExpMaterial material : app.getInputMaterials())
                 {
-                    if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), ss.getLSID()))
+                    if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), st.getLSID()))
                     {
                         _log.debug("   sample's sampleset isn't ours: " + material.getCpasType());
                         continue;
@@ -857,7 +857,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             ));
 
             // create sample type
-            assertNull(protocol.getSampleSet());
+            assertNull(protocol.getSampleType());
             String sampleSetLSID = protocol.getSampleSetLSID();
             assertNull(SampleTypeService.get().getSampleType(sampleSetLSID));
 
@@ -869,7 +869,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             );
             ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLESET_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
-            assertNotNull(protocol.getSampleSet());
+            assertNotNull(protocol.getSampleType());
 
             // import samples:
             //   Name  PTID  WellId  ExprName

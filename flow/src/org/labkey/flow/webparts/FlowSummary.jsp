@@ -76,7 +76,7 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleType _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
+    ExpSampleType _sampleSet = _protocol != null ? _protocol.getSampleType() : null;
     List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples(_sampleSet.getContainer());
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
