@@ -205,7 +205,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
     else
         throw "You specified an invalid plotType! Check valid values in LABKEY.LeveyJenningsPlotHelper.PlotTypeMap.";
 
-    var renderType = Ext.isIE8 ? 'raphael' : 'd3';
     var title = config.controlName + ' ' + ytitle + ' for ' + config.analyte + ' - '
               + (config.isotype ? config.isotype : '[None]') + ' '
               + (config.conjugate ? config.conjugate : '[None]');
@@ -239,7 +238,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
     var plot = LABKEY.vis.LeveyJenningsPlot({
         renderTo: config.renderDiv,
-        rendererType: renderType,
         width: 850,
         height: 300,
         data: plotData,
@@ -252,8 +250,6 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         }
     });
     plot.render();
-
-    return renderType;
 };
 
 // plotType: EC504PL, EC505PL, AUC, HighMFI
