@@ -98,7 +98,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 {
     static private final Logger _log = Logger.getLogger(FlowProtocol.class);
     static protected final String DEFAULT_PROTOCOL_NAME = "Flow";
-    static private final String SAMPLESET_NAME = "Samples";
+    static private final String SAMPLETYPE_NAME = "Samples";
 
     static private final boolean DEFAULT_CASE_SENSITIVE_KEYWORDS = true;
     static private final boolean DEFAULT_CASE_SENSITIVE_STATS_AND_GRAPHS = false;
@@ -244,7 +244,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public ExpSampleType getSampleType()
     {
-        return SampleTypeService.get().getSampleType(getContainer(), SAMPLESET_NAME);
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME);
     }
 
     public Map<String, FieldKey> getSampleTypeJoinFields()
@@ -268,16 +268,16 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public String getSampleSetLSID()
+    public String getSampleTypeLSID()
     {
         String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
         if (propValue != null)
             return propValue;
 
-        return ExperimentService.get().generateLSID(getContainer(), ExpSampleType.class, SAMPLESET_NAME);
+        return ExperimentService.get().generateLSID(getContainer(), ExpSampleType.class, SAMPLETYPE_NAME);
     }
 
-    public void setSampleSetJoinFields(User user, Map<String, FieldKey> values) throws Exception
+    public void setSampleTypeJoinFields(User user, Map<String, FieldKey> values) throws Exception
     {
         List<String> strings = new ArrayList<>();
         for (Map.Entry<String, FieldKey> entry : values.entrySet())
@@ -286,21 +286,21 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         String value = StringUtils.join(strings.iterator(), "&");
         setProperty(user, FlowProperty.SampleSetJoin.getPropertyDescriptor(), value);
-        setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
+        setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleTypeLSID());
         FlowManager.get().flowObjectModified();
     }
 
-    public ActionURL urlCreateSampleSet()
+    public ActionURL urlCreateSampleType()
     {
         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleTypeURL(getContainer());
-        url.addParameter("name", SAMPLESET_NAME);
+        url.addParameter("name", SAMPLETYPE_NAME);
         url.addParameter("nameReadOnly", true);
         return url;
     }
 
     public ActionURL urlUploadSamples()
     {
-        return PageFlowUtil.urlProvider(ExperimentUrls.class).getImportSamplesURL(getContainer(), SAMPLESET_NAME);
+        return PageFlowUtil.urlProvider(ExperimentUrls.class).getImportSamplesURL(getContainer(), SAMPLETYPE_NAME);
     }
 
     public ActionURL urlShowSamples()
@@ -851,14 +851,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
             // add join fields
             assertEquals(0, protocol.getSampleTypeJoinFields().size());
-            protocol.setSampleSetJoinFields(user, Map.of(
+            protocol.setSampleTypeJoinFields(user, Map.of(
                     "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
                     "WellId", FieldKey.fromParts("Keyword", "WELL ID")
             ));
 
             // create sample type
             assertNull(protocol.getSampleType());
-            String sampleSetLSID = protocol.getSampleSetLSID();
+            String sampleSetLSID = protocol.getSampleTypeLSID();
             assertNull(SampleTypeService.get().getSampleType(sampleSetLSID));
 
             List<GWTPropertyDescriptor> props = List.of(
@@ -867,7 +867,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     new GWTPropertyDescriptor("WellId", "string"),
                     new GWTPropertyDescriptor("PTID", "string")
             );
-            ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLESET_NAME, null,
+            ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLETYPE_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
             assertNotNull(protocol.getSampleType());
 
@@ -876,7 +876,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             //   one   p01   E01     L02-060329-PV1-R1
             //   two   p02   E02     L02-060329-PV1-R1
             UserSchema schema = QueryService.get().getUserSchema(user, c, "samples");
-            TableInfo table = schema.getTable(SAMPLESET_NAME);
+            TableInfo table = schema.getTable(SAMPLETYPE_NAME);
 
             BatchValidationException errors = new BatchValidationException();
             QueryUpdateService qus = table.getUpdateService();

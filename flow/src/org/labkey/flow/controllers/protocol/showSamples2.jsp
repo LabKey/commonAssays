@@ -93,7 +93,7 @@
 
 <% if (st == null) { %>
     No samples have been imported in this folder.<br>
-    <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create sample type" /><br>
+    <labkey:link href="<%=protocol.urlCreateSampleType()%>" text="Create sample type" /><br>
 <% } else { %>
 <p>
 There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>

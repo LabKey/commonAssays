@@ -63,13 +63,13 @@
     }
     jsonStats.append("]");
 
-    Collection<String> sampleSetProperties = new ArrayList<>();
+    Collection<String> sampleTypeProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
     ExpSampleType sampleSet = protocol.getSampleType();
     if (sampleSet != null)
     {
         for (DomainProperty dp : sampleSet.getDomain().getProperties())
-            sampleSetProperties.add(dp.getName());
+            sampleTypeProperties.add(dp.getName());
     }
 
     StringBuilder stats = new StringBuilder();
@@ -392,7 +392,7 @@ var FlowPropertySet = {};
 FlowPropertySet.keywords = <%=toJsonArray(fps.getVisibleKeywords())%>;
 FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
-var SampleSet = {};
-SampleSet.properties = <%=toJsonArray(sampleSetProperties)%>;
+var SampleType = {};
+SampleType.properties = <%=toJsonArray(sampleTypeProperties)%>;
 
 </script>

@@ -33,7 +33,7 @@
     Upload sample information and match samples with FCSFiles.<br>
     <% if (protocol.getSampleType() == null) { %>
         No samples have been uploaded in this folder.<br>
-        <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create new sample type" /><br>
+        <labkey:link href="<%=protocol.urlCreateSampleType()%>" text="Create new sample type" /><br>
     <% } else { %>
         <labkey:link href="<%=protocol.getSampleType().detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlShowSamples()%>" text="Show samples joined to FCS Files" /><br>

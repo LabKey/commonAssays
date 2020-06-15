@@ -668,9 +668,9 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleSet)
+        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
-            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
+            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole, sampleType);
             return addExpColumn(col);
         }
 
@@ -1123,11 +1123,11 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleSet)
+        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
             checkLocked();
             var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
-            col.setFk(schema.materialIdForeignKey(sampleSet, null));
+            col.setFk(schema.materialIdForeignKey(sampleType, null));
             return addColumn(col);
         }
 
@@ -2040,7 +2040,7 @@ public class FlowSchema extends UserSchema
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
                 "    flow.object.uri,\n" +
-// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleSet ss)
+// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleType sampleType)
                 "    (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId\n" +
                 "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
                 "FROM exp.data\n" +

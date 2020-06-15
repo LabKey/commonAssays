@@ -442,7 +442,7 @@ public class FlowOverview extends Overview
             }
             else if (_canUpdate)
             {
-                Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleSet());
+                Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleType());
                 action.setDescriptionHTML("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>");
                 ret.addAction(action);
             }

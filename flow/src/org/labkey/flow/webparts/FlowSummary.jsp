@@ -456,7 +456,7 @@
         else
         {
         %>
-            <div><%=link("Upload Samples", _protocol.urlCreateSampleSet())%></div>
+            <div><%=link("Upload Samples", _protocol.urlCreateSampleType())%></div>
         <%
         }
         if (_fcsAnalysisCount > 0)

@@ -138,7 +138,7 @@ public class ProtocolController extends BaseFlowController
         public ModelAndView getView(JoinSampleTypeForm form, boolean reshow, BindException errors)
         {
             form.init();
-            return FormPage.getView("/org/labkey/flow/controllers/protocol/joinSampleSet.jsp", form);
+            return FormPage.getView("/org/labkey/flow/controllers/protocol/joinSampleType.jsp", form);
         }
 
         @Override
@@ -153,7 +153,7 @@ public class ProtocolController extends BaseFlowController
                     continue;
                 fields.put(samplePropertyURI, fcsKey);
             }
-            getProtocol().setSampleSetJoinFields(getUser(), fields);
+            getProtocol().setSampleTypeJoinFields(getUser(), fields);
             _fileCount = getProtocol().updateSampleIds(getUser());
 
             return true;
