@@ -2,6 +2,7 @@
 
 # Ignore line endings for xarfiles
 **/ms2/test/sampledata/xarfiles/**      -text
+*.xar      -text
 
 elisa/module.properties -text
 elisa/src/org/labkey/elisa/ElisaAssayProvider.java -text
