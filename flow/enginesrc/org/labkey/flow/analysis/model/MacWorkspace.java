@@ -101,7 +101,7 @@ public class MacWorkspace extends FlowJoWorkspace
         {
             for (Element elCompensationMatrix : getElementsByTagName(elCompensationMatrices, "CompensationMatrix"))
             {
-                _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
+                addCompensationMatrix(new CompensationMatrix(elCompensationMatrix));
             }
         }
     }
