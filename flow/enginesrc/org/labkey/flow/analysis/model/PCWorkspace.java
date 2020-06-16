@@ -403,7 +403,7 @@ public class PCWorkspace extends FlowJoWorkspace
             {
                 for (Element elCompensationMatrix : getElementsByTagName(elFlowJoEditor, "CompensationMatrix"))
                 {
-                    _compensationMatrices.add(new CompensationMatrix(elCompensationMatrix));
+                    addCompensationMatrix(new CompensationMatrix(elCompensationMatrix));
                 }
             }
         }

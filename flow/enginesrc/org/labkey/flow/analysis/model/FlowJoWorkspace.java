@@ -622,62 +622,6 @@ abstract public class FlowJoWorkspace extends Workspace
     }
 
 
-    protected void warnOnce(String msg)
-    {
-        warnOnce(null, null, null, msg);
-    }
-
-    protected void warnOnce(String sampleId, PopulationName name, SubsetSpec subset, String msg)
-    {
-        for (String warning : getWarnings())
-        {
-            if (warning.endsWith(msg))
-                return;
-        }
-
-        warning(sampleId, name, subset, msg);
-    }
-
-    protected void warning(String sampleId, PopulationName name, SubsetSpec subset, String msg)
-    {
-        SampleInfo sampleInfo = null;
-        if (sampleId != null)
-        {
-            sampleInfo = getSample(sampleId);
-            if (sampleInfo == null)
-                sampleInfo = getDeletedSample(sampleId);
-
-            if (sampleInfo == null)
-            {
-                // Just create a dummy sample for error reporting
-                sampleInfo = new SampleInfo();
-                sampleInfo._sampleId = sampleId;
-            }
-        }
-
-        warning(sampleInfo, name, subset, msg);
-    }
-
-    protected void warning(SampleInfo sample, PopulationName name, SubsetSpec subset, String msg)
-    {
-        StringBuilder sb = new StringBuilder();
-        if (sample != null)
-            sb.append("Sample ").append(sample.toString()).append(": ");
-
-        if (name != null)
-            sb.append(name.toString()).append(": ");
-
-        if (subset != null)
-            sb.append(subset.toString()).append(": ");
-
-        sb.append(msg);
-        warning(sb.toString());
-    }
-
-    protected void warning(String str)
-    {
-        _warnings.add(str);
-    }
 
     /**
      * There are some
@@ -795,7 +739,7 @@ abstract public class FlowJoWorkspace extends Workspace
         {
             String projectRootPath =  AppProps.getInstance().getProjectRoot();
             if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir");
+                projectRootPath = System.getProperty("user.dir") + "/..";
             return new File(projectRootPath);
         }
 
