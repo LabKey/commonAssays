@@ -59,9 +59,11 @@ var MultiValueInput = function (fieldId, initialValues)
             name: fieldId,
             editable: true,
             value: value,
+            enableKeyEvents: true,
             cls: "labkey-multi-value-input",
             listeners: {
-                'specialkey': function (f, e) {
+                keydown: function (f, e) {
+                    if (!e.isSpecialKey()) return;
                     var key = e.getKey();
                     if ((key == e.TAB || key == e.ENTER || key == e.DOWN) && !e.shiftKey)
                     {
