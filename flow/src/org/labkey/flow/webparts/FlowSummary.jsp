@@ -76,8 +76,8 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleType _sampleSet = _protocol != null ? _protocol.getSampleType() : null;
-    List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples(_sampleSet.getContainer());
+    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType() : null;
+    List<? extends ExpMaterial> _sampleTypeSamples = _sampleType == null ? null : _sampleType.getSamples(_sampleType.getContainer());
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -145,7 +145,7 @@
     }
 </script>
 
-<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleSet != null) { %>
+<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleType != null) { %>
     <div class="summary-div">
         <h3 class="summary-header">Summary</h3>
 
@@ -221,16 +221,16 @@
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-    <% if (_sampleSetSamples != null && _sampleSetSamples.size() > 0) { %>
+    <% if (_sampleTypeSamples != null && _sampleTypeSamples.size() > 0) { %>
         <script type="text/javascript">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "samples-div",
                 html: "<table border='0'>" +
                       <%
-                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleSetSamples.size(); sampleIndex++)
+                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleTypeSamples.size(); sampleIndex++)
                         {
-                            ExpMaterial sample = _sampleSetSamples.get(sampleIndex);
+                            ExpMaterial sample = _sampleTypeSamples.get(sampleIndex);
                             String name = sample.getName();
                             String url = sample.detailsURL().getLocalURIString();
                             String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
@@ -243,11 +243,11 @@
                       <%
                          }
 
-                         if (_sampleSetSamples.size() > DISPLAY_MAX_ROWS)
+                         if (_sampleTypeSamples.size() > DISPLAY_MAX_ROWS)
                          {
                       %>
                             "<tr>" +
-                            "<td colspan=2><a href='<%=h(_sampleSet.detailsURL())%>'>More...</a></td>" +
+                            "<td colspan=2><a href='<%=h(_sampleType.detailsURL())%>'>More...</a></td>" +
                             "</tr>" +
                       <%
                          }
@@ -257,7 +257,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=h(_sampleSet.getDescription())%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples(_sampleSet.getContainer()).size()%>)</a>
+            <a title="<%=h(_sampleType.getDescription())%>" href="<%=_sampleType.detailsURL()%>">Samples (<%=_sampleType.getSamples(_sampleType.getContainer()).size()%>)</a>
         </div>
     <% } %>
 
@@ -446,7 +446,7 @@
         <div><%= link("Settings", _protocol.urlShow())%></div>
 
         <%
-        if (_sampleSet != null)
+        if (_sampleType != null)
         {
         %>
             <div><%=link("Show Samples", _protocol.urlShowSamples())%></div>

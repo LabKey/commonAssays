@@ -249,7 +249,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<String, FieldKey> getSampleTypeJoinFields()
     {
-        String prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
+        String prop = (String) getProperty(FlowProperty.SampleTypeJoin.getPropertyDescriptor());
 
         if (prop == null)
             return Collections.emptyMap();
@@ -270,7 +270,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public String getSampleTypeLSID()
     {
-        String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
+        String propValue = (String) getProperty(ExperimentProperty.SampleTypeLSID.getPropertyDescriptor());
         if (propValue != null)
             return propValue;
 
@@ -285,8 +285,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             strings.add(PageFlowUtil.encode(entry.getKey()) + "=" + PageFlowUtil.encode(entry.getValue().toString()));
         }
         String value = StringUtils.join(strings.iterator(), "&");
-        setProperty(user, FlowProperty.SampleSetJoin.getPropertyDescriptor(), value);
-        setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleTypeLSID());
+        setProperty(user, FlowProperty.SampleTypeJoin.getPropertyDescriptor(), value);
+        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID());
         FlowManager.get().flowObjectModified();
     }
 
@@ -328,7 +328,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             if (lookupColumn != null)
                 selectedColumns.add(lookupColumn);
             else
-                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleSet");
+                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleType");
         }
 
         Map<Integer, ExpMaterial> materialMap = new HashMap<>();
@@ -457,7 +457,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 {
                     if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), st.getLSID()))
                     {
-                        _log.debug("   sample's sampleset isn't ours: " + material.getCpasType());
+                        _log.debug("   sample's sampletype isn't ours: " + material.getCpasType());
                         continue;
                     }
                     if (sample != null)
@@ -858,8 +858,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
             // create sample type
             assertNull(protocol.getSampleType());
-            String sampleSetLSID = protocol.getSampleTypeLSID();
-            assertNull(SampleTypeService.get().getSampleType(sampleSetLSID));
+            String sampleTypeLSID = protocol.getSampleTypeLSID();
+            assertNull(SampleTypeService.get().getSampleType(sampleTypeLSID));
 
             List<GWTPropertyDescriptor> props = List.of(
                     new GWTPropertyDescriptor("Name", "string"),

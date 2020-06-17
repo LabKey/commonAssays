@@ -216,10 +216,10 @@ public class NabRunDataTable extends NabBaseTable
     {
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleType sampleSet = SampleTypeService.get().getSampleType(sampleDomainURI);
-        if (sampleSet != null)
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
+        if (sampleType != null)
         {
-            for (DomainProperty pd : sampleSet.getDomain().getProperties())
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
@@ -253,9 +253,9 @@ public class NabRunDataTable extends NabBaseTable
                         {
                             ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                             // Make sure we are filtering to the same set of containers
-                            if (sampleSet != null)
+                            if (sampleType != null)
                             {
-                                materials.setSampleSet(sampleSet, true);
+                                materials.setSampleType(sampleType, true);
                             }
                             var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                             if (propertyCol.getFk() instanceof PropertyForeignKey)

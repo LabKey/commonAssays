@@ -107,10 +107,10 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleType sampleSet = SampleTypeService.get().getSampleType(sampleDomainURI);
-        if (sampleSet != null)
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
+        if (sampleType != null)
         {
-            for (DomainProperty pd : sampleSet.getDomain().getProperties())
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }

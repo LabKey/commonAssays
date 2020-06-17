@@ -92,7 +92,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
 //        PropertyDescriptor materialProperty = antigenDomain.getPropertyByName("SpecimenLsid").getPropertyDescriptor();
         final boolean hasMaterialSpecimenPropertyColumnDecorator = hasMaterialSpecimenPropertyColumnDecorator();
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleType sampleSet = SampleTypeService.get().getSampleType(sampleDomainURI);
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
         var materialColumn = getMutableColumn("SpecimenLsid"); //  new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), false);
         materialColumn.setLabel("Specimen");
         materialColumn.setHidden(true);
@@ -102,9 +102,9 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
             public TableInfo getLookupTableInfo()
             {
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                if (sampleSet != null)
+                if (sampleType != null)
                 {
-                    materials.setSampleSet(sampleSet, true);
+                    materials.setSampleType(sampleType, true);
                 }
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (hasMaterialSpecimenPropertyColumnDecorator && propertyCol.getFk() instanceof PropertyForeignKey)

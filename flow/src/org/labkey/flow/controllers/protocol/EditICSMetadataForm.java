@@ -228,12 +228,12 @@ public class EditICSMetadataForm extends ProtocolForm
         }
 
         FieldKey sampleProperty = FieldKey.fromParts("FCSFile", "Sample");
-        ExpSampleType sampleSet = getProtocol().getSampleType();
-        if (sampleSet != null)
+        ExpSampleType sampleType = getProtocol().getSampleType();
+        if (sampleType != null)
         {
-            if (sampleSet.hasNameAsIdCol())
+            if (sampleType.hasNameAsIdCol())
                 ret.put(new FieldKey(sampleProperty, "Name"), "Sample Name");
-            for (DomainProperty pd : sampleSet.getDomain().getProperties())
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
             {
                 ret.put(new FieldKey(sampleProperty, pd.getName()), "Sample " + pd.getName());
             }
