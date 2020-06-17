@@ -1,0 +1,3122 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="tandem-style.xsl"?>
+<bioml xmlns:GAML="http://www.bioml.com/gaml/" label="models from '..\..\CAexample_mini.mzXML'">
+<group id="2" mh="402.431641" z="1" expect="1000" label="no model obtained" type="model" sumI="5.67" maxI="102178" fI="1021.78"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 2 (charge 1)</note>
+<GAML:trace id="2" label="2.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">402.432</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="2.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="36">
+142.048 158.07 158.07 159.221 175.166 175.893 177.327 182.048 182.683 185.135 193.895 200.232 201.011 207.77 210.02 213.032 227.204 228.213 242.349 250.083 252.268 253.242 257.182 269.065 274.058 294.862 296.992 297.988 307.149 322.432
+323.407 324.373 325.378 326.041 342.9 344.77 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="2.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="36">
+2 46 46 2 100 3 5 9 3 1 3 2 4 2 37 2 9 10 1 1 4 1 8 1 10 1 13 1 1 2
+6 54 44 6 2 11 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="4" mh="848.057055" z="2" expect="7.8e+000" label="gi|27679410|similar_to_riboso gi|27679410|ref|XP_219268.1| similar to ribosomal protein..." type="model" sumI="5.13" maxI="18067" fI="180.67" >
+<protein expect="0.0" id="4.1" uid="1461" label="gi|27679410|similar_to_riboso gi|27679410|ref|XP_219268.1| similar to ribosomal protein..." sumI="5.13" >
+<note label="description">gi|27679410|similar_to_riboso gi|27679410|ref|XP_219268.1| similar to ribosomal protein L36 [Rattus norvegicus] [MASS=11600]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="103">
+	MKVALGIGKR DRYGRYGCCL PTGPVLLSAS IQMMRGQSIS SGLRLTDFGN
+	FFAAISYVAK RLNTEQSREK MRDKMGRHIG AKRKREELNN VMAAMRKMVA
+	KKD
+<domain id="4.1.1" start="62" end="68" expect="7.8e+000" mh="847.427" delta="0.630" hyperscore="14.3" nextscore="13.1" y_score="7.4" y_ions="3" b_score="9.5" b_ions="2" pre="VAKR" post="EKMR" seq="LNTEQSR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 4 (charge 2)</note>
+<GAML:trace id="4" label="4.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">848.057</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="4.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="39">
+158.709 168.811 174.441 175.112 185.813 210.477 218.118 227.252 245.192 257.201 261.81 266.583 269.071 298.852 307.017 308.587 309.753 310.88 320.57 323.291 328.705 331.95 347.782 348.427 360.078 361.771 363.933 364.533 365.234 377.391
+381.311 382.687 389.377 390.25 395.163 442.36 443.946 461.37 478.221 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="4.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="39">
+24 13 19 9 9 6 18 33 14 18 1 7 4 13 41 23 31 36 4 6 34 10 52 8 5 3 100 46 12 24
+3 6 9 20 24 13 5 41 6 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="4" mh="1271.581945" z="3" expect="4.0e+000" label="gi|18311790|phosphoribosylfor gi|18311790|ref|NP_558457.1| phosphoribosylformylglycinamidine..." type="model" sumI="5.52" maxI="153375" fI="1533.75" >
+<protein expect="0.0" id="4.1" uid="2446" label="gi|18311790|phosphoribosylfor gi|18311790|ref|NP_558457.1| phosphoribosylformylglycinamidine..." sumI="5.52" >
+<note label="description">gi|18311790|phosphoribosylfor gi|18311790|ref|NP_558457.1| phosphoribosylformylglycinamidine cyclo-ligase (AIRS) (purM) [Pyrobaculum aerophilum]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="310">
+	MRYKDAGVDL EKQREVHAVA QSVLSGGAGR YVRWVEEGGR QYALHVDGVG
+	TKALWLLQAG KMHVAGWDCL AVNINDVVCD GFKPIAAVDY IAVAPGLENA
+	AKEALMGLSE AARAAGVYIL GGETAIMPDV VTGVDVVCTV LAVREGEVVG
+	EAEPGDYIVG VESSGPHANG FSLLRRLFQL GDNICGTTAA EVFLKPVAMY
+	DKVLNLYKED LIKAAAHITG GGFTKIKRVL GSLGAEIELG PLPCWAEAVL
+	KRGVPRDEAY RVFNMGVGMA LITKTPGDLL KRLEDLGYSA RLIGRVKPEG
+	PVVVDGIPLA 
+<domain id="4.1.1" start="41" end="52" expect="4.0e+000" mh="1270.643" delta="0.939" hyperscore="14.8" nextscore="13.0" y_score="10.0" y_ions="2" b_score="10.9" b_ions="3" pre="EGGR" post="ALWL" seq="QYALHVDGVGTK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 4 (charge 3)</note>
+<GAML:trace id="4" label="4.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1271.58</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="4.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+158.709 168.811 174.441 175.112 185.813 218.118 227.252 245.192 257.201 298.852 307.017 308.587 309.753 310.88 328.705 331.95 347.782 363.933 364.533 365.234 377.391 389.377 390.25 395.163 406.199 407.189 442.36 461.37 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="4.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+3 1 2 1 1 2 4 2 2 2 5 3 4 4 4 1 6 12 5 1 3 1 2 3 100 36 1 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="6" mh="889.010424" z="2" expect="1000" label="no model obtained" type="model" sumI="5.74" maxI="230546" fI="2305.46"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 6 (charge 2)</note>
+<GAML:trace id="6" label="6.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">889.01</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="6.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="18">
+175.319 222.842 251.476 286.849 298.026 331.128 339.613 342.971 358.616 358.616 359.804 365.974 369.933 385.377 386.559 402.868 415.23 419.88 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="6.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="18">
+2 2 2 3 3 4 2 2 100 100 1 1 2 3 4 3 1 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="6" mh="1333.011998" z="3" expect="4.7e+000" label="gi|15900155|ribosomal_protein gi|15900155|ref|NP_344759.1| ribosomal protein L14..." type="model" sumI="5.78" maxI="230546" fI="2305.46" >
+<protein expect="0.0" id="6.1" uid="708" label="gi|15900155|ribosomal_protein gi|15900155|ref|NP_344759.1| ribosomal protein L14..." sumI="5.78" >
+<note label="description">gi|15900155|ribosomal_protein gi|15900155|ref|NP_344759.1| ribosomal protein L14 [Streptococcus pneumoniae TIGR4]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="122">
+	MIQTETRLKV ADNSGAREIL TIKVLGGSGR KFANIGDVIV ASVKQATPGG
+	AVKKGDVVKA VIVRTKSGAR RADGSYIKFD ENAAVIIRED KTPRGTRIFG
+	PVARELREGG FMKIVSLAPE VL
+<domain id="6.1.1" start="32" end="44" expect="4.7e+000" mh="1332.752" delta="0.260" hyperscore="15.2" nextscore="13.1" y_score="10.8" y_ions="2" b_score="5.8" b_ions="4" pre="SGRK" post="QATP" seq="FANIGDVIVASVK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 6 (charge 3)</note>
+<GAML:trace id="6" label="6.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1333.01</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="6.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="24">
+175.319 222.842 251.476 286.849 298.026 331.128 339.613 342.971 358.616 358.616 359.804 365.974 369.933 385.377 386.559 402.868 415.23 419.88 420.731 421.661 426.425 427.259 428.128 446.8 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="6.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="24">
+2 2 2 3 3 4 2 2 100 100 1 1 2 3 4 3 1 3 5 5 3 2 2 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="8" mh="925.576586" z="2" expect="1000" label="no model obtained" type="model" sumI="5.12" maxI="26290" fI="262.9"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 8 (charge 2)</note>
+<GAML:trace id="8" label="8.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">925.577</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="8.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+177.033 190.908 265.819 304.896 319.866 344.186 348.739 359.881 362.25 376.948 378.641 384.576 420.734 421.773 424.185 426.791 428.711 429.812 469.322 479.463 480.419 481.27 482.517 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="8.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+4 15 18 8 5 52 13 7 31 12 16 22 45 10 7 26 23 100 12 3 8 26 38 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="8" mh="1387.861242" z="3" expect="1.6e+001" label="gi|6325139|Mitochondrial_Ribo gi|6325139|ref|NP_015207.1| Mitochondrial Ribosomal..." type="model" sumI="5.47" maxI="94677" fI="946.77" >
+<protein expect="0.0" id="8.1" uid="1927" label="gi|6325139|Mitochondrial_Ribo gi|6325139|ref|NP_015207.1| Mitochondrial Ribosomal..." sumI="5.47" >
+<note label="description">gi|6325139|Mitochondrial_Ribo gi|6325139|ref|NP_015207.1| Mitochondrial Ribosomal Protein; Mrp51p [Saccharomyces cerevisiae]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="344">
+	MTLAELLGRS RIAQVANNHK PLTYTGKKFH PTHQIIETKP STLYRQEWGL
+	KSAIPSKIKS RYLVYNDLDT LERITTFEPR GGTQWNRLRF QEMGVPIVSN
+	IGRQNPFFKY ISRPEDESHA KLSLFKEMKG DTDISPAAMK KRLKKITALI
+	RSFQDEFKEW LVENHPDELK LNSNKLEDYV VKFLNKKLET KTNKKFNTEI
+	IGTGGLSYSL PGKLKNSPNG VIQRTVVPGR ILNVVKENND NKWLAAIGGF
+	VADVVFFQSP PSSFNSMGDF IRMKTFLFEI LEASMEKNGS VSMHARLLEP
+	QNDKTREFFN KRPIYKPLTS RRARRPSVGN IQEANNLLNI IKGN
+<domain id="8.1.1" start="130" end="142" expect="1.6e+001" mh="1389.715" delta="-1.854" hyperscore="11.9" nextscore="10.4" y_score="8.5" y_ions="1" b_score="5.3" b_ions="3" pre="KEMK" post="LKKI" seq="GDTDISPAAMKKR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 8 (charge 3)</note>
+<GAML:trace id="8" label="8.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1387.86</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="8.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+177.033 190.908 265.819 304.896 319.866 344.186 348.739 359.881 362.25 376.948 378.641 384.576 420.734 421.773 424.185 426.791 428.711 429.812 438.514 439.701 440.733 441.577 444.771 445.87 446.572 469.322 480.419 481.27 482.517 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="8.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+1 4 5 2 1 15 3 2 9 3 4 6 12 3 2 7 6 28 14 10 1 4 44 100 2 3 2 7 10 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="10" mh="884.485400" z="2" expect="3.3e+001" label="gi|9838401|ribosomal_protein_ gi|9838401|ref|NP_064014.1| ribosomal protein S13 [Beta..." type="model" sumI="5.17" maxI="11027" fI="110.27" >
+<protein expect="0.0" id="10.1" uid="2404" label="gi|9838401|ribosomal_protein_ gi|9838401|ref|NP_064014.1| ribosomal protein S13 [Beta..." sumI="5.17" >
+<note label="description">gi|9838401|ribosomal_protein_ gi|9838401|ref|NP_064014.1| ribosomal protein S13 [Beta vulgaris]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="116">
+	MSYISGARLV DDKQVKIAST KIDGIGPKKA IQVCYRLGIS DNIKIKELTK
+	YQIDQIEQMI GQDHVVHWEL KRGERADIER LISISCYRGI RHQDGLPLRG
+	QRTHTNARTC RKKIRK
+<domain id="10.1.1" start="1" end="8" expect="3.3e+001" mh="884.429" delta="0.056" hyperscore="11.0" nextscore="10.7" y_score="7.6" y_ions="2" b_score="7.2" b_ions="2" pre="[" post="LVDD" seq="MSYISGAR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="10.2" uid="2711" label="gi|30141205|ribosomal_protein gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium..." sumI="5.56" >
+<note label="description">gi|30141205|ribosomal_protein gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium speciosum] [MASS=13515]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="116">
+	MSYISGARSV PDEQVRISST KMDGIGPKKA IQLRYRLGLS GKIKINELTK
+	YQIDQIEQMI GQDHLVHWEL RRGSRADIER LISIYPYRGI RHQDGSPLRG
+	QRTHTNARTF RKQIRK
+<domain id="10.2.1" start="1" end="8" expect="3.3e+001" mh="884.429" delta="0.056" hyperscore="11.0" nextscore="10.7" y_score="7.6" y_ions="2" b_score="7.2" b_ions="2" pre="[" post="SVPD" seq="MSYISGAR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="10.3" uid="2739" label="gi|24636941|AF314105_1_riboso gi|24636941|gb|AAN63483.1|AF314105_1 ribosomal protein..." sumI="5.17" >
+<note label="description">gi|24636941|AF314105_1_riboso gi|24636941|gb|AAN63483.1|AF314105_1 ribosomal protein S13 [Serapias vomeracea] [MASS=13321]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="116">
+	MSYISGARSV PDSQVRIAST KMDGIGHKKA IQVRSRLGIS GNIKMNELTK
+	SQIDQMEQMI SQDHVVHWEL KRGERADIER LISLSRYRGI RHQDGSPLRG
+	QRTHTNARTC RKQIRK
+<domain id="10.3.1" start="1" end="8" expect="3.3e+001" mh="884.429" delta="0.056" hyperscore="11.0" nextscore="10.7" y_score="7.6" y_ions="2" b_score="7.2" b_ions="2" pre="[" post="SVPD" seq="MSYISGAR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="10.4" uid="4049" label="gi|11830845|ribosomal_protein gi|11830845|emb|CAA89892.1| ribosomal protein S13 [Magnolia..." sumI="5.17" >
+<note label="description">gi|11830845|ribosomal_protein gi|11830845|emb|CAA89892.1| ribosomal protein S13 [Magnolia x soulangeana]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="116">
+	MSYISGARSV PDKQVRIAST KMDGIGPKKA IQVRYRLGIS GNIKMNELTK
+	YQIDQIEQMI GQDHVVHWEL KRGERADIER LISISRYRGI RHQDGSPLRG
+	QRTHTNARTF RKQIRK
+<domain id="10.4.1" start="1" end="8" expect="3.3e+001" mh="884.429" delta="0.056" hyperscore="11.0" nextscore="10.7" y_score="7.6" y_ions="2" b_score="7.2" b_ions="2" pre="[" post="SVPD" seq="MSYISGAR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 10 (charge 2)</note>
+<GAML:trace id="10" label="10.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">884.485</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="10.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="41">
+158.539 188.827 191.005 215.015 228.943 233.778 243.101 246.603 293.139 297.164 316.683 322.388 327.185 328.002 329.595 346.168 348.449 352.961 367.151 379.023 381.707 385.67 390.719 394.746 398.37 399.978 401.719 402.455 406.233 407.084
+412.86 415.216 417.67 445.511 459.428 460.63 461.692 477.076 478.076 495.16 496.25 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="10.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="41">
+9 8 62 10 18 80 30 20 19 48 20 9 90 33 28 32 26 48 53 9 30 23 20 19 15 22 10 23 44 9
+20 32 100 38 57 73 33 17 9 10 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="10" mh="1326.224462" z="3" expect="1.2e+000" label="gi|13095586|DNA_polymerase gi|13095586|ref|NP_076501.1| DNA polymerase [Bovine herpesvirus..." type="model" sumI="5.29" maxI="29420" fI="294.2" >
+<protein expect="0.0" id="10.1" uid="564" label="gi|13095586|DNA_polymerase gi|13095586|ref|NP_076501.1| DNA polymerase [Bovine herpesvirus..." sumI="5.29" >
+<note label="description">gi|13095586|DNA_polymerase gi|13095586|ref|NP_076501.1| DNA polymerase [Bovine herpesvirus 4]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1005">
+	MEFFNPYISK KKTDKRISCV DDPDKKTNPY CRLVPKCFKT PGTPGVISIT
+	TTDTPVLFHQ DKEYPIFTSG DHQRSYWSAL KPTPAPIPPK DKLFFHVYDI
+	IETIYTPDRC PDIPIQFQTD IIPNGTVLKL LGKTQDGASV CVNVFQQMVY
+	FYVLVPDGVN LSYVIQQTLN GGVNKQTCKF SITQERKKIL KEYDPSLYPV
+	YKITLSAPTE INQLVGNLTS CGCEVFESNV NASTRFIIDN KFSTFGWYSC
+	SNPHPRISQR DSRTDLEFDC GLGDLQFHEE EQQWPPYTIM SFDIECIGEQ
+	GFPCATKDED LVIQISCIIW TVCSESPPQN ILLSLGTCDP IANTDVYEFP
+	SELDMFYAFF TLLRDFNIDF VTGYNIANFD FPYIIDRATQ VYNIPIRHFT
+	KVISGSTFEV NQPMNTGAGF MRSFSKIKIS GLVPIDMYQV CKDKLSLSDY
+	KLNTVAKHCM GTQKEDVTYK EIPSLFRSGE AGRARIGSYC VLDSVLVLDL
+	LKYFMIHVEI SEIAKMAKIP ARRVLTDGQQ IRVFSCLLEA AKKEHFILPI
+	PGAQKPGGYQ GATVINPIPG FYNTPILVVD FASLYPSIIQ AHNLCYSTMI
+	QDQNLHLHHL KPDDYETFHL STGPIHFVKQ HKTKSLLSTL LTAWLAKRKT
+	IRKELANCDD GPMKTILDKQ QLAIKVTCNS VYGFTGVASG ILPCIPIAET
+	VTLQGRTMLE KSKAFVEMIT PERLSDIVSY PVPCDPDASF RVIYGDTDSL
+	FIECRGYPMQ SVLNFADKLT ETTTKALFKD PIKLEAEKTF QCLLMLTKKR
+	YIGILSSDKL VMKGVDLIRK TACSFVQTTS KEILDLVLRD PEVKQAAQYL
+	CRQAPAKVYS DGLPVGFWKV IDVLNNSYAA LATGKVSVES LTFSTELSRP
+	FGEYKTTTLP HLTVYRKIMS RNEELPQIHD RIPYVFIKGD QRGCKSDLAE
+	DPTYVSQNKI PISVEIYFDK LIHGVANILQ CLFGNNSNMT VEILYNFVNI
+	PYSFT
+<domain id="10.1.1" start="789" end="799" expect="1.2e+000" mh="1325.732" delta="0.492" hyperscore="18.6" nextscore="16.9" y_score="7.9" y_ions="3" b_score="9.3" b_ions="4" pre="EAEK" post="RYIG" seq="TFQCLLMLTKK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 10 (charge 3)</note>
+<GAML:trace id="10" label="10.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1326.22</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="10.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+158.539 188.827 191.005 215.015 228.943 233.778 243.101 246.603 293.139 297.164 316.683 322.388 327.185 328.002 329.595 346.168 348.449 352.961 367.151 379.023 381.707 385.67 390.719 394.746 398.37 399.978 401.719 402.455 406.233 407.084
+412.86 415.216 417.67 418.394 419.639 423.145 424.256 445.511 459.428 460.63 461.692 477.076 478.076 495.16 496.25 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="10.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+3 3 23 4 7 30 11 7 7 18 8 4 34 12 11 12 10 18 20 3 11 9 7 7 6 8 4 9 17 3
+8 12 37 9 100 23 17 14 21 27 12 6 3 4 37 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="12" mh="1036.452197" z="2" expect="1000" label="no model obtained" type="model" sumI="5.48" maxI="66802" fI="668.02"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 12 (charge 2)</note>
+<GAML:trace id="12" label="12.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1036.45</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="12.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+224.934 226.213 238.901 240.295 260.124 282.86 285.371 298.758 298.758 304.277 321.834 325.831 346.421 358.602 378.583 384.581 388.999 392.945 404.095 404.94 415.072 439.874 442.457 457.6 474.72 476.838 477.967 478.634 479.499 483.235
+493.441 522.382 534.385 535.468 536.302 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="12.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+6 3 5 4 3 3 5 100 100 19 1 5 2 7 4 6 2 6 19 7 6 2 11 7 3 15 7 3 9 6
+8 2 5 38 26 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="12" mh="1554.174657" z="3" expect="4.8e+000" label="gi|18406325|40S_ribosomal_pro gi|18406325|ref|NP_564737.1| 40S ribosomal protein,..." type="model" sumI="5.51" maxI="66802" fI="668.02" >
+<protein expect="0.0" id="12.1" uid="1078" label="gi|18406325|40S_ribosomal_pro gi|18406325|ref|NP_564737.1| 40S ribosomal protein,..." sumI="5.51" >
+<note label="description">gi|18406325|40S_ribosomal_pro gi|18406325|ref|NP_564737.1| 40S ribosomal protein, putative [Arabidopsis thaliana]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="284">
+	MAERGGESGA ERGGDRGDFG RGFGGGRGGG RGRDRGPRGR GRRGGRASEE
+	TKWVPVTKLG RLVADNKITK LEQIYLHSLP VKEYQIIDHL VGPTLKDEVM
+	KIMPVQKQTR AGQRTRFKAF VVVGDGNGHV GLGVKCSKEV ATAIRGAIIL
+	AKLSVVPVRR GYWGNKIGKP HTVPCKVTGK CGSVTVRMVP APRGSGIVAA
+	RVPKKVLQFA GIDDVFTSSR GSTKTLGNFV KATFDCLQKT YGFLTPEFWK
+	ETRFSRSPYQ EHTDFLSTKA VSATKVITEG EDQA
+<domain id="12.1.1" start="257" end="269" expect="4.8e+000" mh="1552.728" delta="1.447" hyperscore="15.4" nextscore="14.9" y_score="10.8" y_ions="3" b_score="7.8" b_ions="3" pre="RFSR" post="AVSA" seq="SPYQEHTDFLSTK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 12 (charge 3)</note>
+<GAML:trace id="12" label="12.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1554.17</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="12.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="39">
+224.934 226.213 238.901 240.295 260.124 282.86 285.371 298.758 298.758 304.277 321.834 325.831 346.421 358.602 378.583 384.581 388.999 392.945 404.095 404.94 415.072 439.874 442.457 457.6 474.72 476.838 477.967 478.634 479.499 483.235
+493.441 494.109 495.47 501.258 520.771 522.382 534.385 535.468 536.302 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="12.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="39">
+6 3 5 4 3 3 5 100 100 19 1 5 2 7 4 6 2 6 19 7 6 2 11 7 3 15 7 3 9 6
+8 4 13 6 4 2 5 38 26 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="14" mh="535.910400" z="1" expect="1000" label="no model obtained" type="model" sumI="5.50" maxI="240378" fI="2403.78"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 14 (charge 1)</note>
+<GAML:trace id="14" label="14.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">535.91</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="14.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+238.543 280.908 283.08 297.015 298.659 299.668 300.967 396.087 414.797 422.729 429.068 438.591 440.905 451.084 456.653 478.434 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="14.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+1 4 1 2 100 2 1 1 6 2 1 1 3 2 2 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="16" mh="856.489184" z="2" expect="1000" label="no model obtained" type="model" sumI="5.50" maxI="156181" fI="1561.81"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 16 (charge 2)</note>
+<GAML:trace id="16" label="16.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">856.489</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="16.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+158.898 209.004 226.882 244.436 255.208 272.209 286.727 292.09 299.995 313.2 315.16 322.287 332.364 342.435 342.435 347.259 349.389 356.359 358.096 358.789 359.742 370.749 387.373 392.076 399.246 444.061 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="16.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+1 1 3 1 9 1 4 2 1 3 2 1 4 4 4 1 1 2 25 100 21 2 1 2 1 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="16" mh="1284.230138" z="3" expect="1.7e+000" label="gi|2262205|neuroendocrine_sec gi|2262205|gb|AAC48752.1| neuroendocrine secretory..." type="model" sumI="5.55" maxI="156181" fI="1561.81" >
+<protein expect="0.0" id="16.1" uid="2972" label="gi|2262205|neuroendocrine_sec gi|2262205|gb|AAC48752.1| neuroendocrine secretory..." sumI="5.55" >
+<note label="description">gi|2262205|neuroendocrine_sec gi|2262205|gb|AAC48752.1| neuroendocrine secretory protein 55 [Bos taurus] [MASS=27494]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="241">
+	MDRRSRPQLG RRARHNYNDL CPPIGRRAAT ALLWLSCSIA LLRALATSST
+	RAQQRAAAQR RTFLNAHHRS AAQVFPEPPE SDHEDTDFEP SLPECPEYQE
+	EEFDYESETE SESEIESETE FETESDTAPT TEPETEPEDE PGPVVPKRPT
+	FHQSLTERLS ALRLRSPDAS PSRAPPSTQE SESPRQGEEP EDKDPRDPEE
+	SEEPKEEEKQ QQHRCKPKKP TRRDPSPESP SKRGAIPIRR H
+<domain id="16.1.1" start="174" end="185" expect="1.7e+000" mh="1285.602" delta="-1.372" hyperscore="16.8" nextscore="13.9" y_score="10.0" y_ions="3" b_score="4.6" b_ions="4" pre="SPSR" post="QGEE" seq="APPSTQESESPR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 16 (charge 3)</note>
+<GAML:trace id="16" label="16.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1284.23</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="16.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+158.898 209.004 226.882 244.436 255.208 272.209 286.727 292.09 299.995 313.2 315.16 322.287 332.364 342.435 342.435 347.259 349.389 356.359 358.096 358.789 359.742 370.749 387.373 392.076 399.246 404.649 405.322 405.322 406.584 409.292
+
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="16.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+1 1 3 1 9 1 4 2 1 3 2 1 4 4 4 1 1 2 25 100 21 2 1 2 1 3 7 7 4 7
+
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="18" mh="821.829882" z="2" expect="2.0e+000" label="gi|2950379|capacitative_calci gi|2950379|emb|CAA12161.1| capacitative calcium entry..." type="model" sumI="5.25" maxI="12126" fI="121.26" >
+<protein expect="0.0" id="18.1" uid="98" label="gi|2950379|capacitative_calci gi|2950379|emb|CAA12161.1| capacitative calcium entry..." sumI="5.25" >
+<note label="description">gi|2950379|capacitative_calci gi|2950379|emb|CAA12161.1| capacitative calcium entry channel 1, truncated variant bCCE1Delta514 [Bos taurus] [MASS=53503]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="468">
+	MLLDILKFLF IYCLVLLAFA NGLNQLYFYY EETKGLSCKG IRCEKQNNAF
+	STLFETLQSL FWSIFGLINL YVTNVKAQHE FTEFVGATMF GTYNVISLVV
+	LLNMLIAMMN NSYQLIADHA DIEWKFARTK LWMSYFEEGG TLPTPFNVIP
+	SPKSLWYLIK WIWTHLCKKK MRRKPESFGT IGRRAADNLR RHHQYQEVMR
+	NLVKRYVAAM IRDAKTEEGL TEENFKELKQ DISSFRFEVL GLLRGSKLST
+	VQSAQGTKES SNSADSDEKS DNEGSSKDKK KNFSLFDLTT LIHPRSAAIA
+	AERHTISNGS ALVVQEPPRE KQRKVNFVTD IRHFGLFHRR SKQHAAAEQN
+	ANQIFSVSEG VARQQAEGPL ERSIQLESRT LASRGDLNIP GLSEQCILVD
+	HRERNTDSLG VQVSKRVCSF KSEKVVVEDT VPIIPKEKKH AKEEDSSADY
+	DANLTDTITH EDYVTTRL
+<domain id="18.1.1" start="270" end="277" expect="2.0e+000" mh="823.343" delta="-1.513" hyperscore="14.9" nextscore="13.8" y_score="11.8" y_ions="3" b_score="5.7" b_ions="1" pre="SDEK" post="DKKK" seq="SDNEGSSK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 18 (charge 2)</note>
+<GAML:trace id="18" label="18.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">821.83</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="18.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="49">
+142.81 151.174 196.492 216.635 216.635 233.626 235.949 239.329 244.102 245.648 247.986 253.358 282.263 293.463 296.533 298.028 312.048 313.082 326.796 336.568 341.563 350.898 354.243 358.76 366.786 368.121 369.561 370.693 374.211 378.878
+384.551 414.06 427.344 428.441 429.728 435.254 443.957 446.311 451.986 453.112 464.105 471.008 557.456 574.077 594.186 595.403 621.854 640.08 655.523 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="18.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="49">
+13 40 17 27 27 86 18 11 48 12 13 22 10 71 34 27 35 46 26 16 16 41 72 22 6 100 22 61 15 17
+12 20 14 38 9 10 23 9 59 62 51 33 12 22 9 7 50 48 23 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="18" mh="1232.241185" z="3" expect="1.7e+000" label="gi|30141205|ribosomal_protein gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium..." type="model" sumI="5.32" maxI="13280" fI="132.8" >
+<protein expect="0.0" id="18.1" uid="2711" label="gi|30141205|ribosomal_protein gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium..." sumI="5.56" >
+<note label="description">gi|30141205|ribosomal_protein gi|30141205|emb|CAD30285.1| ribosomal protein S13 [Lilium speciosum] [MASS=13515]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="116">
+	<domain id="18.1.1" start="17" end="28" expect="1.7e+000" mh="1233.651" delta="-1.410" hyperscore="20.0" nextscore="19.6" y_score="11.3" y_ions="7" b_score="5.9" b_ions="1" pre="EQVR" post="KAIQ" seq="ISSTKMDGIGPK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 18 (charge 3)</note>
+<GAML:trace id="18" label="18.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1232.24</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="18.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+142.81 151.174 196.492 216.635 216.635 233.626 235.949 239.329 244.102 245.648 247.986 253.358 282.263 293.463 296.533 298.028 312.048 313.082 326.796 336.568 341.563 350.898 354.243 358.76 368.121 369.561 370.693 374.211 378.878 384.551
+387.349 388.767 390.182 393.071 394.227 413.247 414.06 427.344 428.441 435.254 443.957 451.986 453.112 464.105 471.008 557.456 574.077 621.854 640.08 655.523 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="18.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+12 36 16 24 24 79 16 10 44 11 12 20 9 65 31 25 32 42 24 14 15 37 66 20 91 20 56 14 16 11
+52 31 28 100 38 17 18 13 34 10 21 54 57 46 30 11 20 45 44 21 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="20" mh="685.633789" z="1" expect="1000" label="no model obtained" type="model" sumI="5.29" maxI="36781" fI="367.81"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 20 (charge 1)</note>
+<GAML:trace id="20" label="20.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">685.634</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="20.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+285.855 294.853 340.617 343.555 343.555 355.122 355.956 358.067 358.819 359.544 360.989 375.032 429.11 430.142 430.936 476.068 506.502 509.249 526.148 528.168 571.033 572.046 587.204 607.464 621.544 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="20.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+21 5 7 16 16 21 11 21 72 11 2 2 100 74 12 9 20 25 3 22 8 19 17 7 7 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="22" mh="619.957764" z="1" expect="1000" label="no model obtained" type="model" sumI="4.90" maxI="37101" fI="371.01"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 22 (charge 1)</note>
+<GAML:trace id="22" label="22.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">619.958</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="22.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+255.689 259.155 270.697 310.341 313.28 384.086 388.161 405.929 409.05 417.314 434.351 471.156 500.651 506.193 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="22.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+10 8 4 2 6 17 4 14 6 10 100 4 13 16 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="24" mh="1043.767870" z="2" expect="1000" label="no model obtained" type="model" sumI="5.12" maxI="15110" fI="151.1"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 24 (charge 2)</note>
+<GAML:trace id="24" label="24.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1043.77</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="24.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+223.008 224.732 239.657 296.152 300.587 300.587 307.992 309.173 324.82 340.37 356.218 362.805 402.454 403.143 408.176 409.018 424.46 425.858 427.366 429.161 445.912 463.081 464.112 465.425 478.252 486.359 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="24.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+30 18 41 21 100 100 25 13 19 12 10 17 23 6 27 24 74 28 36 43 8 69 23 78 2 22 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="24" mh="1565.148168" z="3" expect="1.0e+001" label="gi|16082591|Uncharacterized_c gi|16082591|ref|NP_394583.1| Uncharacterized conserved..." type="model" sumI="5.15" maxI="15110" fI="151.1" >
+<protein expect="0.0" id="24.1" uid="3367" label="gi|16082591|Uncharacterized_c gi|16082591|ref|NP_394583.1| Uncharacterized conserved..." sumI="5.15" >
+<note label="description">gi|16082591|Uncharacterized_c gi|16082591|ref|NP_394583.1| Uncharacterized conserved protein [Thermoplasma acidophilum]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="222">
+	MLHLVIADAE LETIPEEMQA DPAIRRFAKK RNKRVDRMIL DSNYMHTSID
+	RYFPNESKRR GRPDIIYLLL EMTQESILNH KNQLRTYVHT RNNQVIRISP
+	ITRMPKSYNR FIGLFEDLFE KRIITNNGKE LLSMEESSLG DLINSIRRDR
+	TILLHPKGEM RKPSEFISNA NILIVIGGFS EGDFISDTSF INERYAIFDQ
+	ELTIWSVANE MVANYERAVG LT
+<domain id="24.1.1" start="149" end="161" expect="1.0e+001" mh="1565.858" delta="-0.710" hyperscore="14.3" nextscore="13.6" y_score="8.1" y_ions="1" b_score="10.9" b_ions="4" pre="SIRR" post="KPSE" seq="DRTILLHPKGEMR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 24 (charge 3)</note>
+<GAML:trace id="24" label="24.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1565.15</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="24.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+223.008 224.732 239.657 296.152 300.587 300.587 307.992 309.173 324.82 340.37 356.218 362.805 402.454 403.143 408.176 409.018 424.46 425.858 427.366 429.161 445.912 463.081 464.112 465.425 478.252 486.359 498.477 499.477 504.733 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="24.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+30 18 41 21 100 100 25 13 19 12 10 17 23 6 27 24 74 28 36 43 8 69 23 78 2 22 12 5 57 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="26" mh="503.097473" z="1" expect="1000" label="no model obtained" type="model" sumI="5.29" maxI="72404" fI="724.04"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 26 (charge 1)</note>
+<GAML:trace id="26" label="26.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">503.097</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="26.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+225.066 225.959 228.055 237.789 238.601 243.383 244.241 248.292 262.055 262.94 280.888 284.912 288.442 294.026 297.842 298.746 299.72 338.889 344.803 356.864 358.518 373.039 373.902 405.439 414.841 415.988 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="26.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+3 1 8 2 11 2 5 4 27 1 3 11 2 2 6 100 15 8 6 4 13 3 1 6 18 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="28" mh="447.034546" z="1" expect="1000" label="no model obtained" type="model" sumI="5.62" maxI="205878" fI="2058.78"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 28 (charge 1)</note>
+<GAML:trace id="28" label="28.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">447.035</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="28.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+185.081 216.083 228.103 274.063 276.025 288.856 313.362 333.156 333.156 342.669 344.811 349.467 358.678 359.676 360.67 386.078 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="28.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+1 2 1 3 2 2 1 7 7 2 2 4 33 100 28 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="30" mh="1048.529345" z="2" expect="1000" label="no model obtained" type="model" sumI="4.91" maxI="8804" fI="88.04"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 30 (charge 2)</note>
+<GAML:trace id="30" label="30.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1048.53</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="30.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+222.697 235.095 258.986 264.33 267.25 275.706 281.546 305.026 317.762 325.013 379.301 379.301 382.093 396.253 397.346 398.132 406.27 409.847 410.737 424.202 426.229 427.026 428.388 429.962 463.033 482.365 487.899 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="30.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+27 27 56 8 9 21 8 22 44 52 100 100 39 10 28 27 61 26 36 15 37 48 24 25 9 24 46 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="30" mh="1572.290380" z="3" expect="5.7e-001" label="gi|32491316|rpsD gi|32491316|ref|NP_871570.1| rpsD [Wigglesworthia glossinidia endosymbiont..." type="model" sumI="4.98" maxI="10464" fI="104.64" >
+<protein expect="0.0" id="30.1" uid="4291" label="gi|32491316|rpsD gi|32491316|ref|NP_871570.1| rpsD [Wigglesworthia glossinidia endosymbiont..." sumI="4.98" >
+<note label="description">gi|32491316|rpsD gi|32491316|ref|NP_871570.1| rpsD [Wigglesworthia glossinidia endosymbiont of Glossina brevipalpis]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="225">
+	MDADLQKEEE FNLYFIEIKM AKYLGPKLKL SRREGTDLFL KSGVRAIESK
+	CKIDHLPGQH GSRRSRLSDY GIQLREKQKL RRMYVILERQ FKKYYKKAVR
+	MKGNTGENLL ILLESRLDNV VYRMGFGSTR LESRQLISHK SIIINKKVIN
+	IPSYQIKPND CIEVKEIAKK QSRIKAAIEI SEQREKQSWI DVDRVKMQGI
+	FKKFPDRSDL SSEINEHLII ELYSK
+<domain id="30.1.1" start="8" end="19" expect="5.7e-001" mh="1573.778" delta="-1.488" hyperscore="17.9" nextscore="14.7" y_score="9.3" y_ions="3" b_score="11.2" b_ions="4" pre="DLQK" post="MAKY" seq="EEEFNLYFIEIK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 30 (charge 3)</note>
+<GAML:trace id="30" label="30.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1572.29</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="30.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+222.697 235.095 258.986 264.33 267.25 275.706 281.546 305.026 317.762 325.013 379.301 379.301 382.093 396.253 397.346 398.132 406.27 409.847 410.737 424.202 426.229 427.026 428.388 429.962 463.033 482.365 487.899 494.164 501.299 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="30.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+23 23 48 7 8 18 7 19 37 43 84 84 33 9 24 23 51 21 31 12 31 40 20 21 7 20 39 29 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="32" mh="861.071703" z="2" expect="1.6e+001" label="gi|19115094|60s_ribosomal_pro gi|19115094|ref|NP_594182.1| 60s ribosomal protein..." type="model" sumI="5.19" maxI="36952" fI="369.52" >
+<protein expect="0.0" id="32.1" uid="3037" label="gi|19115094|60s_ribosomal_pro gi|19115094|ref|NP_594182.1| 60s ribosomal protein..." sumI="5.19" >
+<note label="description">gi|19115094|60s_ribosomal_pro gi|19115094|ref|NP_594182.1| 60s ribosomal protein L32 [Schizosaccharomyces pombe]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="127">
+	MAAVNIIKKR TKPFKRHQSD RFKRVGESWR KPRGIDSCVR RRFRGTISMP
+	KIGYGNNKKT RYCMPNGLKA FLVRNVSDVE LLLMHNKTYA AEIAGNVSAR
+	KRVEIVEKAR ALGVKVTNAG AKVRSQE
+<domain id="32.1.1" start="1" end="8" expect="1.6e+001" mh="859.507" delta="1.565" hyperscore="11.0" nextscore="10.8" y_score="7.0" y_ions="2" b_score="7.6" b_ions="2" pre="[" post="KRTK" seq="MAAVNIIK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 32 (charge 2)</note>
+<GAML:trace id="32" label="32.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">861.072</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="32.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+148.958 253.937 260.746 274.334 274.334 285.119 303.426 311.363 315.976 317.033 319.428 334.21 335.863 341.876 347.659 357.541 358.673 359.727 360.748 361.805 373.451 375.497 376.876 387.406 388.985 390.019 390.714 392.475 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="32.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+8 3 4 15 15 11 8 15 22 21 8 4 3 7 13 6 35 100 29 25 22 1 3 19 2 13 5 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="32" mh="1291.103917" z="3" expect="1.8e-001" label="gi|13442951|MAIL gi|13442951|dbj|BAB39767.1| MAIL [Bos taurus] [MASS=78248]" type="model" sumI="5.27" maxI="36952" fI="369.52" >
+<protein expect="0.0" id="32.1" uid="2840" label="gi|13442951|MAIL gi|13442951|dbj|BAB39767.1| MAIL [Bos taurus] [MASS=78248]" sumI="5.27" >
+<note label="description">gi|13442951|MAIL gi|13442951|dbj|BAB39767.1| MAIL [Bos taurus] [MASS=78248]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="718">
+	MIVDKLLDDS RGGEGLLDAA GDCGLMTSPL NLAYFYGASP PAAAPGACDG
+	GCSASGPSAP GSPGSDSSDF SSASSVSSCG AVESRPRGGA RAERLQVEPH
+	MGVVRQQRGP FQGVRVKNSV KELLLHIRSH KQKASGQAVD DFKTQSVNRE
+	QFTELKNTVS YSGKRKGSDS LSDGPACKRS ALLHTQFLTP PQTPTPAESM
+	EDVHHNESKQ DSCADLLQNI INIKNECSPV SLNTVHVSWM SPGQSLRLPH
+	EQCQDLHRGQ VFSPPQKYQP FQVSSSPHMM DQASMYQYSP QNQSVQPPPQ
+	HYTHNPALEY SPYSRTSQSP SYEPHLFGRE PQFCPDQSFA PLLSDPRQSE
+	NIAVPPQTAP SVQQQIDTHL QNFSLMPPDT CEALARPDAS STPLSTPLPF
+	PNLGGNPMST TQLGKSFFQW QVEQEENKLA NISQDQFLSK DADGDTFLHI
+	AVAQGRRALS YVLARKMNAL HMLDIKEHNG QSAFQVAVAA NQHLIVQDLV
+	TLGAQVNTTD CWGRTPLHVC AEKGHSQVLQ AIQKGAAGSN QFVDLEATNY
+	DGLTPLHCAV LAHNAVVHEL QRNQQPHSPE VQELLLKNKS LVDTIKCLIQ
+	MGAAVEAKDR KSGRTALHLA AEEANLELIR LFLELPSCLS FVNAKAYNGN
+	TALHVAASLQ YRVTQLDAVR LLMRKGADPS TRNLENEQPV HLVPDGPVGE
+	QIRRILKGKS IQQRAPPY
+<domain id="32.1.1" start="167" end="179" expect="1.8e-001" mh="1292.590" delta="-1.486" hyperscore="16.9" nextscore="16.7" y_score="8.8" y_ions="4" b_score="10.9" b_ions="4" pre="GKRK" post="SALL" seq="GSDSLSDGPACKR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 32 (charge 3)</note>
+<GAML:trace id="32" label="32.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1291.1</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="32.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="33">
+148.958 253.937 260.746 274.334 274.334 285.119 303.426 311.363 315.976 317.033 319.428 334.21 335.863 341.876 347.659 357.541 358.673 359.727 360.748 361.805 373.451 375.497 376.876 387.406 388.985 390.019 390.714 392.475 406.622 407.749
+408.582 412.589 414.006 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="32.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="33">
+8 3 4 15 15 11 8 15 22 21 8 4 3 7 13 6 35 100 29 25 22 1 3 19 2 13 5 2 18 4
+5 54 7 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="34" mh="538.096191" z="1" expect="1000" label="no model obtained" type="model" sumI="5.46" maxI="100604" fI="1006.04"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 34 (charge 1)</note>
+<GAML:trace id="34" label="34.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">538.096</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="34.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="31">
+224.917 239.206 239.897 266.917 270.021 271.106 280.936 281.806 283.141 284.034 296.714 297.926 298.795 299.848 300.825 317.152 333.839 340.967 345.57 350.691 358.768 359.515 360.459 396.291 402.281 415.841 416.901 450.676 457.944 466.031
+476.039 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="34.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="31">
+3 4 1 1 3 2 4 2 2 1 1 8 70 100 25 1 1 5 2 4 3 6 2 1 2 10 6 2 2 3
+9 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="36" mh="610.058350" z="1" expect="1000" label="no model obtained" type="model" sumI="5.17" maxI="57547" fI="575.47"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 36 (charge 1)</note>
+<GAML:trace id="36" label="36.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">610.058</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="36.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+225 238.688 267.094 268.979 282.866 284.771 344.463 354.991 370.851 372.699 414.965 418.613 424.433 454.796 463.623 488.896 496.265 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="36.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+6 19 3 10 6 34 13 100 5 22 6 9 2 6 4 12 4 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="38" mh="880.440722" z="2" expect="1000" label="no model obtained" type="model" sumI="4.99" maxI="22591" fI="225.91"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 38 (charge 2)</note>
+<GAML:trace id="38" label="38.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">880.441</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="38.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+183.316 194.363 220.862 238.895 245.07 248.729 272.365 285.077 309.375 327.091 344.593 344.593 346.772 360.643 369.939 379.365 382.763 388.175 394.691 398.709 401.703 403.98 411.166 414.575 457.3 458.201 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="38.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+19 8 16 4 22 10 20 16 2 100 23 23 8 8 45 4 19 12 9 11 13 9 10 6 7 10 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="38" mh="1320.157445" z="3" expect="2.2e+000" label="gi|29348672|putative_deoxyrib gi|29348672|ref|NP_812175.1| putative deoxyribose-phosphate..." type="model" sumI="5.11" maxI="22591" fI="225.91" >
+<protein expect="0.0" id="38.1" uid="2909" label="gi|29348672|putative_deoxyrib gi|29348672|ref|NP_812175.1| putative deoxyribose-phosphate..." sumI="5.11" >
+<note label="description">gi|29348672|putative_deoxyrib gi|29348672|ref|NP_812175.1| putative deoxyribose-phosphate aldolase [Bacteroides thetaiotaomicron VPI-5482]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="300">
+	MEENSSQSNK YDAALAKYNT NLSDADIQAR VADLIEKKVP ENNTEEVKKL
+	LFNCIDLTTL NSTDSDESVM HFTEKVNEFD NEFPDMKNVA AICVYPNFAD
+	IVKNTLQVDG INIACVSGGF PSSQTFIEVK VAETALAIAD GADEIDIVIS
+	IGKFLSGDYE TMCEEIQELK EVCKERHLKV ILETGALKTA SNIKKASILS
+	MYSGADFIKT STGKQQPAAT PEAAYVMCEA IKEYYQKTNN KIGFKPAGGI
+	NTVHDAIIYY TIVKEILGEE WLNNRLFRLG TSRLANLLLS DIKGEEIKFF
+	
+<domain id="38.1.1" start="177" end="188" expect="2.2e+000" mh="1321.820" delta="-1.663" hyperscore="15.5" nextscore="14.0" y_score="9.5" y_ions="5" b_score="7.8" b_ions="2" pre="CKER" post="TASN" seq="HLKVILETGALK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 38 (charge 3)</note>
+<GAML:trace id="38" label="38.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1320.16</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="38.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+183.316 194.363 220.862 238.895 245.07 248.729 272.365 285.077 309.375 327.091 344.593 344.593 346.772 360.643 369.939 379.365 382.763 388.175 394.691 398.709 401.703 403.98 411.166 414.575 416.88 419.499 422.332 442.888 457.3 458.201
+
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="38.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+19 8 16 4 22 10 20 16 2 100 23 23 8 8 45 4 19 12 9 11 13 9 10 6 28 52 47 11 7 10
+
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="40" mh="1108.881884" z="2" expect="2.7e+001" label="gi|30519569|B18R_protein gi|30519569|emb|CAD90744.1| B18R protein [Cowpox virus]..." type="model" sumI="5.12" maxI="49273" fI="492.73" >
+<protein expect="0.0" id="40.1" uid="563" label="gi|30519569|B18R_protein gi|30519569|emb|CAD90744.1| B18R protein [Cowpox virus]..." sumI="5.12" >
+<note label="description">gi|30519569|B18R_protein gi|30519569|emb|CAD90744.1| B18R protein [Cowpox virus] [MASS=94694]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="795">
+	MDEDTRLSRY LYLTDREHIN VDSIKQLCKI SDPNACYRCG CTALHEYFYN
+	YRSVNGKYKY RYNGYYQYYS SSDYENYNEY YYDDYDKTGM NSESDSESES
+	DNISIKTEYE NEYEFYDETQ DQSTQLVGYD IKLKTNEDDF VDEFYGYDRS
+	VGVHDYIDES INKVVYGRES HVRWRDIWQE HNDGVYSIGK EYIDNIYEDR
+	HTIDEFYKID SVSDVDDAEH ISQITNDVST QTWEKKSELD RYMESYPRHR
+	YSKHSVFKGF SDKVRKNDLD MNVVKELLSN GASLTIKDSS NKDPIAVYFR
+	RTIMNLEMID IINKHTTIYE RRYIVHTYLK NYRNFDYPFF RKLVLTNKHC
+	LNNYYNISDS KYGTPLHILA SNKKLITPNY MKLLVYNGND INARGEDTQM
+	RTPLHKYLCK FVYHNIEYGI RYYNEKIIDA FIELGADLTI PNDDGMIPVV
+	YCIHSNAEYG YNNITNIKII RKLLNLSRHA PHNLFRDRVM HDYISNTYID
+	LECLDIIRSL DGFDINGYFE GRTPLHCAIQ HNFTQIAEYL LDRGADISLK
+	TDDGKTVFDL SLCSYIPLKW TSFLISRLPP KSVICSLTNH IIDYVLTNNR
+	RIIWQSQMIN KYVLLLDPSF YSRFRNAIES ELDQYNNRYN RFEHDRDRVN
+	EKYGKVLHDL DTYIKDVQVL KSTSITNNIT LYDTIINNKS EFPIRRANDK
+	QLINLIKSNT YHNLIEKVIK NTLEKYTLTN IVLEYMISSR SQSSYLSRIP
+	NEILLEILYK LDMYDLRNLY TRYMRENDIA EYHIENTRSI STQTE
+<domain id="40.1.1" start="374" end="382" expect="2.7e+001" mh="1107.623" delta="1.259" hyperscore="11.5" nextscore="8.0" y_score="7.2" y_ions="1" b_score="7.2" b_ions="3" pre="ASNK" post="LLVY" seq="KLITPNYMK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 40 (charge 2)</note>
+<GAML:trace id="40" label="40.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1108.88</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="40.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+241.762 354.66 370.657 398.322 416.811 427.174 438.02 440.12 441.321 445.976 456.341 457.634 478.466 495.128 496.524 497.347 519.273 527.679 571.821 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="40.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+4 4 22 17 4 4 4 100 31 3 4 4 9 30 12 7 2 6 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="40" mh="1662.819188" z="3" expect="2.3e+000" label="gi|30519558|B7R_protein gi|30519558|emb|CAD90733.1| B7R protein [Cowpox virus] [MASS=31016]" type="model" sumI="5.15" maxI="49273" fI="492.73" >
+<protein expect="0.0" id="40.1" uid="4132" label="gi|30519558|B7R_protein gi|30519558|emb|CAD90733.1| B7R protein [Cowpox virus] [MASS=31016]" sumI="5.15" >
+<note label="description">gi|30519558|B7R_protein gi|30519558|emb|CAD90733.1| B7R protein [Cowpox virus] [MASS=31016]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="271">
+	MRDIILVVLF INSIHAKITS YKFESVNFDS KIEWTGDGLY NISLKNYGIK
+	TWQTMYTNVP EGTYDISGFP KNDFVSFWVK FEQGDYKVEE YCTGLCVEVK
+	IGPPTVTLTE YNDHINLYIE HPYATRGSKK IPIYKRGDMC DIYLLYTANF
+	TFGDSEEPVT YDIDDYDCTS TGCSIDFATT EKVCVTAQGA TEGFLEKITP
+	WSSEVCLTPK KNVYTCAIRS KEDVPNFKDK MARVIKRKFN KQSQSYLTKF
+	LGSTSNDVTT FLSMLDLTKY S
+<domain id="40.1.1" start="18" end="31" expect="2.3e+000" mh="1664.817" delta="-1.997" hyperscore="14.8" nextscore="11.9" y_score="7.8" y_ions="4" b_score="6.8" b_ions="3" pre="IHAK" post="IEWT" seq="ITSYKFESVNFDSK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 40 (charge 3)</note>
+<GAML:trace id="40" label="40.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1662.82</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="40.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="22">
+241.762 354.66 370.657 398.322 416.811 427.174 438.02 440.12 441.321 445.976 456.341 457.634 478.466 495.128 496.524 497.347 519.273 527.679 530.529 536.211 536.94 571.821 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="40.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="22">
+4 4 22 17 4 4 4 100 31 3 4 4 9 30 12 7 2 6 7 3 9 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="42" mh="833.632006" z="2" expect="1000" label="no model obtained" type="model" sumI="5.03" maxI="9230" fI="92.3"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 42 (charge 2)</note>
+<GAML:trace id="42" label="42.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">833.632</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="42.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+179.91 180.917 192.11 202.163 270.164 288.117 304.525 304.525 319.782 321.892 335.846 336.795 339.024 342.409 344.432 346.599 347.574 356.823 363.566 364.874 372.905 373.758 378.689 385.978 388.021 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="42.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+31 17 34 27 54 17 98 98 97 28 12 10 29 30 36 85 14 57 38 35 100 47 71 13 70 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="42" mh="1249.944371" z="3" expect="4.3e+000" label="gi|27684893|similar_to_60S_RI gi|27684893|ref|XP_237285.1| similar to 60S RIBOSOMAL..." type="model" sumI="5.10" maxI="9230" fI="92.3" >
+<protein expect="0.0" id="42.1" uid="4278" label="gi|27684893|similar_to_60S_RI gi|27684893|ref|XP_237285.1| similar to 60S RIBOSOMAL..." sumI="5.10" >
+<note label="description">gi|27684893|similar_to_60S_RI gi|27684893|ref|XP_237285.1| similar to 60S RIBOSOMAL PROTEIN L7 [Rattus norvegicus] [MASS=11749]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="103">
+	MAAVPEKRKK VAIVPEPLRK TCHKQSYGQI NKKQIALTNN SLIARYLGEF
+	GIICMEDLIH ETYTVGNRFR KANNFLWPFK LSSPQGGMKK RPLTEMLATG
+	KTR
+<domain id="42.1.1" start="9" end="19" expect="4.3e+000" mh="1249.799" delta="0.145" hyperscore="15.6" nextscore="15.6" y_score="9.3" y_ions="2" b_score="13.0" b_ions="3" pre="PEKR" post="KTCH" seq="KKVAIVPEPLR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 42 (charge 3)</note>
+<GAML:trace id="42" label="42.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1249.94</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="42.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+179.91 180.917 192.11 202.163 270.164 288.117 304.525 304.525 319.782 321.892 335.846 336.795 339.024 342.409 344.432 346.599 347.574 356.823 363.566 364.874 372.905 373.758 378.689 385.978 388.021 390.258 393.765 394.505 399.152 400.419
+
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="42.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+31 17 34 27 54 17 98 98 97 28 12 10 29 30 36 85 14 57 38 35 100 47 71 13 70 32 18 13 72 88
+
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="44" mh="1092.359423" z="2" expect="2.0e-001" label="gi|22711977|hypothetical_chlo gi|22711977|ref|NP_683861.1| hypothetical chloroplast..." type="model" sumI="5.05" maxI="10692" fI="106.92" >
+<protein expect="0.0" id="44.1" uid="457" label="gi|22711977|hypothetical_chlo gi|22711977|ref|NP_683861.1| hypothetical chloroplast..." sumI="5.05" >
+<note label="description">gi|22711977|hypothetical_chlo gi|22711977|ref|NP_683861.1| hypothetical chloroplast RF1 [Chaetosphaeridium globosum]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1450">
+	MITTYSTFLF NFLSQFQYLV NIPEPLILFG LYYGFLTTLP ISFSHIVVIR
+	NRLIEGKTSS VMAFCGLITG QLCMIGTIYY TPLYKLFIKP HLILLLSIIY
+	SFFYWQRLRN NQNYDDLREA QSLINVRNFF SFFDSFVFQI LNPILLPTPI
+	FFRLNNVFLF RYSNNLNFFL SFFIGSLIGN FLFFNALNWI RYRFEQDSNV
+	IYPVLKLLIN KSIIPIVFCI CLIPIAKYSH IPFCTMKQKE GQSSYSFDKN
+	WPNIIFDSNQ PHRPIRIFSE TKTDDNLNIN DNLSKKQTSQ FFFKECISDG
+	NVRISYTYPS TLANFQTDLS SSFQDFSLSE QSFDNLYSNW KLEKLSRKDN
+	LNNLLLTKIK LLNNKKEWFY KHFQNKFGTF IKDDNNYNKF VKKSNDVRLK
+	QSSKIQIKKS KLLTSDIRDI STTQSGFYDL KKNKLKSFIS QKFKMNSNNS
+	TLPVWNHLNK QLLQNELKRI KKQLQDKTKN IKENDFNNLK LLKSNIETID
+	NTINDIHHNK IKQITSVDLI KIFATNNKTL LLETLAFNKK ITQKDNFNFN
+	KLFQHKNKKF TTNSGNENTY LNLNDIFKNI KRLPKWRTFS KHVVYDEVSD
+	IRRRAIKSNS KLKIANKDSD IIIFEYKKSL NFRARLPKGS LRARRKNKFT
+	WKLFHNNLNS PFFIRSKQLL NKTDIPFLKY NENYLNFFKN FISPDKNINY
+	LNNDISEMRR QELLFKWDKT NVHILRSMVL VGQAFFRKYI KLPIFIFFKN
+	LSRQLLYQPS EWTKDWSNWM NEWYIFCYYD GTELAKDQWP EMWLQRGIQI
+	KLINPFYIKP WYIQKSFIKN KQNKKTRTSY LTVFGSQQEL PFGKKIRMPS
+	FWKPVRREVS KSIKLKLYFP FLTLQKNTII LFEKVFNKKR INEDNKTIEK
+	SILNKKNEQL ILKKDEVIPN NKSIAGKLSK LDFHNQNITK TSIKNATKQI
+	LIKNEYNSLL KENKNLFTKN KIVFLKIKNI LNKLNLKLIK VKINFTYKIK
+	TVLKIISRNL LKFYSIIQFQ LENLGRNNSN DLSYKNQLSY QKDFPNFNNF
+	CLNQANIIQN LCKNNILKHK KLNQNFQINS KNLNQTNIID VNPENIKAQD
+	FKNLLENIYT FTPTINLWDK LSTNNWKISV QNNWKQKSYN NYDLTKKALV
+	SKNLNFISYF YQNNLINNLN KKIKHTKIFN LSKNYLSLNN LNQNQIKNFD
+	FQNSLNNNIT YKKNIKNFTI RQNVPSQLRR WDWKNNKIKK FVNRLLQKNT
+	ILLKEEVFNL IPFFDRFTIQ NPMIRNWSHP ISSILDDEIF TYELLDTFLQ
+	INKNIDFLHT KQIEDNLSSN SNQAIASLPL SSTTAENFLY YLTTVEDLIS
+	IEDKKELKIL NSLNFNKSTP NYIKTNVVEK SLNENLSKNL QSILSKETLD
+	SINNTQILKK FLWASYRCED LACMNRFWFS TNNGSRFGTL RLRLYPNLKN
+	
+<domain id="44.1.1" start="390" end="398" expect="2.0e-001" mh="1092.616" delta="-0.257" hyperscore="17.3" nextscore="16.4" y_score="11.5" y_ions="4" b_score="8.0" b_ions="1" pre="NYNK" post="LKQS" seq="FVKKSNDVR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 44 (charge 2)</note>
+<GAML:trace id="44" label="44.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1092.36</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="44.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+174.964 254.081 274.764 287.45 303.168 304.251 311.044 333.396 343.58 350.154 367.555 377.14 389.094 395.03 410.79 411.503 411.503 425.238 429.391 432.146 443.492 449.514 466.86 477.619 480.607 501.282 502.748 506.318 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="44.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+63 15 89 72 82 29 8 57 14 40 33 21 17 49 19 30 30 42 9 30 43 25 18 35 19 46 100 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="44" mh="1638.035497" z="3" expect="3.3e+000" label="gi|14318169|AF379640_1_riboso gi|14318169|gb|AAK59928.1|AF379640_1 ribosomal protein..." type="model" sumI="5.06" maxI="10692" fI="106.92" >
+<protein expect="0.0" id="44.1" uid="3609" label="gi|14318169|AF379640_1_riboso gi|14318169|gb|AAK59928.1|AF379640_1 ribosomal protein..." sumI="5.06" >
+<note label="description">gi|14318169|AF379640_1_riboso gi|14318169|gb|AAK59928.1|AF379640_1 ribosomal protein S11 [Heliothis virescens] [MASS=17622]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="152">
+	MADQTEKAFQ KQATVFLNKK GGLKRKDMRH SKNVGLGFKT PREAIEGTYI
+	DKKCPFTGNV SIRGRILTGV VQKMKMQRTI VIRRDYLHYL PKYNRFEKRH
+	RNMSVHLSPC FRDVELGDIV TIGECRPLSK TIRFNVLKVT KGKGSKKSFK
+	KF
+<domain id="44.1.1" start="84" end="95" expect="3.3e+000" mh="1637.855" delta="0.181" hyperscore="17.1" nextscore="16.9" y_score="8.8" y_ions="2" b_score="11.1" b_ions="4" pre="IVIR" post="FEKR" seq="RDYLHYLPKYNR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 44 (charge 3)</note>
+<GAML:trace id="44" label="44.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1638.04</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="44.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+174.964 254.081 274.764 287.45 303.168 304.251 311.044 333.396 343.58 350.154 367.555 377.14 389.094 395.03 410.79 411.503 411.503 425.238 429.391 432.146 443.492 449.514 466.86 477.619 480.607 501.282 502.748 506.318 508.055 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="44.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="29">
+63 15 89 72 82 29 8 57 14 40 33 21 17 49 19 30 30 42 9 30 43 25 18 35 19 46 100 3 30 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="46" mh="662.701416" z="1" expect="1.1e+001" label="gi|6324780|NucleOlar_Complex_ gi|6324780|ref|NP_014849.1| NucleOlar Complex 2; involved..." type="model" sumI="5.08" maxI="12369" fI="123.69" >
+<protein expect="0.0" id="46.1" uid="1270" label="gi|6324780|NucleOlar_Complex_ gi|6324780|ref|NP_014849.1| NucleOlar Complex 2; involved..." sumI="5.08" >
+<note label="description">gi|6324780|NucleOlar_Complex_ gi|6324780|ref|NP_014849.1| NucleOlar Complex 2; involved in nuclear export of pre-ribosomes; Noc2p [Saccharomyces cerevisiae]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="710">
+	MGKVSKSTKK FQSKHLKHTL DQRRKEKIQK KRIQGRRGNK TDQEKADAAG
+	TREQQQLKKS AKEEVFKDMS VETFFEKGIE IPKENKKLKK KTTKEQSDED
+	SSSSEEEEDM GQSMAKLAEK DPEFYKYLEE NDKDLLDFAG TNPLDGIDSQ
+	DEGEDAERNS NIEEKSEQME LEKEKIELSL KLVRKWKKQL HDSPSLKLLR
+	NIISAFKVAV NLNKEENIED YKYAITDEKA FHELMFMVLK DVPQAIQKMA
+	PYKIVKGART LPNGGNVSRV SSIVKSHAGS LLILLNDITN TETAALVLHS
+	VNELMPYLLS YRRILKELIK SIVGVWSTTR ELETQIASFA FLINTTKEFK
+	KSMLETTLKT TYSTFIKSCR KTNMRSMPLI NFQKNSAAEL FGIDEVLGYQ
+	VGFEYIRQLA IHLRNTMNAT TKKSSKINSA EAYKIVYNWQ FCHSLDFWSR
+	VLSFACQPEK ENGSESPLRQ LIYPLVQVTL GVIRLIPTPQ FFPLRFYLIK
+	SLIRLSQNSG VFIPIYPLLS EILTSTAFTK APKKSPNLAA FDFEHNIKCT
+	QAYLNTKIYQ EGLSEQFVDL LGDYFALYCK NIAFPELVTP VIISLRRYIK
+	TSTNVKLNKR LSTVVEKLNQ NSTFIQEKRS DVEFGPTNKS EVSRFLNDVA
+	WNKTPLGSYV AVQREVKEEK ARLMRESMEE QDKERETEEA KLLNSLESDD
+	DNEDVEMSDA 
+<domain id="46.1.1" start="46" end="52" expect="1.1e+001" mh="661.326" delta="1.375" hyperscore="14.2" nextscore="10.1" y_score="11.6" y_ions="2" b_score="7.3" b_ions="2" pre="DQEK" post="EQQQ" seq="ADAAGTR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 46 (charge 1)</note>
+<GAML:trace id="46" label="46.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">662.701</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="46.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+253.78 290.917 299.23 300.226 325.156 328.643 333.118 355.428 356.861 390.434 392.648 408.257 416.979 434.815 436.13 444.374 475.304 487.157 488.258 522.705 527.291 533.134 543.942 549.24 565.561 568.755 593.241 601.791 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="46.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+8 31 55 43 22 13 9 17 11 82 9 76 77 91 14 18 54 54 47 6 9 9 28 34 14 9 100 24 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="48" mh="852.885790" z="2" expect="1000" label="no model obtained" type="model" sumI="5.10" maxI="23583" fI="235.83"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 48 (charge 2)</note>
+<GAML:trace id="48" label="48.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">852.886</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="48.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+174.754 175.856 190.793 202.823 212.759 241.57 251.167 254.53 272.276 290.774 297.027 304.894 305.997 307.586 313.225 315.137 315.137 330.578 337.434 343.935 364.163 365.373 366.256 367.064 390.297 391.095 396.251 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="48.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+10 7 16 19 18 3 26 16 12 100 38 1 12 3 28 20 20 36 13 7 20 9 17 26 37 13 4 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="48" mh="1278.825048" z="3" expect="2.8e-001" label="gi|16078254|similar_to_riboso gi|16078254|ref|NP_389071.1| similar to ribosomal-protein-alanine..." type="model" sumI="5.20" maxI="23583" fI="235.83" >
+<protein expect="0.0" id="48.1" uid="2924" label="gi|16078254|similar_to_riboso gi|16078254|ref|NP_389071.1| similar to ribosomal-protein-alanine..." sumI="5.20" >
+<note label="description">gi|16078254|similar_to_riboso gi|16078254|ref|NP_389071.1| similar to ribosomal-protein-alanine N-acetyltransferase [Bacillus subtilis]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="181">
+	MLKGKTIYVR PLEVTDAEEN LGLQSENRDF FEQFSMIRAD DYYTVEGQRK
+	RITEYQERLE KDEEYHFGIF TASDDRLIGT VSLFQIIRGA LQTAFIGYFL
+	DKAHNGKGIM TEAVRLVVDY AFHELKLHRI EAGVMPRNLG SMRVLEKAGF
+	HKEGIARKNV KINGVWEDHQ VLAILNPDDE Q
+<domain id="48.1.1" start="127" end="137" expect="2.8e-001" mh="1278.710" delta="0.115" hyperscore="18.0" nextscore="13.5" y_score="9.7" y_ions="6" b_score="8.8" b_ions="2" pre="HELK" post="NLGS" seq="LHRIEAGVMPR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 48 (charge 3)</note>
+<GAML:trace id="48" label="48.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1278.83</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="48.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="32">
+174.754 175.856 190.793 202.823 212.759 241.57 251.167 254.53 272.276 290.774 297.027 304.894 305.997 307.586 313.225 315.137 315.137 330.578 337.434 343.935 364.163 365.373 366.256 367.064 390.297 391.095 396.251 397.747 401.685 403.199
+404.427 407.275 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="48.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="32">
+10 7 16 19 18 3 26 16 12 100 38 1 12 3 28 20 20 36 13 7 20 9 17 26 37 13 4 7 8 19
+15 85 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="50" mh="1153.413134" z="2" expect="1.5e+001" label="gi|20178384|CPXV016_protein gi|20178384|ref|NP_619805.1| CPXV016 protein [Cowpox..." type="model" sumI="5.58" maxI="40104" fI="401.04" >
+<protein expect="0.0" id="50.1" uid="1243" label="gi|20178384|CPXV016_protein gi|20178384|ref|NP_619805.1| CPXV016 protein [Cowpox..." sumI="5.58" >
+<note label="description">gi|20178384|CPXV016_protein gi|20178384|ref|NP_619805.1| CPXV016 protein [Cowpox virus]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="764">
+	MASLTEHAIV NVRKLIYSTC LEDFDNRIST NARINNYDPD DGYCSDGDIY
+	SYNHTVRYKH IKVFKKKYYG IDNRQRQQYT DSKTALIDII GSMILMLKAD
+	RKNKSLVDQY KKFVKYIIKD NKSKTANHVF DIPNNGDMDI LYTYFNSPRT
+	RCIKLDLIKY MVDVGIVNLN YVCKKTGYGI LHAYLGNMNV DIDILEWLCN
+	NGVDVNLQNS NLITPLHTYM ITGNVCVDVI KKIIELGGDM DMKCVNGMSP
+	IMTYMTNIDN VNPEITNAYI ESLDGDKVKN IPMILHSYIT LARNIDISVV
+	YSFLQPGVKL HYKDSAGRTC LHQYILRHNI STNIIKLLHE YGNDVNEPDN
+	IGNTVLHTYL SMLSVVHILD PETDNDIRLD VIQCLLSLGA DITAVNCLGY
+	TPLTSYICTA QNYMYYDIID CLISDKVLNM VKHRILQDLL IRVDDTPCII
+	HHIIAKYNIP TDLYTDEYEP YDSTDIHDVY HCAIIERYNN AVCETSGMTP
+	LHVSIISHTN ANIVMDSFVY LLSIQANINI PTKNGVDPLM LTMENNMLSG
+	HQWYLVKNIL DKRPNVDIVI SFLDKCYAAG KFPSLLLSED DIIKPTLRLA
+	LMLAGLDYCN KCIEYMERDI AILDNSHAMF LAFDKLVSIR DNIDKLTKLH
+	INSRSNISIY DILVSKCYKE DIITHRENHN LVACCHGNDP LYDIINKYIT
+	DARSMYYIAN DISRYIMDMY PVMRIPVPLL FSCIIGIFRL TYFKKIIIDR
+	HHDSFINARL TDEA
+<domain id="50.1.1" start="75" end="83" expect="1.5e+001" mh="1153.560" delta="-0.146" hyperscore="11.6" nextscore="10.6" y_score="8.3" y_ions="2" b_score="7.7" b_ions="2" pre="IDNR" post="TALI" seq="QRQQYTDSK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 50 (charge 2)</note>
+<GAML:trace id="50" label="50.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1153.41</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="50.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+184.757 216.222 233.919 235.188 304.307 315.529 318.017 323.611 330.919 339.252 345.698 345.698 363.211 370.743 371.911 379.449 384.984 413.238 423.506 426.173 429.644 444.134 445.167 448.212 449.663 450.305 460.098 462.972 488.231 489.201
+489.88 500.226 502.99 504.084 505.743 508.361 512.396 513.26 518.063 523.282 531.69 533.035 535.297 541.258 542.406 551.401 793.417 815.874 831.786 839.278 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="50.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+12 11 17 24 14 13 20 10 14 17 11 11 12 10 11 21 17 19 9 10 14 30 39 18 32 35 11 19 11 17
+11 13 10 9 13 12 26 100 15 35 15 53 14 23 23 10 13 21 13 13 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="50" mh="1729.616063" z="3" expect="3.9e+000" label="gi|19113765|40s_ribosomal_pro gi|19113765|ref|NP_592853.1| 40s ribosomal protein..." type="model" sumI="5.61" maxI="40104" fI="401.04" >
+<protein expect="0.0" id="50.1" uid="2361" label="gi|19113765|40s_ribosomal_pro gi|19113765|ref|NP_592853.1| 40s ribosomal protein..." sumI="5.61" >
+<note label="description">gi|19113765|40s_ribosomal_pro gi|19113765|ref|NP_592853.1| 40s ribosomal protein s26 [Schizosaccharomyces pombe]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="120">
+	MTQKRRNCGR NKHGRGHTKF VRCINCSRAV PKDKAIKRWN IRNMVETAAI
+	RDLSEASVYS EYAIPKIYVK LQYCVSCAIH ARVVRVRSRE GRRIRTPPPR
+	VRYNRDGKRV NPAAIAKTAL 
+<domain id="50.1.1" start="38" end="51" expect="3.9e+000" mh="1729.928" delta="-0.312" hyperscore="19.2" nextscore="19.0" y_score="9.3" y_ions="6" b_score="6.9" b_ions="2" pre="KAIK" post="DLSE" seq="RWNIRNMVETAAIR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 50 (charge 3)</note>
+<GAML:trace id="50" label="50.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1729.62</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="50.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+184.757 216.222 233.919 235.188 304.307 315.529 318.017 330.919 339.252 345.698 345.698 363.211 370.743 371.911 379.449 384.984 413.238 426.173 429.644 444.134 445.167 448.212 449.663 450.305 460.098 462.972 488.231 489.201 489.88 500.226
+502.99 505.743 508.361 512.396 513.26 518.063 523.282 531.69 533.035 535.297 541.258 542.406 551.401 558.184 559.412 560.312 793.417 815.874 831.786 839.278 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="50.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+12 11 17 24 14 13 20 14 17 11 11 12 10 11 21 17 19 10 14 30 39 18 32 35 11 19 11 17 11 13
+10 13 12 26 100 15 35 15 53 14 23 23 10 26 47 11 13 21 13 13 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="52" mh="653.499756" z="1" expect="8.1e+000" label="gi|27806859|limbin gi|27806859|ref|NP_776352.1| limbin [Bos taurus]" type="model" sumI="7.87" maxI="2.3661e+007" fI="236610" >
+<protein expect="0.0" id="52.1" uid="3251" label="gi|27806859|limbin gi|27806859|ref|NP_776352.1| limbin [Bos taurus]" sumI="7.87" >
+<note label="description">gi|27806859|limbin gi|27806859|ref|NP_776352.1| limbin [Bos taurus]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1209">
+	MKFSKEIEVF NPPLASSASS GPWVHSVFAF THSWPRKTLF KRDSAVTHRL
+	YGDISRDFQG TSENGVIFQK CAVVSVQSEW PSAHVRLFVN NTRTPTAANL
+	SDLFLLDNIT GLTIRESAGN QTSRGFQAFR KKFLQVGDSF SVSYTASLEA
+	RDVGSGDILL LPAQLSFQSS SPNRTQLKAP FTITAEEKIT VLPNHGLHAA
+	GFCVAFILSL VLTWAVLFFM VRYQCVKGSS LTRHQVQHHE NKLEHSQFTS
+	ADGVNEDLAL NDQMIDILSS EDPGSMLQAL EELEIATLNR ADSDLEACRT
+	QISKDIIALL LKNLTSSGQL SPQVERRMGA VFKKQFLLLE KEIQEEYDRK
+	MVALTAECDL ETRKKTESQY QREMAAMEEA EEVLKRVSER SAVECSSLLR
+	TLHGLEQEHL RRSLALQQEE DLAKAHRQLA IFQRNELHNI FFTQIKSAIF
+	KGELKPEAAK MLLQDYSKIQ ESVEELMDFF QASKRYHLSK RFGHREYLVQ
+	NIQSSETRMQ GLLSTASAQL TLLIQKHERA GYLDEDQMQV LLERAQTEVF
+	SIKQKLDNDL KQEKKKLHQK LIIKRRREML QKHKEQRREQ LSIAEASGAA
+	EDAGQYLGQW RGLMAEHSAA LEELQERLDQ AALDELRALT LSLSEKATEE
+	LRRLQNSGMT QELLKRGVPW LFLQQILEEH SRDLAARAER LEGEERDRGQ
+	EGVQSVRQRL KDDALEASTE EQAELRHWEH LIFTKLCSSA FSLSEEELLG
+	MRQEVHGCFA QMDRSLALPK IRARVLLQRF QTAWREAEFL KLDQAMTAPE
+	LQPQSKARKP RSKSRSKIDL LKKCTEDKIQ LFKEQAPEDL VEKVRGELLR
+	ERVQQLEAQE GLFAESLVSL QFQKAARMAR TLWAYTALLS IQDLLLEELN
+	SSETLTKSAC MQILESHSPE LQELERKLED QLAHQEAAQL QRALDSWQQW
+	AGEGPALLQE PEETDSERHV SAVLQRALSK GQKLLEYHQQ SLREEQEDSV
+	VLEDLLENME TDTFVTLYGQ ELRLASYLSK LTMLPGGTLR RLLTVALPAA
+	SQAELLAVLD SVGQKHQDHS VENDGSRVQA DLGRRGKHQG WWQALESKLR
+	GELINRGLEK MLWAQKRKES ILKKTCPPLR ERVIFSGKRS WPHLSLESTD
+	ELTPVPIVGA EAVDLLNTGE KLFIFRNPKE PEISLHVPPR KKKKNFLNAK
+	KAAWALGLN
+<domain id="52.1.1" start="566" end="570" expect="8.1e+000" mh="653.409" delta="0.090" hyperscore="10.7" nextscore="10.3" y_score="2.6" y_ions="1" b_score="7.5" b_ions="3" pre="QEKK" post="LIIK" seq="KLHQK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 52 (charge 1)</note>
+<GAML:trace id="52" label="52.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">653.5</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="52.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="41">
+209.121 211.128 219.923 242.167 260.193 261.153 270.269 297.116 306.961 320.705 322.34 325.107 339.196 340.305 357.232 358.296 365.326 377.296 379.266 394.111 396.084 421.048 449.64 450.294 455.36 459.147 466.636 467.343 468.305 469.511
+479.192 480.221 485.078 489.371 490.353 491.467 507.247 508.306 525.25 526.005 556.451 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="52.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="41">
+4 5 2 3 2 1 2 17 2 2 3 2 20 3 100 11 4 3 3 4 3 1 2 2 1 1 1 12 10 6
+17 2 8 4 7 2 23 5 5 1 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="54" mh="643.253174" z="1" expect="4.9e+000" label="gi|166869|ribosomal_protein_S gi|166869|gb|AAA32867.1| ribosomal protein S11 [MASS=17738]" type="model" sumI="6.33" maxI="715107" fI="7151.07" >
+<protein expect="0.0" id="54.1" uid="2647" label="gi|166869|ribosomal_protein_S gi|166869|gb|AAA32867.1| ribosomal protein S11 [MASS=17738]" sumI="6.33" >
+<note label="description">gi|166869|ribosomal_protein_S gi|166869|gb|AAA32867.1| ribosomal protein S11 [MASS=17738]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="159">
+	MAEQTEKAFL KQPKVFLSSK ISGKGKRPGK GGNRFWKNIG LGFKTPREAI
+	DGAYIDSKCP FTGTVSIRGR ILAGTCHSAK MQRTIIVRRD YLHFVKKYPR
+	YEKRHSHIPA HVSPCFRVKE GDHVIIGQCR PLSKTVRFNV LKVIPTGASA
+	FGKKALTGV
+<domain id="54.1.1" start="25" end="30" expect="4.9e+000" mh="642.405" delta="0.849" hyperscore="11.9" nextscore="8.0" y_score="9.4" y_ions="2" b_score="4.6" b_ions="2" pre="ISGK" post="GGNR" seq="GKRPGK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 54 (charge 1)</note>
+<GAML:trace id="54" label="54.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">643.253</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="54.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+214.082 223.033 223.997 254.066 269.044 272.016 279.625 283.675 285.243 300.988 324.076 325.081 342.241 343.148 350.884 353.104 357.996 368.121 369.215 370.111 386.222 394.11 394.885 411.301 412.086 421.973 428.997 439.239 440.11 441.1
+457.129 514.257 515.62 537.108 538.146 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="54.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+1 3 1 2 1 2 1 3 1 4 2 4 1 2 4 1 6 4 4 2 1 9 2 1 13 10 6 8 100 3
+68 1 1 21 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="56" mh="949.727587" z="2" expect="3.4e+000" label="gi|108682|B39272_gamma-aminob gi|108682|pir||B39272 gamma-aminobutyric acid receptor..." type="model" sumI="5.28" maxI="15230" fI="152.3" >
+<protein expect="0.0" id="56.1" uid="2663" label="gi|108682|B39272_gamma-aminob gi|108682|pir||B39272 gamma-aminobutyric acid receptor..." sumI="5.28" >
+<note label="description">gi|108682|B39272_gamma-aminob gi|108682|pir||B39272 gamma-aminobutyric acid receptor A gamma-2L chain - bovine [MASS=55117]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="475">
+	MSSPNIWSTG SSVYSTPVFS QKMTLWILLL LSLYPGLTRQ KSDDDYEDYA
+	SNKTWVLTPK VPEGDVTVIL NNLLEGYDNK LRPDIGVKPT LIHTDMYVNS
+	IGPVNAINME YTIDIFFAQT WYDRRLKFNS TIKVLRLNSN MVGKIWIPDT
+	FFRNSKKADA HWITTPNRML RIWNDGRVLY TLRLTIDAEC QLQLHNFPMD
+	GHSCPLEFSS YGYPREEIVY QWKRSSVEVG DTRSWRLYQF SFVGLRNTTE
+	VVKTTSGDYV VMTVYSDLSR RMGYFTIQTY IPCTLIVVLS WVSFWINKDA
+	VPARTSLGIT TVLTMTTLST IARKSLPKVS YVTAMDLFVS VCFIFVFSAL
+	VEYGTLHYFV SNRKPSKDKD KKKKNPLLRM FSFKAPTIDI RPRSATIQMN
+	NATHLQERDE EYGYECLDGK DCASFFCCFE DCRTGAWRHG RIHIRIAKMD
+	SYARIFFPTA FCLFNLVYWV SYLYL
+<domain id="56.1.1" start="225" end="233" expect="3.4e+000" mh="949.459" delta="0.269" hyperscore="14.8" nextscore="13.4" y_score="9.4" y_ions="3" b_score="9.1" b_ions="2" pre="QWKR" post="SWRL" seq="SSVEVGDTR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 56 (charge 2)</note>
+<GAML:trace id="56" label="56.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">949.728</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="56.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="49">
+164.935 171.113 175.07 196.209 205.006 212.532 215.03 221.077 226.079 243.987 262.252 262.252 263.083 264.823 272.963 283.716 301.222 309.018 310.479 312.994 325.99 343.25 343.906 346.354 347.234 361.142 363.934 369.883 377.286 381
+386.111 391.043 392.666 393.511 397.478 400.406 402.446 407.352 413.63 415.347 418.02 432.791 434.142 439.551 440.415 441.531 447.894 484.354 549.163 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="56.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="49">
+14 13 52 26 2 28 14 14 20 4 47 47 7 8 3 7 38 9 28 27 12 26 60 6 100 10 30 25 31 26
+61 48 47 17 9 7 9 27 19 28 7 13 5 12 93 15 42 48 8 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="56" mh="1424.087743" z="3" expect="1.6e-001" label="gi|30089158|low_density_lipop gi|30089158|emb|CAD89505.1| low density lipoprotein..." type="model" sumI="5.38" maxI="41408" fI="414.08" >
+<protein expect="0.0" id="56.1" uid="2677" label="gi|30089158|low_density_lipop gi|30089158|emb|CAD89505.1| low density lipoprotein..." sumI="5.38" >
+<note label="description">gi|30089158|low_density_lipop gi|30089158|emb|CAD89505.1| low density lipoprotein receptor-related protein 8 [Bos taurus] [MASS=16201]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="138">
+	YLWRHRMSAR TQMPAASICV NYKGYFKCEC HPGYEMDTLT KNCKAVAGRS
+	PSLIFTNRHE VRRIDLVKRD YSRLIPMLKN VVALDVEVAT NRIYWCDLSY
+	RKIYSAYMDK ASNPVEQDVL IDKHAAPLPR AWRWTGFH
+<domain id="56.1.1" start="11" end="23" expect="1.6e-001" mh="1425.686" delta="-1.599" hyperscore="24.8" nextscore="19.7" y_score="8.0" y_ions="6" b_score="8.9" b_ions="6" pre="MSAR" post="GYFK" seq="TQMPAASICVNYK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 56 (charge 3)</note>
+<GAML:trace id="56" label="56.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1424.09</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="56.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+164.935 171.113 175.07 196.209 212.532 215.03 221.077 226.079 243.987 262.252 262.252 263.083 264.823 283.716 301.222 309.018 310.479 312.994 325.99 343.25 343.906 346.354 347.234 361.142 363.934 369.883 377.286 381 386.111 391.043
+392.666 393.511 397.478 400.406 402.446 407.352 413.63 415.347 418.02 432.791 434.142 439.551 440.415 441.531 447.894 456.311 457.021 458.301 484.354 549.163 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="56.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+5 5 19 10 10 5 5 7 1 17 17 2 3 3 14 3 10 10 5 10 22 2 37 4 11 9 11 10 22 18
+17 6 3 3 3 10 7 10 3 5 2 5 34 5 15 9 14 100 17 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="58" mh="449.344666" z="1" expect="1000" label="no model obtained" type="model" sumI="7.21" maxI="4.99918e+006" fI="49991.8"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 58 (charge 1)</note>
+<GAML:trace id="58" label="58.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">449.345</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="58.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+146.967 164.873 171.924 181.301 184.663 185.559 187.075 203.47 204.088 205.252 209.158 216.993 218.08 226.132 244.188 244.978 245.977 288.141 298.983 302.086 315.351 316.039 317.117 318.127 319.622 343.301 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="58.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="26">
+1 3 2 2 3 1 5 6 31 6 6 13 2 18 41 50 12 1 1 2 1 100 17 2 1 1 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="60" mh="472.330139" z="1" expect="1000" label="no model obtained" type="model" sumI="6.66" maxI="1.1408e+006" fI="11408"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 60 (charge 1)</note>
+<GAML:trace id="60" label="60.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">472.33</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="60.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="20">
+146.969 184.951 197.081 212.994 212.994 213.994 225.132 226.078 242.035 243 253.18 260.104 261.112 280.96 282.102 297.944 325.215 325.974 341.141 344.318 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="60.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="20">
+20 9 5 72 72 14 4 1 26 4 3 100 12 15 4 4 3 31 3 1 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="62" mh="564.226563" z="1" expect="1000" label="no model obtained" type="model" sumI="5.41" maxI="21876" fI="218.76"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 62 (charge 1)</note>
+<GAML:trace id="62" label="62.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">564.227</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="62.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+176.949 218.527 220.818 220.818 242.893 263.007 263.783 265.003 270.734 283.223 309.047 310.026 311.361 326.514 348.961 353.163 353.852 355.215 371.216 382.462 386.331 397.121 409.902 415.044 428.006 441.109 448.099 459.281 460.266 463.85
+475.229 479.578 481.201 483.463 499.432 503.387 506.409 580.32 584.051 600.485 674.733 680.283 716.057 732.118 733.313 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="62.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+59 10 51 51 10 7 7 91 8 13 40 12 11 52 7 39 6 9 35 6 19 100 7 25 14 27 26 59 5 2
+26 23 40 12 33 94 4 13 6 4 58 12 26 9 7 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="64" mh="928.905200" z="2" expect="1000" label="no model obtained" type="model" sumI="5.70" maxI="188655" fI="1886.55"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 64 (charge 2)</note>
+<GAML:trace id="64" label="64.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">928.905</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="64.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+255.099 285.074 290.924 301.047 318.727 351.377 354.197 357.069 364.413 380.222 388.088 392.148 399.821 407.346 411.927 420.369 422.803 422.803 423.83 430.082 431.018 436.945 511.263 556.958 574.886 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="64.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+2 1 2 4 3 4 1 1 1 2 2 3 4 5 2 3 100 100 7 2 1 3 2 4 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="64" mh="1392.854161" z="3" expect="1.8e+000" label="gi|15668549|LSU_ribosomal_pro gi|15668549|ref|NP_247347.1| LSU ribosomal protein..." type="model" sumI="5.76" maxI="188655" fI="1886.55" >
+<protein expect="0.0" id="64.1" uid="1472" label="gi|15668549|LSU_ribosomal_pro gi|15668549|ref|NP_247347.1| LSU ribosomal protein..." sumI="5.76" >
+<note label="description">gi|15668549|LSU_ribosomal_pro gi|15668549|ref|NP_247347.1| LSU ribosomal protein L11P (rplK) [Methanococcus jannaschii]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="161">
+	MAKEVVEVLV TGGRATAGPP LGPAIGPLGV NVMQVVKEIN EKTKDYEGMQ
+	VPVKVIVDTE TRKFEIEVGI PPTTALIKKE LGIETAAHEP RHEVVGNLTL
+	EQVIKIAKMK KDAMLSYTLK NAVKEVLGTC GSMGVTVEGK DPKEVQKEID
+	AGVYDEYFKE E
+<domain id="64.1.1" start="43" end="54" expect="1.8e+000" mh="1394.698" delta="-1.844" hyperscore="15.0" nextscore="13.2" y_score="5.4" y_ions="5" b_score="4.8" b_ions="3" pre="INEK" post="VIVD" seq="TKDYEGMQVPVK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 64 (charge 3)</note>
+<GAML:trace id="64" label="64.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1392.85</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="64.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+255.099 285.074 290.924 301.047 318.727 351.377 354.197 357.069 364.413 380.222 388.088 392.148 399.821 407.346 411.927 420.369 422.803 422.803 423.83 430.082 431.018 436.945 440.52 441.857 443.915 446.967 448.021 511.263 556.958 574.886
+
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="64.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+2 1 2 4 3 4 1 1 1 2 2 3 4 5 2 3 100 100 7 2 1 3 16 2 8 12 3 2 4 3
+
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="66" mh="520.277588" z="1" expect="1000" label="no model obtained" type="model" sumI="5.60" maxI="77151" fI="771.51"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 66 (charge 1)</note>
+<GAML:trace id="66" label="66.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">520.278</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="66.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="43">
+172.234 175.021 176.981 220.865 224.994 232.564 236.821 238.892 247.185 258.013 261.283 264.867 267.102 281.135 282.968 296.028 298.814 298.814 299.761 308.926 319.749 326.68 353.375 358.406 361.111 365.706 370.597 371.255 382.656 386.909
+397.005 399.703 403.004 414.908 423.452 430.796 441.05 455.997 458.236 458.925 464.163 464.954 620.411 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="66.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="43">
+4 2 15 10 4 5 2 7 1 4 3 19 3 5 22 4 100 100 23 15 1 5 1 9 3 7 8 2 3 5
+10 5 3 45 4 12 2 4 18 9 5 2 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="68" mh="608.269287" z="1" expect="1000" label="no model obtained" type="model" sumI="5.27" maxI="37158" fI="371.58"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 68 (charge 1)</note>
+<GAML:trace id="68" label="68.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">608.269</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="68.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+220.415 221.148 236.753 238.902 264.038 265.001 283.265 308.977 321.439 326.772 353.071 354.932 370.838 386.892 396.949 415.256 440.659 459.325 485.201 493.265 498.038 503.142 508.713 529.327 547.131 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="68.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+13 13 14 4 6 11 3 12 40 19 23 15 36 9 31 27 15 19 5 18 6 25 8 33 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="70" mh="889.229540" z="2" expect="1000" label="no model obtained" type="model" sumI="5.60" maxI="218322" fI="2183.22"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 70 (charge 2)</note>
+<GAML:trace id="70" label="70.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">889.23</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="70.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+169.982 185.011 196.781 212.967 216.145 232.137 250.459 288.26 312.181 312.958 341.111 342.099 342.782 356.236 357.196 358.542 369.569 383.961 387.664 401.421 408.788 414.384 419.775 450.247 505.861 527.038 543.121 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="70.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+2 1 2 4 2 2 3 2 8 1 2 4 1 2 2 100 2 4 3 6 2 2 8 7 2 5 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="70" mh="1333.340673" z="3" expect="9.7e+000" label="gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." type="model" sumI="5.61" maxI="218322" fI="2183.22" >
+<protein expect="0.0" id="70.1" uid="717" label="gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." sumI="5.66" >
+<note label="description">gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding protein D26; GPBPD26 [Bos taurus] [MASS=68077]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="598">
+	MSDNQSWNSS GSEEDPETES GPPVERCGVL SKWTNYIHGW QDRWVVLKNN
+	TLSYYKSEDE TEYGCRGSIC LSKAVITPHD FDECRFDISV NDSVWYLRAQ
+	DPDHRQQWID AIEQHKTESG YGSESSLRRH GSMVSLVSGA SGYSATSTSS
+	FKKGHSLREK LAEMETFRDI LCRQVDTLQK FFDACADAVS KDEFQRDKVV
+	EDDEDDFPTT RSDGDFLHNT NGNKEKVFPH VTPKGINGID FKGEAITFKA
+	TTAGILATLS HCIELMVKRE DSWQKRMDKE TEKRRRVEEA YKNAMTELKK
+	KSHFGGPDYE EGPNSLINEE EFFDAVEAAL DRQDKIEEQS QSEKVRLHWS
+	TSMPSGDAFS SVGTHRFVQK VEEMVQNHMT YSLQDVGGDA NWQLVVEEGE
+	MKVYRREVEE NGIVLDPLKA THAVKGVTGH EVCNYFWNVD VRNDWETTIE
+	NFHVVETLAD NAIIIYQTHK RVWPASQRDV LYLSAIRKIP ALNENDPETW
+	IVCNFSVDHS SAPLNNRCVR AKINVAMICQ TLVSPPEGNQ EISRDNILCK
+	ITYVANVNPG GWAPASVLRA VAKREYPKFL KRFTSYVQEK TAGKPILF
+<domain id="70.1.1" start="336" end="346" expect="9.7e+000" mh="1332.675" delta="0.665" hyperscore="12.6" nextscore="12.4" y_score="5.0" y_ions="1" b_score="9.3" b_ions="3" pre="RQDK" post="LHWS" seq="IEEQSQSEKVR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 70 (charge 3)</note>
+<GAML:trace id="70" label="70.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1333.34</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="70.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+169.982 185.011 196.781 212.967 216.145 232.137 250.459 288.26 312.181 312.958 341.111 342.099 342.782 356.236 357.196 358.542 369.569 383.961 387.664 401.421 408.788 414.384 419.775 427.642 450.247 505.861 527.038 543.121 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="70.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="28">
+2 1 2 4 2 2 3 2 8 1 2 4 1 2 2 100 2 4 3 6 2 2 8 7 7 2 5 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="72" mh="857.473315" z="2" expect="2.8e+001" label="gi|17563246|ribosomal_Protein gi|17563246|ref|NP_505007.1| ribosomal Protein, Small..." type="model" sumI="5.59" maxI="136684" fI="1366.84" >
+<protein expect="0.0" id="72.1" uid="2525" label="gi|17563246|ribosomal_Protein gi|17563246|ref|NP_505007.1| ribosomal Protein, Small..." sumI="5.59" >
+<note label="description">gi|17563246|ribosomal_Protein gi|17563246|ref|NP_505007.1| ribosomal Protein, Small subunit (14.0 kD) (rps-30) [Caenorhabditis elegans]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="130">
+	MQIFLLGLDN TTHTLDVDAS TTLSAIKGVI GAGEEFSISY GSKVLSEELT
+	LGECQIESLS TLSVNGRLLG GKVHGSLARA GKVRAQTPKV DKQDKKKKKR
+	GRAFRRVQYT RRYVNVASGP GKKRGPNSNS 
+<domain id="72.1.1" start="123" end="130" expect="2.8e+001" mh="859.438" delta="-1.965" hyperscore="9.0" nextscore="9.0" y_score="1.8" y_ions="1" b_score="5.8" b_ions="3" pre="GPGK" post="]" seq="KRGPNSNS" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 72 (charge 2)</note>
+<GAML:trace id="72" label="72.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">857.473</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="72.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+166.705 216.153 225.983 229.189 285.453 296.343 298.191 306.975 329.415 341.075 342.37 351.896 358.064 358.673 358.673 359.602 368.299 369.022 383.363 387.604 388.757 393.055 403.399 446.392 516.177 540.152 553.038 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="72.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="27">
+2 2 2 2 1 2 5 1 2 8 4 2 9 100 100 17 1 3 5 2 1 3 3 2 2 1 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="72" mh="1285.706334" z="3" expect="4.3e+000" label="gi|27807269|tenascin_X gi|27807269|ref|NP_777128.1| tenascin X [Bos taurus]" type="model" sumI="5.61" maxI="136684" fI="1366.84" >
+<protein expect="0.0" id="72.1" uid="2984" label="gi|27807269|tenascin_X gi|27807269|ref|NP_777128.1| tenascin X [Bos taurus]" sumI="5.61" >
+<note label="description">gi|27807269|tenascin_X gi|27807269|ref|NP_777128.1| tenascin X [Bos taurus]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="4135">
+	MPTQCSLTSN LALLMLLGTV TAGPFSPRSN MTLPAPRPPP QPGGRTVQPE
+	GGGPSSRLYE HTVEGGEKQV VFTHRINLPP SAGCGCPPGT EPPVPASEVQ
+	ALRVRLEILE ELVKGLKEQC TGGCCPPAAQ AGTGQTDIRS LCSLHGVFDL
+	SRCACSCEPG WGGPTCSDPE GAEGPPSSPP SAPGSCPDDC NDQGRCVRGR
+	CVCFPGYTGP SCSWPSCPGD CHGRGRCVQG VCVCRSGFSG DDCSVRSCPR
+	GCSQRGRCED GRCVCNPGYS GEDCGVRSCP RDCSQRGRCE NGRCVCNPGY
+	TGDDCGVRSC PRGCSQKGRC EDGRCVCDPG YTGDDCGSRT CPWDCGEGGR
+	CVDGRCVCWP GYAGEDCSTR TCPRDCRGPR GCEDGECICD PGYSGDDCGV
+	RSCPSDCNQR GRCEDGRCVC WPGYSGPDCG ARACPRDCRG RGRCENGVCV
+	CHAGYSGEDC GVRSCPGDCR RRGRCESGRC VCWPGYTGRD CGTRACPGDC
+	RGRGRCVDGR CVCNPGFAGE DCGSRRCPGD CRGRGRCGDG VCSCDVGYEG
+	EDCGKRSCPR GCQGRGQCLE GRCVCDDGYE GEDCGVRRCP RDCNQRGVCQ
+	DGVCTCWEGF AGEDCGLRVC PSNCHRRGRC ENGRCVCDSG YTGPSCATRT
+	CPADCRGRGR CVQGVCVCHV GYSGEDCGQE EPPASACPGG CGPRELCSAG
+	QCVCVEGFRG PDCAIQTCPG DCRGRGECRE GSCVCQDGYA GEDCGEEVPA
+	IEGMRMHLLE ETTVRTEWTR APGNVDAYEI QFIPTTEGAS PPFTARVPSS
+	ASAYDQRGLA PGQEYQVTVR ALRGTNWGPP ASKTITTMID GPQDLRVVAV
+	TPTTLELNWL RPQAEVDRFV VSYVSAGNQR VRLEVPSEAD GTLLTGLMPG
+	VEYVVTVTAE RGRAVSYPAS IRANTGSSLS GLLGATDEPP PSGPSTTQGA
+	QAPVLQQRPQ ELAELRVLGK DKTGRLRVAW TAQPDTFTHF QLRLRVPEGP
+	GAHEELLPGD VRQALVPSPP PESPYELSLR GIPPSGEPSA PLIYQGIMDK
+	DGEKPGKPLA PPRLGKLTVT DVTSDSLLLH WTVPEGEFDS FVIQYKDRDR
+	PQVVPVEGPQ RSALISNLDV GRKYKFVLYG LVGKKRHGPL VAEAKILSQT
+	DPSPVTPPRL GNLWVTDPTP DSLHLSWTVP EGQFDSFMVQ YRDRAGRPQV
+	VPVEGPDRSV IISPLDPDHK YRFTLFGIAN KNRHGPLTAD GTTAPEKKEE
+	PRHPEPPERP LLGELTVAGA TADSLRLSWT VAQGSFDSFV VQYKDAQGRP
+	QAVPVTGDEN EVAIPSLEPD RKYKMNLYGL HGRQRVGPVS VVATTAPQEV
+	LDETPSATEM EETPSPTEPS TKAPESPEKP LLGELMVTGS SPDSLSLSWT
+	IPQGHFDSFT VQYRDGDGQP RVMRVPGDED GVTISGLEPD HKYKMNLYGF
+	HDRQRVGPMS VIGVTTAEEE TPSPTEMEET PSPTEVEETP SPMEPSTEAP
+	EPAEEPLLGE LTVTGSSPDS LSLSWTVPQG HFDSFTVQYK GRDGPQVVRV
+	RGEETEVTIG GLEPGRKYKM NLYGLHGGQR SGPVSTVGVT APQAEETPPA
+	TEPPKEPRLG ELTVTDVTPN SVGLEWTVSE GQFDSFMVQY KDRDGQSHVV
+	PVAADQREAT VSGLEPERKY RMNVYGLHGG QRVGPLSVVA LTAPVPPDPV
+	TEPPVEPRLG ELTVTDVTPD SVGLSWTVAE GEFDSFLVQY KDRDGQPQVV
+	PVATDQREVT IPGLEPSRKY KFLLFGIQDG KRRSTVSVEA KTVGRGDASP
+	GAPPRLGELW VTDPTPDSLR LSWTVPEGHF DSFVVQFKDR DGPRVVSVEG
+	HERSVTISPL DSGRKYRFLV YGLLGKRRHG PLTTEGTTET RRAVDEAGTK
+	RPSKPRLGEE LQVTGVTSNS VGLSWTVPEG HFDSFVIQYR DRDGQPQVVP
+	VEGSRREVSV SGLDPARRYK LLLYGLSRDK RVGPISAIAV TEPAPREEIK
+	AEPATFSPPA SEPLLGEVTL EEAAPHSLRL SWTATEGEFD SFEVQYTDEN
+	GQLQEVNVGG DQHDITISDL ESDHRYLVSL YGFHDGQRVG PAHIEAMTAP
+	REEDDEPSES LSTTQTPSTA VPEPHIKPRL GELAVTDTTP DSLSLSWTVP
+	EGQFDHFLIQ YKNGDGQPKV VRVPGDEDEV TISGLEPDHK YKMNLYGFHN
+	RQRMGPVSVI GVTTAEEETP SPTEMEETPS PTEMEETPSP TEPNTEVPEP
+	PEEPFLEELT VTGSSPDSLS LSWTVPQGHF DSFTVQYKNG DGQPKVVRVP
+	GHDKGVTISG LEPDHKYKMN LYGFHDRQRV GPVSVIGVTT AEEETPSPTE
+	VEETPSPTEP STEAPEPPEE PVLGELMVTG SSPDSLSLSW TVPQGHFDSF
+	TVQYKGRDGP QVVRVGGEET EVTVEGLEPG HKYKMNLYGL HGGRRVGPVS
+	TVAMTAREEE PPASPPLKPQ LGELTVTDAT PDSLSLSWTV PEGQFDHFLV
+	QYKNGDGQPK AVRVPGDEDG VTISGLEPDH KYKMNLYGFH DRQRVGPVST
+	VGLTVSEKDQ EMTPAPTDLP TAAPEPPIKP RLGELVVTDA TPDSLSLSWT
+	VPEGQFDHFL IQYKNGDGQP KAVRVPGDED EVTISGLEPD HKYKMNLYGF
+	HDRQRMGPVS VIGVTTAEEE TPGPTEMEQT PSPTEVEETP GPTEVEETPS
+	PTEPSTEAPE PPEEPLLGEL TVTGSSPDSL SLSWTVPQGH FDSFTIQHKG
+	RDGPQVVRVG GEETEVTIGG LEPGRKYKMN LYGLHSGQRV GPVSTVGVTD
+	PQEVVEETPS PTEPSTEAPE PPEEPLLGDL TVTGSSPDSL SLSWTVPQGH
+	FDSFTIQYKG RDRPQVVRVG GEETEVTIGG LEPRHKYKMN LYGLHGGRRV
+	GPVSTVGVTA PDYDAMTTQT PSTSVPEPPT KPRLGEVTVT DATPDSLSLS
+	WTIPEGQFDH FLVQYKNGDG QPKAVRVPGD EDGVTISGLE PDHKYKMNLY
+	GFHDHQRVGP VSVIGVTTAE EETPSPTKME ETPSPTEMEE TPSPTEPSTE
+	APEPPEEPLL GELTVTGSSP DSLSLSWTVP QGHFDSFTVQ YKGRDGPQVV
+	RVGGEETEVT VGGLEPGRKY KMHLYGLHGG RRVGPASTVG VTASLTTERP
+	LAPRLGELAV AVVTSDTARL SWTVEQGPFD SFLVQYKDVQ GQPQAVPVAG
+	DLREVTVSSL APGRKYKFLL FGLRDEKRHG PVSADAKTLP DTKPAPRLGE
+	LTVTDVTPGS VGLSWTVPEG EFDSFMVQYK DRDGQPRVVP VAADQREVTV
+	PGLEPNRKYK FLLYGLVGRK RLGPISAEGS TAPLEKERQP PPRLGELTVT
+	DETPNSLRLS WTVAQGRFDS FVVQYRGTDG QPRMVPVAAD QREFTVEGLE
+	PGRKYKFLLY GLLGGQRLGP ASVLGMTAPE EDTPAPWHAA TEAPKPPEGP
+	RLGVLAVRDV SPDSLRLSWS VVQGPFDSFV VQYQDTDGQP QALLVGGDQN
+	KVLVSGLEPS TSYEFFLYGL HEGKRLGPVS AEGTTGPVPA GQTPGEPGPR
+	LSHLSVTDVT TSSLRLNWEA PPEAFDSFLL RFGVPSPSTL EPQLRPLLQR
+	ELTVPGTRRS AVLRDLHPGT LYTLTLYGLR GPHKADSIQG TARTLSPVLE
+	SPRDLQFSEI RETSARVSWT PPTSRVDGFK VSYQLADGGE PQSVQVDGRT
+	QKLEGLIPGA QYEVTVVSVR GFEESEPLTG FLTTVPDGPT HLRALNLTDE
+	SALLHWKPPQ TPVDTYDVKV TAPGAPSLQA SAPGSAVDYP LQGLVTHTNY
+	TATLRGLRGP NFTSPASITF TTGLEAPQDL EAKEVTPRTA LLTWTAPEVS
+	PTGYLLSFNT PGGQTQEILL PGGVTSHQLR GLFPSTPYST WLRAMWGDSF
+	TPPVSTSFTT GGLRIPFPRD CGEEMQNGVS TSRTTTIFLN GNRERPLNVF
+	CDMETDGGGW LVFQRRMDGK TDFWRDWEDY AHGFGNISGE FWLGNEALHS
+	LTKAGDYSLR VDLRAGDEAV FAQYDSFQVD SADEYYRLHL EGYHGTAGDS
+	MSYHSGSVFS ARDRDPNNLL ISCAVSYRGA WWYRNCHYAN LNGLYGSTVD
+	HQGVSWYYWK GFDFSVPFTE MKLRPRSYRP LGRGG
+<domain id="72.1.1" start="1956" end="1967" expect="4.3e+000" mh="1285.686" delta="0.020" hyperscore="15.9" nextscore="15.2" y_score="6.4" y_ions="4" b_score="5.6" b_ions="4" pre="EGSR" post="RYKL" seq="REVSVSGLDPAR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 72 (charge 3)</note>
+<GAML:trace id="72" label="72.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1285.71</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="72.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="32">
+166.705 216.153 225.983 229.189 285.453 296.343 298.191 306.975 329.415 341.075 342.37 351.896 358.064 358.673 358.673 359.602 368.299 369.022 383.363 387.604 388.757 393.055 403.399 404.436 406.272 408.329 411.115 411.839 446.392 516.177
+540.152 553.038 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="72.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="32">
+2 2 2 2 1 2 5 1 2 8 4 2 9 100 100 17 1 3 5 2 1 3 3 2 5 4 3 2 2 2
+1 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="76" mh="655.249268" z="1" expect="1000" label="no model obtained" type="model" sumI="6.09" maxI="754942" fI="7549.42"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 76 (charge 1)</note>
+<GAML:trace id="76" label="76.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">655.249</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="76.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+226.066 227.128 243.93 315.219 337.139 354.942 394.287 412.164 413.151 450.105 467.985 469.047 478.416 522.998 526.093 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="76.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+16 1 1 2 5 1 2 100 11 2 11 3 2 4 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="78" mh="1018.306689" z="2" expect="8.0e+000" label="gi|125696|K6B1_RAT_Ribosomal_ gi|125696|sp|P21425|K6B1_RAT Ribosomal protein S6 kinase..." type="model" sumI="4.96" maxI="11902" fI="119.02" >
+<protein expect="0.0" id="78.1" uid="4034" label="gi|125696|K6B1_RAT_Ribosomal_ gi|125696|sp|P21425|K6B1_RAT Ribosomal protein S6 kinase..." sumI="4.96" >
+<note label="description">gi|125696|K6B1_RAT_Ribosomal_ gi|125696|sp|P21425|K6B1_RAT Ribosomal protein S6 kinase I (S6K) (P70-S6K)</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="502">
+	MAGVFDIDLD QPEDAGSEDE LEEGGQLNES MDHGGVGPYE LGMEHCEKFE
+	ISETSVNRGP EKIRPECFEL LRVLGKGGYG KVFQVRKVTG ANTGKIFAMK
+	VLKKAMIVRN AKDTAHTKAE RNILEEVKHP FIVDLIYAFQ TGGKLYLILE
+	YLSGGELFMQ LEREGIFMED TACFYLAEIS MALGHLHQKG IIYRDLKPEN
+	IMLNHQGHVK LTDFGLCKES IHDGTVTHTF CGTIEYMAPE ILMRSGHNRA
+	VDWWSLGALM YDMLTGAPPF TGENRKKTID KILKCKLNLP PYLTQEARDL
+	LKKLLKRNAA SRLGAGPGDA GEVQAHPFFR HINWEELLAR KVEPPFKPLL
+	QSEEDVSQFD SKFTRQTPVD SPDDSTLSES ANQVFLGFTY VAPSVLESVK
+	EKFSFEPKIR SPRRFIGSPR TPVSPVKFSP GDFWGRGASA STANPQTPVE
+	YPMETSGIEQ MDVTTSGEAS APLPIRQPNS GPYKKQAFPM ISKRPEHLRM
+	NL
+<domain id="78.1.1" start="477" end="485" expect="8.0e+000" mh="1018.532" delta="-0.225" hyperscore="12.9" nextscore="8.0" y_score="7.4" y_ions="2" b_score="10.1" b_ions="2" pre="LPIR" post="QAFP" seq="QPNSGPYKK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 78 (charge 2)</note>
+<GAML:trace id="78" label="78.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1018.31</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="78.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+229.969 257.781 275.816 340.254 372.204 390.275 396.757 408.986 418.296 422.116 438.641 440.698 448.415 464.085 468.412 481.706 484.542 676.709 792.513 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="78.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+31 12 11 50 6 29 38 82 100 10 60 27 86 41 8 26 48 34 61 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="78" mh="1526.956395" z="3" expect="6.3e+000" label="gi|27477455|similar_to_riboso gi|27477455|ref|XP_210525.1| similar to ribosomal protein..." type="model" sumI="5.01" maxI="11902" fI="119.02" >
+<protein expect="0.0" id="78.1" uid="1691" label="gi|27477455|similar_to_riboso gi|27477455|ref|XP_210525.1| similar to ribosomal protein..." sumI="5.01" >
+<note label="description">gi|27477455|similar_to_riboso gi|27477455|ref|XP_210525.1| similar to ribosomal protein L36 [Homo sapiens] [MASS=12706]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="112">
+	MTRRLGMKAN QKPLEIRRDS QATLESSSQD FALPYGPWPP PGQPRRCVAL
+	TLTSCMPWSC SRTPSTKRAL KFTKKRVGTH VHVKKQQEEL RPSLAAMRKL
+	PRTEPPPPLC TQ
+<domain id="78.1.1" start="86" end="98" expect="6.3e+000" mh="1528.790" delta="-1.834" hyperscore="13.7" nextscore="13.2" y_score="9.6" y_ions="1" b_score="9.0" b_ions="4" pre="HVKK" post="KLPR" seq="QQEELRPSLAAMR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 78 (charge 3)</note>
+<GAML:trace id="78" label="78.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1526.96</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="78.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="21">
+229.969 257.781 275.816 340.254 372.204 390.275 396.757 408.986 418.296 422.116 438.641 440.698 448.415 464.085 468.412 481.706 484.542 488.127 491.667 676.709 792.513 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="78.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="21">
+31 12 11 50 6 29 38 82 100 10 60 27 86 41 8 26 48 23 68 34 61 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="80" mh="1003.655322" z="2" expect="2.1e+001" label="gi|27674517|similar_to_riboso gi|27674517|ref|XP_220755.1| similar to ribosomal protein..." type="model" sumI="5.42" maxI="29534" fI="295.34" >
+<protein expect="0.0" id="80.1" uid="2625" label="gi|27674517|similar_to_riboso gi|27674517|ref|XP_220755.1| similar to ribosomal protein..." sumI="5.42" >
+<note label="description">gi|27674517|similar_to_riboso gi|27674517|ref|XP_220755.1| similar to ribosomal protein L7a, cytosolic [validated] - rat [Rattus norvegicus] [MASS=35680]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="317">
+	MHMSTTGRNT STFYHEMSEQ GYSVEEEEAA VGLGKRLLRS MVKFDFLSWV
+	LSKMPKGKKA KGKKVAPAPT VVKKQEAKKV ANPLFEKRPK NFGIGQDIQP
+	KRDLTRFIKW PCYIRLQRQR AIFYKRLKVP PTINQFTQAL DRLTVTQLLK
+	LAHNTGQRQS RRRSRGCWPV LKAAGKGDVP TKRPPVLRAG VNTVTTSVEN
+	KKAQLVVIAH DIDPIELVVS LPALCRKMGV PYCIIKGKAR LGRLVHRKTC
+	TTVAFTQVNS EDKGALAKLV EAIRTNYNDR YDEIRCHWGG NVLGPKSVAR
+	IAKLEKAKAK ELVTKLG
+<domain id="80.1.1" start="36" end="43" expect="2.1e+001" mh="1002.624" delta="1.031" hyperscore="12.4" nextscore="11.3" y_score="4.9" y_ions="2" b_score="9.9" b_ions="2" pre="GLGK" post="FDFL" seq="RLLRSMVK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 80 (charge 2)</note>
+<GAML:trace id="80" label="80.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1003.66</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="80.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="48">
+176.709 221.035 224.027 238.923 242.102 246.886 252.818 265.048 269.673 289.158 296.528 298.565 312.226 322.417 325.869 336.961 345.194 346.797 355.109 356.134 358.071 365.232 371.043 377.026 383.031 384.06 388.841 390.377 397.13 401.19
+415.165 421.228 423.981 429.621 438.093 440.336 449.295 457.209 458.075 459.689 460.793 461.529 466.116 468.679 472.729 474.149 475.193 520.465 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="80.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="48">
+22 17 3 46 6 10 16 11 21 7 23 100 18 11 17 27 5 16 75 14 29 20 6 6 37 9 3 8 7 9
+34 9 6 2 14 6 17 13 5 10 76 11 50 9 13 7 9 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="80" mh="1504.979344" z="3" expect="3.7e+000" label="gi|33241144|Ribosomal_protein gi|33241144|ref|NP_876086.1| Ribosomal protein L15..." type="model" sumI="5.50" maxI="29534" fI="295.34" >
+<protein expect="0.0" id="80.1" uid="1842" label="gi|33241144|Ribosomal_protein gi|33241144|ref|NP_876086.1| Ribosomal protein L15..." sumI="5.50" >
+<note label="description">gi|33241144|Ribosomal_protein gi|33241144|ref|NP_876086.1| Ribosomal protein L15 [Prochlorococcus marinus subsp. marinus str. CCMP1375]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="151">
+	MTSISLDSLK PNKGARKRKT RKGRGIAAGQ GASCGFGMRG QKSRSGRPTR
+	PGFEGGQMPL YRRVPKLKHF PLVNSKSFTL INVASLNSLK EGSTVNLDSL
+	VKTGIVTSPK YPLKVLGNGN LKVKLVVQAA AFTASAKTKI EGAGGSCEVF
+	E
+<domain id="80.1.1" start="123" end="137" expect="3.7e+000" mh="1503.889" delta="1.090" hyperscore="18.7" nextscore="18.3" y_score="9.1" y_ions="5" b_score="8.6" b_ions="4" pre="GNLK" post="TKIE" seq="VKLVVQAAAFTASAK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 80 (charge 3)</note>
+<GAML:trace id="80" label="80.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1504.98</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="80.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+176.709 221.035 238.923 242.102 246.886 252.818 265.048 269.673 289.158 296.528 298.565 312.226 322.417 325.869 336.961 345.194 346.797 355.109 356.134 358.071 365.232 371.043 377.026 383.031 384.06 390.377 397.13 401.19 415.165 421.228
+423.981 438.093 440.336 449.295 457.209 458.075 459.689 460.793 461.529 466.116 468.679 472.729 474.149 475.193 478.699 479.609 483.434 484.197 485.065 520.465 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="80.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="50">
+22 17 46 6 10 16 11 21 7 23 100 18 11 17 27 5 16 75 14 29 20 6 6 37 9 8 7 9 34 9
+6 14 6 17 13 5 10 76 11 50 9 13 7 9 24 8 27 62 59 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="82" mh="924.313769" z="2" expect="1000" label="no model obtained" type="model" sumI="5.10" maxI="16991" fI="169.91"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 82 (charge 2)</note>
+<GAML:trace id="82" label="82.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">924.314</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="82.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+179.811 184.048 186.625 201.745 236.373 258.497 261.302 320.775 329.163 350.102 355.79 358.479 371.056 378.71 388.32 390.206 394.867 401.372 407.458 417.333 418.252 419.794 420.61 421.761 427.338 428.847 429.763 434.234 473.81 479.374
+
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="82.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="30">
+8 39 10 27 13 20 13 11 16 36 8 54 16 20 9 8 15 27 10 17 9 21 100 16 7 95 20 30 38 26
+
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="82" mh="1385.967016" z="3" expect="3.9e+000" label="gi|30794356|RPGR-interacting_ gi|30794356|ref|NP_851377.1| RPGR-interacting protein..." type="model" sumI="5.38" maxI="102817" fI="1028.17" >
+<protein expect="0.0" id="82.1" uid="323" label="gi|30794356|RPGR-interacting_ gi|30794356|ref|NP_851377.1| RPGR-interacting protein..." sumI="5.38" >
+<note label="description">gi|30794356|RPGR-interacting_ gi|30794356|ref|NP_851377.1| RPGR-interacting protein 1 [Bos taurus]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1221">
+	MIPTSKGKNT KTQPPLSRMT RDELEDSLFR LREEHMLVKE LFWKQQDEIK
+	RMRTALLRLT ASGRGLRAEA AADESSGSPL NGGGTESGGT APSSTSVPRC
+	PGSSCSSSAW APLLPAAPSL ASTRDTDSST PPGHRAEKPK RESRDRLSYT
+	APPTFKEHVT NEKARGEVAS EPSELGHLMT SDTMQVEEPP KSPEKMWSKD
+	ENFAQRSSLE STQKATELRA SIKENIQLIR LKKLLHERNT SLAVTKAQLT
+	EVQAAYETLL HKNQGILGAA HNALLSQVNE LRAELKEESK KAVSLKSQME
+	DVSILQITLK EFQERVEDLE KERKLLNDNY DKLLESMLDS SNQPQWSHEL
+	GEQLQQKVSQ LQDQLDVEMK EKREILLQLS QEKAQNKDLE LEVTSLLQKH
+	KQEVEDLQNI STFSQSPDRQ SAPATHPALF QETIQIQPCE PKNQEEKKLS
+	QMLSELQVSH AETTLELEKT RDMLILQRKI NVCYQEELEA MMTKADNENK
+	DHEAKLERLN QLLDLKNKRI NQLEEQLKDV AYGTRQLPLC LKPLPAHENE
+	DKVDISPWHQ SENLFELHIH QAFLTSAALA QAGDTQPTTF CTYSFYDFET
+	HCTPLVVGPQ PLYDFTSQYV VEIDSLFLHY LQGASAQLDL HQAIASEHHT
+	LAAGWICFDR VLETVERVHG SATLTGTGGE VFGVLEYWMR LRFPIRSSLQ
+	AYNKRKKAQA YLAANVLGAW EAQKDEPRSG TWKNQNELRV EIIRCCGLRS
+	RSLGAQPSPY VMYRFFTFSD HDTTIIPASS NPYFRDLARF PVLVTSDLDQ
+	YLRREALSVY VFDDEDSEPG SYLGRVQVPL LPLAQNKSIQ GDFNLTDPVG
+	EPNGSVQVHL DWGSCYLPPE NFPKPEAQSE EDTRDGLETS IEEEEASFPP
+	QDQMVSIDTP TEAGQYQAKR KPPQVGERKE REHQVAGYSR RKHGRKTGLQ
+	GKNRMEYLSH NLLNGNTLQQ VKYIEWKFSG LKISADHVLK NQQKEEEMTS
+	SYSAQILKET PHPVNDKEFC EQASEGSEAQ TTDSDEIVTP VSQKCPKADS
+	EKMCIEIVSL AFYPEAEVMC DENVEQVYVE YRFYDLPLSE TETPVSLRKP
+	RAGEEIYFHF SKVIDLDPVE QKERRQFLFT MLIGEDPEQG HLKFTVVSDP
+	IEEEKKECQE VGYAYLELWP MLVSGRDILE QDLDIVGPED QATPIGKLKV
+	SLQAAAALQA IYKEMTEDLC S
+<domain id="82.1.1" start="388" end="399" expect="3.9e+000" mh="1387.768" delta="-1.801" hyperscore="15.8" nextscore="15.1" y_score="4.3" y_ions="2" b_score="7.2" b_ions="6" pre="AQNK" post="HKQE" seq="DLELEVTSLLQK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 82 (charge 3)</note>
+<GAML:trace id="82" label="82.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1385.97</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="82.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="34">
+179.811 184.048 186.625 201.745 236.373 258.497 261.302 320.775 329.163 350.102 355.79 358.479 371.056 378.71 388.32 390.206 394.867 401.372 407.458 417.333 418.252 419.794 420.61 421.761 427.338 428.847 429.763 434.234 438.372 444.214
+444.874 445.897 473.81 479.374 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="82.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="34">
+1 7 2 5 2 3 2 2 3 6 1 9 3 3 2 1 2 4 2 3 2 3 17 3 1 16 3 5 3 2
+100 8 6 4 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="84" mh="536.180176" z="1" expect="1000" label="no model obtained" type="model" sumI="5.44" maxI="186733" fI="1867.33"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 84 (charge 1)</note>
+<GAML:trace id="84" label="84.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">536.18</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="84.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+166.022 223.092 238.265 280.76 282.658 297.125 298.734 299.8 321.55 358.425 368.254 371.218 415.016 454.915 470.125 478.334 478.334 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="84.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+2 2 2 4 2 3 100 7 3 2 2 2 6 3 2 1 1 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="86" mh="844.894457" z="2" expect="1000" label="no model obtained" type="model" sumI="5.47" maxI="116032" fI="1160.32"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 86 (charge 2)</note>
+<GAML:trace id="86" label="86.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">844.894</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="86.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+238.057 262.174 264.38 280.146 290.605 319.851 324.019 329.44 333.531 343.174 362.135 362.135 364.56 377.664 379.777 380.792 380.792 381.767 382.425 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="86.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+1 4 1 1 3 2 1 2 3 5 2 2 3 2 10 100 100 9 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="86" mh="1266.838048" z="3" expect="4.9e+000" label="gi|32411611|40S_RIBOSOMAL_PRO gi|32411611|ref|XP_326286.1| 40S RIBOSOMAL PROTEIN..." type="model" sumI="5.52" maxI="116032" fI="1160.32" >
+<protein expect="0.0" id="86.1" uid="403" label="gi|32411611|40S_RIBOSOMAL_PRO gi|32411611|ref|XP_326286.1| 40S RIBOSOMAL PROTEIN..." sumI="5.52" >
+<note label="description">gi|32411611|40S_RIBOSOMAL_PRO gi|32411611|ref|XP_326286.1| 40S RIBOSOMAL PROTEIN S22 (S15A) (YS24) [Neurospora crassa]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="130">
+	MVRTSVLHDA LNSINNAEKA GKRQVLIRPS SKVIIKFLQV MQKHGYIGEF
+	EEVDDHRSGK IVVQLNGRMN KCGVISPRYN VRLAELEKWV VKLLPARQFG
+	YVILTTSAGI MDHEEARRKH VSGKIIGFFY 
+<domain id="86.1.1" start="120" end="130" expect="4.9e+000" mh="1267.683" delta="-0.845" hyperscore="12.6" nextscore="11.1" y_score="5.0" y_ions="4" b_score="8.0" b_ions="2" pre="ARRK" post="]" seq="HVSGKIIGFFY" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 86 (charge 3)</note>
+<GAML:trace id="86" label="86.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1266.84</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="86.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+238.057 262.174 264.38 280.146 290.605 319.851 324.019 329.44 333.531 343.174 362.135 362.135 364.56 377.664 379.777 380.792 380.792 381.767 382.425 386.99 398.876 402.672 403.966 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="86.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+1 4 1 1 3 2 1 2 3 5 2 2 3 2 10 100 100 9 3 4 18 4 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="88" mh="957.118090" z="2" expect="1000" label="no model obtained" type="model" sumI="4.52" maxI="7195" fI="71.95"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 88 (charge 2)</note>
+<GAML:trace id="88" label="88.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">957.118</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="88.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+177.901 183.189 258.859 264.91 283.8 302.503 306.359 315.899 331.077 372.408 382.009 390.49 399.317 418.686 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="88.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+38 23 11 86 17 17 29 11 20 27 14 100 46 19 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="88" mh="1435.173497" z="3" expect="7.6e+000" label="gi|27671250|similar_to_a_disi gi|27671250|ref|XP_221699.1| similar to a disintegrin-like..." type="model" sumI="4.66" maxI="7195" fI="71.95" >
+<protein expect="0.0" id="88.1" uid="1640" label="gi|27671250|similar_to_a_disi gi|27671250|ref|XP_221699.1| similar to a disintegrin-like..." sumI="4.66" >
+<note label="description">gi|27671250|similar_to_a_disi gi|27671250|ref|XP_221699.1| similar to a disintegrin-like and metalloprotease (reprolysin type) with thrombospondin type 1 motif, 5 (aggrecanase-2) [Mus musculus] [Rattus norvegicus] [MASS=108848]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="991">
+	MRLEWASLLL LLLLLCASCL ALAADNPAAA PAQDKTRQPR AAAAAAQPDQ
+	RQWEETQERG HPQPLARQRR SSGLVQNIDQ LYSGGGKVGY LVYAGGRRFL
+	LDLERDDTVG AAGGIVTAGG LSASSGHRGH CFYRGTVDGS PRSLAVFDLC
+	GGLDGFFAVK HARYTLKPLL RGSWAESERV YGDGSSRILH VYTREGFSFE
+	ALPPRTSCET PASPSGAQES PSVHSSSRRR TELAPQLLDH SAFSPAGNAG
+	PQTWWRRRRR SISRARQVEL LLVADSSMAK MYGRGLQHYL LTLASIANRL
+	YSHASIENHI RLAVVKVVVL TDKSLEVSKN AATTLKNFCK WQHQHNQLGD
+	DHEEHYDAAI LFTREDLCGH HSCDTLGMAD VGTICSPERS CAVIEDDGLH
+	AAFTVAHEIG HLLGLSHDDS KFCEENFGST EDKRLMSSIL TSIDASKPWS
+	KCTSATITEF LDDGHGNCLL DVPRKQILGP EELPGQTYDA TQQCNLTFGP
+	EYSVCPGMDV CARLWCAVVR QGQMVCLTKK LPAVEGTPCG KGRICLQGKC
+	VDKTKKKYYS GDTSAPALLE MRSRIKMSCL ALEMGCKPLI DSYAATGMID
+	ASDWNIQVGR FSKESQNIFC FLFQTSSHGN WGSWGPWGQC SRSCGGGVQF
+	AYRHCNNPAP RNSGRYCTGK RAIYRSCSVI PCPPNGKSFR HEQCEAKNGY
+	QSDAKGVKTF VEWVPKYAGV LPADVCKLTC RAKGTGYYVV FSPKVTDGTE
+	CRPYSNSVCV RGRCVRTGCD GIIGSKLQYD KCGVCGGDNS SCTKIIGTFN
+	KKSKGYTDVV RIPEGATHIK VRQFKAKDQT RFTAYLALKK KTGEYLINGK
+	YMISTSETII DINGTVMNYS GWSHRDDFLH GMGYSATKEI LIVQILATDP
+	TKALDVRYSF FVPKKTTQKV NSVISHSSNK VGLHSPQLQW VTGPWLACSR
+	TCDTGWHTRT VQCQDGNRKL AKGCILSQRP SAFKQCLLKK C
+<domain id="88.1.1" start="38" end="51" expect="7.6e+000" mh="1433.724" delta="1.449" hyperscore="13.3" nextscore="12.8" y_score="8.1" y_ions="2" b_score="10.5" b_ions="2" pre="DKTR" post="QWEE" seq="QPRAAAAAAQPDQR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 88 (charge 3)</note>
+<GAML:trace id="88" label="88.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1435.17</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="88.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="18">
+177.901 183.189 258.859 264.91 283.8 302.503 306.359 315.899 331.077 372.408 382.009 390.49 399.317 418.686 422.354 456.365 456.365 459.744 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="88.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="18">
+38 23 11 86 17 17 29 11 20 27 14 100 46 19 28 51 51 39 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="90" mh="447.031799" z="1" expect="1000" label="no model obtained" type="model" sumI="5.29" maxI="141735" fI="1417.35"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 90 (charge 1)</note>
+<GAML:trace id="90" label="90.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">447.032</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="90.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+149.996 224.064 228.021 228.021 250.458 315.287 318.99 333.589 340.741 341.945 343.402 355.35 359.644 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="90.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+2 2 4 4 4 2 4 5 5 2 3 1 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="94" mh="1224.572070" z="2" expect="1000" label="no model obtained" type="model" sumI="4.81" maxI="14233" fI="142.33"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 94 (charge 2)</note>
+<GAML:trace id="94" label="94.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1224.57</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="94.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+240.71 270.995 278.761 286.787 308.512 354.826 355.969 356.97 373.617 398.567 418.293 526.434 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="94.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+35 42 100 42 43 59 23 50 16 14 24 12 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="94" mh="1836.354467" z="3" expect="4.1e+000" label="gi|27688373|similar_to_riboso gi|27688373|ref|XP_225551.1| similar to ribosomal protein..." type="model" sumI="4.87" maxI="14233" fI="142.33" >
+<protein expect="0.0" id="94.1" uid="46" label="gi|27688373|similar_to_riboso gi|27688373|ref|XP_225551.1| similar to ribosomal protein..." sumI="4.87" >
+<note label="description">gi|27688373|similar_to_riboso gi|27688373|ref|XP_225551.1| similar to ribosomal protein S6 [Rattus norvegicus] [MASS=14736]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="131">
+	MGDIFLDLNC YEWIYVGVSG LKENVATEVV ADALDEEWKG CVAKISGGNN
+	KQGFPMKQGV LTQSGVRLLR KGHSLIIYTE GSWGEQEDDD HHRVVGKPLN
+	REYRSRGPKH PFATPCVLHH RCLHIALKEH T
+<domain id="94.1.1" start="40" end="57" expect="4.1e+000" mh="1835.925" delta="0.429" hyperscore="13.3" nextscore="13.3" y_score="9.5" y_ions="4" b_score="8.4" b_ions="1" pre="EEWK" post="QGVL" seq="GCVAKISGGNNKQGFPMK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 94 (charge 3)</note>
+<GAML:trace id="94" label="94.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1836.35</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="94.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+240.71 270.995 278.761 286.787 308.512 354.826 355.969 356.97 373.617 398.567 418.293 526.434 568.119 578.453 589.588 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="94.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+35 42 100 42 43 59 23 50 16 14 24 12 11 19 30 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="98" mh="1572.389697" z="2" expect="1000" label="no model obtained" type="model" sumI="4.67" maxI="9728" fI="97.28"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 98 (charge 2)</note>
+<GAML:trace id="98" label="98.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1572.39</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="98.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+530.786 546.821 548.746 554.717 571.239 589.39 629.522 631.917 652.457 694.763 697.506 725.755 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="98.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+13 31 100 14 72 54 55 4 22 42 21 55 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="98" mh="2358.080907" z="3" expect="3.0e+001" label="gi|27806653|dopamine_receptor gi|27806653|ref|NP_776467.1| dopamine receptor D1 [Bos..." type="model" sumI="4.71" maxI="9728" fI="97.28" >
+<protein expect="0.0" id="98.1" uid="861" label="gi|27806653|dopamine_receptor gi|27806653|ref|NP_776467.1| dopamine receptor D1 [Bos..." sumI="4.71" >
+<note label="description">gi|27806653|dopamine_receptor gi|27806653|ref|NP_776467.1| dopamine receptor D1 [Bos taurus]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="446">
+	MRTLNTSTME GTGLVAERDF SFRILTACFL SLLILSTLLG NTLVCAAVIR
+	FRHLRSKVTN FFVISLAVSD LLVAVLVMPW KAVAEIAGFW PFGSFCNIWV
+	AFDIMCSTAS ILNLCVISVD RYWAISSPFR YERKMTPKAA FILISVAWTL
+	SVLISFIPVQ LSWHKAKPTG PSEGNATSLG KTINNCDSSL SRTYAISSSL
+	ISFYIPVAIM IVTYTRIYRI AQKQIRRISA LERAAVHAKN CQTTTGNGNP
+	MECSQPESSF KMSFKRETKV LKTLSVIMGV FVCCWLPFFI LNCMVPFCGS
+	GETKPFCIDS ITFDVFVWFG WANSSLNPII YAFNADFRKA FSTLLGCYRL
+	CPTTNNAIET VSINNNGAVV FSSHHEPRGS ISKDCNVVYL IPHAVGSSEG
+	LKKEEAVGIA KPLEKLSPAL SVILDYDTDV SLEKIQPITQ NGQHPT
+<domain id="98.1.1" start="240" end="261" expect="3.0e+001" mh="2359.959" delta="-1.878" hyperscore="11.2" nextscore="9.3" y_score="10.8" y_ions="2" b_score="8.8" b_ions="2" pre="VHAK" post="MSFK" seq="NCQTTTGNGNPMECSQPESSFK" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 98 (charge 3)</note>
+<GAML:trace id="98" label="98.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2358.08</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="98.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+530.786 546.821 548.746 554.717 571.239 589.39 629.522 631.917 652.457 694.763 697.506 725.755 726.897 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="98.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+13 31 100 14 72 54 55 4 22 42 21 55 47 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="100" mh="936.071093" z="2" expect="1000" label="no model obtained" type="model" sumI="4.67" maxI="7050" fI="70.5"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 100 (charge 2)</note>
+<GAML:trace id="100" label="100.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">936.071</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="100.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+182.967 260.607 290.584 314.082 349.269 349.269 381.131 408.04 411.353 424.329 425.121 426.832 427.627 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="100.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+77 72 37 11 55 55 49 39 48 100 19 71 31 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="100" mh="1403.603002" z="3" expect="1.3e+001" label="gi|29829740|putative_non-ribo gi|29829740|ref|NP_824374.1| putative non-ribosomal..." type="model" sumI="4.75" maxI="7050" fI="70.5" >
+<protein expect="0.0" id="100.1" uid="2611" label="gi|29829740|putative_non-ribo gi|29829740|ref|NP_824374.1| putative non-ribosomal..." sumI="4.75" >
+<note label="description">gi|29829740|putative_non-ribo gi|29829740|ref|NP_824374.1| putative non-ribosomal peptide synthetase [Streptomyces avermitilis MA-4680]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1263">
+	MSAPVDTPVP GGEPMAWLPT PADPAASGAY APEEPAEKMA GAEPGAVSVL
+	ATRTTPARVL AAWAALLHHH TGRVDLDFGF ADAAARPATV RLRVEPTASL
+	GALEEAAARA LRSPSPGEPA AATPWMVRHT DAGPSGPGRA GALVAELDES
+	AGGGCLRLRH DPAAHRADAV ARHAVHLRGA LTALADDPTL PVRELDPLTP
+	AERTRLLVDF NRTTVPYPRD SRVEELFAER ARTAPGHPAV VHGDTVLSYA
+	ELDHRSELLA ARLRAEGLPP GEPVALLLRR EPTLVVAALA VLKAGGVYLP
+	VDPDYPADRV AYLLADSGAR RVLTVSDLAG QLKAVHDRSA DDLTVLALDT
+	WDWRRTPGTP PCAPDAPPRD AGDAAYLMYT SGTTGKPKGV LVPHRGITRL
+	VSGIGYVRLD PTTRMAQVGT TGFDASVWEM WGALLGGGTL CILDRETLLD
+	TEELGRALRE QRITTALFTS ALFSRLADED VTLFRPLRDL LVGGDVLSAR
+	HAREVLAANP GLRLVNAYGP TENAVISTCQ IVGEPVGARV PIGRPVPNAT
+	AYVLNQDGLP LPTGVPGELH VGGDGLAVGY HGRPDLTERA FVPHPFAPGQ
+	KLYRTGDRVR LLPDGAVDFV GRTDHQVKVR GFRVEPGEIE TTLSALPGVR
+	AAVVLARRLP GSSDSYLCGY VVGDPDLDTD RLRSAAAESL PPHMVPAHLI
+	VLPALPLTVN GKVDRAALPE PAVATGTAPG GRPPRDELER ALIDLWEDTL
+	GIAGLGVDDL LSAYGAGSLT ATRLSARIRR TLHLACPVSL VLTAPTVAAL
+	AERLRGAEPS GHGPLSPDAH PDGPQGPAPL SPQQHGIYVE QVKDPTGTEY
+	NLPLVVDLPE VPSAERLRTT LAALVARHDV LRTDITLDAD GRPHQRVHAE
+	LPVALEEVDL PDDADPDAWT ARWVRAFDPH RAPLWRVALL RRPGRARLVM
+	DIHHLITDGC SLTLLATEWA RQLGGAEPAR PEVGYADYAR WAAGPAGREH
+	ALAQGEFWRR TYATPVRPLD LPTDLPRPPV RRTEGAHLSF PLAAELSHAI
+	RELARAEGVT PFHVLLAGYT AFLGRMSGSD DVTVGTPVSG RHLPGVERTQ
+	GMFVNTLCLR LNPRPELSFR AHLRAVADHA MAAADHQDFP FGELVAAAGE
+	RDYSRHPMFD TLFAVQDTGL HQVDFLGGRP RWTPEATGRT LFDLNLQIDD
+	APEGFTAHWA YSTHLFLPGT VELFRDELLA LFDAAVTAPD TALHSMNVVA
+	ATTQAVPDFD FDF
+<domain id="100.1.1" start="501" end="513" expect="1.3e+001" mh="1403.787" delta="-0.184" hyperscore="12.6" nextscore="11.9" y_score="9.0" y_ions="2" b_score="9.0" b_ions="2" pre="LSAR" post="LVNA" seq="HAREVLAANPGLR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 100 (charge 3)</note>
+<GAML:trace id="100" label="100.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1403.6</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="100.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+182.967 260.607 290.584 314.082 349.269 349.269 381.131 408.04 411.353 424.329 425.121 426.832 427.627 444.564 450.884 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="100.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+77 72 37 11 55 55 49 39 48 100 19 71 31 94 44 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="104" mh="609.932617" z="1" expect="1000" label="no model obtained" type="model" sumI="4.95" maxI="48481" fI="484.81"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 104 (charge 1)</note>
+<GAML:trace id="104" label="104.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">609.933</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="104.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+238.77 240.302 268.638 284.985 284.985 298.52 310.141 328.594 354.971 372.466 397.755 400.878 453.161 460.462 486.047 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="104.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+3 2 9 17 17 2 2 4 100 4 2 7 3 4 7 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="106" mh="651.342285" z="1" expect="1000" label="no model obtained" type="model" sumI="4.52" maxI="7751" fI="77.51"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 106 (charge 1)</note>
+<GAML:trace id="106" label="106.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">651.342</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="106.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+238.408 400.042 400.042 409.041 417.802 437.994 490.35 493.707 552.719 565.036 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="106.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+40 100 100 47 13 19 22 14 8 62 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="108" mh="1271.071093" z="2" expect="1000" label="no model obtained" type="model" sumI="5.31" maxI="91061" fI="910.61"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 108 (charge 2)</note>
+<GAML:trace id="108" label="108.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1271.07</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="108.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+204.84 375.817 387.546 400.164 400.164 404.326 420.316 421.451 422.09 423.49 439.76 462.199 462.858 479.918 480.763 485.357 522.774 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="108.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+3 3 2 35 35 6 2 6 100 6 3 7 2 7 2 2 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="108" mh="1906.103002" z="3" expect="8.4e+000" label="gi|22050542|similar_to_60S_ri gi|22050542|ref|XP_171196.1| similar to 60S ribosomal..." type="model" sumI="5.31" maxI="91061" fI="910.61" >
+<protein expect="0.0" id="108.1" uid="1016" label="gi|22050542|similar_to_60S_ri gi|22050542|ref|XP_171196.1| similar to 60S ribosomal..." sumI="5.31" >
+<note label="description">gi|22050542|similar_to_60S_ri gi|22050542|ref|XP_171196.1| similar to 60S ribosomal protein L21 [Homo sapiens] [MASS=16003]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="137">
+	MMNTKGKRRG TRYMFSRPFR KHGNGHCSKR NAPQVLPRQN WKSFTQHAVG
+	IVVNKQVKGK ILAKRINVRI EHIKHSKSRD SFLKCVKEND QKKKEAKEKG
+	TWVQLKCQPA PPREAHFVRT NGKEPELLEP IPYEFMA
+<domain id="108.1.1" start="107" end="123" expect="8.4e+000" mh="1907.966" delta="-1.863" hyperscore="10.3" nextscore="8.2" y_score="3.4" y_ions="1" b_score="9.1" b_ions="3" pre="VQLK" post="EPEL" seq="CQPAPPREAHFVRTNGK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="108.2" uid="3137" label="gi|20837041|similar_to_60S_ri gi|20837041|ref|XP_123814.1| similar to 60S ribosomal..." sumI="5.31" >
+<note label="description">gi|20837041|similar_to_60S_ri gi|20837041|ref|XP_123814.1| similar to 60S ribosomal protein L21 [Mus musculus] [MASS=16129]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="139">
+	MALFLWPHTC ESTRRVIFVD IKGMGTVQKG MPHKCYHGKT GRVYNVTQHA
+	VGIIVNKQVK GKILAKRINI RIEHIKHSKS RDSFLKRVKE NDQKKKEAKE
+	KGTWVQLKCQ PAPPREAHFV RTNGKEPELL EPIPYEFMD
+<domain id="108.2.1" start="109" end="125" expect="8.4e+000" mh="1907.966" delta="-1.863" hyperscore="10.3" nextscore="8.2" y_score="3.4" y_ions="1" b_score="9.1" b_ions="3" pre="VQLK" post="EPEL" seq="CQPAPPREAHFVRTNGK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="108.3" uid="3213" label="gi|20885398|similar_to_60S_ri gi|20885398|ref|XP_125085.1| similar to 60S ribosomal..." sumI="5.31" >
+<note label="description">gi|20885398|similar_to_60S_ri gi|20885398|ref|XP_125085.1| similar to 60S ribosomal protein L21 [Mus musculus] [MASS=12753]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="111">
+	MGTVQKGMPH KCYHGKTPRV YNVTQHAVGI IVNKQIKGKI LAKRINVRIE
+	HIKHSKSRDS FLKQVKENDQ KKKEAKEKGT WVQLKCQPAP PREAHFVRTN
+	GKEPELLEPI P
+<domain id="108.3.1" start="86" end="102" expect="8.4e+000" mh="1907.966" delta="-1.863" hyperscore="10.3" nextscore="8.2" y_score="3.4" y_ions="1" b_score="9.1" b_ions="3" pre="VQLK" post="EPEL" seq="CQPAPPREAHFVRTNGK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 108 (charge 3)</note>
+<GAML:trace id="108" label="108.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1906.1</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="108.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+204.84 375.817 387.546 400.164 400.164 404.326 420.316 421.451 422.09 423.49 439.76 462.199 462.858 479.918 480.763 485.357 522.774 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="108.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="17">
+3 3 2 35 35 6 2 6 100 6 3 7 2 7 2 2 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="110" mh="606.527100" z="1" expect="1000" label="no model obtained" type="model" sumI="4.88" maxI="29755" fI="297.55"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 110 (charge 1)</note>
+<GAML:trace id="110" label="110.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">606.527</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="110.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+246.925 371.143 393.248 400.087 410.767 433.117 447.777 447.777 456.096 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="110.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+10 100 55 14 8 22 20 20 5 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="112" mh="752.732788" z="1" expect="1000" label="no model obtained" type="model" sumI="4.77" maxI="14956" fI="149.56"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 112 (charge 1)</note>
+<GAML:trace id="112" label="112.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">752.733</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="112.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="8">
+437.8 465.086 476.861 499.453 538.076 539.084 586.429 660.835 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="112.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="8">
+29 24 45 17 100 44 37 94 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="114" mh="653.553223" z="1" expect="1000" label="no model obtained" type="model" sumI="4.75" maxI="18533" fI="185.33"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 114 (charge 1)</note>
+<GAML:trace id="114" label="114.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">653.553</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="114.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+307.356 308.509 395.128 400.083 401.342 438.973 438.973 439.706 456.526 479.922 481.042 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="114.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+27 13 25 17 100 35 35 7 12 9 25 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="116" mh="1731.009326" z="2" expect="1000" label="no model obtained" type="model" sumI="4.57" maxI="17834" fI="178.34"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 116 (charge 2)</note>
+<GAML:trace id="116" label="116.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1731.01</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="116.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+455.684 579.699 614.294 628.962 636.827 652.068 669.204 702.924 707.01 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="116.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+6 11 40 5 17 100 7 13 10 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="116" mh="2596.010350" z="3" expect="1000" label="no model obtained" type="model" sumI="4.58" maxI="17834" fI="178.34"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 116 (charge 3)</note>
+<GAML:trace id="116" label="116.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2596.01</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="116.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+455.684 579.699 614.294 628.962 636.827 652.068 669.204 702.924 707.01 847.573 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="116.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+6 11 40 5 17 100 7 13 10 7 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="118" mh="400.169006" z="1" expect="1000" label="no model obtained" type="model" sumI="5.50" maxI="65130" fI="651.3"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 118 (charge 1)</note>
+<GAML:trace id="118" label="118.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">400.169</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="118.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+154.619 161.883 170.789 183.034 199.036 201.673 201.673 204.994 223.785 225.041 226.007 226.977 227.976 228.874 244.162 245.048 245.963 254.693 256.081 261.711 262.663 263.273 268.146 268.816 280.76 281.476 283.006 286.006 287.093 289.303
+298.919 299.988 301.715 303.639 304.876 309.774 310.914 311.889 313.147 313.787 327.672 337.056 337.852 340.719 341.419 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="118.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="45">
+2 3 2 3 9 4 4 4 4 5 5 16 17 11 3 36 8 1 4 2 10 6 9 12 3 3 7 36 3 6
+58 7 5 100 4 3 1 5 21 6 4 1 1 33 1 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="120" mh="1355.696337" z="2" expect="1000" label="no model obtained" type="model" sumI="4.91" maxI="19577" fI="195.77"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 120 (charge 2)</note>
+<GAML:trace id="120" label="120.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1355.7</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="120.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+362.797 366.147 378.821 425.502 427.393 429.063 441.074 458.566 463.819 463.819 478.671 480.995 481.989 503.073 635.834 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="120.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="15">
+13 22 19 44 18 6 3 12 48 48 25 100 21 7 28 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="120" mh="2033.040868" z="3" expect="5.9e+001" label="gi|7438074|T13363_phosphoribo gi|7438074|pir||T13363 phosphoribosylformylglycinamidine..." type="model" sumI="4.94" maxI="19577" fI="195.77" >
+<protein expect="0.0" id="120.1" uid="1622" label="gi|7438074|T13363_phosphoribo gi|7438074|pir||T13363 phosphoribosylformylglycinamidine..." sumI="4.94" >
+<note label="description">gi|7438074|T13363_phosphoribo gi|7438074|pir||T13363 phosphoribosylformylglycinamidine synthase (EC 6.3.5.3) - fruit fly (Drosophila melanogaster)</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="1354">
+	MVILRYYDVQ AHSAAEEESV LRRLREEDGA VVSVRMERCY HLEYSAQAEH
+	SLALDELLVW LVKQPLSKGQ SLSRQPALQS TGSSQLLLEI GPRFNFSTPY
+	STNCVNIFQN LGYSEVRRME TSTRYLVTFG EGSKAPEAAR FVPLLGDRMT
+	QCLYTEENTP KASFDEQLPE RQANWHFVPV LEEGRAALER INQELGLAFN
+	DYDLDYYHDL FAKELGRNPT TVELFDCAQS NSEHSRHWFF RGRMVIDGVE
+	QPKSLIRMIM DTQAHTNPNN TIKFSDNSSA MVGFDHQTIV PSSVVAPGAV
+	RLQSVQSDLI FTAETHNMPT AVAPFSGATT GTGGRLRDVQ GVGRGGVPIA
+	GTAGYCVGAL HIPGYKQPYE PLDFKYPATF APPLQVLIEA SNGASDYGNK
+	FGEPVISGFA LSYGLNSAAD ASQRDEYVKP IMFSGGLGTM PATMREKLPP
+	ARGQLLAKIG GPVYRIGVGG GAASSVEIQG SGDAELDFNA VQRGDAEMEN
+	KLNRVVRACL DLGEQNPILA IHDQGAGGNG NVLKELVEPG FAGAVIFSKE
+	FQLGDPTYTA LELWGAEYQE NNAILCNADQ RELLEKICRR ERCPISFVGV
+	VTGDGRVTLL EKPAPKDLEQ ALNAFNRSEV SPFDLELKYV LGDMPKRTYD
+	LKREQTPLKE LSLPKGLLLD EALERVLSLV AVGSKRFLTN KVDRCVGGLI
+	AQQQCVGPLQ APLADYALTT VSHFSHSGIA TSIGTQPLKG LLDPAAMARM
+	CVAEALSNLV FVKISELADV KCSGNWMWAA KLPGEGARMF DACKELCQIL
+	EELHIAIDGG KDSLSMAAKV GGETIKSPGT LVISTYAPCP DVRLKVTPDL
+	KGPGAGSKTS LLWINLENSA RLGGSALAQA YAQQGKDTPN LTRSDVLGKA
+	FAVTQSLLGD GLIQAGHDVS DGGLLVCVLE MAIGGLSGLR VDLSEPLAKL
+	KNFDKSVEKL NRPELAVLFA EECGWVVEVL DTDLERVRST YEKAGVPNYY
+	LGVTEGFGLD SRVVLKNGKS ELLDQPLRVL YKKWERTSYE LEKLQANPEC
+	AEAEYNSLEY RQAPQYRGPQ NVQAELTLKR SSAPVRVAVL REEGVNSERE
+	MMACLLRANF EVHDVTMSDL LQGTASVSQY RGLIFPGGFS YADTLGSAKG
+	WAANILHNPR LLPQFEAFKR RQDVFSLGIC NGCQLMTLIG FVGSAKSEVG
+	ADPDVALLHN KSQRFECRWA TVKIPSNRSI MLGSMKDLVL GCWVAHGEGR
+	FAFRDEKLIS HLQSEQLVTL QYVDDVGKPT ELYPLNPNGS PQGIAGLCSS
+	DGRHLALMPH PERCSSMYQW PYVPSSFEVS PTQSESPWQI MFNNAYNWCV
+	KSNQ
+<domain id="120.1.1" start="1237" end="1254" expect="5.9e+001" mh="2033.017" delta="0.023" hyperscore="9.6" nextscore="9.4" y_score="2.1" y_ions="1" b_score="8.4" b_ions="3" pre="GSMK" post="DEKL" seq="DLVLGCWVAHGEGRFAFR" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 120 (charge 3)</note>
+<GAML:trace id="120" label="120.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2033.04</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="120.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+362.797 366.147 378.821 425.502 427.393 429.063 441.074 458.566 463.819 463.819 478.671 480.995 481.989 503.073 635.834 641.297 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="120.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+13 22 19 44 18 6 3 12 48 48 25 100 21 7 28 29 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="124" mh="429.024902" z="1" expect="1000" label="no model obtained" type="model" sumI="5.30" maxI="163731" fI="1637.31"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 124 (charge 1)</note>
+<GAML:trace id="124" label="124.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">429.025</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="124.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+215.359 215.359 226.427 244.798 254.863 269.684 276.054 287.861 298.651 341.03 358.625 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="124.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+4 4 2 2 1 1 1 3 2 3 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="130" mh="1039.474169" z="2" expect="1000" label="no model obtained" type="model" sumI="5.34" maxI="88664" fI="886.64"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 130 (charge 2)</note>
+<GAML:trace id="130" label="130.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1039.47</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="130.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+176.623 217.149 224.895 238.156 239.767 279.724 282.829 282.829 297.699 298.761 299.729 305.04 306.64 322.836 323.946 358.231 358.877 373.122 403.696 414.924 415.819 432.891 451.123 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="130.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="23">
+3 3 3 4 5 9 3 3 10 100 46 6 2 3 3 10 5 4 2 15 4 2 1 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="130" mh="1558.707616" z="3" expect="2.1e+001" label="gi|15965120|PROBABLE_50S_RIBO gi|15965120|ref|NP_385473.1| PROBABLE 50S RIBOSOMAL..." type="model" sumI="5.34" maxI="88664" fI="886.64" >
+<protein expect="0.0" id="130.1" uid="2610" label="gi|15965120|PROBABLE_50S_RIBO gi|15965120|ref|NP_385473.1| PROBABLE 50S RIBOSOMAL..." sumI="5.34" >
+<note label="description">gi|15965120|PROBABLE_50S_RIBO gi|15965120|ref|NP_385473.1| PROBABLE 50S RIBOSOMAL PROTEIN L24 [Sinorhizobium meliloti]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="103">
+	MQKIRKGDKV VVLTGKDKGR TGEVIQVMPK EDRALVRGVN VVKRHQRQTQ
+	NQEAGIITKE ASIHLSNIAI ADPKDGKPTR VGFKIDGDKK VRVAKRSGDV
+	IDG
+<domain id="130.1.1" start="17" end="30" expect="2.1e+001" mh="1557.842" delta="0.866" hyperscore="11.4" nextscore="11.3" y_score="6.4" y_ions="3" b_score="5.3" b_ions="2" pre="LTGK" post="EDRA" seq="DKGRTGEVIQVMPK" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 130 (charge 3)</note>
+<GAML:trace id="130" label="130.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1558.71</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="130.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="24">
+176.623 217.149 224.895 238.156 239.767 279.724 282.829 282.829 297.699 298.761 299.729 305.04 306.64 322.836 323.946 358.231 358.877 373.122 403.696 414.924 415.819 432.891 451.123 472.439 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="130.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="24">
+3 3 3 4 5 9 3 3 10 100 46 6 2 3 3 10 5 4 2 15 4 2 1 3 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="142" mh="755.648193" z="1" expect="1000" label="no model obtained" type="model" sumI="5.02" maxI="20433" fI="204.33"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 142 (charge 1)</note>
+<GAML:trace id="142" label="142.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">755.648</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="142.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+258.192 306.245 319.913 361.067 362.347 367.101 384.018 393.813 394.932 396.066 420.447 430.141 453.128 482.864 493.993 499.38 519.323 520.275 529.229 540.984 542.1 547.315 558.316 560.827 614.358 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="142.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="25">
+11 19 15 59 26 13 31 18 33 8 10 6 16 7 16 18 11 11 17 100 4 27 14 22 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="144" mh="730.089478" z="1" expect="1000" label="no model obtained" type="model" sumI="4.54" maxI="7923" fI="79.23"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 144 (charge 1)</note>
+<GAML:trace id="144" label="144.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">730.089</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="144.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+240.931 258.986 379.508 430.742 488.066 498.82 514.917 534.718 610.902 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="144.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+22 50 88 59 38 100 22 29 29 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="146" mh="464.839600" z="1" expect="1000" label="no model obtained" type="model" sumI="4.58" maxI="7987" fI="79.87"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 146 (charge 1)</note>
+<GAML:trace id="146" label="146.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">464.84</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="146.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+236.648 251.042 261.147 285.847 295.833 306.371 355.879 380.767 392.805 404.626 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="146.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+42 100 33 40 25 99 58 38 13 23 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="148" mh="1479.981249" z="2" expect="1000" label="no model obtained" type="model" sumI="4.56" maxI="6431" fI="64.31"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 148 (charge 2)</note>
+<GAML:trace id="148" label="148.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1479.98</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="148.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+242.72 434.385 488.032 527.084 560.946 582.353 605.663 612.32 639.824 666.57 681.055 681.055 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="148.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+36 100 19 66 15 94 19 45 42 84 23 23 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="148" mh="2219.468236" z="3" expect="1.8e+001" label="gi|4883902|APETALA3_homolog_R gi|4883902|gb|AAD31697.1| APETALA3 homolog RbAP3-2..." type="model" sumI="4.57" maxI="6431" fI="64.31" >
+<protein expect="0.0" id="148.1" uid="1008" label="gi|4883902|APETALA3_homolog_R gi|4883902|gb|AAD31697.1| APETALA3 homolog RbAP3-2..." sumI="4.57" >
+<note label="description">gi|4883902|APETALA3_homolog_R gi|4883902|gb|AAD31697.1| APETALA3 homolog RbAP3-2 [Ranunculus bulbosus] [MASS=22484]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="194">
+	AGIMKKAQEL TVLCDAKVAL LMISNNTHKI SEYVSPGTSF KAIYDQYEKT
+	SGVSLWDSEY ERMQRNLKKV KEDNNKLRKE IRQRQGDDLD GLSFAELRGL
+	EQNMHSSVER VRHRKEHVIR TQTDTTNKKI KSHEETQRTL LAEYDVMDKA
+	GSQYSFVQQD EDYDPINIGS RIYAIQMQSH QDAQDYGSYS LRLA
+<domain id="148.1.1" start="80" end="98" expect="1.8e+001" mh="2218.121" delta="1.347" hyperscore="12.5" nextscore="8.0" y_score="7.9" y_ions="2" b_score="11.0" b_ions="3" pre="KLRK" post="GLEQ" seq="EIRQRQGDDLDGLSFAELR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 148 (charge 3)</note>
+<GAML:trace id="148" label="148.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2219.47</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="148.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+242.72 434.385 488.032 527.084 560.946 582.353 605.663 612.32 639.824 666.57 681.055 681.055 706.974 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="148.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+36 100 19 66 15 94 19 45 42 84 23 23 17 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="150" mh="503.293396" z="1" expect="1000" label="no model obtained" type="model" sumI="5.41" maxI="93241" fI="932.41"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 150 (charge 1)</note>
+<GAML:trace id="150" label="150.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">503.293</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="150.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+175.965 208.741 221.064 238.747 239.458 265.035 268.97 280.977 282.676 285.633 288.989 297.81 298.597 298.597 299.752 345.021 345.918 358.62 371.228 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="150.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="19">
+3 2 2 5 2 3 4 4 8 5 4 4 100 100 7 3 6 2 15 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="156" mh="1407.662890" z="2" expect="1000" label="no model obtained" type="model" sumI="4.60" maxI="6303" fI="63.03"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 156 (charge 2)</note>
+<GAML:trace id="156" label="156.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1407.66</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="156.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+359.68 373.141 408.66 466.509 478.001 489.815 505.941 506.611 531.403 597.879 632.746 643.938 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="156.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="12">
+70 24 28 57 55 16 95 81 24 100 55 23 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="156" mh="2110.990697" z="3" expect="1.0e+001" label="gi|30156614|similar_to_60S_RI gi|30156614|ref|XP_295973.2| similar to 60S RIBOSOMAL..." type="model" sumI="4.68" maxI="6303" fI="73.51" >
+<protein expect="0.0" id="156.1" uid="955" label="gi|30156614|similar_to_60S_RI gi|30156614|ref|XP_295973.2| similar to 60S RIBOSOMAL..." sumI="4.68" >
+<note label="description">gi|30156614|similar_to_60S_RI gi|30156614|ref|XP_295973.2| similar to 60S RIBOSOMAL PROTEIN L12 [Homo sapiens] [MASS=57432]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="534">
+	METTGLFLLL LSLPEYLAIL FRVRDTLGTV QSVGCSVDGC HPNDIKDNID
+	GGAEECPARE LVFPMSQFTS AAAVGKEVRK PGPAQKVRAG CVAAPRVLLT
+	LTCLGPEVKK APWRNTFLFL SKWRTGFAEA LSPYWEREKD LHVSRMLKPD
+	SERNDKVIAN CSQLLYRVVL PTSPVSLLKM PGTATSKKEK VPEVGIPWFP
+	REMGDNRKGW GSEGWEDGRN SVALQVPAAC SLIRPPAVQS APGNLRGPVI
+	ALELPASLQG KHARRFSLAL GRAVERLAPA PDGPDAGDLR KQRLRGGSAI
+	ALLQAGLADA GRAQIQRSNQ ALGGLLKSVH NALCLRDLSL GSKSRLQQKA
+	VSGCISGVGQ GPPSVSLAVE GLLIAANDDE IAGLGQTFRS RRSVFVQDVG
+	LLGCQAEIFT SAVSHPGCSQ EHCVGVQFKI TQSVSGLFGF ECSALQVAQP
+	QPSSCHISYW IGCLIKIIIK IDLLISMHLL CLSHPCVPLS TEDVRIDRLF
+	VCQPYPELRS HSQLGLVKPE DLAASESTSA EHAE
+<domain id="156.1.1" start="89" end="109" expect="1.0e+001" mh="2111.172" delta="-0.181" hyperscore="12.9" nextscore="12.8" y_score="8.6" y_ions="3" b_score="8.6" b_ions="1" pre="QKVR" post="KAPW" seq="AGCVAAPRVLLTLTCLGPEVK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 156 (charge 3)</note>
+<GAML:trace id="156" label="156.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2110.99</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="156.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+359.68 373.141 408.66 466.509 478.001 489.815 505.941 506.611 531.403 597.879 632.746 643.938 645.492 652.827 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="156.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+60 20 24 49 47 13 82 69 20 86 47 20 56 60 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="168" mh="2236.347216" z="2" expect="1000" label="no model obtained" type="model" sumI="4.60" maxI="12099" fI="120.99"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 168 (charge 2)</note>
+<GAML:trace id="168" label="168.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2236.35</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="168.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+531.023 590.032 650.404 858.957 904.847 904.847 1058.75 1060.1 1062.07 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="168.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+80 100 13 11 44 44 10 9 20 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="168" mh="3354.017186" z="3" expect="1000" label="no model obtained" type="model" sumI="4.60" maxI="12099" fI="120.99"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 168 (charge 3)</note>
+<GAML:trace id="168" label="168.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">3354.02</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="168.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+531.023 590.032 650.404 858.957 904.847 904.847 1058.75 1060.1 1062.07 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="168.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+80 100 13 11 44 44 10 9 20 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="172" mh="446.924072" z="1" expect="1000" label="no model obtained" type="model" sumI="5.50" maxI="137581" fI="1375.81"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 172 (charge 1)</note>
+<GAML:trace id="172" label="172.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">446.924</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="172.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+149.013 160.867 173.978 184.926 222.762 250.504 271.717 284.973 286.885 288.942 330.704 341.899 359.625 359.625 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="172.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+2 2 2 1 4 9 1 3 1 1 4 2 100 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="176" mh="444.945801" z="1" expect="1000" label="no model obtained" type="model" sumI="5.71" maxI="229122" fI="2291.22"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 176 (charge 1)</note>
+<GAML:trace id="176" label="176.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">444.946</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="176.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+204.566 217.291 248.606 297.15 342.541 342.541 352.55 356.577 358.747 358.747 359.653 360.602 372.009 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="176.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="13">
+2 2 3 1 3 3 1 3 100 100 2 1 2 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="178" mh="1136.919482" z="2" expect="1000" label="no model obtained" type="model" sumI="4.60" maxI="9075" fI="90.75"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 178 (charge 2)</note>
+<GAML:trace id="178" label="178.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1136.92</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="178.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+291.136 350.886 371.854 373.499 415.03 481.602 497.114 498.772 512.167 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="178.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+24 100 47 55 28 87 18 68 13 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="178" mh="1704.875585" z="3" expect="1.7e+001" label="gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." type="model" sumI="4.63" maxI="9075" fI="90.75" >
+<protein expect="0.0" id="178.1" uid="717" label="gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding..." sumI="5.66" >
+<note label="description">gi|11967329|AF232933_1_Goodpa gi|11967329|gb|AAG42049.1|AF232933_1 Goodpasture antigen-binding protein D26; GPBPD26 [Bos taurus] [MASS=68077]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="598">
+	<domain id="178.1.1" start="333" end="346" expect="1.7e+001" mh="1703.856" delta="1.020" hyperscore="12.0" nextscore="11.9" y_score="10.0" y_ions="2" b_score="9.1" b_ions="2" pre="ALDR" post="LHWS" seq="QDKIEEQSQSEKVR" missed_cleavages="2">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 178 (charge 3)</note>
+<GAML:trace id="178" label="178.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1704.88</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="178.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+291.136 350.886 371.854 373.499 415.03 481.602 497.114 498.772 512.167 544.851 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="178.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="10">
+24 100 47 55 28 87 18 68 13 26 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="188" mh="429.130859" z="1" expect="1000" label="no model obtained" type="model" sumI="5.46" maxI="121347" fI="1213.47"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 188 (charge 1)</note>
+<GAML:trace id="188" label="188.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">429.131</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="188.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+148.711 166.468 202.663 214.956 315.184 326.093 340.881 355.241 358.768 358.768 359.776 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="188.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="11">
+2 4 2 2 2 6 1 4 100 100 14 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="192" mh="2652.806200" z="2" expect="1000" label="no model obtained" type="model" sumI="4.58" maxI="8134" fI="81.34"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 192 (charge 2)</note>
+<GAML:trace id="192" label="192.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">2652.81</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="192.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+428.849 898.806 911.726 914.351 976.512 1048.69 1111.56 1208.36 1266.17 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="192.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+66 35 100 18 33 36 59 54 69 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="192" mh="3978.705662" z="3" expect="1000" label="no model obtained" type="model" sumI="4.58" maxI="8134" fI="81.34"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 192 (charge 3)</note>
+<GAML:trace id="192" label="192.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">3978.71</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="192.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+428.849 898.806 911.726 914.351 976.512 1048.69 1111.56 1208.36 1266.17 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="192.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="9">
+66 35 100 18 33 36 59 54 69 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="194" mh="564.289307" z="1" expect="1.9e+001" label="gi|287435|VP4 gi|287435|dbj|BAA03284.1| VP4 [Bovine rotavirus] [MASS=86724]" type="model" sumI="5.12" maxI="19440" fI="194.4" >
+<protein expect="0.0" id="194.1" uid="644" label="gi|287435|VP4 gi|287435|dbj|BAA03284.1| VP4 [Bovine rotavirus] [MASS=86724]" sumI="5.12" >
+<note label="description">gi|287435|VP4 gi|287435|dbj|BAA03284.1| VP4 [Bovine rotavirus] [MASS=86724]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="772">
+	MRSLIYRQLL YNSYSVDLSD EITNIGAEKK ENVTVQLGEF AQSQYAPVSW
+	GSGETLSGNV EEQPLDGPYT PDSSNLPSNY WYLVNPSNDG VVFSVTDNST
+	FWMFTYLVLP NTAQTNVTVN VMNETVNISI DNSGSTYRFV DYIKTSSTQA
+	YGSRNYLNTA HRLQAYRRDG DGNISNYWGA DTQGDLRVGT YSNPVPNAVI
+	NLNADFYVIP DSQQEICTEY IRGGLPAMQT TTYVTPISYT IRSQRIVRPN
+	EDIVISKASR WKEVQYNRDI VIRFVFANNI IKAGGLGYKW SEISYKANNY
+	QYTYMRDVVE VVAHTTVSVN GVSVYNYNTG PLPTDFMIRN YDVLKESSFV
+	YVDYWDDSQA FRNMVYVRSL SAELNQVRCV GGHYSFALPV GSWPVMQGGS
+	VILTFDGVTL STQFTDYVSL NSLRFRFRCA VSEPPFRVTG TRISNLYGLP
+	AANPMGDQQY YEASGRFSLI SLVPSNDDYQ TPIANSVTVR QDLERQLDEM
+	RKEFNELSAN IALSQLIDLA LLPLDMFSMF SGIQSTVEAA KSFATSVMKK
+	FRKSDLAKSV NSLTDAITDA AGSISRSSTL RSVNSAVSVW TDISDIVDST
+	DNVVAATATA AAKKFRVKEF TTEFDGVSFD DISAAVVKTK MNKLNVVDEE
+	ILPQIITEAS EKFIPNRAYR LIDGEKVYEV TTEGKYFAYL TETFEEVVFD
+	AERFAELVTD SPVISAIIDF KTIKNLNDNY GITREQALNM LRSDPKVLRS
+	FINQNNPIIK NRIEQLILQC RI
+<domain id="194.1.1" start="577" end="581" expect="1.9e+001" mh="563.315" delta="0.975" hyperscore="12.4" nextscore="8.0" y_score="7.1" y_ions="3" b_score="6.6" b_ions="2" pre="SISR" post="SVNS" seq="SSTLR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<protein expect="0.0" id="194.2" uid="2009" label="gi|549415|VP4_ROTBA_Outer_cap gi|549415|sp|P36307|VP4_ROTBA Outer capsid protein..." sumI="5.12" >
+<note label="description">gi|549415|VP4_ROTBA_Outer_cap gi|549415|sp|P36307|VP4_ROTBA Outer capsid protein VP4 (Hemagglutinin) (Outer layer protein VP4) [Contains: Outer capsid proteins VP5 and VP8]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="772">
+	MASLIYRQLL YNSYSVDLSD EITNIGAEKK ENVTVQIGGF AQSQYAPVSW
+	GSGETLSGNV EEQTLDGPYA PDSSNLPSNC WYLVNPSNDG VVFSWTDNST
+	FWMFTYLVLP NTAQTNVTVN VMNETVNISI DNSGSTYRFE DYIKTSPTQS
+	YGSRNYLNTA HRLQAYRRDG DGNISNYWGA DTQGDLRVGT YSHPVPNAVI
+	NLNADFYVIP DSQQEICTEY IRGGLPAMQT TTYVTPISYA VRSQRVARPN
+	EDIIISKASL WKEVQYNRDI VIRFVFANNI IKAGGLGYKW SEISYKANNY
+	QYTYMRDGVE VVAHTTVSVN GVSVYNYNTG PLPTDFMIRN YDVLKESSFV
+	YVDYWDDSQA FRNMVYVRSL NAELNQVRCV GGHYSFALPV GSWPVMQGGS
+	VILTFDSVTL STQFTDYVSL NSLRFRFRCA VSEPPFRVTG TRISNLYGLP
+	AANPMGDQQY YEASGRFSLI SLVPSNDDYQ TPIANSVTVR QDLERQLDEM
+	RREFNELSAN IALSQLIDLA LLPLDMFSMF SGIQSTVEAA KTFATSVMKK
+	FRKSDLAKSV NSLTDAITDA AGSISRSSTL RSVNSVASVW TDISDIVDST
+	DNVVAATATA AAKKFRVKEF TTEFNGVSFD DISAAVVKTK MNKLNVVDEE
+	LLPQIITEAS EKFIPNRAYR LIDGEKVYEV TTEGKYFAYL TETFEEVVFD
+	AERFAELVTD SQVISAIIDF KTIKNLNDNY GITREQALNM LRSDPKVLRS
+	FINQNNPIIK NRIEQLILQC RI
+<domain id="194.2.1" start="577" end="581" expect="1.9e+001" mh="563.315" delta="0.975" hyperscore="12.4" nextscore="8.0" y_score="7.1" y_ions="3" b_score="6.6" b_ions="2" pre="SISR" post="SVNS" seq="SSTLR" missed_cleavages="0">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 194 (charge 1)</note>
+<GAML:trace id="194" label="194.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">564.289</GAML:attribute>
+<GAML:attribute type="charge">1</GAML:attribute>
+<GAML:Xdata label="194.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+173.906 175.406 236.932 255.885 264.896 282.753 284.428 290.888 293.031 306.939 308.955 311.28 347.95 347.95 351.153 352.91 358.937 366.415 368.613 370.805 388.899 393.119 404.691 415.28 448.839 455.091 459.035 476.077 477.3 478.482
+479.165 481.595 485.363 492.801 500.851 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="194.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="35">
+13 8 10 24 68 28 41 8 9 16 13 28 10 10 15 12 7 13 100 6 7 6 15 26 4 10 12 14 15 22
+67 15 9 16 4 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="200" mh="917.058886" z="2" expect="1000" label="no model obtained" type="model" sumI="4.69" maxI="10697" fI="106.97"  >
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 200 (charge 2)</note>
+<GAML:trace id="200" label="200.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">917.059</GAML:attribute>
+<GAML:attribute type="charge">2</GAML:attribute>
+<GAML:Xdata label="200.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+176.104 220.581 241.472 262.603 262.603 283.013 308.662 328.982 359.052 370.966 384.08 385.681 386.81 398.822 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="200.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="14">
+16 26 3 17 17 11 28 55 40 66 21 56 5 100 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group id="200" mh="1375.084691" z="3" expect="5.2e+000" label="gi|9838465|ribosomal_protein_ gi|9838465|ref|NP_064078.1| ribosomal protein S3 [Beta..." type="model" sumI="4.78" maxI="10697" fI="106.97" >
+<protein expect="0.0" id="200.1" uid="1551" label="gi|9838465|ribosomal_protein_ gi|9838465|ref|NP_064078.1| ribosomal protein S3 [Beta..." sumI="4.78" >
+<note label="description">gi|9838465|ribosomal_protein_ gi|9838465|ref|NP_064078.1| ribosomal protein S3 [Beta vulgaris]</note>
+<file type="peptide" URL="..\..\..\databases\Bovine_mini.fasta"/>
+<peptide start="1" end="551">
+	MARKGNPISV RLDLNRSSDS SWFNDYYYSK LVYQDLNLRS YFGSIRPPTR
+	LTFGFRLGRC IIIHFQKRTF INFFLPRRPQ RRKRRKKSRP GKTKGRWWEL
+	GKVGPIECLY SSEGRKEERN EVRDRRAGKR VESIRLDDQK KQNEIRVWPK
+	KKQRYGYHDR SPSIKKNLSK SLRVSGAFKH PKYAEVVNDI AFLIENDSSF
+	KKTKLFKFFF PKKSRYDGPT SHLLKRTLPA VRPSLNYSVM QYLLNTKKKM
+	HSDPVLVLNH FVAPGVVEPS TMNRANAQGG SLDKRIRSRI AFFVESSTSQ
+	KKCLAEAKKR LTHFIRQAND LRFAGRRKTT ISLFPFFGAT FFFPRDGVRV
+	YNNLFFKDAR EQLLGQLRIK CWNLMGKDKV MKLIEKFIDL GGIRELIKGI
+	EMMIEIILKN IRIAYGSNSY LNEVKKMRSL LSNRTNTNTL IESVKIKSVY
+	QSASPIAQDI SFQPKKKRGS FRSIFSKIVK KIPLVMKRGV EGIRICCSGR
+	LEGAEIARTE CGKYGKTSCN VLHQKIDYAS AEVSTRYGIV GVKVWISYSP
+	K
+<domain id="200.1.1" start="387" end="398" expect="5.2e+000" mh="1373.815" delta="1.270" hyperscore="13.5" nextscore="13.4" y_score="9.8" y_ions="3" b_score="8.3" b_ions="1" pre="LIEK" post="GIEM" seq="FIDLGGIRELIK" missed_cleavages="1">
+</domain>
+</peptide>
+</protein>
+<group type="support" label="fragment ion mass spectrum">
+<note label="Description">CAexample_mini.mzXML scan 200 (charge 3)</note>
+<GAML:trace id="200" label="200.spectrum" type="tandem mass spectrum">
+<GAML:attribute type="M+H">1375.08</GAML:attribute>
+<GAML:attribute type="charge">3</GAML:attribute>
+<GAML:Xdata label="200.spectrum" units="MASSTOCHARGERATIO">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+176.104 220.581 241.472 262.603 262.603 283.013 308.662 328.982 359.052 370.966 384.08 385.681 386.81 398.822 403.872 415.282 
+</GAML:values>
+</GAML:Xdata>
+<GAML:Ydata label="200.spectrum" units="UNKNOWN">
+<GAML:values byteorder="INTEL" format="ASCII" numvalues="16">
+16 26 3 17 17 11 28 55 40 66 21 56 5 100 47 58 
+</GAML:values>
+</GAML:Ydata>
+</GAML:trace>
+</group></group>
+<group label="input parameters" type="parameters">
+	<note type="input" label="list path, default parameters">..\..\..\default_input.xml</note>
+	<note type="input" label="list path, taxonomy information">taxonomy.xml</note>
+	<note type="input" label="output, histogram column width">30</note>
+	<note type="input" label="output, histograms">no</note>
+	<note type="input" label="output, maximum valid expectation value">0.1</note>
+	<note type="input" label="output, one sequence copy">yes</note>
+	<note type="input" label="output, parameters">yes</note>
+	<note type="input" label="output, path">output.xml</note>
+	<note type="input" label="output, path hashing">yes</note>
+	<note type="input" label="output, performance">yes</note>
+	<note type="input" label="output, proteins">yes</note>
+	<note type="input" label="output, results">all</note>
+	<note type="input" label="output, sequences">yes</note>
+	<note type="input" label="output, sort results by">spectrum</note>
+	<note type="input" label="output, spectra">yes</note>
+	<note type="input" label="output, xsl path">tandem-style.xsl</note>
+	<note type="input" label="protein, C-terminal residue modification mass">0.0</note>
+	<note type="input" label="protein, N-terminal residue modification mass">0.0</note>
+	<note type="input" label="protein, cleavage site">[RK]|{P}</note>
+	<note type="input" label="protein, taxon">sequences</note>
+	<note type="input" label="refine">no</note>
+	<note type="input" label="refine, maximum valid expectation value">0.1</note>
+	<note type="input" label="refine, spectrum synthesis">yes</note>
+	<note type="input" label="scoring, b ions">yes</note>
+	<note type="input" label="scoring, maximum missed cleavage sites">2</note>
+	<note type="input" label="scoring, minimum ion count">4</note>
+	<note type="input" label="scoring, y ions">yes</note>
+	<note type="input" label="spectrum, dynamic range">100.0</note>
+	<note type="input" label="spectrum, minimum fragment mz">140.0</note>
+	<note type="input" label="spectrum, minimum parent m+h">500.0</note>
+	<note type="input" label="spectrum, minimum peaks">10</note>
+	<note type="input" label="spectrum, parent monoisotopic mass error minus">2.0</note>
+	<note type="input" label="spectrum, parent monoisotopic mass error plus">2.0</note>
+	<note type="input" label="spectrum, parent monoisotopic mass error units">Daltons</note>
+	<note type="input" label="spectrum, parent monoisotopic mass isotope error">no</note>
+	<note type="input" label="spectrum, path">..\..\..\bov_sample\CAexample_mini.mzXML</note>
+	<note type="input" label="spectrum, threads">1</note>
+	<note type="input" label="spectrum, total peaks">50</note>
+	<note type="input" label="spectrum, use noise suppression">no</note>
+</group>
+<group label="unused input parameters"  type="parameters">
+	<note type="input" label="pipeline, protocol description">This is a test protocol using X!Tandem defaults.</note>
+	<note type="input" label="pipeline, protocol name">test1</note>
+	<note type="input" label="refine, point mutations">no</note>
+	<note type="input" label="refine, potential N-terminus modifications">+42.0@[</note>
+	<note type="input" label="refine, unanticipated cleavage">yes</note>
+	<note type="input" label="refine, use potential modifications for full refinement">no</note>
+	<note type="input" label="spectrum, fragment monoisotopic mass error">0.5</note>
+	<note type="input" label="spectrum, fragment monoisotopic mass error units">Daltons</note>
+</group>
+<group label="performance parameters" type="parameters">
+	<note label="list path, sequence source #1">..\..\..\databases\Bovine_mini.fasta</note>
+	<note label="modelling, total peptides used">56038</note>
+	<note label="modelling, total proteins used">4308</note>
+	<note label="modelling, total spectra used">110</note>
+	<note label="process, start time">2005:11:03:14:13:53</note>
+	<note label="process, version">x! tandem 2005.10.01.2</note>
+	<note label="refining, # input models">0</note>
+	<note label="refining, # input spectra">0</note>
+	<note label="refining, # partial cleavage">0</note>
+	<note label="refining, # point mutations">0</note>
+	<note label="refining, # potential C-terminii">0</note>
+	<note label="refining, # potential N-terminii">0</note>
+	<note label="refining, # unanticipated cleavage">0</note>
+	<note label="timing, initial modelling total (sec)">8.28</note>
+	<note label="timing, initial modelling/spectrum (sec)">0.075</note>
+	<note label="timing, load sequence models (sec)">0.06</note>
+	<note label="timing, refinement/spectrum (sec)">-57067623292765390000000000000000000000000000000000000000000000000.000</note>
+</group>
+</bioml>

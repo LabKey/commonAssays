@@ -54,7 +54,7 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
     public void testUploadAndCopy()
     {
         clickProject(TEST_ASSAY_PRJ_LUMINEX);
-        _listHelper.importListArchive(getProjectName(), TestFileUtils.getSampleData("Luminex/UploadAndCopy.lists.zip"));
+        _listHelper.importListArchive(getProjectName(), TestFileUtils.getSampleData("luminex/UploadAndCopy.lists.zip"));
 
         clickProject(TEST_ASSAY_PRJ_LUMINEX);
 

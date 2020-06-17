@@ -1,0 +1,1547 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/truncated.pep.xsl"?>
+<msms_pipeline_analysis date="2012-01-09T17:38:35" summary_xml="/truncated.pep.xml" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /opt/cptools/bin_ep/tpp.4.5.1/schema/pepXML_v117.xsd">
+<analysis_summary analysis="xpress" time="2012-01-09T17:40:31">
+<xpressratio_summary version="2.1 (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))" author="Jimmy Eng" same_scan_range="Y" labeled_residues="KR" xpress_light="0" massdiff="K,8.01 R,10.01" masstol="0.10" min_num_chromatogram_points="6" min_num_isotope_peaks="0"/>
+</analysis_summary>
+<analysis_summary analysis="peptideprophet" time="2012-01-09T17:38:49">
+<peptideprophet_summary version="PeptideProphet  (TPP v4.5 RAPTURE rev 1, Build 201112210851 (linux))" author="AKeller@ISB" min_prob="0.05" options=" EXTRAITRS=20 DECOY=DECOY ACCMASS " est_tot_num_correct="65650.9">
+<inputfile name="dummyFile"/>
+<roc_error_data charge="all">
+<roc_data_point min_prob="0.9999" sensitivity="0.2017" error="0.0001" num_corr="13240" num_incorr="1"/>
+<roc_data_point min_prob="0.9990" sensitivity="0.4502" error="0.0003" num_corr="29558" num_incorr="8"/>
+<roc_data_point min_prob="0.9900" sensitivity="0.6883" error="0.0015" num_corr="45189" num_incorr="68"/>
+<roc_data_point min_prob="0.9800" sensitivity="0.7475" error="0.0025" num_corr="49071" num_incorr="125"/>
+<roc_data_point min_prob="0.9500" sensitivity="0.8208" error="0.0053" num_corr="53888" num_incorr="288"/>
+<roc_data_point min_prob="0.9000" sensitivity="0.8735" error="0.0096" num_corr="57348" num_incorr="558"/>
+<roc_data_point min_prob="0.8500" sensitivity="0.9021" error="0.0137" num_corr="59225" num_incorr="822"/>
+<roc_data_point min_prob="0.8000" sensitivity="0.9215" error="0.0177" num_corr="60500" num_incorr="1090"/>
+<roc_data_point min_prob="0.7500" sensitivity="0.9368" error="0.0220" num_corr="61503" num_incorr="1380"/>
+<roc_data_point min_prob="0.7000" sensitivity="0.9477" error="0.0258" num_corr="62218" num_incorr="1650"/>
+<roc_data_point min_prob="0.6500" sensitivity="0.9569" error="0.0300" num_corr="62822" num_incorr="1940"/>
+<roc_data_point min_prob="0.6000" sensitivity="0.9642" error="0.0340" num_corr="63299" num_incorr="2225"/>
+<roc_data_point min_prob="0.5500" sensitivity="0.9692" error="0.0374" num_corr="63631" num_incorr="2470"/>
+<roc_data_point min_prob="0.5000" sensitivity="0.9735" error="0.0409" num_corr="63914" num_incorr="2727"/>
+<roc_data_point min_prob="0.4500" sensitivity="0.9772" error="0.0446" num_corr="64157" num_incorr="2994"/>
+<roc_data_point min_prob="0.4000" sensitivity="0.9806" error="0.0487" num_corr="64377" num_incorr="3293"/>
+<roc_data_point min_prob="0.3500" sensitivity="0.9836" error="0.0531" num_corr="64576" num_incorr="3625"/>
+<roc_data_point min_prob="0.3000" sensitivity="0.9865" error="0.0584" num_corr="64766" num_incorr="4018"/>
+<roc_data_point min_prob="0.2500" sensitivity="0.9892" error="0.0646" num_corr="64943" num_incorr="4487"/>
+<roc_data_point min_prob="0.2000" sensitivity="0.9918" error="0.0723" num_corr="65114" num_incorr="5078"/>
+<roc_data_point min_prob="0.1500" sensitivity="0.9940" error="0.0812" num_corr="65259" num_incorr="5767"/>
+<roc_data_point min_prob="0.1000" sensitivity="0.9961" error="0.0930" num_corr="65392" num_incorr="6706"/>
+<roc_data_point min_prob="0.0500" sensitivity="0.9981" error="0.1141" num_corr="65527" num_incorr="8437"/>
+<roc_data_point min_prob="0.0000" sensitivity="1.0000" error="0.5734" num_corr="65651" num_incorr="88227"/>
+<error_point error="0.0000" min_prob="1.0000" num_corr="2" num_incorr="0"/>
+<error_point error="0.0001" min_prob="0.9998" num_corr="16957" num_incorr="2"/>
+<error_point error="0.0002" min_prob="0.9994" num_corr="25733" num_incorr="5"/>
+<error_point error="0.0003" min_prob="0.9988" num_corr="30268" num_incorr="9"/>
+<error_point error="0.0004" min_prob="0.9983" num_corr="33258" num_incorr="13"/>
+<error_point error="0.0005" min_prob="0.9977" num_corr="35444" num_incorr="18"/>
+<error_point error="0.0006" min_prob="0.9970" num_corr="37177" num_incorr="22"/>
+<error_point error="0.0007" min_prob="0.9964" num_corr="38602" num_incorr="27"/>
+<error_point error="0.0008" min_prob="0.9957" num_corr="39809" num_incorr="32"/>
+<error_point error="0.0009" min_prob="0.9949" num_corr="40853" num_incorr="37"/>
+<error_point error="0.0010" min_prob="0.9942" num_corr="41769" num_incorr="42"/>
+<error_point error="0.0015" min_prob="0.9901" num_corr="45128" num_incorr="68"/>
+<error_point error="0.0020" min_prob="0.9854" num_corr="47337" num_incorr="95"/>
+<error_point error="0.0025" min_prob="0.9804" num_corr="48953" num_incorr="123"/>
+<error_point error="0.0030" min_prob="0.9754" num_corr="50213" num_incorr="151"/>
+<error_point error="0.0040" min_prob="0.9645" num_corr="52113" num_incorr="209"/>
+<error_point error="0.0050" min_prob="0.9537" num_corr="53516" num_incorr="269"/>
+<error_point error="0.0060" min_prob="0.9418" num_corr="54623" num_incorr="330"/>
+<error_point error="0.0070" min_prob="0.9306" num_corr="55533" num_incorr="392"/>
+<error_point error="0.0080" min_prob="0.9191" num_corr="56306" num_incorr="454"/>
+<error_point error="0.0090" min_prob="0.9073" num_corr="56972" num_incorr="517"/>
+<error_point error="0.0100" min_prob="0.8953" num_corr="57558" num_incorr="581"/>
+<error_point error="0.0150" min_prob="0.8339" num_corr="59690" num_incorr="909"/>
+<error_point error="0.0200" min_prob="0.7718" num_corr="61077" num_incorr="1247"/>
+<error_point error="0.0250" min_prob="0.7111" num_corr="62079" num_incorr="1592"/>
+<error_point error="0.0300" min_prob="0.6491" num_corr="62829" num_incorr="1944"/>
+<error_point error="0.0400" min_prob="0.5120" num_corr="63847" num_incorr="2661"/>
+<error_point error="0.0500" min_prob="0.3855" num_corr="64441" num_incorr="3392"/>
+<error_point error="0.0750" min_prob="0.1835" num_corr="65163" num_incorr="5285"/>
+<error_point error="0.1000" min_prob="0.0791" num_corr="65448" num_incorr="7273"/>
+</roc_error_data>
+<roc_error_data charge="2" charge_est_correct="38840.9">
+<roc_data_point min_prob="0.9999" sensitivity="0.2151" error="0.0001" num_corr="8356" num_incorr="1"/>
+<roc_data_point min_prob="0.9990" sensitivity="0.4971" error="0.0003" num_corr="19310" num_incorr="5"/>
+<roc_data_point min_prob="0.9900" sensitivity="0.7303" error="0.0014" num_corr="28366" num_incorr="40"/>
+<roc_data_point min_prob="0.9800" sensitivity="0.7821" error="0.0023" num_corr="30377" num_incorr="69"/>
+<roc_data_point min_prob="0.9500" sensitivity="0.8460" error="0.0046" num_corr="32861" num_incorr="153"/>
+<roc_data_point min_prob="0.9000" sensitivity="0.8917" error="0.0083" num_corr="34636" num_incorr="291"/>
+<roc_data_point min_prob="0.8500" sensitivity="0.9150" error="0.0116" num_corr="35540" num_incorr="418"/>
+<roc_data_point min_prob="0.8000" sensitivity="0.9308" error="0.0149" num_corr="36154" num_incorr="547"/>
+<roc_data_point min_prob="0.7500" sensitivity="0.9428" error="0.0183" num_corr="36620" num_incorr="682"/>
+<roc_data_point min_prob="0.7000" sensitivity="0.9528" error="0.0219" num_corr="37009" num_incorr="828"/>
+<roc_data_point min_prob="0.6500" sensitivity="0.9615" error="0.0258" num_corr="37347" num_incorr="991"/>
+<roc_data_point min_prob="0.6000" sensitivity="0.9690" error="0.0300" num_corr="37638" num_incorr="1164"/>
+<roc_data_point min_prob="0.5500" sensitivity="0.9734" error="0.0330" num_corr="37806" num_incorr="1289"/>
+<roc_data_point min_prob="0.5000" sensitivity="0.9768" error="0.0358" num_corr="37940" num_incorr="1409"/>
+<roc_data_point min_prob="0.4500" sensitivity="0.9798" error="0.0388" num_corr="38055" num_incorr="1538"/>
+<roc_data_point min_prob="0.4000" sensitivity="0.9826" error="0.0423" num_corr="38165" num_incorr="1685"/>
+<roc_data_point min_prob="0.3500" sensitivity="0.9853" error="0.0463" num_corr="38269" num_incorr="1860"/>
+<roc_data_point min_prob="0.3000" sensitivity="0.9878" error="0.0510" num_corr="38366" num_incorr="2061"/>
+<roc_data_point min_prob="0.2500" sensitivity="0.9901" error="0.0565" num_corr="38458" num_incorr="2303"/>
+<roc_data_point min_prob="0.2000" sensitivity="0.9923" error="0.0632" num_corr="38543" num_incorr="2598"/>
+<roc_data_point min_prob="0.1500" sensitivity="0.9942" error="0.0710" num_corr="38617" num_incorr="2951"/>
+<roc_data_point min_prob="0.1000" sensitivity="0.9962" error="0.0826" num_corr="38693" num_incorr="3484"/>
+<roc_data_point min_prob="0.0500" sensitivity="0.9982" error="0.1038" num_corr="38771" num_incorr="4493"/>
+<roc_data_point min_prob="0.0000" sensitivity="1.0000" error="0.5604" num_corr="38841" num_incorr="49519"/>
+<error_point error="0.0000" min_prob="1.0000" num_corr="2" num_incorr="0"/>
+<error_point error="0.0001" min_prob="0.9998" num_corr="10118" num_incorr="1"/>
+<error_point error="0.0002" min_prob="0.9994" num_corr="16619" num_incorr="3"/>
+<error_point error="0.0003" min_prob="0.9989" num_corr="19716" num_incorr="6"/>
+<error_point error="0.0004" min_prob="0.9982" num_corr="21634" num_incorr="9"/>
+<error_point error="0.0005" min_prob="0.9975" num_corr="22981" num_incorr="11"/>
+<error_point error="0.0006" min_prob="0.9969" num_corr="24027" num_incorr="14"/>
+<error_point error="0.0007" min_prob="0.9961" num_corr="24880" num_incorr="17"/>
+<error_point error="0.0008" min_prob="0.9954" num_corr="25597" num_incorr="20"/>
+<error_point error="0.0009" min_prob="0.9946" num_corr="26214" num_incorr="24"/>
+<error_point error="0.0010" min_prob="0.9937" num_corr="26753" num_incorr="27"/>
+<error_point error="0.0015" min_prob="0.9890" num_corr="28679" num_incorr="43"/>
+<error_point error="0.0020" min_prob="0.9833" num_corr="29892" num_incorr="60"/>
+<error_point error="0.0025" min_prob="0.9771" num_corr="30748" num_incorr="77"/>
+<error_point error="0.0030" min_prob="0.9711" num_corr="31410" num_incorr="95"/>
+<error_point error="0.0040" min_prob="0.9581" num_corr="32391" num_incorr="130"/>
+<error_point error="0.0050" min_prob="0.9449" num_corr="33109" num_incorr="166"/>
+<error_point error="0.0060" min_prob="0.9319" num_corr="33669" num_incorr="203"/>
+<error_point error="0.0070" min_prob="0.9177" num_corr="34130" num_incorr="241"/>
+<error_point error="0.0080" min_prob="0.9045" num_corr="34520" num_incorr="278"/>
+<error_point error="0.0090" min_prob="0.8896" num_corr="34854" num_incorr="317"/>
+<error_point error="0.0100" min_prob="0.8755" num_corr="35143" num_incorr="355"/>
+<error_point error="0.0150" min_prob="0.7980" num_corr="36170" num_incorr="551"/>
+<error_point error="0.0200" min_prob="0.7277" num_corr="36817" num_incorr="752"/>
+<error_point error="0.0250" min_prob="0.6603" num_corr="37283" num_incorr="956"/>
+<error_point error="0.0300" min_prob="0.6000" num_corr="37638" num_incorr="1165"/>
+<error_point error="0.0400" min_prob="0.4322" num_corr="38096" num_incorr="1588"/>
+<error_point error="0.0500" min_prob="0.3108" num_corr="38348" num_incorr="2019"/>
+<error_point error="0.0750" min_prob="0.1314" num_corr="38647" num_incorr="3135"/>
+<error_point error="0.1000" min_prob="0.0571" num_corr="38761" num_incorr="4308"/>
+</roc_error_data>
+<roc_error_data charge="3" charge_est_correct="26810.0">
+<roc_data_point min_prob="0.9999" sensitivity="0.1822" error="0.0001" num_corr="4884" num_incorr="0"/>
+<roc_data_point min_prob="0.9990" sensitivity="0.3823" error="0.0003" num_corr="10248" num_incorr="3"/>
+<roc_data_point min_prob="0.9900" sensitivity="0.6275" error="0.0017" num_corr="16822" num_incorr="29"/>
+<roc_data_point min_prob="0.9800" sensitivity="0.6973" error="0.0030" num_corr="18694" num_incorr="56"/>
+<roc_data_point min_prob="0.9500" sensitivity="0.7843" error="0.0064" num_corr="21027" num_incorr="135"/>
+<roc_data_point min_prob="0.9000" sensitivity="0.8472" error="0.0116" num_corr="22713" num_incorr="266"/>
+<roc_data_point min_prob="0.8500" sensitivity="0.8834" error="0.0168" num_corr="23685" num_incorr="404"/>
+<roc_data_point min_prob="0.8000" sensitivity="0.9081" error="0.0218" num_corr="24346" num_incorr="543"/>
+<roc_data_point min_prob="0.7500" sensitivity="0.9281" error="0.0273" num_corr="24883" num_incorr="698"/>
+<roc_data_point min_prob="0.7000" sensitivity="0.9403" error="0.0316" num_corr="25209" num_incorr="822"/>
+<roc_data_point min_prob="0.6500" sensitivity="0.9502" error="0.0359" num_corr="25475" num_incorr="949"/>
+<roc_data_point min_prob="0.6000" sensitivity="0.9572" error="0.0397" num_corr="25661" num_incorr="1061"/>
+<roc_data_point min_prob="0.5500" sensitivity="0.9632" error="0.0437" num_corr="25825" num_incorr="1181"/>
+<roc_data_point min_prob="0.5000" sensitivity="0.9688" error="0.0483" num_corr="25975" num_incorr="1317"/>
+<roc_data_point min_prob="0.4500" sensitivity="0.9736" error="0.0529" num_corr="26101" num_incorr="1457"/>
+<roc_data_point min_prob="0.4000" sensitivity="0.9777" error="0.0578" num_corr="26212" num_incorr="1608"/>
+<roc_data_point min_prob="0.3500" sensitivity="0.9812" error="0.0629" num_corr="26307" num_incorr="1765"/>
+<roc_data_point min_prob="0.3000" sensitivity="0.9847" error="0.0690" num_corr="26400" num_incorr="1957"/>
+<roc_data_point min_prob="0.2500" sensitivity="0.9879" error="0.0762" num_corr="26486" num_incorr="2183"/>
+<roc_data_point min_prob="0.2000" sensitivity="0.9911" error="0.0854" num_corr="26571" num_incorr="2480"/>
+<roc_data_point min_prob="0.1500" sensitivity="0.9937" error="0.0956" num_corr="26642" num_incorr="2816"/>
+<roc_data_point min_prob="0.1000" sensitivity="0.9959" error="0.1077" num_corr="26700" num_incorr="3221"/>
+<roc_data_point min_prob="0.0500" sensitivity="0.9980" error="0.1285" num_corr="26755" num_incorr="3945"/>
+<roc_data_point min_prob="0.0000" sensitivity="1.0000" error="0.5908" num_corr="26810" num_incorr="38708"/>
+<error_point error="0.0000" min_prob="1.0000" num_corr="2" num_incorr="0"/>
+<error_point error="0.0001" min_prob="0.9997" num_corr="6589" num_incorr="1"/>
+<error_point error="0.0002" min_prob="0.9993" num_corr="9083" num_incorr="2"/>
+<error_point error="0.0003" min_prob="0.9988" num_corr="10553" num_incorr="3"/>
+<error_point error="0.0004" min_prob="0.9984" num_corr="11619" num_incorr="5"/>
+<error_point error="0.0005" min_prob="0.9978" num_corr="12448" num_incorr="6"/>
+<error_point error="0.0006" min_prob="0.9973" num_corr="13127" num_incorr="8"/>
+<error_point error="0.0007" min_prob="0.9967" num_corr="13696" num_incorr="10"/>
+<error_point error="0.0008" min_prob="0.9961" num_corr="14184" num_incorr="11"/>
+<error_point error="0.0009" min_prob="0.9955" num_corr="14611" num_incorr="13"/>
+<error_point error="0.0010" min_prob="0.9948" num_corr="14985" num_incorr="15"/>
+<error_point error="0.0015" min_prob="0.9913" num_corr="16399" num_incorr="25"/>
+<error_point error="0.0020" min_prob="0.9877" num_corr="17370" num_incorr="35"/>
+<error_point error="0.0025" min_prob="0.9840" num_corr="18109" num_incorr="45"/>
+<error_point error="0.0030" min_prob="0.9799" num_corr="18703" num_incorr="56"/>
+<error_point error="0.0040" min_prob="0.9715" num_corr="19615" num_incorr="79"/>
+<error_point error="0.0050" min_prob="0.9624" num_corr="20298" num_incorr="102"/>
+<error_point error="0.0060" min_prob="0.9540" num_corr="20844" num_incorr="126"/>
+<error_point error="0.0070" min_prob="0.9440" num_corr="21297" num_incorr="150"/>
+<error_point error="0.0080" min_prob="0.9345" num_corr="21680" num_incorr="175"/>
+<error_point error="0.0090" min_prob="0.9253" num_corr="22014" num_incorr="200"/>
+<error_point error="0.0100" min_prob="0.9153" num_corr="22309" num_incorr="225"/>
+<error_point error="0.0150" min_prob="0.8668" num_corr="23399" num_incorr="357"/>
+<error_point error="0.0200" min_prob="0.8184" num_corr="24135" num_incorr="493"/>
+<error_point error="0.0250" min_prob="0.7705" num_corr="24676" num_incorr="633"/>
+<error_point error="0.0300" min_prob="0.7176" num_corr="25099" num_incorr="777"/>
+<error_point error="0.0400" min_prob="0.5942" num_corr="25676" num_incorr="1070"/>
+<error_point error="0.0500" min_prob="0.4831" num_corr="26026" num_incorr="1370"/>
+<error_point error="0.0750" min_prob="0.2589" num_corr="26474" num_incorr="2147"/>
+<error_point error="0.1000" min_prob="0.1315" num_corr="26666" num_incorr="2964"/>
+</roc_error_data>
+<distribution_point fvalue="-4.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="186" model_2_pos_distr="4.37" model_2_neg_distr="3.50" obs_3_distr="228" model_3_pos_distr="19.86" model_3_neg_distr="61.82" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-4.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="225" model_2_pos_distr="5.58" model_2_neg_distr="15.27" obs_3_distr="336" model_3_pos_distr="23.71" model_3_neg_distr="162.87" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-4.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="324" model_2_pos_distr="7.08" model_2_neg_distr="51.02" obs_3_distr="543" model_3_pos_distr="28.18" model_3_neg_distr="351.39" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-4.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="442" model_2_pos_distr="8.94" model_2_neg_distr="136.31" obs_3_distr="847" model_3_pos_distr="33.34" model_3_neg_distr="642.27" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-4.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="595" model_2_pos_distr="11.23" model_2_neg_distr="301.68" obs_3_distr="1131" model_3_pos_distr="39.27" model_3_neg_distr="1023.14" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-3.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="781" model_2_pos_distr="14.03" model_2_neg_distr="570.10" obs_3_distr="1374" model_3_pos_distr="46.05" model_3_neg_distr="1454.36" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-3.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1056" model_2_pos_distr="17.42" model_2_neg_distr="943.51" obs_3_distr="1701" model_3_pos_distr="53.76" model_3_neg_distr="1881.23" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-3.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1226" model_2_pos_distr="21.52" model_2_neg_distr="1397.09" obs_3_distr="1927" model_3_pos_distr="62.48" model_3_neg_distr="2250.66" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-3.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1460" model_2_pos_distr="26.44" model_2_neg_distr="1884.51" obs_3_distr="2138" model_3_pos_distr="72.29" model_3_neg_distr="2524.26" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-3.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1693" model_2_pos_distr="32.31" model_2_neg_distr="2350.89" obs_3_distr="2286" model_3_pos_distr="83.26" model_3_neg_distr="2683.93" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-2.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1966" model_2_pos_distr="39.26" model_2_neg_distr="2746.88" obs_3_distr="2327" model_3_pos_distr="95.47" model_3_neg_distr="2730.51" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-2.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2253" model_2_pos_distr="47.45" model_2_neg_distr="3038.42" obs_3_distr="2345" model_3_pos_distr="108.97" model_3_neg_distr="2678.42" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-2.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2420" model_2_pos_distr="57.03" model_2_neg_distr="3210.21" obs_3_distr="2261" model_3_pos_distr="123.83" model_3_neg_distr="2549.36" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-2.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2654" model_2_pos_distr="68.17" model_2_neg_distr="3263.98" obs_3_distr="2334" model_3_pos_distr="140.09" model_3_neg_distr="2366.88" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-2.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2753" model_2_pos_distr="81.05" model_2_neg_distr="3213.77" obs_3_distr="2172" model_3_pos_distr="157.77" model_3_neg_distr="2152.76" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-1.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2993" model_2_pos_distr="95.83" model_2_neg_distr="3080.45" obs_3_distr="2196" model_3_pos_distr="176.88" model_3_neg_distr="1925.07" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-1.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="3083" model_2_pos_distr="112.69" model_2_neg_distr="2887.06" obs_3_distr="2078" model_3_pos_distr="197.42" model_3_neg_distr="1697.51" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-1.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="3071" model_2_pos_distr="131.79" model_2_neg_distr="2655.44" obs_3_distr="2022" model_3_pos_distr="219.36" model_3_neg_distr="1479.63" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-1.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="3004" model_2_pos_distr="153.29" model_2_neg_distr="2404.32" obs_3_distr="1967" model_3_pos_distr="242.64" model_3_neg_distr="1277.46" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-1.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2869" model_2_pos_distr="177.32" model_2_neg_distr="2148.54" obs_3_distr="1927" model_3_pos_distr="267.19" model_3_neg_distr="1094.25" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-0.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2637" model_2_pos_distr="204.01" model_2_neg_distr="1899.00" obs_3_distr="1792" model_3_pos_distr="292.91" model_3_neg_distr="931.24" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-0.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2409" model_2_pos_distr="233.42" model_2_neg_distr="1663.10" obs_3_distr="1621" model_3_pos_distr="319.67" model_3_neg_distr="788.27" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-0.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2240" model_2_pos_distr="265.62" model_2_neg_distr="1445.36" obs_3_distr="1395" model_3_pos_distr="347.30" model_3_neg_distr="664.29" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-0.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="2000" model_2_pos_distr="300.62" model_2_neg_distr="1248.10" obs_3_distr="1260" model_3_pos_distr="375.64" model_3_neg_distr="557.77" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="-0.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1863" model_2_pos_distr="338.37" model_2_neg_distr="1071.99" obs_3_distr="1075" model_3_pos_distr="404.47" model_3_neg_distr="466.92" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="0.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1689" model_2_pos_distr="378.78" model_2_neg_distr="916.61" obs_3_distr="984" model_3_pos_distr="433.55" model_3_neg_distr="389.90" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="0.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1605" model_2_pos_distr="421.70" model_2_neg_distr="780.82" obs_3_distr="899" model_3_pos_distr="462.65" model_3_neg_distr="324.91" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="0.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1444" model_2_pos_distr="466.92" model_2_neg_distr="663.07" obs_3_distr="831" model_3_pos_distr="491.48" model_3_neg_distr="270.29" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="0.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1291" model_2_pos_distr="514.17" model_2_neg_distr="561.60" obs_3_distr="765" model_3_pos_distr="519.78" model_3_neg_distr="224.54" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="0.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1131" model_2_pos_distr="563.11" model_2_neg_distr="474.62" obs_3_distr="748" model_3_pos_distr="547.24" model_3_neg_distr="186.32" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="1.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1065" model_2_pos_distr="613.35" model_2_neg_distr="400.38" obs_3_distr="732" model_3_pos_distr="573.57" model_3_neg_distr="154.46" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="1.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="994" model_2_pos_distr="664.43" model_2_neg_distr="337.24" obs_3_distr="654" model_3_pos_distr="598.47" model_3_neg_distr="127.94" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="1.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="911" model_2_pos_distr="715.83" model_2_neg_distr="283.69" obs_3_distr="685" model_3_pos_distr="621.65" model_3_neg_distr="105.91" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="1.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="981" model_2_pos_distr="766.99" model_2_neg_distr="238.39" obs_3_distr="650" model_3_pos_distr="642.84" model_3_neg_distr="87.62" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="1.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="890" model_2_pos_distr="817.33" model_2_neg_distr="200.14" obs_3_distr="695" model_3_pos_distr="661.77" model_3_neg_distr="72.46" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="2.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="903" model_2_pos_distr="866.23" model_2_neg_distr="167.91" obs_3_distr="665" model_3_pos_distr="678.21" model_3_neg_distr="59.90" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="2.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="895" model_2_pos_distr="913.03" model_2_neg_distr="140.78" obs_3_distr="631" model_3_pos_distr="691.94" model_3_neg_distr="49.51" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="2.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="895" model_2_pos_distr="957.12" model_2_neg_distr="117.97" obs_3_distr="673" model_3_pos_distr="702.78" model_3_neg_distr="40.90" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="2.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="871" model_2_pos_distr="997.86" model_2_neg_distr="98.81" obs_3_distr="544" model_3_pos_distr="710.60" model_3_neg_distr="33.79" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="2.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="887" model_2_pos_distr="1034.65" model_2_neg_distr="82.74" obs_3_distr="589" model_3_pos_distr="715.28" model_3_neg_distr="27.91" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="3.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="865" model_2_pos_distr="1066.95" model_2_neg_distr="69.25" obs_3_distr="609" model_3_pos_distr="716.77" model_3_neg_distr="23.05" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="3.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="904" model_2_pos_distr="1094.25" model_2_neg_distr="57.96" obs_3_distr="593" model_3_pos_distr="715.05" model_3_neg_distr="19.03" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="3.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="922" model_2_pos_distr="1116.12" model_2_neg_distr="48.49" obs_3_distr="579" model_3_pos_distr="710.12" model_3_neg_distr="15.71" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="3.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="928" model_2_pos_distr="1132.23" model_2_neg_distr="40.56" obs_3_distr="590" model_3_pos_distr="702.08" model_3_neg_distr="12.97" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="3.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="950" model_2_pos_distr="1142.29" model_2_neg_distr="33.93" obs_3_distr="573" model_3_pos_distr="691.02" model_3_neg_distr="10.71" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="4.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1001" model_2_pos_distr="1146.16" model_2_neg_distr="28.37" obs_3_distr="605" model_3_pos_distr="677.08" model_3_neg_distr="8.84" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="4.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="976" model_2_pos_distr="1143.77" model_2_neg_distr="23.72" obs_3_distr="552" model_3_pos_distr="660.45" model_3_neg_distr="7.30" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="4.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1024" model_2_pos_distr="1135.15" model_2_neg_distr="19.84" obs_3_distr="550" model_3_pos_distr="641.34" model_3_neg_distr="6.02" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="4.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1047" model_2_pos_distr="1120.45" model_2_neg_distr="16.58" obs_3_distr="506" model_3_pos_distr="619.99" model_3_neg_distr="4.97" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="4.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1002" model_2_pos_distr="1099.90" model_2_neg_distr="13.87" obs_3_distr="534" model_3_pos_distr="596.67" model_3_neg_distr="4.10" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="5.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="998" model_2_pos_distr="1073.84" model_2_neg_distr="11.59" obs_3_distr="484" model_3_pos_distr="571.66" model_3_neg_distr="3.39" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="5.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="949" model_2_pos_distr="1042.68" model_2_neg_distr="9.69" obs_3_distr="478" model_3_pos_distr="545.23" model_3_neg_distr="2.79" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="5.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="1034" model_2_pos_distr="1006.89" model_2_neg_distr="8.10" obs_3_distr="493" model_3_pos_distr="517.70" model_3_neg_distr="2.31" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="5.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="976" model_2_pos_distr="967.03" model_2_neg_distr="6.77" obs_3_distr="467" model_3_pos_distr="489.36" model_3_neg_distr="1.90" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="5.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="967" model_2_pos_distr="923.68" model_2_neg_distr="5.66" obs_3_distr="453" model_3_pos_distr="460.49" model_3_neg_distr="1.57" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="6.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="998" model_2_pos_distr="877.46" model_2_neg_distr="4.73" obs_3_distr="447" model_3_pos_distr="431.39" model_3_neg_distr="1.30" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="6.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="968" model_2_pos_distr="829.00" model_2_neg_distr="3.95" obs_3_distr="419" model_3_pos_distr="402.31" model_3_neg_distr="1.07" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="6.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="908" model_2_pos_distr="778.94" model_2_neg_distr="3.30" obs_3_distr="391" model_3_pos_distr="373.52" model_3_neg_distr="0.88" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="6.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="821" model_2_pos_distr="727.91" model_2_neg_distr="2.76" obs_3_distr="373" model_3_pos_distr="345.23" model_3_neg_distr="0.73" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="6.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="809" model_2_pos_distr="676.52" model_2_neg_distr="2.31" obs_3_distr="356" model_3_pos_distr="317.65" model_3_neg_distr="0.60" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="7.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="781" model_2_pos_distr="625.32" model_2_neg_distr="1.93" obs_3_distr="365" model_3_pos_distr="290.97" model_3_neg_distr="0.50" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="7.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="752" model_2_pos_distr="574.84" model_2_neg_distr="1.61" obs_3_distr="312" model_3_pos_distr="265.33" model_3_neg_distr="0.41" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="7.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="693" model_2_pos_distr="525.56" model_2_neg_distr="1.35" obs_3_distr="313" model_3_pos_distr="240.87" model_3_neg_distr="0.34" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="7.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="607" model_2_pos_distr="477.87" model_2_neg_distr="1.13" obs_3_distr="288" model_3_pos_distr="217.68" model_3_neg_distr="0.28" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="7.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="579" model_2_pos_distr="432.15" model_2_neg_distr="0.94" obs_3_distr="243" model_3_pos_distr="195.84" model_3_neg_distr="0.23" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="8.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="536" model_2_pos_distr="388.66" model_2_neg_distr="0.79" obs_3_distr="226" model_3_pos_distr="175.41" model_3_neg_distr="0.19" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="8.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="456" model_2_pos_distr="347.65" model_2_neg_distr="0.66" obs_3_distr="200" model_3_pos_distr="156.40" model_3_neg_distr="0.16" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="8.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="425" model_2_pos_distr="309.26" model_2_neg_distr="0.55" obs_3_distr="192" model_3_pos_distr="138.83" model_3_neg_distr="0.13" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="8.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="340" model_2_pos_distr="273.61" model_2_neg_distr="0.46" obs_3_distr="146" model_3_pos_distr="122.68" model_3_neg_distr="0.11" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="8.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="305" model_2_pos_distr="240.75" model_2_neg_distr="0.38" obs_3_distr="151" model_3_pos_distr="107.92" model_3_neg_distr="0.09" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="9.10" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="215" model_2_pos_distr="210.68" model_2_neg_distr="0.32" obs_3_distr="129" model_3_pos_distr="94.52" model_3_neg_distr="0.07" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="9.30" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="186" model_2_pos_distr="183.36" model_2_neg_distr="0.27" obs_3_distr="123" model_3_pos_distr="82.40" model_3_neg_distr="0.06" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="9.50" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="132" model_2_pos_distr="158.72" model_2_neg_distr="0.22" obs_3_distr="86" model_3_pos_distr="71.52" model_3_neg_distr="0.05" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="9.70" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="121" model_2_pos_distr="136.63" model_2_neg_distr="0.19" obs_3_distr="84" model_3_pos_distr="61.80" model_3_neg_distr="0.04" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<distribution_point fvalue="9.90" obs_1_distr="0" model_1_pos_distr="0.00" model_1_neg_distr="0.00" obs_2_distr="68" model_2_pos_distr="116.98" model_2_neg_distr="0.16" obs_3_distr="70" model_3_pos_distr="53.16" model_3_neg_distr="0.03" obs_4_distr="0" model_4_pos_distr="0.00" model_4_neg_distr="0.00" obs_5_distr="0" model_5_pos_distr="0.00" model_5_neg_distr="0.00" obs_6_distr="0" model_6_pos_distr="0.00" model_6_neg_distr="0.00" obs_7_distr="0" model_7_pos_distr="0.00" model_7_neg_distr="0.00"/>
+<mixture_model precursor_ion_charge="1" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="21">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: 0.05">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="1.87"/>
+<parameter name="stdev" value="1.15"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.24"/>
+<parameter name="stdev" value="0.98"/>
+<parameter name="mu" value="-0.68"/>
+<parameter name="beta" value="0.76"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="2" comments="using no. tolerable trypsin term. [ntt] 0 data as pseudonegatives" prior_probability="0.609" est_tot_correct="38840.9" tot_num_spectra="88360" num_iterations="28">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -1.66">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.12"/>
+<parameter name="stdev" value="2.70"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-1.66"/>
+<parameter name="stdev" value="1.43"/>
+<parameter name="mu" value="-2.30"/>
+<parameter name="beta" value="1.11"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.959"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.041"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.351"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.649"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.000"/>
+<parameter name="-2" value="0.000"/>
+<parameter name="-1" value="0.000"/>
+<parameter name="0" value="0.923"/>
+<parameter name="1" value="0.070"/>
+<parameter name="2" value="0.007"/>
+<parameter name="3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.000"/>
+<parameter name="-2" value="0.000"/>
+<parameter name="-1" value="0.000"/>
+<parameter name="0" value="0.686"/>
+<parameter name="1" value="0.235"/>
+<parameter name="2" value="0.079"/>
+<parameter name="3" value="0.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="3" comments="using no. tolerable trypsin term. [ntt] 0 data as pseudonegatives" prior_probability="0.559" est_tot_correct="26810.0" tot_num_spectra="65518" num_iterations="28">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -2.31">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="3.09"/>
+<parameter name="stdev" value="2.98"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-2.31"/>
+<parameter name="stdev" value="1.34"/>
+<parameter name="mu" value="-2.91"/>
+<parameter name="beta" value="1.04"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.000"/>
+<parameter name="ntt=1" value="0.000"/>
+<parameter name="ntt=2" value="1.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.832"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.168"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.254"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.746"/>
+<parameter name="nmc&gt;=3" value="0.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.000"/>
+<parameter name="-2" value="0.000"/>
+<parameter name="-1" value="0.000"/>
+<parameter name="0" value="0.787"/>
+<parameter name="1" value="0.175"/>
+<parameter name="2" value="0.038"/>
+<parameter name="3" value="0.000"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.000"/>
+<parameter name="-2" value="0.000"/>
+<parameter name="-1" value="0.000"/>
+<parameter name="0" value="0.464"/>
+<parameter name="1" value="0.327"/>
+<parameter name="2" value="0.208"/>
+<parameter name="3" value="0.000"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="4" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="21">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="5" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="21">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="6" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="21">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+<mixture_model precursor_ion_charge="7" comments="using training data negative distributions" prior_probability="0.000" est_tot_correct="0.0" tot_num_spectra="0" num_iterations="21">
+<mixturemodel_distribution name="X! Tandem (k-score) discrim score [fval]	negmean: -0.20">
+<posmodel_distribution type="gaussian">
+<parameter name="mean" value="4.01"/>
+<parameter name="stdev" value="2.53"/>
+</posmodel_distribution>
+<negmodel_distribution type="evd">
+<parameter name="mean" value="-0.20"/>
+<parameter name="stdev" value="0.93"/>
+<parameter name="mu" value="-0.62"/>
+<parameter name="beta" value="0.72"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. tolerable trypsin term. [ntt]">
+<posmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="ntt=0" value="0.333"/>
+<parameter name="ntt=1" value="0.333"/>
+<parameter name="ntt=2" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel_distribution name="no. missed enz. cleavages [nmc]">
+<posmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="nmc=0" value="0.333"/>
+<parameter name="1&lt;=nmc&lt;=2" value="0.333"/>
+<parameter name="nmc&gt;=3" value="0.333"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+<mixturemodel name="Accurate Mass Model" pos_bandwidth="0.024082" neg_bandwidth="0.024082">
+<point value="-0.234000" pos_dens="0.002491" neg_dens="0.063897"/>
+<point value="-0.229135" pos_dens="0.002660" neg_dens="0.071315"/>
+<point value="-0.224270" pos_dens="0.002843" neg_dens="0.079666"/>
+<point value="-0.219405" pos_dens="0.003044" neg_dens="0.089082"/>
+<point value="-0.214540" pos_dens="0.003265" neg_dens="0.099712"/>
+<point value="-0.209674" pos_dens="0.003506" neg_dens="0.111732"/>
+<point value="-0.204809" pos_dens="0.003771" neg_dens="0.125343"/>
+<point value="-0.199944" pos_dens="0.004063" neg_dens="0.140783"/>
+<point value="-0.195079" pos_dens="0.004385" neg_dens="0.158325"/>
+<point value="-0.190214" pos_dens="0.004741" neg_dens="0.178287"/>
+<point value="-0.185349" pos_dens="0.005135" neg_dens="0.201043"/>
+<point value="-0.180484" pos_dens="0.005571" neg_dens="0.227024"/>
+<point value="-0.175619" pos_dens="0.006056" neg_dens="0.256735"/>
+<point value="-0.170754" pos_dens="0.006596" neg_dens="0.290762"/>
+<point value="-0.165889" pos_dens="0.007199" neg_dens="0.329788"/>
+<point value="-0.161023" pos_dens="0.007873" neg_dens="0.374605"/>
+<point value="-0.156158" pos_dens="0.008629" neg_dens="0.426128"/>
+<point value="-0.151293" pos_dens="0.009479" neg_dens="0.485416"/>
+<point value="-0.146428" pos_dens="0.010439" neg_dens="0.553682"/>
+<point value="-0.141563" pos_dens="0.011525" neg_dens="0.632313"/>
+<point value="-0.136698" pos_dens="0.012759" neg_dens="0.722881"/>
+<point value="-0.131833" pos_dens="0.014166" neg_dens="0.827148"/>
+<point value="-0.126968" pos_dens="0.015777" neg_dens="0.947067"/>
+<point value="-0.122103" pos_dens="0.017630" neg_dens="1.084769"/>
+<point value="-0.117238" pos_dens="0.019773" neg_dens="1.242526"/>
+<point value="-0.112372" pos_dens="0.022264" neg_dens="1.422703"/>
+<point value="-0.107507" pos_dens="0.025179" neg_dens="1.627666"/>
+<point value="-0.102642" pos_dens="0.028613" neg_dens="1.859658"/>
+<point value="-0.097777" pos_dens="0.032690" neg_dens="2.120618"/>
+<point value="-0.092912" pos_dens="0.037569" neg_dens="2.411945"/>
+<point value="-0.088047" pos_dens="0.043460" neg_dens="2.734184"/>
+<point value="-0.083182" pos_dens="0.050647" neg_dens="3.086660"/>
+<point value="-0.078317" pos_dens="0.059526" neg_dens="3.467060"/>
+<point value="-0.073452" pos_dens="0.070660" neg_dens="3.871045"/>
+<point value="-0.068587" pos_dens="0.084861" neg_dens="4.291990"/>
+<point value="-0.063721" pos_dens="0.103305" neg_dens="4.720963"/>
+<point value="-0.058856" pos_dens="0.127723" neg_dens="5.147076"/>
+<point value="-0.053991" pos_dens="0.160765" neg_dens="5.558262"/>
+<point value="-0.049126" pos_dens="0.206712" neg_dens="5.942415"/>
+<point value="-0.044261" pos_dens="0.272832" neg_dens="6.288685"/>
+<point value="-0.039396" pos_dens="0.372217" neg_dens="6.588610"/>
+<point value="-0.034531" pos_dens="0.530906" neg_dens="6.836739"/>
+<point value="-0.029666" pos_dens="0.807557" neg_dens="7.030489"/>
+<point value="-0.024801" pos_dens="1.346993" neg_dens="7.169277"/>
+<point value="-0.019935" pos_dens="2.507762" neg_dens="7.253181"/>
+<point value="-0.015070" pos_dens="5.053107" neg_dens="7.281681"/>
+<point value="-0.010205" pos_dens="10.106460" neg_dens="7.252985"/>
+<point value="-0.005340" pos_dens="18.247426" neg_dens="7.164279"/>
+<point value="-0.000475" pos_dens="27.784234" neg_dens="7.012868"/>
+<point value="0.004390" pos_dens="34.256908" neg_dens="6.797787"/>
+<point value="0.009255" pos_dens="33.561149" neg_dens="6.521279"/>
+<point value="0.014120" pos_dens="26.236615" neg_dens="6.189571"/>
+<point value="0.018985" pos_dens="16.953544" neg_dens="5.812682"/>
+<point value="0.023850" pos_dens="9.745928" neg_dens="5.403337"/>
+<point value="0.028716" pos_dens="5.495208" neg_dens="4.975381"/>
+<point value="0.033581" pos_dens="3.265786" neg_dens="4.542166"/>
+<point value="0.038446" pos_dens="2.075426" neg_dens="4.115318"/>
+<point value="0.043311" pos_dens="1.389197" neg_dens="3.704061"/>
+<point value="0.048176" pos_dens="0.966374" neg_dens="3.315066"/>
+<point value="0.053041" pos_dens="0.693581" neg_dens="2.952685"/>
+<point value="0.057906" pos_dens="0.511050" neg_dens="2.619355"/>
+<point value="0.062771" pos_dens="0.385073" neg_dens="2.316030"/>
+<point value="0.067636" pos_dens="0.295795" neg_dens="2.042556"/>
+<point value="0.072501" pos_dens="0.230987" neg_dens="1.797970"/>
+<point value="0.077367" pos_dens="0.182897" neg_dens="1.580726"/>
+<point value="0.082232" pos_dens="0.146539" neg_dens="1.388889"/>
+<point value="0.087097" pos_dens="0.118633" neg_dens="1.220283"/>
+<point value="0.091962" pos_dens="0.096949" neg_dens="1.072631"/>
+<point value="0.096827" pos_dens="0.079914" neg_dens="0.943658"/>
+<point value="0.101692" pos_dens="0.066401" neg_dens="0.831179"/>
+<point value="0.106557" pos_dens="0.055584" neg_dens="0.733152"/>
+<point value="0.111422" pos_dens="0.046856" neg_dens="0.647717"/>
+<point value="0.116287" pos_dens="0.039760" neg_dens="0.573207"/>
+<point value="0.121152" pos_dens="0.033951" neg_dens="0.508150"/>
+<point value="0.126018" pos_dens="0.029164" neg_dens="0.451263"/>
+<point value="0.130883" pos_dens="0.025195" neg_dens="0.401432"/>
+<point value="0.135748" pos_dens="0.021884" neg_dens="0.357697"/>
+<point value="0.140613" pos_dens="0.019106" neg_dens="0.319236"/>
+<point value="0.145478" pos_dens="0.016763" neg_dens="0.285344"/>
+<point value="0.150343" pos_dens="0.014776" neg_dens="0.255417"/>
+<point value="0.155208" pos_dens="0.013082" neg_dens="0.228940"/>
+<point value="0.160073" pos_dens="0.011631" neg_dens="0.205471"/>
+<point value="0.164938" pos_dens="0.010381" neg_dens="0.184632"/>
+<point value="0.169804" pos_dens="0.009300" neg_dens="0.166096"/>
+<point value="0.174669" pos_dens="0.008361" neg_dens="0.149583"/>
+<point value="0.179534" pos_dens="0.007542" neg_dens="0.134851"/>
+<point value="0.184399" pos_dens="0.006824" neg_dens="0.121689"/>
+<point value="0.189264" pos_dens="0.006193" neg_dens="0.109914"/>
+<point value="0.194129" pos_dens="0.005636" neg_dens="0.099368"/>
+<point value="0.198994" pos_dens="0.005142" neg_dens="0.089912"/>
+<point value="0.203859" pos_dens="0.004704" neg_dens="0.081422"/>
+<point value="0.208724" pos_dens="0.004313" neg_dens="0.073792"/>
+<point value="0.213589" pos_dens="0.003963" neg_dens="0.066928"/>
+<point value="0.218455" pos_dens="0.003649" neg_dens="0.060747"/>
+<point value="0.223320" pos_dens="0.003368" neg_dens="0.055175"/>
+<point value="0.228185" pos_dens="0.003113" neg_dens="0.050148"/>
+<point value="0.233050" pos_dens="0.002884" neg_dens="0.045607"/>
+<point value="0.237915" pos_dens="0.002676" neg_dens="0.041503"/>
+<point value="0.242780" pos_dens="0.002487" neg_dens="0.037791"/>
+</mixturemodel>
+<mixturemodel_distribution name="isotopic peak mass difference [IsoMassDiff]">
+<posmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</posmodel_distribution>
+<negmodel_distribution>
+<parameter name="-3" value="0.143"/>
+<parameter name="-2" value="0.143"/>
+<parameter name="-1" value="0.143"/>
+<parameter name="0" value="0.143"/>
+<parameter name="1" value="0.143"/>
+<parameter name="2" value="0.143"/>
+<parameter name="3" value="0.143"/>
+</negmodel_distribution>
+</mixturemodel_distribution>
+</mixture_model>
+</peptideprophet_summary>
+</analysis_summary>
+<analysis_summary analysis="interact" time="2012-01-09T17:38:07">
+<interact_summary filename="truncated.pep.xml" directory="/truncated.work">
+<inputfile name="../truncated.pep.xml"/>
+</interact_summary>
+</analysis_summary>
+<dataset_derivation generation_no="0"/>
+<msms_run_summary base_name="truncated1" search_engine="X! Tandem (k-score)" msManufacturer="Thermo Scientific" msModel="LTQ Velos" msIonization="nanoelectrospray" msMassAnalyzer="radial ejection linear ion trap" msDetector="electron multiplier" raw_data_type="raw" raw_data=".mzXML">
+<sample_enzyme name="trypsin">
+<specificity cut="KR" no_cut="P" sense="C"/>
+</sample_enzyme>
+<search_summary base_name="C4_HL_24h_010712_F1" search_engine="X! Tandem (k-score)" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" search_id="1">
+<search_database local_path="truncated.fasta" type="AA"/>
+<enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="2" min_number_termini="2"/>
+<aminoacid_modification aminoacid="C" massdiff="57.0215" mass="160.0306" variable="N"/>
+<aminoacid_modification aminoacid="C" massdiff="-17.0265" mass="143.0041" variable="Y" symbol="^"/>
+<!--X! Tandem n-terminal AA variable modification-->
+<aminoacid_modification aminoacid="E" massdiff="-18.0106" mass="111.0320" variable="Y" symbol="^"/>
+<!--X! Tandem n-terminal AA variable modification-->
+<aminoacid_modification aminoacid="K" massdiff="8.0142" mass="136.1092" variable="Y"/>
+<aminoacid_modification aminoacid="M" massdiff="15.9949" mass="147.0354" variable="Y"/>
+<aminoacid_modification aminoacid="Q" massdiff="-17.0265" mass="111.0321" variable="Y" symbol="^"/>
+<!--X! Tandem n-terminal AA variable modification-->
+<aminoacid_modification aminoacid="R" massdiff="10.0083" mass="166.1094" variable="Y"/>
+<!-- Input parameters -->
+<parameter name="list path, taxonomy information" value="taxonomy.xml"/>
+<parameter name="output, histogram column width" value="30"/>
+<parameter name="output, histograms" value="no"/>
+<parameter name="output, maximum valid expectation value" value="0.1"/>
+<parameter name="output, one sequence copy" value="yes"/>
+<parameter name="output, parameters" value="yes"/>
+<parameter name="output, path" value="truncated.xtan.xml"/>
+<parameter name="output, path hashing" value="no"/>
+<parameter name="output, performance" value="yes"/>
+<parameter name="output, proteins" value="yes"/>
+<parameter name="output, results" value="all"/>
+<parameter name="output, sequences" value="no"/>
+<parameter name="output, sort results by" value="spectrum"/>
+<parameter name="output, spectra" value="no"/>
+<parameter name="output, xsl path" value="tandem-style.xsl"/>
+<parameter name="protein, C-terminal residue modification mass" value="0.0"/>
+<parameter name="protein, N-terminal residue modification mass" value="0.0"/>
+<parameter name="protein, cleavage semi" value="no"/>
+<parameter name="protein, cleavage site" value="[RK]|{P}"/>
+<parameter name="protein, taxon" value="sequences"/>
+<parameter name="refine" value="no"/>
+<parameter name="refine, maximum valid expectation value" value="0.1"/>
+<parameter name="refine, spectrum synthesis" value="yes"/>
+<parameter name="residue, modification mass" value="57.02146@C"/>
+<parameter name="residue, potential modification mass" value="15.994915@M,8.014199@K,10.008269@R"/>
+<parameter name="residue, potential modification motif" value=""/>
+<parameter name="scoring, algorithm" value="k-score"/>
+<parameter name="scoring, b ions" value="yes"/>
+<parameter name="scoring, maximum missed cleavage sites" value="2"/>
+<parameter name="scoring, minimum ion count" value="1"/>
+<parameter name="scoring, y ions" value="yes"/>
+<parameter name="spectrum, dynamic range" value="100.0"/>
+<parameter name="spectrum, fragment monoisotopic mass error" value="0.5"/>
+<parameter name="spectrum, fragment monoisotopic mass error units" value="Daltons"/>
+<parameter name="spectrum, minimum fragment mz" value="140.0"/>
+<parameter name="spectrum, minimum parent m+h" value="500.0"/>
+<parameter name="spectrum, minimum peaks" value="10"/>
+<parameter name="spectrum, parent monoisotopic mass error minus" value="50"/>
+<parameter name="spectrum, parent monoisotopic mass error plus" value="50"/>
+<parameter name="spectrum, parent monoisotopic mass error units" value="ppm"/>
+<parameter name="spectrum, parent monoisotopic mass isotope error" value="yes"/>
+<parameter name="spectrum, path" value="C4_HL_24h_010712_F1.mzXML"/>
+<parameter name="spectrum, threads" value="4"/>
+<parameter name="spectrum, total peaks" value="50"/>
+<parameter name="spectrum, use conditioning" value="no"/>
+<parameter name="spectrum, use noise suppression" value="no"/>
+<!-- Unused input parameters -->
+<parameter name="pipeline msconvert, enable" value="true"/>
+<parameter name="pipeline prophet, accurate mass" value="yes"/>
+<parameter name="pipeline prophet, decoy tag" value="DECOY"/>
+<parameter name="pipeline quantitation, algorithm" value="xpress"/>
+<parameter name="pipeline quantitation, mass tolerance" value="0.1"/>
+<parameter name="pipeline quantitation, residue label mass" value="8.014199@K,10.008269@R"/>
+<parameter name="pipeline tandem, version" value="2010.10.01.1"/>
+<parameter name="pipeline tpp, version" value="4.5.1"/>
+<parameter name="pipeline, data type" value="Fractions"/>
+<parameter name="pipeline, database" value="truncated.fasta"/>
+<parameter name="pipeline, load spectra" value="no"/>
+<parameter name="pipeline, protocol description" value=""/>
+<parameter name="refine, point mutations" value="no"/>
+<parameter name="refine, potential C-terminus modifications" value=""/>
+<parameter name="refine, potential N-terminus modifications" value="+42.0@["/>
+<parameter name="refine, potential modification mass" value=""/>
+<parameter name="refine, potential modification motif" value=""/>
+<parameter name="refine, unanticipated cleavage" value="yes"/>
+<parameter name="refine, use potential modifications for full refinement" value="no"/>
+<parameter name="scoring, pluggable scoring" value="yes"/>
+<parameter name="tpp fractions, globus queue" value="cpq64"/>
+<parameter name="tpp, globus queue" value="cpq64"/>
+<parameter name="xtandem, globus queue" value="cpq64"/>
+<!-- Performance parameters -->
+<parameter name="list path, sequence source #1" value="truncated.fasta"/>
+<parameter name="list path, sequence source description #1" value="no description"/>
+<parameter name="modelling, total peptides used" value="737313215"/>
+<parameter name="modelling, total proteins used" value="173273"/>
+<parameter name="modelling, total spectra used" value="15265"/>
+<parameter name="process, start time" value="2012:01:09:14:25:08"/>
+<parameter name="process, version" value="x! tandem 2010.10.01.1 (LabKey, Insilicos and ISB)"/>
+<parameter name="quality values" value="489 373 322 258 227 195 140 103 76 49 24 20 19 9 3 0 0 0 0 0"/>
+<parameter name="refining, # input models" value="0"/>
+<parameter name="refining, # input spectra" value="0"/>
+<parameter name="refining, # partial cleavage" value="0"/>
+<parameter name="refining, # point mutations" value="0"/>
+<parameter name="refining, # potential C-terminii" value="0"/>
+<parameter name="refining, # potential N-terminii" value="0"/>
+<parameter name="refining, # unanticipated cleavage" value="0"/>
+<parameter name="timing, initial modelling total (sec)" value="4041.97"/>
+<parameter name="timing, initial modelling/spectrum (sec)" value="0.265"/>
+<parameter name="timing, load sequence models (sec)" value="13.22"/>
+<parameter name="timing, refinement/spectrum (sec)" value="0.000"/>
+</search_summary>
+<analysis_timestamp analysis="xpress" time="2012-01-09T17:40:31" id="1">
+<xpressratio_timestamp xpress_light="0"/>
+</analysis_timestamp>
+<analysis_timestamp analysis="peptideprophet" time="2012-01-09T17:38:49" id="1"/>
+<spectrum_query spectrum="dummySpectra.00749.00749.2" start_scan="749" end_scan="749" precursor_neutral_mass="984.5065" assumed_charge="2" index="1" retention_time_sec="667.636">
+<search_result>
+<search_hit hit_rank="1" peptide="RPNPAPGTR" peptide_prev_aa="K" peptide_next_aa="K" protein="IPI00298928" protein_descr="IPI:IPI00298928.1|SWISS-PROT:Q9UQ13-1|ENSEMBL:ENSP00000358464|REFSEQ:NP_031399|H-INV:HIT000064588|VEGA:OTTHUMP00000020481 Tax_Id=9606 Gene_Symbol=SHOC2 Isoform 1 of Leucine-rich repeat protein SHOC-2" num_tot_proteins="2" num_matched_ions="15" tot_num_ions="16" calc_neutral_pep_mass="984.5367" massdiff="-0.030" num_tol_term="2" num_missed_cleavages="0" is_rejected="0">
+<modification_info modified_peptide="R[166]PNPAPGTR[166]">
+<mod_aminoacid_mass position="1" mass="166.1094"/>
+<mod_aminoacid_mass position="9" mass="166.1094"/>
+</modification_info>
+<search_score name="hyperscore" value="355"/>
+<search_score name="nextscore" value="334"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="cscore" value="0"/>
+<search_score name="zscore" value="0"/>
+<search_score name="ascore" value="0"/>
+<search_score name="xscore" value="0"/>
+<search_score name="expect" value="2.1"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.4511" all_ntt_prob="(0.0000,0.0000,0.4511)">
+<search_score_summary>
+<parameter name="fval" value="0.7678"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="0"/>
+<parameter name="massd" value="-0.030"/>
+<parameter name="isomassd" value="0"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+<spectrum_query spectrum="dummySpectra.00755.00755.2" start_scan="755" end_scan="755" precursor_neutral_mass="1338.6086" assumed_charge="2" index="2" retention_time_sec="670.386">
+<search_result>
+<search_hit hit_rank="1" peptide="RCYGDGGGAKGNK" peptide_prev_aa="R" peptide_next_aa="M" protein="IPI00888109" protein_descr="IPI:IPI00888109.2|ENSEMBL:ENSP00000411623 Tax_Id=9606 Gene_Symbol=- 19 kDa protein" num_tot_proteins="1" num_matched_ions="10" tot_num_ions="24" calc_neutral_pep_mass="1338.6099" massdiff="-0.001" num_tol_term="2" num_missed_cleavages="1" is_rejected="0">
+<modification_info modified_peptide="RCYGDGGGAKGNK">
+<mod_aminoacid_mass position="2" mass="160.0306"/>
+</modification_info>
+<search_score name="hyperscore" value="292"/>
+<search_score name="nextscore" value="276"/>
+<search_score name="bscore" value="1"/>
+<search_score name="yscore" value="1"/>
+<search_score name="cscore" value="0"/>
+<search_score name="zscore" value="0"/>
+<search_score name="ascore" value="0"/>
+<search_score name="xscore" value="0"/>
+<search_score name="expect" value="5.3"/>
+<analysis_result analysis="peptideprophet">
+<peptideprophet_result probability="0.1453" all_ntt_prob="(0.0000,0.0000,0.1453)">
+<search_score_summary>
+<parameter name="fval" value="-0.2389"/>
+<parameter name="ntt" value="2"/>
+<parameter name="nmc" value="1"/>
+<parameter name="massd" value="-0.001"/>
+<parameter name="isomassd" value="0"/>
+</search_score_summary>
+</peptideprophet_result>
+</analysis_result>
+</search_hit>
+</search_result>
+</spectrum_query>
+</msms_run_summary>
+</msms_pipeline_analysis>

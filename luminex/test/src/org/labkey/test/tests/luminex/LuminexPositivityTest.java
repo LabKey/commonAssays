@@ -92,9 +92,9 @@ public final class LuminexPositivityTest extends LuminexTest
     public void testImportAnalyteDefaults()
     {
         String assayName = "Luminex Analyte Default Test";
-        File analyteDefaults = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues.tsv");
-        File badDefaults = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad.tsv");
-        File noAnalytes = TestFileUtils.getSampleData("Luminex/LuminexDefaultValues_bad_only_analytes.tsv");
+        File analyteDefaults = TestFileUtils.getSampleData("luminex/LuminexDefaultValues.tsv");
+        File badDefaults = TestFileUtils.getSampleData("luminex/LuminexDefaultValues_bad.tsv");
+        File noAnalytes = TestFileUtils.getSampleData("luminex/LuminexDefaultValues_bad_only_analytes.tsv");
         Set<SetAnalyteDefaultValuesPage.AnalyteDefault> expectedDefaults = new HashSet<>();
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Analyte1", "Blank"));
         expectedDefaults.add(new SetAnalyteDefaultValuesPage.AnalyteDefault("Blank", 110));

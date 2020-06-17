@@ -36,8 +36,8 @@ import java.io.File;
 @BaseWebDriverTest.ClassTimeout(minutes = 25)
 public final class LuminexExclusionRetentionTest extends LuminexTest
 {
-    private static final File BASE_RUN_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin.xls");
-    private static final File REIMPORT_FILE = TestFileUtils.getSampleData("Luminex/01-11A12-IgA-Biotin_reimport.xls");
+    private static final File BASE_RUN_FILE = TestFileUtils.getSampleData("luminex/01-11A12-IgA-Biotin.xls");
+    private static final File REIMPORT_FILE = TestFileUtils.getSampleData("luminex/01-11A12-IgA-Biotin_reimport.xls");
     private static final String RUN_NAME = "ReimportTestRun";
 
     private static final String[] ANALYTE_NAMES = new String[] {"ENV1","ENV2","ENV4","ENV5","BLANK"};
