@@ -21,7 +21,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 
@@ -120,8 +119,8 @@ public class PlateParserTests
     {
         for (Pair<String, String> test : singlePlateTests)
         {
-            File nabFile = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(NabModule.class), test.first);
-            File expectedFile = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(NabModule.class), test.second);
+            File nabFile = JunitUtil.getSampleData(null, test.first);
+            File expectedFile = JunitUtil.getSampleData(null, test.second);
 
             final double[][] expected = parseExpected(expectedFile);
             PlateTemplate template = template(nabFile.getName(), expected.length, expected[0].length);
