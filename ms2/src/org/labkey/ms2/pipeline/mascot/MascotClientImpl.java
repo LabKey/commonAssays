@@ -27,12 +27,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms2.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -1523,6 +1525,11 @@ public class MascotClientImpl implements SearchClient
         @Test
         public void testMockMascotServer() throws IOException
         {
+            if (!AppProps.getInstance().isDevMode())
+            {
+                Assume.assumeNotNull("Mock mascot server requires DeveloperTools module. Skipping test in production mode.",
+                        ModuleLoader.getInstance().getModule("DeveloperTools"));
+            }
             MascotClientImpl client = new MascotClientImpl(ActionURL.getBaseServerURL() + "/mockmascot/cgi/", _log);
             String version = client.getMascotVersion().trim();
             Assert.assertEquals("Hello - Server: LabKey MockMascotServer 1.0", version);
