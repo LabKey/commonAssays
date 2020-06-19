@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.VersionNumber;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -735,17 +735,9 @@ abstract public class FlowJoWorkspace extends Workspace
 
     public static class LoadTests extends Assert
     {
-        private File projectRoot()
-        {
-            String projectRootPath =  AppProps.getInstance().getProjectRoot();
-            if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir") + "/..";
-            return new File(projectRootPath);
-        }
-
         private Workspace loadWorkspace(String path) throws Exception
         {
-            File file = new File(projectRoot(), "sampledata/" + path);
+            File file = JunitUtil.getSampleData(null, path);
             return Workspace.readWorkspace(file.getName(), path, new FileInputStream(file));
         }
 

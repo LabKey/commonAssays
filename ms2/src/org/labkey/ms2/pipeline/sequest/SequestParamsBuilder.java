@@ -22,10 +22,12 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.client.ParameterNames;
@@ -1052,7 +1054,7 @@ public abstract class SequestParamsBuilder
         public void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
-            root = JunitUtil.getSampleData(null, "xarfiles/ms2pipe/databases");
+            root = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(MS2Module.class), "xarfiles/ms2pipe/databases");
             dbPath = root.getCanonicalPath();
             spb = createParamsBuilder();
         }
