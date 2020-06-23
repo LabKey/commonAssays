@@ -18,6 +18,7 @@ package org.labkey.flow.analysis.model;
 
 import Jama.Matrix;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.xerces.impl.Constants;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.util.DateUtil;
@@ -27,6 +28,7 @@ import org.labkey.flow.analysis.data.NumberArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,15 +44,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_1_5_NS;
 import static org.labkey.flow.analysis.model.WorkspaceParser.COMPENSATION_2_0_NS;
 import static org.labkey.flow.analysis.model.WorkspaceParser.DATATYPES_1_5_NS;
@@ -68,11 +74,14 @@ public class CompensationMatrix implements Serializable
     public static String PREFIX = "<";
     public static String SUFFIX = ">";
     public static String DITHERED_PREFIX = "dithered-";
+
     String _name;
     String[] _channelNames;
     double[][] _rows;
     String _prefix;
     String _suffix;
+
+    Set<String> _warnings = new LinkedHashSet<>();
 
     public CompensationMatrix(String name)
     {
@@ -116,17 +125,23 @@ public class CompensationMatrix implements Serializable
 
     public CompensationMatrix(InputStream is) throws Exception
     {
-        String strContents = PageFlowUtil.getStreamContentsAsString(is);
+        this("comp", PageFlowUtil.getStreamContentsAsString(is));
+    }
+
+    public CompensationMatrix(String name, String str) throws Exception
+    {
+        this(name);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE, true);
         DocumentBuilder db = dbf.newDocumentBuilder();
-        try
+        try (var rdr = new StringReader(str))
         {
-            Document doc = db.parse(strContents);
+            Document doc = db.parse(new InputSource(rdr));
             init(doc.getDocumentElement());
         }
         catch (Exception e)
         {
-            init(strContents);
+            init(str);
         }
     }
 
@@ -202,6 +217,26 @@ public class CompensationMatrix implements Serializable
         _suffix = elMatrix.getAttribute("suffix");
         _suffix = _suffix == null ? ">" : _suffix;
 
+        // The <transforms:parameters> element was added at some point (at least v10.5.3).
+        // When present, we will ignore any channels that aren't listed in the parameters element.
+        Set<String> parameterNames = null;
+        NodeList nlParameters = elMatrix.getElementsByTagNameNS(DATATYPES_2_0_NS, "parameters");
+        if (nlParameters.getLength() == 1)
+        {
+            parameterNames = new LinkedHashSet<>();
+            Element elParameters = (Element)nlParameters.item(0);
+            NodeList nlParameter = elParameters.getElementsByTagNameNS(DATATYPES_2_0_NS, "parameter");
+            for (int i = 0; i < nlParameter.getLength(); i++)
+            {
+                if (!(nlParameter.item(i) instanceof Element))
+                    continue;
+                Element elParameter = (Element)nlParameter.item(i);
+                String name = elParameter.getAttributeNS(DATATYPES_2_0_NS, "name");
+                if (!parameterNames.add(name))
+                    throw new FlowException("Duplicate parameter '" + name + "' in comp. matrix '" + _name + "'");
+            }
+        }
+
         NodeList nlSpillover = elMatrix.getElementsByTagNameNS(TRANSFORMATIONS_1_5_NS, "spillover");
         if (nlSpillover.getLength() == 0)
             nlSpillover = elMatrix.getElementsByTagNameNS(TRANSFORMATIONS_2_0_NS, "spillover");
@@ -216,7 +251,13 @@ public class CompensationMatrix implements Serializable
             if (channelName == null || channelName.length() == 0)
                 channelName = elSpillover.getAttributeNS(DATATYPES_2_0_NS, "parameter");
             if (channelName == null || channelName.length() == 0)
-                throw new FlowException("Compensation matrix spillover name required");
+                throw new FlowException("Compensation matrix spillover name required in comp. matrix '" + _name + "'");
+
+            if (parameterNames != null && !parameterNames.contains(channelName))
+            {
+                _warnings.add("Ignoring parameter name '" + channelName + "' not in parameter list in comp. matrix '" + _name + "'");
+                continue;
+            }
 
             Map<String, Double> mapValues = new HashMap<>();
             NodeList nlCoefficient = elSpillover.getElementsByTagNameNS(TRANSFORMATIONS_1_5_NS, "coefficient");
@@ -232,17 +273,26 @@ public class CompensationMatrix implements Serializable
                 if (parameterName == null || parameterName.length() == 0)
                     parameterName = elCoefficient.getAttributeNS(DATATYPES_2_0_NS, "parameter");
                 if (parameterName == null || parameterName.length() == 0)
-                    throw new FlowException("Compensation matrix coefficient name required");
+                    throw new FlowException("Compensation matrix coefficient name required in comp. matrix '" + _name + "'");
+
+                if (parameterNames != null && !parameterNames.contains(parameterName))
+                {
+                    _warnings.add("Ignoring parameter name '" + parameterName + "' not in parameter list in comp. matrix '" + _name + "'");
+                    continue;
+                }
 
                 String value = elCoefficient.getAttributeNS(TRANSFORMATIONS_1_5_NS, "value");
                 if (value == null || value.length() == 0)
                     value = elCoefficient.getAttributeNS(TRANSFORMATIONS_2_0_NS, "value");
                 if (value == null || value.length() == 0)
-                    throw new FlowException("Compensation matrix coefficient value required");
+                    throw new FlowException("Compensation matrix coefficient value required in comp. matrix '" + _name + "'");
 
                 Double d = Double.valueOf(value);
                 mapValues.put(parameterName, d);
             }
+
+            if (parameterNames != null && mapValues.size() != parameterNames.size())
+                throw new FlowException("Expected " + parameterNames.size() + " but had " + mapValues.size() + " parameters for channel '" + channelName + "' in comp. matrix '" + _name + "'");
 
             setChannel(channelName, mapValues);
         }
@@ -429,8 +479,16 @@ public class CompensationMatrix implements Serializable
         return new DataFrame(fields, cols);
     }
 
+    public Set<String> getWarnings()
+    {
+        return _warnings;
+    }
+
     public String toString()
     {
+        if (_channelNames == null)
+            return "<empty matrix>";
+
         StringBuffer ret = new StringBuffer();
         for (int i = 0; i < _channelNames.length; i ++)
         {
@@ -698,6 +756,41 @@ public class CompensationMatrix implements Serializable
 
     public static class TestFCS extends Assert
     {
+        // Issue 40622: NPE parsing FlowJo comp. matrix with invalid parameters
+        @Test
+        public void testBadParameters() throws Exception
+        {
+            String xml =
+                    "<transforms:spilloverMatrix spectral=\"0\"  prefix=\"Comp-\"  name=\"Acquisition-defined\"  editable=\"0\"  color=\"#c0c0c0\"  version=\"FlowJo-10.6.2\"  status=\"FINALIZED\"  transforms:id=\"e4bdce04-f94a-44c3-b7d5-9eeb280f44fe\"  suffix=\"\" " +
+                    " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+                    " xmlns:gating=\"http://www.isac-net.org/std/Gating-ML/v2.0/gating\"" +
+                    " xmlns:transforms=\"http://www.isac-net.org/std/Gating-ML/v2.0/transformations\"" +
+                    " xmlns:data-type=\"http://www.isac-net.org/std/Gating-ML/v2.0/datatypes\" " +
+                    ">\n" +
+                    "  <data-type:parameters>\n" +
+                    "    <data-type:parameter data-type:name=\"PE-A\"  userProvidedCompInfix=\"Comp-PE-A\" />\n" +
+                    "    <data-type:parameter data-type:name=\"PE-Cy7-A\"  userProvidedCompInfix=\"Comp-PE-Cy7-A\" />\n" +
+                    "  </data-type:parameters>\n" +
+                    "  <transforms:spillover data-type:parameter=\"expected-bad-channel\"  userProvidedCompInfix=\"Comp-APC-Cy7-A\" >\n" +
+                    "  </transforms:spillover>\n" +
+                    "  <transforms:spillover data-type:parameter=\"PE-A\"  userProvidedCompInfix=\"Comp-PE-A\" >\n" +
+                    "    <transforms:coefficient data-type:parameter=\"PE-A\"  transforms:value=\"1\" />\n" +
+                    "    <transforms:coefficient data-type:parameter=\"APC-Cy7-A\"  transforms:value=\"0.0063016186\" />\n" +
+                    "    <transforms:coefficient data-type:parameter=\"PE-Cy7-A\"  transforms:value=\"0.0181903485\" />\n" +
+                    "  </transforms:spillover>\n" +
+                    "  <transforms:spillover data-type:parameter=\"PE-Cy7-A\"  userProvidedCompInfix=\"Comp-PE-Cy7-A\" >\n" +
+                    "    <transforms:coefficient data-type:parameter=\"PE-A\"  transforms:value=\"0.0138724567\" />\n" +
+                    "    <transforms:coefficient data-type:parameter=\"PE-Cy7-A\"  transforms:value=\"1\" />\n" +
+                    "  </transforms:spillover>\n" +
+                    "</transforms:spilloverMatrix>\n";
+
+            var matrix = new CompensationMatrix("comp", xml);
+            Set<String> warnings = matrix.getWarnings();
+            assertThat(warnings, hasItems(
+                    "Ignoring parameter name 'expected-bad-channel' not in parameter list in comp. matrix 'Acquisition-defined'",
+                    "Ignoring parameter name 'APC-Cy7-A' not in parameter list in comp. matrix 'Acquisition-defined'"));
+        }
+
         @Test
         public void testFcsLoad() throws IOException
         {

@@ -1,0 +1,3 @@
+id	organism	individual	caseorcontrol	code	score	datemeasured
+10	mouse	m-111	case	OV+	9.9	12/5/2004
+20	mouse	m-120	control	H	7.6	12/3/2004

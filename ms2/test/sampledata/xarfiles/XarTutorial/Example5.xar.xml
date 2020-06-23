@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exp:ExperimentArchive xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://www.labkey.org/download/XarSchema/V2.2/expTypes.xsd">
+	<exp:Experiment rdf:about="${FolderLSIDBase}:Tutorial">
+		<exp:Name>Tutorial Examples</exp:Name>
+	</exp:Experiment>
+	<exp:ProtocolDefinitions>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MS2EndToEndProtocol">
+			<exp:Name>Example 5 Protocol (MS2 end to end)</exp:Name>
+			<exp:ProtocolDescription>Prepare sample, do LCMS2, the run XTandem analysis </exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRun</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance xsi:nil="true"/>
+			<exp:OutputDataPerInstance xsi:nil="true"/>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoXTandemSearch</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Do XTandem Search</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:SamplePrep">
+			<exp:Name>Sample Prep Protocol</exp:Name>
+			<exp:ProtocolDescription>Describes sample handling and preparation steps</exp:ProtocolDescription>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>1</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoSamplePrep</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Prepare sample</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialLSID" ValueType="String">${RunLSIDBase}:PreparedSample</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputMaterialNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputMaterialName" ValueType="String">Prepared sample</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:LCMS2">
+			<exp:Name>Analyze sample using LCMS2</exp:Name>
+			<exp:ProtocolDescription>Describe MS2 machine settings, on-board fractionation, etc.</exp:ProtocolDescription>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>1</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>0</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:Example5.DoLCMS2</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Do MS2 scan</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${RunLSIDBase}:RAWFile</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">raw file (N/A)</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:ConvertToMzXML">
+			<exp:Name>Convert to mzXML</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>1</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:OutputDataType>Data</exp:OutputDataType>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String"/>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:Example5.DoConvertToMzXML</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Do conversion to MzXML</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${FolderLSIDBase}:Example5.mzxml_file</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">MzXML file</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:XTandemAnalyze">
+			<exp:Name>XTandem analysis</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:XTandemAnalyze</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">XTandem Database Search</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${FolderLSIDBase}:Example5.xtan_file</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">XTandem Search Results</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String"/>
+			</exp:ParameterDeclarations>
+			<exp:Properties/>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:ConvertToPepXml">
+			<exp:Name>Convert To PepXml</exp:Name>
+			<exp:ApplicationType>ProtocolApplication</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance>0</exp:MaxInputMaterialPerInstance>
+			<exp:MaxInputDataPerInstance>1</exp:MaxInputDataPerInstance>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>1</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoConvertToPepXml</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">PepXml/XTandem Search Results</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataLSID" ValueType="String">${FolderLSIDBase}:Example5.pep_file</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataName" ValueType="String">PepXml/XTandem Search Results</exp:SimpleVal>
+				<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String"/>
+			</exp:ParameterDeclarations>
+			<exp:Properties/>
+		</exp:Protocol>
+		<exp:Protocol rdf:about="${FolderLSIDBase}:MarkRunOutput">
+			<exp:Name>Mark run outputs</exp:Name>
+			<exp:ProtocolDescription>Mark the output data or materials for the run.  Any and all inputs to an application of this type are considered outputs of the run.</exp:ProtocolDescription>
+			<exp:ApplicationType>ExperimentRunOutput</exp:ApplicationType>
+			<exp:MaxInputMaterialPerInstance xsi:nil="true"/>
+			<exp:MaxInputDataPerInstance xsi:nil="true"/>
+			<exp:OutputMaterialPerInstance>0</exp:OutputMaterialPerInstance>
+			<exp:OutputDataPerInstance>0</exp:OutputDataPerInstance>
+			<exp:ParameterDeclarations>
+				<exp:SimpleVal Name="ApplicationLSIDTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationLSID" ValueType="String">${RunLSIDBase}:DoMarkRunOutput</exp:SimpleVal>
+				<exp:SimpleVal Name="ApplicationNameTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.ApplicationName" ValueType="String">Run output</exp:SimpleVal>
+			</exp:ParameterDeclarations>
+		</exp:Protocol>
+	</exp:ProtocolDefinitions>
+	<exp:ProtocolActionDefinitions>
+		<exp:ProtocolActionSet ParentProtocolLSID="${FolderLSIDBase}:MS2EndToEndProtocol">
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MS2EndToEndProtocol" ActionSequence="1">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:SamplePrep" ActionSequence="10">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:LCMS2" ActionSequence="20">
+				<exp:PredecessorAction ActionSequenceRef="10"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:ConvertToMzXML" ActionSequence="30">
+				<exp:PredecessorAction ActionSequenceRef="20"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:XTandemAnalyze" ActionSequence="60">
+				<exp:PredecessorAction ActionSequenceRef="1"/>
+				<exp:PredecessorAction ActionSequenceRef="30"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:ConvertToPepXml" ActionSequence="70">
+				<exp:PredecessorAction ActionSequenceRef="60"/>
+			</exp:ProtocolAction>
+			<exp:ProtocolAction ChildProtocolLSID="${FolderLSIDBase}:MarkRunOutput" ActionSequence="1000">
+				<exp:PredecessorAction ActionSequenceRef="70"/>
+			</exp:ProtocolAction>
+		</exp:ProtocolActionSet>
+	</exp:ProtocolActionDefinitions>
+	<exp:StartingInputDefinitions>
+		<exp:Material rdf:about="${FolderLSIDBase}:Example4_Sample">
+			<exp:Name>MS2 Sample for Example 4</exp:Name>
+		</exp:Material>
+		<exp:Data rdf:about="${FolderLSIDBase}:Example4.tandem_file">
+			<exp:Name>Tandem Settings</exp:Name>
+			<exp:CpasType>Data</exp:CpasType>
+			<exp:DataFileUrl>\xtandem\Default\tandem.xml</exp:DataFileUrl>
+		</exp:Data>
+		<exp:Data rdf:about="${FolderLSIDBase}:Example4.fasta_file">
+			<exp:Name>Bovine_mini.fasta</exp:Name>
+			<exp:CpasType>Data</exp:CpasType>
+			<exp:DataFileUrl>\databases\Bovine_mini.fasta</exp:DataFileUrl>
+		</exp:Data>
+	</exp:StartingInputDefinitions>
+	<exp:ExperimentRuns>
+		<exp:ExperimentRun rdf:about="${FolderLSIDBase}:Example5Run">
+			<exp:Name>Example 5 Run (MS2 end to end)</exp:Name>
+			<exp:ProtocolLSID>${FolderLSIDBase}:MS2EndToEndProtocol</exp:ProtocolLSID>
+			<exp:Comments/>
+			<exp:Properties/>
+			<exp:ExperimentLog>
+				<exp:ExperimentLogEntry ActionSequenceRef="1"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="10"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="20"/>
+				<exp:ExperimentLogEntry ActionSequenceRef="30">
+					<exp:CommonParametersApplied>
+						<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">Example4.mzXML</exp:SimpleVal>
+					</exp:CommonParametersApplied>
+				</exp:ExperimentLogEntry>
+				<exp:ExperimentLogEntry ActionSequenceRef="60">
+					<exp:CommonParametersApplied>
+						<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">xtandem\Default\Example4.xtan.xml</exp:SimpleVal>
+					</exp:CommonParametersApplied>
+				</exp:ExperimentLogEntry>
+				<exp:ExperimentLogEntry ActionSequenceRef="70">
+					<exp:CommonParametersApplied>
+						<exp:SimpleVal Name="OutputDataFileTemplate" OntologyEntryURI="terms.fhcrc.org#XarTemplate.OutputDataFile" ValueType="String">xtandem\Default\Example4.pep.xml</exp:SimpleVal>
+					</exp:CommonParametersApplied>
+				</exp:ExperimentLogEntry>
+				<exp:ExperimentLogEntry ActionSequenceRef="1000"/>
+			</exp:ExperimentLog>
+			<exp:ProtocolApplications/>
+		</exp:ExperimentRun>
+	</exp:ExperimentRuns>
+</exp:ExperimentArchive>

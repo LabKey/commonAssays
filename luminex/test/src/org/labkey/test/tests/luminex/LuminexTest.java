@@ -66,26 +66,26 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
-    public static final File TEST_ASSAY_XAR_FILE = TestFileUtils.getSampleData("Luminex/" + TEST_ASSAY_XAR_NAME + ".xar");
+    public static final File TEST_ASSAY_XAR_FILE = TestFileUtils.getSampleData("luminex/" + TEST_ASSAY_XAR_NAME + ".xar");
 
     protected static final String TEST_ASSAY_LUM_SET_PROP_SPECIES = "testSpecies1";
-    public static final File TEST_ASSAY_LUM_FILE1 = TestFileUtils.getSampleData("Luminex/10JAN07_plate_1.xls");
-    public static final File TEST_ASSAY_LUM_FILE2 = TestFileUtils.getSampleData("Luminex/pnLINCO20070302A.xlsx");
-    public static final File TEST_ASSAY_LUM_FILE3 = TestFileUtils.getSampleData("Luminex/WithIndices.xls");
-    public static final File TEST_ASSAY_LUM_FILE4 = TestFileUtils.getSampleData("Luminex/WithAltNegativeBead.xls");
-    public static final File TEST_ASSAY_LUM_FILE5 = TestFileUtils.getSampleData("Luminex/Guide Set plate 1.xls");
-    public static final File TEST_ASSAY_LUM_FILE6 = TestFileUtils.getSampleData("Luminex/Guide Set plate 2.xls");
-    public static final File TEST_ASSAY_LUM_FILE7 = TestFileUtils.getSampleData("Luminex/Guide Set plate 3.xls");
-    public static final File TEST_ASSAY_LUM_FILE8 = TestFileUtils.getSampleData("Luminex/Guide Set plate 4.xls");
-    public static final File TEST_ASSAY_LUM_FILE9 = TestFileUtils.getSampleData("Luminex/Guide Set plate 5.xls");
-    public static final File TEST_ASSAY_LUM_FILE10 = TestFileUtils.getSampleData("Luminex/RawAndSummary.xlsx");
-    public static final File TEST_ASSAY_LUM_FILE11 = TestFileUtils.getSampleData("Luminex/PositivityWithBaseline.xls");
-    public static final File TEST_ASSAY_LUM_FILE12 = TestFileUtils.getSampleData("Luminex/PositivityWithoutBaseline.xls");
-    public static final File TEST_ASSAY_LUM_FILE13 = TestFileUtils.getSampleData("Luminex/PositivityThreshold.xls");
+    public static final File TEST_ASSAY_LUM_FILE1 = TestFileUtils.getSampleData("luminex/10JAN07_plate_1.xls");
+    public static final File TEST_ASSAY_LUM_FILE2 = TestFileUtils.getSampleData("luminex/pnLINCO20070302A.xlsx");
+    public static final File TEST_ASSAY_LUM_FILE3 = TestFileUtils.getSampleData("luminex/WithIndices.xls");
+    public static final File TEST_ASSAY_LUM_FILE4 = TestFileUtils.getSampleData("luminex/WithAltNegativeBead.xls");
+    public static final File TEST_ASSAY_LUM_FILE5 = TestFileUtils.getSampleData("luminex/Guide Set plate 1.xls");
+    public static final File TEST_ASSAY_LUM_FILE6 = TestFileUtils.getSampleData("luminex/Guide Set plate 2.xls");
+    public static final File TEST_ASSAY_LUM_FILE7 = TestFileUtils.getSampleData("luminex/Guide Set plate 3.xls");
+    public static final File TEST_ASSAY_LUM_FILE8 = TestFileUtils.getSampleData("luminex/Guide Set plate 4.xls");
+    public static final File TEST_ASSAY_LUM_FILE9 = TestFileUtils.getSampleData("luminex/Guide Set plate 5.xls");
+    public static final File TEST_ASSAY_LUM_FILE10 = TestFileUtils.getSampleData("luminex/RawAndSummary.xlsx");
+    public static final File TEST_ASSAY_LUM_FILE11 = TestFileUtils.getSampleData("luminex/PositivityWithBaseline.xls");
+    public static final File TEST_ASSAY_LUM_FILE12 = TestFileUtils.getSampleData("luminex/PositivityWithoutBaseline.xls");
+    public static final File TEST_ASSAY_LUM_FILE13 = TestFileUtils.getSampleData("luminex/PositivityThreshold.xls");
 
-    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_1 = TestFileUtils.getSampleData("Luminex/plate 1_IgA-Biot (Standard2).xls");
-    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_2 = TestFileUtils.getSampleData("Luminex/plate 2_IgA-Biot (Standard2).xls");
-    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3 = TestFileUtils.getSampleData("Luminex/plate 3_IgA-Biot (Standard1).xls");
+    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_1 = TestFileUtils.getSampleData("luminex/plate 1_IgA-Biot (Standard2).xls");
+    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_2 = TestFileUtils.getSampleData("luminex/plate 2_IgA-Biot (Standard2).xls");
+    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3 = TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls");
 
     public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
     public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");

@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns:ExperimentArchive xsi:schemaLocation="http://cpas.fhcrc.org/exp/xml http://www.labkey.org/download/XarSchema/V2.3/expTypes.xsd" xmlns:ns="http://cpas.fhcrc.org/exp/xml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <ns:ProtocolDefinitions>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch:9">
+      <ns:Name>X!Tandem analysis</ns:Name>
+      <ns:ApplicationType>ExperimentRun</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Check FASTA">
+      <ns:Name>Check FASTA</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ReAdW mzXML Conversion">
+      <ns:Name>ReAdW mzXML Conversion</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:msPrefix">
+      <ns:Name>msPrefix</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:msPicture">
+      <ns:Name>msPicture</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:X!Tandem">
+      <ns:Name>X!Tandem</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Tandem2XML">
+      <ns:Name>Tandem2XML</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:PeptideProphet">
+      <ns:Name>PeptideProphet</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Peptide Quantitation">
+      <ns:Name>Peptide Quantitation</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ProteinProphet">
+      <ns:Name>ProteinProphet</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Protein Quantitation">
+      <ns:Name>Protein Quantitation</ns:Name>
+      <ns:ApplicationType>ProtocolApplication</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+    <ns:Protocol rdf:about="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch.Output:9">
+      <ns:Name>MS2.XTandemSearch.Output</ns:Name>
+      <ns:ApplicationType>ExperimentRunOutput</ns:ApplicationType>
+      <ns:OutputMaterialType>Material</ns:OutputMaterialType>
+      <ns:OutputDataType>Data</ns:OutputDataType>
+    </ns:Protocol>
+  </ns:ProtocolDefinitions>
+  <ns:ProtocolActionDefinitions>
+    <ns:ProtocolActionSet ParentProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch:9">
+      <ns:ProtocolAction ActionSequence="1" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch:9"/>
+      <ns:ProtocolAction ActionSequence="2" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Check FASTA"/>
+      <ns:ProtocolAction ActionSequence="3" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ReAdW mzXML Conversion"/>
+      <ns:ProtocolAction ActionSequence="4" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:msPrefix"/>
+      <ns:ProtocolAction ActionSequence="5" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:msPicture"/>
+      <ns:ProtocolAction ActionSequence="6" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:X!Tandem"/>
+      <ns:ProtocolAction ActionSequence="7" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Tandem2XML"/>
+      <ns:ProtocolAction ActionSequence="8" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:PeptideProphet"/>
+      <ns:ProtocolAction ActionSequence="9" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Peptide Quantitation"/>
+      <ns:ProtocolAction ActionSequence="10" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ProteinProphet"/>
+      <ns:ProtocolAction ActionSequence="11" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Protein Quantitation"/>
+      <ns:ProtocolAction ActionSequence="12" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:PeptideProphet"/>
+      <ns:ProtocolAction ActionSequence="13" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Peptide Quantitation"/>
+      <ns:ProtocolAction ActionSequence="14" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ProteinProphet"/>
+      <ns:ProtocolAction ActionSequence="15" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Protein Quantitation"/>
+      <ns:ProtocolAction ActionSequence="16" ChildProtocolLSID="urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch.Output:9"/>
+    </ns:ProtocolActionSet>
+  </ns:ProtocolActionDefinitions>
+  <ns:StartingInputDefinitions>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>Bovine_mini1.fasta</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>../../../databases/Bovine_mini1.fasta</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/databases/Bovine_mini1.fasta</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>Bovine_mini2.fasta</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>../../../databases/Bovine_mini2.fasta</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/databases/Bovine_mini2.fasta</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>Bovine_mini3.fasta</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>../../../databases/Bovine_mini3.fasta</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/databases/Bovine_mini3.fasta</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>iTRAQ.mzXML</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>../../iTRAQ.mzXML</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/iTRAQ.mzXML</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>libraprotocol1.xml</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>../../../.labkey/protocols/libra/libraprotocol1.xml</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/.labkey/protocols/libra/libraprotocol1.xml</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+    <ns:Data rdf:about="${AutoFileLSID}">
+      <ns:Name>tandem.xml</ns:Name>
+      <ns:CpasType>Data</ns:CpasType>
+      <ns:DataFileUrl>tandem.xml</ns:DataFileUrl>
+      <ns:Properties>
+        <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/tandem.xml</ns:SimpleVal>
+      </ns:Properties>
+    </ns:Data>
+  </ns:StartingInputDefinitions>
+  <ns:ExperimentRuns>
+    <ns:ExperimentRun rdf:about="urn:lsid:${LSIDAuthority}:Run.Folder-${Container.RowId}:e8f81310-af26-102e-8298-dee36fa17720">
+      <ns:Name>itraq/iTRAQ (Libra)</ns:Name>
+      <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch:9</ns:ProtocolLSID>
+      <ns:ProtocolApplications>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81313-af26-102e-8298-dee36fa17720">
+          <ns:Name>Run inputs</ns:Name>
+          <ns:CpasType>ExperimentRun</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch:9</ns:ProtocolLSID>
+          <ns:ActionSequence>1</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="AnalysisParameters" DataFileUrl="tandem.xml">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="Spectra" DataFileUrl="../../iTRAQ.mzXML">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini1.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini2.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini3.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="LibraConfig" DataFileUrl="../../../.labkey/protocols/libra/libraprotocol1.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters/>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects/>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81314-af26-102e-8298-dee36fa17720">
+          <ns:Name>Check FASTA</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Check FASTA</ns:ProtocolLSID>
+          <ns:ActionSequence>2</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini1.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini2.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini3.fasta">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters/>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects/>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81315-af26-102e-8298-dee36fa17720">
+          <ns:Name>X!Tandem</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:X!Tandem</ns:ProtocolLSID>
+          <ns:ActionSequence>6</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini1.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini2.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="FASTA" DataFileUrl="../../../databases/Bovine_mini3.fasta">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="Spectra" DataFileUrl="../../iTRAQ.mzXML">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\tandem.exe input.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="${AutoFileLSID}">
+              <ns:Name>iTRAQ.xtan.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+              <ns:DataFileUrl>iTRAQ.xtan.xml</ns:DataFileUrl>
+              <ns:Properties>
+                <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/iTRAQ.xtan.xml</ns:SimpleVal>
+              </ns:Properties>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81316-af26-102e-8298-dee36fa17720">
+          <ns:Name>Tandem2XML</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Tandem2XML</ns:ProtocolLSID>
+          <ns:ActionSequence>7</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="TandemXML" DataFileUrl="iTRAQ.xtan.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\Tandem2XML iTRAQ.xtan.xml iTRAQ_raw.pep.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="${AutoFileLSID}">
+              <ns:Name>iTRAQ_raw.pep.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+              <ns:DataFileUrl>iTRAQ_raw.pep.xml</ns:DataFileUrl>
+              <ns:Properties>
+                <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/iTRAQ_raw.pep.xml</ns:SimpleVal>
+              </ns:Properties>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81317-af26-102e-8298-dee36fa17720">
+          <ns:Name>PeptideProphet</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:PeptideProphet</ns:ProtocolLSID>
+          <ns:ActionSequence>12</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="RawPepXML" DataFileUrl="iTRAQ_raw.pep.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\xinteract -x20 -Opt -nR -Llibraprotocol1.xml-7 -NiTRAQ.pep.xml iTRAQ_raw.pep.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="urn:lsid:${LSIDAuthority}:Data.Folder-${Container.RowId}-Xar-e8f8130f-af26-102e-8298-dee36fa17720:iTRAQ.pep.xml">
+              <ns:Name>iTRAQ.pep.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81318-af26-102e-8298-dee36fa17720">
+          <ns:Name>libra Peptide Quantitation</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Peptide Quantitation</ns:ProtocolLSID>
+          <ns:ActionSequence>13</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="PepXML">urn:lsid:${LSIDAuthority}:Data.Folder-${Container.RowId}-Xar-e8f8130f-af26-102e-8298-dee36fa17720:iTRAQ.pep.xml</ns:DataLSID>
+            <ns:DataLSID RoleName="mzXML" DataFileUrl="../../iTRAQ.mzXML">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="LibraConfig" DataFileUrl="../../../.labkey/protocols/libra/libraprotocol1.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Quantitation algorithm" OntologyEntryURI="terms.labkey.org#QuantitationAlgorithm" ValueType="String">libra</ns:SimpleVal>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\xinteract -x20 -Opt -nR -Llibraprotocol1.xml-7 -NiTRAQ.pep.xml iTRAQ_raw.pep.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="${AutoFileLSID}">
+              <ns:Name>iTRAQ.pep.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+              <ns:DataFileUrl>iTRAQ.pep.xml</ns:DataFileUrl>
+              <ns:Properties>
+                <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/iTRAQ.pep.xml</ns:SimpleVal>
+              </ns:Properties>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f81319-af26-102e-8298-dee36fa17720">
+          <ns:Name>ProteinProphet</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:ProteinProphet</ns:ProtocolLSID>
+          <ns:ActionSequence>14</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="PepXML" DataFileUrl="iTRAQ.pep.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\xinteract -x20 -Opt -nR -Llibraprotocol1.xml-7 -NiTRAQ.pep.xml iTRAQ_raw.pep.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="urn:lsid:${LSIDAuthority}:Data.Folder-${Container.RowId}-Xar-e8f8130f-af26-102e-8298-dee36fa17720:iTRAQ.prot.xml">
+              <ns:Name>iTRAQ.prot.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f8131a-af26-102e-8298-dee36fa17720">
+          <ns:Name>libra Protein Quantitation</ns:Name>
+          <ns:CpasType>ProtocolApplication</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:Protein Quantitation</ns:ProtocolLSID>
+          <ns:ActionSequence>15</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="PepXML" DataFileUrl="iTRAQ.pep.xml">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="ProtXML">urn:lsid:${LSIDAuthority}:Data.Folder-${Container.RowId}-Xar-e8f8130f-af26-102e-8298-dee36fa17720:iTRAQ.prot.xml</ns:DataLSID>
+            <ns:DataLSID RoleName="LibraConfig" DataFileUrl="../../../.labkey/protocols/libra/libraprotocol1.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters>
+            <ns:SimpleVal Name="Quantitation algorithm" OntologyEntryURI="terms.labkey.org#QuantitationAlgorithm" ValueType="String">libra</ns:SimpleVal>
+            <ns:SimpleVal Name="Command line" OntologyEntryURI="terms.labkey.org#CommandLine" ValueType="String">C:\labkey\build\deploy\bin\xinteract -x20 -Opt -nR -Llibraprotocol1.xml-7 -NiTRAQ.pep.xml iTRAQ_raw.pep.xml</ns:SimpleVal>
+          </ns:ProtocolApplicationParameters>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects>
+            <ns:Data rdf:about="${AutoFileLSID}">
+              <ns:Name>iTRAQ.libra.tsv</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+              <ns:DataFileUrl>iTRAQ.libra.tsv</ns:DataFileUrl>
+              <ns:Properties>
+                <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/iTRAQ.libra.tsv</ns:SimpleVal>
+              </ns:Properties>
+            </ns:Data>
+            <ns:Data rdf:about="${AutoFileLSID}">
+              <ns:Name>iTRAQ.prot.xml</ns:Name>
+              <ns:CpasType>Data</ns:CpasType>
+              <ns:DataFileUrl>iTRAQ.prot.xml</ns:DataFileUrl>
+              <ns:Properties>
+                <ns:SimpleVal ValueType="String" OntologyEntryURI="terms.fhcrc.org#Data.OriginalURL" Name="OriginalURL">file:/C:/Temp/itraq/xtandem/Libra/iTRAQ.prot.xml</ns:SimpleVal>
+              </ns:Properties>
+            </ns:Data>
+          </ns:OutputDataObjects>
+        </ns:ProtocolApplication>
+        <ns:ProtocolApplication rdf:about="${RunLSIDBase}:e8f8131b-af26-102e-8298-dee36fa17720">
+          <ns:Name>Run outputs</ns:Name>
+          <ns:CpasType>ExperimentRunOutput</ns:CpasType>
+          <ns:ProtocolLSID>urn:lsid:${LSIDAuthority}:Protocol.Folder-${Container.RowId}:MS2.XTandemSearch.Output:9</ns:ProtocolLSID>
+          <ns:ActionSequence>16</ns:ActionSequence>
+          <ns:InputRefs>
+            <ns:DataLSID RoleName="LibraOutput" DataFileUrl="iTRAQ.libra.tsv">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="QuantProtXML" DataFileUrl="iTRAQ.prot.xml">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="QuantPepXML" DataFileUrl="iTRAQ.pep.xml">${AutoFileLSID}</ns:DataLSID>
+            <ns:DataLSID RoleName="TandemXML" DataFileUrl="iTRAQ.xtan.xml">${AutoFileLSID}</ns:DataLSID>
+          </ns:InputRefs>
+          <ns:ProtocolApplicationParameters/>
+          <ns:OutputMaterials/>
+          <ns:OutputDataObjects/>
+        </ns:ProtocolApplication>
+      </ns:ProtocolApplications>
+    </ns:ExperimentRun>
+  </ns:ExperimentRuns>
+</ns:ExperimentArchive>

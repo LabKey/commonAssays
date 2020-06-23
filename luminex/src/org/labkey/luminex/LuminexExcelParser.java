@@ -34,6 +34,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.JunitUtil;
@@ -842,7 +843,7 @@ public class LuminexExcelParser
 
         private LuminexExcelParser createParser(String fileName) throws IOException
         {
-            File luminexDir = JunitUtil.getSampleData(null, "Luminex");
+            File luminexDir = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(LuminexModule.class), "luminex");
             assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
 
             Domain dummyDomain = PropertyService.get().createDomain(ContainerManager.getRoot(), "fakeURI", "dummyDomain");

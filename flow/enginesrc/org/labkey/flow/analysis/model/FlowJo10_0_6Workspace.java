@@ -66,9 +66,9 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
             int index = _compensationMatrices.indexOf(matrix);
             if (index == -1)
             {
-                _compensationMatrices.add(matrix);
-                index = _compensationMatrices.size()-1;
+                index = addCompensationMatrix(matrix);
             }
+
             // CONSIDER: Add CompensationMatrix field to SampleInfo instead of using index
             // Issue 19843: **flow: FlowJo 10.0.6 ArrayIndexOutOfBoundsException during import -- compensationId is a 1-based index into the list
             sampleInfo._compensationId = String.valueOf(index+1);
