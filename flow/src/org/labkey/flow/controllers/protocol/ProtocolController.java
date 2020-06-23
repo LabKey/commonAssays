@@ -125,7 +125,7 @@ public class ProtocolController extends BaseFlowController
     }
 
     @RequiresPermission(UpdatePermission.class)
-    public class JoinSampleSetAction extends ProtocolViewAction<JoinSampleTypeForm>
+    public class JoinSampleTypeAction extends ProtocolViewAction<JoinSampleTypeForm>
     {
         private int _fileCount;
 

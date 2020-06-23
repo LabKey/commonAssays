@@ -428,13 +428,13 @@ public class FlowOverview extends Overview
                     
                     if (protocol.getSampleTypeJoinFields().size() != 0)
                     {
-                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
+                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
                         action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
                         ret.addAction(action);
                     }
                     else
                     {
-                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
+                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
                         action.setDescriptionHTML("You can specify how these sample descriptions should be linked to FCS files.");
                         ret.addAction(action);
                     }

@@ -22,7 +22,7 @@
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.util.URLHelper" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleTypeAction" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -100,7 +100,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
 
 <% if (protocol.getSampleTypeJoinFields().size() == 0) { %>
 <p>
-    <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
+    <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
 
@@ -216,9 +216,9 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
         <labkey:link href="<%=st.detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
+        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
+        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
         <% } %>
     </p>
     <% } %>

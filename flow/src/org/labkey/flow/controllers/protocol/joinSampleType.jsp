@@ -40,7 +40,7 @@
 
         <p>Use this page to set which properties of the sample need to match keywords of the FCS files.</p>
 
-        <labkey:form action="<%=form.getProtocol().urlFor(ProtocolController.JoinSampleSetAction.class)%>" method="POST">
+        <labkey:form action="<%=form.getProtocol().urlFor(ProtocolController.JoinSampleTypeAction.class)%>" method="POST">
             <table><tr><th>Sample Property</th><th>FCS Property</th></tr>
                 <% for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
                 { %>

@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.labkey.flow.controllers.attribute.AttributeController"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleTypeAction" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
 <%@ page import="org.labkey.flow.data.AttributeType" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -39,9 +39,9 @@
         <labkey:link href="<%=protocol.urlShowSamples()%>" text="Show samples joined to FCS Files" /><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
         <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
-            <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
+            <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
-            <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
+            <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
         <% } %>
     <% } %>
 </p>
