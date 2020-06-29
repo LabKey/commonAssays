@@ -29,7 +29,7 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpMaterialRunInput;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -668,9 +668,9 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
-            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
+            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole, sampleType);
             return addExpColumn(col);
         }
 
@@ -1123,11 +1123,11 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
             checkLocked();
             var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
-            col.setFk(schema.materialIdForeignKey(sampleSet, null));
+            col.setFk(schema.materialIdForeignKey(sampleType, null));
             return addColumn(col);
         }
 
@@ -1524,13 +1524,13 @@ public class FlowSchema extends UserSchema
         ret.getMutableColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
-        ExpSampleSet ss = null;
+        ExpSampleType st = null;
         if (_protocol != null)
         {
-            ss = _protocol.getSampleSet();
+            st = _protocol.getSampleType();
         }
-        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, ss);
-        if (ss == null)
+        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, st);
+        if (st == null)
         {
             colMaterialInput.setHidden(true);
         }
@@ -2040,7 +2040,7 @@ public class FlowSchema extends UserSchema
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
                 "    flow.object.uri,\n" +
-// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleSet ss)
+// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleType sampleType)
                 "    (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId\n" +
                 "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
                 "FROM exp.data\n" +

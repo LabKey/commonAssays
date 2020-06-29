@@ -241,7 +241,7 @@ Ext.onReady(function() {
     // sample filters
     //
 
-    if (hasSampleFilters || SampleSet.properties.length > 0)
+    if (hasSampleFilters || SampleType.properties.length > 0)
     {
         for (i = 0; i < sample.length; i++)
         {

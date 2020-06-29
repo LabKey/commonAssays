@@ -22,7 +22,7 @@
 <% UpdateSamplesForm form = (UpdateSamplesForm) __form;%>
 <labkey:errors />
 <p>
-    <%= form.fileCount%> FCS files were linked to samples in this sample set.
+    <%= form.fileCount%> FCS files were linked to samples in this sample type.
 </p>
-<p><a href="<%=h(form.getProtocol().getSampleSet().detailsURL())%>">Show Samples</a><br>
-<a href="<%=h(form.getProtocol().urlFor(ProtocolController.JoinSampleSetAction.class))%>">Edit join properties</a></p>
+<p><a href="<%=h(form.getProtocol().getSampleType().detailsURL())%>">Show Samples</a><br>
+<a href="<%=h(form.getProtocol().urlFor(ProtocolController.JoinSampleTypeAction.class))%>">Edit join properties</a></p>

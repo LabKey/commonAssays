@@ -275,14 +275,14 @@ flow/src/org/labkey/flow/controllers/newFolder.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/EditFCSAnalysisFilterForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/EditFCSAnalysisNameForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/EditICSMetadataForm.java -text
-flow/src/org/labkey/flow/controllers/protocol/JoinSampleSetForm.java -text
+flow/src/org/labkey/flow/controllers/protocol/JoinSampleTypeForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/ProtocolController.java -text
 flow/src/org/labkey/flow/controllers/protocol/ProtocolForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/UpdateSamplesForm.java -text
 flow/src/org/labkey/flow/controllers/protocol/editFCSAnalysisFilter.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/editFCSAnalysisName.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/editICSMetadata.jsp -text
-flow/src/org/labkey/flow/controllers/protocol/joinSampleSet.jsp -text
+flow/src/org/labkey/flow/controllers/protocol/joinSampleType.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showProtocol.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/showSamples2.jsp -text
 flow/src/org/labkey/flow/controllers/protocol/updateSamples.jsp -text

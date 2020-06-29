@@ -18,7 +18,7 @@ package org.labkey.flow.controllers.protocol;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.UnauthorizedException;
@@ -29,7 +29,7 @@ import org.labkey.flow.query.FlowTableType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class JoinSampleSetForm extends ProtocolForm
+public class JoinSampleTypeForm extends ProtocolForm
 {
     static public final int KEY_FIELDS_MAX = 5;
 
@@ -39,7 +39,7 @@ public class JoinSampleSetForm extends ProtocolForm
     public void init() throws UnauthorizedException
     {
         FlowProtocol protocol = getProtocol();
-        Map.Entry<String, FieldKey>[] entries = protocol.getSampleSetJoinFields().entrySet().toArray(new Map.Entry[KEY_FIELDS_MAX]);
+        Map.Entry<String, FieldKey>[] entries = protocol.getSampleTypeJoinFields().entrySet().toArray(new Map.Entry[KEY_FIELDS_MAX]);
         for (int i = 0; i < KEY_FIELDS_MAX; i ++)
         {
             Map.Entry<String, FieldKey> entry = entries[i];
@@ -69,12 +69,12 @@ public class JoinSampleSetForm extends ProtocolForm
     {
         LinkedHashMap<String,String> ret = new LinkedHashMap<>();
         ret.put("", "");
-        ExpSampleSet sampleSet = getProtocol().getSampleSet();
-        if (sampleSet != null)
+        ExpSampleType sampleType = getProtocol().getSampleType();
+        if (sampleType != null)
         {
-            if (sampleSet.hasNameAsIdCol())
+            if (sampleType.hasNameAsIdCol())
                 ret.put("Name", "Name");
-            for (DomainProperty property : sampleSet.getDomain().getProperties())
+            for (DomainProperty property : sampleType.getDomain().getProperties())
             {
                 ret.put(property.getName(), property.getName());
             }

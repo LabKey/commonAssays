@@ -297,10 +297,10 @@ Ext4.define('Microarray.GeoExportPanel', {
                     }
                 },{
                     xtype: 'labkey-combo',
-                    fieldLabel: 'Sample Set',
+                    fieldLabel: 'Sample Type',
                     width: 400,
                     queryMode: 'local',
-                    itemId: 'sourceSampleSet',
+                    itemId: 'sourceSampleType',
                     disabled: !LABKEY.Security.currentUser.canUpdate,
                     displayField: 'Name',
                     valueField: 'Name',
@@ -314,7 +314,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                             delay: 100, //
                             load: function(store){
                                 var active;
-                                var field = this.down('#sourceSampleSet');
+                                var field = this.down('#sourceSampleType');
                                 if(!field.getValue() && store.getCount()){
                                     store.each(function(r){
                                         if(r.get('Active')){
@@ -415,11 +415,11 @@ Ext4.define('Microarray.GeoExportPanel', {
                     },{
                         border: false,
                         style: 'padding: 5px;',
-                        html: 'NOTE: In order to filter you custom query to show only the selected run IDs you must include the substitution ${RUN_IDS} in your SQL.  This will automtatically be converted to contain the Run IDs.  Other supported substitutions include:' +
+                        html: 'NOTE: In order to filter your custom query to show only the selected run IDs you must include the substitution ${RUN_IDS} in your SQL. This will automatically be converted to contain the Run IDs. Other supported substitutions include:' +
                             '<br>${ASSAY_NAME}, which will match the name of the assay, chosen using the dropdown menu above' +
-                            '<br>${SAMPLE_SET_NAME}, which will match the name of the sample set, chosen using the dropdown above' +
+                            '<br>${SAMPLE_TYPE_NAME}, which will match the name of the sample type, chosen using the dropdown above' +
                             '<br><br>An example SQL statement could look like: <br><br>' +
-                            'SELECT r.RowId, s.Study, r.Name <br>FROM assay."${ASSAY_NAME} Data" r <br>LEFT JOIN samples."${SAMPLE_SET_NAME}" s ON (s.RowId = r.SampleId)<br>WHERE r.Run.RowId IN (${RUN_IDS})'
+                            'SELECT r.RowId, s.Study, r.Name <br>FROM assay."${ASSAY_NAME} Data" r <br>LEFT JOIN samples."${SAMPLE_TYPE_NAME}" s ON (s.RowId = r.SampleId)<br>WHERE r.Run.RowId IN (${RUN_IDS})'
                     },{
                         xtype: 'displayfield',
                         itemId: 'run_ids',
@@ -477,7 +477,7 @@ Ext4.define('Microarray.GeoExportPanel', {
                 var value;
                 var recordIdx;
                 var record;
-                var fields = ['sourceAssay', 'sourceSampleSet', 'custom_sql', 'run_ids'];
+                var fields = ['sourceAssay', 'sourceSampleType', 'custom_sql', 'run_ids'];
                 Ext4.each(fields, function(prop_name){
                     field = this.down('#' + prop_name);
                     value = field.getValue();
@@ -588,18 +588,24 @@ Ext4.define('Microarray.GeoExportPanel', {
 
         re = new RegExp(/\${ASSAY_NAME}/i);
         if(sql.match(re) && !assayName){
-            alert('SQL contain ${ASSAY_NAME}, but no assay was selected');
+            alert('SQL contains ${ASSAY_NAME}, but no assay was selected');
             return;
         }
         sql = sql.replace(re, assayName);
 
-        re = new RegExp(/\${SAMPLE_SET_NAME}/i);
-        var sampleSet = samplePanel.down('#sourceSampleSet').getValue();
-        if(sql.match(re) && !sampleSet){
-            alert('SQL contain ${SAMPLE_SET_NAME}, but no sample set was selected');
+        re = new RegExp(/\${SAMPLE_TYPE_NAME}/i);
+        var sampleType = samplePanel.down('#sourceSampleType').getValue();
+        if(sql.match(re) && !sampleType){
+            alert('SQL contains ${SAMPLE_TYPE_NAME}, but no sample type was selected');
             return;
         }
-        sql = sql.replace(re, sampleSet);
+        sql = sql.replace(re, sampleType);
+
+        re = new RegExp(/\${SAMPLE_SET_NAME}/i);
+        if(sql.match(re)){
+            alert('SQL contains ${SAMPLE_SET_NAME}: this substitution is no longer supported; use ${SAMPLE_TYPE_NAME} instead');
+            return;
+        }
 
         return sql;
     },

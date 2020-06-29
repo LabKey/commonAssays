@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet"%>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType"%>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.util.URLHelper" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleSetAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleTypeAction" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
@@ -37,7 +37,7 @@
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
-    ExpSampleSet ss = protocol.getSampleSet();
+    ExpSampleType st = protocol.getSampleType();
 
     ExperimentUrls expUrls = urlProvider(ExperimentUrls.class);
 
@@ -84,23 +84,23 @@
             .addParameter("query.Sample/Name~isblank", "");
 
     URLHelper urlUnlinkedSamples = null;
-    if (ss != null)
+    if (st != null)
     {
-        urlUnlinkedSamples = ss.detailsURL();
+        urlUnlinkedSamples = st.detailsURL();
         urlUnlinkedSamples.addFilter("Material", FieldKey.fromParts("RowId"), IN, unlinkedSampleIds);
     }
 %>
 
-<% if (ss == null) { %>
+<% if (st == null) { %>
     No samples have been imported in this folder.<br>
-    <labkey:link href="<%=protocol.urlCreateSampleSet()%>" text="Create sample set" /><br>
+    <labkey:link href="<%=protocol.urlCreateSampleType()%>" text="Create sample type" /><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
+There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
-<% if (protocol.getSampleSetJoinFields().size() == 0) { %>
+<% if (protocol.getSampleTypeJoinFields().size() == 0) { %>
 <p>
-    <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
+    <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
 
@@ -213,12 +213,12 @@ There are <a href="<%=h(ss.detailsURL())%>"><%=sampleCount%> sample descriptions
     </table>
 
     <p>
-        <labkey:link href="<%=ss.detailsURL()%>" text="Show sample set"/><br>
+        <labkey:link href="<%=st.detailsURL()%>" text="Show sample type"/><br>
         <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
-        <% if (protocol.getSampleSetJoinFields().size() != 0) { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Modify sample join fields" /><br>
+        <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
+        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Modify sample join fields" /><br>
         <% } else { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleSetAction.class)%>" text="Join samples to FCS File Data" /><br>
+        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
         <% } %>
     </p>
     <% } %>

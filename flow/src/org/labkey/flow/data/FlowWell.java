@@ -24,7 +24,7 @@ import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -343,11 +343,11 @@ public class FlowWell extends FlowDataObject
         return getExpObject().getComment();
     }
 
-    public ExpMaterial getSample(ExpSampleSet set)
+    public ExpMaterial getSample(ExpSampleType set)
     {
         for (ExpMaterial material : getSamples())
         {
-            if (set.equals(material.getSampleSet()))
+            if (set.equals(material.getSampleType()))
                 return material;
         }
         return null;

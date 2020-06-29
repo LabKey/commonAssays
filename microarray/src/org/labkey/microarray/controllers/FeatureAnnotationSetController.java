@@ -124,7 +124,7 @@ public class FeatureAnnotationSetController extends SpringActionController
             int rowsDeleted = MicroarrayManager.get().deleteFeatureAnnotationSet(form.getIds(false));
 
             // TODO catch somewhere on attempting to delete one that is in use, prompt to cascade the delete
-            // Similarly, deleting a referenced sample set currently throws an FK exception. again, deal with it
+            // Similarly, deleting a referenced sample type currently throws an FK exception. again, deal with it
             // gracefully and prompt to cascade.
 
             DataRegionSelection.clearAll(getViewContext());

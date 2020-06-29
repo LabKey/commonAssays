@@ -464,7 +464,7 @@ public class FlowController extends BaseFlowController
                 {
                     FlowProtocol destProtocol = FlowProtocol.ensureForContainer(getUser(), destContainer);
                     destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
-                    destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
+                    destProtocol.setSampleTypeJoinFields(getUser(), srcProtocol.getSampleTypeJoinFields());
                     destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
                     destProtocol.setICSMetadata(getUser(), srcProtocol.getICSMetadataString());
                 }

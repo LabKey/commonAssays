@@ -19,8 +19,9 @@ import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
@@ -50,10 +51,10 @@ public class ElisaResultsTable extends AssayResultTable
 
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
-        if (sampleSet != null)
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
+        if (sampleType != null)
         {
-            for (DomainProperty pd : sampleSet.getDomain().getProperties())
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
                         ExpMaterialTable.Column.Property.toString(), pd.getName()));
@@ -70,9 +71,9 @@ public class ElisaResultsTable extends AssayResultTable
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, cf);
                 // Make sure we are filtering to the same set of containers
                 materials.setContainerFilter(getContainerFilter());
-                if (sampleSet != null)
+                if (sampleType != null)
                 {
-                    materials.setSampleSet(sampleSet, true);
+                    materials.setSampleType(sampleType, true);
                 }
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)

@@ -59,7 +59,7 @@ public class FeatureDataTable extends FilteredTable<ExpressionMatrixProtocolSche
         sampleIdColumn.setHidden(false);
         sampleIdColumn.setLabel("Sample Id");
 
-        // Lookup to exp.materials since we don't know the sample set
+        // Lookup to exp.materials since we don't know the sample type
         sampleIdColumn.setFk(QueryForeignKey
                 .from(schema, cf)
                 .schema(ExpSchema.SCHEMA_NAME)
