@@ -42,7 +42,7 @@ function createSampleFilter(filterIdx, filter)
     return {
         xtype:'compositefield', filterIdx: filterIdx, fieldLabel: 'Sample Property', items: [
             {xtype:'hidden', name:'filter[' + filterIdx + '].type', value:'sample'},
-            {xtype:'combo', name:'filter[' + filterIdx + '].property', store:SampleSet.properties, value:filter.property},
+            {xtype:'combo', name:'filter[' + filterIdx + '].property', store:SampleType.properties, value:filter.property},
             {xtype:'textfield', name:'filter[' + filterIdx + '].value', value:filter.value},
             {xtype:'button', text:'Remove', handler: function () { removeFilter(filterIdx); } }
         ]
