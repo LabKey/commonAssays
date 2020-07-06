@@ -133,12 +133,6 @@ public class WorkspaceData implements Serializable
             SessionHelper.clearStashedAttribute(request, token);
     }
 
-    public void clearStashedWorkspace(HttpServletRequest request)
-    {
-        if (token != null)
-            SessionHelper.clearStashedAttribute(request, token);
-    }
-
     public IWorkspace getWorkspaceObject()
     {
         return _object;
