@@ -40,6 +40,7 @@ import org.labkey.api.study.StudyService;
 import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.SessionHelper;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;

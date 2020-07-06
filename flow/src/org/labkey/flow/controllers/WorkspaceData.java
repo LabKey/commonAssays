@@ -28,6 +28,9 @@ import org.labkey.api.util.SessionHelper;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.Analysis;
+import org.labkey.api.util.SessionHelper;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.IWorkspace;
@@ -56,6 +59,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.labkey.api.action.SpringActionController.ERROR_MSG;
+import java.util.concurrent.TimeUnit;
 
 public class WorkspaceData implements Serializable
 {
@@ -86,6 +90,7 @@ public class WorkspaceData implements Serializable
 
     public void setOriginalPath(String path)
     {
+        Map<String, String> ret = new HashMap<>();
         if (path != null)
         {
             path = PageFlowUtil.decode(path);
@@ -120,6 +125,12 @@ public class WorkspaceData implements Serializable
                 _object = (IWorkspace)SessionHelper.getStashedAttribute(request, token);
             }
         }
+    }
+
+    public void clearStashedWorkspace(HttpServletRequest request)
+    {
+        if (token != null)
+            SessionHelper.clearStashedAttribute(request, token);
     }
 
     public void clearStashedWorkspace(HttpServletRequest request)
@@ -350,7 +361,8 @@ public class WorkspaceData implements Serializable
             for (String msg : messages)
                 errors.reject(ERROR_MSG, msg);
         }
-        else
+
+        if (_object != null && token == null)
         {
             _object.getWarnings().addAll(messages);
         }
