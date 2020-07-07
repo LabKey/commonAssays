@@ -16,7 +16,8 @@
 package org.labkey.ms2.matrix;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RuntimeSQLException;
@@ -53,7 +54,7 @@ import java.util.TreeSet;
 public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 {
     public static final String PROTEIN_SEQ_ID_COLUMN_NAME = "Molecule Identifier";
-    private static final Logger LOG = Logger.getLogger(ProteinExpressionMatrixDataHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ProteinExpressionMatrixDataHandler.class);
 
     public ProteinExpressionMatrixDataHandler()
     {

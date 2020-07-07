@@ -17,7 +17,8 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.util.SessionHelper;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.StatisticSet;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 public class UploadAnalysisForm extends EditScriptForm
 {
-    private static final Logger _log = Logger.getLogger(UploadAnalysisForm.class);
+    private static final Logger _log = LogManager.getLogger(UploadAnalysisForm.class);
 
     private String token;
     private int existingStatCount = 0;

@@ -18,7 +18,8 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -96,7 +97,7 @@ import java.util.TreeMap;
 
 public class AnalysisScriptController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(AnalysisScriptController.class);
+    private static final Logger _log = LogManager.getLogger(AnalysisScriptController.class);
 
     public enum Action
     {

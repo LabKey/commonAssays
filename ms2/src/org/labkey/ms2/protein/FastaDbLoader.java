@@ -17,7 +17,8 @@
 package org.labkey.ms2.protein;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.SqlExecutor;

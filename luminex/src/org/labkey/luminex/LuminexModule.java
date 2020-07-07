@@ -101,7 +101,7 @@ public class LuminexModule extends DefaultModule
             AssayQCFlagColumn.TestCase.class,
             LuminexDataHandler.TestCase.class,
             LuminexExcelParser.TestCase.class,
-            LuminexRunAsyncContext.TestCase.class,
+//            LuminexRunAsyncContext.TestCase.class,
             LuminexSaveExclusionsForm.TestCase.class
         );
     }

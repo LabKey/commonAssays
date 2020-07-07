@@ -16,7 +16,8 @@
 package org.labkey.flow.controllers.attribute;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.ReturnUrlForm;
@@ -52,7 +53,7 @@ import java.util.Collection;
  */
 public class AttributeController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(AttributeController.class);
+    private static final Logger _log = LogManager.getLogger(AttributeController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(AttributeController.class);
 

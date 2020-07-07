@@ -27,7 +27,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.labkey.ms2.query.MS2Schema;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * User: jeckels

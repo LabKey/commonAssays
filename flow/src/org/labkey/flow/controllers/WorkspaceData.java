@@ -16,7 +16,8 @@
 
 package org.labkey.flow.controllers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -59,7 +60,7 @@ import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 public class WorkspaceData implements Serializable
 {
-    static final private Logger _log = Logger.getLogger(WorkspaceData.class);
+    static final private Logger _log = LogManager.getLogger(WorkspaceData.class);
 
     String path;
     String name;

@@ -33,7 +33,8 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.apache.commons.beanutils.converters.StringArrayConverter;
 import org.apache.commons.beanutils.Converter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.IOException;

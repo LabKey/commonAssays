@@ -17,7 +17,8 @@
 package org.labkey.flow.query;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.*;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.UserSchema;
@@ -32,7 +33,7 @@ import java.util.Collection;
 
 abstract public class AttributeForeignKey<T extends Comparable<T>> extends AbstractForeignKey
 {
-    protected static final Logger LOG = Logger.getLogger(AttributeForeignKey.class);
+    protected static final Logger LOG = LogManager.getLogger(AttributeForeignKey.class);
 
     @Override
     public StringExpression getURL(ColumnInfo parent)

@@ -16,7 +16,8 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
@@ -39,7 +40,7 @@ import java.util.Set;
  */
 public class SpectrumImporter
 {
-    private static Logger _systemLog = Logger.getLogger(SpectrumImporter.class);
+    private static Logger _systemLog = LogManager.getLogger(SpectrumImporter.class);
     private static final int SQL_BATCH_SIZE = 100;
 
     private Logger _log = null;

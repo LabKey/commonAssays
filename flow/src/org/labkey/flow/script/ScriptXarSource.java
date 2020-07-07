@@ -16,7 +16,8 @@
 
 package org.labkey.flow.script;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.XmlException;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.data.Container;
@@ -33,7 +34,7 @@ import java.nio.file.Path;
 
 public class ScriptXarSource extends XarSource
 {
-    private static final Logger _log = Logger.getLogger(ScriptXarSource.class);
+    private static final Logger _log = LogManager.getLogger(ScriptXarSource.class);
     File _root;
     File _workingDirectory;
     File _logFile;

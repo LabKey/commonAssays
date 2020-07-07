@@ -16,7 +16,8 @@
 
 package org.labkey.flow.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -51,7 +52,7 @@ import java.util.Set;
 
 public class FlowWell extends FlowDataObject
 {
-    static private final Logger _log = Logger.getLogger(FlowWell.class);
+    static private final Logger _log = LogManager.getLogger(FlowWell.class);
 
     // For serialization
     protected FlowWell() {}

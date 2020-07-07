@@ -16,13 +16,14 @@
 
 package org.labkey.flow.view;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.view.JspView;
 import org.labkey.flow.data.FlowStatus;
 
 public class JobStatusView extends JspView<FlowStatus>
 {
-    private static Logger _log = Logger.getLogger(JobStatusView.class);
+    private static Logger _log = LogManager.getLogger(JobStatusView.class);
 
     public JobStatusView(FlowStatus model)
     {

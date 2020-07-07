@@ -19,7 +19,8 @@ package org.labkey.ms2.reader;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.GDuration;
 import org.systemsbiology.jrap.Scan;
 
@@ -34,7 +35,7 @@ import java.util.NoSuchElementException;
  */
 public class SequentialMzxmlIterator extends AbstractMzxmlIterator
 {
-    private static Logger _log = Logger.getLogger(SequentialMzxmlIterator.class);
+    private static Logger _log = LogManager.getLogger(SequentialMzxmlIterator.class);
 
     private File _file;
     private InputStream _in;

@@ -17,7 +17,8 @@
 package org.labkey.ms2;
 
 import org.junit.Assert;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.util.HtmlString;
@@ -28,7 +29,7 @@ import static org.labkey.api.util.PageFlowUtil.helpPopup;
 
 public class Protein
 {
-    private static Logger _log = Logger.getLogger(Protein.class);
+    private static Logger _log = LogManager.getLogger(Protein.class);
 
     private double _mass;
     private String _sequence;

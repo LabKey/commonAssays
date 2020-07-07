@@ -38,7 +38,8 @@
  ******************************************************************************/
 package org.systemsbiology.jrap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.xml.sax.*;
 import org.xml.sax.helpers.XMLReaderFactory;
 
@@ -53,7 +54,7 @@ import java.io.IOException;
  */
 public final class MSXMLParser
 {
-    static Logger _log = Logger.getLogger(MSXMLParser.class);
+    static Logger _log = LogManager.getLogger(MSXMLParser.class);
 
     //
     // Protected class members

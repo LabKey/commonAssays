@@ -18,7 +18,8 @@ package org.labkey.viability;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;

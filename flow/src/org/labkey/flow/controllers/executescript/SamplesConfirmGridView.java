@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
 import org.labkey.api.collections.NamedObjectList;
@@ -71,7 +72,7 @@ import java.util.stream.Collectors;
  */
 public class SamplesConfirmGridView extends GridView
 {
-    public static final Logger LOG = Logger.getLogger(SamplesConfirmGridView.class);
+    public static final Logger LOG = LogManager.getLogger(SamplesConfirmGridView.class);
 
     /*package*/ public static String DATAREGION_NAME = "SamplesConfirm";
 

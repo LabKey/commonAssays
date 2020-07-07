@@ -17,7 +17,8 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
@@ -205,7 +206,7 @@ import static org.labkey.api.util.DOM.at;
 public class MS2Controller extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
-    private static final Logger _log = Logger.getLogger(MS2Controller.class);
+    private static final Logger _log = LogManager.getLogger(MS2Controller.class);
     /** Bogus view name to use as a marker for showing the standard peptide view instead of a custom view or the .lastFilter view */
     private static final String STANDARD_VIEW_NAME = "~~~~~~StandardView~~~~~~~";
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";

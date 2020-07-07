@@ -17,7 +17,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
@@ -48,7 +49,7 @@ import java.util.List;
 public class SearchServiceImpl extends BaseRemoteService implements SearchService
 {
 
-    private static Logger _log = Logger.getLogger(SearchServiceImpl.class);
+    private static Logger _log = LogManager.getLogger(SearchServiceImpl.class);
     private GWTSearchServiceResult results= new GWTSearchServiceResult();
     private AbstractMS2SearchPipelineProvider provider;
     private AbstractMS2SearchProtocol protocol;

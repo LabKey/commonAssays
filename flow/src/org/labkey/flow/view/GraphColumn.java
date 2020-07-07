@@ -16,7 +16,8 @@
 
 package org.labkey.flow.view;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -41,7 +42,7 @@ public class GraphColumn extends DataColumn
     public static final String SEP = "~~~";
 
     private static final String INCLUDE_UTIL_SCRIPT = "~~~Flow/util.js~~~";
-    private Logger _log = Logger.getLogger(GraphColumn.class);
+    private Logger _log = LogManager.getLogger(GraphColumn.class);
     private FlowQuerySettings.ShowGraphs _showGraphs;
 
     public GraphColumn(ColumnInfo colinfo)

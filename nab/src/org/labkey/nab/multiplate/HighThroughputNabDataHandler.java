@@ -16,7 +16,8 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.dilution.WellDataRow;

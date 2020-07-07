@@ -17,7 +17,8 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
@@ -62,7 +63,7 @@ import java.util.Set;
  */
 public class ProteinProphetImporter
 {
-    private static final Logger _log = Logger.getLogger(ProteinProphetImporter.class);
+    private static final Logger _log = LogManager.getLogger(ProteinProphetImporter.class);
 
     private final File _file;
     private final String _experimentRunLSID;

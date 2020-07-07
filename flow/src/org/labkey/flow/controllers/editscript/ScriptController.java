@@ -17,7 +17,8 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.fhcrc.cpas.flow.script.xml.AnalysisDef;
@@ -96,7 +97,7 @@ import java.util.StringTokenizer;
  */
 public class ScriptController extends BaseFlowController
 {
-    private static Logger _log = Logger.getLogger(ScriptController.class);
+    private static Logger _log = LogManager.getLogger(ScriptController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ScriptController.class);
 

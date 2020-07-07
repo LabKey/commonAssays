@@ -25,7 +25,8 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -79,7 +80,7 @@ import java.util.Properties;
 
 public class MascotClientImpl implements SearchClient
 {
-    private static final Logger _log = Logger.getLogger(MascotClientImpl.class);
+    private static final Logger _log = LogManager.getLogger(MascotClientImpl.class);
     
     private final Logger _instanceLogger;
 

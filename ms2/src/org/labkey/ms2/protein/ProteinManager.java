@@ -21,7 +21,8 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -84,7 +85,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProteinManager
 {
-    private static final Logger LOG = Logger.getLogger(ProteinManager.class);
+    private static final Logger LOG = LogManager.getLogger(ProteinManager.class);
     private static final String SCHEMA_NAME = "prot";
 
     public static final int RUN_FILTER = 1;

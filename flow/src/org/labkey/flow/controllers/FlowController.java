@@ -16,7 +16,8 @@
 package org.labkey.flow.controllers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
@@ -79,7 +80,7 @@ import java.nio.file.InvalidPathException;
 
 public class FlowController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(FlowController.class);
+    private static final Logger _log = LogManager.getLogger(FlowController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
 

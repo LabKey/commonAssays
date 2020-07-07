@@ -16,7 +16,8 @@
 
 package org.labkey.nab;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -60,7 +61,7 @@ import java.util.Set;
  */
 public class NabManager extends AbstractNabManager
 {
-    private static final Logger _log = Logger.getLogger(NabManager.class);
+    private static final Logger _log = LogManager.getLogger(NabManager.class);
     private static final NabManager _instance = new NabManager();
 
     private NabManager()

@@ -17,7 +17,8 @@
 package org.labkey.flow.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.data.ColumnInfo;
 
@@ -29,7 +30,7 @@ import java.sql.SQLException;
 
 public class FieldSubstitution
 {
-    static final private Logger _log = Logger.getLogger(FieldSubstitution.class); 
+    static final private Logger _log = LogManager.getLogger(FieldSubstitution.class);
     Object[] _parts;
     static public FieldSubstitution fromString(String s)
     {

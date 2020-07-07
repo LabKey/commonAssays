@@ -16,7 +16,8 @@
 
 package org.labkey.flow.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -46,7 +47,7 @@ import java.util.Set;
  */
 public class FlowExperiment extends FlowObject<ExpExperiment>
 {
-    static private final Logger _log = Logger.getLogger(FlowExperiment.class);
+    static private final Logger _log = LogManager.getLogger(FlowExperiment.class);
     static public String FlowExperimentRunExperimentName = "Flow Experiment Runs";
     static public String FlowWorkspaceExperimentName = "Flow Workspace";
     static public String DEFAULT_ANALYSIS_NAME = "Analysis";

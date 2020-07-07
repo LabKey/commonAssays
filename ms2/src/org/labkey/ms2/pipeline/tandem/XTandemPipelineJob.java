@@ -17,7 +17,8 @@ package org.labkey.ms2.pipeline.tandem;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;

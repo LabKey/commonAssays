@@ -17,7 +17,8 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -108,7 +109,7 @@ import java.util.Set;
  */
 public class LuminexController extends SpringActionController
 {
-    private static final Logger _log = Logger.getLogger(LuminexController.class);
+    private static final Logger _log = LogManager.getLogger(LuminexController.class);
 
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(LuminexController.class, LuminexUploadWizardAction.class);
 

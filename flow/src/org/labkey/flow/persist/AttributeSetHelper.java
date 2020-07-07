@@ -16,7 +16,8 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlSelector;
@@ -45,7 +46,7 @@ import java.util.TreeMap;
  */
 public class AttributeSetHelper
 {
-    private static final Logger LOG = Logger.getLogger(AttributeSetHelper.class);
+    private static final Logger LOG = LogManager.getLogger(AttributeSetHelper.class);
 
 
     public static AttributeSet fromData(ExpData data)

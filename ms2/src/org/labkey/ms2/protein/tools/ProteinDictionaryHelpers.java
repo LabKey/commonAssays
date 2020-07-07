@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2.protein.tools;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlExecutor;
@@ -47,7 +48,7 @@ import java.util.Set;
  */
 public class ProteinDictionaryHelpers
 {
-    private static final Logger _log = Logger.getLogger(ProteinDictionaryHelpers.class);
+    private static final Logger _log = LogManager.getLogger(ProteinDictionaryHelpers.class);
     private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 

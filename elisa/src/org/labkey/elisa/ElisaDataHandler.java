@@ -18,7 +18,8 @@ package org.labkey.elisa;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayProvider;
