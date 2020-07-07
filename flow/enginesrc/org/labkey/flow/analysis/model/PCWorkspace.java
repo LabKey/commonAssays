@@ -232,6 +232,15 @@ public class PCWorkspace extends FlowJoWorkspace
 
         readStats(subset, elBoolNode, results, analysis, sampleId, warnOnMissingStats);
 
+        // recurse
+        for (Element elSubpopulations : getElementsByTagName(elBoolNode, "Subpopulations"))
+        {
+            List<Population> subpops = readSubpopulations(elSubpopulations, subset, analysis, results, sampleId, warnOnMissingStats);
+            for (Population pop : subpops)
+                ret.addPopulation(pop);
+        }
+
+
         return ret;
     }
 
@@ -284,6 +293,7 @@ public class PCWorkspace extends FlowJoWorkspace
 
         readStats(subset, elPopulation, results, analysis, sampleId, warnOnMissingStats);
 
+        // recurse
         for (Element elSubpopulations : getElementsByTagName(elPopulation, "Subpopulations"))
         {
             List<Population> subpops = readSubpopulations(elSubpopulations, subset, analysis, results, sampleId, warnOnMissingStats);
