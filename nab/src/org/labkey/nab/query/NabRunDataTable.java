@@ -338,17 +338,15 @@ public class NabRunDataTable extends NabBaseTable
             if (!hiddenCols.contains(lookupCol.getName()))
             {
                 String legalName = ColumnInfo.legalNameFromName(lookupCol.getName());
-                if (null != _rootTable.getColumn(legalName))
+                ColumnInfo col = _rootTable.getColumn(legalName);
+                if (null != col)
                 {
                     // Column is in NabSpecimen
                     FieldKey key = FieldKey.fromString(legalName);
+                    if (!col.isHidden())
+                        visibleColumns.add(key);
                     if (null == getColumn(key))
-                    {
-                        ColumnInfo col = _rootTable.getColumn(key);
-                        addWrapColumn(col);
-                        if (!col.isHidden())
-                            visibleColumns.add(key);
-                    }
+                        addWrapColumn(_rootTable.getColumn(key));
                 }
                 else
                 {
