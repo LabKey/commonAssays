@@ -111,6 +111,7 @@ public class NabRunDataTable extends NabBaseTable
     public Collection<PropertyDescriptor> getExistingDataProperties(ExpProtocol protocol)
     {
         List<PropertyDescriptor> pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
+        pds.addAll(_nabSpecimenTable.getAdditionalDataProperties(protocol));
 
         pds.sort(Comparator.comparing(PropertyDescriptor::getName));
         return pds;
@@ -341,9 +342,13 @@ public class NabRunDataTable extends NabBaseTable
                 {
                     // Column is in NabSpecimen
                     FieldKey key = FieldKey.fromString(legalName);
-                    visibleColumns.add(key);
                     if (null == getColumn(key))
-                        addWrapColumn(_rootTable.getColumn(key));
+                    {
+                        ColumnInfo col = _rootTable.getColumn(key);
+                        addWrapColumn(col);
+                        if (!col.isHidden())
+                            visibleColumns.add(key);
+                    }
                 }
                 else
                 {
