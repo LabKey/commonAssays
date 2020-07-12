@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.labkey.api.data.Parameter;
+import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.exp.OntologyManager;
 
 import java.sql.SQLException;
@@ -34,7 +35,7 @@ public class LuminexImportHelper implements OntologyManager.UpdateableTableImpor
     }
 
     @Override
-    public void bindAdditionalParameters(Map<String, Object> map, Parameter.ParameterMap target)
+    public void bindAdditionalParameters(Map<String, Object> map, ParameterMapStatement target)
     {
 
     }
