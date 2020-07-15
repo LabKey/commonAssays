@@ -23,6 +23,7 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
@@ -390,5 +391,13 @@ public abstract class NabDataHandler extends DilutionDataHandler
         }
 
         return new Pair<>(row, col);
+    }
+
+    @Override
+    public boolean isValidDataProperty(String propertyName)
+    {
+        return super.isValidDataProperty(propertyName) ||
+            NAbSpecimenTable.PERCENT_NEUT_MAX_PROP.equals(propertyName) ||
+            NAbSpecimenTable.PERCENT_NEUT_INIT_DILUTION_PROP.equals(propertyName);
     }
 }
