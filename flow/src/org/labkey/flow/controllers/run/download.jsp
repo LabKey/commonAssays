@@ -48,7 +48,7 @@
         %>
         </ul>
         <br>
-        <labkey:link href="<%=model.run.urlFor(RunController.DownloadAction.class).addParameter(\"skipMissing\", true)%>" text="Download FCS Files anyway?" />
+        <%=link("Download FCS Files anyway?").href(model.run.urlFor(RunController.DownloadAction.class).addParameter("skipMissing", true))%>
         </p>
 
         <p>
