@@ -1340,6 +1340,35 @@ abstract public class FlowJoWorkspace extends Workspace
             checkAlias(results, new StatisticSpec("{A&B}/{C|D}:Freq_Of_Parent"), new StatisticSpec("(A&B)/(C|D):Freq_Of_Parent"));
         }
 
+        @Test
+        public void loadBooleanSubPopulations2() throws Exception
+        {
+            // Issue 40840: flow: support for sub-populations of boolean populations
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations2.xml");
+            SampleInfo sampleInfo = workspace.getSample("1");
+            assertEquals("test_114_035.fcs", sampleInfo.getLabel());
+
+            Analysis analysis = sampleInfo.getAnalysis();
+
+            Population trucount_pos = analysis.getPopulation(PopulationName.fromString("trucount beads+"));
+            assertEquals(1, trucount_pos.getGates().size());
+
+            Population trucount_neg = analysis.getPopulation(PopulationName.fromString("trucount beads-"));
+            assertEquals(1, trucount_neg.getGates().size());
+            assertTrue(trucount_neg.getGates().get(0) instanceof NotGate);
+
+            Population cd45_less_debris = trucount_neg.getPopulation(PopulationName.fromString("CD45+, less debris"));
+            assertTrue(cd45_less_debris.getGates().get(0) instanceof PolygonGate);
+
+            // Check count stats of the boolean populations.
+            AttributeSet results = sampleInfo.getAnalysisResults();
+            Map<StatisticSpec, Double> stats = results.getStatistics();
+            assertEquals(50009d, stats.get(new StatisticSpec(null, StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(25d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads+"), StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(49984d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-"), StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(43991d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-", "CD45+, less debris"), StatisticSpec.STAT.Count, null)), DELTA);
+        }
+
         private void checkAlias(AttributeSet attrs, StatisticSpec spec, StatisticSpec expectedAlias)
         {
             Iterable<StatisticSpec> alises = attrs.getStatisticAliases(spec);
