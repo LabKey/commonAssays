@@ -69,7 +69,7 @@ The analysis section describes which gates in the analysis, as well as the stati
 <% if (script.getRunCount() > 0) {
     boolean showRuns = FlowPreference.showRuns.getBooleanValue(request);
     if (showRuns) {
-        %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "0")%>' text="Hide Runs"/><br/><%
+        %><%=link("Hide Runs").href(url.clone().replaceParameter("showRuns", "0"))%><br/><%
 
         BindException errors = new NullSafeBindException(new Object(), "fake");
         FlowSchema schema = new FlowSchema(context);
@@ -88,7 +88,7 @@ The analysis section describes which gates in the analysis, as well as the stati
         view.getSettings().getBaseFilter().addCondition(FieldKey.fromParts("AnalysisScript", "RowId"), script.getScriptId(), CompareType.EQUAL);
         include(view, out);
     } else {
-        %><labkey:link href='<%=url.clone().replaceParameter("showRuns", "1")%>' text="Show Runs"/><%
+        %><%=link("Show Runs").href(url.clone().replaceParameter("showRuns", "1"))%><%
     }
 } %>
 </div>
