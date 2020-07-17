@@ -93,14 +93,14 @@
 
 <% if (st == null) { %>
     No samples have been imported in this folder.<br>
-    <labkey:link href="<%=protocol.urlCreateSampleType()%>" text="Create sample type" /><br>
+    <%=link("Create sample type").href(protocol.urlCreateSampleType())%><br>
 <% } else { %>
 <p>
 There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
 <% if (protocol.getSampleTypeJoinFields().size() == 0) { %>
 <p>
-    <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
+    <%=link("Join samples to FCS File Data").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
 
@@ -213,12 +213,12 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
     </table>
 
     <p>
-        <labkey:link href="<%=st.detailsURL()%>" text="Show sample type"/><br>
-        <labkey:link href="<%=protocol.urlUploadSamples()%>" text="Upload more samples from a spreadsheet" /><br>
+        <%=link("Show sample type").href(st.detailsURL())%>"/><br>
+        <%=link("Upload more samples from a spreadsheet").href(protocol.urlUploadSamples())%><br>
         <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Modify sample join fields" /><br>
+        <%=link("Modify sample join fields").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
         <% } else { %>
-        <labkey:link href="<%=protocol.urlFor(JoinSampleTypeAction.class)%>" text="Join samples to FCS File Data" /><br>
+        <%=link("Join samples to FCS File Data").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
         <% } %>
     </p>
     <% } %>

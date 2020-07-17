@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 %>
-<%@ page import="java.util.Map" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
+<%@ page import="org.labkey.flow.data.AttributeType" %>
 <%@ page import="org.labkey.flow.persist.FlowManager" %>
 <%@ page import="org.labkey.flow.persist.FlowManager.FlowEntry" %>
-<%@ page import="org.labkey.flow.data.AttributeType" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
-<%@ page import="org.labkey.flow.persist.AttributeCache" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -66,7 +65,7 @@
             <% } %>
         </td>
         <td>
-            <labkey:link href='<%=editURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>' text="edit"/>
+            <%=link("edit").href(editURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
             <%--<% if (totalCount == 0) { %>--%>
             <%--<labkey:link href='<%=deleteURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>' text="delete"/>--%>
             <%--<% } %>--%>
@@ -89,7 +88,7 @@
             <% } %>
         </td>
         <td>
-            <labkey:link href='<%=editURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>' text="edit"/>
+            <%=link("edit").href(editURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId))%>
             <%--<labkey:link href='<%=deleteURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>' text="delete"/>--%>
             <%--<labkey:link href='<%=makePrimaryURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>' text="make primary"/>--%>
         </td>
@@ -101,7 +100,7 @@
         <td style="padding-left: 1.5em;">
         </td>
         <td>
-            <labkey:link href='<%=aliasURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>' text="create alias"/>
+            <%=link("create alias").href(aliasURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
         </td>
         <td>&nbsp;</td>
     </tr>

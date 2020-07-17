@@ -26,6 +26,7 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.OORDisplayColumnFactory;
 import org.labkey.api.data.Parameter;
+import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
@@ -68,7 +69,6 @@ import java.util.Set;
  */
 public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> implements UpdateableTableInfo
 {
-    private LuminexAssayProvider _provider;
     public static final String FLAGGED_AS_EXCLUDED_COLUMN_NAME = "FlaggedAsExcluded";
     public static final String EXCLUSION_COMMENT_COLUMN_NAME = "ExclusionComment";
     public static final String EXCLUSION_TOGGLE_COLUMN_NAME = "ExclusionToggle";
@@ -77,8 +77,9 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     public static final String EXCLUSION_ANALYTE_COMMENT = "Excluded for analyte";
     public static final String EXCLUSION_TITRATION_COMMENT = "Excluded for titration";
     public static final String EXCLUSION_SINGLEPOINT_UNKNOWN_COMMENT = "Excluded for singlepoint unknown";
-
     public static final Map<String, String> REMAPPED_SCHEMA_COLUMNS;
+
+    private final LuminexAssayProvider _provider;
 
     static
     {
@@ -466,19 +467,19 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     }
 
     @Override
-    public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
+    public ParameterMapStatement insertStatement(Connection conn, User user) throws SQLException
     {
         return StatementUtils.insertStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
-    public Parameter.ParameterMap updateStatement(Connection conn, User user, Set<String> columns) throws SQLException
+    public ParameterMapStatement updateStatement(Connection conn, User user, Set<String> columns) throws SQLException
     {
         return StatementUtils.updateStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
-    public Parameter.ParameterMap deleteStatement(Connection conn)
+    public ParameterMapStatement deleteStatement(Connection conn)
     {
         throw new UnsupportedOperationException();
     }
