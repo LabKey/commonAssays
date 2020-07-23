@@ -17,11 +17,16 @@
 package org.labkey.flow.script;
 
 import org.apache.log4j.Logger;
+import org.labkey.api.action.UrlProvider;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
@@ -174,10 +179,13 @@ public abstract class FlowJob extends PipelineJob
     {
         ActionURL ret = urlRedirect();
         if (ret != null)
-        {
             return ret;
-        }
-        return urlStatus().clone();
+
+        ret = urlStatus();
+        if (ret != null)
+            return ret;
+
+        return null;
     }
 
     public ActionURL urlRedirect()
@@ -195,9 +203,11 @@ public abstract class FlowJob extends PipelineJob
     {
         if (_statusHref == null)
         {
-            File statusFile = getLogFile();
-            _statusHref = new ActionURL(FlowController.ShowStatusJobAction.class, getContainer());
-            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineJobService.statusPathOf(statusFile.toString()));
+            Integer jobId = PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID());
+            if (jobId != null)
+            {
+                _statusHref = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId);
+            }
         }
         return _statusHref;
     }
@@ -205,13 +215,6 @@ public abstract class FlowJob extends PipelineJob
     public String getStatusFilePath()
     {
         return PipelineJobService.statusPathOf(getLogFile().getAbsolutePath());
-    }
-
-    public ActionURL urlCancel()
-    {
-        ActionURL ret = new ActionURL(FlowController.CancelJobAction.class, getContainer());
-        ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
-        return ret;
     }
 
     protected void runPostAnalysisJobs()

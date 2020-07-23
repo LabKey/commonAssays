@@ -59,7 +59,6 @@ public class PipelineTest extends PipelineWebTestBase
         PipelineFolder.MailSettings mail = new PipelineFolder.MailSettings(this);
         mail.setNotifyOnSuccess(true, true, "brother@pipelinebvt.test");
         mail.setNotifyOnError(true, true);
-        mail.setEscalateUsers("momma@pipelinebvt.test");
         folder.setMailSettings(mail);
 
         String[] sampleNames = new String[] { "CAexample_mini1", "CAexample_mini2" };
