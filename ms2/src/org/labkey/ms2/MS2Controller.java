@@ -100,7 +100,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.util.element.Option;
+import org.labkey.api.util.element.Option.OptionBuilder;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -189,7 +189,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import static org.labkey.api.util.DOM.STRONG;
 import static org.labkey.api.util.DOM.TABLE;
@@ -625,41 +625,27 @@ public class MS2Controller extends SpringActionController
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
         SelectBuilder select = new SelectBuilder()
-                                        .id("views")
-                                        .name("viewParams")
-                                        .style("width:200");
-
-        List<Option> options = new ArrayList<>();
-
-        List<String> twoLabels = Arrays.asList("<Select a saved view>", "<Standard View>");
+            .id("views")
+            .name("viewParams")
+            .style("width:200");
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        for (String label : twoLabels)
-        {
-            options.add(new Option.OptionBuilder()
-                    .value("doNotApplyDefaultView=yes")
-                    .label(label)
-                    .build()
-            );
-        }
+        select.addOptions(Stream.of("<Select a saved view>", "<Standard View>")
+            .map(label->new OptionBuilder(label, "doNotApplyDefaultView=yes")));
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
-        // Use TreeSet to sort by name
-        TreeSet<String> names = new TreeSet<>(m.keySet());
-        for (String name : names)
-        {
-            String viewParams = m.get(name);
-            options.add(new Option.OptionBuilder()
-                .value(viewParams)
-                .selected(selectCurrent && viewParams.equals(currentViewParams))
-                .label(name)
-                .build()
-            );
-        }
-        select.addOptions(options);
+        // Sort by name
+        select.addOptions(m.keySet().stream()
+            .sorted()
+            .map(name->{
+                String viewParams = m.get(name);
+                return new OptionBuilder(name, viewParams)
+                    .selected(selectCurrent && viewParams.equals(currentViewParams));
+            })
+        );
 
         return select;
     }
