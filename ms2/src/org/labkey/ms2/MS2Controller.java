@@ -1308,7 +1308,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum DefaultViewType
+    public enum DefaultViewType implements EnumHasHtmlString
     {
         LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
         Standard("Use the standard peptide list view"),
@@ -1329,9 +1329,9 @@ public class MS2Controller extends SpringActionController
 
     public static class ManageViewsBean
     {
-        private ActionURL _returnURL;
-        private DefaultViewType _defaultViewType;
-        private Map<String, String> _views;
+        private final ActionURL _returnURL;
+        private final DefaultViewType _defaultViewType;
+        private final Map<String, String> _views;
         private final String _viewName;
 
         public ManageViewsBean(ActionURL returnURL, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
