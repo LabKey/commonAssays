@@ -21,7 +21,7 @@ import org.labkey.api.util.EnumHasHtmlString;
 * User: kevink
 * Date: 10/21/12
 */
-public enum AnalysisEngine implements EnumHasHtmlString<AnalysisEngine>
+public enum AnalysisEngine implements EnumHasHtmlString
 {
     // LabKey's analysis engine
     LabKey(true),
@@ -32,7 +32,7 @@ public enum AnalysisEngine implements EnumHasHtmlString<AnalysisEngine>
     // Generic external analysis archive
     Archive(false);
 
-    private boolean _requiresPipeline;
+    private final boolean _requiresPipeline;
 
     AnalysisEngine(boolean requiresPipeline)
     {

@@ -1502,7 +1502,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements implements EnumHasHtmlString<PeptideFilteringFormElements>
+    public enum PeptideFilteringFormElements implements EnumHasHtmlString
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1518,7 +1518,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType implements EnumHasHtmlString<PivotType>
+    public enum PivotType implements EnumHasHtmlString
     {
         run, fraction
     }
@@ -1616,7 +1616,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType implements EnumHasHtmlString<ProphetFilterType>
+    public enum ProphetFilterType implements EnumHasHtmlString
     {
         none, probability, customView
     }
