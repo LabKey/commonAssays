@@ -88,7 +88,6 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
-import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
@@ -97,6 +96,7 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
@@ -1308,7 +1308,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum DefaultViewType implements EnumHasHtmlString
+    public enum DefaultViewType implements SimpleHasHtmlString
     {
         LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
         Standard("Use the standard peptide list view"),
@@ -1502,7 +1502,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements implements EnumHasHtmlString
+    public enum PeptideFilteringFormElements implements SimpleHasHtmlString
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1518,7 +1518,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType implements EnumHasHtmlString
+    public enum PivotType implements SimpleHasHtmlString
     {
         run, fraction
     }
@@ -1616,7 +1616,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType implements EnumHasHtmlString
+    public enum ProphetFilterType implements SimpleHasHtmlString
     {
         none, probability, customView
     }

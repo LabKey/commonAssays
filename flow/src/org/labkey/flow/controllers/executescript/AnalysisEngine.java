@@ -15,13 +15,13 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.util.EnumHasHtmlString;
+import org.labkey.api.util.SimpleHasHtmlString;
 
 /**
 * User: kevink
 * Date: 10/21/12
 */
-public enum AnalysisEngine implements EnumHasHtmlString
+public enum AnalysisEngine implements SimpleHasHtmlString
 {
     // LabKey's analysis engine
     LabKey(true),
