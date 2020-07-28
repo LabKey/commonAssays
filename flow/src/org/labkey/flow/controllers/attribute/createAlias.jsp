@@ -70,7 +70,7 @@ Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
     function validateForm() {
         errorEl.innerHTML = '';
 
-        var currentAttribute = <%=PageFlowUtil.jsString(entry.getName())%>;
+        var currentAttribute = <%=q(entry.getName())%>;
         var newAlias = aliasEl.value;
 
         if (!newAlias) {
@@ -84,7 +84,7 @@ Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
         }
 
         if (newAlias.toLowerCase() === currentAttribute.toLowerCase()) {
-            var type = <%=PageFlowUtil.jsString(entry.getType().name())%>;
+            var type = <%=q(entry.getType().name())%>;
             var result = confirm("Current " + type + " '" + LABKEY.Utils.encodeHtml(currentAttribute) + "' and alias '" + newAlias + "' only differ by casing.\n\nWould you like to continue creating the alias?");
             if (!result)
                 return false;

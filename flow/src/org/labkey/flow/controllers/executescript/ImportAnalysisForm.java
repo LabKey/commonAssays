@@ -15,7 +15,7 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.util.EnumHasHtmlString;
+import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 import org.labkey.flow.data.FlowRun;
@@ -36,27 +36,24 @@ public class ImportAnalysisForm
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMETER_SEPARATOR = "\ufe50";
 
-    public enum SelectFCSFileOption implements EnumHasHtmlString<SelectFCSFileOption>
+    public enum SelectFCSFileOption implements SimpleHasHtmlString
     {
         None, Included, Previous, Browse
     }
 
+    private final WorkspaceData workspace = new WorkspaceData();
+    private final SelectedSamples selectedSamples = new SelectedSamples();
+
     private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
-    private WorkspaceData workspace = new WorkspaceData();
     private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.None;
     private Map<FlowRun, String> existingKeywordRuns = null;
     private int existingKeywordRunId;
-
     private String importGroupNames = Workspace.ALL_SAMPLES;
     private boolean resolving = false;
-    private SelectedSamples selectedSamples = new SelectedSamples();
-
     private AnalysisEngine selectAnalysisEngine = null;
-
     private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
-
     private String targetStudy;
 
     // FCSFile directories selected in the pipeline browser for association with the imported workspace analysis.

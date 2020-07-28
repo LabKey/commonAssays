@@ -17,18 +17,10 @@ package org.labkey.flow.controllers;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.labkey.api.action.ApiResponse;
-import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.ConfirmAction;
-import org.labkey.api.action.FormApiAction;
-import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.HasViewContext;
-import org.labkey.api.action.ReturnUrlForm;
-import org.labkey.api.action.SimpleErrorView;
-import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
+import org.labkey.api.action.*;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
@@ -43,15 +35,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
-import org.labkey.api.view.NotFoundException;
-import org.labkey.api.view.RedirectException;
-import org.labkey.api.view.VBox;
-import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.*;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
@@ -397,7 +381,10 @@ public class ReportsController extends BaseFlowController
                         PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
                         FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
                         PipelineService.get().queueJob(job);
-                        throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer()));
+
+                        // navigate to the job status page
+                        int jobId = PipelineService.get().getJobId(getUser(), getContainer(), job.getJobGUID());
+                        throw new RedirectException(PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId));
                     }
                 }
                 else

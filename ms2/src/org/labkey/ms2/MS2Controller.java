@@ -89,7 +89,6 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
-import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
@@ -98,10 +97,11 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.util.element.Option;
+import org.labkey.api.util.element.Option.OptionBuilder;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -190,7 +190,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import static org.labkey.api.util.DOM.STRONG;
 import static org.labkey.api.util.DOM.TABLE;
@@ -626,41 +626,27 @@ public class MS2Controller extends SpringActionController
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
         SelectBuilder select = new SelectBuilder()
-                                        .id("views")
-                                        .name("viewParams")
-                                        .style("width:200");
-
-        List<Option> options = new ArrayList<>();
-
-        List<String> twoLabels = Arrays.asList("<Select a saved view>", "<Standard View>");
+            .id("views")
+            .name("viewParams")
+            .style("width:200");
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        for (String label : twoLabels)
-        {
-            options.add(new Option.OptionBuilder()
-                    .value("doNotApplyDefaultView=yes")
-                    .label(label)
-                    .build()
-            );
-        }
+        select.addOptions(Stream.of("<Select a saved view>", "<Standard View>")
+            .map(label->new OptionBuilder(label, "doNotApplyDefaultView=yes")));
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
-        // Use TreeSet to sort by name
-        TreeSet<String> names = new TreeSet<>(m.keySet());
-        for (String name : names)
-        {
-            String viewParams = m.get(name);
-            options.add(new Option.OptionBuilder()
-                .value(viewParams)
-                .selected(selectCurrent && viewParams.equals(currentViewParams))
-                .label(name)
-                .build()
-            );
-        }
-        select.addOptions(options);
+        // Sort by name
+        select.addOptions(m.keySet().stream()
+            .sorted()
+            .map(name->{
+                String viewParams = m.get(name);
+                return new OptionBuilder(name, viewParams)
+                    .selected(selectCurrent && viewParams.equals(currentViewParams));
+            })
+        );
 
         return select;
     }
@@ -1323,7 +1309,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum DefaultViewType
+    public enum DefaultViewType implements SimpleHasHtmlString
     {
         LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
         Standard("Use the standard peptide list view"),
@@ -1344,9 +1330,9 @@ public class MS2Controller extends SpringActionController
 
     public static class ManageViewsBean
     {
-        private ActionURL _returnURL;
-        private DefaultViewType _defaultViewType;
-        private Map<String, String> _views;
+        private final ActionURL _returnURL;
+        private final DefaultViewType _defaultViewType;
+        private final Map<String, String> _views;
         private final String _viewName;
 
         public ManageViewsBean(ActionURL returnURL, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
@@ -1517,7 +1503,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements implements EnumHasHtmlString<PeptideFilteringFormElements>
+    public enum PeptideFilteringFormElements implements SimpleHasHtmlString
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1533,7 +1519,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType implements EnumHasHtmlString<PivotType>
+    public enum PivotType implements SimpleHasHtmlString
     {
         run, fraction
     }
@@ -1631,7 +1617,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType implements EnumHasHtmlString<ProphetFilterType>
+    public enum ProphetFilterType implements SimpleHasHtmlString
     {
         none, probability, customView
     }

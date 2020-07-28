@@ -32,6 +32,7 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
@@ -330,6 +331,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             {
                 run.setFilePathRoot(runFilePathRoot);
             }
+            // remember which job created the run so we can show this run on the job details page
+            run.setJobId(PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID()));
             run.save(user);
             if (getAnalysisEngine() != null)
                 run.setProperty(user, FlowProperty.AnalysisEngine.getPropertyDescriptor(), getAnalysisEngine().name());

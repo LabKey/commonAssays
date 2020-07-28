@@ -16,7 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
-import org.labkey.api.util.EnumHasHtmlString;
+import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.StatisticSpec.STAT;
 import org.labkey.flow.analysis.web.SubsetSpec;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public enum StatisticSet implements EnumHasHtmlString<StatisticSet>
+public enum StatisticSet implements SimpleHasHtmlString
 {
     existing("Existing", null),
     workspace("Workspace", null),
@@ -46,7 +46,8 @@ public enum StatisticSet implements EnumHasHtmlString<StatisticSet>
 
     final StatisticSpec _spec;
     final String _label;
-    final static Map<StatisticSpec, StatisticSet> statSpecMap = new HashMap();
+    final static Map<StatisticSpec, StatisticSet> statSpecMap = new HashMap<>();
+
     static
     {
         for (StatisticSet set : values())
@@ -57,6 +58,7 @@ public enum StatisticSet implements EnumHasHtmlString<StatisticSet>
             }
         }
     }
+
     StatisticSet(String label, StatisticSpec statistic)
     {
         _label = label;
