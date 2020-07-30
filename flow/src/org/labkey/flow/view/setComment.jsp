@@ -115,7 +115,7 @@ LABKEY.requiresExt3(function() {
                         'line-height': "18px",
                         display: "block",
                         visibility: "hidden",
-                        background: "transparent url(<%=contextPath%>/_.gif) no-repeat 0 2px"
+                        background: "transparent url(<%=h(contextPath)%>/_.gif) no-repeat 0 2px"
                     }
                 });
                 this.alignStatusIcon();
@@ -125,11 +125,11 @@ LABKEY.requiresExt3(function() {
             switch (status)
             {
                 case 'loading':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/grid/loading.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=h(contextPath)%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/grid/loading.gif)");
                     this.statusEl.setStyle("color", "silver");
                     break;
                 case 'success':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/tree/drop-yes.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=h(contextPath)%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/tree/drop-yes.gif)");
                     this.statusEl.setStyle("color", "green");
                     if (!this.delayHide)
                     {
@@ -138,7 +138,7 @@ LABKEY.requiresExt3(function() {
                     this.delayHide.delay(4000);
                     break;
                 case 'error':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/form/exclamation.gif)")
+                    this.statusEl.setStyle("background-image", "url(<%=h(contextPath)%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/form/exclamation.gif)")
                     this.statusEl.setStyle("color", "red");
                     break;
             }
