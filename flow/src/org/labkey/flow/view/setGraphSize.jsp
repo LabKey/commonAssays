@@ -142,7 +142,7 @@
 <%
 for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
     <div class="labkey-graph-size">
-        [<a class="<%=entry.getKey().equals(graphSize) ? "labkey-selected-link" : ""%>" name="graphSize<%=entry.getKey()%>" onclick="setGraphSize(<%=entry.getKey()%>)"><%=h(entry.getValue())%></a>]
+        [<a class="<%=h(entry.getKey().equals(graphSize) ? "labkey-selected-link" : "")%>" name="graphSize<%=h(entry.getKey())%>" onclick="setGraphSize(<%=h(entry.getKey())%>)"><%=h(entry.getValue())%></a>]
     </div>
 <% } %>
 <img id="updateGraphSize" height="1" width="1" src="<%=getWebappURL("_.gif")%>">

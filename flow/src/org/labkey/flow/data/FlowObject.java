@@ -61,6 +61,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         _expObject = expObject;
     }
 
+    @Override
     public T getExpObject()
     {
         return _expObject;
