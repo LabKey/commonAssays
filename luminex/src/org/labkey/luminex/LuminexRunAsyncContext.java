@@ -281,9 +281,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             }
 
             @Override
-            public void info(Object append)
+            public void info(String message)
             {
-                sb.append(append);
+                sb.append(message);
                 sb.append("\n");
             }
 
