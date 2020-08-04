@@ -33,6 +33,7 @@ import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.util.StringExpression;
 import org.labkey.nab.NabAssayProvider;
 
@@ -74,10 +75,14 @@ public class NabWellDataTable extends NabBaseTable
                 newCol = addOneBasedColumn(name, col);
             else
                 newCol = addWrapColumn(name, col);
+
             if (col.isHidden())
-            {
                 newCol.setHidden(col.isHidden());
-            }
+
+            if ("DilutionData".equalsIgnoreCase(name))
+                newCol.setFk(QueryForeignKey.from(schema, cf).to("DilutionData", "RowId", "WellGroupName"));
+            if ("RunData".equalsIgnoreCase(name))
+                newCol.setFk(QueryForeignKey.from(schema, cf).to("Data", "RowId", "WellGroupName"));
         }
 
         AssayProvider provider = AssayService.get().getProvider(_protocol);
