@@ -18,7 +18,8 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.collections4.iterators.ArrayIterator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.audit.AuditLogService;
@@ -83,7 +84,7 @@ import static org.labkey.flow.data.AttributeType.keyword;
 public class FlowManager
 {
     private static final FlowManager instance = new FlowManager();
-    private static final Logger _log = Logger.getLogger(FlowManager.class);
+    private static final Logger _log = LogManager.getLogger(FlowManager.class);
     private static final String SCHEMA_NAME = "flow";
 
     static public FlowManager get()

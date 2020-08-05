@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -36,7 +37,7 @@ import java.util.Map;
  */
 public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipelineJob>
 {
-    private static Logger _log = Logger.getLogger(XTandemSearchProtocol.class);
+    private static Logger _log = LogManager.getLogger(XTandemSearchProtocol.class);
 
     public XTandemSearchProtocol(String name, String description, String xml)
     {

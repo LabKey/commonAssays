@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.collections.CaseInsensitiveTreeSet;
 import org.labkey.api.writer.FileSystemFile;
@@ -42,7 +43,7 @@ import java.util.Set;
  */
 public class ExternalAnalysis extends BaseWorkspace implements Serializable
 {
-    public static final Logger LOG = Logger.getLogger(ExternalAnalysis.class);
+    public static final Logger LOG = LogManager.getLogger(ExternalAnalysis.class);
 
     protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
     protected Set<CompensationMatrix> _compensationMatrices = new LinkedHashSet<>();

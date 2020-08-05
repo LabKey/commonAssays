@@ -16,7 +16,8 @@
 
 package org.labkey.flow.script;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.UrlProvider;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipeRoot;

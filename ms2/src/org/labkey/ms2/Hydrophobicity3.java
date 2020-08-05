@@ -1,6 +1,7 @@
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.reader.Readers;
 
 import java.io.BufferedReader;
@@ -46,7 +47,7 @@ public class Hydrophobicity3 {
 /* translation of the ReadParmFile perl routine.  This does not read a parameter */
 /* file; it makes static initializers for the parameter data.                    */
 
-    static Logger _log = Logger.getLogger(Hydrophobicity3.class);
+    static Logger _log = LogManager.getLogger(Hydrophobicity3.class);
     public static String VERSION = "Krokhin,3.0";
 
     private static class AAParams {

@@ -18,7 +18,8 @@ package org.labkey.flow.script;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -39,7 +40,7 @@ import java.util.Map;
  */
 public class KeywordsJob extends ScriptJob
 {
-    private static final Logger _log = Logger.getLogger(KeywordsJob.class);
+    private static final Logger _log = LogManager.getLogger(KeywordsJob.class);
 
     private final List<File> _paths;
     private final Container _targetStudy;

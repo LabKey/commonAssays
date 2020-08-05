@@ -17,7 +17,8 @@
 package org.labkey.flow.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,7 +97,7 @@ import static org.junit.Assert.assertNull;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
-    static private final Logger _log = Logger.getLogger(FlowProtocol.class);
+    static private final Logger _log = LogManager.getLogger(FlowProtocol.class);
     static protected final String DEFAULT_PROTOCOL_NAME = "Flow";
     static private final String SAMPLETYPE_NAME = "Samples";
 

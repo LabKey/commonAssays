@@ -16,7 +16,8 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnHeaderType;
@@ -81,7 +82,7 @@ import java.util.Map;
  */
 public abstract class AbstractMS2RunView
 {
-    private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
+    private static Logger _log = LogManager.getLogger(AbstractMS2RunView.class);
 
     private final Container _container;
     private final User _user;

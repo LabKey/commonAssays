@@ -15,7 +15,8 @@
  */
 package org.labkey.luminex;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -72,7 +73,7 @@ import java.util.Set;
 public class LuminexManager
 {
     private static final LuminexManager instance = new LuminexManager();
-    private static final Logger _log = Logger.getLogger(LuminexManager.class);
+    private static final Logger _log = LogManager.getLogger(LuminexManager.class);
     public static final String SCHEMA_NAME = "luminex";
     public static final String RERUN_TRANSFORM = "rerunTransform";
 

@@ -18,7 +18,8 @@ package org.labkey.elispot;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.statistics.MathStat;

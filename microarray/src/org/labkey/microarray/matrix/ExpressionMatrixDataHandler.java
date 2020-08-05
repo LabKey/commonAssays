@@ -16,7 +16,8 @@
 package org.labkey.microarray.matrix;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -55,7 +56,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
     public static final String FEATURE_ID_COLUMN_NAME = "ID_REF";
     public static final String FEATURE_ID_COLUMN_IMPORT_ALIAS = "feature_id";
 
-    private static final Logger LOG = Logger.getLogger(ExpressionMatrixDataHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ExpressionMatrixDataHandler.class);
 
     // CONSIDER: move this flag to the assay design
 //    private static boolean autoCreateSamples = true;

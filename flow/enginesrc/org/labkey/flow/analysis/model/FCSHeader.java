@@ -17,7 +17,8 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.search.AbstractDocumentParser;
@@ -43,7 +44,7 @@ public class FCSHeader
 {
     public static final String CONTENT_TYPE = "application/vnd.isac.fcs";
 
-    private static final Logger LOG = Logger.getLogger(FCSHeader.class);
+    private static final Logger LOG = LogManager.getLogger(FCSHeader.class);
 
     private Map<String, String> keywords = new CaseInsensitiveHashMap<>();
     int dataLast;

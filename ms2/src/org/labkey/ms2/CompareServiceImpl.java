@@ -16,7 +16,8 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.query.ComparisonCrosstabView;
@@ -40,7 +41,7 @@ import java.util.List;
  */
 public class CompareServiceImpl extends BaseRemoteService implements CompareService
 {
-    private static Logger _log = Logger.getLogger(CompareServiceImpl.class);
+    private static Logger _log = LogManager.getLogger(CompareServiceImpl.class);
 
     public CompareServiceImpl(ViewContext context)
     {

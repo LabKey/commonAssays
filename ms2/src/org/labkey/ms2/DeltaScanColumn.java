@@ -16,7 +16,8 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
@@ -38,7 +39,7 @@ import java.util.Set;
  */
 public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 {
-    private static final Logger _log = Logger.getLogger(DeltaScanColumn.class);
+    private static final Logger _log = LogManager.getLogger(DeltaScanColumn.class);
 
     private ColumnInfo _fractionColInfo;
     private ColumnInfo _scanColInfo;

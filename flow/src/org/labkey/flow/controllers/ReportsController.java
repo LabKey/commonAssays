@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.controllers;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.*;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -53,7 +54,7 @@ import java.util.Collection;
  */
 public class ReportsController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(ReportsController.class);
+    private static final Logger _log = LogManager.getLogger(ReportsController.class);
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ReportsController.class);
 
     public ReportsController()

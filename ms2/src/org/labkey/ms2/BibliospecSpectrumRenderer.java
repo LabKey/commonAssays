@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.RuntimeSQLException;
@@ -54,7 +55,7 @@ import java.util.Map;
  */
 public class BibliospecSpectrumRenderer implements SpectrumRenderer
 {
-    private static final Logger LOG = Logger.getLogger(BibliospecSpectrumRenderer.class);
+    private static final Logger LOG = LogManager.getLogger(BibliospecSpectrumRenderer.class);
 
     private final ViewContext _context;
 

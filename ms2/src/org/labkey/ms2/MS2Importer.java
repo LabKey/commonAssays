@@ -18,7 +18,8 @@ package org.labkey.ms2;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
@@ -82,7 +83,7 @@ public abstract class MS2Importer
     protected Logger _log = null;
 
     // Use system logger for bugs & system problems, and in cases where we don't have a pipeline logger
-    protected static Logger _systemLog = Logger.getLogger(MS2Importer.class);
+    protected static Logger _systemLog = LogManager.getLogger(MS2Importer.class);
     protected final XarContext _context;
 
     public MS2Importer(XarContext context, User user, Container c, String description, String fullFileName, Logger log)

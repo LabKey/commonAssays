@@ -17,7 +17,8 @@ package org.labkey.ms2.reader;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.arrays.FloatArray;
 import org.labkey.ms2.FloatParser;
 import org.labkey.ms2.MS2Importer;
@@ -39,7 +40,7 @@ import java.util.zip.GZIPInputStream;
  */
 public class TarIterator implements SimpleScanIterator
 {
-    private static final Logger _log = Logger.getLogger(TarIterator.class);
+    private static final Logger _log = LogManager.getLogger(TarIterator.class);
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
     private String _dtaFileNamePrefix = null;

@@ -17,7 +17,8 @@
 package org.labkey.ms2.reader;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.protein.fasta.Protein;
@@ -310,7 +311,7 @@ public class PepXmlLoader extends MS2XmlLoader
 
     public static class PeptideIterator implements Iterator<PepXmlPeptide>
     {
-        private static Logger _log = Logger.getLogger(PepXmlLoader.class);
+        private static Logger _log = LogManager.getLogger(PepXmlLoader.class);
 
         private SimpleXMLStreamReader _parser;
         private PepXmlPeptide _peptide = null;
@@ -425,7 +426,7 @@ public class PepXmlLoader extends MS2XmlLoader
         //then all elements are null except the actual modifications.  Index+1 = position of mod
         private ModifiedAminoAcid[] _modifiedAminoAcids = null; // TODO Delete this? This doesn't seem to be used ???
 
-        private static Logger _log = Logger.getLogger(PepXmlPeptide.class);
+        private static Logger _log = LogManager.getLogger(PepXmlPeptide.class);
 
         protected static PepXmlPeptide getNextPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
                 throws XMLStreamException

@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -49,7 +50,7 @@ import javax.xml.stream.events.XMLEvent;
  */
 public class SimpleXMLEventRewriter
 {
-    private static Logger _log = Logger.getLogger(SimpleXMLEventRewriter.class);
+    private static Logger _log = LogManager.getLogger(SimpleXMLEventRewriter.class);
 
     private static XMLEventFactory eventFactory = XMLEventFactory.newInstance();
     private static DatatypeFactory typeFactory = null;

@@ -15,7 +15,8 @@
  */
 package org.labkey.elispot;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.ConcurrentCaseInsensitiveSortedMap;
@@ -48,7 +49,7 @@ import java.util.Set;
  */
 public class ElispotManager
 {
-    private static final Logger _log = Logger.getLogger(ElispotManager.class);
+    private static final Logger _log = LogManager.getLogger(ElispotManager.class);
     private static final ElispotManager _instance = new ElispotManager();
 
     public static final String ELISPOT_RUNDATA_TABLE_NAME = "rundata";

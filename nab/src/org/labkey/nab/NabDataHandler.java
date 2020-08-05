@@ -16,7 +16,8 @@
 
 package org.labkey.nab;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
@@ -54,7 +55,7 @@ import java.util.Map;
  */
 public abstract class NabDataHandler extends DilutionDataHandler
 {
-    public static final Logger LOG = Logger.getLogger(NabDataHandler.class);
+    public static final Logger LOG = LogManager.getLogger(NabDataHandler.class);
 
     public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
