@@ -21,8 +21,6 @@
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -83,7 +81,7 @@ Browse the pipeline
 
             fileSystem = Ext4.create('File.system.Webdav', {
                 rootPath : <%=q(pipeRoot.getWebdavURL())%>,
-                rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+                rootName : <%=q(AppProps.getInstance().getServerName())%>
             });
 
             fileBrowser = Ext4.create('File.panel.Browser', {

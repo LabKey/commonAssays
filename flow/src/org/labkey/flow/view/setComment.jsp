@@ -125,11 +125,11 @@ LABKEY.requiresExt3(function() {
             switch (status)
             {
                 case 'loading':
-                    this.statusEl.setStyle("background-image", "url(<%=getExtJs3Root()%>/resources/images/default/grid/loading.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("grid/loading.gif")%>)");
                     this.statusEl.setStyle("color", "silver");
                     break;
                 case 'success':
-                    this.statusEl.setStyle("background-image", "url(<%=getExtJs3Root()%>/resources/images/default/tree/drop-yes.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("tree/drop-yes.gif")%>)");
                     this.statusEl.setStyle("color", "green");
                     if (!this.delayHide)
                     {
@@ -138,7 +138,7 @@ LABKEY.requiresExt3(function() {
                     this.delayHide.delay(4000);
                     break;
                 case 'error':
-                    this.statusEl.setStyle("background-image", "url(<%=getExtJs3Root()%>/resources/images/default/form/exclamation.gif)")
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("form/exclamation.gif")%>)");
                     this.statusEl.setStyle("color", "red");
                     break;
             }
