@@ -80,7 +80,7 @@ var report =
             property:<%=q(f.property)%>,
             value:<%=q(f.value)%>,
             type:<%=q(f.type)%>,
-            op:<%=text(null==f.op?q("eq"):q(f.op))%>}<%
+            op:<%=(null==f.op?q("eq"):q(f.op))%>}<%
         comma =",";
     }
     %>]
