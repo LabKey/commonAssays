@@ -105,7 +105,7 @@
 <script>
     var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
-    var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
+    var importedGroup = <%=q(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
 
 <%
@@ -135,7 +135,7 @@ if (groups.size() > 1)
         function onGroupChanged(selectedGroup) {
             importedGroup = selectedGroup || "All Samples";
 
-            var dr = LABKEY.DataRegions[<%= PageFlowUtil.jsString(SamplesConfirmGridView.DATAREGION_NAME) %>];
+            var dr = LABKEY.DataRegions[<%= q(SamplesConfirmGridView.DATAREGION_NAME) %>];
             if (dr) {
                 var group = groups[importedGroup];
                 if (group) {
