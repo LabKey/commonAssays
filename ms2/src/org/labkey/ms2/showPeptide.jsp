@@ -77,11 +77,11 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.print("    ");
+            out.print(unsafe("    "));
             out.println(link("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl));
         }
     }
-    out.print(text(ctx.modificationHref));
+    out.print(ctx.modificationHref);
 %>
 
     </td></tr>
@@ -245,7 +245,7 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
     $(function() {
         /* render the spectrum with the given options */
         $("#lorikeet").specview({
-            sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
+            sequence: <%=q(p.getTrimmedPeptide())%>,
             precursorMz: 1,
             staticMods: staticMods,
             variableMods: varMods,
@@ -264,7 +264,7 @@ for (org.labkey.ms2.MS2Modification mod : run.getModifications(org.labkey.ms2.Ma
 {
     if (!mod.getVariable())
     { %>
-        <%= h(staticModIndex == 0 ? "" : ",") %>staticMods[<%= staticModIndex++%>] = { modMass: <%= h(Formats.f4.format(mod.getMassDiff())) %>, aminoAcid: <%= PageFlowUtil.jsString(mod.getAminoAcid())%>}<%
+        <%= h(staticModIndex == 0 ? "" : ",") %>staticMods[<%= staticModIndex++%>] = { modMass: <%= h(Formats.f4.format(mod.getMassDiff())) %>, aminoAcid: <%=q(mod.getAminoAcid())%>}<%
     }
 }
 %>

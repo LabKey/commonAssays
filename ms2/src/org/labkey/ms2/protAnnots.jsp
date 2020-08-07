@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.AnnotationView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

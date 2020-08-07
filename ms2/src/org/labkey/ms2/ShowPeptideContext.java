@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
+import org.labkey.api.util.HasHtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 
@@ -39,10 +40,10 @@ public class ShowPeptideContext
     public ActionURL previousUrl;
     public ActionURL nextUrl;
     public ActionURL showGzUrl;
-    public String modificationHref;
+    public HasHtmlString modificationHref;
     public String pepSearchHref;
 
-    ShowPeptideContext(MS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ActionURL url, ActionURL previousUrl, ActionURL nextUrl, ActionURL showGzUrl, String modHref, Container container, User user)
+    ShowPeptideContext(MS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ActionURL url, ActionURL previousUrl, ActionURL nextUrl, ActionURL showGzUrl, HasHtmlString modHref, Container container, User user)
     {
         this.form = form;
         this.run = run;
