@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.util.HasHtmlString" %>
-<%@ page import="org.labkey.api.util.element.Input" %>
 <%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
@@ -26,7 +25,7 @@
 <%!
     private HasHtmlString statOption(StatisticSet option)
     {
-        return new Input.InputBuilder()
+        return input()
             .type("checkbox")
             .name("ff_statisticSet")
             .value(option.name())

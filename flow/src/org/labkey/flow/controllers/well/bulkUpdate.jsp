@@ -44,10 +44,10 @@ var keywords = [
     String comma = "";
     for (String kw : form.getKeywords(context))
     {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(kw));
-        out.print("]");
+        out.print(unsafe(comma));
+        out.print(unsafe("["));
+        out.print(q(kw));
+        out.print(unsafe("]"));
         comma = ",";
     }%>
 ];
@@ -57,10 +57,10 @@ var values = [
     comma = "";
     for (String v : form.getValues(context, form.keyword))
     {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(v));
-        out.print("]");
+        out.print(unsafe(comma));
+        out.print(unsafe("["));
+        out.print(q(v));
+        out.print(unsafe("]"));
         comma = ",";
     }%>
 ];
