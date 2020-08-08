@@ -66,43 +66,43 @@
    <td><%
     if (bean.genBankUrls.isEmpty()) { %><em>none loaded</em><% }
     for(String id : bean.genBankUrls)
-        out.println(id + "<br>");
+        out.println(h(id + "<br>"));
     %>
    </td>
     <td><%
      if (bean.GIs.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.GIs)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
     <td><%
      if (bean.swissProtAccns.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.swissProtAccns)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
     <td><%
      if (bean.swissProtNames.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.swissProtNames)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
     <td><%
      if (bean.ensemblIds.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.ensemblIds)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
     <td><%
      if (bean.IPI.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.IPI)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
     <td><%
      if (bean.goCategories.length == 0) { %><em>none loaded</em><% }
      for(String id : bean.goCategories)
-         out.println(id + "<br>");
+         out.println(h(id + "<br>"));
      %>
     </td>
 </tr>

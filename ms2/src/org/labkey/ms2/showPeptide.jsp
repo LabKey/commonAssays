@@ -16,14 +16,13 @@
  */
 %>
 <%@ page import="org.labkey.api.util.Formats"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager" %>
+<%@ page import="org.labkey.ms2.MS2Manager"%>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
 <%@ page import="org.labkey.ms2.MassType" %>
@@ -66,7 +65,9 @@
 <%
         if (fraction.wasloadedFromGzFile())
         {
-            out.println(" " + MS2GZFileRenderer.getFileNameInGZFile(fraction.getFileName(), p.getScan(), p.getCharge(), "dta") + "<br>");
+            out.print(unsafe(" "));
+            out.print(h(MS2GZFileRenderer.getFileNameInGZFile(fraction.getFileName(), p.getScan(), p.getCharge(), "dta")));
+            out.println(unsafe("<br>"));
         }
 %>
 <%

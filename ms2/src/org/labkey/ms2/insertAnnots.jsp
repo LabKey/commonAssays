@@ -45,7 +45,7 @@
        </select>
       </td>
     </tr>
-    <tr id="fastaOrganism" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+    <tr id="fastaOrganism" style="display: <%=h("fasta".equals(bean.getFileType()) ? "table-row" : "none")%>;">
        <td class="labkey-form-label">Default Organism</td>
        <td><input type='text' name='defaultOrganism' size='50' value='<%=h(bean.getDefaultOrganism())%>'></td>
     </tr>
