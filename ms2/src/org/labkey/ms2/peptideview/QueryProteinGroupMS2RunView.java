@@ -145,7 +145,6 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
     @Override
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-
     }
 
     @Override
