@@ -49,7 +49,7 @@
         var panel = Ext4.create('LABKEY.ext4.PlateSummary', {
             runId       : <%=bean.getRun()%>,
             width       : 1500,
-            renderTo    : q(renderId),
+            renderTo    : <%=q(renderId)%>,
             isFluorospot: <%=bean.isFluorospot()%>
         });
     });

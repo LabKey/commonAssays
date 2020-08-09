@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
+<%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
-<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% AnalysisForm bean = (AnalysisForm) form; %>
@@ -33,9 +33,9 @@
     var STATS = [];
     <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
         STATS.push({
-            name: <%= stat.name() %>,
-            shortName: <%= stat.getShortName() %>,
-            longName: <%= stat.getLongName() %>,
+            name: <%=h(stat.name())%>,
+            shortName: <%=h(stat.getShortName())%>,
+            longName: <%=h(stat.getLongName())%>,
             parameterRequired: <%= stat.isParameterRequired() %>
         });
     <% } %>

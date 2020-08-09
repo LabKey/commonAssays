@@ -25,10 +25,10 @@
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.security.User" %>
-<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
+<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
@@ -232,9 +232,9 @@
                         {
                             ExpMaterial sample = _sampleTypeSamples.get(sampleIndex);
                             String name = sample.getName();
-                            String url = sample.detailsURL().getLocalURIString();
-                            String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
-                            String src = StringUtils.isNotEmpty(sample.getComment()) ? sample.urlFlag(true) : AppProps.getInstance().getContextPath() + "/_.gif";
+                            ActionURL url = sample.detailsURL();
+                            HtmlString comment = sample.getComment() != null ? unsafe(" title='" + h(sample.getComment()) + "'") : HtmlString.EMPTY_STRING;
+                            HtmlString src = StringUtils.isNotEmpty(sample.getComment()) ? h(sample.urlFlag(true)) : getWebappURL("/_.gif");
                       %>
                           "<tr>" +
                           "<td><a<%=comment%> href='<%=h(url)%>'><img src='<%=src%>'></a>" +

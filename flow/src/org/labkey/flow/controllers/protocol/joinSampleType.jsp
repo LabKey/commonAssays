@@ -16,10 +16,9 @@
  */
 %>
 <%@ page import="org.labkey.api.query.FieldKey"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.flow.controllers.protocol.JoinSampleTypeForm"%>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController"%>
-<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Map"%>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -44,11 +43,12 @@
             <table><tr><th>Sample Property</th><th>FCS Property</th></tr>
                 <% for (int i = 0; i < form.ff_samplePropertyURI.length; i ++)
                 { %>
-                <tr><td>
-                    <%=PageFlowUtil.strSelect("ff_samplePropertyURI", sampleKeyFields, form.ff_samplePropertyURI[i]) %>
-                </td>
+                <tr>
                     <td>
-                        <%=PageFlowUtil.strSelect("ff_dataField", dataKeyFields, form.ff_dataField[i])%>
+                        <%=select().name("ff_samplePropertyURI").addOptions(sampleKeyFields).selected(form.ff_samplePropertyURI[i]).className(null)%>
+                    </td>
+                    <td>
+                        <%=select().name("ff_dataField").addOptions(dataKeyFields).selected(form.ff_dataField[i]).className(null)%>
                     </td>
                 </tr>
                 <% } %>

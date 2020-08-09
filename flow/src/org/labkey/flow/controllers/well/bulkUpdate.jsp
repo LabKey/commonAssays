@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -108,7 +107,7 @@ Ext.onReady(function(){
                 fieldLabel: 'Keyword',
                 name: 'keyword',
                 forceSelection: true,
-                value: <%=PageFlowUtil.jsString(form.keyword)%>,
+                value: <%=q(form.keyword)%>,
                 displayField:'keyword',
                 typeAhead: true,
                 mode: 'local',
@@ -119,7 +118,7 @@ Ext.onReady(function(){
             %>,
             {
                 xtype:'fieldset',
-                //title:'<%=i%>', collapsible:true, collapsed:<%=i==0?"false":"true"%>,
+                //title:'<%=i%>', collapsible:true, collapsed:<%=i!=0%>,
                 width: 330, autoHeight:true, defaults: {width: 210},
                 defaultType: 'textfield',
                 items:

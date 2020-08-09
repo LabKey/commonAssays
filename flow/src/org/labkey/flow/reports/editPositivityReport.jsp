@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -28,7 +27,6 @@
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
-<%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page import="org.labkey.flow.reports.StatPickerView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -93,10 +91,10 @@
 var form;
 var report =
 {
-    reportId:<%=PageFlowUtil.jsString(reportId)%>,
-    name:<%=PageFlowUtil.jsString(d.getReportName())%>,
-    description:<%=PageFlowUtil.jsString(d.getReportDescription())%>,
-    subset:<%=PageFlowUtil.jsString(d.getProperty("subset"))%>,
+    reportId:<%=q(reportId)%>,
+    name:<%=q(d.getReportName())%>,
+    description:<%=q(d.getReportDescription())%>,
+    subset:<%=q(d.getProperty("subset"))%>,
     filter :
     [<%
     String comma = "";
@@ -158,7 +156,7 @@ function Form_onDelete()
        url = new ActionURL(ReportsController.BeginAction.class, c);
    }
    %>
-   window.location = <%=PageFlowUtil.jsString(url.getLocalURIString())%>;
+   window.location = <%=q(url.getLocalURIString())%>;
 }
 
 Ext.onReady(function() {

@@ -16,15 +16,17 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils"%>
+<%@ page import="org.labkey.api.util.HtmlString"%>
 <%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
-<%@ page import="org.labkey.flow.controllers.editscript.EditGateTreeForm"%>
+<%@ page import="org.labkey.flow.controllers.editscript.EditGateTreeForm" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
-<%! String indent(SubsetSpec subset)
+<%!
+    HtmlString indent(SubsetSpec subset)
     {
-        return StringUtils.repeat("+", subset.getSubsets().length);
+        return h(StringUtils.repeat("+", subset.getSubsets().length));
     }
 %>
 <% EditGateTreeForm form = (EditGateTreeForm) getForm(); %>

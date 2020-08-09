@@ -17,6 +17,7 @@
 %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.flow.controllers.protocol.EditFCSAnalysisFilterForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="java.util.LinkedHashMap" %>
@@ -67,7 +68,7 @@
         }
         %>
         <tr>
-            <td><%=i == 0 ? "&nbsp;" : "and"%></td>
+            <td><%=i == 0 ? HtmlString.NBSP : h("and")%></td>
             <td><select name="ff_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /> </select></td>
             <td><select name="ff_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
             <td><input name="ff_value" type="text" value="<%=h(value)%>" /></td>
