@@ -179,7 +179,7 @@
 
                 fileSystem = Ext4.create('File.system.Webdav', {
                     rootPath : <%=q(pipeRoot.getWebdavURL())%>,
-                    rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+                    rootName : <%=q(AppProps.getInstance().getServerName())%>
                     //rootOffset : <%=q(keywordDir)%>
                 });
 

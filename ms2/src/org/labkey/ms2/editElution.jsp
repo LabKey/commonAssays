@@ -109,11 +109,11 @@
             {
                 if (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan())
                 {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
                 else
                 {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
             }
             else
@@ -167,11 +167,11 @@
             {
                 if (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan())
                 {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
                 else
                 {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
             }
             else
@@ -250,12 +250,12 @@ function updateRange(prefix)
         {
             if (i >= firstSelected && i <= lastSelected)
             {
-                document[prefix + "ImgScan" + i].src = "<%= contextPath%>" + "/_images/red.gif";
+                document[prefix + "ImgScan" + i].src = "<%=getWebappURL("/_images/red.gif")%>";
                 area += intensities[prefix][i];
             }
             else
             {
-                document[prefix + "ImgScan" + i].src = "<%= contextPath%>" + "/_images/gray.gif";
+                document[prefix + "ImgScan" + i].src = "<%=getWebappURL("/_images/gray.gif")%>";
             }
         }
     }

@@ -28,7 +28,7 @@
         <input type="text" name="name" value="<%=h(form.name)%>">
     </p>
     <p>
-        Which sections of the '<%=form.getFlowScript().getName()%>' script do you want to copy?<br>
+        Which sections of the '<%=h(form.getFlowScript().getName())%>' script do you want to copy?<br>
 <% if (form.getFlowScript().hasStep(FlowProtocolStep.calculateCompensation)) { %>
         <input type="checkbox" name="copyCompensationCalculation" value="true"<%=checked(form.copyCompensationCalculation)%>>Compensation Calculation<br>
 <% } %>

@@ -1,4 +1,3 @@
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%
 /*
  * Copyright (c) 2007-2019 LabKey Corporation
@@ -16,8 +15,8 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ include file="showSensitivityDetails.jsp" %>
-
 <table>
 <%
     ViewContext context = getViewContext();
@@ -34,16 +33,16 @@
         String charge = Integer.toString(i);
 %>
 <tr>
-    <td><img src="<%=dist.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Distribution"></td>
-    <td><img src="<%=distCumulative.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Cumulative Distribution"></td>
+    <td><img src="<%=h(dist.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Distribution"></td>
+    <td><img src="<%=h(distCumulative.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Cumulative Distribution"></td>
 </tr>
 <tr>
-    <td><img src="<%=versus.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Observed vs. Model"></td>
-    <td><img src="<%=versusCumulative.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Cumulative Observed vs. Model"></td>
+    <td><img src="<%=h(versus.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Observed vs. Model"></td>
+    <td><img src="<%=h(versusCumulative.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Cumulative Observed vs. Model"></td>
 </tr>
 <% if (bean.run.getNegativeHitCount() > bean.run.getPeptideCount() / 3) { %>
 <tr>
-    <td><img src="<%=versusPP.replaceParameter("charge", charge).getEncodedLocalURIString()%>" alt="Charge <%=charge%>+ Observed vs. Prophet"></td>
+    <td><img src="<%=h(versusPP.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Observed vs. Prophet"></td>
 </tr>
 <% } %>
 <%   }  %>

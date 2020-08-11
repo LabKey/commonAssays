@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -44,10 +43,10 @@ var keywords = [
     String comma = "";
     for (String kw : form.getKeywords(context))
     {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(kw));
-        out.print("]");
+        out.print(unsafe(comma));
+        out.print(unsafe("["));
+        out.print(q(kw));
+        out.print(unsafe("]"));
         comma = ",";
     }%>
 ];
@@ -57,10 +56,10 @@ var values = [
     comma = "";
     for (String v : form.getValues(context, form.keyword))
     {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(v));
-        out.print("]");
+        out.print(unsafe(comma));
+        out.print(unsafe("["));
+        out.print(q(v));
+        out.print(unsafe("]"));
         comma = ",";
     }%>
 ];
@@ -108,7 +107,7 @@ Ext.onReady(function(){
                 fieldLabel: 'Keyword',
                 name: 'keyword',
                 forceSelection: true,
-                value: <%=PageFlowUtil.jsString(form.keyword)%>,
+                value: <%=q(form.keyword)%>,
                 displayField:'keyword',
                 typeAhead: true,
                 mode: 'local',
@@ -119,7 +118,7 @@ Ext.onReady(function(){
             %>,
             {
                 xtype:'fieldset',
-                //title:'<%=i%>', collapsible:true, collapsed:<%=i==0?"false":"true"%>,
+                //title:'<%=i%>', collapsible:true, collapsed:<%=i!=0%>,
                 width: 330, autoHeight:true, defaults: {width: 210},
                 defaultType: 'textfield',
                 items:

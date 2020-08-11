@@ -69,14 +69,14 @@
 
                 %>
                 <tr>
-                    <td><%= i == 0 ? "" : "and" %></td>
+                    <td><%=h(i == 0 ? "" : "and")%></td>
                     <% if (canEdit) { %>
                     <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
                     <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
                     <td><input type="text" name="ff_filter_value" value="<%=h(value)%>"></td>
                     <% } else { %>
-                    <td><%=fieldOptions.get(field)%></td>
-                    <td><%=opOptions.get(op)%></td>
+                    <td><%=h(fieldOptions.get(field))%></td>
+                    <td><%=h(opOptions.get(op))%></td>
                     <td><%=h(value)%></td>
                     <% } %>
                 </tr>

@@ -252,7 +252,7 @@
             for (Titration.Type t : Titration.Type.values())
             {
 %>
-                var propertyName = <%=PageFlowUtil.jsString(LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue())) %>;
+                var propertyName = <%=q(LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue())) %>;
                 var hiddenEl = getHiddenFormElement(propertyName);
                 var inputEl = getInputFormElement(propertyName);
                 if (hiddenEl && inputEl)
@@ -265,7 +265,7 @@
         for (String singlePointControl : trackedSinglePointControls)
         {
 %>
-            var propertyName = <%=PageFlowUtil.jsString(LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControl)) %>;
+            var propertyName = <%=q(LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControl)) %>;
             var hiddenEl = getHiddenFormElement(propertyName);
             var inputEl = getInputFormElement(propertyName);
             if (hiddenEl && inputEl)

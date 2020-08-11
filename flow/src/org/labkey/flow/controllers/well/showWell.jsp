@@ -455,7 +455,7 @@ if (getGraphs().length > 0)
     {
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
-        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class))%>&amp;graph=<%=PageFlowUtil.encode(graph.toString())%>" onerror="flowImgError(this);">
+        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>" onerror="flowImgError(this);">
         </span><wbr>
         <%
     }

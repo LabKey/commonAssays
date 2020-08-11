@@ -16,11 +16,10 @@
  */
 %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="java.util.List"%>
-<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Map"%>
 <%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -40,7 +39,7 @@ var AutoComp = {};
     boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
     for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
     {
-        %>AutoComp[<%=PageFlowUtil.jsString(autoComp.getName())%>]={<%
+        %>AutoComp[<%=q(autoComp.getName())%>]={<%
 
         // 'criteria' : [ primarykKeyword, secondaryKeyword, secondaryValue ]
         AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
@@ -55,7 +54,7 @@ var AutoComp = {};
         String and = "\n";
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=text(and)%><%= PageFlowUtil.jsString(param.getParameterName())%> : <%=text(javascriptArray(
+            %><%=text(and)%><%=q(param.getParameterName())%> : <%=text(javascriptArray(
                 param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate()))%><%
             and = ",\n";
         }
@@ -66,8 +65,8 @@ var AutoComp = {};
 %>
 var SS = []; // SUBSETS
 <%
-    Map<Integer, Integer> hashToIndexMap = new TreeMap();
-    Integer index = 0;
+    Map<Integer, Integer> hashToIndexMap = new TreeMap<>();
+    int index = 0;
     for (Map<String, List<String>> valueSubsets : keywordValueSampleMap.values())
     {
         for (List<String> subsets : valueSubsets.values())
@@ -76,7 +75,7 @@ var SS = []; // SUBSETS
             if (!hashToIndexMap.containsKey(subsetHash))
             {
                 hashToIndexMap.put(subsetHash, index);
-                index = index.intValue() + 1;
+                index = (int)index + 1;
                 %>SS.push(<%=text(javascriptArray(subsets))%>);<%
                 out.println();
             }
@@ -88,13 +87,13 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
     for (Map.Entry<String, Map<String, List<String>>> keywordEntry : keywordValueSampleMap.entrySet())
     {
         String keyword = keywordEntry.getKey();
-        %>KV[<%=PageFlowUtil.jsString(keyword)%>]=o(<%
+        %>KV[<%=q(keyword)%>]=o(<%
         String and="";
         for (Map.Entry<String, List<String>> valueEntry : keywordEntry.getValue().entrySet())
         {
             String value = valueEntry.getKey();
             int subsetHash = valueEntry.getValue().hashCode();
-            %><%=text(and)%><%=PageFlowUtil.jsString(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
+            %><%=text(and)%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
             and = ",";
         }
         %>);<%

@@ -325,7 +325,6 @@ flow/src/org/labkey/flow/data/FlowProviderSchema.java -text
 flow/src/org/labkey/flow/data/FlowRun.java -text
 flow/src/org/labkey/flow/data/FlowRunWorkspace.java -text
 flow/src/org/labkey/flow/data/FlowScript.java -text
-flow/src/org/labkey/flow/data/FlowStatus.java -text
 flow/src/org/labkey/flow/data/FlowWell.java -text
 flow/src/org/labkey/flow/data/FlowWorkspace.java -text
 flow/src/org/labkey/flow/data/ICSMetadata.java -text
@@ -390,11 +389,9 @@ flow/src/org/labkey/flow/view/ExportAnalysisManifest.java -text
 flow/src/org/labkey/flow/view/FlowQueryView.java -text
 flow/src/org/labkey/flow/view/GraphColumn.java -text
 flow/src/org/labkey/flow/view/GraphDataRegion.java -text
-flow/src/org/labkey/flow/view/JobStatusView.java -text
 flow/src/org/labkey/flow/view/SetCommentView.java -text
 flow/src/org/labkey/flow/view/errors.jsp -text
 flow/src/org/labkey/flow/view/exportAnalysis.jsp -text
-flow/src/org/labkey/flow/view/jobStatus.jsp -text
 flow/src/org/labkey/flow/view/setComment.jsp -text
 flow/src/org/labkey/flow/view/setGraphSize.jsp -text
 flow/src/org/labkey/flow/webparts/AnalysesWebPart.java -text

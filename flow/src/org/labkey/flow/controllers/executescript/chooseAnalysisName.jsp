@@ -62,9 +62,9 @@
     <labkey:button text="Analyze runs" action="<%=new ActionURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class, c)%>"/>
     <labkey:button text="Go back" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, c)%>"/>
     <% for (int runid : form.getSelectedRunIds()) { %>
-    <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
+    <input type="hidden" name="<%=h(DataRegion.SELECT_CHECKBOX_NAME)%>" value="<%=runid%>">
     <% } %>
-    <input type="hidden" name="<%=DataRegionSelection.DATA_REGION_SELECTION_KEY%>" value="<%=form.getDataRegionSelectionKey()%>"> 
+    <input type="hidden" name="<%=h(DataRegionSelection.DATA_REGION_SELECTION_KEY)%>" value="<%=h(form.getDataRegionSelectionKey())%>">
     <input type="hidden" name="scriptId" value="<%=form.getProtocol().getScriptId()%>">
     <input type="hidden" name="actionSequence" value="<%=form.getProtocolStep().getDefaultActionSequence()%>">
     <input type="hidden" name="ff_compensationMatrixOption" value="<%=h(form.ff_compensationMatrixOption)%>">

@@ -83,7 +83,7 @@
 <script type="text/javascript">
     function renderPanel(){
         var onCancel = function(){
-            window.location = <%=PageFlowUtil.jsString(returnUrl)%>;
+            window.location = <%=q(returnUrl)%>;
         };
 
         var onUpload = function(){
@@ -110,7 +110,7 @@
                 width : 580,
                 labelWidth: 125,
                 name: 'name',
-                value: <%=PageFlowUtil.jsString(name)%>,
+                value: <%=q(name)%>,
                 fieldLabel: 'Name',
                 allowBlank: false
             }, {
@@ -118,7 +118,7 @@
                 width : 580,
                 labelWidth: 125,
                 name: 'vendor',
-                value: <%=PageFlowUtil.jsString(vendor)%>,
+                value: <%=q(vendor)%>,
                 fieldLabel: 'Vendor',
                 allowBlank: false
             }, {
@@ -126,7 +126,7 @@
                 width: 580,
                 labelWidth: 125,
                 name: 'description',
-                value: <%=PageFlowUtil.jsString(description)%>,
+                value: <%=q(description)%>,
                 fieldLabel: 'Description',
                 allowBlank: true
             }, {
@@ -134,7 +134,7 @@
                 width: 580,
                 labelWidth: 125,
                 name: 'comment',
-                value: <%=PageFlowUtil.jsString(comment)%>,
+                value: <%=q(comment)%>,
                 fieldLabel: 'Comment',
                 allowBlank: true
             }, {

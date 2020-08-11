@@ -16,6 +16,7 @@
  */
 %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
+<%@ page import="org.json.JSONObject" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -23,7 +24,6 @@
 <%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ page import="java.util.List" %>
-<%@ page import="org.json.JSONObject" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -139,8 +139,8 @@
                 jsonObj.put(entry.getKey().toString(), entry.getValue());
             }
         %>
-        // next value is intentionally not escaped -- comes from server and won't be parsed correctly in escaped form
-        var fdrOptionToThresholdMap = JSON.parse( '<%= jsonObj.toString() %>' );
+        // next value is intentionally not HTML escaped -- comes from server and won't be parsed correctly in escaped form
+        var fdrOptionToThresholdMap = JSON.parse( '<%=jsonObj%>' );
         if(document.getElementById('isIonCutoff').checked) {
             this.setGteParameter(fdrOptionToThresholdMap[desiredFdr]);
         }

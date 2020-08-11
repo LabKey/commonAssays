@@ -34,43 +34,43 @@
 </tr>
 <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Successful</td>
-    <td align="right"><a href="<%=h(bean.successfulURL)%>"><%=bean.stats.get("successfulRuns")%></a></td>
-    <td align="right"><%=bean.stats.get("successfulPeptides")%></td>
-    <td align="right"><%=bean.stats.get("successfulSpectra")%></td>
+    <td align="right"><%=link(bean.stats.get("successfulRuns"), bean.successfulURL).clearClasses()%></td>
+    <td align="right"><%=h(bean.stats.get("successfulPeptides"))%></td>
+    <td align="right"><%=h(bean.stats.get("successfulSpectra"))%></td>
 </tr>
 <tr class="labkey-row">
     <td style="font-weight: bold;">In-Process</td>
-    <td align="right"><a href="<%=h(bean.inProcessURL)%>"><%=bean.stats.get("inProcessRuns")%></a></td>
-    <td align="right"><%=bean.stats.get("inProcessPeptides")%></td>
-    <td align="right"><%=bean.stats.get("inProcessSpectra")%></td>
+    <td align="right"><%=link(bean.stats.get("inProcessRuns"), bean.inProcessURL).clearClasses()%></td>
+    <td align="right"><%=h(bean.stats.get("inProcessPeptides"))%></td>
+    <td align="right"><%=h(bean.stats.get("inProcessSpectra"))%></td>
 </tr>
 <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Failed</td>
-    <td align="right"><a href="<%=h(bean.failedURL)%>"><%=bean.stats.get("failedRuns")%></a></td>
-    <td align="right"><%=bean.stats.get("failedPeptides")%></td>
-    <td align="right"><%=bean.stats.get("failedSpectra")%></td>
+    <td align="right"><%=link(bean.stats.get("failedRuns"), bean.failedURL).clearClasses()%></td>
+    <td align="right"><%=h(bean.stats.get("failedPeptides"))%></td>
+    <td align="right"><%=h(bean.stats.get("failedSpectra"))%></td>
 </tr>
 <tr class="labkey-row">
     <td colspan="4">&nbsp;</td>
 </tr>
     <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Deleted</td>
-    <td align="right"><a href="<%=h(bean.deletedURL)%>"><%=bean.stats.get("deletedRuns")%></a></td>
-    <td align="right"><%=bean.stats.get("deletedPeptides")%></td>
-    <td align="right"><%=bean.stats.get("deletedSpectra")%></td>
+    <td align="right"><%=link(bean.stats.get("deletedRuns"), bean.deletedURL).clearClasses()%></td>
+    <td align="right"><%=h(bean.stats.get("deletedPeptides"))%></td>
+    <td align="right"><%=h(bean.stats.get("deletedSpectra"))%></td>
 </tr>
 <tr class="labkey-row">
     <td style="font-weight: bold;">To Be Purged</td>
-    <td align="right"><%=bean.stats.get("purgedRuns")%></td>
-    <td align="right"><%=bean.stats.get("purgedPeptides")%></td>
-    <td align="right"><%=bean.stats.get("purgedSpectra")%></td>
+    <td align="right"><%=h(bean.stats.get("purgedRuns"))%></td>
+    <td align="right"><%=h(bean.stats.get("purgedPeptides"))%></td>
+    <td align="right"><%=h(bean.stats.get("purgedSpectra"))%></td>
 </tr>
 </table><br>
 
 <%
     if (null != bean.purgeStatus)
     { %>
-<table class="labkey-data-region"><tr><td><%=bean.purgeStatus%> Refresh this page to update status.</td></tr></table><%
+<table class="labkey-data-region"><tr><td><%=h(bean.purgeStatus)%> Refresh this page to update status.</td></tr></table><%
     }
     else
     { %>

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.AnnotationView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -28,7 +28,7 @@
    <td class="labkey-form-label" nowrap="true">Description</td><td><%=h(bean.seqDesc)%></td>
 </tr>
 <tr>
-   <td class="labkey-form-label" nowrap="true">Gene name(s)</td><td><%=bean.geneName%><% // geneName is either an href or empty string, so don't filter %></td>
+   <td class="labkey-form-label" nowrap="true">Gene name(s)</td><td><%=HtmlString.join(bean.geneNameLinks, HtmlString.unsafe(", "))%></td>
 </tr>
 <tr>
    <td class="labkey-form-label" nowrap="true">Organisms</td>
@@ -65,45 +65,66 @@
 </tr>
 <tr valign="top">
    <td><%
-    if (bean.genBankUrls.isEmpty()) { %><em>none loaded</em><% }
-    for(String id : bean.genBankUrls)
-        out.println(id + "<br>");
+    if (bean.genBankLinks.isEmpty()) { %><em>none loaded</em><% }
+    for (HtmlString link : bean.genBankLinks)
+    {
+        out.print(link);
+        out.println(unsafe("<br>"));
+    }
     %>
    </td>
     <td><%
-     if (bean.GIs.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.GIs)
-         out.println(id + "<br>");
+     if (bean.GIs.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.GIs)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
     <td><%
-     if (bean.swissProtAccns.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.swissProtAccns)
-         out.println(id + "<br>");
+     if (bean.swissProtAccns.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.swissProtAccns)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
     <td><%
-     if (bean.swissProtNames.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.swissProtNames)
-         out.println(id + "<br>");
+     if (bean.swissProtNames.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.swissProtNames)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
     <td><%
-     if (bean.ensemblIds.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.ensemblIds)
-         out.println(id + "<br>");
+     if (bean.ensemblIds.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.ensemblIds)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
     <td><%
-     if (bean.IPI.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.IPI)
-         out.println(id + "<br>");
+     if (bean.IPI.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.IPI)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
     <td><%
-     if (bean.goCategories.length == 0) { %><em>none loaded</em><% }
-     for(String id : bean.goCategories)
-         out.println(id + "<br>");
+     if (bean.goCategories.isEmpty()) { %><em>none loaded</em><% }
+     for (HtmlString link : bean.goCategories)
+     {
+         out.print(link);
+         out.println(unsafe("<br>"));
+     }
      %>
     </td>
 </tr>

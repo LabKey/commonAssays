@@ -18,11 +18,12 @@
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.FilterInfo" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.protocol.EditICSMetadataForm" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%! void addCompare(Map<String, String> options, CompareType ct)
@@ -32,15 +33,15 @@
 <%
     EditICSMetadataForm form = (EditICSMetadataForm)__form;
 
-    Map<FieldKey, String> keywordSampleOptions = new LinkedHashMap();
+    Map<FieldKey, String> keywordSampleOptions = new LinkedHashMap<>();
     keywordSampleOptions.put(null, "");
     keywordSampleOptions.putAll(form.getKeywordAndSampleFieldMap(false));
 
-    Map<FieldKey, String> keywordSampleStatsOptions = new LinkedHashMap();
+    Map<FieldKey, String> keywordSampleStatsOptions = new LinkedHashMap<>();
     keywordSampleStatsOptions.put(null, "");
     keywordSampleStatsOptions.putAll(form.getKeywordAndSampleFieldMap(true));
 
-    Map<String, String> opOptions = new LinkedHashMap();
+    Map<String, String> opOptions = new LinkedHashMap<>();
     addCompare(opOptions, CompareType.EQUAL);
     addCompare(opOptions, CompareType.NEQ_OR_NULL);
     addCompare(opOptions, CompareType.ISBLANK);
@@ -101,7 +102,7 @@
             <table class="lk-fields-table">
                 <% for (int i = 0; i < EditICSMetadataForm.MATCH_COLUMNS_MAX; i++) { %>
                 <tr>
-                    <td><%=i == 0 ? "&nbsp;" : "and"%></td>
+                    <td><%=i == 0 ? HtmlString.NBSP : h("and")%></td>
                     <td>
                         <select name="ff_matchColumn"><labkey:options value="<%=form.matchColumn[i]%>" map="<%=keywordSampleOptions%>" /></select>
                     </td>
@@ -130,7 +131,7 @@
                         FilterInfo filter = form.backgroundFilter[i];
                         %>
                         <tr>
-                            <td><%=i == 0 ? "&nbsp;" : "and"%></td>
+                            <td><%=i == 0 ? HtmlString.NBSP : h("and")%></td>
                             <td><select name="ff_backgroundFilterField"><labkey:options value="<%=filter == null ? null : filter.getField()%>" map="<%=keywordSampleStatsOptions%>" /></select></td>
                             <td><select name="ff_backgroundFilterOp"><labkey:options value="<%=filter == null ? null : filter.getOp().getPreferredUrlKey()%>" map="<%=opOptions%>" /></select></td>
                             <td><input name="ff_backgroundFilterValue" type="text" value="<%=h(filter == null ? null : filter.getValue())%>"></td>

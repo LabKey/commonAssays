@@ -91,6 +91,7 @@ import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
+import org.labkey.api.util.HasHtmlString;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
@@ -478,7 +479,7 @@ public class MS2Controller extends SpringActionController
     public static class RunSummaryBean
     {
         public MS2Run run;
-        public String modHref;
+        public HasHtmlString modHref;
         public boolean writePermissions;
         public String quantAlgorithm;
     }
@@ -628,7 +629,7 @@ public class MS2Controller extends SpringActionController
         SelectBuilder select = new SelectBuilder()
             .id("views")
             .name("viewParams")
-            .style("width:200");
+            .addStyle("width:200");
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
@@ -652,7 +653,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private String modificationHref(MS2Run run)
+    private HasHtmlString modificationHref(MS2Run run)
     {
         Map<String, String> fixed = new TreeMap<>();
         Map<String, String> var = new TreeMap<>();
@@ -675,7 +676,7 @@ public class MS2Controller extends SpringActionController
 
         onClick.append(", 100); return false;");
 
-        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
+        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
     }
 
     private DOM.Renderable appendMods(Map<String, String> mods, String heading)

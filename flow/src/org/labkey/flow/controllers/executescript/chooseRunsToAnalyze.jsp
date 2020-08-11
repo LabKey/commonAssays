@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.JspView"%>
+<%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.flow.analysis.model.PopulationSet"%>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController"%>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsView" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
@@ -42,11 +41,6 @@
         dependencies.add("vis/ColumnVisualizationAnalytics.css");
         dependencies.add("query/ColumnQueryAnalytics.js");
         dependencies.add("query/ColumnSummaryStatistics");
-    }
-
-    String select(String name, Object curVal, Collection<? extends FlowObject> objs, String nullLabel)
-    {
-        return PageFlowUtil.strSelect(name, FlowObject.idLabelsFor(objs, nullLabel), curVal);
     }
 %>
 <%

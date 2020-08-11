@@ -32,7 +32,6 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.GUID;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
@@ -192,11 +191,6 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
         {
             region.addHiddenFormField(param.getKey().toString(), param.getValue().toString());
         }
-    }
-
-    static public <T extends FlowObject> String strSelect(String name, T current, Collection<T> objects)
-    {
-        return PageFlowUtil.strSelect(name, idLabelsFor(objects, ""), current == null ? null : current.getId());
     }
 
     static public Map<Object,String> idLabelsFor(Collection<? extends FlowObject> list, String nullLabel)

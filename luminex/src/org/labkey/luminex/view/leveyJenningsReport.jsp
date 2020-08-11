@@ -66,9 +66,9 @@
 
         function init()
         {
-            _controlName = <%=PageFlowUtil.jsString(bean.getControlName())%>;
-            _controlType = <%=PageFlowUtil.jsString(bean.getControlType().toString())%>;
-            _protocolName = <%=PageFlowUtil.jsString(bean.getProtocol().getName())%>;
+            _controlName = <%=q(bean.getControlName())%>;
+            _controlType = <%=q(bean.getControlType().toString())%>;
+            _protocolName = <%=q(bean.getProtocol().getName())%>;
             _protocolId = <%=bean.getProtocol().getRowId()%>;
 
             if ("" == _controlType || "" == _controlName)
