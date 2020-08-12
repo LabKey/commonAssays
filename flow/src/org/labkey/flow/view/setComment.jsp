@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -29,7 +28,6 @@
     setFlagUrl.addParameter("redirect", false);
 
     boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
-    String contextPath = getViewContext().getContextPath();
 %>
 <% if (canEdit) { %>
 <span class="extContainer x-form-field-wrap">
@@ -115,7 +113,7 @@ LABKEY.requiresExt3(function() {
                         'line-height': "18px",
                         display: "block",
                         visibility: "hidden",
-                        background: "transparent url(<%=h(contextPath)%>/_.gif) no-repeat 0 2px"
+                        background: "transparent url(<%=getWebappURL("_.gif")%>) no-repeat 0 2px"
                     }
                 });
                 this.alignStatusIcon();

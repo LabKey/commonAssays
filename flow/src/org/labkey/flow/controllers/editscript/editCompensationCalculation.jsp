@@ -74,8 +74,7 @@ var SS = []; // SUBSETS
             int subsetHash = subsets.hashCode();
             if (!hashToIndexMap.containsKey(subsetHash))
             {
-                hashToIndexMap.put(subsetHash, index);
-                index = (int)index + 1;
+                hashToIndexMap.put(subsetHash, index++);
                 %>SS.push(<%=text(javascriptArray(subsets))%>);<%
                 out.println();
             }
