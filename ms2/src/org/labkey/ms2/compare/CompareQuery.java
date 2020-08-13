@@ -352,7 +352,7 @@ public abstract class CompareQuery extends SQLFragment
             {
                 ActionURL linkURL = originalLinkURL.clone();
                 linkURL.setContainer(_runs.get(i).getContainer());
-                linkURL.replaceParameter("run", String.valueOf(_runs.get(i).getRun()));
+                linkURL.replaceParameter("run", _runs.get(i).getRun());
 
                 _columnsPerRun = 0;
                 for (RunColumn column : _gridColumns)

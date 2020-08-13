@@ -36,7 +36,7 @@
 
 <% if (aliased != null) { %>
 <b>Alias of:</b><br>
-<a href='<%=h(detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), String.valueOf(aliased.getRowId())))%>'><%=h(aliased.getName())%></a>
+<a href='<%=h(detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), aliased.getRowId()))%>'><%=h(aliased.getName())%></a>
 <p>
 <% } %>
 
@@ -44,7 +44,7 @@
 <b>Aliases:</b>
 <ul>
     <% for (org.labkey.flow.persist.AttributeCache.Entry alias : aliases) { %>
-    <li><a href='<%=detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), String.valueOf(alias.getRowId()))%>'><%=h(alias.getName())%></a> </li>
+    <li><a href='<%=detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), alias.getRowId())%>'><%=h(alias.getName())%></a> </li>
     <% } %>
 </ul>
 <p>

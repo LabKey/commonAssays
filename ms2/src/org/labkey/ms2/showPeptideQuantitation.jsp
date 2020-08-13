@@ -61,7 +61,7 @@ if (errorMessage != null)
         <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
         <% for (int i = 1; i <= 6; i++)
         {
-            URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", Integer.toString(i)); %>
+            URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", i); %>
             <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
             <td class="labkey-tab<%= i == currentCharge ? "-selected" : "" %>" style="margin-bottom: 0;"><a href="<%= h(chargeUrl ) %>#quantitation"><%= i %>+</a></td><%
         } %>
