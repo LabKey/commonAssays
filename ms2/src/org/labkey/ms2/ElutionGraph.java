@@ -35,8 +35,8 @@ public class ElutionGraph
     public static final int WIDTH = 700;
     public static final int HEIGHT = 200;
 
-    private DefaultTableXYDataset _dataset = new DefaultTableXYDataset();
-    private JFreeChart _chart = ChartFactory.createXYBarChart(
+    private final DefaultTableXYDataset _dataset = new DefaultTableXYDataset();
+    private final JFreeChart _chart = ChartFactory.createXYBarChart(
                 null,
                 "Scan",
                 false,

@@ -1098,7 +1098,7 @@ public class MS2Controller extends SpringActionController
             bean.chartTitle = chartTitle;
             bean.goChartType = _goChartType;
             bean.filterInfos = filters;
-            bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+            bean.imageMap = HtmlString.unsafe(ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo()));
             bean.foundData = !pjch.getDataset().getExtraInfo().isEmpty();
             bean.queryString = queryString;
             bean.grouping = form.getGrouping();
@@ -1128,7 +1128,7 @@ public class MS2Controller extends SpringActionController
         public Map<String, SimpleFilter> filterInfos;
         public String pieHelperObjName;
         public ActionURL chartURL;
-        public String imageMap;
+        public HtmlString imageMap;
         public boolean foundData;
         public String queryString;
         public String grouping;
