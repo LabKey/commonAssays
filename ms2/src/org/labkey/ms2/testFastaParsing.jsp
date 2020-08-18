@@ -54,7 +54,7 @@
                     <td><strong><%= h(entry.getKey()) %>:</strong></td>
                     <td>
                        <%  String separator = "";
-                        for (String value : entry.getValue()) { %><%= separator%> <%= h(value) %><% separator = ", ";
+                        for (String value : entry.getValue()) { %><%= h(separator)%> <%= h(value) %><% separator = ", ";
                         } %></td>
                 </tr>
             <% } %>

@@ -826,8 +826,8 @@ public class MS2Controller extends SpringActionController
                 else
                 {
                     previousURL = getViewContext().cloneActionURL();
-                    previousURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
-                    previousURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
+                    previousURL.replaceParameter("peptideId", peptideIndex[rowIndex - 1]);
+                    previousURL.replaceParameter("rowIndex", sqlRowIndex - 1);
                 }
 
                 if (rowIndex == (peptideIndex.length - 1))
@@ -835,8 +835,8 @@ public class MS2Controller extends SpringActionController
                 else
                 {
                     nextURL = getViewContext().cloneActionURL();
-                    nextURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
-                    nextURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
+                    nextURL.replaceParameter("peptideId", peptideIndex[rowIndex + 1]);
+                    nextURL.replaceParameter("rowIndex", sqlRowIndex + 1);
                 }
 
                 showGzURL = getViewContext().cloneActionURL();
@@ -1098,7 +1098,7 @@ public class MS2Controller extends SpringActionController
             bean.chartTitle = chartTitle;
             bean.goChartType = _goChartType;
             bean.filterInfos = filters;
-            bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+            bean.imageMap = HtmlString.unsafe(ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo()));
             bean.foundData = !pjch.getDataset().getExtraInfo().isEmpty();
             bean.queryString = queryString;
             bean.grouping = form.getGrouping();
@@ -1128,7 +1128,7 @@ public class MS2Controller extends SpringActionController
         public Map<String, SimpleFilter> filterInfos;
         public String pieHelperObjName;
         public ActionURL chartURL;
-        public String imageMap;
+        public HtmlString imageMap;
         public boolean foundData;
         public String queryString;
         public String grouping;
@@ -4171,9 +4171,9 @@ public class MS2Controller extends SpringActionController
 
                         ActionURL url = getViewContext().cloneActionURL();
                         url.deleteParameter("proteinGroupId");
-                        url.replaceParameter("run", Integer.toString(form.run));
-                        url.replaceParameter("groupNumber", Integer.toString(group.getGroupNumber()));
-                        url.replaceParameter("indistinguishableCollectionId", Integer.toString(group.getIndistinguishableCollectionId()));
+                        url.replaceParameter("run", form.run);
+                        url.replaceParameter("groupNumber", group.getGroupNumber());
+                        url.replaceParameter("indistinguishableCollectionId", group.getIndistinguishableCollectionId());
                         url.setContainer(run.getContainer());
 
                         return HttpView.redirect(url);

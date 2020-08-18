@@ -77,7 +77,7 @@
                 <select name="annotationType">
                     <% for (CustomAnnotationType type : CustomAnnotationType.values())
                     { %>
-                        <option <% if (type.toString().equals(bean.getAnnotationType())) { %> selected <% } %> value="<%= type.toString() %>"><%= type.getDescription() %></option>
+                        <option <% if (type.toString().equals(bean.getAnnotationType())) { %> selected <% } %> value="<%= type %>"><%=h(type.getDescription())%></option>
                     <% } %>
                 </select>
             </td>

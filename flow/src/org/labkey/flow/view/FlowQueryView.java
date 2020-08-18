@@ -243,7 +243,7 @@ public class FlowQueryView extends QueryView
             {
                 URLHelper url = target.clone();
                 if (entry.getKey().intValue() != 0)
-                    url.replaceParameter(FlowParam.experimentId.name(), String.valueOf(entry.getKey()));
+                    url.replaceParameter(FlowParam.experimentId.name(), entry.getKey());
                 button.addMenuItem(entry.getValue(),
                         url.toString(),
                         null,
