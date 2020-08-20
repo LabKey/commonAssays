@@ -58,6 +58,9 @@ public class KeywordUtil
             "BD\\$.*|" +
             "CST .*|" +
             "SPILL|" +
+            "\\$SPILLOVER|" +
+            "COMP|" +
+            "\\$COMP|" +
             "\\$DFC\\d+TO\\d+|" +
             "APPLY COMPENSATION|" +
             "CREATOR|" +
