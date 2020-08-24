@@ -62,7 +62,6 @@ import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 public class WorkspaceData implements Serializable
 {
     private static final Logger _log = LogManager.getLogger(WorkspaceData.class);
-    private static final boolean CREATE_BOOLEAN_ALIASES = true;
 
     String path;
     String name;
@@ -222,9 +221,6 @@ public class WorkspaceData implements Serializable
                 }
 
                 _object = readWorkspace(file, path);
-
-                if (CREATE_BOOLEAN_ALIASES)
-                    _object.createBooleanAliases();
 
                 FlowProtocol protocol = FlowProtocol.ensureForContainer(user,  container);
                 validateKeywordCasing(container, errors, protocol.isCaseSensitiveKeywords());

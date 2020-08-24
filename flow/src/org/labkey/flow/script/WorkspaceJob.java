@@ -285,7 +285,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 return true;
 
             iSample++;
-            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.getLabel();
+            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.toString();
             addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);

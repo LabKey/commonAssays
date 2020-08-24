@@ -116,6 +116,7 @@ abstract public class FlowJoWorkspace extends Workspace
         readCompensationMatrices(elDoc);
         readSamples(elDoc);
         readGroups(elDoc);
+        postProcess();
     }
 
     protected void readVersion(Element elDoc)
@@ -141,6 +142,11 @@ abstract public class FlowJoWorkspace extends Workspace
     abstract protected void readSamples(Element elDoc);
 
     abstract protected void readGroups(Element elDoc);
+
+    protected void postProcess()
+    {
+        createBooleanAliases();
+    }
 
     /**
      * Create backwards compatibility aliases for boolean populations.
@@ -1375,6 +1381,49 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(25d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads+"), StatisticSpec.STAT.Count, null)), DELTA);
             assertEquals(49984d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-"), StatisticSpec.STAT.Count, null)), DELTA);
             assertEquals(43991d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-", "CD45+, less debris"), StatisticSpec.STAT.Count, null)), DELTA);
+        }
+
+        @Test
+        public void loadDuplicateSamples() throws Exception
+        {
+            // Issue 41224: flow: support duplicate sample names in FlowJo workspace
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/duplicate-samples.xml");
+            workspace.createBooleanAliases();
+
+            SampleInfo sample240 = workspace.getSampleById("240");
+            assertEquals("240", sample240.getSampleId());
+            assertEquals("118795.fcs", sample240.getSampleName());
+            assertEquals("1000", sample240.getKeywords().get("$TOT").trim());
+
+            SampleInfo sample241 = workspace.getSampleById("241");
+            assertEquals("241", sample241.getSampleId());
+            assertEquals("118795.fcs", sample241.getSampleName());
+            assertEquals("10000", sample241.getKeywords().get("$TOT").trim());
+
+            List<SampleInfo> samples = workspace.getSampleByLabel("118795.fcs");
+            assertEquals(2, samples.size());
+            assertTrue(samples.contains(sample240));
+            assertTrue(samples.contains(sample241));
+
+            AttributeSet sample240results = sample240.getAnalysisResults();
+            assertEquals(17, sample240results.getStatistics().size());
+            assertEquals(1000d, sample240results.getStatistics().get(new StatisticSpec("Count")), 0.01);
+            assertEquals(2d, sample240results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count")), 0.01);
+
+            AttributeSet sample241results = sample241.getAnalysisResults();
+            assertEquals(19, sample241results.getStatistics().size());
+            assertEquals(10000d, sample241results.getStatistics().get(new StatisticSpec("Count")), 0.01);
+            assertEquals(10d, sample241results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count")), 0.01);
+            assertEquals(10d, sample241results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/bogus_IFNorIL2:Count")), 0.01);
+
+            // Issue 41225: flow: import failure for duplicate aliased statistics
+            // both the IFNorIL2 and "bogus_IFNorIL2" populations have the same boolean gate definition
+            // and so will result in the same aliases being created
+            Set<StatisticSpec> expectedAliases = Set.of(new StatisticSpec("S/Lv/L/3+/4+/(IFNg+|IL2+):Count"));
+            Set<StatisticSpec> aliases1 = sample241results.getStatisticAliases().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count"));
+            Set<StatisticSpec> aliases2 = sample241results.getStatisticAliases().get(new StatisticSpec("S/Lv/L/3+/4+/bogus_IFNorIL2:Count"));
+            assertEquals(expectedAliases, aliases1);
+            assertEquals(expectedAliases, aliases2);
         }
 
         private void checkAlias(AttributeSet attrs, StatisticSpec spec, StatisticSpec expectedAlias)
