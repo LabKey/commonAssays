@@ -59,7 +59,6 @@ public class KeywordUtil
             "CST .*|" +
             "SPILL|" +
             "\\$SPILLOVER|" +
-            "COMP|" +
             "\\$COMP|" +
             "\\$DFC\\d+TO\\d+|" +
             "APPLY COMPENSATION|" +

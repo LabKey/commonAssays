@@ -46,7 +46,6 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
@@ -80,11 +79,6 @@
                 if (keywordDir != null)
                     keywordDirs.add(keywordDir);
             }
-        }
-        else if (form.getExistingKeywordRunId() > 0)
-        {
-            FlowRun keywordsRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-            keywordDirs.add(new File(keywordsRun.getPath()));
         }
         else if (form.getSelectedSamples().getRows() != null && !form.getSelectedSamples().getRows().isEmpty())
         {
@@ -163,7 +157,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseExistingAnalysis" name="createAnalysis" value="false" checked>
             </td>
             <td>
-                Choose an analysis folder to put the results into:<br>
+                <label for="chooseExistingAnalysis">Choose an analysis folder to put the results into:</label><br>
                 <select name="existingAnalysisId" onfocus="document.forms.importAnalysis.chooseExistingAnalysis.checked = true;">
                     <%
                         FlowExperiment recentAnalysis = FlowExperiment.getMostRecentAnalysis(container);
@@ -194,7 +188,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseNewAnalysis" name="createAnalysis" value="true">
             </td>
             <td>
-                Create a new analysis folder:<br>
+                <label for="chooseNewAnalysis">Create a new analysis folder:</label><br>
                 <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>" onfocus="document.forms.importAnalysis.chooseNewAnalysis.checked = true;">
                 <br><br>
             </td>

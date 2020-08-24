@@ -116,7 +116,6 @@ abstract public class FlowJoWorkspace extends Workspace
         readCompensationMatrices(elDoc);
         readSamples(elDoc);
         readGroups(elDoc);
-        postProcess();
     }
 
     protected void readVersion(Element elDoc)
@@ -143,12 +142,21 @@ abstract public class FlowJoWorkspace extends Workspace
 
     abstract protected void readGroups(Element elDoc);
 
-    protected void postProcess()
-    {
-        createAliases();
-    }
-
-    private void createAliases()
+    /**
+     * Create backwards compatibility aliases for boolean populations.
+     *
+     * If a population is defined by a boolean gate, any statistics or plots that
+     * reference the population will have an aliases created that represents the
+     * gate's boolean expression for the population.
+     *
+     * For example, if a population named "IFNg_OR_IL2" is defined by the boolean
+     * gate of the populations "IFNg" and "IL2", the "Count" statistic:
+     * <pre>/S/L/Lv/3+/4+/IFNg_OR_IL2:Count</pre>
+     * will have an alias of
+     * <pre>/S/L/Lv/3+/4+/(IFNg+|IL2+):Count</pre>
+     */
+    @Override
+    public void createBooleanAliases()
     {
         Map<SubsetSpec, SubsetSpec> aliases = new HashMap<>();
 
@@ -409,11 +417,11 @@ abstract public class FlowJoWorkspace extends Workspace
     protected Analysis readSampleAnalysis(Element elSampleNode)
     {
         String sampleId = elSampleNode.getAttribute("sampleID");
-        SampleInfo sample = getSample(sampleId);
+        SampleInfo sample = getSampleById(sampleId);
         if (sample == null)
         {
             // Don't read analysis if sample has been marked as 'deleted'
-            sample = getDeletedSample(sampleId);
+            sample = getDeletedSampleById(sampleId);
             if (sample != null)
                 warning(sample, null, null, "Ignoring deleted sample");
             else
@@ -468,7 +476,7 @@ abstract public class FlowJoWorkspace extends Workspace
             // If we are at the root and "count" is unavailable, try to get it from the "$TOT" keyword
             if (subset == null && (count == null || count == 0.0d || count == -1.0d))
             {
-                SampleInfo sampleInfo = getSample(sampleId);
+                SampleInfo sampleInfo = getSampleById(sampleId);
                 if (sampleInfo != null)
                 {
                     String strTot = sampleInfo.getKeywords().get("$TOT");
@@ -787,7 +795,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(11, workspace.getParameterNames().size());
             assertEquals(0, workspace.getWarnings().size());
 
-            SampleInfo sampleInfo = workspace.getSample("2");
+            SampleInfo sampleInfo = workspace.getSampleById("2");
             assertEquals("Specimen_001_stain.fcs", sampleInfo.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
@@ -996,7 +1004,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 sampleFileName = "931115-C02- Sample 02.fcs";
             }
             String sampleId = mac ? "268435458" : windowsSampleId;
-            SampleInfo sample = workspace.getSample(sampleId);
+            SampleInfo sample = workspace.getSampleById(sampleId);
             assertEquals(sampleFileName, sample.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sample);
@@ -1225,7 +1233,7 @@ abstract public class FlowJoWorkspace extends Workspace
         public void loadSubsets() throws Exception
         {
             Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/subset-parsing.xml");
-            SampleInfo sampleInfo = workspace.getSample("2");
+            SampleInfo sampleInfo = workspace.getSampleById("2");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
             AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
@@ -1296,7 +1304,7 @@ abstract public class FlowJoWorkspace extends Workspace
         public void loadBooleanSubPopulations() throws Exception
         {
             Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
-            SampleInfo sampleInfo = workspace.getSample("1");
+            SampleInfo sampleInfo = workspace.getSampleById("1");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
@@ -1345,7 +1353,7 @@ abstract public class FlowJoWorkspace extends Workspace
         {
             // Issue 40840: flow: support for sub-populations of boolean populations
             Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations2.xml");
-            SampleInfo sampleInfo = workspace.getSample("1");
+            SampleInfo sampleInfo = workspace.getSampleById("1");
             assertEquals("test_114_035.fcs", sampleInfo.getLabel());
 
             Analysis analysis = sampleInfo.getAnalysis();

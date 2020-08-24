@@ -37,6 +37,7 @@ import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.FlowExperiment;
@@ -54,7 +55,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
@@ -91,7 +91,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                             File originalImportedFile,
                             File runFilePathRoot,
                             List<File> keywordDirs,
-                            Map<String, FlowFCSFile> selectedFCSFiles,
+                            SampleIdMap<FlowFCSFile> selectedFCSFiles,
                             String analysisRunName,
                             Container targetStudy,
                             boolean failOnError) throws Exception
@@ -133,7 +133,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         Set<String> sampleIds = new LinkedHashSet<>();
         MultiValuedMap<String, String> sampleIdToNameMap = new CaseInsensitiveArrayListValuedMap<>();
 
-        Tuple3<SampleIdMap<AttributeSet>, SampleIdMap<AttributeSet>, SampleIdMap<CompensationMatrix>> analysis = loadAnalysis();
+        var analysis = loadAnalysis();
         if (analysis == null)
         {
             error("Failed to parse analysis from");
@@ -146,7 +146,9 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         // UNDONE: only import attrs that match the filter
         SimpleFilter filter = _protocol.getFCSAnalysisFilter();
 
-        Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles();
+        ExternalAnalysis workspace = new ExternalAnalysis(_analysisPathRoot.getName(), keywordsMap, resultsMap, sampleCompMatrixMap);
+
+        SampleIdMap<FlowFCSFile> selectedFCSFiles = resolveSelectedFCSFiles(workspace, getSelectedFCSFiles(), getNewlyImportedFCSFiles());
 
         if (keywordsMap.size() > 0)
             info("Preparing keywords for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : keywordsMap.size()) + " samples...");
@@ -164,12 +166,12 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             File file = null;
             if (selectedFCSFiles != null)
             {
-                // Don't import unless the sample label is selected.
-                if (!selectedFCSFiles.containsKey(sampleLabel))
+                // Don't import unless the sample ID is selected.
+                if (!selectedFCSFiles.containsId(id))
                     continue;
 
-                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sampleLabel);
-                if (resolvedFCSFile != null)
+                FlowFCSFile resolvedFCSFile = selectedFCSFiles.getById(id);
+                if (!resolvedFCSFile.isUnmapped())
                 {
                     uri = resolvedFCSFile.getFCSURI();
                     if (uri != null)
@@ -196,7 +198,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             String sampleLabel = resultsMap.getNameForId(id);
 
             // Don't import unless the sample label is selected.
-            if (selectedFCSFiles != null && !selectedFCSFiles.containsKey(sampleLabel))
+            if (selectedFCSFiles != null && !selectedFCSFiles.containsId(id))
                 continue;
 
             sampleIds.add(id);

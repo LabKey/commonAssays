@@ -16,8 +16,8 @@
 
 package org.labkey.flow.controllers;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
@@ -55,12 +55,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.labkey.api.action.SpringActionController.ERROR_MSG;
 
 public class WorkspaceData implements Serializable
 {
-    static final private Logger _log = LogManager.getLogger(WorkspaceData.class);
+    private static final Logger _log = LogManager.getLogger(WorkspaceData.class);
+    private static final boolean CREATE_BOOLEAN_ALIASES = true;
 
     String path;
     String name;
@@ -220,6 +222,9 @@ public class WorkspaceData implements Serializable
                 }
 
                 _object = readWorkspace(file, path);
+
+                if (CREATE_BOOLEAN_ALIASES)
+                    _object.createBooleanAliases();
 
                 FlowProtocol protocol = FlowProtocol.ensureForContainer(user,  container);
                 validateKeywordCasing(container, errors, protocol.isCaseSensitiveKeywords());

@@ -418,7 +418,15 @@ public class ScriptAnalyzer
         }
         else if (sampleId != null)
         {
-            Workspace.SampleInfo sample = workspace.getSample(sampleId);
+            Workspace.SampleInfo sample = workspace.getSampleById(sampleId);
+            if (sample == null)
+            {
+                List<? extends Workspace.SampleInfo> samples = workspace.getSampleByLabel(sampleId);
+                if (samples.size() > 1)
+                    throw new RuntimeException("Found duplicate samples for '" + sampleId + "'");
+                if (!samples.isEmpty())
+                    sample = samples.get(0);
+            }
             if (sample == null)
                 throw new RuntimeException("Cannot find sample '" + sampleId + "'");
 

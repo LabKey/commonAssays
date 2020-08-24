@@ -15,10 +15,10 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.labkey.api.collections.CaseInsensitiveMapWrapper;
-import org.labkey.api.collections.CaseInsensitiveTreeSet;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.writer.FileSystemFile;
 import org.labkey.api.writer.VirtualFile;
 import org.labkey.flow.persist.AnalysisSerializer;
@@ -28,24 +28,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: kevink
  * Date: 11/16/12
  */
-public class ExternalAnalysis extends BaseWorkspace implements Serializable
+public class ExternalAnalysis extends BaseWorkspace<ExternalAnalysis.SampleInfo> implements Serializable
 {
     public static final Logger LOG = LogManager.getLogger(ExternalAnalysis.class);
 
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
     protected Set<CompensationMatrix> _compensationMatrices = new LinkedHashSet<>();
     protected Map<String, CompensationMatrix> _sampleCompensationMatrices = new HashMap<>();
 
@@ -95,12 +92,10 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
 
     private SampleInfo ensureSample(String id, String name)
     {
-        SampleInfo sample = _sampleInfos.get(id);
+        SampleInfo sample = getSampleById(id);
         if (sample == null)
         {
-            sample = new SampleInfo();
-            sample._sampleId = id;
-            sample._sampleName = name;
+            sample = new SampleInfo(id, name);
             _sampleInfos.put(id, sample);
         }
         return sample;
@@ -109,7 +104,7 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
     private void addSampleKeywords(String id, String name, AttributeSet keywords)
     {
         SampleInfo sample = ensureSample(id, name);
-        sample._keywords.putAll(keywords.getKeywords());
+        sample.putAllKeywords(keywords.getKeywords());
         _keywords.addAll(keywords.getKeywords().keySet());
 
         for (int i = 0; i < 100; i++)
@@ -141,8 +136,9 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
     @Override
     public List<String> getSampleIds()
     {
-        List<String> ret = new ArrayList<>(_sampleInfos.size());
-        for (ISampleInfo sample : _sampleInfos.values())
+        List<SampleInfo> allSamples = getSamples();
+        List<String> ret = new ArrayList<>(allSamples.size());
+        for (ISampleInfo sample : allSamples)
             ret.add(sample.getSampleId());
 
         return ret;
@@ -151,33 +147,12 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
     @Override
     public List<String> getSampleLabels()
     {
-        List<String> ret = new ArrayList<>(_sampleInfos.size());
-        for (ISampleInfo sample : _sampleInfos.values())
+        List<SampleInfo> allSamples = getSamples();
+        List<String> ret = new ArrayList<>(allSamples.size());
+        for (ISampleInfo sample : allSamples)
             ret.add(sample.getLabel());
 
         return ret;
-    }
-
-    @Override
-    public List<? extends ISampleInfo> getSamples()
-    {
-        return new ArrayList<>(_sampleInfos.values());
-    }
-
-    @Override
-    public ISampleInfo getSample(String sampleIdOrLabel)
-    {
-        SampleInfo sample = _sampleInfos.get(sampleIdOrLabel);
-        if (sample != null)
-            return sample;
-
-        for (SampleInfo sampleInfo : _sampleInfos.values())
-        {
-            if (sampleIdOrLabel.equals(sampleInfo.getLabel()))
-                return sampleInfo;
-        }
-
-        return null;
     }
 
     @Override
@@ -206,8 +181,13 @@ public class ExternalAnalysis extends BaseWorkspace implements Serializable
         return new ArrayList<>(_compensationMatrices);
     }
 
-    private class SampleInfo extends SampleInfoBase
+    protected class SampleInfo extends SampleInfoBase
     {
+        protected SampleInfo(@NotNull String sampleId, @Nullable String sampleName)
+        {
+            super(sampleId, sampleName);
+        }
+
         @Override
         public Analysis getAnalysis()
         {

@@ -18,11 +18,13 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
@@ -38,7 +40,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
-import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
@@ -57,6 +58,7 @@ import org.labkey.flow.analysis.model.FCS;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.IWorkspace;
+import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.BaseFlowController;
 import org.labkey.flow.controllers.FlowController;
@@ -653,20 +655,6 @@ public class AnalysisScriptController extends BaseFlowController
             workspace.validate(getUser(), getContainer(), errors, getRequest());
         }
 
-        private FlowRun getExistingKeywordRun(ImportAnalysisForm form, Errors errors)
-        {
-            int keywordRunId = form.getExistingKeywordRunId();
-            if (keywordRunId > 0 && form.getKeywordDir() != null && form.getKeywordDir().length > 0)
-            {
-                errors.reject(ERROR_MSG, "Can't select both an existing run and a file path.");
-                return null;
-            }
-
-            if (keywordRunId > 0)
-                return FlowRun.fromRunId(keywordRunId);
-            return null;
-        }
-
         // path may be:
         // - absolute (run path)
         // - a file-browser path (relative to pipe root but starts with '/')
@@ -697,17 +685,8 @@ public class AnalysisScriptController extends BaseFlowController
         }
 
         // Get the directory to use as the file path root of the flow analysis run.
-        private File getRunPathRoot(FlowRun keywordRun, List<File> keywordDirs, Map<String, FlowFCSFile> resolvedFCSFiles, File workspacePath, Errors errors)
+        private File getRunPathRoot(List<File> keywordDirs, SampleIdMap<FlowFCSFile> resolvedFCSFiles, File workspacePath, Errors errors)
         {
-            if (keywordRun != null && keywordRun.getPath() != null)
-            {
-                File dir = getDir(keywordRun.getPath(), errors);
-                if (errors.hasErrors())
-                    return null;
-
-                return dir;
-            }
-
             if (keywordDirs != null && !keywordDirs.isEmpty())
             {
                 // CONSIDER: Use common parent path of all keywordDir paths.  For now, just use first path.
@@ -717,10 +696,11 @@ public class AnalysisScriptController extends BaseFlowController
             if (resolvedFCSFiles != null && !resolvedFCSFiles.isEmpty())
             {
                 // CONSIDER: Use common parent path of all resolvedFCSFile paths.  For now, just use first path.
-                for (Map.Entry<String, FlowFCSFile> entry : resolvedFCSFiles.entrySet())
+                for (String id : resolvedFCSFiles.idSet())
                 {
-                    FlowFCSFile fcsFile = entry.getValue();
-                    if (fcsFile != null)
+                    FlowFCSFile fcsFile = resolvedFCSFiles.getById(id);
+                    assert fcsFile != null;
+                    if (!fcsFile.isUnmapped())
                     {
                         FlowRun flowRun = fcsFile.getRun();
                         ExpRun expRun = flowRun != null ? flowRun.getExperimentRun() : null;
@@ -740,35 +720,8 @@ public class AnalysisScriptController extends BaseFlowController
         // to the selected pipeline browser directory under the pipeline root.
         private List<File> getKeywordDirs(ImportAnalysisForm form, Errors errors)
         {
-            FlowRun keywordRun = getExistingKeywordRun(form, errors);
-            if (errors.hasErrors())
-                return null;
-
             String path = null;
-            if (keywordRun != null)
-            {
-                String keywordRunPath = keywordRun.getPath();
-                if (keywordRunPath == null)
-                {
-                    assert false; // form shouldn't allow user to select a keyword run without a path
-                    errors.reject(ERROR_MSG, "Selected FCS File run doesn't have a path.");
-                    return null;
-                }
-                PipeRoot root = getPipeRoot();
-                File keywordRunFile = new File(keywordRunPath);
-                if (!root.isUnderRoot(keywordRunFile))
-                {
-                    errors.reject(ERROR_MSG, "Selected FCS File run isn't under the current pipeline root.");
-                    return null;
-                }
-                path = root.relativePath(keywordRunFile);
-                if (path == null)
-                {
-                    errors.reject(ERROR_MSG, "Couldn't relativize the selected FCS File run path");
-                    return null;
-                }
-            }
-            else if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
+            if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
             {
                 // UNDONE: Currently, only a single keyword directory is supported.
                 path = PageFlowUtil.decode(form.getKeywordDir()[0]);
@@ -782,12 +735,13 @@ public class AnalysisScriptController extends BaseFlowController
 
                 return Collections.singletonList(keywordDir);
             }
+
             return null;
         }
 
-        // Returns a map of workspace sample label -> FlowFCSFile from either
+        // Returns a map of workspace sample ID -> FlowFCSFile from either
         // the resolved FCSFiles previously imported or from an existing keyword run.
-        private Map<String, FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors)
+        private SampleIdMap<FlowFCSFile> getSelectedFCSFiles(ImportAnalysisForm form, Errors errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -795,61 +749,47 @@ public class AnalysisScriptController extends BaseFlowController
             if (rows.size() == 0)
                 return null;
 
-            Map<String, FlowFCSFile> fcsFiles = new HashMap<>(rows.size());
-            int keywordRunId = form.getExistingKeywordRunId();
-            if (keywordRunId > 0)
+            if (form.isResolving() && form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StringUtils.isNotEmpty(form.getKeywordDir()[0]))
             {
-                // Get the FlowFCSFile for the exising keywords run
-                FlowRun keywordRun = getExistingKeywordRun(form, errors);
-                if (errors.hasErrors())
-                    return null;
-
-                // XXX: do we need to remap by workspace sample label ?
-                for (FlowWell well : keywordRun.getWells())
-                {
-                    if (well instanceof FlowFCSFile)
-                    {
-                        FlowFCSFile file = (FlowFCSFile)well;
-                        if (file.isOriginalFCSFile())
-                            fcsFiles.put(well.getName(), (FlowFCSFile)well);
-                    }
-                }
+                errors.reject(ERROR_MSG, "Can't select directory of FCS files and resolve existing FCS files");
+                return null;
             }
-            else
+
+            // Get the FlowFCSFile for the resolved samples and remap by sample id.
+            SampleIdMap<FlowFCSFile> fcsFiles = new SampleIdMap<>();
+            for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : rows.entrySet())
             {
-                if (form.isResolving() && form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StringUtils.isNotEmpty(form.getKeywordDir()[0]))
+                SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
+                if (resolvedSample.isSelected())
                 {
-                    errors.reject(ERROR_MSG, "Can't select directory of FCS files and resolve existing FCS files");
-                    return null;
-                }
-
-                // Get the FlowFCSFile for the resolved samples and remap by sample label.
-                for (Map.Entry<String, SelectedSamples.ResolvedSample> entry : rows.entrySet())
-                {
-                    SelectedSamples.ResolvedSample resolvedSample = entry.getValue();
-                    if (resolvedSample.isSelected())
+                    ISampleInfo sampleInfo = workspace.getSampleById(entry.getKey());
+                    if (sampleInfo == null)
                     {
-                        FlowFCSFile file = null;
-                        if (form.isResolving())
-                        {
-                            file = (FlowFCSFile)FlowWell.fromWellId(resolvedSample.getMatchedFile());
-                            if (file == null)
-                            {
-                                errors.reject(ERROR_MSG, "Failed to find resolved FCS file with rowid '" + resolvedSample.getMatchedFile() + "'");
-                                return null;
-                            }
+                        errors.reject(ERROR_MSG, "FCS file not found for sample id '" + entry.getKey() + "'");
+                        return null;
+                    }
 
-                            if (!file.isOriginalFCSFile())
-                            {
-                                errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is a FCS files created from importing an external analysis.");
-                                return null;
-                            }
+                    if (form.isResolving())
+                    {
+                        FlowFCSFile file = (FlowFCSFile)FlowWell.fromWellId(resolvedSample.getMatchedFile());
+                        if (file == null)
+                        {
+                            errors.reject(ERROR_MSG, "Failed to find resolved FCS file with rowid '" + resolvedSample.getMatchedFile() + "'");
+                            return null;
                         }
 
-                        ISampleInfo sampleInfo = workspace.getSample(entry.getKey());
-                        if (sampleInfo == null)
-                            continue;
-                        fcsFiles.put(sampleInfo.getLabel(), file);
+                        if (!file.isOriginalFCSFile())
+                        {
+                            errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is a FCS files created from importing an external analysis.");
+                            return null;
+                        }
+
+                        fcsFiles.put(sampleInfo, file);
+                    }
+                    else
+                    {
+                        // place maker value into the selected sample map
+                        fcsFiles.put(sampleInfo, FlowFCSFile.UNMAPPED);
                     }
                 }
             }
@@ -885,10 +825,10 @@ public class AnalysisScriptController extends BaseFlowController
                 workspaceFile = root.resolvePath(path);
             }
 
-            // First, try to find an existing run in the same directory as the workspace.
-            // Default to selecting a previous run if there are any keyword runs.
-            if (workspaceFile != null && form.getExistingKeywordRunId() == 0)
+            if (workspaceFile != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
             {
+                // First, try to find an existing run in the same directory as the workspace.
+                // Default to selecting a previous run if there are any keyword runs.
                 List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
                 Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.size());
                 for (FlowRun keywordRun : allKeywordRuns)
@@ -909,16 +849,14 @@ public class AnalysisScriptController extends BaseFlowController
                     }
                 }
 
-                form.setExistingKeywordRuns(keywordRuns);
                 if (!keywordRuns.isEmpty())
-                    form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
-            }
-
-            // Next, guess the FCS files are in the same directory as the workspace.
-            if (form.getExistingKeywordRunId() == 0 && form.getKeywordDir() == null)
-            {
-                if (workspaceFile != null)
                 {
+                    form.setKeywordRunsExist(true);
+                    form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
+                }
+                else
+                {
+                    // Next, guess the FCS files are in the same directory as the workspace.
                     File keywordDir = null;
                     for (ISampleInfo sampleInfo : samples)
                     {
@@ -944,6 +882,9 @@ public class AnalysisScriptController extends BaseFlowController
                     }
                 }
             }
+
+            if (form.getSelectFCSFilesOption() == null)
+                form.setSelectFCSFilesOption(SelectFCSFileOption.None);
 
             form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
         }
@@ -1002,7 +943,7 @@ public class AnalysisScriptController extends BaseFlowController
 
                 // Resolve samples from workspace with previously imported FCSFiles
                 form.setResolving(true);
-                resolveSamples(form);
+                resolveSamples(form, null);
 
                 form.setWizardStep(ImportAnalysisStep.REVIEW_SAMPLES);
             }
@@ -1021,30 +962,28 @@ public class AnalysisScriptController extends BaseFlowController
 
                 File keywordDir = keywordDirs.get(0);
 
-                if (form.getExistingKeywordRunId() == 0)
+                // Translate selected keyword directory into a existing keyword run if possible.
+                FlowRun existingKeywordRun = null;
+                List<FlowRun> keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, keywordDir);
+                if (keywordRuns.size() > 0)
                 {
-                    // Translate selected keyword directory into a existing keyword run if possible.
-                    List<FlowRun> keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, keywordDir);
-                    if (keywordRuns.size() > 0)
+                    for (FlowRun keywordRun : keywordRuns)
                     {
-                        for (FlowRun keywordRun : keywordRuns)
+                        FlowExperiment experiment = keywordRun.getExperiment();
+                        if (experiment != null && experiment.isKeywords())
                         {
-                            FlowExperiment experiment = keywordRun.getExperiment();
-                            if (experiment != null && experiment.isKeywords())
-                            {
-                                form.setExistingKeywordRunId(keywordRun.getRunId());
-                                form.setKeywordDir(null);
-                                break;
-                            }
+                            existingKeywordRun = keywordRun;
+                            form.setKeywordDir(null);
+                            break;
                         }
                     }
                 }
 
-                if (form.getExistingKeywordRunId() > 0)
+                if (existingKeywordRun != null)
                 {
                     // Resolve workspace samples against the previously imported FCS files.
                     form.setResolving(true);
-                    resolveSamples(form);
+                    resolveSamples(form, existingKeywordRun);
                 }
                 else
                 {
@@ -1088,7 +1027,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private void resolveSamples(ImportAnalysisForm form)
+        private void resolveSamples(ImportAnalysisForm form, @Nullable FlowRun keywordRun)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
@@ -1102,10 +1041,9 @@ public class AnalysisScriptController extends BaseFlowController
             if (selectedSamples.getRows().isEmpty())
             {
                 List<FlowFCSFile> files;
-                if (form.getExistingKeywordRunId() > 0)
+                if (keywordRun != null)
                 {
-                    FlowRun run = FlowRun.fromRunId(form.getExistingKeywordRunId());
-                    files = Arrays.asList(run.getFCSFiles());
+                    files = Arrays.asList(keywordRun.getFCSFiles());
                 }
                 else
                 {
@@ -1279,27 +1217,15 @@ public class AnalysisScriptController extends BaseFlowController
 
         private void stepConfirm(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            FlowRun keywordRun = getExistingKeywordRun(form, errors);
-            if (errors.hasErrors())
-                return;
-
             List<File> keywordDirs = getKeywordDirs(form, errors);
             if (errors.hasErrors())
                 return;
 
-            // Only allow importing keyword directories if there doesn't already exist a keyword run.
-            assert keywordRun == null || keywordDirs != null;
-
-            // Get the list of selected samples and, if resolving, the resolved FlowFCSFile wells.
-            // Map of workspace sample label -> FlowFCSFile (if resolving)
-            Map<String, FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
+            // Get the list of selected samples.
+            // When resolving, the map contains sample ID to the resolved FlowFCSFile well, otherwise FlowFCSFile.NONE
+            SampleIdMap<FlowFCSFile> selectedFCSFiles = getSelectedFCSFiles(form, errors);
             if (errors.hasErrors())
                 return;
-
-//            // Either we are: not associating any FCSFiles, importing keyword directories, or we have resolved existing FCS files.
-//            assert form.getSelectFCSFilesOption() == SelectFCSFileOption.None ||
-//                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Previous && resolvedFCSFiles != null && keywordDirs == null) ||
-//                    (form.getSelectFCSFilesOption() == SelectFCSFileOption.Browse && resolvedFCSFiles == null && keywordDirs != null);
 
             FlowExperiment experiment;
             if (form.isCreateAnalysis())
@@ -1338,7 +1264,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             // Choose a run path root for the imported analysis based upon the input FCS files.
-            File runFilePathRoot = getRunPathRoot(keywordRun, keywordDirs, selectedFCSFiles, pipelineFile, errors);
+            File runFilePathRoot = getRunPathRoot(keywordDirs, selectedFCSFiles, pipelineFile, errors);
 
             AnalysisEngine analysisEngine = getAnalysisEngine(form, errors);
             if (errors.hasErrors())
