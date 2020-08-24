@@ -34,9 +34,10 @@ import java.util.Objects;
  */
 public class SampleUtil
 {
-    private static final String[] KEYWORDS = new String[] { "$FIL", "GUID", "$TOT", "$PAR", "$DATE", "$ETIM", "EXPORT TIME" };
-    private static final int MAX_MATCHES = KEYWORDS.length+1;
-    private static final int MIN_MATCHES = 2;
+    private static final String[] KEYWORDS = new String[] { "$FIL", "GUID", "$TOT", "$PAR", "$DATE", "$ETIM", "EXPORT TIME", "$ENDDATA" };
+    // max possible score: 2 points for each keyword (and one more for the file name itself)
+    private static final int MAX_MATCHES = 2 * (KEYWORDS.length+1);
+    private static final int MIN_MATCHES = 4;
 
     private static class FlowFCSFileList extends ArrayList<FlowFCSFile>
     {
@@ -51,8 +52,16 @@ public class SampleUtil
         assert a.length == b.length;
         int dist = -1;
         for (int i = 0, len = a.length; i < len; i++)
+        {
             if (Objects.equals(a[i], b[i]))
-                dist++;
+            {
+                // give non-null values more weight
+                if (a[i] != null)
+                    dist += 2;
+                else
+                    dist += 1;
+            }
+        }
 
         return dist;
     }
