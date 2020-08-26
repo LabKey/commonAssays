@@ -48,9 +48,9 @@ public class SampleIdMap<V>
         };
     }
 
-    private Map<String, V> _idToDataMap;
-    private Map<String, String> _idToNameMap;
-    private CaseInsensitiveArrayListValuedMap<String> _nameToIdMap;
+    private final Map<String, V> _idToDataMap;
+    private final Map<String, String> _idToNameMap;
+    private final CaseInsensitiveArrayListValuedMap<String> _nameToIdMap;
 
     public SampleIdMap()
     {

@@ -55,7 +55,7 @@
             Map<String, String[]> groupSamples = new TreeMap<>();
             for (String sampleID : group.getSampleIds())
             {
-                Workspace.SampleInfo sampleInfo = w.getSample(sampleID);
+                Workspace.SampleInfo sampleInfo = w.getSampleById(sampleID);
                 if (sampleInfo != null)
                     groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
             }
@@ -88,7 +88,6 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>

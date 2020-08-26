@@ -237,6 +237,10 @@ public class SamplesConfirmGridView extends GridView
             dr.addDisplayColumn(dc);
         }
 
+        // Add SampleId column
+        dc = new SimpleDisplayColumn("${" + SAMPLE_ID_FIELD_KEY.getName() + "}");
+        dc.setCaption("ID");
+        dr.addDisplayColumn(dc);
 
         // Add SampleName column
         dc = new SimpleDisplayColumn("${" + SAMPLE_NAME_FIELD_KEY.getName() + "}");

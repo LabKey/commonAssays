@@ -458,8 +458,8 @@ public class MacWorkspace extends FlowJoWorkspace
 
     protected SampleInfo readSample(Element elSample)
     {
-        SampleInfo ret = new SampleInfo();
-        ret._sampleId = elSample.getAttribute("sampleID");
+        String id = elSample.getAttribute("sampleID");
+        SampleInfo ret = new SampleInfo(id, null);
         if (elSample.hasAttribute("compensationID"))
         {
             ret._compensationId = elSample.getAttribute("compensationID");
@@ -469,7 +469,7 @@ public class MacWorkspace extends FlowJoWorkspace
             readKeywords(ret, elFCSHeader);
         }
         readParameterInfo(elSample);
-        _sampleInfos.put(ret._sampleId, ret);
+        addSample(ret);
         return ret;
     }
 

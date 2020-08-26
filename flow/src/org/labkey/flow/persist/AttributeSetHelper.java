@@ -16,8 +16,9 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlSelector;
@@ -25,6 +26,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.security.User;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
@@ -34,6 +36,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -122,13 +125,21 @@ public class AttributeSetHelper
 
     public static void save(AttributeSet attrs, User user, ExpData data) throws SQLException
     {
+        save(attrs, user, data, null);
+    }
+
+    public static void save(AttributeSet attrs, User user, ExpData data, @Nullable Logger log) throws SQLException
+    {
         prepareForSave(data.getName(), attrs, data.getContainer(), true); // TODO: is clearing the cache here correct?
-        doSave(attrs, user, data);
+        doSave(attrs, user, data, log);
     }
 
     // NOTE: uncaches on transaction post-commit
-    public static void doSave(AttributeSet attrs, User user, ExpData data) throws SQLException
+    public static void doSave(AttributeSet attrs, User user, ExpData data, @Nullable Logger log) throws SQLException
     {
+        if (log == null)
+            log = LOG;
+
         //LOG.info("+doSave");
         FlowManager mgr = FlowManager.get();
         try (DbScope.Transaction transaction = mgr.getSchema().getScope().ensureTransaction())
@@ -155,6 +166,11 @@ public class AttributeSetHelper
             Map<StatisticSpec, Double> statistics = attrs.getStatistics();
             if (!statistics.isEmpty())
             {
+                // Issue 41225: flow: import failure for duplicate aliased statistics
+                // Track the list of statistics and values for each preferredId key.
+                // If there is a duplicate statistic (e.g., two stats that are aliased) verify they have the same value.
+                Map<Integer, List<Map.Entry<StatisticSpec, Double>>> valuesForPreferredId = new HashMap<>();
+
                 String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, OriginalStatisticId, Value) VALUES (?,?,?,?)";
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
@@ -163,7 +179,30 @@ public class AttributeSetHelper
                     assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
-                    paramsList.add(Arrays.<Object>asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
+
+                    var duplicateValues = valuesForPreferredId.computeIfAbsent(preferredId, (k) -> new ArrayList<>());
+                    if (duplicateValues.isEmpty())
+                    {
+                        duplicateValues.add(entry);
+                        paramsList.add(Arrays.<Object>asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
+                    }
+                    else
+                    {
+                        duplicateValues.add(entry);
+
+                        // Throw if the duplicates don't have identical values
+                        boolean valuesIdentical = true;
+                        StringBuilder sb = new StringBuilder("Duplicate statistics found for '" + data.getName() + "' (" + obj.getRowId() + "):");
+                        for (Map.Entry<StatisticSpec, Double> dup : duplicateValues) {
+                            sb.append("\n  '").append(dup.getKey()).append("' with value ").append(dup.getValue());
+                            if (!dup.getValue().equals(entry.getValue()))
+                                valuesIdentical = false;
+                        }
+                        if (valuesIdentical)
+                            log.warn(sb.toString());
+                        else
+                            throw new FlowException(sb.toString());
+                    }
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
             }

@@ -199,7 +199,7 @@ public class Main
                     List<Workspace.SampleInfo> samples = new ArrayList<>(sampleIDs.size());
                     for (String sampleId : sampleIDs)
                     {
-                        Workspace.SampleInfo sample = workspace.getSample(sampleId);
+                        Workspace.SampleInfo sample = workspace.getSampleById(sampleId);
                         samples.add(sample);
                     }
                     String indent = "  ";

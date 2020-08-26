@@ -73,7 +73,6 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
@@ -133,19 +132,7 @@
     </li>
 
     <%
-        FlowRun keywordRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-        if (keywordRun != null) {
-            String keywordRunPath = pipeRoot.relativePath(new File(keywordRun.getPath()));
-    %>
-    <li style="padding-bottom:0.5em;">
-        <b>Existing FCS File run:</b>
-        <a href="<%=keywordRun.urlShow().addParameter(QueryParam.queryName, FlowTableType.FCSFiles.toString())%>" target="_blank" title="Show FCS File run in a new window"><%=h(keywordRun.getName())%></a>
-    </li>
-    <li style="padding-bottom:0.5em;">
-        <b>FCS File Path:</b> <%=h(keywordRunPath)%>
-    </li>
-    <%
-    } else if (form.isResolving() && !form.getSelectedSamples().getRows().isEmpty()) {
+    if (form.isResolving() && !form.getSelectedSamples().getRows().isEmpty()) {
     %>
     <li style="padding-bottom:0.5em;">
         <b>Existing FCS files:</b>

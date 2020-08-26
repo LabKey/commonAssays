@@ -16,8 +16,8 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.labkey.api.collections.CaseInsensitiveMapWrapper;
-import org.labkey.api.collections.CaseInsensitiveTreeSet;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
@@ -36,7 +36,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +44,7 @@ import java.util.Set;
  * User: kevink
  * Date: 2/8/12
  */
-public abstract class Workspace extends BaseWorkspace implements Serializable
+public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> implements Serializable
 {
     public static final String ALL_SAMPLES = "All Samples";
     
@@ -55,8 +54,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     // sample id -> analysis
     protected Map<String, Analysis> _sampleAnalyses = new LinkedHashMap<>();
     protected Map<String, GroupInfo> _groupInfos = new LinkedHashMap<>();
-    protected Map<String, SampleInfo> _sampleInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
-    protected Map<String, SampleInfo> _deletedInfos = new CaseInsensitiveMapWrapper<>(new LinkedHashMap<>());
+
     protected List<CalibrationTable> _calibrationTables = new ArrayList<>();
     protected ScriptSettings _settings = new ScriptSettings();
     protected List<CompensationMatrix> _compensationMatrices = new ArrayList<>();
@@ -232,15 +230,14 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
         SampleInfo sampleInfo = null;
         if (sampleId != null)
         {
-            sampleInfo = getSample(sampleId);
+            sampleInfo = getSampleById(sampleId);
             if (sampleInfo == null)
-                sampleInfo = getDeletedSample(sampleId);
+                sampleInfo = getDeletedSampleById(sampleId);
 
             if (sampleInfo == null)
             {
                 // Just create a dummy sample for error reporting
-                sampleInfo = new SampleInfo();
-                sampleInfo._sampleId = sampleId;
+                sampleInfo = new SampleInfo(sampleId, "");
             }
         }
 
@@ -354,17 +351,6 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     }
 
     /**
-     * Get all samples in the workspace, including samples that are no longer referenced by any group.
-     * Usually using .getSamples() is preferred.
-     * After deleting samples from a FlowJo workspace, the workspace may retain the sample info and just
-     * remove it from the "All Samples" group.
-     */
-    public List<SampleInfo> getSamplesComplete()
-    {
-        return new ArrayList<>(_sampleInfos.values());
-    }
-
-    /**
      * Get a Set of SampleInfos from any group names or sample IDs or names that match.
      *
      * @param groupNames A set of group IDs or group names.
@@ -387,7 +373,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
                 if (groupNames.contains(groupId) || groupNames.contains(groupName))
                 {
                     for (String sampleID : group.getSampleIds())
-                        sampleInfos.add(getSample(sampleID));
+                        sampleInfos.add(getSampleById(sampleID));
                 }
             }
         }
@@ -449,46 +435,6 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
             allSampleLabels.add(sample.getLabel());
 
         return allSampleLabels;
-    }
-
-    public int getSampleCount()
-    {
-        return _sampleInfos.size();
-    }
-
-    /**
-     * Get SampleInfo by either workspace sample ID or by FCS filename ($FIL keyword.)
-     * @param sampleIdOrLabel Sample ID or FCS filename.
-     * @return SampleInfo
-     */
-    @Override
-    public SampleInfo getSample(String sampleIdOrLabel)
-    {
-        SampleInfo sample = findSample(_sampleInfos, sampleIdOrLabel);
-        assert sample == null || !sample.isDeleted();
-        return sample;
-    }
-
-    public SampleInfo getDeletedSample(String sampleIdOrLabel)
-    {
-        SampleInfo sample = findSample(_deletedInfos, sampleIdOrLabel);
-        assert sample == null || sample.isDeleted();
-        return sample;
-    }
-
-    private SampleInfo findSample(Map<String, SampleInfo> samples, String sampleIdOrLabel)
-    {
-        SampleInfo sample = samples.get(sampleIdOrLabel);
-        if (sample != null)
-            return sample;
-
-        for (SampleInfo sampleInfo : samples.values())
-        {
-            if (sampleIdOrLabel.equals(sampleInfo.getLabel()))
-                return sampleInfo;
-        }
-
-        return null;
     }
 
     @Override
@@ -561,29 +507,29 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
     {
         String _compensationId;
 
-        public void setDeleted(boolean deleted)
+        public SampleInfo(@NotNull String sampleId, @Nullable String sampleName)
         {
-            _deleted = deleted;
+            super(sampleId, sampleName);
         }
 
-        public void setSampleId(String id)
+        public SampleInfo(@NotNull String sampleId, @Nullable String sampleName, boolean deleted)
         {
-            _sampleId = id;
+            super(sampleId, sampleName, deleted);
         }
-        public void setSampleName(String name)
-        {
-            _sampleName = name;
-        }
+
+        @Override
         public void putKeyword(String keyword, String value)
         {
             // FCS format encodes empty keyword values as a single space character -- convert it to null.
             value = StringUtils.trimToNull(value);
-            _keywords.put(keyword, value);
+            super.putKeyword(keyword, value);
             Workspace.this._keywords.add(keyword);
         }
+
+        @Override
         public void putAllKeywords(Map<String, String> keywords)
         {
-            _keywords.putAll(keywords);
+            super.putAllKeywords(keywords);
             Workspace.this._keywords.addAll(keywords.keySet());
         }
 
@@ -694,7 +640,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
         public List<String> getSampleIds()
         {
             if (_sampleIds.size() == 0 && isAllSamples())
-                return new ArrayList<>(Workspace.this._sampleInfos.keySet());
+                return new ArrayList<>(Workspace.this.getSampleIdsComplete());
             return _sampleIds;
         }
 
@@ -704,7 +650,7 @@ public abstract class Workspace extends BaseWorkspace implements Serializable
             ArrayList<SampleInfo> sampleInfos = new ArrayList<>(sampleIds.size());
             for (String sampleId : sampleIds)
             {
-                SampleInfo sampleInfo = getSample(sampleId);
+                SampleInfo sampleInfo = getSampleById(sampleId);
                 if (sampleInfo != null)
                     sampleInfos.add(sampleInfo);
             }
