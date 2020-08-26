@@ -36,7 +36,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
+    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>This comparison view is based on ProteinProphet data so the runs must be associated with ProteinProphet data.
         All proteins in all ProteinProphet protein groups will be shown in the comparison, subject to the filter criteria.</p>
     <p style="width:100%" class="labkey-title-area-line"></p>

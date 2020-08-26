@@ -41,7 +41,7 @@
 <script type="text/javascript" src="<%=getWebappURL("MS2/inlineViewDesigner.js")%>"></script>
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
+    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>
         Group by:<br/>
         <div class="labkey-indented">

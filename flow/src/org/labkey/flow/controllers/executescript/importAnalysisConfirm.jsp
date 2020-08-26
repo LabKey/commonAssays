@@ -139,7 +139,7 @@
     %>
     <li style="padding-bottom:0.5em;">
         <b>Existing FCS File run:</b>
-        <a href="<%=keywordRun.urlShow().addParameter(QueryParam.queryName, FlowTableType.FCSFiles.toString())%>" target="_blank" title="Show FCS File run in a new window"><%=h(keywordRun.getName())%></a>
+        <a href="<%=h(keywordRun.urlShow().addParameter(QueryParam.queryName, FlowTableType.FCSFiles.toString()))%>" target="_blank" title="Show FCS File run in a new window"><%=h(keywordRun.getName())%></a>
     </li>
     <li style="padding-bottom:0.5em;">
         <b>FCS File Path:</b> <%=h(keywordRunPath)%>
@@ -162,7 +162,7 @@
             ActionURL url = schema.urlFor(QueryAction.executeQuery, FlowTableType.FCSFiles);
             filter.applyToURL(url, QueryView.DATAREGIONNAME_DEFAULT);
         %>
-        <a href="<%=url%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
+        <a href="<%=h(url)%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
     </li>
     <%
     } else {
@@ -188,7 +188,7 @@
         <% } else { %>
         <b>Existing Analysis Folder:</b>
         <% FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId()); %>
-        <a href="<%=experiment.urlShow()%>" target="_blank"><%=h(experiment.getName())%></a>
+        <a href="<%=h(experiment.urlShow())%>" target="_blank"><%=h(experiment.getName())%></a>
         <% } %>
     </li>
 

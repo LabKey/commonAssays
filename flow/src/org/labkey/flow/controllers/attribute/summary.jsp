@@ -33,8 +33,6 @@
 
     ActionURL editURL = new ActionURL(AttributeController.EditAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
     ActionURL detailsURL = new ActionURL(AttributeController.DetailsAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
-    ActionURL deleteURL = new ActionURL(AttributeController.DeleteAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
-    ActionURL makePrimaryURL = new ActionURL(AttributeController.MakePrimaryAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
     ActionURL aliasURL = new ActionURL(AttributeController.CreateAliasAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
 %>
 
@@ -59,7 +57,7 @@
         </td>
         <td>
             <% if (primaryUsages != null && primaryUsages.intValue() > 0) { %>
-            <i>(<a href='<%=detailsURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>'><%=primaryUsages%> usages</a>)</i>
+            <i>(<a href='<%=h(detailsURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>'><%=primaryUsages%> usages</a>)</i>
             <% } else { %>
             <i class="labkey-error">(unused)</i>
             <% } %>
@@ -82,7 +80,7 @@
         </td>
         <td>
             <% if (usages != null && usages.intValue() > 0) { %>
-            <i>(<a href='<%=detailsURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>'><%=usages%> usages</a>)</i>
+            <i>(<a href='<%=h(detailsURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId))%>'><%=usages%> usages</a>)</i>
             <% } else { %>
             <i class="labkey-error">(unused)</i>
             <% } %>

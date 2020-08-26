@@ -38,7 +38,7 @@
         <tr>
             <td>Run Name:</td>
             <td>
-                <a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer()).addParameter("runId",well.getRun().getRunId())%>"><%=h(well.getRun().getName())%>
+                <a href="<%=h(new ActionURL(RunController.ShowRunAction.class, getContainer()).addParameter("runId",well.getRun().getRunId()))%>"><%=h(well.getRun().getName())%>
                 </a></td>
         </tr>
         <% if (form.ff_isBulkEdit)
