@@ -99,7 +99,7 @@ public abstract class BaseWorkspace<S extends ISampleInfo> implements IWorkspace
     @Override
     public List<S> getSamples()
     {
-        return new ArrayList<>(_sampleInfos.values());
+        return List.copyOf(_sampleInfos.values());
     }
 
     /**
