@@ -19,6 +19,8 @@ package org.labkey.elisa;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.XarContext;
@@ -46,9 +48,11 @@ import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UniqueID;
@@ -60,6 +64,7 @@ import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.visualization.GenericChartReport;
+import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
@@ -236,13 +241,30 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension).");
+        if (form instanceof ElisaRunUploadForm)
+        {
+            if (((ElisaRunUploadForm)form).getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
+                return new HtmlView(HtmlString.of("The ELISA data files must be in a tabular format (.tsv or .csv extension)."));
+        }
+        return new HtmlView(HtmlString.of("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension)."));
     }
 
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new ElisaProtocolSchema(user, container, this, protocol, targetStudy);
+    }
+
+    @Override
+    public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
+    {
+        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
+    }
+
+    @Override
+    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    {
+        return super.createSampleFilePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
     }
 
     @Override

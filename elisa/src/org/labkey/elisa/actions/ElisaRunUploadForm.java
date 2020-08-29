@@ -18,6 +18,7 @@ package org.labkey.elisa.actions;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.assay.actions.PlateUploadFormImpl;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.elisa.ElisaAssayProvider;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ public class ElisaRunUploadForm extends PlateUploadFormImpl<ElisaAssayProvider>
     private Map<String, Map<DomainProperty, String>> _sampleProperties;
     private PlateSamplePropertyHelper _samplePropertyHelper;
     private Map<String, Map<DomainProperty, String>> _concentrationProperties;
+    private SampleMetadataInputFormat _inputFormat;
 
     @Override
     public PlateSamplePropertyHelper getSamplePropertyHelper()
@@ -64,5 +66,14 @@ public class ElisaRunUploadForm extends PlateUploadFormImpl<ElisaAssayProvider>
     public void setConcentrationProperties(Map<String, Map<DomainProperty, String>> concentrationProperties)
     {
         _concentrationProperties = concentrationProperties;
+    }
+
+    public SampleMetadataInputFormat getSampleMetadataInputFormat()
+    {
+        if (_inputFormat == null)
+        {
+            _inputFormat = getProvider().getMetadataInputFormat(getProtocol());
+        }
+        return _inputFormat;
     }
 }
