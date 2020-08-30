@@ -1,6 +1,8 @@
 import org.labkey.gradle.util.BuildUtils
 
 dependencies {
+   external("org.apache.httpcomponents:httpmime:${httpmimeVersion}")
+   external("org.ardverk:patricia-trie:${patriciaTrieVersion}")
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
 
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtension: "module")
