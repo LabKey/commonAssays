@@ -31,6 +31,20 @@ import java.util.ListIterator;
 
 public class FlowFCSFile extends FlowWell
 {
+    // Represents an FCS file selected by the user for import that has no corresponding FCS file imported in the database.
+    // This can happen when there are no FCS files to be imported or when a directory of FCS files will be imported at the same time as the workspace.
+    // Unfortuantely, since we use Jackson serialization to save/restore the job state, we can't check UNMAPPED for object equality
+    // and instead rely on the <code>isUnresolved</code> method to check for a null ExpData.
+    public static final FlowFCSFile UNMAPPED = new FlowFCSFile();
+    static {
+        UNMAPPED.setEntityId("UNMAPPED");
+    }
+
+    public final boolean isUnmapped()
+    {
+        return null == getData() && "UNMAPPED".equals(getEntityId());
+    }
+
     // For serialization
     protected FlowFCSFile() {}
 

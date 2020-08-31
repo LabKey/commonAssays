@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.labkey.api.data.Container;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.flow.persist.AttributeSet;
 
 import java.util.List;
@@ -38,44 +39,50 @@ public interface IWorkspace
 
     /**
      * Warnings generated during loading of the workspace.
-     * @return
      */
     List<String> getWarnings();
 
     /**
      * Get union of all keywords found in all samples.
-     * @return
      */
     Set<String> getKeywords();
 
     /**
      * Get a list of all parameter names.
-     * @return
      */
     List<String> getParameterNames();
 
     List<ParameterInfo> getParameters();
 
     /**
-     * Get all internal sample ids.
-     * @return
+     * Get all internal sample ids.  Each id is guaranteed to be unique.
      */
     List<String> getSampleIds();
 
     /**
-     * Get all sample labels.
-     * @return
+     * Get all sample labels.  More than one sample may have the same label.
      */
     List<String> getSampleLabels();
 
     List<? extends ISampleInfo> getSamples();
 
     /**
-     * Get sample by either sample id or label.
-     * @param sampleIdOrLabel
-     * @return
+     * Get SampleInfo by workspace sample ID.
      */
-    ISampleInfo getSample(String sampleIdOrLabel);
+    @Nullable
+    ISampleInfo getSampleById(String sampleId);
+
+    /**
+     * Get SampleInfos by sample label (typically the FCS filename, $FIL keyword)
+     */
+    @NotNull
+    List<? extends ISampleInfo> getSampleByLabel(String label);
+
+    /**
+     * List of duplicate sample lables (FCS filenames) found in the workspace that have distinct IDs.
+     */
+    @NotNull
+    List<String> getDuplicateSampleLabels();
 
     /**
      * @return true if the workspace has an analysis definition
@@ -90,4 +97,10 @@ public interface IWorkspace
 
     List<CompensationMatrix> getCompensationMatrices();
 
+    /**
+     * Create backwards compatibility aliases for boolean populations.
+     */
+    default void createBooleanAliases()
+    {
+    }
 }

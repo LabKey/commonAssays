@@ -44,25 +44,22 @@ public class PCWorkspace extends FlowJoWorkspace
 
     protected SampleInfo readSample(Element elSample)
     {
-        SampleInfo sampleInfo = new SampleInfo();
+        Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+        String sampleName = elSampleNode.getAttribute("name");
+        String sampleId = elSampleNode.getAttribute("sampleID");
+        boolean deleted = readSampleDeletedFlag(elSampleNode);
+        SampleInfo sampleInfo = new SampleInfo(sampleId, sampleName, deleted);
+
         for (Element elKeywords : getElementsByTagName(elSample, "Keywords"))
         {
             readKeywords(sampleInfo, elKeywords);
         }
         readParameterInfo(sampleInfo);
 
-        Element elSampleNode = getElementByTagName(elSample, "SampleNode");
-        sampleInfo._sampleName = elSampleNode.getAttribute("name");
-        sampleInfo._sampleId = elSampleNode.getAttribute("sampleID");
-        sampleInfo._deleted = readSampleDeletedFlag(elSampleNode);
-
         readSampleCompensation(sampleInfo, elSample);
         readSampleTransformations(sampleInfo, elSample);
 
-        if (sampleInfo._deleted)
-            _deletedInfos.put(sampleInfo.getSampleId(), sampleInfo);
-        else
-            _sampleInfos.put(sampleInfo.getSampleId(), sampleInfo);
+        addSample(sampleInfo);
         return sampleInfo;
     }
 

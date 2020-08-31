@@ -19,12 +19,10 @@ import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
-import org.labkey.flow.data.FlowRun;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: kevink
@@ -46,9 +44,8 @@ public class ImportAnalysisForm
     private final SelectedSamples selectedSamples = new SelectedSamples();
 
     private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
-    private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.None;
-    private Map<FlowRun, String> existingKeywordRuns = null;
-    private int existingKeywordRunId;
+    private SelectFCSFileOption selectFCSFilesOption = null;
+    private boolean keywordRunsExist = false;
     private String importGroupNames = Workspace.ALL_SAMPLES;
     private boolean resolving = false;
     private AnalysisEngine selectAnalysisEngine = null;
@@ -112,20 +109,14 @@ public class ImportAnalysisForm
     }
 
     // not a POSTed parameter - For rending the SELECT_FCSFILES step
-    public void setExistingKeywordRuns(Map<FlowRun, String> keywordRuns)
+    public boolean getKeywordRunsExist()
     {
-        this.existingKeywordRuns = keywordRuns;
+        return keywordRunsExist;
     }
 
-    // not a POSTed parameter
-    public Map<FlowRun, String> getExistingKeywordRuns()
+    protected void setKeywordRunsExist(boolean keywordRunsExist)
     {
-        return existingKeywordRuns;
-    }
-
-    public int getExistingKeywordRunId()
-    {
-        return existingKeywordRunId;
+        this.keywordRunsExist = keywordRunsExist;
     }
 
     public AnalysisEngine getSelectAnalysisEngine()
@@ -151,11 +142,6 @@ public class ImportAnalysisForm
     public void setImportGroupNames(String importGroupNames)
     {
         this.importGroupNames = importGroupNames;
-    }
-
-    public void setExistingKeywordRunId(int existingKeywordRunId)
-    {
-        this.existingKeywordRunId = existingKeywordRunId;
     }
 
     public boolean isCreateAnalysis()

@@ -16,6 +16,8 @@
 
 package org.labkey.flow.data;
 
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpData;
@@ -71,7 +73,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         return ret;
     }
 
-    static public FlowCompensationMatrix create(User user, Container container, String name, AttributeSet attrs) throws Exception
+    static public FlowCompensationMatrix create(User user, Container container, String name, AttributeSet attrs, @Nullable Logger log) throws Exception
     {
         ExperimentService svc = ExperimentService.get();
 
@@ -89,7 +91,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             }
             data.setDataFileURI(new File(FlowSettings.getWorkingDirectory(), "compensation." + FlowDataHandler.EXT_DATA).toURI());
             data.save(user);
-            AttributeSetHelper.doSave(attrs, user, data);
+            AttributeSetHelper.doSave(attrs, user, data, log);
             flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
             transaction.commit();
             return flowComp;
