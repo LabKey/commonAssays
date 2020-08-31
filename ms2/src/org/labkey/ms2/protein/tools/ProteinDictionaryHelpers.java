@@ -186,7 +186,7 @@ public class ProteinDictionaryHelpers
         return (null == goId ? 0 : goId);
     }
 
-    public static enum GoTypes
+    public enum GoTypes
     {
         CELL_LOCATION {
             public String toString()

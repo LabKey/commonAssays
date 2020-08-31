@@ -18,13 +18,13 @@ package org.labkey.ms2.protein;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.util.SimpleHasHtmlString;
+import org.labkey.api.util.SafeToRenderEnum;
 
 /**
  * User: jeckels
  * Date: Apr 3, 2007
  */
-public enum CustomAnnotationType implements SimpleHasHtmlString
+public enum CustomAnnotationType implements SafeToRenderEnum
 {
     IPI("IPI", IdentifierType.IPI)
     {

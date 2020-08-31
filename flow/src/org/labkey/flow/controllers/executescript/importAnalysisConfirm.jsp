@@ -79,7 +79,7 @@
 <% } %>
 <input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=form.getSelectAnalysisEngine()%>">
-<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=h(form.isCreateAnalysis())%>">
+<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=form.isCreateAnalysis()%>">
 
 <%--
 <% for (int i = 0; form.getEngineOptionFilterKeyword() != null && i < form.getEngineOptionFilterKeyword().length; i++) { %>

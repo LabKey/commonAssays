@@ -34,7 +34,7 @@ import java.util.List;
 * User: jeckels
 * Date: 8/12/13
 */
-public enum MS2ExportType implements SimpleHasHtmlString
+public enum MS2ExportType
 {
     Excel
     {
