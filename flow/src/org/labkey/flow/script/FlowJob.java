@@ -178,28 +178,15 @@ public abstract class FlowJob extends PipelineJob
     @Override
     public ActionURL getStatusHref()
     {
-        ActionURL ret = urlRedirect();
-        if (ret != null)
-            return ret;
-
-        ret = urlStatus();
-        if (ret != null)
-            return ret;
-
-        return null;
-    }
-
-    public ActionURL urlRedirect()
-    {
-        if (!isComplete())
-            return null;
         if (hasErrors())
             return null;
         return urlData();
     }
 
+    /** Link to imported data once job has completed */
     public abstract ActionURL urlData();
 
+    /** Link to pipeline status details */
     public ActionURL urlStatus()
     {
         if (_statusHref == null)

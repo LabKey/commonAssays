@@ -83,7 +83,7 @@ public abstract class BaseFlowController extends SpringActionController
             PipelineService service = PipelineService.get();
             service.queueJob(job);
 
-            ActionURL forward = job.getStatusHref().clone();
+            ActionURL forward = job.urlStatus();
             putParam(forward, FlowParam.redirect, 1);
             return forward;
         }
