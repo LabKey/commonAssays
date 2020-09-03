@@ -78,7 +78,7 @@
 <% } %>
 <input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=form.getSelectAnalysisEngine()%>">
-<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=h(form.isCreateAnalysis())%>">
+<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=form.isCreateAnalysis()%>">
 
 <%--
 <% for (int i = 0; form.getEngineOptionFilterKeyword() != null && i < form.getEngineOptionFilterKeyword().length; i++) { %>
@@ -149,7 +149,7 @@
             ActionURL url = schema.urlFor(QueryAction.executeQuery, FlowTableType.FCSFiles);
             filter.applyToURL(url, QueryView.DATAREGIONNAME_DEFAULT);
         %>
-        <a href="<%=url%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
+        <a href="<%=h(url)%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
     </li>
     <%
     } else {
@@ -175,7 +175,7 @@
         <% } else { %>
         <b>Existing Analysis Folder:</b>
         <% FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId()); %>
-        <a href="<%=experiment.urlShow()%>" target="_blank"><%=h(experiment.getName())%></a>
+        <a href="<%=h(experiment.urlShow())%>" target="_blank"><%=h(experiment.getName())%></a>
         <% } %>
     </li>
 

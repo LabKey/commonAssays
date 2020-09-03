@@ -866,7 +866,7 @@ public class LuminexController extends SpringActionController
             }
         }
 
-        private List<GuideSet> _guideSets;
+        private final List<GuideSet> _guideSets;
 
         public GuideSetsDeleteBean(String returnUrl, String selectionKey, int protocolId, Container container, String assayName)
         {

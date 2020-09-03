@@ -132,7 +132,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
             %>
         <tr class="<%=getShadeRowClass(i)%>">
             <td valign="top">
-                <a href="<%=expUrls.getMaterialDetailsURL(getContainer(), sample.first)%>"><%=h(sample.second)%></a>
+                <a href="<%=h(expUrls.getMaterialDetailsURL(getContainer(), sample.first))%>"><%=h(sample.second)%></a>
                 (<%=fcsFileCount%>)
             </td>
             <td>
@@ -141,7 +141,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
                 {
                     if (fcsFile.first != null)
                     {
-                        %><a href="<%=new ActionURL(WellController.ShowWellAction.class, getContainer()).addParameter("wellId", fcsFile.first)%>"><%=h(fcsFile.second)%></a><br><%
+                        %><a href="<%=h(new ActionURL(WellController.ShowWellAction.class, getContainer()).addParameter("wellId", fcsFile.first))%>"><%=h(fcsFile.second)%></a><br><%
                     }
                 }
             %>
@@ -174,7 +174,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
                     %>
                     <tr class="<%=getShadeRowClass(sampleIdx)%>">
                         <td valign="top">
-                            <a href="<%=expUrls.getMaterialDetailsURL(getContainer(), sample.first)%>"><%=h(sample.second)%></a>
+                            <a href="<%=h(expUrls.getMaterialDetailsURL(getContainer(), sample.first))%>"><%=h(sample.second)%></a>
                         </td>
                     </tr>
                     <% } %>
@@ -200,7 +200,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
                     %>
                     <tr class="<%=getShadeRowClass(fcsFileIdx)%>">
                         <td valign="top">
-                            <a href="<%=new ActionURL(WellController.ShowWellAction.class, getContainer()).addParameter("wellId", fcsFile.first)%>"><%=h(fcsFile.second)%></a>
+                            <a href="<%=h(new ActionURL(WellController.ShowWellAction.class, getContainer()).addParameter("wellId", fcsFile.first))%>"><%=h(fcsFile.second)%></a>
                         </td>
                     </tr>
                     <% } %>

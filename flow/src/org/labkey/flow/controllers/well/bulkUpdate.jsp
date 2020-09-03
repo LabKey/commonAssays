@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -38,31 +39,10 @@
 <div id="updateForm" />
 <script type="text/javascript">
 
-var keywords = [
-<%
-    String comma = "";
-    for (String kw : form.getKeywords(context))
-    {
-        out.print(unsafe(comma));
-        out.print(unsafe("["));
-        out.print(q(kw));
-        out.print(unsafe("]"));
-        comma = ",";
-    }%>
-];
+var keywords = <%=new JSONArray(form.getKeywords(context))%>
 var keywordStore = new Ext.data.SimpleStore({fields:['keyword'], data:keywords}) 
-var values = [
-<%
-    comma = "";
-    for (String v : form.getValues(context, form.keyword))
-    {
-        out.print(unsafe(comma));
-        out.print(unsafe("["));
-        out.print(q(v));
-        out.print(unsafe("]"));
-        comma = ",";
-    }%>
-];
+var values = <%=new JSONArray(form.getValues(context, form.keyword))%>
+
 var valuesStore = new Ext.data.SimpleStore({fields:['value'], data:values})
 
 var updateFormPanel;

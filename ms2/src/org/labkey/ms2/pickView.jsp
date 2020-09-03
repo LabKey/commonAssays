@@ -27,7 +27,7 @@
 <p><%=h(bean.viewInstructions)%></p>
 <p>
     To create a view, go back to the
-    <a href="<%= new ActionURL(MS2Controller.ShowListAction.class, getContainer())%>">list of MS2 runs</a>
+    <a href="<%=h(new ActionURL(MS2Controller.ShowListAction.class, getContainer()))%>">list of MS2 runs</a>
     and click to view one of the individual runs. Apply the filters that you want. Click on the "Save View" button,
     and pick a name. The next time you do a comparison, your saved view will appear in the list below and you can
     select it to apply the same filter to your comparison.

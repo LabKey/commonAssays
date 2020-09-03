@@ -359,12 +359,12 @@ if (getRun() == null)
 }
 else 
 {
-    %><tr><td>Run Name:</td><td><a href="<%=getRun().urlShow()%>"><%=h(getRun().getName())%></a></td></tr><%
+    %><tr><td>Run Name:</td><td><a href="<%=h(getRun().urlShow())%>"><%=h(getRun().getName())%></a></td></tr><%
 
     FlowExperiment experiment = getRun().getExperiment();
     if (experiment != null)
     {
-        %><tr><td>Analysis Folder:</td><td><a href="<%=experiment.urlShow()%>"><%=h(experiment.getName())%></a></td></tr><%
+        %><tr><td>Analysis Folder:</td><td><a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getName())%></a></td></tr><%
     }
 }
     %><tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr><%
@@ -582,7 +582,7 @@ else
 
 if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
 {
-    %><a class="labkey-text-link" href="<%=well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells")%>" rel="nofollow">Download Analysis zip</a><br><%
+    %><a class="labkey-text-link" href="<%=h(well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells"))%>" rel="nofollow">Download Analysis zip</a><br><%
 }
 
 if (getRun() != null)
