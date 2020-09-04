@@ -16,7 +16,6 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.labkey.api.util.SafeToRenderEnum;
-import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
 
