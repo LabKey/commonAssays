@@ -25,6 +25,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssayUploadXarContext;
+import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.PlateReader;
@@ -34,12 +35,17 @@ import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.DoublePoint;
+import org.labkey.api.data.statistics.FitFailedException;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ProvenanceService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
@@ -96,6 +102,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         final ProvenanceService pvs = ProvenanceService.get();
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
+        ExpRun run = data.getRun();
         Container container = data.getContainer();
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
@@ -126,6 +133,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
                         WellGroup controlGroup = controlGroups.get(0);
                         SimpleRegression regression = new SimpleRegression(true);
+                        List<DoublePoint> pointData = new ArrayList<>();
 
                         Map<String, ExpMaterial> materialMap = new HashMap<>();
                         for (Map.Entry<ExpMaterial,String> e : data.getRun().getMaterialInputs().entrySet())
@@ -147,6 +155,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             if (concentrations.containsKey(key))
                             {
                                 conc = concentrations.get(key);
+                                pointData.add(new DoublePoint(conc, mean));
                                 regression.addData(conc, mean);
                             }
 
@@ -178,15 +187,30 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             }
                         }
 
-                        // add the coefficient of determination to the run
+                        // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
+                        StatsService.CurveFitType curveFitType = StatsService.CurveFitType.LINEAR;
+                        DomainProperty curveFitPd = runProperties.get(DilutionAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
+                        if (curveFitPd != null)
+                        {
+                            Object value = run.getProperty(curveFitPd);
+                            if (value != null)
+                                curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
+                        }
+
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
                         DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS);
-                        if (cod != null && fitParams != null && !Double.isNaN(regression.getRSquare()))
+                        CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, pointData.toArray(DoublePoint[]::new));
+                        if (cod != null && fitParams != null && !Double.isNaN(curveFit.getFitError()))
                         {
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
+                            if (curveFit.getParameters() != null)
+                            {
+                                Map<String, Object> params = curveFit.getParameters().toMap();
 
-                            String params = String.valueOf(regression.getSlope()) + "&" + String.valueOf(regression.getIntercept());
-                            data.getRun().setProperty(context.getUser(), fitParams.getPropertyDescriptor(), params);
+                                // TODO : will need a standard way to serialize parameters
+                                var serializedParams = params.get("slope") + "&" + params.get("intercept");
+                                data.getRun().setProperty(context.getUser(), fitParams.getPropertyDescriptor(), serializedParams);
+                            }
                         }
 
                         for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
@@ -222,7 +246,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             }
                         }
                     }
-                    catch (ValidationException e)
+                    catch (FitFailedException | ValidationException e)
                     {
                         throw new ExperimentException(e);
                     }

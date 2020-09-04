@@ -18,6 +18,11 @@ package org.labkey.elisa.actions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.assay.actions.PlateBasedUploadWizardAction;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -32,12 +37,8 @@ import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.actions.PlateBasedUploadWizardAction;
-import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
-import org.labkey.api.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.elisa.ElisaAssayProvider;
@@ -78,6 +79,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     protected RunStepHandler getRunStepHandler()
     {
         return new PlateBasedRunStepHandler() {
+/*
             @Override
             public void validateStep(ElisaRunUploadForm form, Errors errors)
             {
@@ -95,6 +97,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                     }
                 }
             }
+*/
 
             @Override
             public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
@@ -111,7 +114,12 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                         errors.addError(new ObjectError("main", null, null, e.toString()));
                     }
                 }
-                return false;
+
+                // if this is a manual metadata upload, continue to the concentrations input view
+                if (form.getSampleMetadataInputFormat() == SampleMetadataInputFormat.MANUAL)
+                    return false;
+                else
+                    return super.executeStep(form, errors);
             }
 
             @Override
@@ -119,16 +127,21 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             {
                 if (form.isResetDefaultValues() || errors.hasErrors())
                     return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
-                else
+                else if (form.getSampleMetadataInputFormat() == SampleMetadataInputFormat.MANUAL)
                     return getConcentrationsView(form, false, errors);
-            }
+                else
+                    return null;            }
         };
     }
 
     @Override
     protected void addRunActionButtons(ElisaRunUploadForm form, InsertView insertView, ButtonBar bbar)
     {
-        addNextButton(bbar);
+        // don't render the concentrations view
+        if (form.getSampleMetadataInputFormat() == SampleMetadataInputFormat.MANUAL)
+            addNextButton(bbar);
+        else
+            addFinishButtons(form, insertView, bbar);
         addResetButton(form, insertView, bbar);
     }
 

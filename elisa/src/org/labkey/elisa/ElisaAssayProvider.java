@@ -18,37 +18,42 @@ package org.labkey.elisa;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractTsvAssayProvider;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayPipelineProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProviderSchema;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayTableMetadata;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateBasedDataExchangeHandler;
+import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.Lookup;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
-import org.labkey.api.assay.plate.PlateBasedDataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.actions.AssayRunUploadForm;
-import org.labkey.api.assay.AbstractTsvAssayProvider;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayPipelineProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayTableMetadata;
-import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.study.assay.ThawListResolverType;
-import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UniqueID;
@@ -60,6 +65,7 @@ import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.visualization.GenericChartReport;
+import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
@@ -95,6 +101,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public static final String CORRELATION_COEFFICIENT_PROPERTY_NAME = "RSquared";
     public static final String CORRELATION_COEFFICIENT_CAPTION = "Coefficient of Determination";
+
+    public static final String CURVE_FIT_METHOD_PROPERTY_NAME = "CurveFitMethod";
+    public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
 
     public static final String CURVE_FIT_PARAMETERS = "CurveFitParams";
     public static final String CURVE_FIT_PARAMETERS_CAPTION = "Fit Parameters";
@@ -187,6 +196,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         fitProp.setFormat("0.000");
         fitProp.setShownInInsertView(false);
 
+        Container lookupContainer = c.getProject();
+        DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
+        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
+        method.setRequired(true);
+        method.setShownInUpdateView(false);
+
         DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS, CURVE_FIT_PARAMETERS_CAPTION, PropertyType.STRING, "Curve fit parameters.");
         fitParams.setShownInInsertView(false);
         fitParams.setShownInDetailsView(false);
@@ -236,13 +251,40 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension).");
+        if (form instanceof ElisaRunUploadForm)
+        {
+            return new JspView<>("/org/labkey/assay/view/tsvDataDescription.jsp", form);
+/*
+
+            if (((ElisaRunUploadForm)form).getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
+                return new HtmlView(HtmlString.of("The ELISA data files must be in a tabular format (.tsv or .csv extension)."));
+*/
+        }
+        return new HtmlView(HtmlString.of("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension)."));
+    }
+
+    @Override
+    public AssayProviderSchema createProviderSchema(User user, Container container, Container targetStudy)
+    {
+        return new ElisaProviderSchema(user, container, this, targetStudy);
     }
 
     @Override
     public AssayProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         return new ElisaProtocolSchema(user, container, this, protocol, targetStudy);
+    }
+
+    @Override
+    public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
+    {
+        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
+    }
+
+    @Override
+    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    {
+        return super.createSampleFilePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
     }
 
     @Override
