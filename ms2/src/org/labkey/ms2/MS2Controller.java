@@ -91,15 +91,14 @@ import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
-import org.labkey.api.util.HasHtmlString;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.SafeToRenderEnum;
-import org.labkey.api.util.SimpleHasHtmlString;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
@@ -480,7 +479,7 @@ public class MS2Controller extends SpringActionController
     public static class RunSummaryBean
     {
         public MS2Run run;
-        public HasHtmlString modHref;
+        public LinkBuilder modHref;
         public boolean writePermissions;
         public String quantAlgorithm;
     }
@@ -654,7 +653,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private HasHtmlString modificationHref(MS2Run run)
+    private LinkBuilder modificationHref(MS2Run run)
     {
         Map<String, String> fixed = new TreeMap<>();
         Map<String, String> var = new TreeMap<>();
