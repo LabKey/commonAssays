@@ -109,7 +109,7 @@
     %>
 
     <div>
-        <input type=checkbox name=targetSeqIds value="<%= h(protein.getSeqId())%>" checked>
+        <input type=checkbox name=targetSeqIds value="<%=protein.getSeqId()%>" checked>
 
         <span id="<%= h(divId) %>"></span>
         <span><a href="<%= h(proteinUrl) %>"><%= h(protein.getBestName())%></a></span>

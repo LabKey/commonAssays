@@ -156,7 +156,7 @@ function Form_onDelete()
        url = new ActionURL(ReportsController.BeginAction.class, c);
    }
    %>
-   window.location = <%=q(url.getLocalURIString())%>;
+   window.location = <%=q(url)%>;
 }
 
 Ext.onReady(function() {

@@ -43,11 +43,11 @@
            </tr>
            <tr>
                <td class="labkey-form-label">Charge</td>
-               <td>+<%=h(p.getCharge())%></td>
+               <td>+<%=p.getCharge()%></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Scan</td>
-               <td>+<%=h(p.getScan())%></td>
+               <td>+<%=p.getScan()%></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Light to heavy ratio</td>
