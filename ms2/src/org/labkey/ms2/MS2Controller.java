@@ -17,8 +17,8 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
@@ -91,14 +91,14 @@ import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
-import org.labkey.api.util.HasHtmlString;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.SimpleHasHtmlString;
+import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
@@ -479,7 +479,7 @@ public class MS2Controller extends SpringActionController
     public static class RunSummaryBean
     {
         public MS2Run run;
-        public HasHtmlString modHref;
+        public LinkBuilder modHref;
         public boolean writePermissions;
         public String quantAlgorithm;
     }
@@ -653,7 +653,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    private HasHtmlString modificationHref(MS2Run run)
+    private LinkBuilder modificationHref(MS2Run run)
     {
         Map<String, String> fixed = new TreeMap<>();
         Map<String, String> var = new TreeMap<>();
@@ -1310,7 +1310,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum DefaultViewType implements SimpleHasHtmlString
+    public enum DefaultViewType implements SafeToRenderEnum
     {
         LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
         Standard("Use the standard peptide list view"),
@@ -1504,7 +1504,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements implements SimpleHasHtmlString
+    public enum PeptideFilteringFormElements implements SafeToRenderEnum
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1520,7 +1520,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType implements SimpleHasHtmlString
+    public enum PivotType implements SafeToRenderEnum
     {
         run, fraction
     }
@@ -1618,7 +1618,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType implements SimpleHasHtmlString
+    public enum ProphetFilterType implements SafeToRenderEnum
     {
         none, probability, customView
     }

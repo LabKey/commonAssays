@@ -27,7 +27,7 @@
     MS2Controller.GoChartBean bean = ((JspView<MS2Controller.GoChartBean>) HttpView.currentView()).getModelBean();
 %>
 <% for (Map.Entry<String, SimpleFilter> entry : bean.filterInfos.entrySet()) { %>
-    <%= h(entry.getKey()) %>: <%= entry.getValue().getFilterText().isEmpty() ? "<em>No filters applied</em>" : h(entry.getValue().getFilterText()) %><br/>
+    <%= h(entry.getKey()) %>: <%= entry.getValue().getFilterText().isEmpty() ? unsafe("<em>No filters applied</em>") : h(entry.getValue().getFilterText()) %><br/>
 <% } %>
 
 <% if (bean.foundData) { %>
@@ -41,9 +41,9 @@
                     <td valign="middle">Chart type:</td>
                     <td valign="middle">
                         <select name="chartType" id="chartType">
-                            <option value="<%=GoTypes.CELL_LOCATION%>"<%=selected(GoTypes.CELL_LOCATION == bean.goChartType)%>><%=h(GoTypes.CELL_LOCATION.toString())%></option>
-                            <option value="<%=GoTypes.FUNCTION%>"<%=selected(GoTypes.FUNCTION == bean.goChartType)%>><%=h(GoTypes.FUNCTION.toString())%></option>
-                            <option value="<%=GoTypes.PROCESS%>"<%=selected(GoTypes.PROCESS == bean.goChartType)%>><%=h(GoTypes.PROCESS.toString())%></option>
+                            <option value="<%=h(GoTypes.CELL_LOCATION)%>"<%=selected(GoTypes.CELL_LOCATION == bean.goChartType)%>><%=h(GoTypes.CELL_LOCATION)%></option>
+                            <option value="<%=h(GoTypes.FUNCTION)%>"<%=selected(GoTypes.FUNCTION == bean.goChartType)%>><%=h(GoTypes.FUNCTION)%></option>
+                            <option value="<%=h(GoTypes.PROCESS)%>"<%=selected(GoTypes.PROCESS == bean.goChartType)%>><%=h(GoTypes.PROCESS)%></option>
                         </select>
                     </td>
                     <td valign="middle"><%= button("Submit").submit(true) %></td>

@@ -86,7 +86,7 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<form action="<%=formUrl%>" method="GET" onsubmit="return validate();">
+<form action="<%=h(formUrl)%>" method="GET" onsubmit="return validate();">
     <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
     <% } %>

@@ -29,7 +29,7 @@
    <td>&nbsp;</td><td align="right" class="labkey-form-label"><strong>Total</strong></td><td align='right' class="labkey-form-label"><strong>Most Recent Batch</strong></td>
 </tr>
 <tr>
-   <td align='left' class="labkey-form-label">Completed</td><td align='right'><%=insertion.getCompletionDate() == null ? "Not complete" : formatDateTime(insertion.getCompletionDate())%></td><td align='right'><%=formatDateTime(insertion.getChangeDate())%></td>
+   <td align='left' class="labkey-form-label">Completed</td><td align='right'><%=insertion.getCompletionDate() == null ? h("Not complete") : formatDateTime(insertion.getCompletionDate())%></td><td align='right'><%=formatDateTime(insertion.getChangeDate())%></td>
 </tr>
 <tr>
    <td align='left' class="labkey-form-label">Records</td><td align='right'><%=h(insertion.getRecordsProcessed())%></td><td align='right'><%=h(insertion.getMrmSize())%></td>

@@ -62,7 +62,7 @@
 </script>
 
 <% if (renderForm) { %>
-    <form action='<%=exportURL%>' method='POST'>
+    <form action='<%=h(exportURL)%>' method='POST'>
 <% } %>
 
 <table class="lk-fields-table">

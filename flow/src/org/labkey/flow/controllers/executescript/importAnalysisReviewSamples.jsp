@@ -113,7 +113,7 @@ if (protocol != null)
     if (protocol.getFCSAnalysisFilterString() != null)
     {
         %>
-        Samples will be filtered by the current protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a>:
+        Samples will be filtered by the current protocol <a href="<%=h(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>" target="_blank">FCS analysis filter</a>:
         <br>
         <div style="padding-left: 2em;">
             <%=h(protocol.getFCSAnalysisFilter().getFilterText())%>
@@ -122,7 +122,7 @@ if (protocol != null)
     }
     else
     {
-        %>No protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
+        %>No protocol <a href="<%=h(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
     }
 }
 

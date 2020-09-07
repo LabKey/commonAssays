@@ -27,7 +27,7 @@
                 discovered files will be added.
                 The upgrade task may be long running but will be
                 invoked as a pipeline job; you will be able to monitor progress and view log information from
-                the <a href="<%=urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot())%>">pipeline status </a>page.</td>
+                the <a href="<%=h(urlProvider(PipelineUrls.class).urlBegin(ContainerManager.getRoot()))%>">pipeline status </a>page.</td>
     </tr>
     <tr><td>&nbsp;</td></tr>
     <tr><td><%= button("Import Scan Counts").submit(true) %></td></tr>

@@ -39,7 +39,7 @@
             value pairs <i>must</i> all match in the FCS header to be included in the analysis.
             <% if (protocol != null) { %>
             Alternatively, you may
-            <a href="<%= protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class) %>">create protocol filters</a>
+            <a href="<%=h(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>">create protocol filters</a>
             that will be applied to all analysis scripts in the project folder.
             <% } %>
             </p>

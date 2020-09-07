@@ -170,7 +170,7 @@
         });
         </script>
         <div id="fcsFileRuns-div">
-            <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsFileRunsURL)%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsRunCount > 0) --%>
 
@@ -189,12 +189,12 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=fcsAnalysisRunsURL%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
+                renderer: createRenderer("<%=h(fcsAnalysisRunsURL)%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
             });
         });
         </script>
         <div id="fcsAnalysisRuns-div">
-            <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsAnalysisRunsURL)%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
@@ -257,7 +257,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=h(_sampleType.getDescription())%>" href="<%=_sampleType.detailsURL()%>">Samples (<%=_sampleType.getSamples(_sampleType.getContainer()).size()%>)</a>
+            <a title="<%=h(_sampleType.getDescription())%>" href="<%=h(_sampleType.detailsURL())%>">Samples (<%=_sampleType.getSamples(_sampleType.getContainer()).size()%>)</a>
         </div>
     <% } %>
 
@@ -299,39 +299,39 @@
                             '<div class="summary-header">Execute Script</div>',
                             <% if (!script.hasStep(FlowProtocolStep.calculateCompensation) && !script.hasStep(FlowProtocolStep.analysis)) { %>
                                 '<div>This blank script must be<br>',
-                                '<a href="<%=script.urlShow()%>">edited</a> before it can be used.</div>',
+                                '<a href="<%=h(script.urlShow())%>">edited</a> before it can be used.</div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation)%>">Compensation</a></div>',
+                                '<div><a href="<%=h(script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation))%>">Compensation</a></div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis)%>">Statistics and Graphs</a></div>',
+                                '<div><a href="<%=h(script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis))%>">Statistics and Graphs</a></div>',
                             <% } %>
                         '</div>',
                         <% if (canEditScript || script.hasStep(FlowProtocolStep.calculateCompensation) || script.hasStep(FlowProtocolStep.analysis)) { %>
                             '<div class="summary-div">',
                                 '<div class="summary-header">Analysis Definition</div>',
                                 <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.EditCompensationCalculationAction.class)%>">Show Compensation</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditCompensationCalculationAction.class))%>">Show Compensation</a></div>',
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>">Upload FlowJo Compensation</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.UploadCompensationCalculationAction.class))%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditAnalysisAction.class))%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
-                                        '<div><a href="<%=script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
+                                        '<div><a href="<%=h(script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis))%>">Rename Populations</a></div>',
                                     <% } %>
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.UploadAnalysisAction.class)%>">Upload FlowJo Analysis</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.UploadAnalysisAction.class))%>">Upload FlowJo Analysis</a></div>',
                                 <% } %>
                             '</div>',
                         <% } %>
                         '<div class="summary-div">',
                             '<div class="summary-header">Manage</div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.EditSettingsAction.class)%>">Settings</a></div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.CopyAction.class)%>">Copy</a></div>',
+                            '<div><a href="<%=h(script.urlFor(ScriptController.EditSettingsAction.class))%>">Settings</a></div>',
+                            '<div><a href="<%=h(script.urlFor(ScriptController.CopyAction.class))%>">Copy</a></div>',
                             <% if (runCount == 0) { %>
-                                '<div><a href="<%=script.urlFor(ScriptController.DeleteAction.class)%>">Delete</a></div>',
+                                '<div><a href="<%=h(script.urlFor(ScriptController.DeleteAction.class))%>">Delete</a></div>',
                             <% } %>
                         '</div>',
                         <% if (runCount > 0) { %>
@@ -352,7 +352,7 @@
             });
             </script>
             <div id="script-<%=script.getScriptId()%>-div" style="white-space:nowrap;">
-                <a href="<%=script.urlShow()%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
+                <a href="<%=h(script.urlShow())%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }
