@@ -77,6 +77,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: klum
@@ -85,28 +86,41 @@ import java.util.Set;
 public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 {
     public static final String NAME = "ELISA";
-    public static final String ASSAY_DOMAIN_CONCENTRATION_WELLGROUP = ExpProtocol.ASSAY_DOMAIN_PREFIX + "ConcentrationWellGroup";
 
-    public static final String ABSORBANCE_PROPERTY_NAME = "Absorption";
-    public static final String ABSORBANCE_PROPERTY_CAPTION = "Absorption";
+    // run properties
+    public static final String CORRELATION_COEFFICIENT_PROPERTY = "RSquared";
+    public static final String CURVE_FIT_METHOD_PROPERTY = "CurveFitMethod";
+    public static final String CURVE_FIT_PARAMETERS_PROPERTY = "CurveFitParams";
 
-    public static final String CONCENTRATION_PROPERTY_NAME = "Concentration";
-    public static final String CONCENTRATION_PROPERTY_CAPTION = "Concentration (ug/ml)";
+    // results properties
+    public static final String ABSORBANCE_PROPERTY = "Absorption";
+    public static final String CONCENTRATION_PROPERTY = "Concentration";
+    public static final String WELL_LOCATION_PROPERTY = "WellLocation";
+    public static final String WELLGROUP_PROPERTY = "WellgroupLocation";
+    public static final String SPOT_PROPERTY = "Spot";
+    public static final String DILUTION_PROPERTY = "Dilution";
+    public static final String CV_PROPERTY = "CV";
+    public static final String EXCLUDED_PROPERTY = "Excluded";
+    public static final String PERCENT_RECOVERY = "Recovery_Percent";
+    public static final String PERCENT_RECOVERY_MEAN = "Recovery_Mean";
 
-    public static final String WELL_PROPERTY_NAME = "WellLocation";
-    public static final String WELL_PROPERTY_CAPTION = "Well Location";
+    // sample properties
+    public static final String AUC_PROPERTY = "AUC";
+    public static final String MEAN_ABSORPTION_PROPERTY = "Absorption_Mean";
+    public static final String CV_ABSORPTION_PROPERTY = "Absorption_CV";
+    public static final String MEAN_CONCENTRATION_PROPERTY = "Concentration_Mean";
+    public static final String CV_CONCENTRATION_PROPERTY = "Concentration_CV";
+    public static final Set<String> EXTRA_SAMPLE_PROPS;
 
-    public static final String WELLGROUP_PROPERTY_NAME = "WellgroupLocation";
-    public static final String WELLGROUP_PROPERTY_CAPTION = "Well Group";
-
-    public static final String CORRELATION_COEFFICIENT_PROPERTY_NAME = "RSquared";
-    public static final String CORRELATION_COEFFICIENT_CAPTION = "Coefficient of Determination";
-
-    public static final String CURVE_FIT_METHOD_PROPERTY_NAME = "CurveFitMethod";
-    public static final String CURVE_FIT_METHOD_PROPERTY_CAPTION = "Curve Fit Method";
-
-    public static final String CURVE_FIT_PARAMETERS = "CurveFitParams";
-    public static final String CURVE_FIT_PARAMETERS_CAPTION = "Fit Parameters";
+    static
+    {
+        EXTRA_SAMPLE_PROPS = Set.of(
+                AUC_PROPERTY,
+                MEAN_ABSORPTION_PROPERTY,
+                CV_ABSORPTION_PROPERTY,
+                MEAN_CONCENTRATION_PROPERTY,
+                CV_CONCENTRATION_PROPERTY);
+    }
 
     enum PlateReaderType
     {
@@ -192,17 +206,17 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
         Domain domain = result.getKey();
 
-        DomainProperty fitProp = addProperty(domain, CORRELATION_COEFFICIENT_PROPERTY_NAME, CORRELATION_COEFFICIENT_CAPTION, PropertyType.DOUBLE, "Coefficient of Determination of the calibration curve.");
+        DomainProperty fitProp = addProperty(domain, CORRELATION_COEFFICIENT_PROPERTY, "Coefficient of Determination", PropertyType.DOUBLE, "Coefficient of Determination of the calibration curve.");
         fitProp.setFormat("0.000");
         fitProp.setShownInInsertView(false);
 
         Container lookupContainer = c.getProject();
-        DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY_NAME, CURVE_FIT_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
+        DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
         method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
         method.setRequired(true);
         method.setShownInUpdateView(false);
 
-        DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS, CURVE_FIT_PARAMETERS_CAPTION, PropertyType.STRING, "Curve fit parameters.");
+        DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS_PROPERTY, "Fit Parameters", PropertyType.STRING, "Curve fit parameters.");
         fitParams.setShownInInsertView(false);
         fitParams.setShownInDetailsView(false);
         fitParams.setShownInUpdateView(false);
@@ -222,6 +236,13 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(domain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
         addProperty(domain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
 
+        // extra computed properties at the sample scope
+        addProperty(domain, AUC_PROPERTY, AUC_PROPERTY, PropertyType.DOUBLE, "Area Under the Curve");
+        addProperty(domain, MEAN_ABSORPTION_PROPERTY, "Absorption Mean", PropertyType.DOUBLE, "Mean Absorption across sample replicates");
+        addProperty(domain, CV_ABSORPTION_PROPERTY, "Absorption CV", PropertyType.DOUBLE, "Absorption CV across sample replicates");
+        addProperty(domain, MEAN_CONCENTRATION_PROPERTY, "Concentration Mean", PropertyType.DOUBLE, "Mean Concentration across sample replicates");
+        addProperty(domain, CV_CONCENTRATION_PROPERTY, "Concentration CV", PropertyType.DOUBLE, "Concentration CV across sample replicates");
+
         return result;
     }
 
@@ -236,12 +257,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         specimenLsid.setShownInDetailsView(false);
         specimenLsid.setShownInUpdateView(false);
 
-        addProperty(dataDomain, WELL_PROPERTY_NAME, WELL_PROPERTY_CAPTION, PropertyType.STRING, "Well location.");
-        addProperty(dataDomain, WELLGROUP_PROPERTY_NAME, WELLGROUP_PROPERTY_CAPTION, PropertyType.STRING, "Well Group location.");
+        addProperty(dataDomain, WELL_LOCATION_PROPERTY, "Well Location", PropertyType.STRING, "Well location.");
+        addProperty(dataDomain, WELLGROUP_PROPERTY, "Well Group", PropertyType.STRING, "Well Group location.");
 
-        DomainProperty absProp = addProperty(dataDomain, ABSORBANCE_PROPERTY_NAME,  ABSORBANCE_PROPERTY_CAPTION, PropertyType.DOUBLE, "Well group value measuring the absorption.");
+        DomainProperty absProp = addProperty(dataDomain, ABSORBANCE_PROPERTY,  "Absorption", PropertyType.DOUBLE, "Well group value measuring the absorption.");
         absProp.setFormat("0.000");
-        DomainProperty concProp = addProperty(dataDomain, CONCENTRATION_PROPERTY_NAME,  CONCENTRATION_PROPERTY_CAPTION, PropertyType.DOUBLE, "Well group value measuring the concentration.");
+        DomainProperty concProp = addProperty(dataDomain, CONCENTRATION_PROPERTY,  "Concentration (ug/ml)", PropertyType.DOUBLE, "Well group value measuring the concentration.");
         concProp.setFormat("0.000");
         concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
 
@@ -284,7 +305,15 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
-        return super.createSampleFilePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
+        // some of the sample properties are calculated versus collected
+        List<DomainProperty> properties = sampleProperties.stream()
+                .filter(dp -> !EXTRA_SAMPLE_PROPS.contains(dp.getName()))
+                .collect(Collectors.toList());
+
+        if (inputFormat == SampleMetadataInputFormat.MANUAL)
+            return new PlateSamplePropertyHelper(properties, template);
+        else
+            return super.createSampleFilePropertyHelper(c, protocol, properties, template, inputFormat);
     }
 
     @Override
@@ -300,16 +329,16 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
 
-        runProperties.add(CORRELATION_COEFFICIENT_PROPERTY_NAME);
-        runProperties.add(CURVE_FIT_PARAMETERS);
+        runProperties.add(CORRELATION_COEFFICIENT_PROPERTY);
+        runProperties.add(CURVE_FIT_PARAMETERS_PROPERTY);
 
         Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
 
         dataProperties.add(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
-        dataProperties.add(WELL_PROPERTY_NAME);
-        dataProperties.add(WELLGROUP_PROPERTY_NAME);
-        dataProperties.add(ABSORBANCE_PROPERTY_NAME);
-        dataProperties.add(CONCENTRATION_PROPERTY_NAME);
+        dataProperties.add(WELL_LOCATION_PROPERTY);
+        dataProperties.add(WELLGROUP_PROPERTY);
+        dataProperties.add(ABSORBANCE_PROPERTY);
+        dataProperties.add(CONCENTRATION_PROPERTY);
 
         return domainMap;
     }
@@ -364,11 +393,11 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         form.setDataRegionName(QueryView.DATAREGIONNAME_DEFAULT);
 
         // setup the plot for the calibration curve (absorption vs concentration)
-        form.setAutoColumnXName(CONCENTRATION_PROPERTY_NAME);
-        form.setAutoColumnYName(ABSORBANCE_PROPERTY_NAME);
+        form.setAutoColumnXName(CONCENTRATION_PROPERTY);
+        form.setAutoColumnYName(ABSORBANCE_PROPERTY);
 
         Domain runDomain = getRunDomain(protocol);
-        DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS);
+        DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS_PROPERTY);
 
         Domain sampleDomain = getSampleWellGroupDomain(protocol);
         List<String> sampleColumns = new ArrayList<>();

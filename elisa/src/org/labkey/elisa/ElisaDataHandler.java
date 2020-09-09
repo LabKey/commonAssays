@@ -19,6 +19,7 @@ package org.labkey.elisa;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayProvider;
@@ -34,10 +35,12 @@ import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.data.statistics.FitFailedException;
+import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
@@ -51,6 +54,8 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.security.User;
+import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
@@ -62,6 +67,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * User: klum
@@ -108,9 +114,18 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
         if (provider instanceof PlateBasedAssayProvider)
         {
+            PlateBasedAssayProvider plateProvider = (PlateBasedAssayProvider)provider;
             Map<String, DomainProperty> runProperties = new HashMap<>();
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
                 runProperties.put(column.getName(), column);
+
+            Map<String, DomainProperty> sampleProperties = new CaseInsensitiveHashMap<>();
+            for (DomainProperty prop : ((PlateBasedAssayProvider) provider).getSampleWellGroupDomain(protocol).getProperties())
+                sampleProperties.put(prop.getName(), prop);
+
+            if (plateProvider.getMetadataInputFormat(protocol).equals(SampleMetadataInputFormat.MANUAL))
+            {
+            }
 
             PlateReader reader = ((PlateBasedAssayProvider)provider).getPlateReader(BioTekPlateReader.LABEL);
             if (reader != null)
@@ -165,9 +180,9 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 Map<String, Object> row = new HashMap<>();
 
                                 Well well = plate.getWell(position.getRow(), position.getColumn());
-                                row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
-                                row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, replicate.getPositionDescription());
-                                row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
+                                row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
+                                row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
+                                row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
                                 if (specimenGroupMap.containsKey(position))
                                 {
                                     ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
@@ -181,7 +196,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 }
 
                                 if (conc != -1)
-                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME, conc);
+                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, conc);
 
                                 results.add(row);
                             }
@@ -197,15 +212,17 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
                         }
 
-                        DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY_NAME);
-                        DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS);
-                        CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, pointData.toArray(DoublePoint[]::new));
-                        if (cod != null && fitParams != null && !Double.isNaN(curveFit.getFitError()))
+                        DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY);
+                        DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS_PROPERTY);
+                        CurveFit standardCurveFit = StatsService.get().getCurveFit(curveFitType, pointData.toArray(DoublePoint[]::new));
+                        standardCurveFit.setLogXScale(false);
+
+                        if (cod != null && fitParams != null && !Double.isNaN(standardCurveFit.getFitError()))
                         {
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
-                            if (curveFit.getParameters() != null)
+                            if (standardCurveFit.getParameters() != null)
                             {
-                                Map<String, Object> params = curveFit.getParameters().toMap();
+                                Map<String, Object> params = standardCurveFit.getParameters().toMap();
 
                                 // TODO : will need a standard way to serialize parameters
                                 var serializedParams = params.get("slope") + "&" + params.get("intercept");
@@ -215,6 +232,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
                         for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
                         {
+                            List<DoublePoint> samplePoints = new ArrayList<>();
                             for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
                             {
                                 for (Position position : replicate.getPositions())
@@ -222,9 +240,9 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     Map<String, Object> row = new HashMap<>();
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
 
-                                    row.put(ElisaAssayProvider.WELL_PROPERTY_NAME, position.getDescription());
-                                    row.put(ElisaAssayProvider.WELLGROUP_PROPERTY_NAME, replicate.getPositionDescription());
-                                    row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY_NAME, well.getValue());
+                                    row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
+                                    row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
+                                    row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
                                     if (specimenGroupMap.containsKey(position))
                                     {
                                         ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
@@ -238,12 +256,16 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                     }
 
                                     // compute the concentration
-                                    double concentration = (well.getValue() - regression.getIntercept()) / regression.getSlope();
-                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME, concentration);
+                                    double concentration = standardCurveFit.fitCurveY(well.getValue());
+                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, concentration);
 
+                                    samplePoints.add(new DoublePoint(concentration, well.getValue()));
                                     results.add(row);
                                 }
                             }
+
+                            // compute sample scoped statistics
+                            calculateSampleStats(context.getUser(), materialMap.get(sampleGroup.getName()), sampleProperties, curveFitType, samplePoints);
                         }
                     }
                     catch (FitFailedException | ValidationException e)
@@ -259,6 +281,58 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         return datas;
     }
 
+    /**
+     * Generate sample scoped stats for this run
+     * @param material the sample to compute stats for
+     * @param sampleProps map of sample domain properties
+     * @param curveFitType curve fit selected for this run
+     * @param sampleValues the list of x,y pairs (concentration, absorption) for the sample wells
+     */
+    private void calculateSampleStats(User user, @Nullable ExpMaterial material, Map<String, DomainProperty> sampleProps,
+                                      StatsService.CurveFitType curveFitType, List<DoublePoint> sampleValues) throws FitFailedException, ValidationException
+    {
+        if (material != null)
+        {
+            if (sampleProps.containsKey(ElisaAssayProvider.AUC_PROPERTY))
+            {
+                CurveFit sampleCurveFit = StatsService.get().getCurveFit(curveFitType, sampleValues.toArray(DoublePoint[]::new));
+                sampleCurveFit.setLogXScale(false);
+
+                material.setProperty(user, sampleProps.get(ElisaAssayProvider.AUC_PROPERTY).getPropertyDescriptor(), sampleCurveFit.calculateAUC(StatsService.AUCType.NORMAL));
+            }
+
+            List<Double> absorption = sampleValues.stream()
+                    .map(dp -> dp.second)
+                    .collect(Collectors.toList());
+            MathStat absStat = StatsService.get().getStats(absorption);
+            if (sampleProps.containsKey(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY))
+            {
+                material.setProperty(user, sampleProps.get(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY).getPropertyDescriptor(), absStat.getMean());
+            }
+
+            if (sampleProps.containsKey(ElisaAssayProvider.CV_ABSORPTION_PROPERTY))
+            {
+                double cv = absStat.getStdDev() / absStat.getMean();
+                material.setProperty(user, sampleProps.get(ElisaAssayProvider.CV_ABSORPTION_PROPERTY).getPropertyDescriptor(), cv);
+            }
+
+            List<Double> concentration = sampleValues.stream()
+                    .map(dp -> dp.first)
+                    .collect(Collectors.toList());
+            MathStat concStat = StatsService.get().getStats(concentration);
+            if (sampleProps.containsKey(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY))
+            {
+                material.setProperty(user, sampleProps.get(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY).getPropertyDescriptor(), concStat.getMean());
+            }
+
+            if (sampleProps.containsKey(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY))
+            {
+                double cv = concStat.getStdDev() / concStat.getMean();
+                material.setProperty(user, sampleProps.get(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY).getPropertyDescriptor(), cv);
+            }
+        }
+    }
+
     private Map<String, Double> getStandardConcentrations(AssayRunUploadContext context) throws ExperimentException
     {
         Map<String, Double> concentrations = new HashMap<>();
@@ -271,7 +345,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 for (DomainProperty dp : entry.getValue().keySet())
                 {
                     double conc = 0;
-                    if (ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME.equals(dp.getName()))
+                    if (ElisaAssayProvider.CONCENTRATION_PROPERTY.equals(dp.getName()))
                     {
                         conc = NumberUtils.toDouble(entry.getValue().get(dp), 0);
                     }

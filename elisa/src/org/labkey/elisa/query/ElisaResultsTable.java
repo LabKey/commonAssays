@@ -15,6 +15,9 @@
  */
 package org.labkey.elisa.query;
 
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayResultTable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ContainerFilter;
@@ -22,20 +25,12 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.SampleTypeService;
-import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayResultTable;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.elisa.ElisaDataHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User: klum
@@ -47,30 +42,20 @@ public class ElisaResultsTable extends AssayResultTable
     {
         super(schema, cf, includeCopiedToStudyColumns);
 
-        List<FieldKey> visibleColumns = new ArrayList<>();
-
-        // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
-        if (sampleType != null)
-        {
-            for (DomainProperty pd : sampleType.getDomain().getProperties())
-            {
-                visibleColumns.add(FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
-                        ExpMaterialTable.Column.Property.toString(), pd.getName()));
-            }
-        }
 
         // add a lookup to the material table
         BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
-        specimenColumn.setFk(new LookupForeignKey("LSID")
+        specimenColumn.setLabel("Specimen");
+        specimenColumn.setHidden(false);
+
+        specimenColumn.setFk(new LookupForeignKey(getContainerFilter(), "LSID", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, cf);
-                // Make sure we are filtering to the same set of containers
-                materials.setContainerFilter(getContainerFilter());
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                 if (sampleType != null)
                 {
                     materials.setSampleType(sampleType, true);
@@ -78,15 +63,13 @@ public class ElisaResultsTable extends AssayResultTable
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)
                 {
-                    ((PropertyForeignKey)propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(_provider, _protocol, schema));
+                    ((PropertyForeignKey) propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(_provider, _protocol, schema));
                 }
                 propertyCol.setHidden(false);
                 materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
+
                 return materials;
             }
         });
-
-        visibleColumns.addAll(getDefaultVisibleColumns());
-        setDefaultVisibleColumns(visibleColumns);
     }
 }
