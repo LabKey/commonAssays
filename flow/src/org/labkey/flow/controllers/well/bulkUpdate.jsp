@@ -20,7 +20,8 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController.BulkUpdateKeywordsAction" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController.UpdateKeywordsForm" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -31,7 +32,7 @@
     }
 %>
 <%
-    WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)HttpView.currentModel();
+    UpdateKeywordsForm form = (UpdateKeywordsForm)HttpView.currentModel();
     ViewContext context = getViewContext();
 %>
 <span style="color:green;"><%=h(form.message)%></span><br>
@@ -57,7 +58,7 @@ function keywordCombo_onSelect()
 function form_onSubmit()
 {
     var form = updateFormPanel.getForm();
-    form.getEl().dom.action=<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>;
+    form.getEl().dom.action=<%=q(urlFor(BulkUpdateKeywordsAction.class))%>;
     form.getEl().dom.submit();
 }
 
@@ -112,7 +113,7 @@ Ext.onReady(function(){
                 ]
             } <%}}%>
         ],
-        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>})}}]
+        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:<%=q(urlFor(BulkUpdateKeywordsAction.class))%>})}}]
     });
 
     keywordCombo.on('select', keywordCombo_onSelect);

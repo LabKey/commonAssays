@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.flow.controllers.ReportsController" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.BeginAction" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.DeleteAction" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
 <%@ page import="org.labkey.flow.reports.StatPickerView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -35,8 +35,6 @@
     }
 %>
 <%
-    Container c = getContainer();
-
     Tuple3<FilterFlowReport, ActionURL, ActionURL> bean = (Tuple3<FilterFlowReport, ActionURL, ActionURL>) HttpView.currentModel();
     FilterFlowReport report = bean.first;
     ActionURL returnURL = bean.second;
@@ -44,8 +42,8 @@
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
-    String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
-    String canURL = cancelURL == null ? retURL : cancelURL.getLocalURIString();
+    ActionURL retURL = returnURL == null ? urlFor(BeginAction.class) : returnURL;
+    ActionURL canURL = cancelURL == null ? retURL : cancelURL;
 %>
 <style type="text/css">
     .x-form-item {
@@ -114,7 +112,7 @@ function Form_onDelete()
    ActionURL url = null;
    if (d.getReportId() != null)
    {
-       url = new ActionURL(ReportsController.DeleteAction.class, c).addParameter("reportId", report.getReportId().toString());
+       url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());
        if (returnURL != null)
            url.addReturnURL(returnURL);
    }
@@ -124,7 +122,7 @@ function Form_onDelete()
    }
    else
    {
-       url = new ActionURL(ReportsController.BeginAction.class, c);
+       url = urlFor(BeginAction.class);
    }
    %>
    window.location = <%=q(url)%>;

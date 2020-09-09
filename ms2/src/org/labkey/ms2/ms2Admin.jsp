@@ -75,7 +75,7 @@
     else
     { %>
 <labkey:form method="post" action="<%=new ActionURL(MS2Controller.PurgeRunsAction.class, ContainerManager.getRoot())%>">
-<table class="labkey-data-region"><tr><td>Currently set to purge all MS2 runs deleted <input name="days" value="<%=bean.days%>" size="2"> days ago or before&nbsp;<%= button("Update").submit(true).onClick("this.form.action=" + q(buildURL(MS2Controller.ShowMS2AdminAction.class)) + ";") %></td></tr>
+<table class="labkey-data-region"><tr><td>Currently set to purge all MS2 runs deleted <input name="days" value="<%=bean.days%>" size="2"> days ago or before&nbsp;<%= button("Update").submit(true).onClick("this.form.action=" + q(urlFor(MS2Controller.ShowMS2AdminAction.class)) + ";") %></td></tr>
 <tr><td><%= button("Purge Deleted MS2 Runs").submit(true) %></td></tr></table></labkey:form><%
     }
 %>

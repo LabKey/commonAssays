@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideChartsAction" %>
 <%@ page import="org.labkey.ms2.protein.tools.ProteinDictionaryHelpers.GoTypes" %>
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -31,7 +32,7 @@
 <% } %>
 
 <% if (bean.foundData) { %>
-    <labkey:form name="chartForm" action="<%=buildURL(MS2Controller.PeptideChartsAction.class)%>">
+    <labkey:form name="chartForm" action="<%=urlFor(PeptideChartsAction.class)%>">
     <%=bean.imageMap%>
     <table align="left">
     <tr>

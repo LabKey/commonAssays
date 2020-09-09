@@ -17,6 +17,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ActionURL;
+import org.labkey.ms2.MS2Controller.PepSearchAction;
 
 /**
  * Model for the PepSearchView.jsp
@@ -27,7 +28,7 @@ import org.labkey.api.view.ActionURL;
  */
 public class PepSearchModel
 {
-    private String _resultsUri;
+    private final ActionURL _resultsUri;
     private String _pepSeq = null;
     private boolean _exact = false;
     private boolean _subfolders = false;
@@ -36,7 +37,7 @@ public class PepSearchModel
 
     public PepSearchModel(Container container)
     {
-        _resultsUri = new ActionURL(MS2Controller.PepSearchAction.class, container).getLocalURIString();
+        _resultsUri = new ActionURL(PepSearchAction.class, container);
     }
 
     public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders, String runIds)
@@ -48,7 +49,7 @@ public class PepSearchModel
         _runIds = runIds;
     }
 
-    public String getResultsUri()
+    public ActionURL getResultsUri()
     {
         return _resultsUri;
     }
