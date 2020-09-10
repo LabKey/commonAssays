@@ -91,7 +91,8 @@ public class NabRunDataTable extends NabBaseTable
         var addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 
-        // create an AliasColumn for the results to pull in their DilutionData (note that this will result in row duplication)
+        // Create an AliasColumn for the results to pull in their DilutionData (note that this will result in row duplication).
+        // This is for a client scenario where they want to be able to access and export the dilution data for copied-to-study NAb results.
         AliasedColumn dilutionDataCol = new AliasedColumn("DilutionData", wrapColumn(getRealTable().getColumn("RowId")));
         dilutionDataCol.setFk(QueryForeignKey.from(schema, cf).to("DilutionData", "RunData", "Dilution"));
         dilutionDataCol.setDescription("Note that bringing this column or any of its children will result in row duplication "
