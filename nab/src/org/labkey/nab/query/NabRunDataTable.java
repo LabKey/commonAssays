@@ -38,6 +38,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
@@ -47,6 +48,7 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
@@ -88,6 +90,14 @@ public class NabRunDataTable extends NabBaseTable
         ExprColumn runIdColumn = new ExprColumn(this, DilutionProviderSchema.RUN_ID_COLUMN_NAME, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".RunID"), JdbcType.INTEGER);
         var addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
+
+        // create an AliasColumn for the results to pull in their DilutionData (note that this will result in row duplication)
+        AliasedColumn dilutionDataCol = new AliasedColumn("DilutionData", wrapColumn(getRealTable().getColumn("RowId")));
+        dilutionDataCol.setFk(QueryForeignKey.from(schema, cf).to("DilutionData", "RunData", "Dilution"));
+        dilutionDataCol.setDescription("Note that bringing this column or any of its children will result in row duplication "
+                + "for the data/results grid as it will join in all dilution values for the given sample/specimen row.");
+        dilutionDataCol.setHidden(true);
+        addColumn(dilutionDataCol);
 
         Set<String> hiddenProperties = new HashSet<>();
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
