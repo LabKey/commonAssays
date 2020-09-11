@@ -22,8 +22,9 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.flow.controllers.ReportsController" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.BeginAction" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.DeleteAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.EditICSMetadataAction" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
@@ -49,8 +50,8 @@
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
-    String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
-    String canURL = cancelURL == null ? retURL : cancelURL.getLocalURIString();
+    ActionURL retURL = returnURL == null ? urlFor(BeginAction.class) : returnURL;
+    ActionURL canURL = cancelURL == null ? retURL : cancelURL;
 
     FlowProtocol protocol = FlowProtocol.getForContainer(c);
     ICSMetadata metadata = protocol == null ? null : protocol.getICSMetadata();
@@ -59,7 +60,7 @@
     ActionURL editICSMetadataURL = null;
     if (protocol != null)
     {
-        editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
+        editICSMetadataURL = protocol.urlFor(EditICSMetadataAction.class);
         editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
     }
 %>
@@ -143,7 +144,7 @@ function Form_onDelete()
    ActionURL url = null;
    if (d.getReportId() != null)
    {
-       url = new ActionURL(ReportsController.DeleteAction.class, c).addParameter("reportId", report.getReportId().toString());
+       url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());
        if (returnURL != null)
            url.addReturnURL(returnURL);
    }
@@ -153,10 +154,10 @@ function Form_onDelete()
    }
    else
    {
-       url = new ActionURL(ReportsController.BeginAction.class, c);
+       url = urlFor(BeginAction.class);
    }
    %>
-   window.location = <%=q(url.getLocalURIString())%>;
+   window.location = <%=q(url)%>;
 }
 
 Ext.onReady(function() {

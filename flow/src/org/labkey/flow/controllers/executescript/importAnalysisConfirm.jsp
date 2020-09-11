@@ -93,7 +93,7 @@
 <% if (form.isCreateAnalysis()) { %>
 <input type="hidden" name="newAnalysisName" id="newAnalysisName" value="<%=h(form.getNewAnalysisName())%>">
 <% } else { %>
-<input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=h(form.getExistingAnalysisId())%>">
+<input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=form.getExistingAnalysisId()%>">
 <% } %>
 
 <input type="hidden" name="targetStudy" id="targetStudy" value="<%=h(form.getTargetStudy())%>">
@@ -149,7 +149,7 @@
             ActionURL url = schema.urlFor(QueryAction.executeQuery, FlowTableType.FCSFiles);
             filter.applyToURL(url, QueryView.DATAREGIONNAME_DEFAULT);
         %>
-        <a href="<%=h(url)%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
+        <a href="<%=h(url)%>" target="_blank" title="Show FCS files"><%=rowIds.size()%> FCS files</a>
     </li>
     <%
     } else {

@@ -171,7 +171,7 @@ those results must be put into different analysis folders.
                         {
                             String disabledReason = disabledAnalyses.get(analysis.getExperimentId());
                     %>
-                    <option value="<%=h(analysis.getExperimentId())%>"
+                    <option value="<%=analysis.getExperimentId()%>"
                             <%=selected(disabledReason == null && analysis.getExperimentId() == selectedId)%>
                             <%=text(disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":"")%>>
                         <%=h(analysis.getName())%>

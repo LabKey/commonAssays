@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditCompensationCalculationAction" %>
 <%@ page import="java.util.List"%>
 <%@ page import="java.util.Map"%>
 <%@ page import="java.util.TreeMap" %>
@@ -102,7 +102,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<labkey:form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>">
+<labkey:form method="POST" action="<%=formAction(EditCompensationCalculationAction.class)%>">
 
 <% if (hasAutoCompScripts) { %>
         <labkey:panel title="Choose AutoCompensation script">

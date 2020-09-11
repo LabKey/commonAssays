@@ -20,7 +20,8 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.util.HelpTopic" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.MascotConfigAction" %>
+<%@ page import="org.labkey.ms2.MS2Controller.MascotTestAction" %>
 <%@ page import="org.labkey.ms2.pipeline.mascot.MascotConfig" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
@@ -68,7 +69,7 @@
                 <td colspan="2">
                     Configuration is currently being inherited from <%= h(mascotConfig.getContainer().isRoot() ? "the site-level" : mascotConfig.getContainer().getPath())%>.
                     Saving will override the inherited configuration.<br/>
-                    <%= link("edit inherited settings", new ActionURL(MS2Controller.MascotConfigAction.class, mascotConfig.getContainer()))%>
+                    <%= link("edit inherited settings", new ActionURL(MascotConfigAction.class, mascotConfig.getContainer()))%>
                 </td>
             </tr>
         <% } %>
@@ -106,7 +107,7 @@
     <% } %>
 </labkey:form>
 
-<labkey:form name="mascottest" action="mascotTest.view" enctype="multipart/form-data" method="post" target='_new' >
+<labkey:form name="mascottest" action="<%=urlFor(MascotTestAction.class)%>" enctype="multipart/form-data" method="post" target='_new' >
     <input type="hidden" name="mascotServer" value="" />
     <input type="hidden" name="mascotUserAccount" value="" />
     <input type="hidden" name="mascotUserPassword" value="" />
