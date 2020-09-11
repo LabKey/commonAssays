@@ -27,10 +27,14 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
+import org.labkey.elisa.ElisaAssayProvider;
 import org.labkey.elisa.ElisaDataHandler;
+
+import java.util.List;
 
 /**
  * User: klum
@@ -71,5 +75,20 @@ public class ElisaResultsTable extends AssayResultTable
                 return materials;
             }
         });
+
+        List<FieldKey> defaultColumns = List.of(
+                FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property", ElisaAssayProvider.SPECIMENID_PROPERTY_NAME),
+                FieldKey.fromParts(ElisaAssayProvider.WELL_LOCATION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.WELLGROUP_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.STANDARD_CONCENTRATION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.ABSORBANCE_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.CV_ABSORPTION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.CONCENTRATION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY),
+                FieldKey.fromParts(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY),
+                FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property", ElisaAssayProvider.AUC_PROPERTY)
+        );
+        setDefaultVisibleColumns(defaultColumns);
     }
 }

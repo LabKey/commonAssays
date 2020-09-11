@@ -94,12 +94,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     // results properties
     public static final String ABSORBANCE_PROPERTY = "Absorption";
+    public static final String STANDARD_CONCENTRATION_PROPERTY = "Std_Concentration";
     public static final String CONCENTRATION_PROPERTY = "Concentration";
     public static final String WELL_LOCATION_PROPERTY = "WellLocation";
     public static final String WELLGROUP_PROPERTY = "WellgroupLocation";
     public static final String SPOT_PROPERTY = "Spot";
     public static final String DILUTION_PROPERTY = "Dilution";
-    public static final String CV_PROPERTY = "CV";
     public static final String EXCLUDED_PROPERTY = "Excluded";
     public static final String PERCENT_RECOVERY = "Recovery_Percent";
     public static final String PERCENT_RECOVERY_MEAN = "Recovery_Mean";
@@ -114,12 +114,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     static
     {
-        EXTRA_SAMPLE_PROPS = Set.of(
-                AUC_PROPERTY,
-                MEAN_ABSORPTION_PROPERTY,
-                CV_ABSORPTION_PROPERTY,
-                MEAN_CONCENTRATION_PROPERTY,
-                CV_CONCENTRATION_PROPERTY);
+        EXTRA_SAMPLE_PROPS = Set.of(AUC_PROPERTY);
     }
 
     enum PlateReaderType
@@ -237,11 +232,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(domain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
 
         // extra computed properties at the sample scope
-        addProperty(domain, AUC_PROPERTY, AUC_PROPERTY, PropertyType.DOUBLE, "Area Under the Curve");
-        addProperty(domain, MEAN_ABSORPTION_PROPERTY, "Absorption Mean", PropertyType.DOUBLE, "Mean Absorption across sample replicates");
-        addProperty(domain, CV_ABSORPTION_PROPERTY, "Absorption CV", PropertyType.DOUBLE, "Absorption CV across sample replicates");
-        addProperty(domain, MEAN_CONCENTRATION_PROPERTY, "Concentration Mean", PropertyType.DOUBLE, "Mean Concentration across sample replicates");
-        addProperty(domain, CV_CONCENTRATION_PROPERTY, "Concentration CV", PropertyType.DOUBLE, "Concentration CV across sample replicates");
+        addPropertyWithFormat(domain, AUC_PROPERTY, AUC_PROPERTY, PropertyType.DOUBLE, "Area Under the Curve", "0.0000");
 
         return result;
     }
@@ -257,16 +248,34 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         specimenLsid.setShownInDetailsView(false);
         specimenLsid.setShownInUpdateView(false);
 
-        addProperty(dataDomain, WELL_LOCATION_PROPERTY, "Well Location", PropertyType.STRING, "Well location.");
-        addProperty(dataDomain, WELLGROUP_PROPERTY, "Well Group", PropertyType.STRING, "Well Group location.");
+        addProperty(dataDomain, WELL_LOCATION_PROPERTY, "Well Location", PropertyType.STRING, "Well location");
+        addProperty(dataDomain, WELLGROUP_PROPERTY, "Well Group", PropertyType.STRING, "Replicate Well Group");
 
-        DomainProperty absProp = addProperty(dataDomain, ABSORBANCE_PROPERTY,  "Absorption", PropertyType.DOUBLE, "Well group value measuring the absorption.");
-        absProp.setFormat("0.000");
-        DomainProperty concProp = addProperty(dataDomain, CONCENTRATION_PROPERTY,  "Concentration (ug/ml)", PropertyType.DOUBLE, "Well group value measuring the concentration.");
-        concProp.setFormat("0.000");
+        addPropertyWithFormat(dataDomain, ABSORBANCE_PROPERTY,  "Absorption", PropertyType.DOUBLE, "Raw signal value", "0.000");
+        DomainProperty concProp = addPropertyWithFormat(dataDomain, CONCENTRATION_PROPERTY,  "Concentration (ug/ml)", PropertyType.DOUBLE, "Calculated concentration", "0.000");
         concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
+        addPropertyWithFormat(dataDomain, STANDARD_CONCENTRATION_PROPERTY,  "Std Concentration (ug/ml)", PropertyType.DOUBLE, "Standard control concentration", "0.000");
+
+        addProperty(dataDomain, SPOT_PROPERTY, "Spot", PropertyType.INTEGER, "Spot or Analyte for the well");
+        addProperty(dataDomain, DILUTION_PROPERTY, "Dilution", PropertyType.DOUBLE, "Dilution for the well");
+        addProperty(dataDomain, EXCLUDED_PROPERTY, "Excluded", PropertyType.BOOLEAN, null);
+        addPropertyWithFormat(dataDomain, PERCENT_RECOVERY, "Percent Recovery", PropertyType.DOUBLE, "Ratio of computed concentration to specified", "0.000%");
+        addPropertyWithFormat(dataDomain, PERCENT_RECOVERY_MEAN, "Percent Recovery Mean", PropertyType.DOUBLE, "Mean of recovery for the control", "0.000%");
+
+        addPropertyWithFormat(dataDomain, MEAN_ABSORPTION_PROPERTY, "Absorption Mean", PropertyType.DOUBLE, "Mean Absorption across replicates", "0.000");
+        addPropertyWithFormat(dataDomain, CV_ABSORPTION_PROPERTY, "Absorption CV", PropertyType.DOUBLE, "Absorption CV across replicates", "0.000");
+        addPropertyWithFormat(dataDomain, MEAN_CONCENTRATION_PROPERTY, "Concentration Mean", PropertyType.DOUBLE, "Mean Concentration across replicates", "0.000");
+        addPropertyWithFormat(dataDomain, CV_CONCENTRATION_PROPERTY, "Concentration CV", PropertyType.DOUBLE, "Concentration CV across replicates", "0.000");
 
         return new Pair<>(dataDomain, Collections.emptyMap());
+    }
+
+    private DomainProperty addPropertyWithFormat(Domain domain, String name, String label, PropertyType type, String description, String format)
+    {
+        DomainProperty prop = addProperty(domain, name, label, type, description);
+        prop.setFormat(format);
+
+        return prop;
     }
 
     @Override

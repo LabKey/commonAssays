@@ -80,6 +80,24 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
     {
         return new PlateBasedRunStepHandler() {
             @Override
+            public void validateStep(ElisaRunUploadForm form, Errors errors)
+            {
+                super.validateStep(form, errors);
+
+                if (!errors.hasErrors())
+                {
+                    try
+                    {
+                        form.getUploadedData();
+                    }
+                    catch (ExperimentException e)
+                    {
+                        errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
+                    }
+                }
+            }
+
+            @Override
             public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
             {
                 form.setSampleProperties(_postedSampleProperties);
