@@ -94,7 +94,7 @@
             <td style="text-align:right;"><%=h(pVal)%></td>
             <td style="padding-left: 1em"></td>
             <td class="labkey-form-label">Ion Threshold</td>
-            <td style="text-align:right" id="ionThresholdValue"><%=h(bean.getScoreThreshold())%></td>
+            <td style="text-align:right" id="ionThresholdValue"><%=bean.getScoreThreshold()%></td>
         </tr>
         <tr>
             <td class="labkey-form-label">In Target</td>

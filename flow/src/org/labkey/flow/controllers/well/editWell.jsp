@@ -63,7 +63,7 @@
                     for (FlowWell flowWell : wells)
                     {%>
                 <%=h(prefix + flowWell.getName())%>
-                <input type="hidden" name="ff_fileRowId" value="<%=h(flowWell.getRowId())%>">
+                <input type="hidden" name="ff_fileRowId" value="<%=flowWell.getRowId()%>">
                 <% prefix = ", ";
                 }%>
             </td>
@@ -76,7 +76,7 @@
         <tr>
             <td>Well Name:</td>
             <td><input type="text" name="ff_name" value="<%=h(form.ff_name)%>">
-                <input type="hidden" name="ff_fileRowId" value="<%=h(wells.get(0).getRowId())%>"></td>
+                <input type="hidden" name="ff_fileRowId" value="<%=wells.get(0).getRowId()%>"></td>
         </tr>
         <tr>
             <td>Comment:</td>

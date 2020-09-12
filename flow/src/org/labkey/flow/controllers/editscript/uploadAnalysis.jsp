@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.api.util.element.Input.InputBuilder" %>
 <%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisAction" %>
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
@@ -33,7 +33,7 @@
     }
 %>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
+<labkey:form method="POST" action="<%=formAction(UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form._workspaceObject != null)
     { %>
     <input type="hidden" name="token" value="<%=h(form.getToken())%>">

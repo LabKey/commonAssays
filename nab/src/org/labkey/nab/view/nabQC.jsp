@@ -70,7 +70,7 @@
             renderTo    : 'nabQCDiv',
             edit        : <%=bean.isEdit()%>,
             runId       : <%=bean.getRunId()%>,
-            returnUrl   : <%=q(bean.getReturnUrl(getContainer()).getLocalURIString())%>,
+            returnUrl   : <%=q(bean.getReturnUrl(getContainer()))%>,
             runName     : <%=q(assay.getRunName())%>,
             runProperties : <%=text(jsonMapper.writeValueAsString(runProperties))%>,
             controlProperties : <%=text(jsonMapper.writeValueAsString(controlProperties))%>
