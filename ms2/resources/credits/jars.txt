@@ -1,0 +1,5 @@
+{table}
+Filename|Component|Version|Source|License|LabKey Dev|Purpose
+httpmime-4.5.3.jar|Apache HTTP Mime|4.5.3|{link:Apache|http://hc.apache.org/httpcomponents-client-ga}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|adam|HTTP client for requests of remote servers
+patricia-trie-0.6.jar|PATRICIA Trie|0.6|{link:PATRICIA Trie|http://code.google.com/p/patricia-trie/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|jeckels|PATRICIA Trie data structure implementation
+{table}
