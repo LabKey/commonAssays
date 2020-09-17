@@ -79,6 +79,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_DATA;
+import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_RUN;
+
 /**
  * User: klum
  * Date: 10/6/12
@@ -103,6 +106,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String EXCLUDED_PROPERTY = "Excluded";
     public static final String PERCENT_RECOVERY = "Recovery_Percent";
     public static final String PERCENT_RECOVERY_MEAN = "Recovery_Mean";
+    public static final String PLATE_PROPERTY = "PlateName";
+    public static final String CONTROL_ID_PROPERTY = "ControlId";
+    public static final String CONTROL_AUC_PROPERTY = "AUC_Control";
 
     // sample properties
     public static final String AUC_PROPERTY = "AUC";
@@ -226,7 +232,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Pair<Domain, Map<DomainProperty, Object>> result = super.createSampleWellGroupDomain(c, user);
         Domain domain = result.getKey();
 
-        addProperty(domain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
+        DomainProperty specimenProperty = addProperty(domain, SPECIMENID_PROPERTY_NAME, SPECIMENID_PROPERTY_CAPTION, PropertyType.STRING);
+        specimenProperty.setImportAliasSet(Set.of("Sample"));
         addProperty(domain, PARTICIPANTID_PROPERTY_NAME, PARTICIPANTID_PROPERTY_CAPTION, PropertyType.STRING);
         addProperty(domain, VISITID_PROPERTY_NAME, VISITID_PROPERTY_CAPTION, PropertyType.DOUBLE);
         addProperty(domain, DATE_PROPERTY_NAME, DATE_PROPERTY_CAPTION, PropertyType.DATE_TIME);
@@ -239,7 +246,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     protected Pair<Domain,Map<DomainProperty,Object>> createResultDomain(Container c, User user)
     {
-        Domain dataDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ExpProtocol.ASSAY_DOMAIN_DATA), "Data Fields");
+        Domain dataDomain = PropertyService.get().createDomain(c, getPresubstitutionLsid(ASSAY_DOMAIN_DATA), "Data Fields");
         dataDomain.setDescription("Define the results fields for this assay design. The user is prompted for these fields for individual rows within the imported run, typically done as a file upload.");
 
         DomainProperty specimenLsid = addProperty(dataDomain, ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Specimen", PropertyType.STRING, "Specimen Data Lookup");
@@ -257,6 +264,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addPropertyWithFormat(dataDomain, STANDARD_CONCENTRATION_PROPERTY,  "Std Concentration (ug/ml)", PropertyType.DOUBLE, "Standard control concentration", "0.000");
 
         addProperty(dataDomain, SPOT_PROPERTY, "Spot", PropertyType.INTEGER, "Spot or Analyte for the well");
+        addProperty(dataDomain, PLATE_PROPERTY, "Plate Name", PropertyType.STRING, "Plate Name for multi-plate imports");
         addProperty(dataDomain, DILUTION_PROPERTY, "Dilution", PropertyType.DOUBLE, "Dilution for the well");
         addProperty(dataDomain, EXCLUDED_PROPERTY, "Excluded", PropertyType.BOOLEAN, null);
         addPropertyWithFormat(dataDomain, PERCENT_RECOVERY, "Percent Recovery", PropertyType.DOUBLE, "Ratio of computed concentration to specified", "0.000%");
@@ -266,6 +274,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addPropertyWithFormat(dataDomain, CV_ABSORPTION_PROPERTY, "Absorption CV", PropertyType.DOUBLE, "Absorption CV across replicates", "0.000");
         addPropertyWithFormat(dataDomain, MEAN_CONCENTRATION_PROPERTY, "Concentration Mean", PropertyType.DOUBLE, "Mean Concentration across replicates", "0.000");
         addPropertyWithFormat(dataDomain, CV_CONCENTRATION_PROPERTY, "Concentration CV", PropertyType.DOUBLE, "Concentration CV across replicates", "0.000");
+
+        addProperty(dataDomain, CONTROL_ID_PROPERTY, "Control ID", PropertyType.STRING, "Control Well Identifier");
+        addPropertyWithFormat(dataDomain, CONTROL_AUC_PROPERTY, "Control AUC", PropertyType.DOUBLE, "Area Under the Curve", "0.0000");
 
         return new Pair<>(dataDomain, Collections.emptyMap());
     }
@@ -322,7 +333,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         if (inputFormat == SampleMetadataInputFormat.MANUAL)
             return new PlateSamplePropertyHelper(properties, template);
         else
-            return super.createSampleFilePropertyHelper(c, protocol, properties, template, inputFormat);
+            return new ElisaSampleFilePropertyHelper(c, protocol, properties, template, inputFormat);
     }
 
     @Override
@@ -330,24 +341,24 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
 
-        if (!domainMap.containsKey(ExpProtocol.ASSAY_DOMAIN_DATA))
-            domainMap.put(ExpProtocol.ASSAY_DOMAIN_DATA, new HashSet<String>());
+        domainMap.computeIfAbsent(ASSAY_DOMAIN_DATA, s -> new HashSet<>());
+        domainMap.computeIfAbsent(ASSAY_DOMAIN_RUN, s -> new HashSet<>());
+        domainMap.computeIfAbsent(ASSAY_DOMAIN_SAMPLE_WELLGROUP, s -> new HashSet<>());
 
-        if (!domainMap.containsKey(ExpProtocol.ASSAY_DOMAIN_RUN))
-            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, new HashSet<String>());
-
-        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
-
+        Set<String> runProperties = domainMap.get(ASSAY_DOMAIN_RUN);
         runProperties.add(CORRELATION_COEFFICIENT_PROPERTY);
         runProperties.add(CURVE_FIT_PARAMETERS_PROPERTY);
 
-        Set<String> dataProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_DATA);
+        Set<String> resultProperties = domainMap.get(ASSAY_DOMAIN_DATA);
+        resultProperties.add(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
+        resultProperties.add(WELL_LOCATION_PROPERTY);
+        resultProperties.add(WELLGROUP_PROPERTY);
+        resultProperties.add(ABSORBANCE_PROPERTY);
+        resultProperties.add(CONCENTRATION_PROPERTY);
+        resultProperties.add(STANDARD_CONCENTRATION_PROPERTY);
+        resultProperties.add(EXCLUDED_PROPERTY);
 
-        dataProperties.add(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
-        dataProperties.add(WELL_LOCATION_PROPERTY);
-        dataProperties.add(WELLGROUP_PROPERTY);
-        dataProperties.add(ABSORBANCE_PROPERTY);
-        dataProperties.add(CONCENTRATION_PROPERTY);
+        domainMap.get(ASSAY_DOMAIN_SAMPLE_WELLGROUP).add(AUC_PROPERTY);
 
         return domainMap;
     }
@@ -446,7 +457,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public Domain getConcentrationWellGroupDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_DATA);
     }
 
     @Override

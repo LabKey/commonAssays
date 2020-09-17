@@ -16,27 +16,20 @@
 
 package org.labkey.elisa;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
-import org.labkey.api.assay.plate.PlateReader;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.data.statistics.FitFailedException;
@@ -49,7 +42,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ProvenanceService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
@@ -58,16 +50,14 @@ import org.labkey.api.security.User;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.elisa.actions.ElisaRunUploadForm;
-import org.labkey.elisa.plate.BioTekPlateReader;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -80,6 +70,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     public static final String NAMESPACE = "ElisaDataType";
     public static final AssayDataType DATA_TYPE;
     public static final String ELISA_INPUT_MATERIAL_DATA_PROPERTY = "SpecimenLsid";
+    public static final String STANDARDS_WELL_GROUP_NAME = "Standards";
 
     static
     {
@@ -104,197 +95,21 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         return true;
     }
 
-    public Map<DataType, List<Map<String, Object>>> getOldValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
-    {
-        final ProvenanceService pvs = ProvenanceService.get();
-        List<Map<String, Object>> results = new ArrayList<>();
-        ExpProtocol protocol = data.getRun().getProtocol();
-        ExpRun run = data.getRun();
-        Container container = data.getContainer();
-        AssayProvider provider = AssayService.get().getProvider(protocol);
-
-        if (provider instanceof PlateBasedAssayProvider)
-        {
-            PlateBasedAssayProvider plateProvider = (PlateBasedAssayProvider)provider;
-            Map<String, DomainProperty> runProperties = new HashMap<>();
-            for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
-                runProperties.put(column.getName(), column);
-
-            Map<String, DomainProperty> sampleProperties = new CaseInsensitiveHashMap<>();
-            for (DomainProperty prop : ((PlateBasedAssayProvider) provider).getSampleWellGroupDomain(protocol).getProperties())
-                sampleProperties.put(prop.getName(), prop);
-
-            if (plateProvider.getMetadataInputFormat(protocol).equals(SampleMetadataInputFormat.MANUAL))
-            {
-                //
-            }
-
-            PlateReader reader = ((PlateBasedAssayProvider)provider).getPlateReader(BioTekPlateReader.LABEL);
-            if (reader != null)
-            {
-                PlateTemplate template = ((PlateBasedAssayProvider)provider).getPlateTemplate(container, protocol);
-                double[][] cellValues = reader.loadFile(template, dataFile);
-                Plate plate = PlateService.get().createPlate(template, cellValues, null);
-
-                // collect the standards from the control group so we can calculate the calibration curve
-                List<? extends WellGroup> controlGroups = plate.getWellGroups(WellGroup.Type.CONTROL);
-                // TODO: add validation in the plate template handler
-                assert(controlGroups.size() == 1);
-
-                if (context instanceof AssayUploadXarContext)
-                {
-                    try {
-                        // collect the standard concentration values
-                        AssayRunUploadContext runContext = ((AssayUploadXarContext)context).getContext();
-                        Map<String, Double> concentrations = getStandardConcentrations(runContext);
-
-                        WellGroup controlGroup = controlGroups.get(0);
-                        SimpleRegression regression = new SimpleRegression(true);
-                        List<DoublePoint> pointData = new ArrayList<>();
-
-                        Map<String, ExpMaterial> materialMap = new HashMap<>();
-                        for (Map.Entry<ExpMaterial,String> e : data.getRun().getMaterialInputs().entrySet())
-                            materialMap.put(e.getValue(), e.getKey());
-
-                        Map<Position, String> specimenGroupMap = new HashMap<>();
-                        for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
-                        {
-                            for (Position pos : sample.getPositions())
-                                specimenGroupMap.put(pos, sample.getName());
-                        }
-
-                        for (WellGroup replicate : controlGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
-                        {
-                            double mean = replicate.getMean();
-                            double conc = -1;
-
-                            String key = replicate.getPositionDescription();
-                            if (concentrations.containsKey(key))
-                            {
-                                conc = concentrations.get(key);
-                                pointData.add(new DoublePoint(conc, mean));
-                                regression.addData(conc, mean);
-                            }
-
-                            // save the individual well values for the control group
-                            for (Position position : replicate.getPositions())
-                            {
-                                Map<String, Object> row = new HashMap<>();
-
-                                Well well = plate.getWell(position.getRow(), position.getColumn());
-                                row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
-                                row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
-                                row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
-                                if (specimenGroupMap.containsKey(position))
-                                {
-                                    ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
-                                    if (material != null)
-                                    {
-                                        row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                                        // TODO: Support adding the material to existing provenance inputs on the row, if any
-                                        if (pvs != null)
-                                            row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
-                                    }
-                                }
-
-                                if (conc != -1)
-                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, conc);
-
-                                results.add(row);
-                            }
-                        }
-
-                        // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
-                        StatsService.CurveFitType curveFitType = StatsService.CurveFitType.LINEAR;
-                        DomainProperty curveFitPd = runProperties.get(DilutionAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
-                        if (curveFitPd != null)
-                        {
-                            Object value = run.getProperty(curveFitPd);
-                            if (value != null)
-                                curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
-                        }
-
-                        DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY);
-                        DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS_PROPERTY);
-                        CurveFit standardCurveFit = StatsService.get().getCurveFit(curveFitType, pointData.toArray(DoublePoint[]::new));
-                        standardCurveFit.setLogXScale(false);
-
-                        if (cod != null && fitParams != null && !Double.isNaN(standardCurveFit.getFitError()))
-                        {
-                            data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
-                            if (standardCurveFit.getParameters() != null)
-                            {
-                                Map<String, Object> params = standardCurveFit.getParameters().toMap();
-
-                                // TODO : will need a standard way to serialize parameters
-                                var serializedParams = params.get("slope") + "&" + params.get("intercept");
-                                data.getRun().setProperty(context.getUser(), fitParams.getPropertyDescriptor(), serializedParams);
-                            }
-                        }
-
-                        for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
-                        {
-                            List<DoublePoint> samplePoints = new ArrayList<>();
-                            for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
-                            {
-                                for (Position position : replicate.getPositions())
-                                {
-                                    Map<String, Object> row = new HashMap<>();
-                                    Well well = plate.getWell(position.getRow(), position.getColumn());
-
-                                    row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
-                                    row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
-                                    row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
-                                    if (specimenGroupMap.containsKey(position))
-                                    {
-                                        ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
-                                        if (material != null)
-                                        {
-                                            row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                                            // TODO: Support adding the material to existing provenance inputs on the row, if any
-                                            if (pvs != null)
-                                                row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
-                                        }
-                                    }
-
-                                    // compute the concentration
-                                    double concentration = standardCurveFit.fitCurveY(well.getValue());
-                                    row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, concentration);
-
-                                    samplePoints.add(new DoublePoint(concentration, well.getValue()));
-                                    results.add(row);
-                                }
-                            }
-
-                            // compute sample scoped statistics
-                            calculateSampleStats(context.getUser(), materialMap.get(sampleGroup.getName()), sampleProperties, curveFitType, samplePoints);
-                        }
-                    }
-                    catch (FitFailedException | ValidationException e)
-                    {
-                        throw new ExperimentException(e);
-                    }
-                }
-            }
-        }
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
-        datas.put(getDataType(), results);
-
-        return datas;
-    }
-
-    private ElisaImportHelper getImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile)
+    private ElisaImportHelper getImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile) throws ExperimentException
     {
         if (provider.getMetadataInputFormat(protocol).equals(SampleMetadataInputFormat.MANUAL))
         {
             return new ManualImportHelper(context, provider, protocol, dataFile);
+        }
+        else if (provider.getMetadataInputFormat(protocol).equals(SampleMetadataInputFormat.COMBINED))
+        {
+            return new HighThroughputImportHelper(context, provider, protocol, dataFile);
         }
         return null;
     }
 
     public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        final ProvenanceService pvs = ProvenanceService.get();
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
         ExpRun run = data.getRun();
@@ -316,6 +131,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                     try
                     {
                         Plate plate = analytePlateEntry.getValue();
+                        Integer spot = analytePlateEntry.getKey();
                         SimpleRegression regression = new SimpleRegression(true);
                         Map<String, Double> standardConcentrations = importHelper.getStandardConcentrations(plateName, analytePlateEntry.getKey());
 
@@ -344,39 +160,51 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 for (Position position : replicate.getPositions())
                                 {
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = createWellRow(replicate, well, position, standardCurve, specimenGroupMap, materialMap, pvs);
+                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, replicate, well, position, standardCurve, materialMap);
+                                    // don't record empty records
+                                    if (row.isEmpty())
+                                        continue;
+
+                                    Double conc = (Double) row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
+                                    if (conc != null)
+                                        concentrations.add(conc);
 
                                     if (standardConcentrations.containsKey(replicate.getPositionDescription()))
                                     {
-                                        Double conc = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
-                                        concentrations.add(conc);
-
                                         Double stdConc = standardConcentrations.get(replicate.getPositionDescription());
                                         // the assigned standard concentration
-                                        row.put(ElisaAssayProvider.STANDARD_CONCENTRATION_PROPERTY, stdConc);
+                                        if (stdConc != null)
+                                            row.put(ElisaAssayProvider.STANDARD_CONCENTRATION_PROPERTY, stdConc);
 
                                         // percent recovery is the ratio of computed concentration to assigned
-                                        Double recovery = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY) / stdConc;
-                                        if (!recovery.isInfinite() && !recovery.isNaN())
+                                        if (conc != null && stdConc != null)
                                         {
-                                            row.put(ElisaAssayProvider.PERCENT_RECOVERY, recovery);
-                                            recoveries.add(recovery);
+                                            Double recovery = conc / stdConc;
+                                            if (!recovery.isInfinite() && !recovery.isNaN())
+                                            {
+                                                row.put(ElisaAssayProvider.PERCENT_RECOVERY, recovery);
+                                                recoveries.add(recovery);
+                                            }
                                         }
                                     }
                                     replicateRows.add(row);
                                 }
 
-                                // compute stats on the replicate values
-                                MathStat concStat = StatsService.get().getStats(concentrations);
-                                MathStat recovStat = StatsService.get().getStats(recoveries);
-                                Double concCV = concStat.getStdDev() / concStat.getMean();
-
-                                // update rows and add to main collection
-                                for (Map<String, Object> row : replicateRows)
+                                if (!concentrations.isEmpty())
                                 {
-                                    row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
-                                    row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, concStat.getMean());
-                                    row.put(ElisaAssayProvider.PERCENT_RECOVERY_MEAN, recovStat.getMean());
+                                    // compute stats on the replicate values
+                                    MathStat concStat = StatsService.get().getStats(concentrations);
+                                    MathStat recovStat = StatsService.get().getStats(recoveries);
+                                    Double concCV = concStat.getStdDev() / concStat.getMean();
+
+                                    // update rows and add to main collection
+                                    for (Map<String, Object> row : replicateRows)
+                                    {
+                                        row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
+                                        row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, concStat.getMean());
+                                        if (!recoveries.isEmpty())
+                                            row.put(ElisaAssayProvider.PERCENT_RECOVERY_MEAN, recovStat.getMean());
+                                    }
                                 }
                                 results.addAll(replicateRows);
                             }
@@ -395,34 +223,44 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 for (Position position : replicate.getPositions())
                                 {
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = createWellRow(replicate, well, position, standardCurve, specimenGroupMap, materialMap, pvs);
+                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, replicate, well, position, standardCurve, materialMap);
+                                    // don't record empty records
+                                    if (row.isEmpty())
+                                        continue;
 
-                                    Double conc = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
-                                    concentrations.add(conc);
-                                    samplePoints.add(new DoublePoint(conc, well.getValue()));
+                                    if (row.containsKey(ElisaAssayProvider.CONCENTRATION_PROPERTY))
+                                    {
+                                        Double conc = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
+                                        concentrations.add(conc);
+                                        samplePoints.add(new DoublePoint(conc, well.getValue()));
+                                    }
                                     replicateRows.add(row);
                                 }
 
-                                // compute concentration mean and CV values
-                                MathStat stat = StatsService.get().getStats(concentrations);
-                                Double concCV = stat.getStdDev() / stat.getMean();
-
-                                // update rows and add to main collection
-                                for (Map<String, Object> row : replicateRows)
+                                if (!concentrations.isEmpty())
                                 {
-                                    row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
-                                    row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, stat.getMean());
+                                    // compute concentration mean and CV values
+                                    MathStat stat = StatsService.get().getStats(concentrations);
+                                    Double concCV = stat.getStdDev() / stat.getMean();
+
+                                    // update rows and add to main collection
+                                    for (Map<String, Object> row : replicateRows)
+                                    {
+                                        row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
+                                        row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, stat.getMean());
+                                    }
                                 }
                                 results.addAll(replicateRows);
                             }
                             // compute sample scoped statistics
-                            calculateSampleStats(context.getUser(), materialMap.get(sampleGroup.getName()), sampleProperties, standardCurve.getType(), samplePoints);
+                            String materialKey = importHelper.getMaterialKey(plateName, sampleGroup.getName());
+                            calculateSampleStats(context.getUser(), materialMap.get(materialKey), sampleProperties, standardCurve, samplePoints);
                         }
 
                         // record the fit parameters and the r squared value for the run
                         DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY);
                         DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS_PROPERTY);
-                        if (cod != null && fitParams != null && !Double.isNaN(standardCurve.getFitError()))
+                        if (standardCurve != null && cod != null && fitParams != null && !Double.isNaN(standardCurve.getFitError()))
                         {
                             data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
                             if (standardCurve.getParameters() != null)
@@ -449,62 +287,31 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     }
 
     /**
-     * Helper to create a standard well row
-     *
-     * @param replicate the replicate well group
-     * @param well the well we are creating the row for
-     * @param stdCurveFit the selected curvefit for the standard curve
-     * @param specimenGroupMap map of position to specimen well group name
-     * @param materialMap map of specimen well group name to expMaterial
-     */
-    private Map<String, Object> createWellRow(WellGroup replicate, Well well, Position position, CurveFit stdCurveFit,
-                                              Map<Position, String> specimenGroupMap,
-                                              Map<String, ExpMaterial> materialMap, ProvenanceService pvs)
-    {
-        Map<String, Object> row = new HashMap<>();
-
-        row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
-        row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
-        row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
-        row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, stdCurveFit.fitCurveY(well.getValue()));
-
-        row.put(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY, replicate.getMean());
-        row.put(ElisaAssayProvider.CV_ABSORPTION_PROPERTY, replicate.getStdDev() / replicate.getMean());
-
-        // if this well is a sample well group add the material LSID
-        if (specimenGroupMap.containsKey(position))
-        {
-            ExpMaterial material = materialMap.get(specimenGroupMap.get(position));
-            if (material != null)
-            {
-                row.put(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, material.getLSID());
-                // TODO: Support adding the material to existing provenance inputs on the row, if any
-                if (pvs != null)
-                    row.put(ProvenanceService.PROVENANCE_INPUT_PROPERTY, List.of(material.getLSID()));
-            }
-        }
-        return row;
-    }
-
-    /**
      * Calculates a curve fit to represent the calibration curve, the type of curve fit is determined by
      * the run level property. A simple regression object can be passed in to be populated by the same input
      * data and can be used to generate an R squared value.
      *
      * @throws ExperimentException
      */
+    @Nullable
     private CurveFit calculateStandardCurve(ExpRun run, Plate plate, @Nullable SimpleRegression regression, Map<String, Double> standardConcentrations,
                                             Map<String, DomainProperty> runProperties) throws ExperimentException
     {
         // compute the calibration curve, there could be multiple control groups but one contains the standards
-        WellGroup stdWellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, "Standards");
+        WellGroup stdWellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, STANDARDS_WELL_GROUP_NAME);
         if (stdWellGroup != null)
         {
             List<DoublePoint> points = new ArrayList<>();
+            double maxValue = 0d;
 
             for (WellGroup replicate : stdWellGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
             {
-                double mean = replicate.getMean();
+                maxValue = replicate.getMean() > maxValue ? replicate.getMean() : maxValue;
+            }
+
+            for (WellGroup replicate : stdWellGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
+            {
+                double mean = replicate.getMean(); // / maxValue;
                 double concentration;
 
                 String key = replicate.getPositionDescription();
@@ -518,20 +325,28 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                     LOG.warn("Unable to find a standard concentration for the replicate well group : " + key);
             }
 
-            // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
-            StatsService.CurveFitType curveFitType = StatsService.CurveFitType.LINEAR;
-            DomainProperty curveFitPd = runProperties.get(DilutionAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
-            if (curveFitPd != null)
+            if (!points.isEmpty())
             {
-                Object value = run.getProperty(curveFitPd);
-                if (value != null)
-                    curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
+                points.sort(Comparator.comparing(o -> o.first));
+
+                // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
+                StatsService.CurveFitType curveFitType = StatsService.CurveFitType.LINEAR;
+                DomainProperty curveFitPd = runProperties.get(DilutionAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
+                if (curveFitPd != null)
+                {
+                    Object value = run.getProperty(curveFitPd);
+                    if (value != null)
+                        curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
+                }
+
+                CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, points.toArray(DoublePoint[]::new));
+                curveFit.setLogXScale(false);
+                curveFit.setAssumeCurveDecreasing(false);
+
+                return curveFit;
             }
-
-            CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, points.toArray(DoublePoint[]::new));
-            curveFit.setLogXScale(false);
-
-            return curveFit;
+            else
+                return null;
         }
         else
             throw new ExperimentException("Standards well group does not exists in the plate template : " + plate.getName());
@@ -541,17 +356,16 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
      * Generate sample scoped stats for this run
      * @param material the sample to compute stats for
      * @param sampleProps map of sample domain properties
-     * @param curveFitType curve fit selected for this run
      * @param sampleValues the list of x,y pairs (concentration, absorption) for the sample wells
      */
     private void calculateSampleStats(User user, @Nullable ExpMaterial material, Map<String, DomainProperty> sampleProps,
-                                      StatsService.CurveFitType curveFitType, List<DoublePoint> sampleValues) throws FitFailedException, ValidationException
+                                      CurveFit curveFit, List<DoublePoint> sampleValues) throws FitFailedException, ValidationException
     {
         if (material != null)
         {
-            if (sampleProps.containsKey(ElisaAssayProvider.AUC_PROPERTY))
+            if (sampleProps.containsKey(ElisaAssayProvider.AUC_PROPERTY) && curveFit != null)
             {
-                CurveFit sampleCurveFit = StatsService.get().getCurveFit(curveFitType, sampleValues.toArray(DoublePoint[]::new));
+                CurveFit sampleCurveFit = StatsService.get().getCurveFit(curveFit.getType(), sampleValues.toArray(DoublePoint[]::new));
                 sampleCurveFit.setLogXScale(false);
 
                 material.setProperty(user, sampleProps.get(ElisaAssayProvider.AUC_PROPERTY).getPropertyDescriptor(), sampleCurveFit.calculateAUC(StatsService.AUCType.NORMAL));
@@ -586,100 +400,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 double cv = concStat.getStdDev() / concStat.getMean();
                 material.setProperty(user, sampleProps.get(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY).getPropertyDescriptor(), cv);
             }
-        }
-    }
-
-    private Map<String, Double> getStandardConcentrations(AssayRunUploadContext context) throws ExperimentException
-    {
-        Map<String, Double> concentrations = new HashMap<>();
-        if (context instanceof ElisaRunUploadForm)
-        {
-            Map<String, Map<DomainProperty, String>> props = ((ElisaRunUploadForm)context).getConcentrationProperties();
-
-            for (Map.Entry<String, Map<DomainProperty, String>> entry : props.entrySet())
-            {
-                for (DomainProperty dp : entry.getValue().keySet())
-                {
-                    double conc = 0;
-                    if (ElisaAssayProvider.CONCENTRATION_PROPERTY.equals(dp.getName()))
-                    {
-                        conc = NumberUtils.toDouble(entry.getValue().get(dp), 0);
-                    }
-                    concentrations.put(entry.getKey(), conc);
-                }
-            }
-
-            return concentrations;
-        }
-        else
-            throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accessible.");
-    }
-
-    /**
-     * Import helper that uses the standard import wizard form entry fields.
-     */
-    private static class ManualImportHelper implements ElisaImportHelper
-    {
-        private AssayUploadXarContext _context;
-        private PlateBasedAssayProvider _provider;
-        private ExpProtocol _protocol;
-        private File _dataFile;
-
-        public ManualImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile)
-        {
-            _context = context;
-            _provider = provider;
-            _protocol = protocol;
-            _dataFile = dataFile;
-        }
-
-        @Override
-        public Set<String> getPlates()
-        {
-            return Set.of(PLACEHOLDER_PLATE_NAME);
-        }
-
-        @Override
-        public Map<Integer, Plate> getAnalyteToPlate(String plateName) throws ExperimentException
-        {
-            Map<Integer, Plate> analyteMap = new HashMap<>();
-            PlateReader reader = _provider.getPlateReader(BioTekPlateReader.LABEL);
-            if (reader != null)
-            {
-                PlateTemplate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
-                double[][] cellValues = reader.loadFile(template, _dataFile);
-                Plate plate = PlateService.get().createPlate(template, cellValues, null);
-
-                analyteMap.put(1, plate);
-            }
-            return analyteMap;
-        }
-
-        @Override
-        public Map<String, Double> getStandardConcentrations(String plateName, int analyteNum) throws ExperimentException
-        {
-            Map<String, Double> concentrations = new HashMap<>();
-            AssayRunUploadContext runUploadContext = _context.getContext();
-            if (runUploadContext instanceof ElisaRunUploadForm)
-            {
-                Map<String, Map<DomainProperty, String>> props = ((ElisaRunUploadForm)runUploadContext).getConcentrationProperties();
-
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : props.entrySet())
-                {
-                    for (DomainProperty dp : entry.getValue().keySet())
-                    {
-                        double conc = 0;
-                        if (ElisaAssayProvider.CONCENTRATION_PROPERTY.equals(dp.getName()))
-                        {
-                            conc = NumberUtils.toDouble(entry.getValue().get(dp), 0);
-                        }
-                        concentrations.put(entry.getKey(), conc);
-                    }
-                }
-                return concentrations;
-            }
-            else
-                throw new ExperimentException("The form is not an instance of ElisaRunUploadForm, concentration values were not accessible.");
         }
     }
 }

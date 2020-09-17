@@ -35,6 +35,7 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
 {
     public static final String DEFAULT_PLATE = "default";
     public static final String UNDILUTED_PLATE = "undiluted";
+    public static final String HIGH_THROUGHPUT_PLATE = "high-throughput (multi plate)";
     public static final String STANDARDS_CONTROL_SAMPLE = "Standards";
 
     @Override
@@ -46,7 +47,10 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public List<String> getTemplateTypes(Pair<Integer, Integer> size)
     {
-        return Arrays.asList(DEFAULT_PLATE, UNDILUTED_PLATE);
+        if (size.first == 8)
+            return Arrays.asList(DEFAULT_PLATE, UNDILUTED_PLATE);
+        else
+            return Arrays.asList(HIGH_THROUGHPUT_PLATE);
     }
 
     @Override
@@ -110,13 +114,68 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
                 }
             }
         }
+        else if (HIGH_THROUGHPUT_PLATE.equals(templateTypeName))
+        {
+            template = createHighThroughputPlate(container, rowCount, colCount);
+        }
+        return template;
+    }
+
+    private PlateTemplate createHighThroughputPlate(Container container, int rowCount, int colCount)
+    {
+        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+
+        // control well groups
+        template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(container, 0, 0),
+                PlateService.get().createPosition(container, 7, 2));
+
+        for (int row = 8; row < rowCount; row++)
+        {
+            String wellGroupName = "Control " + (row-7);
+            template.addWellGroup(wellGroupName, WellGroup.Type.CONTROL,
+                    PlateService.get().createPosition(container, row, 0),
+                    PlateService.get().createPosition(container, row, 2));
+        }
+
+        // control replicates
+        for (int row = 0; row < rowCount; row++)
+        {
+            String wellGroupName = (row <= 7)
+                    ? "Standard, Replicate " + (row + 1)
+                    : "Control, Replicate " + (row - 7);
+
+            template.addWellGroup(wellGroupName, WellGroup.Type.REPLICATE,
+                    PlateService.get().createPosition(container, row, 0),
+                    PlateService.get().createPosition(container, row, 2));
+        }
+
+        // sample well groups
+        for (int col = 3; col < colCount; col++)
+        {
+            String wellGroupName = "Sample " + (col-2);
+            template.addWellGroup(wellGroupName, WellGroup.Type.SPECIMEN,
+                    PlateService.get().createPosition(container, 0, col),
+                    PlateService.get().createPosition(container, rowCount-1, col));
+
+            // sample replicates
+            for (int row = 0; row < rowCount; row += 2)
+            {
+                String replicateGroupName = wellGroupName + ", Replicate " + ((row/2) + 1);
+                template.addWellGroup(replicateGroupName, WellGroup.Type.REPLICATE,
+                        PlateService.get().createPosition(container, row, col),
+                        PlateService.get().createPosition(container, row+1, col));
+            }
+        }
+
+        // replicate well groups
         return template;
     }
 
     @Override
     public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        return Collections.singletonList(new Pair<>(8, 12));
+        return List.of(new Pair<>(8, 12), new Pair<>(16, 24));
     }
 
     @Override
