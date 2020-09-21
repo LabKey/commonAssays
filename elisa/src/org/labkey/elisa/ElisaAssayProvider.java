@@ -94,6 +94,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String CORRELATION_COEFFICIENT_PROPERTY = "RSquared";
     public static final String CURVE_FIT_METHOD_PROPERTY = "CurveFitMethod";
     public static final String CURVE_FIT_PARAMETERS_PROPERTY = "CurveFitParams";
+    public static final String CONCENTRATION_UNITS_PROPERTY = "ConcentrationUnits";
 
     // results properties
     public static final String ABSORBANCE_PROPERTY = "Absorption";
@@ -108,7 +109,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String PERCENT_RECOVERY_MEAN = "Recovery_Mean";
     public static final String PLATE_PROPERTY = "PlateName";
     public static final String CONTROL_ID_PROPERTY = "ControlId";
-    public static final String CONTROL_AUC_PROPERTY = "AUC_Control";
 
     // sample properties
     public static final String AUC_PROPERTY = "AUC";
@@ -118,9 +118,19 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String CV_CONCENTRATION_PROPERTY = "Concentration_CV";
     public static final Set<String> EXTRA_SAMPLE_PROPS;
 
+    public static Set<String> REQUIRED_RESULT_PROPERTIES;
+
     static
     {
         EXTRA_SAMPLE_PROPS = Set.of(AUC_PROPERTY);
+
+        REQUIRED_RESULT_PROPERTIES = Set.of(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
+                WELL_LOCATION_PROPERTY,
+                WELLGROUP_PROPERTY,
+                ABSORBANCE_PROPERTY,
+                CONCENTRATION_PROPERTY,
+                STANDARD_CONCENTRATION_PROPERTY,
+                EXCLUDED_PROPERTY);
     }
 
     enum PlateReaderType
@@ -210,6 +220,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         DomainProperty fitProp = addProperty(domain, CORRELATION_COEFFICIENT_PROPERTY, "Coefficient of Determination", PropertyType.DOUBLE, "Coefficient of Determination of the calibration curve.");
         fitProp.setFormat("0.000");
         fitProp.setShownInInsertView(false);
+        addProperty(domain, CONCENTRATION_UNITS_PROPERTY, "Concentration Units", PropertyType.STRING, "Units eg. (ug/ml)");
 
         Container lookupContainer = c.getProject();
         DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
@@ -259,9 +270,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addProperty(dataDomain, WELLGROUP_PROPERTY, "Well Group", PropertyType.STRING, "Replicate Well Group");
 
         addPropertyWithFormat(dataDomain, ABSORBANCE_PROPERTY,  "Absorption", PropertyType.DOUBLE, "Raw signal value", "0.000");
-        DomainProperty concProp = addPropertyWithFormat(dataDomain, CONCENTRATION_PROPERTY,  "Concentration (ug/ml)", PropertyType.DOUBLE, "Calculated concentration", "0.000");
+        DomainProperty concProp = addPropertyWithFormat(dataDomain, CONCENTRATION_PROPERTY,  "Concentration", PropertyType.DOUBLE, "Calculated concentration", "0.000");
         concProp.setDefaultValueTypeEnum(DefaultValueType.LAST_ENTERED);
-        addPropertyWithFormat(dataDomain, STANDARD_CONCENTRATION_PROPERTY,  "Std Concentration (ug/ml)", PropertyType.DOUBLE, "Standard control concentration", "0.000");
+        addPropertyWithFormat(dataDomain, STANDARD_CONCENTRATION_PROPERTY,  "Std Concentration", PropertyType.DOUBLE, "Standard control concentration", "0.000");
 
         addProperty(dataDomain, SPOT_PROPERTY, "Spot", PropertyType.INTEGER, "Spot or Analyte for the well");
         addProperty(dataDomain, PLATE_PROPERTY, "Plate Name", PropertyType.STRING, "Plate Name for multi-plate imports");
@@ -274,9 +285,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         addPropertyWithFormat(dataDomain, CV_ABSORPTION_PROPERTY, "Absorption CV", PropertyType.DOUBLE, "Absorption CV across replicates", "0.000");
         addPropertyWithFormat(dataDomain, MEAN_CONCENTRATION_PROPERTY, "Concentration Mean", PropertyType.DOUBLE, "Mean Concentration across replicates", "0.000");
         addPropertyWithFormat(dataDomain, CV_CONCENTRATION_PROPERTY, "Concentration CV", PropertyType.DOUBLE, "Concentration CV across replicates", "0.000");
-
         addProperty(dataDomain, CONTROL_ID_PROPERTY, "Control ID", PropertyType.STRING, "Control Well Identifier");
-        addPropertyWithFormat(dataDomain, CONTROL_AUC_PROPERTY, "Control AUC", PropertyType.DOUBLE, "Area Under the Curve", "0.0000");
 
         return new Pair<>(dataDomain, Collections.emptyMap());
     }
@@ -350,13 +359,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         runProperties.add(CURVE_FIT_PARAMETERS_PROPERTY);
 
         Set<String> resultProperties = domainMap.get(ASSAY_DOMAIN_DATA);
-        resultProperties.add(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
-        resultProperties.add(WELL_LOCATION_PROPERTY);
-        resultProperties.add(WELLGROUP_PROPERTY);
-        resultProperties.add(ABSORBANCE_PROPERTY);
-        resultProperties.add(CONCENTRATION_PROPERTY);
-        resultProperties.add(STANDARD_CONCENTRATION_PROPERTY);
-        resultProperties.add(EXCLUDED_PROPERTY);
+        resultProperties.addAll(REQUIRED_RESULT_PROPERTIES);
 
         domainMap.get(ASSAY_DOMAIN_SAMPLE_WELLGROUP).add(AUC_PROPERTY);
 

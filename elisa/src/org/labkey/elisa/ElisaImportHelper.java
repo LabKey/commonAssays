@@ -50,5 +50,5 @@ public interface ElisaImportHelper
      * to incorporate the plate name unless samples are the same across plates. Otherwise the well
      * group name is sufficient.
      */
-    String getMaterialKey(String plateName, String sampleWellGroup);
+    String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup);
 }

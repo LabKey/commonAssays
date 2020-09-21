@@ -16,6 +16,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
 import org.labkey.api.reader.DataLoaderService;
@@ -28,8 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.labkey.elisa.ElisaDataHandler.STANDARDS_WELL_GROUP_NAME;
 
 public class HighThroughputImportHelper extends AbstractElisaImportHelper
 {
@@ -67,6 +66,8 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             if (!hasWellLocationColumn)
                 throw new ExperimentException("Sample metadata file does not contain required column \"" + hasWellLocationColumn + "\".");
 
+            List<? extends DomainProperty> resultDomain = _provider.getResultsDomain(_protocol).getProperties();
+
             for (Map<String, Object> row : loader)
             {
                 String wellLocation = String.valueOf(row.get(wellLocationColumnName));
@@ -83,7 +84,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
                     // store the raw signal values on a per analyte basis
                     analytePlate.setRawSignal(position, spot, signal);
-                    analytePlate.setExtraProperties(row, position, spot);
+                    analytePlate.setExtraProperties(row, position, spot, resultDomain);
 
                     if (concentration != null)
                     {
@@ -123,7 +124,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
         Map<Position, String> specimenGroupMap = getSpecimenGroupMap();
         if (specimenGroupMap.containsKey(position))
         {
-            String materialKey = getMaterialKey(plateName, specimenGroupMap.get(position));
+            String materialKey = getMaterialKey(plateName, spot, specimenGroupMap.get(position));
             ExpMaterial material = materialMap.get(materialKey);
             if (material != null)
             {
@@ -137,18 +138,18 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     }
 
     /**
-     * For multiple plate uploads, we need to create unique specimen LSIDs for each plate/sample
+     * For multiple plate uploads, we need to create unique specimen LSIDs for each plate/sample/analyte
      * combination.
      */
-    public static String getSpecimenGroupKey(String plateName, String sampleWellGroup)
+    public static String getSpecimenGroupKey(String plateName, Integer analyteNum, String sampleWellGroup)
     {
-        return plateName + "-" + sampleWellGroup;
+        return plateName + "-" + analyteNum + "-" + sampleWellGroup;
     }
 
     @Override
-    public String getMaterialKey(String plateName, String sampleWellGroup)
+    public String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup)
     {
-        return getSpecimenGroupKey(plateName, sampleWellGroup);
+        return getSpecimenGroupKey(plateName, analyteNum, sampleWellGroup);
     }
 
     @Override
@@ -211,24 +212,14 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
         public void setStdConcentration(Position position, Integer spot, Double concentration)
         {
-            WellGroupTemplate replicateWellGroup = null;
-            WellGroupTemplate controlWellGroup = null;
-
             for (WellGroupTemplate wellGroup : _plateTemplate.getWellGroups(position))
             {
                 if (wellGroup.getType() == WellGroup.Type.REPLICATE)
-                    replicateWellGroup = wellGroup;
-                else if (wellGroup.getType() == WellGroup.Type.CONTROL)
-                    controlWellGroup = wellGroup;
-            }
-
-            if (controlWellGroup != null && replicateWellGroup != null)
-            {
-                // limit to only the Standards controls
-                if (controlWellGroup.getName().equals(STANDARDS_WELL_GROUP_NAME))
                 {
                     Map<String, Double> concentrations = _stdConcentrations.computeIfAbsent(spot, s -> new HashMap<>());
-                    concentrations.put(replicateWellGroup.getPositionDescription(), concentration);
+                    concentrations.put(wellGroup.getPositionDescription(), concentration);
+
+                    return;
                 }
             }
         }
@@ -242,7 +233,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             }
         }
 
-        public void setExtraProperties(Map<String, Object> row, PositionImpl position, Integer spot)
+        public void setExtraProperties(Map<String, Object> row, PositionImpl position, Integer spot, List<? extends DomainProperty> resultsDomain)
         {
             Map<String, Object> extraProperties = new HashMap<>();
             // need to adjust the column value to be 0 based to match the template locations
@@ -260,12 +251,31 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
                 }
             }
 
-            if (row.containsKey(ElisaAssayProvider.DILUTION_PROPERTY))
+            // pick up any properties that match those in the results domain (outside of the built-in ones)
+            for (DomainProperty prop : resultsDomain)
             {
-                extraProperties.put(ElisaAssayProvider.DILUTION_PROPERTY, row.get(ElisaAssayProvider.DILUTION_PROPERTY));
+                if (!ElisaAssayProvider.REQUIRED_RESULT_PROPERTIES.contains(prop.getName()))
+                {
+                    Object value = getValue(row, prop);
+                    if (value != null)
+                        extraProperties.put(prop.getName(), value);
+                }
             }
-
             _extraWellData.put(getWellAnalyteKey(position, spot), extraProperties);
+        }
+
+        private Object getValue(Map<String, Object> row, DomainProperty property)
+        {
+            Object value = row.get(property.getName());
+            if (value != null)
+                return value;
+            for (String alias : property.getImportAliasSet())
+            {
+                value = row.get(alias);
+                if (value != null)
+                    return value;
+            }
+            return null;
         }
 
         public Map<String, Object> getExtraProperties(Position position, Integer spot)

@@ -50,26 +50,31 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
             String plateColumnName = "Plate Name";
             String sampleColumnName = "Sample";
             String wellLocationColumnName = "Well";
+            String spotColumnName = "Spot";
 
             boolean hasPlateColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(plateColumnName));
             boolean hasSampleColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(sampleColumnName));
             boolean hasWellLocationColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(wellLocationColumnName));
+            boolean hasSpotColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(spotColumnName));
 
             if (!hasPlateColumn)
                 throw new ExperimentException("Sample metadata file does not contain required column \"" + plateColumnName + "\".");
             if (!hasSampleColumn)
                 throw new ExperimentException("Sample metadata file does not contain required column \"" + sampleColumnName + "\".");
             if (!hasWellLocationColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + hasWellLocationColumn + "\".");
+                throw new ExperimentException("Sample metadata file does not contain required column \"" + wellLocationColumnName + "\".");
+            if (!hasSpotColumn)
+                throw new ExperimentException("Sample metadata file does not contain required column \"" + spotColumnName + "\".");
 
             for (Map<String, Object> row : loader)
             {
                 String wellLocation = String.valueOf(row.get(wellLocationColumnName));
                 String plateName = String.valueOf(row.get(plateColumnName));
+                Integer spot = (Integer)row.get(spotColumnName);
 
                 if (wellLocation != null && plateName != null)
                 {
-                    String sampleWellGroup = getSampleWellGroupFromLocation(plateName, wellLocation);
+                    String sampleWellGroup = getSampleWellGroupFromLocation(plateName, spot, wellLocation);
                     if (sampleWellGroup != null)
                     {
                         Map<DomainProperty, String> sampleProperties = allProperties.computeIfAbsent(sampleWellGroup, k -> new HashMap<>());
@@ -91,7 +96,7 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
     }
 
     @Nullable
-    private String getSampleWellGroupFromLocation(String plateName, String wellLocation)
+    private String getSampleWellGroupFromLocation(String plateName, Integer analyteNum, String wellLocation)
     {
         try
         {
@@ -102,7 +107,7 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
             for (WellGroupTemplate wellGroup : _template.getWellGroups(position))
             {
                 if (wellGroup.getType() == WellGroup.Type.SPECIMEN)
-                    return HighThroughputImportHelper.getSpecimenGroupKey(plateName, wellGroup.getName());
+                    return HighThroughputImportHelper.getSpecimenGroupKey(plateName, analyteNum, wellGroup.getName());
             }
             return null;
         }

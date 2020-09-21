@@ -72,7 +72,7 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     }
 
     @Override
-    public String getMaterialKey(String plateName, String sampleWellGroup)
+    public String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup)
     {
         return sampleWellGroup;
     }

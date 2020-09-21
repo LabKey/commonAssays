@@ -253,7 +253,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 results.addAll(replicateRows);
                             }
                             // compute sample scoped statistics
-                            String materialKey = importHelper.getMaterialKey(plateName, sampleGroup.getName());
+                            String materialKey = importHelper.getMaterialKey(plateName, spot, sampleGroup.getName());
                             calculateSampleStats(context.getUser(), materialMap.get(materialKey), sampleProperties, standardCurve, samplePoints);
                         }
 
@@ -322,7 +322,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                     regression.addData(concentration, mean);
                 }
                 else
-                    LOG.warn("Unable to find a standard concentration for the replicate well group : " + key);
+                    LOG.info("Unable to find a standard concentration for the replicate well group : " + key);
             }
 
             if (!points.isEmpty())
