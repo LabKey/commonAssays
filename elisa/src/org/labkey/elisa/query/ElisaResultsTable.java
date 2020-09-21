@@ -25,16 +25,17 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.SampleTypeService;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
-import org.labkey.elisa.ElisaAssayProvider;
 import org.labkey.elisa.ElisaDataHandler;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * User: klum
@@ -48,6 +49,18 @@ public class ElisaResultsTable extends AssayResultTable
 
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
+        Set<FieldKey> visibleColumns = new LinkedHashSet<>();
+
+
+        // add material lookup columns to the view first, so they appear at the left:
+        if (sampleType != null)
+        {
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
+            {
+                visibleColumns.add(FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
+                        ExpMaterialTable.Column.Property.toString(), pd.getName()));
+            }
+        }
 
         // add a lookup to the material table
         BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
@@ -76,19 +89,7 @@ public class ElisaResultsTable extends AssayResultTable
             }
         });
 
-        List<FieldKey> defaultColumns = List.of(
-                FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property", ElisaAssayProvider.SPECIMENID_PROPERTY_NAME),
-                FieldKey.fromParts(ElisaAssayProvider.WELL_LOCATION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.WELLGROUP_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.STANDARD_CONCENTRATION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.ABSORBANCE_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.CV_ABSORPTION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.CONCENTRATION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY),
-                FieldKey.fromParts(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY),
-                FieldKey.fromParts(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY, "Property", ElisaAssayProvider.AUC_PROPERTY)
-        );
-        setDefaultVisibleColumns(defaultColumns);
+        visibleColumns.addAll(getDefaultVisibleColumns());
+        setDefaultVisibleColumns(visibleColumns);
     }
 }
