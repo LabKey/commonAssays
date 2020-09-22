@@ -734,7 +734,7 @@ public class FlowManager
 
         try
         {
-            Table.delete(getTinfoKeywordAttr(), entry._rowId);
+            Table.delete(attributeTable(type), entry._rowId);
         }
         finally
         {
