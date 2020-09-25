@@ -15,14 +15,12 @@
  */
 package org.labkey.test.tests.luminex;
 
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
-import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -38,6 +36,7 @@ import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +77,7 @@ public final class LuminexPositivityTest extends LuminexTest
     @Test (timeout = 16 * 60 * 1000) // Preferable to have the individual test time out rather than the class
     public void testPositivity()
     {
-        Assume.assumeTrue("Skipping test on SQL Server: TODO 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
+        // Assume.assumeTrue("Skipping test on SQL Server: TODO Issue 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
         setupResultsDefaultView();
         test3xFoldChange();
         test5xFoldChange();
@@ -204,9 +203,9 @@ public final class LuminexPositivityTest extends LuminexTest
         verifyExclusionPipelineJobComplete(2, "INSERT analyte exclusion", runToKeep, "");
 
         setPositivityThresholdParams(100, 99);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 1", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
-        checkPositivityValues("positive", 0, new String[0]);
-        checkPositivityValues("negative", 0, new String[0]);
+        DataRegionTable drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 1", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
+        checkPositivityValues("positive", 0, new String[0], drt);
+        checkPositivityValues("negative", 0, new String[0], drt);
         clickAndWait(Locator.linkWithText("view runs"));
         waitAndClickAndWait(Locator.linkWithText(runToKeep));
         excludeAnalyteForRun(_analyteNames.get(0), false, "");
@@ -216,11 +215,11 @@ public final class LuminexPositivityTest extends LuminexTest
 
         // now we actual test the case of getting baseline visit data from a previously uploaded run
         setPositivityThresholdParams(99, 98);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 2", TEST_ASSAY_LUM_FILE12, "1", "3", false, true);
+        drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run 2", TEST_ASSAY_LUM_FILE12, "1", "3", false, true);
         String[] posWells = new String[]{"A2", "B2", "A6", "B6", "A9", "B9", "A10", "B10"};
-        checkPositivityValues("positive", posWells.length, posWells);
+        checkPositivityValues("positive", posWells.length, posWells, drt);
         String[] negWells = new String[]{"A3", "B3", "A5", "B5"};
-        checkPositivityValues("negative", negWells.length, negWells);
+        checkPositivityValues("negative", negWells.length, negWells, drt);
     }
 
     @LogMethod
@@ -228,9 +227,9 @@ public final class LuminexPositivityTest extends LuminexTest
     {
         setPositivityThresholdParams(100, 100);
         setNegativeControlParams(false, true);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Negative Control", TEST_ASSAY_LUM_FILE11, "1", "5", false, true);
-        checkPositivityValues("positive", 0, new String[0]);
-        checkPositivityValues("negative", 0, new String[0]);
+        DataRegionTable drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Negative Control", TEST_ASSAY_LUM_FILE11, "1", "5", false, true);
+        checkPositivityValues("positive", 0, new String[0], drt);
+        checkPositivityValues("negative", 0, new String[0], drt);
     }
 
     @LogMethod
@@ -243,21 +242,21 @@ public final class LuminexPositivityTest extends LuminexTest
 
         // file contains the baseline visit data, which is not used in this case since we don't have a baseline visit run property set
         setPositivityThresholdParams(101, 100);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " No Base Visit 1", TEST_ASSAY_LUM_FILE11, "", "", false, true);
+        DataRegionTable drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " No Base Visit 1", TEST_ASSAY_LUM_FILE11, "", "", false, true);
         String[] posWells = new String[] {"A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4", "A6", "B6", "A7", "B7", "A8", "B8", "A9", "B9", "A10", "B10"};
-        checkPositivityValues("positive", posWells.length, posWells);
+        checkPositivityValues("positive", posWells.length, posWells, drt);
         String[] negWells = new String[] {"A5", "B5"};
-        checkPositivityValues("negative", negWells.length, negWells);
-        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01");
-        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15");
+        checkPositivityValues("negative", negWells.length, negWells, drt);
+        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01", drt);
+        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15", drt);
 
         // file contains data that is only checked against thresholds (i.e. no baseline visit data)
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " No Base Visit 2", TEST_ASSAY_LUM_FILE13, "", "", false, false);
+        drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " No Base Visit 2", TEST_ASSAY_LUM_FILE13, "", "", false, false);
         posWells = new String[] {"C1", "D1"};
-        checkPositivityValues("positive", posWells.length, posWells);
+        checkPositivityValues("positive", posWells.length, posWells, drt);
         negWells = new String[] {"C2", "D2", "C3", "D3", "C4", "D4", "C5", "D5"};
-        checkPositivityValues("negative", negWells.length, negWells);
-        checkDescriptionParsing("P562, Wk 48, 7-27-2011", " ", "P562", "48.0", "2011-07-27");
+        checkPositivityValues("negative", negWells.length, negWells, drt);
+        checkDescriptionParsing("P562, Wk 48, 7-27-2011", " ", "P562", "48.0", "2011-07-27", drt);
     }
 
     @LogMethod
@@ -265,13 +264,13 @@ public final class LuminexPositivityTest extends LuminexTest
     {
         // file contains the baseline visit data
         setPositivityThresholdParams(100, 101);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " 5x Fold Change", TEST_ASSAY_LUM_FILE11, "1", "5", false, true);
+        DataRegionTable drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " 5x Fold Change", TEST_ASSAY_LUM_FILE11, "1", "5", false, true);
         String[] posWells = new String[] {"A9", "B9", "A10", "B10"};
-        checkPositivityValues("positive", posWells.length, posWells);
+        checkPositivityValues("positive", posWells.length, posWells, drt);
         String[] negWells = new String[] {"A2", "B2", "A3", "B3", "A5", "B5", "A6", "B6"};
-        checkPositivityValues("negative", negWells.length, negWells);
-        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01");
-        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15");
+        checkPositivityValues("negative", negWells.length, negWells, drt);
+        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01", drt);
+        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15", drt);
     }
 
     @LogMethod
@@ -279,13 +278,13 @@ public final class LuminexPositivityTest extends LuminexTest
     {
         // file contains the baseline visit data
         setPositivityThresholdParams(100, 100);
-        uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " 3x Fold Change", TEST_ASSAY_LUM_FILE11, "1", "3", false, false);
+        DataRegionTable drt = uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " 3x Fold Change", TEST_ASSAY_LUM_FILE11, "1", "3", false, false);
         String[] posWells = new String[] {"A2", "B2", "A6", "B6", "A9", "B9", "A10", "B10"};
-        checkPositivityValues("positive", posWells.length, posWells);
+        checkPositivityValues("positive", posWells.length, posWells, drt);
         String[] negWells = new String[] {"A3", "B3", "A5", "B5"};
-        checkPositivityValues("negative", negWells.length, negWells);
-        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01");
-        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15");
+        checkPositivityValues("negative", negWells.length, negWells, drt);
+        checkDescriptionParsing("123400001 1 2012-10-01", " ", "123400001", "1.0", "2012-10-01", drt);
+        checkDescriptionParsing("123400002,2,1/15/2012", " ", "123400002", "2.0", "2012-01-15", drt);
     }
 
     private void setupResultsDefaultView()
@@ -355,9 +354,8 @@ public final class LuminexPositivityTest extends LuminexTest
     }
 
     @LogMethod (quiet = true)
-    private void checkDescriptionParsing(@LoggedParam String description, String specimenID, String participantID, String visitID, String date)
+    private void checkDescriptionParsing(@LoggedParam String description, String specimenID, String participantID, String visitID, String date, DataRegionTable drt)
     {
-        DataRegionTable drt = new DataRegionTable("Data", this);
         drt.ensureColumnsPresent("Description", "Specimen ID", "Participant ID", "Visit ID", "Date");
         int rowID = drt.getIndexWhereDataAppears(description, "Description");
         assertEquals(specimenID, drt.getDataAsText(rowID, "Specimen ID"));
@@ -367,15 +365,13 @@ public final class LuminexPositivityTest extends LuminexTest
     }
 
     @LogMethod (quiet = true)
-    private void checkPositivityValues(@LoggedParam String type, int numExpected, String[] positivityWells)
+    private void checkPositivityValues(@LoggedParam String type, int numExpected, String[] positivityWells, DataRegionTable drt)
     {
         // verify that we are already on the Data results view
         assertElementPresent(Locator.tagWithText("span", "Exclusions"));
 
-        assertTextPresent(type, numExpected);
-
-        DataRegionTable drt = new DataRegionTable("Data", this);
         List<String> posivitiy = drt.getColumnDataAsText("Positivity");
+        assertEquals(String.format("Wrong number of '%s' wells.", type), numExpected, Collections.frequency(posivitiy, type));
         List<String> wells = drt.getColumnDataAsText("Well");
 
         for(String well : positivityWells)

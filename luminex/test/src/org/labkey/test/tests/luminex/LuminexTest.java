@@ -608,7 +608,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
 
     @LogMethod(quiet = true)
-    public void uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
+    public DataRegionTable uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
     {
         createNewAssayRun(assayName, assayRunId);
         checkCheckbox(Locator.name("calculatePositivity"));
@@ -617,6 +617,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         selectPositivityFile(file, expectDuplicateFile);
         setAnalytePropertyValues();
         finishUploadPositivityFile(assayRunId, isBackgroundUpload);
+        return new DataRegionTable("Data", this);
     }
 
     public void finishUploadPositivityFile(String assayRunId, boolean isBackgroundUpload)
