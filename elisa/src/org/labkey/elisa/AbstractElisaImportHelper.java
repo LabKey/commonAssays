@@ -63,7 +63,7 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
         row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
         row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
         if (stdCurveFit != null)
-            row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, stdCurveFit.fitCurveY(well.getValue()));
+            row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, stdCurveFit.solveForX(well.getValue()));
 
         row.put(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY, replicate.getMean());
         row.put(ElisaAssayProvider.CV_ABSORPTION_PROPERTY, replicate.getStdDev() / replicate.getMean());

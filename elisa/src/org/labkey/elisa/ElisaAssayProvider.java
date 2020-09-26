@@ -49,6 +49,7 @@ import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
+import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
@@ -81,6 +82,7 @@ import java.util.stream.Collectors;
 
 import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_DATA;
 import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_RUN;
+import static org.labkey.elisa.ElisaModule.EXPERIMENTAL_MULTI_PLATE_SUPPORT;
 
 /**
  * User: klum
@@ -98,8 +100,12 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     // results properties
     public static final String ABSORBANCE_PROPERTY = "Absorption";
+    public static final String MEAN_ABSORPTION_PROPERTY = "Absorption_Mean";
+    public static final String CV_ABSORPTION_PROPERTY = "Absorption_CV";
     public static final String STANDARD_CONCENTRATION_PROPERTY = "Std_Concentration";
     public static final String CONCENTRATION_PROPERTY = "Concentration";
+    public static final String MEAN_CONCENTRATION_PROPERTY = "Concentration_Mean";
+    public static final String CV_CONCENTRATION_PROPERTY = "Concentration_CV";
     public static final String WELL_LOCATION_PROPERTY = "WellLocation";
     public static final String WELLGROUP_PROPERTY = "WellgroupLocation";
     public static final String SPOT_PROPERTY = "Spot";
@@ -112,10 +118,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     // sample properties
     public static final String AUC_PROPERTY = "AUC";
-    public static final String MEAN_ABSORPTION_PROPERTY = "Absorption_Mean";
-    public static final String CV_ABSORPTION_PROPERTY = "Absorption_CV";
-    public static final String MEAN_CONCENTRATION_PROPERTY = "Concentration_Mean";
-    public static final String CV_CONCENTRATION_PROPERTY = "Concentration_CV";
     public static final Set<String> EXTRA_SAMPLE_PROPS;
 
     public static Set<String> REQUIRED_RESULT_PROPERTIES;
@@ -222,11 +224,14 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         fitProp.setShownInInsertView(false);
         addProperty(domain, CONCENTRATION_UNITS_PROPERTY, "Concentration Units", PropertyType.STRING, "Units eg. (ug/ml)");
 
-        Container lookupContainer = c.getProject();
-        DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
-        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
-        method.setRequired(true);
-        method.setShownInUpdateView(false);
+        if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
+        {
+            Container lookupContainer = c.getProject();
+            DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
+            method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
+            method.setRequired(true);
+            method.setShownInUpdateView(false);
+        }
 
         DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS_PROPERTY, "Fit Parameters", PropertyType.STRING, "Curve fit parameters.");
         fitParams.setShownInInsertView(false);
@@ -304,11 +309,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         if (form instanceof ElisaRunUploadForm)
         {
             return new JspView<>("/org/labkey/assay/view/tsvDataDescription.jsp", form);
-/*
-
-            if (((ElisaRunUploadForm)form).getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
-                return new HtmlView(HtmlString.of("The ELISA data files must be in a tabular format (.tsv or .csv extension)."));
-*/
         }
         return new HtmlView(HtmlString.of("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension)."));
     }
@@ -328,7 +328,10 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
     {
-        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
+        if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
+            return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
+        else
+            return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL};
     }
 
     @Override

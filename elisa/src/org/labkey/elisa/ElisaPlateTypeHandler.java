@@ -21,11 +21,14 @@ import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.util.Pair;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.labkey.elisa.ElisaModule.EXPERIMENTAL_MULTI_PLATE_SUPPORT;
 
 /**
  * User: klum
@@ -175,7 +178,10 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
     @Override
     public List<Pair<Integer, Integer>> getSupportedPlateSizes()
     {
-        return List.of(new Pair<>(8, 12), new Pair<>(16, 24));
+        if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
+            return List.of(new Pair<>(8, 12), new Pair<>(16, 24));
+        else
+            return List.of(new Pair<>(8, 12));
     }
 
     @Override
