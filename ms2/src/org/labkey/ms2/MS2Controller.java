@@ -3699,7 +3699,7 @@ public class MS2Controller extends SpringActionController
                     if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);
                     else
-                        out.write(getFormattedValue(ctx));
+                        getFormattedHtml(ctx).appendTo(out);
                 }
             };
             ActionURL showRunURL = MS2Controller.getShowRunURL(getUser(), ContainerManager.getRoot());
