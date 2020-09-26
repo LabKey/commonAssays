@@ -308,7 +308,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     {
         if (form instanceof ElisaRunUploadForm)
         {
-            return new JspView<>("/org/labkey/assay/view/tsvDataDescription.jsp", form);
+            if (((ElisaRunUploadForm)form).getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
+                return new JspView<>("/org/labkey/assay/view/tsvDataDescription.jsp", form);
         }
         return new HtmlView(HtmlString.of("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension)."));
     }
