@@ -37,6 +37,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.util.HtmlString;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
@@ -206,13 +207,13 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 
         @NotNull
         @Override
-        public String getFormattedValue(RenderContext ctx)
+        public HtmlString getFormattedHtml(RenderContext ctx)
         {
-            String value = super.getFormattedValue(ctx);
+            HtmlString value = super.getFormattedHtml(ctx);
             PlateReader reader = getReader(ctx);
 
             if (reader != null)
-                return reader.getWellDisplayValue(value);
+                return HtmlString.of(reader.getWellDisplayValue(value));
             else
                 return value;
         }

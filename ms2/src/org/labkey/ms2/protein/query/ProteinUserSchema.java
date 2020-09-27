@@ -34,6 +34,7 @@ import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.ProteinManager;
@@ -358,9 +359,10 @@ public class ProteinUserSchema extends UserSchema
 
                     @NotNull
                     @Override
-                    public String getFormattedValue(RenderContext ctx)
+                    public HtmlString getFormattedHtml(RenderContext ctx)
                     {
-                        return PageFlowUtil.filter(getDisplayValue(ctx));
+                        Object value = getDisplayValue(ctx);
+                        return value == null ? HtmlString.EMPTY_STRING : HtmlString.of(value.toString());
                     }
 
                     @Override
