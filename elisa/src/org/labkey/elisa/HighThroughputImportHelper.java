@@ -23,7 +23,6 @@ import org.labkey.api.reader.DataLoaderService;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,29 +48,15 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             _plateTemplate = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
             DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
             DataLoader loader = factory.createLoader(_dataFile, true);
-
-            String plateColumnName = "Plate Name";
-            String sampleColumnName = "Sample";
-            String wellLocationColumnName = "Well";
             String signalColumnName = "Signal";
 
-            boolean hasPlateColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(plateColumnName));
-            boolean hasSampleColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(sampleColumnName));
-            boolean hasWellLocationColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(wellLocationColumnName));
-
-            if (!hasPlateColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + plateColumnName + "\".");
-            if (!hasSampleColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + sampleColumnName + "\".");
-            if (!hasWellLocationColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + hasWellLocationColumn + "\".");
-
+            ElisaSampleFilePropertyHelper.validateRequiredColumns(loader.getColumns());
             List<? extends DomainProperty> resultDomain = _provider.getResultsDomain(_protocol).getProperties();
 
             for (Map<String, Object> row : loader)
             {
-                String wellLocation = String.valueOf(row.get(wellLocationColumnName));
-                String plateName = String.valueOf(row.get(plateColumnName));
+                String wellLocation = String.valueOf(row.get(ElisaSampleFilePropertyHelper.WELL_LOCATION_COLUMN_NAME));
+                String plateName = String.valueOf(row.get(ElisaSampleFilePropertyHelper.PLATE_COLUMN_NAME));
 
                 AnalytePlate analytePlate = _plateMap.computeIfAbsent(plateName, p -> new AnalytePlate(p, _plateTemplate));
 

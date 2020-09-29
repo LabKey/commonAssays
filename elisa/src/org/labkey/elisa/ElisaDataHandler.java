@@ -136,6 +136,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         Map<String, Double> standardConcentrations = importHelper.getStandardConcentrations(plateName, analytePlateEntry.getKey());
 
                         CurveFit standardCurve = calculateStandardCurve(run, plate, regression, standardConcentrations, runProperties);
+                        if (standardCurve != null && standardCurve.getParameters() == null)
+                            throw new ExperimentException("Unable to fit the standard concentrations to a curve, please check the input data and try again");
 
                         Map<String, ExpMaterial> materialMap = data.getRun().getMaterialInputs().entrySet().stream()
                                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));

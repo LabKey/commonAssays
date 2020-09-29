@@ -3,7 +3,6 @@ package org.labkey.elisa;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.plate.WellGroupTemplate;
@@ -11,6 +10,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
 import org.labkey.api.reader.DataLoaderService;
@@ -26,6 +26,11 @@ import java.util.Map;
 
 public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
 {
+    public static final String PLATE_COLUMN_NAME = "Plate Name";
+    public static final String SAMPLE_COLUMN_NAME = "Sample";
+    public static final String WELL_LOCATION_COLUMN_NAME = "Well";
+    public static final String SPOT_COLUMN_NAME = "Spot";
+
     public ElisaSampleFilePropertyHelper(Container container, ExpProtocol protocol, List<? extends DomainProperty> domainProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
         super(container, protocol, domainProperties, template, inputFormat);
@@ -47,30 +52,13 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
             DataLoaderFactory factory = DataLoaderService.get().findFactory(metadataFile, null);
             DataLoader loader = factory.createLoader(metadataFile, true);
 
-            String plateColumnName = "Plate Name";
-            String sampleColumnName = "Sample";
-            String wellLocationColumnName = "Well";
-            String spotColumnName = "Spot";
-
-            boolean hasPlateColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(plateColumnName));
-            boolean hasSampleColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(sampleColumnName));
-            boolean hasWellLocationColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(wellLocationColumnName));
-            boolean hasSpotColumn = Arrays.stream(loader.getColumns()).anyMatch(c -> c.getColumnName().equalsIgnoreCase(spotColumnName));
-
-            if (!hasPlateColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + plateColumnName + "\".");
-            if (!hasSampleColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + sampleColumnName + "\".");
-            if (!hasWellLocationColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + wellLocationColumnName + "\".");
-            if (!hasSpotColumn)
-                throw new ExperimentException("Sample metadata file does not contain required column \"" + spotColumnName + "\".");
+            validateRequiredColumns(loader.getColumns());
 
             for (Map<String, Object> row : loader)
             {
-                String wellLocation = String.valueOf(row.get(wellLocationColumnName));
-                String plateName = String.valueOf(row.get(plateColumnName));
-                Integer spot = (Integer)row.get(spotColumnName);
+                String wellLocation = String.valueOf(row.get(WELL_LOCATION_COLUMN_NAME));
+                String plateName = String.valueOf(row.get(PLATE_COLUMN_NAME));
+                Integer spot = (Integer)row.get(SPOT_COLUMN_NAME);
 
                 if (wellLocation != null && plateName != null)
                 {
@@ -93,6 +81,18 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
         }
         _sampleProperties = allProperties;
         return _sampleProperties;
+    }
+
+    public static void validateRequiredColumns(ColumnDescriptor[] columns) throws ExperimentException
+    {
+        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(PLATE_COLUMN_NAME)))
+            throw new ExperimentException("Sample metadata file does not contain required column \"" + PLATE_COLUMN_NAME + "\".");
+        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(SAMPLE_COLUMN_NAME)))
+            throw new ExperimentException("Sample metadata file does not contain required column \"" + SAMPLE_COLUMN_NAME + "\".");
+        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(WELL_LOCATION_COLUMN_NAME)))
+            throw new ExperimentException("Sample metadata file does not contain required column \"" + WELL_LOCATION_COLUMN_NAME + "\".");
+        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(SPOT_COLUMN_NAME)))
+            throw new ExperimentException("Sample metadata file does not contain required column \"" + SPOT_COLUMN_NAME + "\".");
     }
 
     @Nullable
