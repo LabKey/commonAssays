@@ -22,7 +22,7 @@ public interface ElisaImportHelper
 
     /**
      * Gets a map of analyte number to plate populated with raw signal values. Multi-plex plates will
-     * record multiple values per well (for each analyte). We will model this a multiple plates, one for
+     * record multiple values per well (for each analyte). We will model this as multiple plates, one for
      * each analyte.
      */
     Map<Integer, Plate> getAnalyteToPlate(String plateName) throws ExperimentException;
