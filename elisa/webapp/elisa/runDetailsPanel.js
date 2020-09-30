@@ -22,15 +22,29 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
     },
 
     initComponent : function() {
-
-        this.items = [
-            this.createRunDetailView()
-        ];
+        this.items = [];
 
         this.callParent([arguments]);
+
+        this.queryRunDetails();
     },
 
-    createRunDetailView : function() {
+    queryRunDetails : function() {
+        LABKEY.Query.selectRows({
+            schemaName: this.schemaName,
+            queryName: this.runTableName,
+            columns: 'Name,Created,RSquared,CurveFitParams',
+            filterArray: [LABKEY.Filter.create('RowId', this.runId)],
+            scope: this,
+            success: function(response) {
+                if (response.rows.length === 1) {
+                    this.createRunDetailView(response.rows[0]);
+                }
+            }
+        });
+    },
+
+    createRunDetailView : function(data) {
 
         Ext4.define('Elisa.model.RunDetail', {
             extend : 'Ext.data.Model',
@@ -42,26 +56,10 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             ]
         });
 
-        var config = {
-            model   : 'Elisa.model.RunDetail',
-            autoLoad: true,
-            proxy   : {
-                type   : 'ajax',
-                url    : LABKEY.ActionURL.buildURL('query', 'selectRows.api'),
-                extraParams : {
-                    schemaName : this.schemaName,
-                    queryName  : this.runTableName,
-                    'query.columns' : 'Name,Created,RSquared,CurveFitParams'
-                },
-                reader : {
-                    type : 'json',
-                    root : 'rows'
-                }
-            },
-            filters : [{property:'RowId', value : this.runId}]
-        };
-
-        this.elisaDetailStore = Ext4.create('Ext.data.Store', config);
+        this.elisaDetailStore = Ext4.create('Ext.data.Store', {
+            model: 'Elisa.model.RunDetail',
+            data: data
+        });
 
         var tpl = new Ext4.XTemplate(
             '<div>',
@@ -79,7 +77,7 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
                     if (data.CurveFitParams)
                     {
                         var parts = data.CurveFitParams.split('&');
-                        return 'slope : ' + Ext.util.Format.number(parts[0], "0.00") + ' intercept : ' + Ext.util.Format.number(parts[1], "0.00");
+                        return 'slope : ' + Ext4.util.Format.number(parts[0], "0.00") + ', intercept : ' + Ext4.util.Format.number(parts[1], "0.00");
                     }
                     else
                         return 'error';
@@ -87,74 +85,12 @@ Ext4.define('LABKEY.elisa.RunDetailsPanel', {
             }
         );
 
-        return Ext4.create('Ext.view.View', {
+        this.add(Ext4.create('Ext.view.View', {
             store   : this.elisaDetailStore,
-            loadMask: true,
             tpl     : tpl,
             ui      : 'custom',
             flex    : 1,
             scope   : this
-        });
-    },
-
-    createRunDataView : function() {
-
-        Ext4.define('Elisa.model.RunData', {
-            extend : 'Ext.data.Model',
-            fields : [
-                {name : 'WellgroupLocation'},
-                {name : 'WellLocation'},
-                {name : 'Absorption'},
-                {name : 'Concentration'},
-                {name : 'RSquared', mapping : 'Run/RSquared'}
-            ]
-        });
-
-        var urlParams = LABKEY.ActionURL.getParameters(this.baseUrl);
-        var filterUrl = urlParams['filterUrl'];
-
-        // lastly check if there is a filter on the url
-        var filters = LABKEY.Filter.getFiltersFromUrl(filterUrl, this.dataRegionName);
-
-        var config = {
-            model   : 'Elisa.model.RunData',
-            autoLoad: true,
-            pageSize: 92,
-            proxy   : {
-                type   : 'ajax',
-                url    : LABKEY.ActionURL.buildURL('query', 'selectRows.api'),
-                extraParams : {
-                    schemaName : this.schemaName,
-                    queryName  : this.queryName,
-                    filters    : filters
-                },
-                reader : {
-                    type : 'json',
-                    root : 'rows'
-                }
-            }
-        };
-
-        this.elisaDetailStore = Ext4.create('Ext.data.Store', config);
-
-        var tpl = new Ext4.XTemplate(
-            '<div>',
-                '<table width="100%">',
-                    '<tr><td>Well Location</td><td>Well Group</td><td>Absorption</td><td>Concentration</td></tr>',
-                    '<tpl for=".">',
-                    '<tr class="{[xindex % 2 === 0 ? "labkey-alternate-row" : "labkey-row"]}"><td>{WellLocation}</td><td>{WellgroupLocation}</td><td>{Absorption}</td><td>{[Ext.util.Format.number(values.Concentration, "0.000")]}</td></tr>',
-                '</tpl></table>',
-            '</div>'
-        );
-
-        return Ext4.create('Ext.view.View', {
-            store   : this.elisaDetailStore,
-            loadMask: true,
-            tpl     : tpl,
-            ui      : 'custom',
-            flex    : 1,
-            padding : '20, 8',
-            scope   : this
-        });
+        }));
     }
 });
