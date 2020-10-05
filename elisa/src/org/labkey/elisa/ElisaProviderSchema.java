@@ -19,8 +19,7 @@ public class ElisaProviderSchema extends AssayProviderSchema
 
     enum ElisaCurveFits
     {
-        FOUR_PARAMETER(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()),
-        FIVE_PARAMETER(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()),
+        FOUR_PARAMETER(StatsService.CurveFitType.FOUR_PARAMETER_SIMPLEX.getLabel()),
         LINEAR(StatsService.CurveFitType.LINEAR.getLabel());
 
         private String _label;
