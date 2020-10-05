@@ -51,4 +51,9 @@ public interface ElisaImportHelper
      * group name is sufficient.
      */
     String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup);
+
+    /**
+     * Get any extra properties to include in the result data for the specified plate/location/analyte combination
+     */
+    Map<String, Object> getExtraProperties(String plateName, Position position, Integer spot);
 }

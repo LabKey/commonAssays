@@ -1,5 +1,6 @@
 package org.labkey.elisa;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
@@ -15,6 +16,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,8 +65,23 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
         row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
         row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
         if (stdCurveFit != null)
-            row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, stdCurveFit.solveForX(well.getValue()));
-
+        {
+            double calcConc = stdCurveFit.solveForX(well.getValue());
+            if (!Double.isNaN(calcConc))
+            {
+                Map<String, Object> extraProps = getExtraProperties(plateName, position, spot);
+                if (extraProps.containsKey(ElisaAssayProvider.DILUTION_PROPERTY))
+                {
+                    // if there is a dilution value, multiply the calculated concentration by dilution
+                    Object dilution = extraProps.get(ElisaAssayProvider.DILUTION_PROPERTY);
+                    if (dilution instanceof Number)
+                    {
+                        calcConc = calcConc * NumberUtils.createDouble(String.valueOf(dilution));
+                    }
+                }
+                row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, calcConc);
+            }
+        }
         row.put(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY, replicate.getMean());
         row.put(ElisaAssayProvider.CV_ABSORPTION_PROPERTY, replicate.getStdDev() / replicate.getMean());
 
@@ -75,5 +92,11 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     public String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup)
     {
         return sampleWellGroup;
+    }
+
+    @Override
+    public Map<String, Object> getExtraProperties(String plateName, Position position, Integer spot)
+    {
+        return Collections.emptyMap();
     }
 }

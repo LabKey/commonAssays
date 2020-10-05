@@ -368,6 +368,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             if (sampleProps.containsKey(ElisaAssayProvider.AUC_PROPERTY) && curveFit != null)
             {
                 CurveFit sampleCurveFit = StatsService.get().getCurveFit(curveFit.getType(), sampleValues.toArray(DoublePoint[]::new));
+                // initialize with the standard curve params
+                sampleCurveFit.setParameters(curveFit.getParameters());
                 sampleCurveFit.setLogXScale(false);
 
                 material.setProperty(user, sampleProps.get(ElisaAssayProvider.AUC_PROPERTY).getPropertyDescriptor(), sampleCurveFit.calculateAUC(StatsService.AUCType.NORMAL));

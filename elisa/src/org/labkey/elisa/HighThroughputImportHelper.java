@@ -95,15 +95,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
         row.put(ElisaAssayProvider.SPOT_PROPERTY, spot);
 
         // add any extra properties
-        AnalytePlate analytePlate = _plateMap.get(plateName);
-        if (analytePlate != null)
-        {
-            // bail out if this isn't a valid row in the data file
-            if (!analytePlate.hasData(position, spot))
-                return Collections.emptyMap();
-
-            row.putAll(analytePlate.getExtraProperties(position, spot));
-        }
+        row.putAll(getExtraProperties(plateName, position, spot));
 
         // if this well is a sample well group add the material LSID
         Map<Position, String> specimenGroupMap = getSpecimenGroupMap();
@@ -159,6 +151,21 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     public Map<String, Double> getStandardConcentrations(String plateName, int analyteNum) throws ExperimentException
     {
         return _plateMap.get(plateName).getStdConcentrations(analyteNum);
+    }
+
+    @Override
+    public Map<String, Object> getExtraProperties(String plateName, Position position, Integer spot)
+    {
+        AnalytePlate analytePlate = _plateMap.get(plateName);
+        if (analytePlate != null)
+        {
+            // bail out if this isn't a valid row in the data file
+            if (!analytePlate.hasData(position, spot))
+                return Collections.emptyMap();
+
+            return analytePlate.getExtraProperties(position, spot);
+        }
+        return Collections.emptyMap();
     }
 
     private static class AnalytePlate
