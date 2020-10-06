@@ -30,6 +30,9 @@ import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.data.statistics.FitFailedException;
@@ -45,19 +48,24 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.elisa.query.CurveFitDb;
+import org.labkey.elisa.query.ElisaManager;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -259,19 +267,20 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             calculateSampleStats(context.getUser(), materialMap.get(materialKey), sampleProperties, standardCurve, samplePoints);
                         }
 
-                        // record the fit parameters and the r squared value for the run
-                        DomainProperty cod = runProperties.get(ElisaAssayProvider.CORRELATION_COEFFICIENT_PROPERTY);
-                        DomainProperty fitParams = runProperties.get(ElisaAssayProvider.CURVE_FIT_PARAMETERS_PROPERTY);
-                        if (standardCurve != null && cod != null && fitParams != null && !Double.isNaN(standardCurve.getFitError()))
+                        // record the fit parameters and the r squared value for the standard curve
+                        if (standardCurve != null && !Double.isNaN(standardCurve.getFitError()))
                         {
-                            data.getRun().setProperty(context.getUser(), cod.getPropertyDescriptor(), regression.getRSquare());
                             if (standardCurve.getParameters() != null)
                             {
-                                Map<String, Object> params = standardCurve.getParameters().toMap();
+                                CurveFitDb curveFitDb = new CurveFitDb();
+                                curveFitDb.setRunId(run.getRowId());
+                                curveFitDb.setProtocolId(protocol.getRowId());
+                                curveFitDb.setPlateName(plateName);
+                                curveFitDb.setSpot(spot);
+                                curveFitDb.setFitParameters(standardCurve.getParameters().toJSON().toString());
+                                curveFitDb.setrSquared(regression.getRSquare());
 
-                                // TODO : will need a standard way to serialize parameters
-                                var serializedParams = params.get("slope") + "&" + params.get("intercept");
-                                data.getRun().setProperty(context.getUser(), fitParams.getPropertyDescriptor(), serializedParams);
+                                ElisaManager.saveCurveFit(context.getContainer(), context.getUser(), curveFitDb);
                             }
                         }
                     }
@@ -404,6 +413,29 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 double cv = concStat.getStdDev() / concStat.getMean();
                 material.setProperty(user, sampleProps.get(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY).getPropertyDescriptor(), cv);
             }
+        }
+    }
+
+    @Override
+    public void beforeDeleteData(List<ExpData> datas, User user) throws ExperimentException
+    {
+        try (DbScope.Transaction transaction = ElisaProtocolSchema.getSchema().getScope().ensureTransaction())
+        {
+            super.beforeDeleteData(datas, user);
+
+            Set<Integer> runIds = new HashSet<>();
+            for (ExpData data : datas)
+            {
+                if (null != data.getRunId())
+                    runIds.add(data.getRunId());
+            }
+
+            if (!runIds.isEmpty())
+            {
+                SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RunId"), runIds));
+                Table.delete(ElisaProtocolSchema.getTableInfoCurveFit(), filter);
+            }
+            transaction.commit();
         }
     }
 }

@@ -219,9 +219,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         Pair<Domain, Map<DomainProperty, Object>> result = super.createRunDomain(c, user);
         Domain domain = result.getKey();
 
-        DomainProperty fitProp = addProperty(domain, CORRELATION_COEFFICIENT_PROPERTY, "Coefficient of Determination", PropertyType.DOUBLE, "Coefficient of Determination of the calibration curve.");
-        fitProp.setFormat("0.000");
-        fitProp.setShownInInsertView(false);
         addProperty(domain, CONCENTRATION_UNITS_PROPERTY, "Concentration Units", PropertyType.STRING, "Units eg. (ug/ml)");
 
         if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
@@ -232,12 +229,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
             method.setRequired(true);
             method.setShownInUpdateView(false);
         }
-
-        DomainProperty fitParams = addProperty(domain, CURVE_FIT_PARAMETERS_PROPERTY, "Fit Parameters", PropertyType.STRING, "Curve fit parameters.");
-        fitParams.setShownInInsertView(false);
-        fitParams.setShownInDetailsView(false);
-        fitParams.setShownInUpdateView(false);
-        fitParams.setHidden(true);
 
         return result;
     }
@@ -358,10 +349,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         domainMap.computeIfAbsent(ASSAY_DOMAIN_RUN, s -> new HashSet<>());
         domainMap.computeIfAbsent(ASSAY_DOMAIN_SAMPLE_WELLGROUP, s -> new HashSet<>());
 
-        Set<String> runProperties = domainMap.get(ASSAY_DOMAIN_RUN);
-        runProperties.add(CORRELATION_COEFFICIENT_PROPERTY);
-        runProperties.add(CURVE_FIT_PARAMETERS_PROPERTY);
-
         Set<String> resultProperties = domainMap.get(ASSAY_DOMAIN_DATA);
         resultProperties.addAll(REQUIRED_RESULT_PROPERTIES);
 
@@ -415,20 +402,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         form.setRunId(run.getRowId());
         form.setRunName(run.getName());
 
-        Domain runDomain = getRunDomain(protocol);
-        DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS_PROPERTY);
-        if (prop != null)
-        {
-            Object fitParams = run.getProperty(prop);
-            if (fitParams != null)
-            {
-                List<Double> params = new ArrayList<>();
-                for (String param : fitParams.toString().split("&"))
-                    params.add(Double.parseDouble(param));
-
-                form.setFitParams(params.toArray(new Double[params.size()]));
-            }
-        }
+        // fake params until we refactor the details view to query from the CurveFit table
+        form.setFitParams(new Double[2]);
 
         return new JspView<>("/org/labkey/elisa/view/runDetailsView.jsp", form);
     }
