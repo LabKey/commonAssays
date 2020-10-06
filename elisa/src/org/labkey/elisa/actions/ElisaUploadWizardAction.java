@@ -167,6 +167,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         resolverType.addHiddenFormFields(form, view);
 
         ButtonBar bbar = new ButtonBar();
+        bbar.setStyle(ButtonBar.Style.separateButtons);
         addFinishButtons(form, view, bbar);
         addResetButton(form, view, bbar);
 
