@@ -407,33 +407,16 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public ModelAndView createRunDetailsView(ViewContext context, ExpProtocol protocol, ExpRun run)
     {
-        VBox view = new VBox();
-        ElisaController.GenericReportForm form = new ElisaController.GenericReportForm();
         AssaySchema schema = createProtocolSchema(context.getUser(), context.getContainer(), protocol, null);
 
-        form.setComponentId("generic-report-panel-" + UniqueID.getRequestScopedUID(context.getRequest()));
+        ElisaController.RunDetailsForm form = new ElisaController.RunDetailsForm();
+        form.setProtocolId(protocol.getRowId());
         form.setSchemaName(schema.getPath().toString());
-        form.setQueryName(AssayProtocolSchema.DATA_TABLE_NAME);
-        form.setRunTableName(AssayProtocolSchema.RUNS_TABLE_NAME);
-        form.setRenderType(GenericChartReport.RenderType.SCATTER_PLOT.getId());
         form.setRunId(run.getRowId());
-        form.setDataRegionName(QueryView.DATAREGIONNAME_DEFAULT);
-
-        // setup the plot for the calibration curve (absorption vs concentration)
-        form.setAutoColumnXName(CONCENTRATION_PROPERTY);
-        form.setAutoColumnYName(ABSORBANCE_PROPERTY);
+        form.setRunName(run.getName());
 
         Domain runDomain = getRunDomain(protocol);
         DomainProperty prop = runDomain.getPropertyByName(CURVE_FIT_PARAMETERS_PROPERTY);
-
-        Domain sampleDomain = getSampleWellGroupDomain(protocol);
-        List<String> sampleColumns = new ArrayList<>();
-        for (DomainProperty property : sampleDomain.getProperties())
-        {
-            sampleColumns.add(property.getName());
-        }
-        form.setSampleColumns(sampleColumns.toArray(new String[sampleColumns.size()]));
-
         if (prop != null)
         {
             Object fitParams = run.getProperty(prop);
@@ -446,14 +429,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
                 form.setFitParams(params.toArray(new Double[params.size()]));
             }
         }
-        JspView chartView = new JspView<>("/org/labkey/elisa/view/runDetailsView.jsp", form);
 
-        chartView.setTitle("Calibration Curve");
-        chartView.setFrame(WebPartView.FrameType.PORTAL);
-
-        view.addView(chartView);
-
-        return view;
+        return new JspView<>("/org/labkey/elisa/view/runDetailsView.jsp", form);
     }
 
     @Override
