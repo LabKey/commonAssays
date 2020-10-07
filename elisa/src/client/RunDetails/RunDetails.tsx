@@ -2,16 +2,16 @@ import React, { PureComponent } from 'react';
 import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
+import { RUN_COLUMN_NAMES, SAMPLE_COLUMN_NAMES } from "./constants";
 import { RunProperties } from "./components/RunProperties";
+import { CalibrationCurve } from "./components/CalibrationCurve";
 
 import './RunDetails.scss';
-import { CalibrationCurve } from "./components/CalibrationCurve";
 
 export interface AppContext {
     protocolId: number;
     runId: number;
     schemaName: string;
-    fitParams: number[];
 }
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 interface State {
     runPropertiesRow: {[key: string]: any},
     runPropertiesError: string
-    plotRows: [{[key: string]: any}],
+    plotRows: any[],
     plotError: string
 }
 
@@ -39,7 +39,7 @@ export class RunDetails extends PureComponent<Props, State> {
         Query.selectRows({
             schemaName,
             queryName: 'Runs',
-            columns: 'Name,Created,CreatedBy/DisplayName,CurveFitMethod,RSquared,CurveFitParams',
+            columns: RUN_COLUMN_NAMES.join(','),
             filterArray: [Filter.create('RowId', runId)],
             success: (data) => {
                 if (data?.rows?.length === 1) {
@@ -58,12 +58,8 @@ export class RunDetails extends PureComponent<Props, State> {
         Query.selectRows({
             schemaName: schemaName,
             queryName: 'Data',
-            columns: 'SpecimenLsid/Property/SpecimenId,WellLocation,Absorption,Concentration',
-            filterArray: [
-                Filter.create('Run/RowId', runId),
-                // LABKEY.Filter.create('PlateName', 'Plate_1LK05A1071'),
-                // LABKEY.Filter.create('Spot', 1),
-            ],
+            columns: SAMPLE_COLUMN_NAMES.join(','),
+            filterArray: [Filter.create('Run/RowId', runId)],
             success: (data) => {
                 this.setState(() => ({ plotRows: data.rows }));
             },
@@ -71,7 +67,7 @@ export class RunDetails extends PureComponent<Props, State> {
                 console.error(reason);
                 this.setState(() => ({ plotError: reason.exception }));
             }
-        })
+        });
     }
 
     renderRunPropertiesPanel() {
@@ -108,7 +104,7 @@ export class RunDetails extends PureComponent<Props, State> {
                         ? <Alert>{plotError}</Alert>
                         : (plotRows
                             ? <CalibrationCurve {...this.props.context} data={plotRows} runName={runPropertiesRow?.Name}/>
-                            : <LoadingSpinner msg={'Loading plot...'}/>
+                            : <LoadingSpinner msg={'Loading plot data...'}/>
                         )
                     }
                 </div>

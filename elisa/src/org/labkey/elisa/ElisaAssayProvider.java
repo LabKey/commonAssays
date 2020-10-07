@@ -402,9 +402,6 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         form.setRunId(run.getRowId());
         form.setRunName(run.getName());
 
-        // fake params until we refactor the details view to query from the CurveFit table
-        form.setFitParams(new Double[2]);
-
         return new JspView<>("/org/labkey/elisa/view/runDetailsView.jsp", form);
     }
 

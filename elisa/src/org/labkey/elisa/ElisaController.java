@@ -35,7 +35,6 @@ public class ElisaController extends SpringActionController
         private int _runId;
         private String _runName;
         private String _schemaName;
-        private Double[] _fitParams = new Double[0];
 
         public int getRunId()
         {
@@ -55,16 +54,6 @@ public class ElisaController extends SpringActionController
         public void setRunName(String runName)
         {
             _runName = runName;
-        }
-
-        public Double[] getFitParams()
-        {
-            return _fitParams;
-        }
-
-        public void setFitParams(Double[] fitParams)
-        {
-            _fitParams = fitParams;
         }
 
         public String getSchemaName()

@@ -45,8 +45,7 @@
         LABKEY.App.loadApp('elisaRunDetails', <%=q(appId)%>, {
             protocolId: <%=form.getProtocolId()%>,
             runId: <%=form.getRunId()%>,
-            schemaName: <%=q(form.getSchemaName())%>,
-            fitParams: <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>
+            schemaName: <%=q(form.getSchemaName())%>
         });
     })(jQuery);
 </script>

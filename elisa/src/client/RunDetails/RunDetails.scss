@@ -1,5 +1,42 @@
 @import "~@labkey/components/dist/assets/scss/theme";
 
+$lightgray-border: #eee;
+
 .labkey-button {
-  margin-right: 5px;
+  margin-left: 10px;
+}
+
+.plot-options-input-row {
+  width: 275px;
+  padding-bottom: 15px;
+}
+
+.plot-options-field-label {
+  padding-bottom: 5px;
+}
+
+.plot-panel {
+  min-width: 750px;
+}
+
+.plot-panel-display {
+  height: 500px;
+
+  .loading-msg {
+    padding: 10px;
+  }
+}
+
+.plot-panel-section {
+  display: inline-block;
+  vertical-align: top;
+
+  &:not(:last-child) {
+    border-right: 1px solid $lightgray-border;
+  }
+
+  & + .plot-panel-section {
+    border-left: 1px solid $lightgray-border;
+    margin-left: -1px;
+  }
 }
