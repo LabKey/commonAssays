@@ -42,12 +42,12 @@ export function exportSVGToFile(svgEl, format) {
     }
 }
 
-export function filterDataByPlotOptions(data: any[], options: PlotOptions): any[] {
+export function filterDataByPlotOptions(data: any[], options: PlotOptions, includeSampleFilter = true): any[] {
     const { plateName, spot, samples } = options;
     return data.filter((row) => {
         return (plateName === undefined || row['PlateName'] === plateName)
             && (spot === undefined || row['Spot'] === spot)
-            && (samples === undefined || samples.indexOf(row[SAMPLE_COL_NAME]) > -1)
+            && (!includeSampleFilter || samples === undefined || samples.indexOf(row[SAMPLE_COL_NAME]) > -1)
     });
 }
 
@@ -66,7 +66,7 @@ export function getUniqueValues(dataArray: any[], prop: string): any[] {
 }
 
 export function getSelectOptions(data: any[]): SelectOptions[] {
-    return data.map((value) => ({value: value, label: value}));
+    return data.map((value) => ({value: value, label: value || 'null'}));
 }
 
 export function getResultsViewURL(protocolId: number, runId: number, plotOptions: PlotOptions) {

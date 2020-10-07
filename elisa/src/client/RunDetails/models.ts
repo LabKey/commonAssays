@@ -8,5 +8,7 @@ export type PlotOptions = {
     showCurve: boolean,
     plateName: string,
     spot: number,
-    samples: string[]
+    samples: string[],
+    xAxisScale: string,
+    yAxisScale: string
 }

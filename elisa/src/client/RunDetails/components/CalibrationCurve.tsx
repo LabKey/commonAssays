@@ -11,7 +11,7 @@ import {
     tickFormatFn
 } from "../utils";
 import { PlotOptions } from "../models";
-import { SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP } from "../constants";
+import { AXIS_SCALE_TYPES, SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP } from "../constants";
 import { PlotOptionsPanel } from "./PlotOptionsPanel";
 
 interface Props {
@@ -25,7 +25,9 @@ interface State {
     plotId: string,
     plates: string[],
     spots: number[],
-    plotOptions: PlotOptions
+    samples: string[],
+    plotOptions: PlotOptions,
+    filteredData: any[]
 }
 
 export class CalibrationCurve extends PureComponent<Props, State> {
@@ -40,11 +42,15 @@ export class CalibrationCurve extends PureComponent<Props, State> {
             plotId: generateId('calibration-curve-'),
             plates,
             spots,
+            samples: undefined,
             plotOptions: {
                 showCurve: false,
                 plateName: plates.length > 1 ? plates[0] : undefined,
-                spot: spots.length > 1 ? spots[0] : undefined
-            } as PlotOptions
+                spot: spots.length > 1 ? spots[0] : undefined,
+                xAxisScale: AXIS_SCALE_TYPES[0].value,
+                yAxisScale: AXIS_SCALE_TYPES[0].value
+            } as PlotOptions,
+            filteredData: undefined
         };
     }
 
@@ -67,25 +73,65 @@ export class CalibrationCurve extends PureComponent<Props, State> {
     getTitle(): string {
         const { runName } = this.props;
         const { plateName, spot } = this.state.plotOptions;
+
+        // TODO any other details to include in title?
         return runName
             + (plateName !== undefined ? ' - ' + plateName : '')
             + (spot !== undefined ? ' - Spot ' + spot : '');
     }
 
-    renderPlot() {
+    setPlotOption = (key: string, value: any, resetSampleSelection: boolean) => {
+        this.setState((state) => ({
+            plotOptions: {
+                ...state.plotOptions,
+                samples: resetSampleSelection ? undefined : state.plotOptions.samples,
+                [key]: value
+            },
+            filteredData: undefined // clear property so that it will be re-created on next request
+        }));
+    };
+
+    getFilteredData(): any[] {
+        const { filteredData } = this.state;
+
+        if (filteredData === undefined) {
+            this.updateFilteredData();
+        }
+
+        return filteredData;
+    }
+
+    updateFilteredData(): void {
         const { data } = this.props;
         const { plotOptions } = this.state;
+
+        const filteredDataForSamples = filterDataByPlotOptions(data, plotOptions, false);
+        const samples = getUniqueValues(filteredDataForSamples, SAMPLE_COL_NAME);
+
+        this.setState(() => ({
+            filteredData: filterDataByPlotOptions(data, plotOptions),
+            samples
+        }));
+    }
+
+    renderPlot() {
+        const { plotOptions } = this.state;
         const LABKEY = getServerContext();
-        const width = $('.plot-panel').width() - 280;
 
         this.getPlotElement().html('<div class="loading-msg"><i class="fa fa-spinner fa-pulse"></i> Rendering plot...</div>');
         setTimeout(() => {
-            const filteredData = filterDataByPlotOptions(data, plotOptions);
+            const width = $('.plot-panel').width() - 280;
+            const data = this.getFilteredData();
+
+            // call to getFilteredData will reset the filteredData state and recall this, so don't try rendering this time
+            if (data === undefined) {
+                return;
+            }
 
             this.getPlotElement().html('');
             const layers = [
                 new LABKEY.vis.Layer({
-                    data: filteredData,
+                    data,
                     geom: new LABKEY.vis.Geom.Point({
                         plotNullPoints: true,
                         size: 5,
@@ -106,10 +152,10 @@ export class CalibrationCurve extends PureComponent<Props, State> {
             ];
 
             if (plotOptions.showCurve) {
-                const xMin = getMinFromData(filteredData, X_AXIS_PROP);
-                const xMax = getMaxFromData(filteredData, X_AXIS_PROP);
-                const yMin = getMinFromData(filteredData, Y_AXIS_PROP);
-                const yMax = getMaxFromData(filteredData, Y_AXIS_PROP);
+                const xMin = getMinFromData(data, X_AXIS_PROP);
+                const xMax = getMaxFromData(data, X_AXIS_PROP);
+                const yMin = getMinFromData(data, Y_AXIS_PROP);
+                const yMax = getMaxFromData(data, Y_AXIS_PROP);
 
                 layers.push(
                     new LABKEY.vis.Layer({
@@ -138,16 +184,16 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                 },
                 margins: { right: 10 },
                 scales: {
-                    x: {scaleType: 'continuous', trans: 'linear', tickFormat: tickFormatFn},
-                    y: {scaleType: 'continuous', trans: 'linear', tickFormat: tickFormatFn}
+                    x: {scaleType: 'continuous', trans: plotOptions.xAxisScale, tickFormat: tickFormatFn},
+                    y: {scaleType: 'continuous', trans: plotOptions.yAxisScale, tickFormat: tickFormatFn}
                 }
             }).render();
         }, 250);
     }
 
-    goToResults = () => {
+    getViewResultsHref = () => {
         const { runId, protocolId } = this.props;
-        window.location.href = getResultsViewURL(protocolId, runId, this.state.plotOptions);
+        return getResultsViewURL(protocolId, runId, this.state.plotOptions);
     };
 
     exportToPNG = () => {
@@ -160,16 +206,6 @@ export class CalibrationCurve extends PureComponent<Props, State> {
         exportSVGToFile(this.getSVGElement(), LABKEY.vis.SVGConverter.FORMAT_PDF);
     };
 
-    setPlotOption = (key: string, value: any) => {
-        this.setState((state) => ({
-            plotOptions: {
-                ...state.plotOptions,
-                samples: undefined,
-                [key]: value
-            }
-        }));
-    };
-
     render() {
         return (
             <div className={'plot-panel'}>
@@ -179,9 +215,11 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                     {/*TODO hide buttons until plot finishes rendering*/}
                     {/*TODO move export buttons to floating icons over plot*/}
                     {/*TODO where to put the view results button*/}
-                    <button className={'labkey-button primary'} onClick={this.goToResults}>
+
+                    {/*TODO open in new tab?*/}
+                    <a className={'labkey-button primary'} target={'_blank'} href={this.getViewResultsHref()}>
                         View Results
-                    </button>
+                    </a>
                     <span className={'pull-right'}>
                         <button className={'labkey-button'} onClick={this.exportToPNG}>
                             Export to PNG
