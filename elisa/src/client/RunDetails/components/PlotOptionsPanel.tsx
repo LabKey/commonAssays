@@ -3,7 +3,6 @@ import { LoadingSpinner, SelectInput } from "@labkey/components";
 
 import { PlotOptions } from "../models";
 import { getSelectOptions, getUniqueValues } from "../utils";
-import { AXIS_SCALE_TYPES } from "../constants";
 
 interface Props {
     plates: string[],
@@ -17,6 +16,18 @@ export class PlotOptionsPanel extends PureComponent<Props> {
 
     onShowCurveCheck = (evt) => {
         this.props.setPlotOption('showCurve', evt.target.checked, false);
+    };
+
+    onShowLegendCheck = (evt) => {
+        this.props.setPlotOption('showLegend', evt.target.checked, false);
+    };
+
+    onShowXAxisLogCheck = (evt) => {
+        this.props.setPlotOption('xAxisScale', evt.target.checked ? 'log' : 'linear', false);
+    };
+
+    onShowYAxisLogCheck = (evt) => {
+        this.props.setPlotOption('yAxisScale', evt.target.checked ? 'log' : 'linear', false);
     };
 
     onSampleSelection = (name, formValue, selectedOptions) => {
@@ -88,41 +99,35 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                     }
                 </div>
 
-                <div className={'plot-options-input-row'}>
-                    <div className={'plot-options-field-label'}>X-Axis Scale Type</div>
-                    <SelectInput
+                <div className={'plot-options-field-label'}>Other Options</div>
+                <div>
+                    <input
+                        type="checkbox"
                         name='xAxisScale'
-                        key='xAxisScale'
-                        inputClass={'col-xs-11'}
-                        options={AXIS_SCALE_TYPES}
-                        value={plotOptions.xAxisScale}
-                        onChange={(key, value) => setPlotOption('xAxisScale', value, false)}
-                        showLabel={false}
-                        formsy={false}
-                        multiple={false}
-                        required={true}
-                        clearable={false}
+                        checked={plotOptions.xAxisScale === 'log'}
+                        onChange={this.onShowXAxisLogCheck}
                     />
+                    X-axis log scale
                 </div>
-
-                <div className={'plot-options-input-row'}>
-                    <div className={'plot-options-field-label'}>Y-Axis Scale Type</div>
-                    <SelectInput
+                <div>
+                    <input
+                        type="checkbox"
                         name='yAxisScale'
-                        key='yAxisScale'
-                        inputClass={'col-xs-11'}
-                        options={AXIS_SCALE_TYPES}
-                        value={plotOptions.yAxisScale}
-                        onChange={(key, value) => setPlotOption('yAxisScale', value, false)}
-                        showLabel={false}
-                        formsy={false}
-                        multiple={false}
-                        required={true}
-                        clearable={false}
+                        checked={plotOptions.yAxisScale === 'log'}
+                        onChange={this.onShowYAxisLogCheck}
                     />
+                    Y-axis log scale
                 </div>
-
-                <div className={'plot-options-input-row'}>
+                <div>
+                    <input
+                        type="checkbox"
+                        name='showLegend'
+                        checked={plotOptions.showLegend}
+                        onChange={this.onShowLegendCheck}
+                    />
+                    Show samples legend
+                </div>
+                <div>
                     <input
                         type="checkbox"
                         name='showCurve'

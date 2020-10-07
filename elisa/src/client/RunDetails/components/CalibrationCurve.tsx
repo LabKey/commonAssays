@@ -11,7 +11,7 @@ import {
     tickFormatFn
 } from "../utils";
 import { PlotOptions } from "../models";
-import { AXIS_SCALE_TYPES, SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP } from "../constants";
+import { SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP } from "../constants";
 import { PlotOptionsPanel } from "./PlotOptionsPanel";
 
 interface Props {
@@ -47,8 +47,8 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                 showCurve: false,
                 plateName: plates.length > 1 ? plates[0] : undefined,
                 spot: spots.length > 1 ? spots[0] : undefined,
-                xAxisScale: AXIS_SCALE_TYPES[0].value,
-                yAxisScale: AXIS_SCALE_TYPES[0].value
+                xAxisScale: 'linear',
+                yAxisScale: 'linear'
             } as PlotOptions,
             filteredData: undefined
         };
@@ -127,8 +127,22 @@ export class CalibrationCurve extends PureComponent<Props, State> {
             if (data === undefined) {
                 return;
             }
-
             this.getPlotElement().html('');
+
+            const aes = {
+                x: X_AXIS_PROP,
+                y: Y_AXIS_PROP,
+                hoverText: function(row){
+                    return SAMPLE_COLUMN_NAMES.map((col) => {
+                        const label = col === SAMPLE_COL_NAME ? 'Sample' : col;
+                        return label + ': ' + row[col];
+                    }).join('\n');
+                }
+            };
+            if (plotOptions.showLegend) {
+                aes['color'] = SAMPLE_COL_NAME;
+            }
+
             const layers = [
                 new LABKEY.vis.Layer({
                     data,
@@ -138,16 +152,7 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                         opacity: .5,
                         color: '#116596'
                     }),
-                    aes: {
-                        x: X_AXIS_PROP,
-                        y: Y_AXIS_PROP,
-                        hoverText: function(row){
-                            return SAMPLE_COLUMN_NAMES.map((col) => {
-                                const label = col === SAMPLE_COL_NAME ? 'Sample' : col;
-                                return label + ': ' + row[col];
-                            }).join('\n');
-                        }
-                    }
+                    aes
                 })
             ];
 
@@ -171,6 +176,11 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                 );
             }
 
+            const margins = {};
+            if (!plotOptions.showLegend) {
+                margins['right'] = 10;
+            }
+
             // TODO do we want colors per sample and legend when selected?
             new LABKEY.vis.Plot({
                 renderTo: this.state.plotId,
@@ -182,7 +192,7 @@ export class CalibrationCurve extends PureComponent<Props, State> {
                     x: { value: X_AXIS_PROP },
                     y: { value: Y_AXIS_PROP }
                 },
-                margins: { right: 10 },
+                margins,
                 scales: {
                     x: {scaleType: 'continuous', trans: plotOptions.xAxisScale, tickFormat: tickFormatFn},
                     y: {scaleType: 'continuous', trans: plotOptions.yAxisScale, tickFormat: tickFormatFn}

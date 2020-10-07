@@ -6,6 +6,7 @@ export type SelectOptions = {
 
 export type PlotOptions = {
     showCurve: boolean,
+    showLegend: boolean,
     plateName: string,
     spot: number,
     samples: string[],
