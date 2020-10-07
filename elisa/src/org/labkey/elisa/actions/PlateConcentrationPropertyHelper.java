@@ -110,7 +110,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
         for (DomainProperty prop : domainProperties)
         {
             // only interested in the concentration property
-            if (ElisaAssayProvider.CONCENTRATION_PROPERTY_NAME.equals(prop.getName()))
+            if (ElisaAssayProvider.CONCENTRATION_PROPERTY.equals(prop.getName()))
             {
                 domainProperties = Collections.singletonList(prop);
                 break;
