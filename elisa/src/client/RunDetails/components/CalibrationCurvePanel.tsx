@@ -3,16 +3,17 @@ import $ from 'jquery';
 import { getServerContext } from '@labkey/api';
 import { generateId } from '@labkey/components';
 
-import { exportSVGToFile, getMaxFromData, getMinFromData, getPlotTitle, getResultsViewURL, tickFormatFn } from "../utils";
-import { PlotOptions } from "../models";
 import { HOVER_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP, ID_COL_NAME } from "../constants";
+import { exportSVGToFile, getPlotTitle, getResultsViewURL, tickFormatFn } from "../utils";
+import { CurveFitData, PlotOptions } from "../models";
 
 interface Props {
     protocolId: number,
     runId: number,
     runPropertiesRow: {[key: string]: any},
     data: any[],
-    plotOptions: PlotOptions
+    plotOptions: PlotOptions,
+    curveFitData: CurveFitData
 }
 
 interface State {
@@ -45,12 +46,17 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
     }
 
     renderPlot() {
-        const { runPropertiesRow, plotOptions, data } = this.props;
+        const { runPropertiesRow, plotOptions, data, curveFitData } = this.props;
         const LABKEY = getServerContext();
 
         this.getPlotElement().html('<div class="loading-msg"><i class="fa fa-spinner fa-pulse"></i> Rendering plot...</div>');
 
         setTimeout(() => {
+            // if we are showing the curve but don't have the points back yet, don't render this time
+            if (plotOptions.showCurve && !curveFitData) {
+                return;
+            }
+
             this.getPlotElement().html('');
 
             const aes = {
@@ -79,12 +85,7 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
                 })
             ];
 
-            if (plotOptions.showCurve) {
-                const xMin = getMinFromData(data, X_AXIS_PROP);
-                const xMax = getMaxFromData(data, X_AXIS_PROP);
-                const yMin = getMinFromData(data, Y_AXIS_PROP);
-                const yMax = getMaxFromData(data, Y_AXIS_PROP);
-
+            if (plotOptions.showCurve && curveFitData) {
                 layers.push(
                     new LABKEY.vis.Layer({
                         geom: new LABKEY.vis.Geom.Path({
@@ -92,8 +93,7 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
                             color: '#555'
                         }),
                         aes: {x: 'x', y: 'y'},
-                        // TODO add in support for curve fit line display
-                        data: [{x: xMin, y: yMin}, {x: xMax, y: yMax}]
+                        data: curveFitData.points
                     })
                 );
             }
@@ -102,6 +102,11 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
             if (!plotOptions.showLegend) {
                 margins['right'] = 10;
             }
+
+            const scales = {
+                x: {scaleType: 'continuous', trans: plotOptions.xAxisScale, tickFormat: tickFormatFn},
+                y: {scaleType: 'continuous', trans: plotOptions.yAxisScale, tickFormat: tickFormatFn}
+            };
 
             new LABKEY.vis.Plot({
                 renderTo: this.state.plotId,
@@ -114,10 +119,7 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
                     y: { value: Y_AXIS_PROP }
                 },
                 margins,
-                scales: {
-                    x: {scaleType: 'continuous', trans: plotOptions.xAxisScale, tickFormat: tickFormatFn},
-                    y: {scaleType: 'continuous', trans: plotOptions.yAxisScale, tickFormat: tickFormatFn}
-                }
+                scales
             }).render();
         }, 250);
     }

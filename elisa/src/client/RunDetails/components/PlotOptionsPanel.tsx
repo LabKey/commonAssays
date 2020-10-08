@@ -1,11 +1,13 @@
 import React, { PureComponent } from 'react';
 
-import { PlotOptions } from "../models";
+import { CurveFitData, PlotOptions } from "../models";
+import { LabelHelpTip } from "@labkey/components";
 
 interface Props {
     runPropertiesRow: {[key: string]: any},
     plotOptions: PlotOptions,
-    setPlotOption: (key: string, value: any, resetIdSelection: boolean) => void
+    setPlotOption: (key: string, value: any, resetIdSelection: boolean) => void,
+    curveFitData: CurveFitData
 }
 
 export class PlotOptionsPanel extends PureComponent<Props> {
@@ -26,8 +28,24 @@ export class PlotOptionsPanel extends PureComponent<Props> {
         this.props.setPlotOption('yAxisScale', evt.target.checked ? 'log' : 'linear', false);
     };
 
+    renderCurveFitData() {
+        const { curveFitData } = this.props;
+
+        return (
+            <>
+                <div className={'plot-options-field-label'}>R Squared</div>
+                <pre>{curveFitData.rSquared}</pre>
+                <div className={'plot-options-field-label'}>Fit Parameters</div>
+                {curveFitData.fitParameters.startsWith('{')
+                    ? <pre>{JSON.stringify(JSON.parse(curveFitData.fitParameters), null, 2)}</pre>
+                    : <pre>{curveFitData.fitParameters}</pre>
+                }
+            </>
+        )
+    }
+
     render() {
-        const { plotOptions, runPropertiesRow } = this.props;
+        const { plotOptions, runPropertiesRow, curveFitData } = this.props;
 
         return (
             <div className="panel panel-default">
@@ -68,7 +86,9 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                         </div>
 
                         <div className={'plot-options-input-row'}>
-                            <div className={'plot-options-field-label'}>Curve Fit: {runPropertiesRow?.CurveFitMethod}</div>
+                            <div className={'plot-options-field-label'}>
+                                Curve Fit: {runPropertiesRow?.CurveFitMethod}
+                            </div>
                             <div>
                                 <input
                                     type="checkbox"
@@ -76,7 +96,13 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                                     checked={plotOptions.showCurve}
                                     onChange={this.onShowCurveCheck}
                                 />
-                                Show curve fit line (placeholder)
+                                Show curve fit line
+                                {curveFitData &&
+                                    <LabelHelpTip
+                                        title={'Curve Fit Data'}
+                                        body={() => this.renderCurveFitData()}
+                                    />
+                                }
                             </div>
                         </div>
                     </div>

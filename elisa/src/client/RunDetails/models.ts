@@ -16,3 +16,16 @@ export type PlotOptions = {
     xAxisScale: string,
     yAxisScale: string
 }
+
+export type XYPair = {
+    x: number,
+    y: number
+}
+
+export type CurveFitData = {
+    runId: number,
+    curveFitMethod: string,
+    rSquared: number,
+    fitParameters: string,
+    points: XYPair[]
+}

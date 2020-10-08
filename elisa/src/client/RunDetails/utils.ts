@@ -94,3 +94,7 @@ export function getUniqueIdsForPlotSelections(data: any[], plotOptions: PlotOpti
     const filteredData = filterDataByPlotOptions(data, [], [], plotOptions, false);
     return getUniqueValues(filteredData, colName, false);
 }
+
+export function shouldReloadCurveFitData(prevPlotOptions: PlotOptions, newPlotOptions: PlotOptions): boolean {
+    return prevPlotOptions.plateName !== newPlotOptions.plateName || prevPlotOptions.spot !== newPlotOptions.spot;
+}

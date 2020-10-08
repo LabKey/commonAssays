@@ -3,13 +3,19 @@ import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
 import { CONTROL_COL_NAME, ID_COL_NAME, RUN_COLUMN_NAMES, SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES } from "./constants";
-import { PlotOptions } from "./models";
-import { filterDataByPlotOptions, getUniqueIdsForPlotSelections, getUniqueValues } from "./utils";
+import { CurveFitData, PlotOptions } from "./models";
+import {
+    filterDataByPlotOptions,
+    getUniqueIdsForPlotSelections,
+    getUniqueValues,
+    shouldReloadCurveFitData
+} from "./utils";
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 
 import './RunDetails.scss';
+import { getCurveFitXYPairs } from "./actions";
 
 export interface AppContext {
     protocolId: number,
@@ -113,6 +119,7 @@ interface ImplState {
     samples: string[],
     controls: string[],
     plotOptions: PlotOptions,
+    curveFitData: CurveFitData
 }
 
 class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
@@ -122,7 +129,7 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         const plates = getUniqueValues(props.data, 'PlateName');
         const spots = getUniqueValues(props.data, 'Spot');
         const plotOptions = {
-            showCurve: false,
+            showCurve: true,
             showLegend: true,
             plateName: plates.length > 1 ? plates[0] : undefined,
             spot: spots.length > 1 ? spots[0] : undefined,
@@ -142,13 +149,36 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
             plates,
             spots,
             samples,
-            controls
+            controls,
+            curveFitData: undefined
         };
+    }
+
+    componentDidMount(): void {
+        this.getCurveFitData();
+    }
+
+    componentDidUpdate(prevProps: Readonly<ImplProps>, prevState: Readonly<ImplState>, snapshot?: any): void
+    {
+        if (shouldReloadCurveFitData(prevState.plotOptions, this.state.plotOptions)) {
+            this.getCurveFitData();
+        }
+    }
+
+    getCurveFitData() {
+        const { protocolId, runId, data } = this.props;
+        const { plotOptions } = this.state;
+        const filteredData = filterDataByPlotOptions(data, [], [], plotOptions, false);
+
+        getCurveFitXYPairs(protocolId, runId, plotOptions.plateName, plotOptions.spot, filteredData)
+            .then(curveFitData => {
+                this.setState(() => ({ curveFitData }));
+            });
     }
 
     setPlotOption = (key: string, value: any, resetIdSelection: boolean) => {
         const { data } = this.props;
-        const { plotOptions, samples, controls } = this.state;
+        const { plotOptions, samples, controls, curveFitData } = this.state;
 
         const updatedPlotOptions = {
             ...plotOptions,
@@ -165,6 +195,7 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
             filteredData: filterDataByPlotOptions(data, samples, controls, updatedPlotOptions),
             samples: getUniqueIdsForPlotSelections(data, updatedPlotOptions, SAMPLE_COL_NAME),
             controls: getUniqueIdsForPlotSelections(data, updatedPlotOptions, CONTROL_COL_NAME),
+            curveFitData: shouldReloadCurveFitData(plotOptions, updatedPlotOptions) ? undefined : curveFitData
         }));
     };
 
