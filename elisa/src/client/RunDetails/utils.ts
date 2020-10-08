@@ -59,7 +59,7 @@ export function getSelectOptions(data: any[]): SelectOptions[] {
 }
 
 export function getResultsViewURL(protocolId: number, runId: number, plotOptions: PlotOptions) {
-    const { plateName, spot, samples, controls } = plotOptions;
+    const { plateName, spot, samples, controls, showAllSamples, showAllControls } = plotOptions;
 
     const params = {
         rowId: protocolId, 'Data.Run/RowId~eq': runId
@@ -70,11 +70,14 @@ export function getResultsViewURL(protocolId: number, runId: number, plotOptions
     if (spot !== undefined) {
         params['Data.Spot~eq'] = spot;
     }
-    if (samples !== undefined) {
-        params['Data.' + SAMPLE_COL_NAME + '~in'] = samples.join(';');
+
+    if (!showAllSamples) {
+        // add in an extra separator to make this an OR between the samples and controls
+        params['Data.' + SAMPLE_COL_NAME + '~in'] = samples.join(';') + ';';
     }
-    if (controls !== undefined) {
-        params['Data.' + CONTROL_COL_NAME + '~in'] = controls.join(';');
+    if (!showAllControls) {
+        // add in an extra separator to make this an OR between the samples and controls
+        params['Data.' + CONTROL_COL_NAME + '~in'] = controls.join(';') + ';';
     }
 
     return ActionURL.buildURL('assay', 'assayResults', undefined, params);
