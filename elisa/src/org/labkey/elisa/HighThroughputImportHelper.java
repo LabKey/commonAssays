@@ -87,9 +87,10 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
+    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
     {
-        Map<String, Object> row = super.createWellRow(plateName, spot, replicate, well, position, stdCurveFit, materialMap);
+        Map<String, Object> row = super.createWellRow(plateName, spot, parentWellGroup, replicate, well, position, stdCurveFit, materialMap);
 
         row.put(ElisaAssayProvider.PLATE_PROPERTY, plateName);
         row.put(ElisaAssayProvider.SPOT_PROPERTY, spot);

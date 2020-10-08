@@ -170,7 +170,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 for (Position position : replicate.getPositions())
                                 {
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, replicate, well, position, standardCurve, materialMap);
+                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, controlGroup, replicate, well, position, standardCurve, materialMap);
                                     // don't record empty records
                                     if (row.isEmpty())
                                         continue;
@@ -233,7 +233,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 for (Position position : replicate.getPositions())
                                 {
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, replicate, well, position, standardCurve, materialMap);
+                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, sampleGroup, replicate, well, position, standardCurve, materialMap);
                                     // don't record empty records
                                     if (row.isEmpty())
                                         continue;

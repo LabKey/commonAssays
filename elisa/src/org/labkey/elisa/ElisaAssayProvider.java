@@ -47,7 +47,6 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -57,21 +56,16 @@ import org.labkey.api.study.assay.ThawListResolverType;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.UniqueID;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
-import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.visualization.GenericChartReport;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -107,7 +101,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public static final String MEAN_CONCENTRATION_PROPERTY = "Concentration_Mean";
     public static final String CV_CONCENTRATION_PROPERTY = "Concentration_CV";
     public static final String WELL_LOCATION_PROPERTY = "WellLocation";
-    public static final String WELLGROUP_PROPERTY = "WellgroupLocation";
+    public static final String WELLGROUP_LOCATION_PROPERTY = "WellgroupLocation";
+    public static final String WELLGROUP_NAME_PROPERTY = "WellgroupName";
     public static final String SPOT_PROPERTY = "Spot";
     public static final String DILUTION_PROPERTY = "Dilution";
     public static final String EXCLUDED_PROPERTY = "Excluded";
@@ -128,7 +123,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         REQUIRED_RESULT_PROPERTIES = Set.of(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY,
                 WELL_LOCATION_PROPERTY,
-                WELLGROUP_PROPERTY,
+                WELLGROUP_LOCATION_PROPERTY,
+                WELLGROUP_NAME_PROPERTY,
                 ABSORBANCE_PROPERTY,
                 CONCENTRATION_PROPERTY,
                 STANDARD_CONCENTRATION_PROPERTY,
@@ -263,7 +259,8 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         specimenLsid.setShownInUpdateView(false);
 
         addProperty(dataDomain, WELL_LOCATION_PROPERTY, "Well Location", PropertyType.STRING, "Well location");
-        addProperty(dataDomain, WELLGROUP_PROPERTY, "Well Group", PropertyType.STRING, "Replicate Well Group");
+        addProperty(dataDomain, WELLGROUP_LOCATION_PROPERTY, "Well Group Location", PropertyType.STRING, "Replicate Well Group location");
+        addProperty(dataDomain, WELLGROUP_NAME_PROPERTY, "Well Group Name", PropertyType.STRING, "Control or Sample Well Group name");
 
         addPropertyWithFormat(dataDomain, ABSORBANCE_PROPERTY,  "Absorption", PropertyType.DOUBLE, "Raw signal value", "0.000");
         DomainProperty concProp = addPropertyWithFormat(dataDomain, CONCENTRATION_PROPERTY,  "Concentration", PropertyType.DOUBLE, "Calculated concentration", "0.000");

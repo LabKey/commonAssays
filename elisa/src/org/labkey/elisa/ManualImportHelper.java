@@ -86,9 +86,10 @@ public class ManualImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
+    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
     {
-        Map<String, Object> row = super.createWellRow(plateName, spot, replicate, well, position, stdCurveFit, materialMap);
+        Map<String, Object> row = super.createWellRow(plateName, spot, parentWellGroup, replicate, well, position, stdCurveFit, materialMap);
 
         // if this well is a sample well group add the material LSID
         Map<Position, String> specimenGroupMap = getSpecimenGroupMap();

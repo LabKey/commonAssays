@@ -36,12 +36,15 @@ public interface ElisaImportHelper
      * Helper to create a standard well row
      *
      * @param plateName the optional plate name parameter for multi plate imports
+     * @param parentWellGroup the parent of the replicate well group (either control or sample)
      * @param replicate the replicate well group
      * @param well the well we are creating the row for
      * @param stdCurveFit the selected curvefit for the standard curve
      * @param materialMap map of specimen well group name to expMaterial
      */
-    Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position,
+    Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                      Well well,
+                                      Position position,
                                       CurveFit stdCurveFit,
                                       Map<String, ExpMaterial> materialMap);
 

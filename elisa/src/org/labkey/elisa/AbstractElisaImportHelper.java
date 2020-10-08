@@ -55,14 +55,17 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position,
+    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well,
+                                             Position position,
                                              @Nullable CurveFit stdCurveFit,
                                              Map<String, ExpMaterial> materialMap)
     {
         Map<String, Object> row = new HashMap<>();
 
         row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
-        row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
+        row.put(ElisaAssayProvider.WELLGROUP_LOCATION_PROPERTY, replicate.getPositionDescription());
+        row.put(ElisaAssayProvider.WELLGROUP_NAME_PROPERTY, parentWellGroup.getName());
         row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
         if (stdCurveFit != null)
         {
