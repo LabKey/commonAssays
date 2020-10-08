@@ -4,19 +4,9 @@ import { naturalSort } from "@labkey/components";
 import { SAMPLE_COL_NAME } from "./constants";
 import { PlotOptions, SelectOptions } from "./models";
 
-// TODO update or remove
-export function formatFitParams(row) {
-    if (row.CurveFitParams) {
-        const parts = row.CurveFitParams.split('&');
-        return 'Slope : ' + formatNumber(parts[0])
-            + ', Intercept : ' + formatNumber(parts[1]);
-    }
-    return 'There was an error loading the curve fit parameters.';
-}
-
-export function formatNumber(value) {
-    return (Math.round(value * 10000) / 10000).toFixed(4);
-}
+// export function formatNumber(value) {
+//     return (Math.round(value * 10000) / 10000).toFixed(4);
+// }
 
 const valExponentialDigits = 6;
 export function tickFormatFn(value) {
@@ -26,19 +16,10 @@ export function tickFormatFn(value) {
     return value;
 }
 
-// TODO update or remove
-export function linearCurveFitFn(params){
-    if (params && params.length >= 2) {
-        return function(x){return x * params[0] + params[1];}
-    }
-    return function(x) {return x;}
-}
-
-export function exportSVGToFile(svgEl, format) {
+export function exportSVGToFile(svgEl, format, title: string) {
     if (svgEl && svgEl.length > 0) {
         const LABKEY = getServerContext();
-        const title = 'Calibration Curve';
-        LABKEY.vis.SVGConverter.convert(svgEl[0], format, title);
+        LABKEY.vis.SVGConverter.convert(svgEl[0], format, 'Calibration Curve - ' + title);
     }
 }
 
@@ -86,4 +67,16 @@ export function getResultsViewURL(protocolId: number, runId: number, plotOptions
     }
 
     return ActionURL.buildURL('assay', 'assayResults', undefined, params);
+}
+
+export function getPlotTitle(runName: string, plotOptions: PlotOptions): string {
+    const { plateName, spot } = plotOptions;
+    return runName
+        + (plateName !== undefined ? ' - ' + plateName : '')
+        + (spot !== undefined ? ' - Spot ' + spot : '');
+}
+
+export function getUniqueSamplesForPlotSelections(data: any[], plotOptions: PlotOptions): string[] {
+    const filteredDataForSamples = filterDataByPlotOptions(data, plotOptions, false);
+    return getUniqueValues(filteredDataForSamples, SAMPLE_COL_NAME);
 }

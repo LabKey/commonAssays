@@ -3,34 +3,37 @@ import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
 import { RUN_COLUMN_NAMES, SAMPLE_COLUMN_NAMES } from "./constants";
-import { RunProperties } from "./components/RunProperties";
-import { CalibrationCurve } from "./components/CalibrationCurve";
+import { PlotOptions } from "./models";
+import { filterDataByPlotOptions, getUniqueSamplesForPlotSelections, getUniqueValues } from "./utils";
+import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
+import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
+import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 
 import './RunDetails.scss';
 
 export interface AppContext {
-    protocolId: number;
-    runId: number;
-    schemaName: string;
+    protocolId: number,
+    runId: number,
+    schemaName: string,
 }
 
 interface Props {
-    context: AppContext;
+    context: AppContext
 }
 
 interface State {
     runPropertiesRow: {[key: string]: any},
     runPropertiesError: string
-    plotRows: any[],
-    plotError: string
+    data: any[],
+    dataError: string
 }
 
 export class RunDetails extends PureComponent<Props, State> {
     state: Readonly<State> = {
         runPropertiesRow: undefined,
         runPropertiesError: undefined,
-        plotRows: undefined,
-        plotError:  undefined
+        data: undefined,
+        dataError:  undefined
     };
 
     componentDidMount(): void {
@@ -61,63 +64,101 @@ export class RunDetails extends PureComponent<Props, State> {
             columns: SAMPLE_COLUMN_NAMES.join(','),
             filterArray: [Filter.create('Run/RowId', runId)],
             success: (data) => {
-                this.setState(() => ({ plotRows: data.rows }));
+                this.setState(() => ({ data: data.rows }));
             },
             failure: (reason) => {
                 console.error(reason);
-                this.setState(() => ({ plotError: reason.exception }));
+                this.setState(() => ({ dataError: reason.exception }));
             }
         });
     }
 
-    renderRunPropertiesPanel() {
-        const { runPropertiesRow, runPropertiesError } = this.state;
+    render() {
+        const { runPropertiesError, dataError, runPropertiesRow, data } = this.state;
 
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">
-                    Run Properties
-                </div>
-                <div className="panel-body">
-                    {runPropertiesError
-                        ? <Alert>{runPropertiesError}</Alert>
-                        : (runPropertiesRow
-                            ? <RunProperties row={runPropertiesRow}/>
-                            : <LoadingSpinner msg={'Loading properties...'}/>
-                        )
-                    }
-                </div>
-            </div>
-        )
+        if (runPropertiesError || dataError) {
+            return <Alert>{runPropertiesError || dataError}</Alert>
+        }
+
+        if (!runPropertiesRow || !data) {
+            return <LoadingSpinner msg={'Loading data...'}/>
+        }
+
+        return <RunDetailsImpl {...this.props.context} {...this.state}/>
+    }
+}
+
+interface ImplProps {
+    protocolId: number,
+    runId: number,
+    runPropertiesRow: {[key: string]: any},
+    data: any[]
+}
+
+interface ImplState {
+    filteredData: any[]
+    plates: string[],
+    spots: number[],
+    samples: string[],
+    controls: string[],
+    plotOptions: PlotOptions,
+}
+
+class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
+    constructor(props: ImplProps) {
+        super(props);
+
+        const plates = getUniqueValues(props.data, 'PlateName');
+        const spots = getUniqueValues(props.data, 'Spot');
+        const plotOptions = {
+            showCurve: false,
+            showLegend: true,
+            plateName: plates.length > 1 ? plates[0] : undefined,
+            spot: spots.length > 1 ? spots[0] : undefined,
+            xAxisScale: 'linear',
+            yAxisScale: 'linear'
+        } as PlotOptions;
+
+        this.state = {
+            filteredData: filterDataByPlotOptions(props.data, plotOptions),
+            plates,
+            spots,
+            samples: getUniqueSamplesForPlotSelections(props.data, plotOptions),
+            controls: undefined, // TODO
+            plotOptions
+        };
     }
 
-    renderPlotPanel() {
-        const { plotRows, plotError, runPropertiesRow } = this.state;
+    setPlotOption = (key: string, value: any, resetSampleSelection: boolean) => {
+        const { data } = this.props;
+        const { plotOptions } = this.state;
 
-        return (
-            <div className="panel panel-default">
-                <div className="panel-heading">
-                    Calibration Curve
-                </div>
-                <div className="panel-body">
-                    {plotError
-                        ? <Alert>{plotError}</Alert>
-                        : (plotRows
-                            ? <CalibrationCurve {...this.props.context} data={plotRows} runName={runPropertiesRow?.Name}/>
-                            : <LoadingSpinner msg={'Loading plot data...'}/>
-                        )
-                    }
-                </div>
-            </div>
-        )
-    }
+        const updatedPlotOptions = {
+            ...plotOptions,
+            samples: resetSampleSelection ? undefined : plotOptions.samples,
+            [key]: value
+        };
+
+        this.setState(() => ({
+            plotOptions: updatedPlotOptions,
+            filteredData: filterDataByPlotOptions(data, updatedPlotOptions),
+            samples: getUniqueSamplesForPlotSelections(data, updatedPlotOptions)
+        }));
+    };
 
     render() {
+        const { filteredData } = this.state;
+
         return (
-            <>
-                {this.renderRunPropertiesPanel()}
-                {this.renderPlotPanel()}
-            </>
+            <div className={'row'}>
+                <div className={'col col-xs-12 col-md-3 run-details-left'}>
+                    <DataSelectionsPanel {...this.state} setPlotOption={this.setPlotOption}/>
+                    <PlotOptionsPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
+                </div>
+                <div className={'col col-xs-12 col-md-9 run-details-right'}>
+                    <CalibrationCurvePanel {...this.props} {...this.state} data={filteredData}/>
+                </div>
+            </div>
         )
     }
 }

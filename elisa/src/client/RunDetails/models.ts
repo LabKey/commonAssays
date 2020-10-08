@@ -10,6 +10,7 @@ export type PlotOptions = {
     plateName: string,
     spot: number,
     samples: string[],
+    controls: string[],
     xAxisScale: string,
     yAxisScale: string
 }

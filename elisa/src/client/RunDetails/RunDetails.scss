@@ -1,26 +1,21 @@
 @import "~@labkey/components/dist/assets/scss/theme";
 
-$lightgray-border: #eee;
-
 .labkey-button {
-  margin-left: 10px;
+  margin: 10px 10px 0 0;
 }
 
 .plot-options-input-row {
-  width: 275px;
   padding-bottom: 15px;
 }
 
 .plot-options-field-label {
+  font-weight: bold;
+  color: #333;
   padding-bottom: 5px;
 }
 
-.plot-panel {
-  min-width: 750px;
-}
-
 .plot-panel-display {
-  height: 500px;
+  height: 600px;
 
   .loading-msg {
     padding: 10px;
@@ -28,15 +23,5 @@ $lightgray-border: #eee;
 }
 
 .plot-panel-section {
-  display: inline-block;
   vertical-align: top;
-
-  &:not(:last-child) {
-    border-right: 1px solid $lightgray-border;
-  }
-
-  & + .plot-panel-section {
-    border-left: 1px solid $lightgray-border;
-    margin-left: -1px;
-  }
 }
