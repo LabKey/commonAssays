@@ -16,8 +16,32 @@
 
 package org.labkey.elisa;
 
+import org.json.JSONObject;
+import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.actions.AssayRunDetailsAction;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.DoublePoint;
+import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
+import org.labkey.elisa.query.CurveFitDb;
+import org.labkey.elisa.query.ElisaManager;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ElisaController extends SpringActionController
 {
@@ -74,6 +98,118 @@ public class ElisaController extends SpringActionController
         public void setProtocolId(int protocolId)
         {
             _protocolId = protocolId;
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class GetCurveFitXYPairs extends ReadOnlyApiAction<GetCurveFitXYPairsForm>
+    {
+        ExpRun _run;
+
+        @Override
+        public void validateForm(GetCurveFitXYPairsForm form, Errors errors)
+        {
+            _run = ExperimentService.get().getExpRun(form.getRunId());
+            if (_run == null)
+                errors.reject(ERROR_MSG, "Unable to find run for ID " + form.getRunId() + ".");
+
+            if (form.getNumberOfPoints() < 2)
+                errors.reject(ERROR_MSG, "At least 2 points must be requested.");
+            if (form.getxMin() >= form.getxMax())
+                errors.reject(ERROR_MSG, "xMin must be less than xMax.");
+        }
+
+        @Override
+        public Object execute(GetCurveFitXYPairsForm form, BindException errors) throws Exception
+        {
+            ExpProtocol protocol = form.getProtocol();
+            AssayProvider provider = AssayService.get().getProvider(protocol);
+            Domain runDomain = provider.getRunDomain(protocol);
+            StatsService.CurveFitType curveFitType = ElisaManager.getRunCurveFitType(runDomain, _run);
+            List<Map<String, Object>> points = new ArrayList<>();
+
+            CurveFitDb curveFitDb = ElisaManager.getCurveFit(getContainer(), _run, form.getPlateName(), form.getSpot());
+            if (curveFitDb != null)
+            {
+                CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, new DoublePoint[0]);
+                curveFit.setParameters(new JSONObject(curveFitDb.getFitParameters()));
+                curveFit.setLogXScale(false);
+
+                double stepSize = (form.getxMax() - form.getxMin()) / (form.getNumberOfPoints() - 1);
+                double xVal = form.getxMin();
+                while (xVal <= form.getxMax())
+                {
+                    points.add(Map.of("x", xVal, "y", curveFit.fitCurve(xVal)));
+                    xVal += stepSize;
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("runId", _run.getRowId());
+            response.put("curveFitMethod", curveFitType.getLabel());
+            response.put("rSquared", curveFitDb != null ? curveFitDb.getrSquared() : "N/A");
+            response.put("fitParameters", curveFitDb != null ? curveFitDb.getFitParameters() : "N/A");
+            response.put("points", points);
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    public static class GetCurveFitXYPairsForm extends AssayRunDetailsAction.AssayRunDetailsForm
+    {
+        private String _plateName = ManualImportHelper.PLACEHOLDER_PLATE_NAME;
+        private int spot = 1;
+        private double xMin = 0;
+        private double xMax = 100;
+        private int numberOfPoints = 2;
+
+        public String getPlateName()
+        {
+            return _plateName;
+        }
+
+        public void setPlateName(String plateName)
+        {
+            _plateName = plateName;
+        }
+
+        public int getSpot()
+        {
+            return spot;
+        }
+
+        public void setSpot(int spot)
+        {
+            this.spot = spot;
+        }
+
+        public double getxMin()
+        {
+            return xMin;
+        }
+
+        public void setxMin(double xMin)
+        {
+            this.xMin = xMin;
+        }
+
+        public double getxMax()
+        {
+            return xMax;
+        }
+
+        public void setxMax(double xMax)
+        {
+            this.xMax = xMax;
+        }
+
+        public int getNumberOfPoints()
+        {
+            return numberOfPoints;
+        }
+
+        public void setNumberOfPoints(int numberOfPoints)
+        {
+            this.numberOfPoints = numberOfPoints;
         }
     }
 }

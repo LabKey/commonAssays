@@ -24,7 +24,6 @@ import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssayUploadXarContext;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.Position;
@@ -45,6 +44,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
@@ -125,8 +125,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
         if (provider instanceof PlateBasedAssayProvider && context instanceof AssayUploadXarContext)
         {
-            Map<String, DomainProperty> runProperties = provider.getRunDomain(protocol).getProperties().stream()
-                    .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
+            Domain runDomain = provider.getRunDomain(protocol);
             Map<String, DomainProperty> sampleProperties = ((PlateBasedAssayProvider)provider).getSampleWellGroupDomain(protocol)
                     .getProperties().stream()
                     .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
@@ -143,7 +142,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         SimpleRegression regression = new SimpleRegression(true);
                         Map<String, Double> standardConcentrations = importHelper.getStandardConcentrations(plateName, analytePlateEntry.getKey());
 
-                        CurveFit standardCurve = calculateStandardCurve(run, plate, regression, standardConcentrations, runProperties);
+                        CurveFit standardCurve = calculateStandardCurve(run, plate, regression, standardConcentrations, runDomain);
                         if (standardCurve != null && standardCurve.getParameters() == null)
                             throw new ExperimentException("Unable to fit the standard concentrations to a curve, please check the input data and try again");
 
@@ -306,7 +305,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
      */
     @Nullable
     private CurveFit calculateStandardCurve(ExpRun run, Plate plate, @Nullable SimpleRegression regression, Map<String, Double> standardConcentrations,
-                                            Map<String, DomainProperty> runProperties) throws ExperimentException
+                                            Domain runDomain) throws ExperimentException
     {
         // compute the calibration curve, there could be multiple control groups but one contains the standards
         WellGroup stdWellGroup = plate.getWellGroup(WellGroup.Type.CONTROL, STANDARDS_WELL_GROUP_NAME);
@@ -341,15 +340,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 points.sort(Comparator.comparing(o -> o.first));
 
                 // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
-                StatsService.CurveFitType curveFitType = StatsService.CurveFitType.LINEAR;
-                DomainProperty curveFitPd = runProperties.get(DilutionAssayProvider.CURVE_FIT_METHOD_PROPERTY_NAME);
-                if (curveFitPd != null)
-                {
-                    Object value = run.getProperty(curveFitPd);
-                    if (value != null)
-                        curveFitType = StatsService.CurveFitType.fromLabel(String.valueOf(value));
-                }
-
+                StatsService.CurveFitType curveFitType = ElisaManager.getRunCurveFitType(runDomain, run);
                 CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, points.toArray(DoublePoint[]::new));
                 curveFit.setLogXScale(false);
                 curveFit.setAssumeCurveDecreasing(false);
