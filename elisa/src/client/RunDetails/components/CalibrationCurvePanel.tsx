@@ -5,7 +5,7 @@ import { generateId } from '@labkey/components';
 
 import { exportSVGToFile, getMaxFromData, getMinFromData, getPlotTitle, getResultsViewURL, tickFormatFn } from "../utils";
 import { PlotOptions } from "../models";
-import { SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP } from "../constants";
+import { HOVER_COLUMN_NAMES, X_AXIS_PROP, Y_AXIS_PROP, ID_COL_NAME } from "../constants";
 
 interface Props {
     protocolId: number,
@@ -57,14 +57,13 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
                 x: X_AXIS_PROP,
                 y: Y_AXIS_PROP,
                 hoverText: function(row){
-                    return SAMPLE_COLUMN_NAMES.map((col) => {
-                        const label = col === SAMPLE_COL_NAME ? 'Sample' : col;
-                        return label + ': ' + row[col];
+                    return HOVER_COLUMN_NAMES.map((col) => {
+                        return col + ': ' + row[col];
                     }).join('\n');
                 }
             };
             if (plotOptions.showLegend) {
-                aes['color'] = SAMPLE_COL_NAME;
+                aes['color'] = ID_COL_NAME;
             }
 
             const layers = [

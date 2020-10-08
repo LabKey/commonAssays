@@ -1,7 +1,7 @@
 import { Utils, getServerContext, ActionURL } from '@labkey/api';
 import { naturalSort } from "@labkey/components";
 
-import { SAMPLE_COL_NAME } from "./constants";
+import { CONTROL_COL_NAME, ID_COL_NAME, SAMPLE_COL_NAME } from "./constants";
 import { PlotOptions, SelectOptions } from "./models";
 
 // export function formatNumber(value) {
@@ -23,12 +23,16 @@ export function exportSVGToFile(svgEl, format, title: string) {
     }
 }
 
-export function filterDataByPlotOptions(data: any[], options: PlotOptions, includeSampleFilter = true): any[] {
-    const { plateName, spot, samples } = options;
+export function filterDataByPlotOptions(data: any[], samples: string[], controls: string[], options: PlotOptions, includeIdFilter = true): any[] {
+    const { plateName, spot, showAllSamples, showAllControls } = options;
+    const selectedSamples = showAllSamples ? samples : options.samples;
+    const selectedControls = showAllControls ? controls : options.controls;
+    const selectedIds = selectedSamples.concat(selectedControls);
+
     return data.filter((row) => {
         return (plateName === undefined || row['PlateName'] === plateName)
             && (spot === undefined || row['Spot'] === spot)
-            && (!includeSampleFilter || samples === undefined || samples.indexOf(row[SAMPLE_COL_NAME]) > -1)
+            && (!includeIdFilter || selectedIds.indexOf(row[ID_COL_NAME]) > -1)
     });
 }
 
@@ -42,8 +46,12 @@ export function getMaxFromData(data: any[], prop: string): number {
     return Math.max(...values);
 }
 
-export function getUniqueValues(dataArray: any[], prop: string): any[] {
-    return [...new Set(dataArray.map(d => d[prop]))].sort(naturalSort);
+export function getUniqueValues(dataArray: any[], prop: string, includeNull = true): any[] {
+    let values = dataArray.map(d => d[prop]);
+    if (!includeNull) {
+        values = values.filter(d => d !== null);
+    }
+    return [...new Set(values)].sort(naturalSort);
 }
 
 export function getSelectOptions(data: any[]): SelectOptions[] {
@@ -51,7 +59,7 @@ export function getSelectOptions(data: any[]): SelectOptions[] {
 }
 
 export function getResultsViewURL(protocolId: number, runId: number, plotOptions: PlotOptions) {
-    const { plateName, spot, samples } = plotOptions;
+    const { plateName, spot, samples, controls } = plotOptions;
 
     const params = {
         rowId: protocolId, 'Data.Run/RowId~eq': runId
@@ -65,6 +73,9 @@ export function getResultsViewURL(protocolId: number, runId: number, plotOptions
     if (samples !== undefined) {
         params['Data.' + SAMPLE_COL_NAME + '~in'] = samples.join(';');
     }
+    if (controls !== undefined) {
+        params['Data.' + CONTROL_COL_NAME + '~in'] = controls.join(';');
+    }
 
     return ActionURL.buildURL('assay', 'assayResults', undefined, params);
 }
@@ -76,7 +87,7 @@ export function getPlotTitle(runName: string, plotOptions: PlotOptions): string 
         + (spot !== undefined ? ' - Spot ' + spot : '');
 }
 
-export function getUniqueSamplesForPlotSelections(data: any[], plotOptions: PlotOptions): string[] {
-    const filteredDataForSamples = filterDataByPlotOptions(data, plotOptions, false);
-    return getUniqueValues(filteredDataForSamples, SAMPLE_COL_NAME);
+export function getUniqueIdsForPlotSelections(data: any[], plotOptions: PlotOptions, colName: string): string[] {
+    const filteredData = filterDataByPlotOptions(data, [], [], plotOptions, false);
+    return getUniqueValues(filteredData, colName, false);
 }

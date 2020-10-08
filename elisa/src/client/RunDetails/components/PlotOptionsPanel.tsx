@@ -5,7 +5,7 @@ import { PlotOptions } from "../models";
 interface Props {
     runPropertiesRow: {[key: string]: any},
     plotOptions: PlotOptions,
-    setPlotOption: (key: string, value: any, resetSampleSelection: boolean) => void
+    setPlotOption: (key: string, value: any, resetIdSelection: boolean) => void
 }
 
 export class PlotOptionsPanel extends PureComponent<Props> {

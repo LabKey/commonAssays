@@ -2,9 +2,9 @@ import React, { PureComponent } from 'react';
 import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
-import { RUN_COLUMN_NAMES, SAMPLE_COLUMN_NAMES } from "./constants";
+import { CONTROL_COL_NAME, ID_COL_NAME, RUN_COLUMN_NAMES, SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES } from "./constants";
 import { PlotOptions } from "./models";
-import { filterDataByPlotOptions, getUniqueSamplesForPlotSelections, getUniqueValues } from "./utils";
+import { filterDataByPlotOptions, getUniqueIdsForPlotSelections, getUniqueValues } from "./utils";
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
@@ -63,8 +63,19 @@ export class RunDetails extends PureComponent<Props, State> {
             queryName: 'Data',
             columns: SAMPLE_COLUMN_NAMES.join(','),
             filterArray: [Filter.create('Run/RowId', runId)],
-            success: (data) => {
-                this.setState(() => ({ data: data.rows }));
+            success: (response) => {
+                const data = [];
+                response.rows.forEach((row) => {
+                    // if the row has a control value, make sure the sample column is null
+                    if (row[CONTROL_COL_NAME]) {
+                        row[SAMPLE_COL_NAME] = null;
+                    }
+
+                    row[ID_COL_NAME] = row[CONTROL_COL_NAME] || row[SAMPLE_COL_NAME];
+                    data.push(row);
+                });
+
+                this.setState(() => ({ data }));
             },
             failure: (reason) => {
                 console.error(reason);
@@ -115,34 +126,45 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
             showLegend: true,
             plateName: plates.length > 1 ? plates[0] : undefined,
             spot: spots.length > 1 ? spots[0] : undefined,
+            showAllSamples: true,
+            samples: [],
+            showAllControls: true,
+            controls: [],
             xAxisScale: 'linear',
             yAxisScale: 'linear'
         } as PlotOptions;
+        const samples = getUniqueIdsForPlotSelections(props.data, plotOptions, SAMPLE_COL_NAME);
+        const controls = getUniqueIdsForPlotSelections(props.data, plotOptions, CONTROL_COL_NAME);
 
         this.state = {
-            filteredData: filterDataByPlotOptions(props.data, plotOptions),
+            filteredData: filterDataByPlotOptions(props.data, samples, controls, plotOptions),
+            plotOptions,
             plates,
             spots,
-            samples: getUniqueSamplesForPlotSelections(props.data, plotOptions),
-            controls: undefined, // TODO
-            plotOptions
+            samples,
+            controls
         };
     }
 
-    setPlotOption = (key: string, value: any, resetSampleSelection: boolean) => {
+    setPlotOption = (key: string, value: any, resetIdSelection: boolean) => {
         const { data } = this.props;
-        const { plotOptions } = this.state;
+        const { plotOptions, samples, controls } = this.state;
 
         const updatedPlotOptions = {
             ...plotOptions,
-            samples: resetSampleSelection ? undefined : plotOptions.samples,
             [key]: value
         };
 
+        updatedPlotOptions.showAllSamples = resetIdSelection ? true : updatedPlotOptions.showAllSamples;
+        updatedPlotOptions.samples = resetIdSelection || updatedPlotOptions.showAllSamples ? [] : updatedPlotOptions.samples;
+        updatedPlotOptions.showAllControls = resetIdSelection ? true : updatedPlotOptions.showAllControls;
+        updatedPlotOptions.controls = resetIdSelection || updatedPlotOptions.showAllControls ? [] : updatedPlotOptions.controls;
+
         this.setState(() => ({
             plotOptions: updatedPlotOptions,
-            filteredData: filterDataByPlotOptions(data, updatedPlotOptions),
-            samples: getUniqueSamplesForPlotSelections(data, updatedPlotOptions)
+            filteredData: filterDataByPlotOptions(data, samples, controls, updatedPlotOptions),
+            samples: getUniqueIdsForPlotSelections(data, updatedPlotOptions, SAMPLE_COL_NAME),
+            controls: getUniqueIdsForPlotSelections(data, updatedPlotOptions, CONTROL_COL_NAME),
         }));
     };
 

@@ -9,7 +9,9 @@ export type PlotOptions = {
     showLegend: boolean,
     plateName: string,
     spot: number,
+    showAllSamples: boolean;
     samples: string[],
+    showAllControls: boolean;
     controls: string[],
     xAxisScale: string,
     yAxisScale: string

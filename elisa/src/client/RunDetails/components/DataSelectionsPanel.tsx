@@ -10,19 +10,27 @@ interface Props {
     samples: string[],
     controls: string[],
     plotOptions: PlotOptions,
-    setPlotOption: (key: string, value: any, resetSampleSelection: boolean) => void
+    setPlotOption: (key: string, value: any, resetIdSelection: boolean) => void
 }
 
 export class DataSelectionsPanel extends PureComponent<Props> {
 
+    onShowAllSamplesCheck = (evt) => {
+        this.props.setPlotOption('showAllSamples', evt.target.checked, false);
+    };
+
     onSampleSelection = (name, formValue, selectedOptions) => {
         const selectedSamples = getUniqueValues(selectedOptions, 'value');
-        this.props.setPlotOption('samples', selectedSamples.length > 0 ? selectedSamples : undefined, false);
+        this.props.setPlotOption('samples', selectedSamples, false);
+    };
+
+    onShowAllControlsCheck = (evt) => {
+        this.props.setPlotOption('showAllControls', evt.target.checked, false);
     };
 
     onControlSelection = (name, formValue, selectedOptions) => {
         const selectedControls = getUniqueValues(selectedOptions, 'value');
-        this.props.setPlotOption('controls', selectedControls.length > 0 ? selectedControls : undefined, false);
+        this.props.setPlotOption('controls', selectedControls, false);
     };
 
     render() {
@@ -76,19 +84,32 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                         <div className={'plot-options-input-row'}>
                             <div className={'plot-options-field-label'}>Samples</div>
                             {samples
-                                ? <SelectInput
-                                    name='samples'
-                                    key='samples'
-                                    inputClass={'col-xs-12'}
-                                    options={getSelectOptions(samples)}
-                                    value={plotOptions.samples || []}
-                                    onChange={this.onSampleSelection}
-                                    showLabel={false}
-                                    formsy={false}
-                                    multiple={true}
-                                    required={false}
-                                    clearable={false}
-                                />
+                                ? <>
+                                    <div>
+                                        <input
+                                            type="checkbox"
+                                            name='showAllSamples'
+                                            checked={plotOptions.showAllSamples}
+                                            onChange={this.onShowAllSamplesCheck}
+                                        />
+                                        Show all
+                                    </div>
+                                    <SelectInput
+                                        name='samples'
+                                        key='samples'
+                                        inputClass={'col-xs-12'}
+                                        placeholder={'Select samples to plot...'}
+                                        disabled={plotOptions.showAllSamples}
+                                        options={getSelectOptions(samples)}
+                                        value={plotOptions.samples || []}
+                                        onChange={this.onSampleSelection}
+                                        showLabel={false}
+                                        formsy={false}
+                                        multiple={true}
+                                        required={false}
+                                        clearable={false}
+                                    />
+                                </>
                                 : <LoadingSpinner msg={'Loading samples...'}/>
                             }
                         </div>
@@ -96,19 +117,32 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                         <div className={'plot-options-input-row'}>
                             <div className={'plot-options-field-label'}>Controls</div>
                             {controls
-                                ? <SelectInput
-                                    name='controls'
-                                    key='controls'
-                                    inputClass={'col-xs-12'}
-                                    options={getSelectOptions(controls)}
-                                    value={plotOptions.controls || []}
-                                    onChange={this.onControlSelection}
-                                    showLabel={false}
-                                    formsy={false}
-                                    multiple={true}
-                                    required={false}
-                                    clearable={false}
-                                />
+                                ? <>
+                                    <div>
+                                        <input
+                                            type="checkbox"
+                                            name='showAllControls'
+                                            checked={plotOptions.showAllControls}
+                                            onChange={this.onShowAllControlsCheck}
+                                        />
+                                        Show all
+                                    </div>
+                                    <SelectInput
+                                        name='controls'
+                                        key='controls'
+                                        inputClass={'col-xs-12'}
+                                        placeholder={'Select controls to plot...'}
+                                        disabled={plotOptions.showAllControls}
+                                        options={getSelectOptions(controls)}
+                                        value={plotOptions.controls || []}
+                                        onChange={this.onControlSelection}
+                                        showLabel={false}
+                                        formsy={false}
+                                        multiple={true}
+                                        required={false}
+                                        clearable={false}
+                                    />
+                                </>
                                 : <LoadingSpinner msg={'Loading controls...'}/>
                             }
                         </div>
