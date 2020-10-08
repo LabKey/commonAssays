@@ -2,7 +2,14 @@ import React, { PureComponent } from 'react';
 import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
-import { CONTROL_COL_NAME, ID_COL_NAME, RUN_COLUMN_NAMES, SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES } from "./constants";
+import {
+    CONTROL_COL_NAME,
+    ID_COL_NAME,
+    RUN_COLUMN_NAMES,
+    SAMPLE_COL_NAME,
+    SAMPLE_COLUMN_NAMES, STANDARDS_LABEL,
+    WELL_GROUP_COL_NAME
+} from "./constants";
 import { CurveFitData, PlotOptions } from "./models";
 import {
     filterDataByPlotOptions,
@@ -72,6 +79,12 @@ export class RunDetails extends PureComponent<Props, State> {
             success: (response) => {
                 const data = [];
                 response.rows.forEach((row) => {
+                    // consolidate the control name for the standard wells so they plot the same color
+                    const isStandard = row[WELL_GROUP_COL_NAME] === 'Standards';
+                    if (isStandard) {
+                        row[CONTROL_COL_NAME] = STANDARDS_LABEL;
+                    }
+
                     // if the row has a control value, make sure the sample column is null
                     if (row[CONTROL_COL_NAME]) {
                         row[SAMPLE_COL_NAME] = null;

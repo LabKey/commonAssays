@@ -1,7 +1,7 @@
 import { Utils, getServerContext, ActionURL } from '@labkey/api';
 import { naturalSort } from "@labkey/components";
 
-import { CONTROL_COL_NAME, ID_COL_NAME, SAMPLE_COL_NAME } from "./constants";
+import { CONTROL_COL_NAME, ID_COL_NAME, SAMPLE_COL_NAME, STANDARDS_LABEL, WELL_GROUP_COL_NAME } from "./constants";
 import { PlotOptions, SelectOptions } from "./models";
 
 // export function formatNumber(value) {
@@ -75,9 +75,20 @@ export function getResultsViewURL(protocolId: number, runId: number, plotOptions
         // add in an extra separator to make this an OR between the samples and controls
         params['Data.' + SAMPLE_COL_NAME + '~in'] = samples.join(';') + ';';
     }
+
     if (!showAllControls) {
         // add in an extra separator to make this an OR between the samples and controls
-        params['Data.' + CONTROL_COL_NAME + '~in'] = controls.join(';') + ';';
+        if (controls.indexOf(STANDARDS_LABEL) > -1) {
+            if (showAllSamples || samples.length > 0) {
+                params['Data.' + WELL_GROUP_COL_NAME + '~containsoneof'] = STANDARDS_LABEL + ';Sample';
+            }
+            else {
+                params['Data.' + WELL_GROUP_COL_NAME + '~in'] = STANDARDS_LABEL;
+            }
+        }
+        else {
+            params['Data.' + CONTROL_COL_NAME + '~in'] = controls.join(';') + ';';
+        }
     }
 
     return ActionURL.buildURL('assay', 'assayResults', undefined, params);

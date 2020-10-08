@@ -30,16 +30,13 @@ export class PlotOptionsPanel extends PureComponent<Props> {
 
     renderCurveFitData() {
         const { curveFitData } = this.props;
+        const hasFitParams = curveFitData.fitParameters.startsWith('{');
 
         return (
             <>
-                <div className={'plot-options-field-label'}>R Squared</div>
-                <pre>{curveFitData.rSquared}</pre>
-                <div className={'plot-options-field-label'}>Fit Parameters</div>
-                {curveFitData.fitParameters.startsWith('{')
-                    ? <pre>{JSON.stringify(JSON.parse(curveFitData.fitParameters), null, 2)}</pre>
-                    : <pre>{curveFitData.fitParameters}</pre>
-                }
+                <div className={'curve-fit-field-label'}>R Squared: {curveFitData.rSquared}</div>
+                <div className={'curve-fit-field-label'}>Fit Parameters: {!hasFitParams && curveFitData.fitParameters}</div>
+                {hasFitParams && <pre>{JSON.stringify(JSON.parse(curveFitData.fitParameters), null, 2)}</pre>}
             </>
         )
     }
@@ -97,12 +94,7 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                                     onChange={this.onShowCurveCheck}
                                 />
                                 Show curve fit line
-                                {curveFitData &&
-                                    <LabelHelpTip
-                                        title={'Curve Fit Data'}
-                                        body={() => this.renderCurveFitData()}
-                                    />
-                                }
+                                {plotOptions.showCurve && curveFitData && this.renderCurveFitData()}
                             </div>
                         </div>
                     </div>
