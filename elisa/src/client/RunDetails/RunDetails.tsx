@@ -4,17 +4,18 @@ import { Alert, LoadingSpinner } from "@labkey/components";
 
 import {
     CONTROL_COL_NAME,
-    ID_COL_NAME,
     RUN_COLUMN_NAMES,
     SAMPLE_COL_NAME,
-    SAMPLE_COLUMN_NAMES, STANDARDS_LABEL,
-    WELL_GROUP_COL_NAME
+    SAMPLE_COLUMN_NAMES
 } from "./constants";
 import { CurveFitData, PlotOptions } from "./models";
 import {
     filterDataByPlotOptions,
+    getColumnInfoFromQueryDetails,
     getUniqueIdsForPlotSelections,
     getUniqueValues,
+    getUpdatedPlotOptions,
+    parsePlotDataFromResponse,
     shouldReloadCurveFitData
 } from "./utils";
 import { getCurveFitXYPairs } from "./actions";
@@ -58,12 +59,9 @@ export class RunDetails extends PureComponent<Props, State> {
             schemaName,
             queryName: 'Data',
             success: (queryInfo) => {
-                const columnInfo = {};
-                queryInfo.columns.forEach((col) => {
-                     columnInfo[col.fieldKey] = col;
-                });
-
-                this.setState(() => ({ columnInfo }));
+                this.setState(() => ({
+                    columnInfo: getColumnInfoFromQueryDetails(queryInfo)
+                }));
             }
         });
 
@@ -92,24 +90,9 @@ export class RunDetails extends PureComponent<Props, State> {
             columns: SAMPLE_COLUMN_NAMES.join(','),
             filterArray: [Filter.create('Run/RowId', runId)],
             success: (response) => {
-                const data = [];
-                response.rows.forEach((row) => {
-                    // consolidate the control name for the standard wells so they plot the same color
-                    const isStandard = row[WELL_GROUP_COL_NAME] === 'Standards';
-                    if (isStandard) {
-                        row[CONTROL_COL_NAME] = STANDARDS_LABEL;
-                    }
-
-                    // if the row has a control value, make sure the sample column is null
-                    if (row[CONTROL_COL_NAME]) {
-                        row[SAMPLE_COL_NAME] = null;
-                    }
-
-                    row[ID_COL_NAME] = row[CONTROL_COL_NAME] || row[SAMPLE_COL_NAME];
-                    data.push(row);
-                });
-
-                this.setState(() => ({ data }));
+                this.setState(() => ({
+                    data: parsePlotDataFromResponse(response)
+                }));
             },
             failure: (reason) => {
                 console.error(reason);
@@ -208,16 +191,7 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
     setPlotOption = (key: string, value: any, resetIdSelection: boolean) => {
         const { data } = this.props;
         const { plotOptions, samples, controls, curveFitData } = this.state;
-
-        const updatedPlotOptions = {
-            ...plotOptions,
-            [key]: value
-        };
-
-        updatedPlotOptions.showAllSamples = resetIdSelection ? true : updatedPlotOptions.showAllSamples;
-        updatedPlotOptions.samples = resetIdSelection || updatedPlotOptions.showAllSamples ? [] : updatedPlotOptions.samples;
-        updatedPlotOptions.showAllControls = resetIdSelection ? true : updatedPlotOptions.showAllControls;
-        updatedPlotOptions.controls = resetIdSelection || updatedPlotOptions.showAllControls ? [] : updatedPlotOptions.controls;
+        const updatedPlotOptions = getUpdatedPlotOptions(key, value, resetIdSelection, plotOptions);
 
         this.setState(() => ({
             plotOptions: updatedPlotOptions,

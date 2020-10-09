@@ -1,4 +1,4 @@
-import { Ajax, ActionURL, Utils } from "@labkey/api";
+import { Ajax, ActionURL, Utils, getServerContext } from "@labkey/api";
 
 import { CurveFitData } from "./models";
 import { getMaxFromData, getMinFromData } from "./utils";
@@ -28,4 +28,11 @@ export function getCurveFitXYPairs(protocolId: number, runId: number, plateName:
             failure: Utils.getCallbackWrapper((error) => reject(error))
         });
     });
+}
+
+export function exportSVGToFile(svgEl, format, title: string) {
+    if (svgEl && svgEl.length > 0) {
+        const LABKEY = getServerContext();
+        LABKEY.vis.SVGConverter.convert(svgEl[0], format, 'Calibration Curve - ' + title);
+    }
 }

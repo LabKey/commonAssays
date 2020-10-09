@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 
 import { CurveFitData, PlotOptions } from "../models";
+import { CurveFitDataDisplay } from "./CurveFitDataDisplay";
 
 interface Props {
     runPropertiesRow: {[key: string]: any},
@@ -26,19 +27,6 @@ export class PlotOptionsPanel extends PureComponent<Props> {
     onShowYAxisLogCheck = (evt) => {
         this.props.setPlotOption('yAxisScale', evt.target.checked ? 'log' : 'linear', false);
     };
-
-    renderCurveFitData() {
-        const { curveFitData } = this.props;
-        const hasFitParams = curveFitData.fitParameters.startsWith('{');
-
-        return (
-            <>
-                <div className={'curve-fit-field-label'}>R Squared: {curveFitData.rSquared}</div>
-                <div className={'curve-fit-field-label'}>Fit Parameters: {!hasFitParams && curveFitData.fitParameters}</div>
-                {hasFitParams && <pre>{JSON.stringify(JSON.parse(curveFitData.fitParameters), null, 2)}</pre>}
-            </>
-        )
-    }
 
     render() {
         const { plotOptions, runPropertiesRow, curveFitData } = this.props;
@@ -83,7 +71,7 @@ export class PlotOptionsPanel extends PureComponent<Props> {
 
                         <div className={'plot-options-input-row'}>
                             <div className={'plot-options-field-label'}>
-                                Curve Fit: {runPropertiesRow?.CurveFitMethod}
+                                Curve Fit: {runPropertiesRow?.CurveFitMethod ?? 'Linear'}
                             </div>
                             <div>
                                 <input
@@ -93,7 +81,9 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                                     onChange={this.onShowCurveCheck}
                                 />
                                 Show curve fit line
-                                {plotOptions.showCurve && curveFitData && this.renderCurveFitData()}
+                                {plotOptions.showCurve && curveFitData &&
+                                    <CurveFitDataDisplay curveFitData={curveFitData}/>
+                                }
                             </div>
                         </div>
                     </div>

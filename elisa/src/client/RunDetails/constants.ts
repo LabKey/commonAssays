@@ -8,3 +8,4 @@ export const STANDARDS_LABEL = 'Standard';
 export const SAMPLE_COLUMN_NAMES = [SAMPLE_COL_NAME, CONTROL_COL_NAME, WELL_GROUP_COL_NAME, 'WellLocation', Y_AXIS_PROP, X_AXIS_PROP, 'PlateName', 'Spot'];
 export const HOVER_COLUMN_NAMES = [ID_COL_NAME, 'WellLocation', Y_AXIS_PROP, X_AXIS_PROP];
 export const RUN_COLUMN_NAMES = ['Name','CurveFitMethod'];
+export const PLOT_HEIGHT = 600;
