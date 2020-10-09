@@ -38,7 +38,8 @@ interface State {
     runPropertiesRow: {[key: string]: any},
     runPropertiesError: string
     data: any[],
-    dataError: string
+    dataError: string,
+    columnInfo: {[key: string]: any}
 }
 
 export class RunDetails extends PureComponent<Props, State> {
@@ -46,11 +47,25 @@ export class RunDetails extends PureComponent<Props, State> {
         runPropertiesRow: undefined,
         runPropertiesError: undefined,
         data: undefined,
-        dataError:  undefined
+        dataError:  undefined,
+        columnInfo: {}
     };
 
     componentDidMount(): void {
         const { schemaName, runId } = this.props.context;
+
+        Query.getQueryDetails({
+            schemaName,
+            queryName: 'Data',
+            success: (queryInfo) => {
+                const columnInfo = {};
+                queryInfo.columns.forEach((col) => {
+                     columnInfo[col.fieldKey] = col;
+                });
+
+                this.setState(() => ({ columnInfo }));
+            }
+        });
 
         Query.selectRows({
             schemaName,
@@ -122,7 +137,8 @@ interface ImplProps {
     protocolId: number,
     runId: number,
     runPropertiesRow: {[key: string]: any},
-    data: any[]
+    data: any[],
+    columnInfo: {[key: string]: any}
 }
 
 interface ImplState {

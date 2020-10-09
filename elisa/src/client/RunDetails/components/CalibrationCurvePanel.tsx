@@ -13,7 +13,8 @@ interface Props {
     runPropertiesRow: {[key: string]: any},
     data: any[],
     plotOptions: PlotOptions,
-    curveFitData: CurveFitData
+    curveFitData: CurveFitData,
+    columnInfo: {[key: string]: any}
 }
 
 interface State {
@@ -46,7 +47,7 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
     }
 
     renderPlot() {
-        const { runPropertiesRow, plotOptions, data, curveFitData } = this.props;
+        const { runPropertiesRow, plotOptions, data, curveFitData, columnInfo } = this.props;
         const LABKEY = getServerContext();
 
         this.getPlotElement().html('<div class="loading-msg"><i class="fa fa-spinner fa-pulse"></i> Rendering plot...</div>');
@@ -115,8 +116,8 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
                 layers,
                 labels: {
                     main: { value: getPlotTitle(runPropertiesRow?.Name, plotOptions) },
-                    x: { value: X_AXIS_PROP },
-                    y: { value: Y_AXIS_PROP }
+                    x: { value: columnInfo[X_AXIS_PROP] ? columnInfo[X_AXIS_PROP].caption : X_AXIS_PROP },
+                    y: { value: columnInfo[Y_AXIS_PROP] ? columnInfo[Y_AXIS_PROP].caption : Y_AXIS_PROP }
                 },
                 margins,
                 scales
