@@ -33,6 +33,7 @@ import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -67,6 +68,7 @@ import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -421,5 +423,11 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
             return type.getInstance();
         else
             return super.getPlateReader(readerName);
+    }
+
+    @Override
+    public Collection<StatsService.CurveFitType> getCurveFits()
+    {
+        return List.of(StatsService.CurveFitType.FOUR_PARAMETER_SIMPLEX, StatsService.CurveFitType.LINEAR);
     }
 }
