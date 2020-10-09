@@ -17,8 +17,8 @@ export function getCurveFitXYPairs(protocolId: number, runId: number, plateName:
             params: {
                 rowId: protocolId,
                 runId,
-                plateName,
-                spot,
+                plateName: plateName ?? 'PLACEHOLDER_PLATE',
+                spot: spot ?? 1,
                 xMin: xMin,
                 xMax: xMax,
                 numberOfPoints: 10000
