@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page import="org.labkey.api.util.UniqueID" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -34,7 +33,6 @@
 <%
     JspView<ElisaController.RunDetailsForm> me = (JspView<ElisaController.RunDetailsForm>) HttpView.currentView();
     ElisaController.RunDetailsForm form = me.getModelBean();
-    ObjectMapper jsonMapper = new ObjectMapper();
     String appId = "run-details-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
 %>
 

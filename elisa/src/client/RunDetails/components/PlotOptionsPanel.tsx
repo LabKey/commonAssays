@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 
 import { CurveFitData, PlotOptions } from "../models";
-import { LabelHelpTip } from "@labkey/components";
 
 interface Props {
     runPropertiesRow: {[key: string]: any},

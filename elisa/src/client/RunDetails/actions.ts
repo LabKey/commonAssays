@@ -1,4 +1,5 @@
 import { Ajax, ActionURL, Utils } from "@labkey/api";
+
 import { CurveFitData } from "./models";
 import { getMaxFromData, getMinFromData } from "./utils";
 import { X_AXIS_PROP } from "./constants";

@@ -4,10 +4,6 @@ import { naturalSort } from "@labkey/components";
 import { CONTROL_COL_NAME, ID_COL_NAME, SAMPLE_COL_NAME, STANDARDS_LABEL, WELL_GROUP_COL_NAME } from "./constants";
 import { PlotOptions, SelectOptions } from "./models";
 
-// export function formatNumber(value) {
-//     return (Math.round(value * 10000) / 10000).toFixed(4);
-// }
-
 const valExponentialDigits = 6;
 export function tickFormatFn(value) {
     if (Utils.isNumber(value) && Math.abs(Math.round(value)).toString().length >= valExponentialDigits) {

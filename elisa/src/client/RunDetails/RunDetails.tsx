@@ -17,12 +17,12 @@ import {
     getUniqueValues,
     shouldReloadCurveFitData
 } from "./utils";
+import { getCurveFitXYPairs } from "./actions";
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 
 import './RunDetails.scss';
-import { getCurveFitXYPairs } from "./actions";
 
 export interface AppContext {
     protocolId: number,
