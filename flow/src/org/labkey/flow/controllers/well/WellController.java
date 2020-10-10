@@ -807,10 +807,10 @@ public class WellController extends BaseFlowController
             final TreeSet<String> set = new TreeSet<>();
 
             new SqlSelector(FlowManager.get().getSchema(),
-                "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(value -> {
+                "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(String.class, value -> {
                     if (value != null)
                         set.add(value);
-                }, String.class);
+                });
 
             return set;
         }
