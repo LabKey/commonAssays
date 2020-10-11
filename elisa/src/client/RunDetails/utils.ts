@@ -227,3 +227,18 @@ export function getUpdatedPlotOptions(key: string, value: any, resetIdSelection:
     updatedPlotOptions.controls = resetIdSelection || updatedPlotOptions.showAllControls ? [] : updatedPlotOptions.controls;
     return updatedPlotOptions;
 }
+
+export function getDefaultPlotOptions(plates: string[], spots: number[]): PlotOptions {
+    return {
+        showCurve: true,
+        showLegend: true,
+        plateName: plates?.length > 1 ? plates[0] : undefined,
+        spot: spots?.length > 1 ? spots[0] : undefined,
+        showAllSamples: true,
+        samples: [],
+        showAllControls: true,
+        controls: [],
+        xAxisScale: 'linear',
+        yAxisScale: 'linear'
+    } as PlotOptions;
+}

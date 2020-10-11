@@ -1,6 +1,6 @@
 import { PlotOptions } from "./models";
 import {
-    filterDataByPlotOptions,
+    filterDataByPlotOptions, getDefaultPlotOptions,
     getMaxFromData,
     getMinFromData, getPlotConfigFromOptions, getPlotTitle, getResultsViewURL,
     getSelectOptions, getUniqueIdsForPlotSelections,
@@ -181,6 +181,20 @@ describe('utils', () => {
         plotOptions1 = {plateName: 'p1', spot: 0} as PlotOptions;
         plotOptions2 = {plateName: 'p2', spot: 1} as PlotOptions;
         expect(shouldReloadCurveFitData(plotOptions1, plotOptions2)).toBeTruthy();
+    });
+
+    test('getDefaultPlotOptions', () => {
+        expect(getDefaultPlotOptions(undefined, undefined).plateName).toBe(undefined);
+        expect(getDefaultPlotOptions(null, undefined).plateName).toBe(undefined);
+        expect(getDefaultPlotOptions([], undefined).plateName).toBe(undefined);
+        expect(getDefaultPlotOptions(['a'], undefined).plateName).toBe(undefined);
+        expect(getDefaultPlotOptions(['a','b'], undefined).plateName).toBe('a');
+
+        expect(getDefaultPlotOptions(undefined, undefined).spot).toBe(undefined);
+        expect(getDefaultPlotOptions(undefined, null).spot).toBe(undefined);
+        expect(getDefaultPlotOptions(undefined, []).spot).toBe(undefined);
+        expect(getDefaultPlotOptions(undefined, [0]).spot).toBe(undefined);
+        expect(getDefaultPlotOptions(undefined, [0,1]).spot).toBe(0);
     });
 
     test('getPlotConfigFromOptions', () => {

@@ -12,6 +12,7 @@ import { CurveFitData, PlotOptions } from "./models";
 import {
     filterDataByPlotOptions,
     getColumnInfoFromQueryDetails,
+    getDefaultPlotOptions,
     getUniqueIdsForPlotSelections,
     getUniqueValues,
     getUpdatedPlotOptions,
@@ -140,18 +141,7 @@ class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
 
         const plates = getUniqueValues(props.data, 'PlateName');
         const spots = getUniqueValues(props.data, 'Spot');
-        const plotOptions = {
-            showCurve: true,
-            showLegend: true,
-            plateName: plates.length > 1 ? plates[0] : undefined,
-            spot: spots.length > 1 ? spots[0] : undefined,
-            showAllSamples: true,
-            samples: [],
-            showAllControls: true,
-            controls: [],
-            xAxisScale: 'linear',
-            yAxisScale: 'linear'
-        } as PlotOptions;
+        const plotOptions = getDefaultPlotOptions(plates, spots);
         const samples = getUniqueIdsForPlotSelections(props.data, plotOptions, SAMPLE_COL_NAME);
         const controls = getUniqueIdsForPlotSelections(props.data, plotOptions, CONTROL_COL_NAME);
 
