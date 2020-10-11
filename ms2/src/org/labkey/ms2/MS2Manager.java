@@ -691,11 +691,11 @@ public class MS2Manager
 
         // Check for DELETE permission on all containers holding the requested runs
         // UI only allows moving from containers with DELETE permissions, but one could hack the request
-        new SqlSelector(getSchema(), selectSQL).forEach(containerId -> {
+        new SqlSelector(getSchema(), selectSQL).forEach(String.class, containerId -> {
             Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
             if (!c.hasPermission(user, DeletePermission.class))
                 throw new UnauthorizedException();
-        }, String.class);
+        });
 
         SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
         updateSQL.append(runSQL);
