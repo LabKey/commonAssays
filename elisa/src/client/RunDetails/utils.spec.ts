@@ -16,16 +16,16 @@ import {
     Y_AXIS_PROP
 } from "./constants";
 
-const PLOT_DATA = [
-    {PlateName: null, Spot: null, ID: null, Value: 1.1},
-    {PlateName: null, Spot: null, ID: 'b', Value: 10.1},
-    {PlateName: null, Spot: null, ID: 'a', Value: 1.2},
-    {PlateName: 'p2', Spot: 1, ID: 'a', Value: 122.1},
-    {PlateName: 'p2', Spot: 2, ID: 'a', Value: 12.1},
-    {PlateName: 'p2', Spot: 2, ID: 'b', Value: 10.1},
-    {PlateName: 'p1', Spot: 1, ID: 'a', Value: 10.1},
-    {PlateName: 'p1', Spot: 1, ID: 'b', Value: -1.1},
-    {PlateName: 'p1', Spot: 2, ID: 'a', Value: 0.1},
+export const TEST_PLOT_DATA = [
+    {PlateName: null, Spot: null, [SAMPLE_COL_NAME]: null, [CONTROL_COL_NAME]: null, ID: null, Value: 1.1},
+    {PlateName: null, Spot: null, [SAMPLE_COL_NAME]: null, [CONTROL_COL_NAME]: 'b', ID: 'b', Value: 10.1},
+    {PlateName: null, Spot: null, [SAMPLE_COL_NAME]: 'a', [CONTROL_COL_NAME]: null, ID: 'a', Value: 1.2},
+    {PlateName: 'p2', Spot: 1, [SAMPLE_COL_NAME]: 'a', [CONTROL_COL_NAME]: null, ID: 'a', Value: 122.1},
+    {PlateName: 'p2', Spot: 2, [SAMPLE_COL_NAME]: 'a', [CONTROL_COL_NAME]: null, ID: 'a', Value: 12.1},
+    {PlateName: 'p2', Spot: 2, [SAMPLE_COL_NAME]: null, [CONTROL_COL_NAME]: 'b', ID: 'b', Value: 10.1},
+    {PlateName: 'p1', Spot: 1, [SAMPLE_COL_NAME]: 'a', [CONTROL_COL_NAME]: null, ID: 'a', Value: 10.1},
+    {PlateName: 'p1', Spot: 1, [SAMPLE_COL_NAME]: null, [CONTROL_COL_NAME]: 'b', ID: 'b', Value: -1.1},
+    {PlateName: 'p1', Spot: 2, [SAMPLE_COL_NAME]: 'a', [CONTROL_COL_NAME]: null, ID: 'a', Value: 0.1},
 ];
 
 describe('utils', () => {
@@ -41,59 +41,59 @@ describe('utils', () => {
 
     test('filterDataByPlotOptions', () => {
         let plotOptions = {plateName: undefined, spot: undefined, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, [], [], plotOptions, false)).toHaveLength(PLOT_DATA.length);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, [], [], plotOptions, false)).toHaveLength(TEST_PLOT_DATA.length);
 
         plotOptions = {plateName: 'p1', spot: undefined, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, [], [], plotOptions, false)).toHaveLength(3);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, [], [], plotOptions, false)).toHaveLength(3);
 
         plotOptions = {plateName: 'p1', spot: 1, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, [], [], plotOptions, false)).toHaveLength(2);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, [], [], plotOptions, false)).toHaveLength(2);
 
         plotOptions = {plateName: 'p2', spot: 1, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, [], [], plotOptions, false)).toHaveLength(1);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, [], [], plotOptions, false)).toHaveLength(1);
 
         plotOptions = {plateName: 'p2', spot: 3, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, [], [], plotOptions, false)).toHaveLength(0);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, [], [], plotOptions, false)).toHaveLength(0);
 
         plotOptions = {plateName: undefined, spot: undefined, showAllSamples: true, showAllControls: true} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, ['a'], ['b'], plotOptions, false)).toHaveLength(PLOT_DATA.length);
-        expect(filterDataByPlotOptions(PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(8);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, ['a'], ['b'], plotOptions, false)).toHaveLength(TEST_PLOT_DATA.length);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(8);
 
         plotOptions = {plateName: undefined, spot: undefined, showAllSamples: false, samples: [], showAllControls: false, controls: []} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(0);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(0);
 
         plotOptions = {plateName: undefined, spot: undefined, showAllSamples: false, samples: ['a', 'c'], showAllControls: false, controls: []} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(5);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(5);
 
         plotOptions = {plateName: undefined, spot: undefined, showAllSamples: false, samples: [], showAllControls: false, controls: ['b', 'c']} as PlotOptions;
-        expect(filterDataByPlotOptions(PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(3);
+        expect(filterDataByPlotOptions(TEST_PLOT_DATA, ['a'], ['b'], plotOptions, true)).toHaveLength(3);
     });
 
     test('getMinFromData', () => {
-        expect(getMinFromData(PLOT_DATA, 'Value')).toBe(-1.1);
-        expect(getMinFromData(PLOT_DATA, 'Value', false)).toBe(-1.1);
-        expect(getMinFromData(PLOT_DATA, 'Spot')).toBe(0);
-        expect(getMinFromData(PLOT_DATA, 'Spot', false)).toBe(1);
-        expect(getMinFromData(PLOT_DATA, 'ID')).toBeNaN();
-        expect(getMinFromData(PLOT_DATA, 'ID', false)).toBeNaN();
+        expect(getMinFromData(TEST_PLOT_DATA, 'Value')).toBe(-1.1);
+        expect(getMinFromData(TEST_PLOT_DATA, 'Value', false)).toBe(-1.1);
+        expect(getMinFromData(TEST_PLOT_DATA, 'Spot')).toBe(0);
+        expect(getMinFromData(TEST_PLOT_DATA, 'Spot', false)).toBe(1);
+        expect(getMinFromData(TEST_PLOT_DATA, 'ID')).toBeNaN();
+        expect(getMinFromData(TEST_PLOT_DATA, 'ID', false)).toBeNaN();
     });
 
     test('getMaxFromData', () => {
-        expect(getMaxFromData(PLOT_DATA, 'Value')).toBe(122.1);
-        expect(getMaxFromData(PLOT_DATA, 'Value', false)).toBe(122.1);
-        expect(getMaxFromData(PLOT_DATA, 'Spot')).toBe(2);
-        expect(getMaxFromData(PLOT_DATA, 'Spot', false)).toBe(2);
-        expect(getMaxFromData(PLOT_DATA, 'ID')).toBeNaN();
-        expect(getMaxFromData(PLOT_DATA, 'ID', false)).toBeNaN();
+        expect(getMaxFromData(TEST_PLOT_DATA, 'Value')).toBe(122.1);
+        expect(getMaxFromData(TEST_PLOT_DATA, 'Value', false)).toBe(122.1);
+        expect(getMaxFromData(TEST_PLOT_DATA, 'Spot')).toBe(2);
+        expect(getMaxFromData(TEST_PLOT_DATA, 'Spot', false)).toBe(2);
+        expect(getMaxFromData(TEST_PLOT_DATA, 'ID')).toBeNaN();
+        expect(getMaxFromData(TEST_PLOT_DATA, 'ID', false)).toBeNaN();
     });
 
     test('getUniqueValues', () => {
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'PlateName'))).toBe('["p1","p2",null]');
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'PlateName', false))).toBe('["p1","p2"]');
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'Spot'))).toBe('[1,2,null]');
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'Spot', false))).toBe('[1,2]');
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'ID'))).toBe('["a","b",null]');
-        expect(JSON.stringify(getUniqueValues(PLOT_DATA, 'ID', false))).toBe('["a","b"]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'PlateName'))).toBe('["p1","p2",null]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'PlateName', false))).toBe('["p1","p2"]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'Spot'))).toBe('[1,2,null]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'Spot', false))).toBe('[1,2]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'ID'))).toBe('["a","b",null]');
+        expect(JSON.stringify(getUniqueValues(TEST_PLOT_DATA, 'ID', false))).toBe('["a","b"]');
     });
 
     test('getSelectOptions', () => {
@@ -142,17 +142,17 @@ describe('utils', () => {
 
     test('getUniqueIdsForPlotSelections', () => {
         let plotOptions = {plateName: undefined, spot: undefined, showAllSamples: true, samples: [], showAllControls: true, controls: []} as PlotOptions;
-        expect(JSON.stringify(getUniqueIdsForPlotSelections(PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
+        expect(JSON.stringify(getUniqueIdsForPlotSelections(TEST_PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
 
         plotOptions = {plateName: 'p1', spot: 1, showAllSamples: true, samples: [], showAllControls: true, controls: []} as PlotOptions;
-        expect(JSON.stringify(getUniqueIdsForPlotSelections(PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
+        expect(JSON.stringify(getUniqueIdsForPlotSelections(TEST_PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
         plotOptions = {plateName: 'p1', spot: 1, showAllSamples: false, samples: [], showAllControls: false, controls: []} as PlotOptions;
-        expect(JSON.stringify(getUniqueIdsForPlotSelections(PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
+        expect(JSON.stringify(getUniqueIdsForPlotSelections(TEST_PLOT_DATA, plotOptions, 'ID'))).toBe('["a","b"]');
 
         plotOptions = {plateName: 'p1', spot: 2, showAllSamples: true, samples: [], showAllControls: true, controls: []} as PlotOptions;
-        expect(JSON.stringify(getUniqueIdsForPlotSelections(PLOT_DATA, plotOptions, 'ID'))).toBe('["a"]');
+        expect(JSON.stringify(getUniqueIdsForPlotSelections(TEST_PLOT_DATA, plotOptions, 'ID'))).toBe('["a"]');
         plotOptions = {plateName: 'p1', spot: 2, showAllSamples: false, samples: [], showAllControls: false, controls: []} as PlotOptions;
-        expect(JSON.stringify(getUniqueIdsForPlotSelections(PLOT_DATA, plotOptions, 'ID'))).toBe('["a"]');
+        expect(JSON.stringify(getUniqueIdsForPlotSelections(TEST_PLOT_DATA, plotOptions, 'ID'))).toBe('["a"]');
     });
 
     test('shouldReloadCurveFitData', () => {

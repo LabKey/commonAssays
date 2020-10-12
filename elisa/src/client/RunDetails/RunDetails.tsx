@@ -135,7 +135,8 @@ interface ImplState {
     curveFitData: CurveFitData
 }
 
-class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
+// exported just for jest testing
+export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
     constructor(props: ImplProps) {
         super(props);
 
