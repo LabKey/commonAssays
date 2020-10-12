@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.data.FlowProtocolStep"%>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
-<%@ page import="org.labkey.flow.controllers.editscript.CopyProtocolForm" %>
+<%@ page import="org.labkey.flow.controllers.editscript.CopyProtocolForm"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.CopyAction"%>
+<%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <% CopyProtocolForm form = (CopyProtocolForm) this.form; %>
 <labkey:errors/>
-<labkey:form action="<%=formAction(ScriptController.CopyAction.class)%>" method="POST">
+<labkey:form action="<%=formAction(CopyAction.class)%>" method="POST">
     <p>
         What do you want to call the new script?<br>
         <input type="text" name="name" value="<%=h(form.name)%>">

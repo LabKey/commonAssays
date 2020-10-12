@@ -329,7 +329,7 @@ public class FlowOverview extends Overview
                 statusHTML.append("<br>");
             }
             ActionURL urlFlowComp = FlowTableType.CompensationMatrices.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
-            statusHTML.append("There are <a href=\"").append(h(urlFlowComp.getLocalURIString())).append("\">").append(_compensationMatrixCount).append(" compensation matrices</a>.");
+            statusHTML.append("There are <a href=\"").append(h(urlFlowComp)).append("\">").append(_compensationMatrixCount).append(" compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.CompensationControlCount~neq", 0);

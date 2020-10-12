@@ -78,24 +78,24 @@
             runTableName    : <%=q(form.getRunTableName())%>,
             runId           : <%=form.getRunId()%>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
-            baseUrl         : <%=q(baseUrl.getLocalURIString())%>
+            baseUrl         : <%=q(baseUrl)%>
         });
 
         Ext4.create('LABKEY.ext4.GenericChartPanel', {
             renderTo        : <%=q(renderId)%>,
             height          : 500,
             padding         : '20px 0',
-            schemaName      : <%=q(form.getSchemaName() != null ? form.getSchemaName() : null) %>,
-            queryName       : <%=q(form.getQueryName() != null ? form.getQueryName() : null) %>,
+            schemaName      : <%=q(form.getSchemaName())%>,
+            queryName       : <%=q(form.getQueryName())%>,
             dataRegionName  : <%=q(form.getDataRegionName())%>,
             renderType      : <%=q(form.getRenderType())%>,
-            baseUrl         : <%=q(baseUrl.getLocalURIString())%>,
+            baseUrl         : <%=q(baseUrl)%>,
             allowShare      : <%=c.hasPermission(user, ShareReportPermission.class)%>,
             isDeveloper     : <%=user.isBrowserDev()%>,
             hideSave        : <%=user.isGuest()%>,
             hideViewData    : true,
-            autoColumnYName  : <%=q(form.getAutoColumnYName() != null ? form.getAutoColumnYName() : null)%>,
-            autoColumnXName  : <%=q(form.getAutoColumnXName() != null ? form.getAutoColumnXName() : null)%>,
+            autoColumnYName  : <%=q(form.getAutoColumnYName())%>,
+            autoColumnXName  : <%=q(form.getAutoColumnXName())%>,
             defaultNumberFormat: eval(<%=q(numberFormatFn)%>),
             allowEditMode   : <%=!user.isGuest() && c.hasPermission(user, UpdatePermission.class)%>,
             curveFit        : {type : 'linear', min: 0, max: 100, points: 5, params : <%=text(jsonMapper.writeValueAsString(form.getFitParams()))%>},

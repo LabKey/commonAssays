@@ -17,13 +17,14 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.SaveViewAction" %>
+<%@ page import="org.labkey.ms2.MS2Controller.SaveViewBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.SaveViewBean bean = ((JspView<MS2Controller.SaveViewBean>) HttpView.currentView()).getModelBean();
+    SaveViewBean bean = ((JspView<SaveViewBean>) HttpView.currentView()).getModelBean();
 %>
-<labkey:form method="post" action="<%=buildURL(MS2Controller.SaveViewAction.class)%>" className="labkey-data-region">
+<labkey:form method="post" action="<%=urlFor(SaveViewAction.class)%>" className="labkey-data-region">
     <table class="lk-fields-table">
         <tr>
             <td>Name:</td>

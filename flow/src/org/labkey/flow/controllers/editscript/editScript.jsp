@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.flow.ScriptParser"%>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditScriptAction"%>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.EditPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -25,7 +25,7 @@
     FlowScript script = getScript();
     ScriptParser.Error error = scriptParseError;
 %>
-<labkey:form method="POST" action="<%=formAction(ScriptController.EditScriptAction.class)%>">
+<labkey:form method="POST" action="<%=formAction(EditScriptAction.class)%>">
 <% if (error != null) { %>
 <p class="labkey-error"><%=unsafe(PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>"))%></p>
 <% if (error.getLine() != 0) { %>

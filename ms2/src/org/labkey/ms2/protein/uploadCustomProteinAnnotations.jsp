@@ -19,7 +19,8 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.protein.CustomAnnotationType" %>
-<%@ page import="org.labkey.ms2.protein.ProteinController" %>
+<%@ page import="org.labkey.ms2.protein.ProteinController.UploadAnnotationsForm" %>
+<%@ page import="org.labkey.ms2.protein.ProteinController.UploadCustomProteinAnnotations" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -31,13 +32,13 @@
 %>
 
 <%
-    JspView<ProteinController.UploadAnnotationsForm> me = (JspView<ProteinController.UploadAnnotationsForm>) HttpView.currentView();
-    ProteinController.UploadAnnotationsForm bean = me.getModelBean();
+    JspView<UploadAnnotationsForm> me = (JspView<UploadAnnotationsForm>) HttpView.currentView();
+    UploadAnnotationsForm bean = me.getModelBean();
 %>
 
 <labkey:errors/>
 
-<labkey:form action="uploadCustomProteinAnnotations.post" name="proteinListForm" method="POST">
+<labkey:form action="<%=urlFor(UploadCustomProteinAnnotations.class)%>" name="proteinListForm" method="POST">
     <table>
         <tr>
             <td colspan="2">

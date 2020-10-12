@@ -115,7 +115,10 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     @Override
     protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
     {
-        return new SinglePlateDilutionSamplePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
+        if (inputFormat == SampleMetadataInputFormat.MANUAL)
+            return new PlateSamplePropertyHelper(sampleProperties, template);
+        else
+            return new SinglePlateDilutionSamplePropertyHelper(c, protocol, sampleProperties, template, inputFormat);
     }
 
     @Override

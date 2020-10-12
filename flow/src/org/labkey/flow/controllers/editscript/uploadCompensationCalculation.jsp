@@ -16,12 +16,11 @@
  */
 %>
 <%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditCompensationCalculationAction" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <labkey:errors />
-<labkey:form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>"
-      enctype="multipart/form-data">
+<labkey:form method="POST" action="<%=formAction(EditCompensationCalculationAction.class)%>" enctype="multipart/form-data">
     <p>
         The compensation calculation tells <%=h(FlowModule.getLongProductName())%> how
         to identify the compensation controls in an experiment run, and what gates
