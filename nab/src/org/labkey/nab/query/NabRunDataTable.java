@@ -95,7 +95,7 @@ public class NabRunDataTable extends NabBaseTable
         // This is for a client scenario where they want to be able to access and export the dilution data for copied-to-study NAb results.
         AliasedColumn dilutionDataCol = new AliasedColumn("DilutionData", wrapColumn(getRealTable().getColumn("RowId")));
         dilutionDataCol.setFk(QueryForeignKey.from(schema, cf).to("DilutionData", "RunData", "Dilution"));
-        dilutionDataCol.setDescription("Note that bringing this column or any of its children will result in row duplication "
+        dilutionDataCol.setDescription("Note that bringing this column into view, or any of its children, will result in row duplication "
                 + "for the data/results grid as it will join in all dilution values for the given sample/specimen row.");
         dilutionDataCol.setHidden(true);
         addColumn(dilutionDataCol);

@@ -34,6 +34,8 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.AliasedColumn;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AssayDataLinkDisplayColumn;
@@ -97,6 +99,19 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
             }
         });
+
+        // Add hidden aliased column from Run/RowId to expose the cell control aggregates for this run
+        AliasedColumn cellControlAggCol = new AliasedColumn(CELL_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
+        cellControlAggCol.setFk(QueryForeignKey.from(this, cf).to(CELL_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
+        cellControlAggCol.setHidden(true);
+        runTable.addColumn(cellControlAggCol);
+
+        // Add hidden aliased column from Run/RowId to expose the virus control aggregates for this run
+        AliasedColumn virusControlAggCol = new AliasedColumn(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
+        virusControlAggCol.setFk(QueryForeignKey.from(this, cf).to(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
+        virusControlAggCol.setHidden(true);
+        runTable.addColumn(virusControlAggCol);
+
         return runTable;
     }
 
