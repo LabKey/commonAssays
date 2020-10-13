@@ -18,6 +18,9 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.SampleInfoMethod;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.data.Container;
@@ -30,9 +33,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
 
 import java.util.Set;
@@ -45,6 +45,26 @@ import java.util.Set;
 public class NabProviderSchema extends DilutionProviderSchema
 {
     public static final String SCHEMA_NAME = "Nab";
+
+    enum NabCurveFits
+    {
+        FOUR_PARAMETER(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()),
+        FIVE_PARAMETER(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()),
+        POLYNOMIAL(StatsService.CurveFitType.POLYNOMIAL.getLabel()),
+        NONE(StatsService.CurveFitType.NONE.getLabel());
+
+        private String _label;
+
+        NabCurveFits(String label)
+        {
+            _label = label;
+        }
+
+        public String getLabel()
+        {
+            return _label;
+        }
+    }
 
     static public void register(Module module)
     {
@@ -103,7 +123,7 @@ public class NabProviderSchema extends DilutionProviderSchema
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<StatsService.CurveFitType> result = new EnumTableInfo<>(StatsService.CurveFitType.class, this, StatsService.CurveFitType::getLabel, false, "List of possible curve fitting methods for the NAb assay.");
+            EnumTableInfo<NabCurveFits> result = new EnumTableInfo<>(NabCurveFits.class, this, NabCurveFits::getLabel, false, "List of possible curve fitting methods for the NAb assay.");
             result.setPublicSchemaName(SCHEMA_NAME);
             result.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
             return result;

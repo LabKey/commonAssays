@@ -528,7 +528,7 @@ public class ViabilityManager
                     new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
                     new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null);
 
-            ts.forEachMapBatch((rows) -> {
+            ts.forEachMapBatch(1000, (rows) -> {
 
                 List<Integer> resultIDs = new ArrayList<>(rows.size());
                 int[] objectIDs = new int[rows.size()];
@@ -547,7 +547,7 @@ public class ViabilityManager
 
                 OntologyManager.deleteOntologyObjects(c, true, objectIDs);
 
-            }, 1000);
+            });
 
             tx.commit();
         }
