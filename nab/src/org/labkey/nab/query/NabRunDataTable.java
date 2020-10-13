@@ -193,6 +193,10 @@ public class NabRunDataTable extends NabBaseTable
         {
             result = getColumn("FitError");
         }
+        else if ("Fit Parameters".equalsIgnoreCase(name))
+        {
+            result = getColumn("FitParameters");
+        }
         // Be backwards compatible with queries that expect there to an "ObjectId" column. It's a different value from
         // the pre-migration value, but it's enough to make the query run and should be sufficient as long as we
         // continue to generate the same number for a given row.
@@ -332,7 +336,7 @@ public class NabRunDataTable extends NabBaseTable
         for (ColumnInfo columnInfo : _rootTable.getColumns())
         {
             String columnName = columnInfo.getColumnName().toLowerCase();
-            if (columnName.contains("auc_") || columnName.equals("fiterror"))
+            if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals("fitparameters"))
             {
                 addWrapColumn(columnInfo);
             }

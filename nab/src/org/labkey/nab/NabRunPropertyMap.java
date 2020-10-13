@@ -24,6 +24,7 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.exp.api.ExpMaterial;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,6 +70,10 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 sample.put("virusProperties", virusProperties);
 
             DilutionSummary dilutionSummary = result.getDilutionSummary();
+            WellGroup wellGroup = dilutionSummary.getFirstWellGroup();
+            ExpMaterial sampleInput = assay.getMaterial(wellGroup);
+            sample.put("specimenLsid", sampleInput.getLSID());
+
             sample.put("objectId", result.getObjectId());
 
             // add any additional properties associated with this object id
@@ -80,7 +85,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 }
             }
 
-            sample.put("wellgroupName", dilutionSummary.getFirstWellGroup().getName());
+            sample.put("wellgroupName", wellGroup.getName());
             try
             {
                 if (includeStats)

@@ -18,6 +18,12 @@ package org.labkey.nab;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -25,9 +31,12 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -203,5 +212,35 @@ public class NabManager extends AbstractNabManager
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    /**
+     * Ensure the fit parameter value for the given NAb assay run specimen results row is set. If not already set and we have
+     * the SampleResult information, update the NAbSpecimen row in the DB.
+     * @return CureveFit.Parameters as Map
+     * @param user
+     * @param assayRun
+     * @param specimenRow
+     * @param dilutionSummary
+     * @return
+     * @throws FitFailedException
+     */
+    public Map<String, Object> ensureFitParameters(User user, NabSpecimen specimenRow, @Nullable DilutionAssayRun assayRun, @Nullable DilutionSummary dilutionSummary) throws FitFailedException
+    {
+        if (specimenRow != null)
+        {
+            if (specimenRow.getFitParameters() != null)
+            {
+                return new JSONObject(specimenRow.getFitParameters());
+            }
+            else if (assayRun != null &&  dilutionSummary != null)
+            {
+                CurveFit.Parameters fitParams = dilutionSummary.getCurveParameters(assayRun.getRenderedCurveFitType());
+                Table.update(user, DilutionManager.getTableInfoNAbSpecimen(), Map.of("FitParameters", new JSONObject(fitParams.toMap())), specimenRow.getRowId());
+                return fitParams.toMap();
+            }
+        }
+
+        return null;
     }
 }
