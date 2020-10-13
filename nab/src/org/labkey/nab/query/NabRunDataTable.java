@@ -61,6 +61,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
+
 /**
  * User: brittp
  * Date: Jul 6, 2007
@@ -195,7 +197,7 @@ public class NabRunDataTable extends NabBaseTable
         }
         else if ("Fit Parameters".equalsIgnoreCase(name))
         {
-            result = getColumn("FitParameters");
+            result = getColumn(FIT_PARAMETERS_PROPERTY_NAME);
         }
         // Be backwards compatible with queries that expect there to an "ObjectId" column. It's a different value from
         // the pre-migration value, but it's enough to make the query run and should be sufficient as long as we
@@ -336,7 +338,7 @@ public class NabRunDataTable extends NabBaseTable
         for (ColumnInfo columnInfo : _rootTable.getColumns())
         {
             String columnName = columnInfo.getColumnName().toLowerCase();
-            if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals("fitparameters"))
+            if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals(FIT_PARAMETERS_PROPERTY_NAME.toLowerCase()))
             {
                 addWrapColumn(columnInfo);
             }
