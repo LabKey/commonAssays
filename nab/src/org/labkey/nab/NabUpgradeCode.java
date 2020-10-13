@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NabUpgradeCode implements UpgradeCode
+public class NabUpgradeCode implements UpgradeCode // TODO see if we have any example of UpgradeCode that creates a pipeline job to do the work
 {
     private static final Logger _log = LogManager.getLogger(NabUpgradeCode.class);
 
@@ -62,22 +62,27 @@ public class NabUpgradeCode implements UpgradeCode
                         for (ExpRun run : protocol.getExpRuns())
                         {
                             DilutionAssayRun assayRun = dataHandler.getAssayResults(run, upgradeUser);
-                            for (DilutionAssayRun.SampleResult result : assayRun.getSampleResults())
+                            if (assayRun != null)
                             {
-                                DilutionSummary dilutionSummary = result.getDilutionSummary();
-                                ExpMaterial sampleInput = assayRun.getMaterial(dilutionSummary.getFirstWellGroup());
-                                if (sampleInput != null)
+                                for (DilutionAssayRun.SampleResult result : assayRun.getSampleResults())
                                 {
-                                    NabSpecimen specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
-                                    if (specimenRow != null && specimenRow.getFitParameters() == null)
+                                    DilutionSummary dilutionSummary = result.getDilutionSummary();
+                                    ExpMaterial sampleInput = assayRun.getMaterial(dilutionSummary.getFirstWellGroup());
+                                    if (sampleInput != null)
                                     {
-                                        NabManager.get().ensureFitParameters(upgradeUser, specimenRow, assayRun, dilutionSummary);
-                                        counter++;
+                                        NabSpecimen specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
+                                        if (specimenRow != null && specimenRow.getFitParameters() == null)
+                                        {
+                                            NabManager.get().ensureFitParameters(upgradeUser, specimenRow, assayRun, dilutionSummary);
+                                            counter++;
+                                        }
                                     }
+                                    else
+                                        _log.warn("Unable to find sample input for run: run " + run.getRowId() + ", wellgroup " + dilutionSummary.getFirstWellGroup().getName());
                                 }
-                                else
-                                    _log.warn("Unable to find sample input for run: run " + run.getRowId() + ", wellgroup " + dilutionSummary.getFirstWellGroup().getName());
                             }
+                            else
+                                _log.warn("Unable to find dilution results for run: " + run.getRowId());
                         }
 
                         transaction.commit();
