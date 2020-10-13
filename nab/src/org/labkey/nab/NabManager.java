@@ -63,6 +63,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
+
 /**
  * User: brittp
  * Date: Oct 26, 2006
@@ -215,32 +217,24 @@ public class NabManager extends AbstractNabManager
     }
 
     /**
-     * Ensure the fit parameter value for the given NAb assay run specimen results row is set. If not already set and we have
-     * the SampleResult information, update the NAbSpecimen row in the DB.
-     * @return CureveFit.Parameters as Map
+     * Ensure the fit parameter value (as a JSON object) for the given NAb assay run specimen results row.
+     * If not already saved to the DB for the given NAbSpecimen row, save it.
      * @param user
      * @param assayRun
      * @param specimenRow
      * @param dilutionSummary
-     * @return
+     * @return CurveFit.Parameters as Map
      * @throws FitFailedException
      */
     public Map<String, Object> ensureFitParameters(User user, NabSpecimen specimenRow, @Nullable DilutionAssayRun assayRun, @Nullable DilutionSummary dilutionSummary) throws FitFailedException
     {
-        if (specimenRow != null)
-        {
-            if (specimenRow.getFitParameters() != null)
-            {
-                return new JSONObject(specimenRow.getFitParameters());
-            }
-            else if (assayRun != null &&  dilutionSummary != null)
-            {
-                CurveFit.Parameters fitParams = dilutionSummary.getCurveParameters(assayRun.getRenderedCurveFitType());
-                Table.update(user, DilutionManager.getTableInfoNAbSpecimen(), Map.of("FitParameters", new JSONObject(fitParams.toMap())), specimenRow.getRowId());
-                return fitParams.toMap();
-            }
-        }
+        if (specimenRow != null && specimenRow.getFitParameters() != null)
+            return new JSONObject(specimenRow.getFitParameters());
 
-        return null;
+        CurveFit.Parameters fitParams = dilutionSummary.getCurveParameters(assayRun.getRenderedCurveFitType());
+        if (user != null)
+            Table.update(user, DilutionManager.getTableInfoNAbSpecimen(), Map.of(FIT_PARAMETERS_PROPERTY_NAME, new JSONObject(fitParams.toMap())), specimenRow.getRowId());
+
+        return fitParams.toMap();
     }
 }

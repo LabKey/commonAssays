@@ -17,6 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -72,9 +73,14 @@ public class NabRunPropertyMap extends HashMap<String, Object>
             DilutionSummary dilutionSummary = result.getDilutionSummary();
             WellGroup wellGroup = dilutionSummary.getFirstWellGroup();
             ExpMaterial sampleInput = assay.getMaterial(wellGroup);
-            sample.put("specimenLsid", sampleInput.getLSID());
+            NabSpecimen specimenRow = null;
+            if (sampleInput != null)
+            {
+                specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
+                sample.put("specimenLsid", sampleInput.getLSID());
+            }
 
-            sample.put("objectId", result.getObjectId());
+            sample.put("objectId", specimenRow != null ? specimenRow.getRowId() : result.getObjectId());
 
             // add any additional properties associated with this object id
             if (extraObjectIdProps.containsKey(result.getObjectId()))
@@ -104,7 +110,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 }
                 if (includeFitParameters)
                 {
-                    sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getRenderedCurveFitType()).toMap());
+                    sample.put("fitParameters", NabManager.get().ensureFitParameters(null, specimenRow, assay, dilutionSummary));
                 }
                 List<Map<String, Object>> replicates = new ArrayList<>();
                 for (WellGroup sampleGroup : dilutionSummary.getWellGroups())
