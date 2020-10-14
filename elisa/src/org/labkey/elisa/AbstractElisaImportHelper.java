@@ -72,16 +72,6 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
             double calcConc = stdCurveFit.solveForX(well.getValue());
             if (!Double.isNaN(calcConc))
             {
-                Map<String, Object> extraProps = getExtraProperties(plateName, position, spot);
-                if (extraProps.containsKey(ElisaAssayProvider.DILUTION_PROPERTY))
-                {
-                    // if there is a dilution value, multiply the calculated concentration by dilution
-                    Object dilution = extraProps.get(ElisaAssayProvider.DILUTION_PROPERTY);
-                    if (dilution instanceof Number)
-                    {
-                        calcConc = calcConc * NumberUtils.createDouble(String.valueOf(dilution));
-                    }
-                }
                 row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, calcConc);
             }
         }
