@@ -45,8 +45,8 @@ public class NabControlAggregatesTable extends VirtualTable<NabProtocolSchema> i
         });
         addColumn(runCol);
 
-        var controlWellgroupCol = new BaseColumnInfo("ControlWellgroup", this, JdbcType.VARCHAR);
-        addColumn(controlWellgroupCol);
+        addColumn(new BaseColumnInfo("ControlWellgroup", this, JdbcType.VARCHAR));
+        addColumn(new BaseColumnInfo("PlateNumber", this, JdbcType.INTEGER));
 
         var averageCol = new BaseColumnInfo("AvgValue", this, JdbcType.REAL);
         averageCol.setFormat("0.000");
@@ -78,6 +78,7 @@ public class NabControlAggregatesTable extends VirtualTable<NabProtocolSchema> i
         SQLFragment result = new SQLFragment("SELECT\n")
             .append("w.RunId,\n")
             .append("w.ControlWellgroup,\n")
+            .append("w.PlateNumber,\n")
             .append("AVG(w.Value) AS AvgValue,\n")
             .append("MIN(w.Value) AS MinValue,\n")
             .append("MAX(w.Value) AS MaxValue,\n")
@@ -87,8 +88,9 @@ public class NabControlAggregatesTable extends VirtualTable<NabProtocolSchema> i
         NabWellDataTable wellDataTable = (NabWellDataTable)_userSchema.getTable(WELL_DATA_TABLE_NAME, getContainerFilter());
         result.append(wellDataTable, "w");
 
-        result.append(" WHERE w.ControlWellgroup = ? AND Excluded = ?\n")
-            .append("GROUP BY w.RunId, w.ControlWellgroup\n");
+        // NOTE: currently filtering to just Plate 1, to not create Run table row duplication for the high-throughput assay case
+        result.append(" WHERE w.ControlWellgroup = ? AND Excluded = ? AND PlateNumber = 1\n")
+            .append("GROUP BY w.RunId, w.ControlWellgroup, w.PlateNumber\n");
         result.add(_controlName);
         result.add(false);
 
