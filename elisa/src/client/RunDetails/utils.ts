@@ -232,8 +232,8 @@ export function getDefaultPlotOptions(plates: string[], spots: number[]): PlotOp
     return {
         showCurve: true,
         showLegend: true,
-        plateName: plates?.length > 1 ? plates[0] : undefined,
-        spot: spots?.length > 1 ? spots[0] : undefined,
+        plateName: arrayHasNonNullValues(plates) ? plates[0] : undefined,
+        spot: arrayHasNonNullValues(spots) ? spots[0] : undefined,
         showAllSamples: true,
         samples: [],
         showAllControls: true,
@@ -241,4 +241,8 @@ export function getDefaultPlotOptions(plates: string[], spots: number[]): PlotOp
         xAxisScale: 'linear',
         yAxisScale: 'linear'
     } as PlotOptions;
+}
+
+export function arrayHasNonNullValues(arr: any[]): boolean {
+    return arr?.length > 1 || (arr?.length === 1 && arr[0] !== null);
 }

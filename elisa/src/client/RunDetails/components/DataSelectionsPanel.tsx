@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react';
 import { LoadingSpinner, SelectInput } from "@labkey/components";
 
 import { PlotOptions } from "../models";
-import { getSelectOptions, getUniqueValues } from "../utils";
+import { arrayHasNonNullValues, getSelectOptions, getUniqueValues } from "../utils";
 
 interface Props {
     plates: string[],
@@ -43,7 +43,7 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                 </div>
                 <div className="panel-body">
                     <div className={'plot-options-section'}>
-                        {plates.length > 1 &&
+                        {arrayHasNonNullValues(plates) &&
                             <div className={'plot-options-input-row'}>
                                 <div className={'plot-options-field-label'}>Plate Name</div>
                                 <SelectInput
@@ -62,7 +62,7 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                             </div>
                         }
 
-                        {spots.length > 1 &&
+                        {arrayHasNonNullValues(spots) &&
                             <div className={'plot-options-input-row'}>
                                 <div className={'plot-options-field-label'}>Spot</div>
                                 <SelectInput

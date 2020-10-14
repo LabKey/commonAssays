@@ -44,7 +44,7 @@ describe('<DataSelectionsPanel/>', () => {
             />
         );
 
-        validateInputs(wrapper, 2, 2);
+        validateInputs(wrapper, 4, 2);
         wrapper.unmount();
     });
 

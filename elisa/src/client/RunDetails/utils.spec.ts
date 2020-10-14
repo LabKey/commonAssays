@@ -1,5 +1,6 @@
 import { PlotOptions } from "./models";
 import {
+    arrayHasNonNullValues,
     filterDataByPlotOptions, getDefaultPlotOptions,
     getMaxFromData,
     getMinFromData, getPlotConfigFromOptions, getPlotTitle, getResultsViewURL,
@@ -187,13 +188,13 @@ describe('utils', () => {
         expect(getDefaultPlotOptions(undefined, undefined).plateName).toBe(undefined);
         expect(getDefaultPlotOptions(null, undefined).plateName).toBe(undefined);
         expect(getDefaultPlotOptions([], undefined).plateName).toBe(undefined);
-        expect(getDefaultPlotOptions(['a'], undefined).plateName).toBe(undefined);
+        expect(getDefaultPlotOptions(['a'], undefined).plateName).toBe('a');
         expect(getDefaultPlotOptions(['a','b'], undefined).plateName).toBe('a');
 
         expect(getDefaultPlotOptions(undefined, undefined).spot).toBe(undefined);
         expect(getDefaultPlotOptions(undefined, null).spot).toBe(undefined);
         expect(getDefaultPlotOptions(undefined, []).spot).toBe(undefined);
-        expect(getDefaultPlotOptions(undefined, [0]).spot).toBe(undefined);
+        expect(getDefaultPlotOptions(undefined, [0]).spot).toBe(0);
         expect(getDefaultPlotOptions(undefined, [0,1]).spot).toBe(0);
     });
 
@@ -268,5 +269,16 @@ describe('utils', () => {
         validateOptions(getUpdatedPlotOptions('showLegend', true, true, plotOptions), true, 0, true, 0);
         validateOptions(getUpdatedPlotOptions('showAllSamples', true, false, plotOptions), true, 0, false, 1);
         validateOptions(getUpdatedPlotOptions('showAllControls', true, false, plotOptions), false, 1, true, 0);
+    });
+
+    test('arrayHasNonNullValues', () => {
+        expect(arrayHasNonNullValues(undefined)).toBeFalsy();
+        expect(arrayHasNonNullValues(null)).toBeFalsy();
+        expect(arrayHasNonNullValues([])).toBeFalsy();
+        expect(arrayHasNonNullValues([null])).toBeFalsy();
+        expect(arrayHasNonNullValues(['a'])).toBeTruthy();
+        expect(arrayHasNonNullValues(['a','b'])).toBeTruthy();
+        expect(arrayHasNonNullValues([0])).toBeTruthy();
+        expect(arrayHasNonNullValues([0,1])).toBeTruthy();
     });
 });
