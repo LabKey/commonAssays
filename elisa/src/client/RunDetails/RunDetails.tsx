@@ -25,6 +25,7 @@ import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 
 import './RunDetails.scss';
+import { CurveFitPanel } from "./components/CurveFitPanel";
 
 export interface AppContext {
     protocolId: number,
@@ -201,6 +202,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
                 <div className={'col col-xs-12 col-md-3 run-details-left'}>
                     <DataSelectionsPanel {...this.state} setPlotOption={this.setPlotOption}/>
                     <PlotOptionsPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
+                    <CurveFitPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
                 </div>
                 <div className={'col col-xs-12 col-md-9 run-details-right'}>
                     <CalibrationCurvePanel {...this.props} {...this.state} data={filteredData}/>
