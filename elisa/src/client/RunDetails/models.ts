@@ -14,7 +14,9 @@ export type PlotOptions = {
     showAllControls: boolean;
     controls: string[],
     xAxisScale: string,
-    yAxisScale: string
+    xAxisMeasure: string,
+    yAxisScale: string,
+    yAxisMeasure: string
 }
 
 export type XYPair = {

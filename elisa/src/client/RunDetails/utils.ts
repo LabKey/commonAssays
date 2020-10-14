@@ -8,7 +8,9 @@ import {
     SAMPLE_COL_NAME,
     STANDARDS_LABEL,
     WELL_GROUP_COL_NAME,
-    X_AXIS_PROP, Y_AXIS_PROP
+    DEFAULT_X_AXIS_PROP,
+    DEFAULT_Y_AXIS_PROP,
+    SPOT_COL_NAME
 } from "./constants";
 import { CurveFitData, PlotOptions, SelectOptions } from "./models";
 
@@ -28,7 +30,7 @@ export function filterDataByPlotOptions(data: any[], samples: string[], controls
 
     return data.filter((row) => {
         return (plateName === undefined || row['PlateName'] === plateName)
-            && (spot === undefined || row['Spot'] === spot)
+            && (spot === undefined || row[SPOT_COL_NAME] === spot)
             && (!includeIdFilter || selectedIds.indexOf(row[ID_COL_NAME]) > -1)
     });
 }
@@ -57,8 +59,18 @@ export function getUniqueValues(dataArray: any[], prop: string, includeNull = tr
     return [...new Set(values)].sort(naturalSort);
 }
 
-export function getSelectOptions(data: any[]): SelectOptions[] {
-    return data.map((value) => ({value: value, label: value || 'null'}));
+export function getSelectOptions(data: any[], columnInfo?: {[key: string]: any}): SelectOptions[] {
+    return data.map((value) => {
+        let label = value || 'null';
+        if (columnInfo && columnInfo[value]) {
+            label = columnInfo[value].caption;
+        }
+
+        return {
+            value,
+            label
+        }
+    });
 }
 
 export function getResultsViewURL(protocolId: number, runId: number, plotOptions: PlotOptions) {
@@ -71,7 +83,7 @@ export function getResultsViewURL(protocolId: number, runId: number, plotOptions
         params['Data.PlateName~eq'] = plateName;
     }
     if (spot !== undefined) {
-        params['Data.Spot~eq'] = spot;
+        params['Data.' + SPOT_COL_NAME + '~eq'] = spot;
     }
 
     if (!showAllSamples) {
@@ -120,10 +132,11 @@ export function getPlotConfigFromOptions(
     const LABKEY = getServerContext();
 
     const aes = {
-        x: X_AXIS_PROP,
-        y: Y_AXIS_PROP,
+        x: plotOptions.xAxisMeasure,
+        y: plotOptions.yAxisMeasure,
         hoverText: function(row){
-            return HOVER_COLUMN_NAMES.map((col) => {
+            const cols = HOVER_COLUMN_NAMES.concat([plotOptions.xAxisMeasure, plotOptions.yAxisMeasure]);
+            return cols.map((col) => {
                 return col + ': ' + row[col];
             }).join('\n');
         }
@@ -177,8 +190,8 @@ export function getPlotConfigFromOptions(
         layers,
         labels: {
             main: { value: getPlotTitle(runName, plotOptions) },
-            x: { value: columnInfo[X_AXIS_PROP] ? columnInfo[X_AXIS_PROP].caption : X_AXIS_PROP },
-            y: { value: columnInfo[Y_AXIS_PROP] ? columnInfo[Y_AXIS_PROP].caption : Y_AXIS_PROP }
+            x: { value: columnInfo[plotOptions.xAxisMeasure]?.caption || plotOptions.xAxisMeasure },
+            y: { value: columnInfo[plotOptions.yAxisMeasure]?.caption || plotOptions.yAxisMeasure }
         },
         margins,
         scales
@@ -186,12 +199,15 @@ export function getPlotConfigFromOptions(
 }
 
 export function getColumnInfoFromQueryDetails(queryInfo: {[key: string]: any}): {[key: string]: any} {
-    const columnInfo = {};
+    const columnInfo = {}, measures = [DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP];
     queryInfo.columns.forEach((col) => {
         columnInfo[col.fieldKey] = col;
+        if (col.measure && col.fieldKey !== SPOT_COL_NAME && measures.indexOf(col.fieldKey) === -1) {
+            measures.push(col.fieldKey);
+        }
     });
 
-    return columnInfo;
+    return {columnInfo, measures: measures.sort()};
 }
 
 export function parsePlotDataFromResponse(response: {[key: string]: any}): any[] {
@@ -239,7 +255,9 @@ export function getDefaultPlotOptions(plates: string[], spots: number[]): PlotOp
         showAllControls: true,
         controls: [],
         xAxisScale: 'linear',
-        yAxisScale: 'linear'
+        xAxisMeasure: DEFAULT_X_AXIS_PROP,
+        yAxisScale: 'linear',
+        yAxisMeasure: DEFAULT_Y_AXIS_PROP
     } as PlotOptions;
 }
 

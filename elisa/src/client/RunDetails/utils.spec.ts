@@ -13,8 +13,8 @@ import {
     PLOT_HEIGHT, SAMPLE_COL_NAME,
     STANDARDS_LABEL,
     WELL_GROUP_COL_NAME,
-    X_AXIS_PROP,
-    Y_AXIS_PROP
+    DEFAULT_X_AXIS_PROP,
+    DEFAULT_Y_AXIS_PROP
 } from "./constants";
 
 export const TEST_PLOT_DATA = [
@@ -98,8 +98,8 @@ describe('utils', () => {
     });
 
     test('getSelectOptions', () => {
-        const options = getSelectOptions([null, 1, 'a', undefined]);
-        expect(options.length).toBe(4);
+        const options = getSelectOptions([null, 1, 'a', undefined, 'b'], {b: {caption: 'TEST B'}});
+        expect(options.length).toBe(5);
         expect(options[0].value).toBe(null);
         expect(options[0].label).toBe('null');
         expect(options[1].value).toBe(1);
@@ -108,6 +108,8 @@ describe('utils', () => {
         expect(options[2].label).toBe('a');
         expect(options[3].value).toBe(undefined);
         expect(options[3].label).toBe('null');
+        expect(options[4].value).toBe('b');
+        expect(options[4].label).toBe('TEST B');
     });
 
     test('getResultsViewURL', () => {
@@ -199,31 +201,33 @@ describe('utils', () => {
     });
 
     test('getPlotConfigFromOptions', () => {
-        let plotOptions = {plateName: undefined, spot: undefined, showLegend: false, showCurve: false, xAxisScale: 'linear', yAxisScale: 'linear'} as PlotOptions;
+        let plotOptions = {plateName: undefined, spot: undefined, showLegend: false, showCurve: false, xAxisScale: 'linear', yAxisScale: 'linear', xAxisMeasure: DEFAULT_X_AXIS_PROP, yAxisMeasure: DEFAULT_Y_AXIS_PROP} as PlotOptions;
         let config = getPlotConfigFromOptions('id', 100, plotOptions, undefined, undefined, 'TEST', {});
         expect(config.renderTo).toBe('id');
         expect(config.width).toBe(100);
         expect(config.height).toBe(PLOT_HEIGHT);
         expect(config.layers.length).toBe(0);
         expect(config.labels.main.value).toBe('TEST');
-        expect(config.labels.x.value).toBe(X_AXIS_PROP);
-        expect(config.labels.y.value).toBe(Y_AXIS_PROP);
+        expect(config.labels.x.value).toBe(DEFAULT_X_AXIS_PROP);
+        expect(config.labels.y.value).toBe(DEFAULT_Y_AXIS_PROP);
         expect(config.margins.right).toBe(10);
         expect(config.scales.x.trans).toBe('linear');
         expect(config.scales.y.trans).toBe('linear');
 
-        plotOptions = {plateName: 'p1', spot: 2, showLegend: true, showCurve: true, xAxisScale: 'log', yAxisScale: 'log'} as PlotOptions;
+        plotOptions = {plateName: 'p1', spot: 2, showLegend: true, showCurve: true, xAxisScale: 'log', yAxisScale: 'log', xAxisMeasure: 'TestX', yAxisMeasure: 'TestY'} as PlotOptions;
         config = getPlotConfigFromOptions('id', 100, plotOptions, undefined, undefined, 'TEST', {
-            [X_AXIS_PROP]: {caption: 'TEST2'},
-            [Y_AXIS_PROP]: {caption: 'TEST3'}
+            [DEFAULT_X_AXIS_PROP]: {caption: 'TEST2'},
+            [DEFAULT_Y_AXIS_PROP]: {caption: 'TEST3'},
+            TestX: {caption: 'TEST4'},
+            TestY: {caption: 'TEST5'}
         });
         expect(config.renderTo).toBe('id');
         expect(config.width).toBe(100);
         expect(config.height).toBe(PLOT_HEIGHT);
         expect(config.layers.length).toBe(0);
         expect(config.labels.main.value).toBe('TEST - p1 - Spot 2');
-        expect(config.labels.x.value).toBe('TEST2');
-        expect(config.labels.y.value).toBe('TEST3');
+        expect(config.labels.x.value).toBe('TEST4');
+        expect(config.labels.y.value).toBe('TEST5');
         expect(config.margins.right).toBe(undefined);
         expect(config.scales.x.trans).toBe('log');
         expect(config.scales.y.trans).toBe('log');

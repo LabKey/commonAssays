@@ -7,6 +7,7 @@ import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { getDefaultPlotOptions } from "./utils";
+import { CurveFitPanel } from "./components/CurveFitPanel";
 
 describe('<RunDetailsImpl/>', () => {
     test('check initial state from props', () => {
@@ -17,6 +18,7 @@ describe('<RunDetailsImpl/>', () => {
                 runPropertiesRow={undefined}
                 data={TEST_PLOT_DATA}
                 columnInfo={undefined}
+                measures={[]}
             />
         );
         const defaultPlotOptions = getDefaultPlotOptions(['p1','p2'], [1,2]);
@@ -40,12 +42,14 @@ describe('<RunDetailsImpl/>', () => {
                 runPropertiesRow={undefined}
                 data={TEST_PLOT_DATA}
                 columnInfo={undefined}
+                measures={[]}
             />
         );
 
         expect(wrapper.find('.run-details-left')).toHaveLength(1);
         expect(wrapper.find(DataSelectionsPanel)).toHaveLength(1);
         expect(wrapper.find(PlotOptionsPanel)).toHaveLength(1);
+        expect(wrapper.find(CurveFitPanel)).toHaveLength(1);
         expect(wrapper.find('.run-details-right')).toHaveLength(1);
         expect(wrapper.find(CalibrationCurvePanel)).toHaveLength(1);
 

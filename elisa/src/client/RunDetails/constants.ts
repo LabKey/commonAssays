@@ -1,11 +1,12 @@
-export const X_AXIS_PROP = 'Concentration';
-export const Y_AXIS_PROP = 'Absorption';
+export const DEFAULT_X_AXIS_PROP = 'Concentration';
+export const DEFAULT_Y_AXIS_PROP = 'Absorption';
 export const ID_COL_NAME = 'ID';
 export const SAMPLE_COL_NAME = 'SpecimenLsid/Property/SpecimenId';
 export const CONTROL_COL_NAME = 'ControlId';
 export const WELL_GROUP_COL_NAME = 'WellgroupName';
+export const SPOT_COL_NAME = 'Spot';
 export const STANDARDS_LABEL = 'Standard';
-export const SAMPLE_COLUMN_NAMES = [SAMPLE_COL_NAME, CONTROL_COL_NAME, WELL_GROUP_COL_NAME, 'WellLocation', Y_AXIS_PROP, X_AXIS_PROP, 'PlateName', 'Spot'];
-export const HOVER_COLUMN_NAMES = [ID_COL_NAME, 'WellLocation', Y_AXIS_PROP, X_AXIS_PROP];
+export const SAMPLE_COLUMN_NAMES = [SAMPLE_COL_NAME, CONTROL_COL_NAME, WELL_GROUP_COL_NAME, 'WellLocation', DEFAULT_Y_AXIS_PROP, DEFAULT_X_AXIS_PROP, 'PlateName', SPOT_COL_NAME];
+export const HOVER_COLUMN_NAMES = [ID_COL_NAME, 'WellLocation'];
 export const RUN_COLUMN_NAMES = ['Name','CurveFitMethod'];
 export const PLOT_HEIGHT = 600;

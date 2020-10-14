@@ -3,10 +3,8 @@ import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
 import {
-    CONTROL_COL_NAME,
-    RUN_COLUMN_NAMES,
-    SAMPLE_COL_NAME,
-    SAMPLE_COLUMN_NAMES
+    CONTROL_COL_NAME, DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP, RUN_COLUMN_NAMES,
+    SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, SPOT_COL_NAME
 } from "./constants";
 import { CurveFitData, PlotOptions } from "./models";
 import {
@@ -42,7 +40,8 @@ interface State {
     runPropertiesError: string
     data: any[],
     dataError: string,
-    columnInfo: {[key: string]: any}
+    columnInfo: {[key: string]: any},
+    measures: string[]
 }
 
 export class RunDetails extends PureComponent<Props, State> {
@@ -51,7 +50,8 @@ export class RunDetails extends PureComponent<Props, State> {
         runPropertiesError: undefined,
         data: undefined,
         dataError:  undefined,
-        columnInfo: {}
+        columnInfo: {},
+        measures: [DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP]
     };
 
     componentDidMount(): void {
@@ -61,9 +61,17 @@ export class RunDetails extends PureComponent<Props, State> {
             schemaName,
             queryName: 'Data',
             success: (queryInfo) => {
+                const columnInfo = getColumnInfoFromQueryDetails(queryInfo);
                 this.setState(() => ({
-                    columnInfo: getColumnInfoFromQueryDetails(queryInfo)
-                }));
+                    columnInfo: columnInfo.columnInfo,
+                    measures: columnInfo.measures
+                }), () => {
+                    this.queryData();
+                });
+            },
+            failure: (reason) => {
+                console.error(reason);
+                this.setState(() => ({ dataError: reason.exception }));
             }
         });
 
@@ -85,11 +93,16 @@ export class RunDetails extends PureComponent<Props, State> {
                 this.setState(() => ({ runPropertiesError: reason.exception }));
             }
         });
+    }
+
+    queryData() {
+        const { schemaName, runId } = this.props.context;
+        const { measures } = this.state;
 
         Query.selectRows({
             schemaName: schemaName,
             queryName: 'Data',
-            columns: SAMPLE_COLUMN_NAMES.join(','),
+            columns: SAMPLE_COLUMN_NAMES.concat(measures).join(','),
             filterArray: [Filter.create('Run/RowId', runId)],
             success: (response) => {
                 this.setState(() => ({
@@ -123,7 +136,8 @@ interface ImplProps {
     runId: number,
     runPropertiesRow: {[key: string]: any},
     data: any[],
-    columnInfo: {[key: string]: any}
+    columnInfo: {[key: string]: any},
+    measures: string[]
 }
 
 interface ImplState {
@@ -142,7 +156,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         super(props);
 
         const plates = getUniqueValues(props.data, 'PlateName');
-        const spots = getUniqueValues(props.data, 'Spot');
+        const spots = getUniqueValues(props.data, SPOT_COL_NAME);
         const plotOptions = getDefaultPlotOptions(plates, spots);
         const samples = getUniqueIdsForPlotSelections(props.data, plotOptions, SAMPLE_COL_NAME);
         const controls = getUniqueIdsForPlotSelections(props.data, plotOptions, CONTROL_COL_NAME);

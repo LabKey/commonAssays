@@ -2,6 +2,8 @@ import React, { PureComponent } from 'react';
 
 import { CurveFitData, PlotOptions } from "../models";
 import { CurveFitDataDisplay } from "./CurveFitDataDisplay";
+import { LabelHelpTip } from "@labkey/components";
+import { DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP } from "../constants";
 
 interface Props {
     runPropertiesRow: {[key: string]: any},
@@ -34,6 +36,22 @@ export class CurveFitPanel extends PureComponent<Props> {
                                 onChange={this.onShowCurveCheck}
                             />
                             Show curve fit line
+                            <LabelHelpTip
+                                title={'Standard Curve Fit'}
+                                body={() => (
+                                    <>
+                                        <p>
+                                            The curve fit was derived using
+                                            the {DEFAULT_X_AXIS_PROP.toLowerCase()} and {DEFAULT_Y_AXIS_PROP.toLowerCase()} data
+                                            points for the standards well group based on the curve fit method selected for this run.
+                                        </p>
+                                        <p>
+                                            Note that selecting an x-axis or y-axis plot measure different then the default
+                                            will likely result in data points that don't line up with the plotted curve.
+                                        </p>
+                                    </>
+                                )}
+                            />
                             {plotOptions.showCurve && curveFitData &&
                                 <CurveFitDataDisplay curveFitData={curveFitData}/>
                             }

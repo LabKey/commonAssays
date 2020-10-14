@@ -82,10 +82,10 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                         }
 
                         <div className={'plot-options-input-row'}>
-                            <div className={'plot-options-field-label'}>Samples</div>
-                            {samples
-                                ? <>
-                                    <div>
+                            <div className={'plot-options-field-label'}>
+                                Samples
+                                {samples &&
+                                    <span className={'plot-options-show-all pull-right'}>
                                         <input
                                             type="checkbox"
                                             name='showAllSamples'
@@ -93,7 +93,11 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                             onChange={this.onShowAllSamplesCheck}
                                         />
                                         Show all
-                                    </div>
+                                    </span>
+                                }
+                            </div>
+                            {samples
+                                ? <>
                                     <SelectInput
                                         name='samples'
                                         key='samples'
@@ -115,10 +119,10 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                         </div>
 
                         <div className={'plot-options-input-row'}>
-                            <div className={'plot-options-field-label'}>Controls</div>
-                            {controls
-                                ? <>
-                                    <div>
+                            <div className={'plot-options-field-label'}>
+                                Controls
+                                {controls &&
+                                    <span className={'plot-options-show-all pull-right'}>
                                         <input
                                             type="checkbox"
                                             name='showAllControls'
@@ -126,7 +130,11 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                             onChange={this.onShowAllControlsCheck}
                                         />
                                         Show all
-                                    </div>
+                                    </span>
+                                }
+                            </div>
+                            {controls
+                                ? <>
                                     <SelectInput
                                         name='controls'
                                         key='controls'

@@ -12,6 +12,7 @@ describe('<DataSelectionsPanel/>', () => {
         expect(wrapper.find('.plot-options-input-row')).toHaveLength(inputCount + loadingCount);
         expect(wrapper.find('.plot-options-field-label')).toHaveLength(inputCount + loadingCount);
         expect(wrapper.find(SelectInput)).toHaveLength(inputCount);
+        expect(wrapper.find('.plot-options-show-all')).toHaveLength(checkboxCount);
         expect(wrapper.find('input[type="checkbox"]')).toHaveLength(checkboxCount);
         expect(wrapper.find(LoadingSpinner)).toHaveLength(loadingCount);
     }

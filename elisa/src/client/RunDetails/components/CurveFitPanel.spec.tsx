@@ -4,9 +4,10 @@ import { mount } from 'enzyme';
 import { CurveFitPanel } from "./CurveFitPanel";
 import { CurveFitData, PlotOptions } from "../models";
 import { CurveFitDataDisplay } from "./CurveFitDataDisplay";
+import { LabelHelpTip } from "@labkey/components";
 
 describe('<CurveFitPanel/>', () => {
-    test('all unchecked and no curve fit data', () => {
+    test('unchecked and no curve fit data', () => {
         const wrapper = mount(
             <CurveFitPanel
                 runPropertiesRow={undefined}
@@ -23,11 +24,12 @@ describe('<CurveFitPanel/>', () => {
         expect(checkboxes.at(0).prop('checked')).toBeFalsy(); // showCurve
         expect(wrapper.find('.panel-heading').last().text()).toBe('Curve Fit: Linear');
         expect(wrapper.find(CurveFitDataDisplay)).toHaveLength(0);
+        expect(wrapper.find(LabelHelpTip)).toHaveLength(1);
 
         wrapper.unmount();
     });
 
-    test('all checked and 4 param curve fit data', () => {
+    test('checked and 4 param curve fit data', () => {
         const wrapper = mount(
             <CurveFitPanel
                 runPropertiesRow={{CurveFitMethod: '4 Parameter'}}
@@ -44,6 +46,7 @@ describe('<CurveFitPanel/>', () => {
         expect(checkboxes.at(0).prop('checked')).toBeTruthy(); // showCurve
         expect(wrapper.find('.panel-heading').last().text()).toBe('Curve Fit: 4 Parameter');
         expect(wrapper.find(CurveFitDataDisplay)).toHaveLength(1);
+        expect(wrapper.find(LabelHelpTip)).toHaveLength(1);
 
         wrapper.unmount();
     });

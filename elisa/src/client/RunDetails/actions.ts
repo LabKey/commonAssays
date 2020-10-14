@@ -2,12 +2,12 @@ import { Ajax, ActionURL, Utils, getServerContext } from "@labkey/api";
 
 import { CurveFitData } from "./models";
 import { getMaxFromData, getMinFromData } from "./utils";
-import { X_AXIS_PROP } from "./constants";
+import { DEFAULT_X_AXIS_PROP } from "./constants";
 
 export function getCurveFitXYPairs(protocolId: number, runId: number, plateName: string, spot: number, data: any[]): Promise<CurveFitData> {
     return new Promise((resolve, reject) => {
-        const xMin = getMinFromData(data, X_AXIS_PROP);
-        let xMax = getMaxFromData(data, X_AXIS_PROP);
+        const xMin = getMinFromData(data, DEFAULT_X_AXIS_PROP);
+        let xMax = getMaxFromData(data, DEFAULT_X_AXIS_PROP);
         if (xMin === xMax) {
             xMax += 1;
         }
