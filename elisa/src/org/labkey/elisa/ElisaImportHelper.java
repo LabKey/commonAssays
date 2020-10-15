@@ -7,6 +7,7 @@ import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.exp.property.Domain;
 
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ public interface ElisaImportHelper
     /**
      * Helper to create a standard well row
      *
+     * @param domain the result domain of the assay
      * @param plateName the optional plate name parameter for multi plate imports
      * @param parentWellGroup the parent of the replicate well group (either control or sample)
      * @param replicate the replicate well group
@@ -42,7 +44,7 @@ public interface ElisaImportHelper
      * @param stdCurveFit the selected curvefit for the standard curve
      * @param materialMap map of specimen well group name to expMaterial
      */
-    Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+    Map<String, Object> createWellRow(Domain domain, String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
                                       Well well,
                                       Position position,
                                       CurveFit stdCurveFit,

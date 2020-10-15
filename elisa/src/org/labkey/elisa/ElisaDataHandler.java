@@ -126,6 +126,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         if (provider instanceof PlateBasedAssayProvider && context instanceof AssayUploadXarContext)
         {
             Domain runDomain = provider.getRunDomain(protocol);
+            Domain resultDomain = provider.getResultsDomain(protocol);
             Map<String, DomainProperty> sampleProperties = ((PlateBasedAssayProvider)provider).getSampleWellGroupDomain(protocol)
                     .getProperties().stream()
                     .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
@@ -156,53 +157,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 specimenGroupMap.put(pos, sample.getName());
                         }
 
-                        // create entries for the sample wells
-                        for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
-                        {
-                            List<DoublePoint> samplePoints = new ArrayList<>();
-                            for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
-                            {
-                                // gather concentrations for the replicate group so we can compute mean and CV stats
-                                List<Double> concentrations = new ArrayList<>();
-                                List<Map<String, Object>> replicateRows = new ArrayList<>();
-
-                                for (Position position : replicate.getPositions())
-                                {
-                                    Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, sampleGroup, replicate, well, position, standardCurve, materialMap);
-                                    // don't record empty records
-                                    if (row.isEmpty())
-                                        continue;
-
-                                    if (row.containsKey(ElisaAssayProvider.CONCENTRATION_PROPERTY))
-                                    {
-                                        Double conc = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
-                                        concentrations.add(conc);
-                                        samplePoints.add(new DoublePoint(conc, well.getValue()));
-                                    }
-                                    replicateRows.add(row);
-                                }
-
-                                if (!concentrations.isEmpty())
-                                {
-                                    // compute concentration mean and CV values
-                                    MathStat stat = StatsService.get().getStats(concentrations);
-                                    Double concCV = stat.getStdDev() / stat.getMean();
-
-                                    // update rows and add to main collection
-                                    for (Map<String, Object> row : replicateRows)
-                                    {
-                                        row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
-                                        row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, stat.getMean());
-                                    }
-                                }
-                                results.addAll(replicateRows);
-                            }
-                            // compute sample scoped statistics
-                            String materialKey = importHelper.getMaterialKey(plateName, spot, sampleGroup.getName());
-                            calculateSampleStats(context.getUser(), materialMap.get(materialKey), sampleProperties, standardCurve, samplePoints);
-                        }
-
                         // create entries for the control wells
                         for (WellGroup controlGroup : plate.getWellGroups(WellGroup.Type.CONTROL))
                         {
@@ -216,9 +170,10 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                                 for (Position position : replicate.getPositions())
                                 {
                                     Well well = plate.getWell(position.getRow(), position.getColumn());
-                                    Map<String, Object> row = importHelper.createWellRow(plateName, spot, controlGroup, replicate, well, position, standardCurve, materialMap);
+                                    Map<String, Object> row = importHelper.createWellRow(resultDomain, plateName, spot, controlGroup,
+                                            replicate, well, position, standardCurve, materialMap);
                                     // don't record empty records
-                                    if (row.isEmpty())
+                                    if (isRowEmptyOrNull(row))
                                         continue;
 
                                     Double conc = (Double) row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
@@ -266,6 +221,54 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                             }
                         }
 
+                        // create entries for the sample wells
+                        for (WellGroup sampleGroup : plate.getWellGroups(WellGroup.Type.SPECIMEN))
+                        {
+                            List<DoublePoint> samplePoints = new ArrayList<>();
+                            for (WellGroup replicate : sampleGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
+                            {
+                                // gather concentrations for the replicate group so we can compute mean and CV stats
+                                List<Double> concentrations = new ArrayList<>();
+                                List<Map<String, Object>> replicateRows = new ArrayList<>();
+
+                                for (Position position : replicate.getPositions())
+                                {
+                                    Well well = plate.getWell(position.getRow(), position.getColumn());
+                                    Map<String, Object> row = importHelper.createWellRow(resultDomain, plateName, spot, sampleGroup,
+                                            replicate, well, position, standardCurve, materialMap);
+                                    // don't record empty records
+                                    if (isRowEmptyOrNull(row))
+                                        continue;
+
+                                    Double conc = (Double)row.get(ElisaAssayProvider.CONCENTRATION_PROPERTY);
+                                    if (conc != null)
+                                    {
+                                        concentrations.add(conc);
+                                        samplePoints.add(new DoublePoint(conc, well.getValue()));
+                                    }
+                                    replicateRows.add(row);
+                                }
+
+                                if (!concentrations.isEmpty())
+                                {
+                                    // compute concentration mean and CV values
+                                    MathStat stat = StatsService.get().getStats(concentrations);
+                                    Double concCV = stat.getStdDev() / stat.getMean();
+
+                                    // update rows and add to main collection
+                                    for (Map<String, Object> row : replicateRows)
+                                    {
+                                        row.put(ElisaAssayProvider.CV_CONCENTRATION_PROPERTY, concCV);
+                                        row.put(ElisaAssayProvider.MEAN_CONCENTRATION_PROPERTY, stat.getMean());
+                                    }
+                                }
+                                results.addAll(replicateRows);
+                            }
+                            // compute sample scoped statistics
+                            String materialKey = importHelper.getMaterialKey(plateName, spot, sampleGroup.getName());
+                            calculateSampleStats(context.getUser(), materialMap.get(materialKey), sampleProperties, standardCurve, samplePoints);
+                        }
+
                         // record the fit parameters and the r squared value for the standard curve
                         if (standardCurve != null && !Double.isNaN(standardCurve.getFitError()))
                         {
@@ -294,6 +297,17 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         datas.put(getDataType(), results);
 
         return datas;
+    }
+
+    private boolean isRowEmptyOrNull(Map<String, Object> row)
+    {
+        // check if all values are null
+        for (Object value : row.values())
+        {
+            if (value != null)
+                return false;
+        }
+        return true;
     }
 
     /**

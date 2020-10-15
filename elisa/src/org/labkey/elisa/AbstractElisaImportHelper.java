@@ -1,6 +1,5 @@
 package org.labkey.elisa;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
@@ -14,6 +13,8 @@ import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 
 import java.io.File;
 import java.util.Collections;
@@ -55,7 +56,7 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+    public Map<String, Object> createWellRow(Domain domain, String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
                                              Well well,
                                              Position position,
                                              @Nullable CurveFit stdCurveFit,
@@ -63,6 +64,12 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     {
         Map<String, Object> row = new HashMap<>();
 
+        // initialize the row map with keys for all of the columns in the result domain to avoid having data filtered out
+        // in AbstractAssayTsvDataHandler.checkColumns
+        for (DomainProperty prop : domain.getProperties())
+        {
+            row.put(prop.getName(), null);
+        }
         row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
         row.put(ElisaAssayProvider.WELLGROUP_LOCATION_PROPERTY, replicate.getPositionDescription());
         row.put(ElisaAssayProvider.WELLGROUP_NAME_PROPERTY, parentWellGroup.getName());
