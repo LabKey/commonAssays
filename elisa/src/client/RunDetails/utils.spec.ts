@@ -1,20 +1,13 @@
 import { PlotOptions } from "./models";
 import {
-    arrayHasNonNullValues,
-    filterDataByPlotOptions, getDefaultPlotOptions,
-    getMaxFromData,
-    getMinFromData, getPlotConfigFromOptions, getPlotTitle, getResultsViewURL,
-    getSelectOptions, getUniqueIdsForPlotSelections,
-    getUniqueValues, getUpdatedPlotOptions, parsePlotDataFromResponse, shouldReloadCurveFitData,
-    tickFormatFn
+    arrayHasNonNullValues, filterDataByPlotOptions, getDefaultPlotOptions, getMaxFromData,
+    getMinFromData, getMissingFields, getPlotConfigFromOptions, getPlotTitle, getResultsViewURL, getSelectOptions,
+    getUniqueIdsForPlotSelections, getUniqueValues, getUpdatedPlotOptions, parsePlotDataFromResponse,
+    shouldReloadCurveFitData, tickFormatFn
 } from "./utils";
 import {
-    CONTROL_COL_NAME, ID_COL_NAME,
-    PLOT_HEIGHT, SAMPLE_COL_NAME,
-    STANDARDS_LABEL,
-    WELL_GROUP_COL_NAME,
-    DEFAULT_X_AXIS_PROP,
-    DEFAULT_Y_AXIS_PROP
+    CONTROL_COL_NAME, ID_COL_NAME, PLOT_HEIGHT, SAMPLE_COL_NAME, STANDARDS_LABEL, WELL_GROUP_COL_NAME,
+    DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP, REQUIRED_COLUMN_NAMES
 } from "./constants";
 
 export const TEST_PLOT_DATA = [
@@ -249,15 +242,21 @@ describe('utils', () => {
             {[WELL_GROUP_COL_NAME]: 'Other', [CONTROL_COL_NAME]: 'C3', [SAMPLE_COL_NAME]: 'S3'},
             {[WELL_GROUP_COL_NAME]: 'Other', [CONTROL_COL_NAME]: 'C4', [SAMPLE_COL_NAME]: null},
             {[WELL_GROUP_COL_NAME]: 'Other', [CONTROL_COL_NAME]: null, [SAMPLE_COL_NAME]: 'S4'},
+            {[WELL_GROUP_COL_NAME]: 'Control 1', [CONTROL_COL_NAME]: 'C5', [SAMPLE_COL_NAME]: 'S5'},
+            {[WELL_GROUP_COL_NAME]: 'Control 1', [CONTROL_COL_NAME]: null, [SAMPLE_COL_NAME]: 'S6'},
+            {[WELL_GROUP_COL_NAME]: 'Control 1', [SAMPLE_COL_NAME]: 'S7'},
         ];
         const data = parsePlotDataFromResponse({rows});
-        expect(data).toHaveLength(6);
+        expect(data).toHaveLength(9);
         validateRow(data[0], 'Standard', null, 'Standard');
         validateRow(data[1], 'Standard', null, 'Standard');
         validateRow(data[2], 'Standard', null, 'Standard');
         validateRow(data[3], 'C3', null, 'C3');
         validateRow(data[4], 'C4', null, 'C4');
         validateRow(data[5], null, 'S4', 'S4');
+        validateRow(data[6], 'C5', null, 'C5');
+        validateRow(data[7], 'Unknown Control', null, 'Unknown Control');
+        validateRow(data[8], 'Unknown Control', null, 'Unknown Control');
     });
 
     function validateOptions(plotOptions: PlotOptions, showAllSamples: boolean, sampleLength: number, showAllControls: boolean, controlLength: number) {
@@ -284,5 +283,14 @@ describe('utils', () => {
         expect(arrayHasNonNullValues(['a','b'])).toBeTruthy();
         expect(arrayHasNonNullValues([0])).toBeTruthy();
         expect(arrayHasNonNullValues([0,1])).toBeTruthy();
+    });
+
+    test('getMissingFields', () => {
+        expect(getMissingFields(undefined).join(',')).toBe('');
+        expect(getMissingFields({}).join(',')).toBe(REQUIRED_COLUMN_NAMES.join(','));
+
+        const colInfo = {};
+        REQUIRED_COLUMN_NAMES.forEach((col) => colInfo[col] = {});
+        expect(getMissingFields(colInfo).join(',')).toBe('');
     });
 });

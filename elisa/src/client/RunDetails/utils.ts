@@ -10,7 +10,8 @@ import {
     WELL_GROUP_COL_NAME,
     DEFAULT_X_AXIS_PROP,
     DEFAULT_Y_AXIS_PROP,
-    SPOT_COL_NAME
+    SPOT_COL_NAME,
+    REQUIRED_COLUMN_NAMES
 } from "./constants";
 import { CurveFitData, PlotOptions, SelectOptions } from "./models";
 
@@ -54,7 +55,7 @@ export function getMaxFromData(data: any[], prop: string, includeNull = true): n
 export function getUniqueValues(dataArray: any[], prop: string, includeNull = true): any[] {
     let values = dataArray.map(d => d[prop]);
     if (!includeNull) {
-        values = values.filter(d => d !== null);
+        values = values.filter(d => d !== null && d !== undefined);
     }
     return [...new Set(values)].sort(naturalSort);
 }
@@ -215,8 +216,13 @@ export function parsePlotDataFromResponse(response: {[key: string]: any}): any[]
     response.rows.forEach((row) => {
         // consolidate the control name for the standard wells so they plot the same color
         const isStandard = row[WELL_GROUP_COL_NAME] === 'Standards';
+        const isControl = row[WELL_GROUP_COL_NAME]?.startsWith('Control');
         if (isStandard) {
             row[CONTROL_COL_NAME] = STANDARDS_LABEL;
+        }
+        // if the row is a control but we don't have a control name, set it to a default value
+        else if (isControl && !row[CONTROL_COL_NAME]) {
+            row[CONTROL_COL_NAME] = 'Unknown Control';
         }
 
         // if the row has a control value, make sure the sample column is null
@@ -263,4 +269,16 @@ export function getDefaultPlotOptions(plates: string[], spots: number[]): PlotOp
 
 export function arrayHasNonNullValues(arr: any[]): boolean {
     return arr?.length > 1 || (arr?.length === 1 && arr[0] !== null);
+}
+
+export function getMissingFields(columnInfo: {[key: string]: any}): string[] {
+    const missing = [];
+    if (columnInfo) {
+        REQUIRED_COLUMN_NAMES.forEach((col) => {
+            if (!columnInfo[col]) {
+                missing.push(col);
+            }
+        });
+    }
+    return missing
 }
