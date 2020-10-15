@@ -217,11 +217,18 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             }
         }
 
-        public void setRawSignal(Position position, Integer spot, Integer signal)
+        public void setRawSignal(Position position, Integer spot, Integer signal) throws ExperimentException
         {
             if (position != null && spot != null && signal != null)
             {
                 double[][] data = _dataMap.computeIfAbsent(spot, s -> new double[_plateTemplate.getRows()][_plateTemplate.getColumns()]);
+
+                if (position.getRow() >= _plateTemplate.getRows() || position.getColumn()-1 >= _plateTemplate.getColumns())
+                {
+                    throw new ExperimentException("The data from the results file doesn't match the plate template, please check your assay configuration.  " +
+                            "Data parsed at well location: " + position.getDescription() + " won't fit in the template size (" +
+                            _plateTemplate.getRows() + " x " + _plateTemplate.getColumns() + ").");
+                }
                 data[position.getRow()][position.getColumn()-1] = signal.doubleValue();
             }
         }

@@ -51,6 +51,11 @@ public class ManualImportHelper extends AbstractElisaImportHelper
         {
             PlateTemplate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
             double[][] cellValues = reader.loadFile(template, _dataFile);
+            if (cellValues == null)
+            {
+                throw new ExperimentException("Error parsing the uploaded file. The data may not match the layout of the plate: " +
+                        "(" + template.getRows() + " x " + template.getColumns() + ") associated with this assay.");
+            }
             Plate plate = PlateService.get().createPlate(template, cellValues, null);
 
             analyteMap.put(1, plate);

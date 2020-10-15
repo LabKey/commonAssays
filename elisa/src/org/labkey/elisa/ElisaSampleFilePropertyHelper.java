@@ -85,14 +85,15 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
 
     public static void validateRequiredColumns(ColumnDescriptor[] columns) throws ExperimentException
     {
-        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(PLATE_COLUMN_NAME)))
-            throw new ExperimentException("Sample metadata file does not contain required column \"" + PLATE_COLUMN_NAME + "\".");
-        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(SAMPLE_COLUMN_NAME)))
-            throw new ExperimentException("Sample metadata file does not contain required column \"" + SAMPLE_COLUMN_NAME + "\".");
-        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(WELL_LOCATION_COLUMN_NAME)))
-            throw new ExperimentException("Sample metadata file does not contain required column \"" + WELL_LOCATION_COLUMN_NAME + "\".");
-        if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(SPOT_COLUMN_NAME)))
-            throw new ExperimentException("Sample metadata file does not contain required column \"" + SPOT_COLUMN_NAME + "\".");
+        List<String> cols = Arrays.asList(PLATE_COLUMN_NAME, SAMPLE_COLUMN_NAME, WELL_LOCATION_COLUMN_NAME, SPOT_COLUMN_NAME);
+        for (String column : cols)
+        {
+            if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(column)))
+            {
+                throw new ExperimentException("Unable to process the data file, the uploaded file must contain these columns: " +
+                        cols.toString() + ".");
+            }
+        }
     }
 
     @Nullable
