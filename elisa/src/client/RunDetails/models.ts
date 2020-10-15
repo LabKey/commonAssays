@@ -29,5 +29,6 @@ export type CurveFitData = {
     curveFitMethod: string,
     rSquared: number,
     fitParameters: string,
-    points: XYPair[]
+    points: XYPair[],
+    error: string
 }
