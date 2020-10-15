@@ -11,6 +11,7 @@ import {
     filterDataByPlotOptions,
     getColumnInfoFromQueryDetails,
     getDefaultPlotOptions,
+    getMissingFields,
     getUniqueIdsForPlotSelections,
     getUniqueValues,
     getUpdatedPlotOptions,
@@ -21,9 +22,9 @@ import { getCurveFitXYPairs } from "./actions";
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
+import { CurveFitPanel } from "./components/CurveFitPanel";
 
 import './RunDetails.scss';
-import { CurveFitPanel } from "./components/CurveFitPanel";
 
 export interface AppContext {
     protocolId: number,
@@ -155,8 +156,8 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
     constructor(props: ImplProps) {
         super(props);
 
-        const plates = getUniqueValues(props.data, 'PlateName');
-        const spots = getUniqueValues(props.data, SPOT_COL_NAME);
+        const plates = getUniqueValues(props.data, 'PlateName', false);
+        const spots = getUniqueValues(props.data, SPOT_COL_NAME, false);
         const plotOptions = getDefaultPlotOptions(plates, spots);
         const samples = getUniqueIdsForPlotSelections(props.data, plotOptions, SAMPLE_COL_NAME);
         const controls = getUniqueIdsForPlotSelections(props.data, plotOptions, CONTROL_COL_NAME);
@@ -209,19 +210,29 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
     };
 
     render() {
+        const { columnInfo } = this.props;
         const { filteredData } = this.state;
+        const missingFieldKeys = getMissingFields(columnInfo);
 
         return (
-            <div className={'row'}>
-                <div className={'col col-xs-12 col-md-3 run-details-left'}>
-                    <DataSelectionsPanel {...this.state} setPlotOption={this.setPlotOption}/>
-                    <PlotOptionsPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
-                    <CurveFitPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
+            <>
+                {missingFieldKeys?.length > 0 &&
+                    <Alert bsStyle={'warning'}>
+                        Warning: the assay design is missing the following fields which may affect the various plotting
+                        features and display of this page: {missingFieldKeys.join(', ')}.
+                    </Alert>
+                }
+                <div className={'row'}>
+                    <div className={'col col-xs-12 col-md-3 run-details-left'}>
+                        <DataSelectionsPanel {...this.state} setPlotOption={this.setPlotOption}/>
+                        <PlotOptionsPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
+                        <CurveFitPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
+                    </div>
+                    <div className={'col col-xs-12 col-md-9 run-details-right'}>
+                        <CalibrationCurvePanel {...this.props} {...this.state} data={filteredData}/>
+                    </div>
                 </div>
-                <div className={'col col-xs-12 col-md-9 run-details-right'}>
-                    <CalibrationCurvePanel {...this.props} {...this.state} data={filteredData}/>
-                </div>
-            </div>
+            </>
         )
     }
 }
