@@ -192,6 +192,13 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         getCurveFitXYPairs(protocolId, runId, plotOptions.plateName, plotOptions.spot, filteredData)
             .then(curveFitData => {
                 this.setState(() => ({ curveFitData }));
+            })
+            .catch(reason => {
+                console.error(reason);
+                this.setState(() => ({ curveFitData: {
+                    points: [],
+                    error: reason.exception
+                } as CurveFitData }));
             });
     }
 
