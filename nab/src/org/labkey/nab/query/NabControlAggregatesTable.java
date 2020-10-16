@@ -2,18 +2,14 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.BaseColumnInfo;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerFilterable;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.util.StringExpression;
+import org.labkey.api.query.QueryForeignKey;
 
 import static org.labkey.api.assay.dilution.DilutionManager.WELL_DATA_TABLE_NAME;
 
@@ -28,21 +24,7 @@ public class NabControlAggregatesTable extends VirtualTable<NabProtocolSchema> i
         setDescription("Contains one row per run for the aggregate values of the control well data values.");
 
         var runCol = new BaseColumnInfo("RunId", this, JdbcType.INTEGER);
-        runCol.setFk(new LookupForeignKey(getContainerFilter(), "RowID", null)
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return AssayService.get().createRunTable(protocol, provider, schema.getUser(), schema.getContainer(), getLookupContainerFilter());
-            }
-
-            @Override
-            public StringExpression getURL(ColumnInfo parent)
-            {
-                return getURL(parent, true);
-            }
-
-        });
+        runCol.setFk(QueryForeignKey.from(schema, cf).to("Runs", "RowID", null));
         addColumn(runCol);
 
         addColumn(new BaseColumnInfo("ControlWellgroup", this, JdbcType.VARCHAR));
