@@ -226,6 +226,7 @@ public class NabManager extends AbstractNabManager
      * @return CurveFit.Parameters as Map
      * @throws FitFailedException
      */
+    @Deprecated // primarily used in NabPopulateFitParametersPipelineJob (invoked by nab-20.000-20.001.sql), can be deleted in 23.3.0
     public Map<String, Object> ensureFitParameters(User user, NabSpecimen specimenRow, @Nullable DilutionAssayRun assayRun, @Nullable DilutionSummary dilutionSummary) throws FitFailedException
     {
         if (specimenRow != null && specimenRow.getFitParameters() != null)
