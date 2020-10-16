@@ -10,7 +10,6 @@ describe('<PlotButtonBar/>', () => {
             <PlotButtonBar
                 protocolId={1}
                 runId={1}
-                plotId={'test'}
                 runPropertiesRow={undefined}
                 plotOptions={{showAllSamples:true, showAllControls:true} as PlotOptions}
             />
