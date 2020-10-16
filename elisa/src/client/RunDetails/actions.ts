@@ -31,8 +31,8 @@ export function getCurveFitXYPairs(protocolId: number, runId: number, plateName:
 }
 
 export function exportSVGToFile(svgEl, format, title: string) {
-    if (svgEl && svgEl.length > 0) {
+    if (svgEl) {
         const LABKEY = getServerContext();
-        LABKEY.vis.SVGConverter.convert(svgEl[0], format, 'Calibration Curve - ' + title);
+        LABKEY.vis.SVGConverter.convert(svgEl, format, 'Calibration Curve - ' + title);
     }
 }

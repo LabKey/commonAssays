@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, ReactNode } from 'react';
 import { Query, Filter } from "@labkey/api";
 import { Alert, LoadingSpinner } from "@labkey/components";
 
@@ -6,7 +6,7 @@ import {
     CONTROL_COL_NAME, DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP, RUN_COLUMN_NAMES,
     SAMPLE_COL_NAME, SAMPLE_COLUMN_NAMES, SPOT_COL_NAME
 } from "./constants";
-import { CurveFitData, PlotOptions } from "./models";
+import { CommonRunProps, CurveFitData, PlotOptions } from "./models";
 import {
     filterDataByPlotOptions,
     getColumnInfoFromQueryDetails,
@@ -96,7 +96,7 @@ export class RunDetails extends PureComponent<Props, State> {
         });
     }
 
-    queryData() {
+    queryData = (): void => {
         const { schemaName, runId } = this.props.context;
         const { measures } = this.state;
 
@@ -115,13 +115,18 @@ export class RunDetails extends PureComponent<Props, State> {
                 this.setState(() => ({ dataError: reason.exception }));
             }
         });
-    }
+    };
 
-    render() {
+    render(): ReactNode {
         const { runPropertiesError, dataError, runPropertiesRow, data } = this.state;
 
         if (runPropertiesError || dataError) {
-            return <Alert>{runPropertiesError || dataError}</Alert>
+            return (
+                <>
+                    {runPropertiesError && <Alert>{runPropertiesError}</Alert>}
+                    {dataError && <Alert>{dataError}</Alert>}
+                </>
+            )
         }
 
         if (!runPropertiesRow || !data) {
@@ -132,10 +137,7 @@ export class RunDetails extends PureComponent<Props, State> {
     }
 }
 
-interface ImplProps {
-    protocolId: number,
-    runId: number,
-    runPropertiesRow: {[key: string]: any},
+interface ImplProps extends CommonRunProps {
     data: any[],
     columnInfo: {[key: string]: any},
     measures: string[]
@@ -177,14 +179,13 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         this.getCurveFitData();
     }
 
-    componentDidUpdate(prevProps: Readonly<ImplProps>, prevState: Readonly<ImplState>, snapshot?: any): void
-    {
+    componentDidUpdate(prevProps: Readonly<ImplProps>, prevState: Readonly<ImplState>, snapshot?: any): void {
         if (shouldReloadCurveFitData(prevState.plotOptions, this.state.plotOptions)) {
             this.getCurveFitData();
         }
     }
 
-    getCurveFitData() {
+    getCurveFitData(): void {
         const { protocolId, runId, data } = this.props;
         const { plotOptions } = this.state;
         const filteredData = filterDataByPlotOptions(data, [], [], plotOptions, false);
@@ -202,7 +203,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
             });
     }
 
-    setPlotOption = (key: string, value: any, resetIdSelection: boolean) => {
+    setPlotOption = (key: string, value: any, resetIdSelection: boolean): void => {
         const { data } = this.props;
         const { plotOptions, samples, controls, curveFitData } = this.state;
         const updatedPlotOptions = getUpdatedPlotOptions(key, value, resetIdSelection, plotOptions);
@@ -216,7 +217,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         }));
     };
 
-    render() {
+    render(): ReactNode {
         const { columnInfo } = this.props;
         const { filteredData } = this.state;
         const missingFieldKeys = getMissingFields(columnInfo);
@@ -230,12 +231,12 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
                     </Alert>
                 }
                 <div className={'row'}>
-                    <div className={'col col-xs-12 col-md-3 run-details-left'}>
+                    <div className={'col-xs-12 col-md-3 run-details-left'}>
                         <DataSelectionsPanel {...this.state} setPlotOption={this.setPlotOption}/>
                         <PlotOptionsPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
                         <CurveFitPanel {...this.props} {...this.state} setPlotOption={this.setPlotOption}/>
                     </div>
-                    <div className={'col col-xs-12 col-md-9 run-details-right'}>
+                    <div className={'col-xs-12 col-md-9 run-details-right'}>
                         <CalibrationCurvePanel {...this.props} {...this.state} data={filteredData}/>
                     </div>
                 </div>

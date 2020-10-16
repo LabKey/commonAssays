@@ -1,24 +1,16 @@
 import React, { PureComponent } from 'react';
-import $ from 'jquery';
 import { getServerContext } from "@labkey/api";
 
-import { PlotOptions } from "../models";
+import { CommonRunProps, PlotOptions } from "../models";
 import { getPlotTitle, getResultsViewURL } from "../utils";
 import { exportSVGToFile } from "../actions";
 
-interface Props {
-    protocolId: number,
-    runId: number,
-    runPropertiesRow: {[key: string]: any},
+interface Props extends CommonRunProps {
     plotOptions: PlotOptions,
-    plotId: string
+    plotElement: HTMLDivElement
 }
 
 export class PlotButtonBar extends PureComponent<Props> {
-
-    getSVGElement() {
-        return $('#' + this.props.plotId + '>svg');
-    }
 
     getViewResultsHref = () => {
         const { runId, protocolId, plotOptions } = this.props;
@@ -36,9 +28,9 @@ export class PlotButtonBar extends PureComponent<Props> {
     };
 
     exportToFile = (format: string) => {
-        const { runPropertiesRow, plotOptions } = this.props;
+        const { runPropertiesRow, plotOptions, plotElement } = this.props;
         const title = getPlotTitle(runPropertiesRow?.Name, plotOptions);
-        exportSVGToFile(this.getSVGElement(), format, title);
+        exportSVGToFile(plotElement.firstChild, format, title);
     };
 
     render() {

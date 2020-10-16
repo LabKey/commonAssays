@@ -32,3 +32,9 @@ export type CurveFitData = {
     points: XYPair[],
     error: string
 }
+
+export interface CommonRunProps {
+    protocolId: number,
+    runId: number,
+    runPropertiesRow: {[key: string]: any}
+}
