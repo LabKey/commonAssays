@@ -12,6 +12,7 @@ describe('<PlotButtonBar/>', () => {
                 runId={1}
                 runPropertiesRow={undefined}
                 plotOptions={{showAllSamples:true, showAllControls:true} as PlotOptions}
+                plotElement={undefined}
             />
         );
 
