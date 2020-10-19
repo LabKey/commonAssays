@@ -16,6 +16,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
@@ -87,23 +88,16 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
+    public Map<String, Object> createWellRow(Domain domain, String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
     {
-        Map<String, Object> row = super.createWellRow(plateName, spot, replicate, well, position, stdCurveFit, materialMap);
+        Map<String, Object> row = super.createWellRow(domain, plateName, spot, parentWellGroup, replicate, well, position, stdCurveFit, materialMap);
 
         row.put(ElisaAssayProvider.PLATE_PROPERTY, plateName);
         row.put(ElisaAssayProvider.SPOT_PROPERTY, spot);
 
         // add any extra properties
-        AnalytePlate analytePlate = _plateMap.get(plateName);
-        if (analytePlate != null)
-        {
-            // bail out if this isn't a valid row in the data file
-            if (!analytePlate.hasData(position, spot))
-                return Collections.emptyMap();
-
-            row.putAll(analytePlate.getExtraProperties(position, spot));
-        }
+        row.putAll(getExtraProperties(plateName, position, spot));
 
         // if this well is a sample well group add the material LSID
         Map<Position, String> specimenGroupMap = getSpecimenGroupMap();
@@ -161,6 +155,21 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
         return _plateMap.get(plateName).getStdConcentrations(analyteNum);
     }
 
+    @Override
+    public Map<String, Object> getExtraProperties(String plateName, Position position, Integer spot)
+    {
+        AnalytePlate analytePlate = _plateMap.get(plateName);
+        if (analytePlate != null)
+        {
+            // bail out if this isn't a valid row in the data file
+            if (!analytePlate.hasData(position, spot))
+                return Collections.emptyMap();
+
+            return analytePlate.getExtraProperties(position, spot);
+        }
+        return Collections.emptyMap();
+    }
+
     private static class AnalytePlate
     {
         private Map<Integer, Map<String, Double>> _stdConcentrations = new HashMap<>();
@@ -209,11 +218,18 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             }
         }
 
-        public void setRawSignal(Position position, Integer spot, Integer signal)
+        public void setRawSignal(Position position, Integer spot, Integer signal) throws ExperimentException
         {
             if (position != null && spot != null && signal != null)
             {
                 double[][] data = _dataMap.computeIfAbsent(spot, s -> new double[_plateTemplate.getRows()][_plateTemplate.getColumns()]);
+
+                if (position.getRow() >= _plateTemplate.getRows() || position.getColumn()-1 >= _plateTemplate.getColumns())
+                {
+                    throw new ExperimentException("The data from the results file doesn't match the plate template, please check your assay configuration.  " +
+                            "Data parsed at well location: " + position.getDescription() + " won't fit in the template size (" +
+                            _plateTemplate.getRows() + " x " + _plateTemplate.getColumns() + ").");
+                }
                 data[position.getRow()][position.getColumn()-1] = signal.doubleValue();
             }
         }

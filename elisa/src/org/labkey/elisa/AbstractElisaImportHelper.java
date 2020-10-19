@@ -13,8 +13,11 @@ import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,18 +56,32 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position,
+    public Map<String, Object> createWellRow(Domain domain, String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well,
+                                             Position position,
                                              @Nullable CurveFit stdCurveFit,
                                              Map<String, ExpMaterial> materialMap)
     {
         Map<String, Object> row = new HashMap<>();
 
+        // initialize the row map with keys for all of the columns in the result domain to avoid having data filtered out
+        // in AbstractAssayTsvDataHandler.checkColumns
+        for (DomainProperty prop : domain.getProperties())
+        {
+            row.put(prop.getName(), null);
+        }
         row.put(ElisaAssayProvider.WELL_LOCATION_PROPERTY, position.getDescription());
-        row.put(ElisaAssayProvider.WELLGROUP_PROPERTY, replicate.getPositionDescription());
+        row.put(ElisaAssayProvider.WELLGROUP_LOCATION_PROPERTY, replicate.getPositionDescription());
+        row.put(ElisaAssayProvider.WELLGROUP_NAME_PROPERTY, parentWellGroup.getName());
         row.put(ElisaAssayProvider.ABSORBANCE_PROPERTY, well.getValue());
         if (stdCurveFit != null)
-            row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, stdCurveFit.solveForX(well.getValue()));
-
+        {
+            double calcConc = stdCurveFit.solveForX(well.getValue());
+            if (!Double.isNaN(calcConc))
+            {
+                row.put(ElisaAssayProvider.CONCENTRATION_PROPERTY, calcConc);
+            }
+        }
         row.put(ElisaAssayProvider.MEAN_ABSORPTION_PROPERTY, replicate.getMean());
         row.put(ElisaAssayProvider.CV_ABSORPTION_PROPERTY, replicate.getStdDev() / replicate.getMean());
 
@@ -75,5 +92,11 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     public String getMaterialKey(String plateName, Integer analyteNum, String sampleWellGroup)
     {
         return sampleWellGroup;
+    }
+
+    @Override
+    public Map<String, Object> getExtraProperties(String plateName, Position position, Integer spot)
+    {
+        return Collections.emptyMap();
     }
 }

@@ -16,6 +16,7 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.plate.BioTekPlateReader;
@@ -51,6 +52,11 @@ public class ManualImportHelper extends AbstractElisaImportHelper
         {
             PlateTemplate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
             double[][] cellValues = reader.loadFile(template, _dataFile);
+            if (cellValues == null)
+            {
+                throw new ExperimentException("Error parsing the uploaded file. The data may not match the layout of the plate: " +
+                        "(" + template.getRows() + " x " + template.getColumns() + ") associated with this assay.");
+            }
             Plate plate = PlateService.get().createPlate(template, cellValues, null);
 
             analyteMap.put(1, plate);
@@ -86,9 +92,10 @@ public class ManualImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<String, Object> createWellRow(String plateName, Integer spot, WellGroup replicate, Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
+    public Map<String, Object> createWellRow(Domain domain, String plateName, Integer spot, WellGroup parentWellGroup, WellGroup replicate,
+                                             Well well, Position position, CurveFit stdCurveFit, Map<String, ExpMaterial> materialMap)
     {
-        Map<String, Object> row = super.createWellRow(plateName, spot, replicate, well, position, stdCurveFit, materialMap);
+        Map<String, Object> row = super.createWellRow(domain, plateName, spot, parentWellGroup, replicate, well, position, stdCurveFit, materialMap);
 
         // if this well is a sample well group add the material LSID
         Map<Position, String> specimenGroupMap = getSpecimenGroupMap();

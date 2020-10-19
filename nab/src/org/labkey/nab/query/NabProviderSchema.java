@@ -23,11 +23,11 @@ import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.SampleInfoMethod;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
+import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.EnumTableInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
@@ -45,26 +45,6 @@ import java.util.Set;
 public class NabProviderSchema extends DilutionProviderSchema
 {
     public static final String SCHEMA_NAME = "Nab";
-
-    enum NabCurveFits
-    {
-        FOUR_PARAMETER(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()),
-        FIVE_PARAMETER(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()),
-        POLYNOMIAL(StatsService.CurveFitType.POLYNOMIAL.getLabel()),
-        NONE(StatsService.CurveFitType.NONE.getLabel());
-
-        private String _label;
-
-        NabCurveFits(String label)
-        {
-            _label = label;
-        }
-
-        public String getLabel()
-        {
-            return _label;
-        }
-    }
 
     static public void register(Module module)
     {
@@ -123,10 +103,12 @@ public class NabProviderSchema extends DilutionProviderSchema
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<NabCurveFits> result = new EnumTableInfo<>(NabCurveFits.class, this, NabCurveFits::getLabel, false, "List of possible curve fitting methods for the NAb assay.");
-            result.setPublicSchemaName(SCHEMA_NAME);
-            result.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
-            return result;
+            AbstractPlateBasedAssayProvider.CurveFitTableInfo table = new AbstractPlateBasedAssayProvider.CurveFitTableInfo(this, getProvider(),
+                    "List of possible curve fitting methods for the NAb assay.");
+            table.setPublicSchemaName(getSchemaName());
+            table.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
+
+            return table;
         }
 
         // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)

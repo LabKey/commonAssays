@@ -17,20 +17,24 @@
 package org.labkey.elisa;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
-import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.CodeOnlyModule;
-import org.labkey.api.module.ModuleContext;
-import org.labkey.api.assay.plate.PlateService;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.UpgradeCode;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.module.DefaultModule;
+import org.labkey.api.module.ModuleContext;
 import org.labkey.api.settings.AdminConsole;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
-public class ElisaModule extends CodeOnlyModule
+public class ElisaModule extends DefaultModule
 {
     public static final String EXPERIMENTAL_MULTI_PLATE_SUPPORT = "elisaMultiPlateSupport";
 
@@ -38,6 +42,25 @@ public class ElisaModule extends CodeOnlyModule
     public String getName()
     {
         return "Elisa";
+    }
+
+    @Override
+    public @Nullable Double getSchemaVersion()
+    {
+        return 20.000;
+    }
+
+    @Override
+    public boolean hasScripts()
+    {
+        return true;
+    }
+
+    @NotNull
+    @Override
+    public Set<String> getSchemaNames()
+    {
+        return PageFlowUtil.set(ElisaProtocolSchema.ELISA_DB_SCHEMA_NAME);
     }
 
     @NotNull
@@ -74,5 +97,11 @@ public class ElisaModule extends CodeOnlyModule
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();
+    }
+
+    @Override
+    public @Nullable UpgradeCode getUpgradeCode()
+    {
+        return new ElisaUpgradeCode();
     }
 }

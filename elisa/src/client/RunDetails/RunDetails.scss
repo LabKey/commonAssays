@@ -1,0 +1,35 @@
+@import "~@labkey/components/dist/assets/scss/theme";
+
+.labkey-button {
+  margin: 10px 10px 0 0;
+}
+
+.plot-options-input-row {
+  padding-bottom: 15px;
+}
+
+.plot-options-field-label {
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 5px;
+
+  .plot-options-show-all {
+    font-weight: normal;
+  }
+}
+
+.curve-fit-field-label {
+  padding-top: 10px;
+}
+
+.plot-panel-display {
+  height: 600px;
+
+  .loading-msg {
+    padding: 10px;
+  }
+}
+
+.plot-panel-section {
+  vertical-align: top;
+}
