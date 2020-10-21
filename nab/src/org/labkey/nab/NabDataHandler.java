@@ -199,6 +199,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
             String virusWellGroupName = (String)group.get(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME);
             nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
+            nabSpecimenEntries.put(FIT_PARAMETERS_PROPERTY_NAME, group.get(FIT_PARAMETERS_PROPERTY_NAME));
 
             int nabRowid = 0;
             if (commitData)

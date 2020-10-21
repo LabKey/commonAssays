@@ -18,6 +18,12 @@ package org.labkey.nab;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -25,9 +31,12 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -53,6 +62,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
 
 /**
  * User: brittp
@@ -203,5 +214,28 @@ public class NabManager extends AbstractNabManager
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    /**
+     * Ensure the fit parameter value (as a JSON object) for the given NAb assay run specimen results row.
+     * If not already saved to the DB for the given NAbSpecimen row, save it.
+     * @param user
+     * @param assayRun
+     * @param specimenRow
+     * @param dilutionSummary
+     * @return CurveFit.Parameters as Map
+     * @throws FitFailedException
+     */
+    @Deprecated // primarily used in NabPopulateFitParametersPipelineJob (invoked by nab-20.000-20.001.sql), can be deleted in 23.3.0
+    public Map<String, Object> ensureFitParameters(User user, NabSpecimen specimenRow, @Nullable DilutionAssayRun assayRun, @Nullable DilutionSummary dilutionSummary) throws FitFailedException
+    {
+        if (specimenRow != null && specimenRow.getFitParameters() != null)
+            return new JSONObject(specimenRow.getFitParameters());
+
+        CurveFit.Parameters fitParams = dilutionSummary.getCurveParameters(assayRun.getRenderedCurveFitType());
+        if (user != null)
+            Table.update(user, DilutionManager.getTableInfoNAbSpecimen(), Map.of(FIT_PARAMETERS_PROPERTY_NAME, new JSONObject(fitParams.toMap())), specimenRow.getRowId());
+
+        return fitParams.toMap();
     }
 }
