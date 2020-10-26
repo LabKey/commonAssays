@@ -43,7 +43,6 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/build": "0.0.1-fb-labkeyBuildPackage.6",
     "@labkey/components": "0.97.0"
   },
   "devDependencies": {
@@ -54,6 +53,7 @@
     "@hot-loader/react-dom": "16.13.0",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
+    "@labkey/build": "0.0.1-fb-labkeyBuildPackage.7",
     "@labkey/eslint-config-base": "0.0.8",
     "@labkey/eslint-config-react": "0.0.8",
     "@types/jest": "25.2.3",
