@@ -26,3 +26,5 @@ hs_err_pid*
 resources/web/elisa/gen
 
 node_modules
+
+.gradle
