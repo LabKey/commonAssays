@@ -46,7 +46,7 @@
     "@labkey/components": "0.97.0"
   },
   "devDependencies": {
-    "@labkey/build": "0.3.0",
+    "@labkey/build": "0.4.0",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
     "@labkey/eslint-config-base": "0.0.8",
