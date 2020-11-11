@@ -2108,7 +2108,7 @@ public class FlowSchema extends UserSchema
         if (filter.getClauses().size() > 0)
         {
             Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
-            SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
+            SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), "_filter", columnMap);
             SQLFragment t = new SQLFragment("SELECT * FROM (");
             t.append(bgSQL);
             t.append(") _filter_ " );
