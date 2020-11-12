@@ -329,7 +329,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
         // Guide sets are scoped to the protocol, not to folders, so filter on ProtocolId instead of Container
         SQLFragment sql = new SQLFragment("ProtocolId = ?");

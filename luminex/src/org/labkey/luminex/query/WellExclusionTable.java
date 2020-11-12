@@ -151,14 +151,9 @@ public class WellExclusionTable extends AbstractExclusionTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
-        SQLFragment sql = new SQLFragment("DataId IN (SELECT RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append(")");
-        return sql;
+        return getUserSchema().createDataIdContainerFilterSQL("DataId", filter);
     }
 
     @Override
