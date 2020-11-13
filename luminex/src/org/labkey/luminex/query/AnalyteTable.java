@@ -59,8 +59,9 @@ public class AnalyteTable extends AbstractLuminexTable
         super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, cf, filter);
         setName(LuminexProtocolSchema.ANALYTE_TABLE_NAME);
         setPublicSchemaName(AssaySchema.NAME);
-        
+
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        setTitleColumn("Name");
         addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey(cf,"RowId", null)
         {
             @Override
