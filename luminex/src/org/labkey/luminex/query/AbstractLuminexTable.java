@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -51,11 +50,11 @@ public abstract class AbstractLuminexTable extends FilteredTable<LuminexProtocol
         if (_needsFilter)
         {
             clearConditions(CONTAINER_FAKE_COLUMN_NAME);
-            addCondition(createContainerFilterSQL(filter, _userSchema.getContainer()), CONTAINER_FAKE_COLUMN_NAME);
+            addCondition(createContainerFilterSQL(filter), CONTAINER_FAKE_COLUMN_NAME);
         }
     }
 
-    protected abstract SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container);
+    protected abstract SQLFragment createContainerFilterSQL(ContainerFilter filter);
 
     // param: titrationSinglePointControlSwitch - TitrationId for AnalyteTitration, SinglePointControlId for AnalyteSinglePointControl
     public static SQLFragment createQCFlagEnabledSQLFragment(SqlDialect sqlDialect, String flagType, String curveType, String titrationSinglePointControlSwitch)
