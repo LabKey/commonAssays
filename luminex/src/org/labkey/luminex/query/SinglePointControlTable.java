@@ -15,10 +15,8 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.assay.AssayProtocolSchema;
 
@@ -42,14 +40,9 @@ public class SinglePointControlTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
-        SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append(")");
-        return sql;
+        return getUserSchema().createRunIdContainerFilterSQL(filter);
     }
 
 

@@ -185,15 +185,13 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
         SQLFragment sql = new SQLFragment("SinglePointControlId IN (SELECT RowId FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
-        sql.append(" WHERE RunId IN (SELECT RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
         sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append("))");
+        sql.append(getUserSchema().createRunIdContainerFilterSQL(filter));
+        sql.append(")");
         return sql;
     }
 
