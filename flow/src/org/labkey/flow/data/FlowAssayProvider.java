@@ -38,6 +38,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
@@ -468,7 +469,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
+    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
     {
         throw new UnsupportedOperationException();
     }
