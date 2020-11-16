@@ -30,7 +30,7 @@ MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
 String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
 
-<script type="text/javascript" src="<%=getWebappURL("MS2/inlineViewDesigner.js")%>"></script>
+<%=getScriptTag("MS2/inlineViewDesigner.js")%>
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

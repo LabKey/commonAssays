@@ -21,7 +21,6 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.query.FilterView" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -32,7 +31,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext());
 %>
 
-<script type="text/javascript" src="<%=getWebappURL("MS2/inlineViewDesigner.js")%>"></script>
+<%=getScriptTag("MS2/inlineViewDesigner.js")%>
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
