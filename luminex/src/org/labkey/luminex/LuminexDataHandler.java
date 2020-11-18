@@ -1908,7 +1908,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (match != null)
         {
-            materialInputs.put(match.getMaterial(), null);
+            materialInputs.put(match.getMaterial(true), null);
         }
     }
 
