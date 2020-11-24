@@ -16,7 +16,6 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
@@ -71,14 +70,9 @@ public class RunExclusionTable extends AbstractExclusionTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
-        SQLFragment sql = new SQLFragment("RunId IN (SELECT RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append(")");
-        return sql;
+        return getUserSchema().createRunIdContainerFilterSQL(filter);
     }
 
     @Override

@@ -26,7 +26,6 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.ExprColumn;
@@ -60,8 +59,9 @@ public class AnalyteTable extends AbstractLuminexTable
         super(LuminexProtocolSchema.getTableInfoAnalytes(), schema, cf, filter);
         setName(LuminexProtocolSchema.ANALYTE_TABLE_NAME);
         setPublicSchemaName(AssaySchema.NAME);
-        
+
         addColumn(wrapColumn(getRealTable().getColumn("Name")));
+        setTitleColumn("Name");
         addColumn(wrapColumn("Data", getRealTable().getColumn("DataId"))).setFk(new LookupForeignKey(cf,"RowId", null)
         {
             @Override
@@ -140,14 +140,9 @@ public class AnalyteTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
-        SQLFragment sql = new SQLFragment("DataId IN (SELECT RowId FROM ");
-        sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append(")");
-        return sql;
+        return getUserSchema().createDataIdContainerFilterSQL("DataId", filter);
     }
 
     @Override
