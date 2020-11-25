@@ -104,16 +104,17 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            DataLoader loader = createLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME);
+            try (DataLoader loader = createLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME))
+            {
+                ColumnDescriptor[] cols = loader.getColumns();
+                List<String> columnNames = new ArrayList<>(cols.length);
+                for (ColumnDescriptor col : cols)
+                    columnNames.add(col.getColumnName());
 
-            ColumnDescriptor[] cols = loader.getColumns();
-            List<String> columnNames = new ArrayList<>(cols.length);
-            for (ColumnDescriptor col : cols)
-                columnNames.add(col.getColumnName());
+                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME);
 
-            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME);
-
-            insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
+                insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
+            }
         }
         catch (IOException e)
         {
