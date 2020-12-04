@@ -15,12 +15,14 @@
  */
 package org.labkey.test.tests.luminex;
 
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.DailyA;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -77,7 +79,8 @@ public final class LuminexPositivityTest extends LuminexTest
     @Test (timeout = 16 * 60 * 1000) // Preferable to have the individual test time out rather than the class
     public void testPositivity()
     {
-        Assume.assumeTrue("Skipping test on SQL Server: TODO Issue 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
+        Assume.assumeTrue("Skipping test on SQL Server: TODO Issue 28604: Luminex positivity upload occasionally bogs down server",
+            WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
         setupResultsDefaultView();
         test3xFoldChange();
         test5xFoldChange();
