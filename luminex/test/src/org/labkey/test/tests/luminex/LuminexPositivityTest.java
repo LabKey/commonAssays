@@ -77,7 +77,7 @@ public final class LuminexPositivityTest extends LuminexTest
     @Test (timeout = 16 * 60 * 1000) // Preferable to have the individual test time out rather than the class
     public void testPositivity()
     {
-        // Assume.assumeTrue("Skipping test on SQL Server: TODO Issue 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
+        Assume.assumeTrue("Skipping test on SQL Server: TODO Issue 28604: Luminex positivity upload occasionally bogs down server", WebTestHelper.getDatabaseType() != WebTestHelper.DatabaseType.MicrosoftSQLServer);
         setupResultsDefaultView();
         test3xFoldChange();
         test5xFoldChange();
