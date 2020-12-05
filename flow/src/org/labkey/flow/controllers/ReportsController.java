@@ -15,12 +15,22 @@
  */
 package org.labkey.flow.controllers;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.labkey.api.action.*;
+import org.apache.logging.log4j.Logger;
+import org.labkey.api.action.ApiResponse;
+import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.ConfirmAction;
+import org.labkey.api.action.FormApiAction;
+import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.HasViewContext;
+import org.labkey.api.action.LabKeyError;
+import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReturnUrlForm;
+import org.labkey.api.action.SimpleErrorView;
+import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.reports.Report;
 import org.labkey.api.reports.ReportService;
@@ -34,18 +44,34 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.template.ClientDependency;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.reports.FilterFlowReport;
 import org.labkey.flow.reports.FlowReport;
 import org.labkey.flow.reports.FlowReportJob;
 import org.labkey.flow.reports.FlowReportManager;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * User: matthewb
@@ -395,8 +421,8 @@ public class ReportsController extends BaseFlowController
             }
             else
             {
-                // Synchronous report
-                view = r.renderReport(getViewContext());
+                // ajax execute report via POST
+                view = new JspView("/org/labkey/flow/controllers/ajaxExecuteReport.jsp", Pair.of(form, r), errors);
             }
 
             return new VBox(new SelectReportView(form), view);
@@ -408,6 +434,53 @@ public class ReportsController extends BaseFlowController
             new BeginAction(getViewContext()).addNavTrail(root);
             root.addChild("View report: " + r.getDescriptor().getReportName());
         }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public class ExecuteReportAction extends MutatingApiAction<ExecuteForm>
+    {
+        @Override
+        public Object execute(ExecuteForm form, BindException errors) throws Exception
+        {
+            FlowReport r = getReport(getViewContext(), form);
+            r.updateProperties(getViewContext(), getPropertyValues(), errors, true);
+
+            if (r.saveToDomain())
+            {
+                errors.addError(new LabKeyError("FlowReports that save to domains are executed in pipeline jobs"));
+            }
+
+            if (errors.hasErrors())
+                return null;
+
+            HttpView view = r.renderReport(getViewContext());
+
+            LinkedHashSet<ClientDependency> dependencies = view.getClientDependencies();
+            LinkedHashSet<String> cssScripts = new LinkedHashSet<>();
+
+            LinkedHashSet<String> includes = new LinkedHashSet<>();
+            LinkedHashSet<String> implicitIncludes = new LinkedHashSet<>();
+            PageFlowUtil.getJavaScriptFiles(getContainer(), dependencies, includes, implicitIncludes);
+
+            MockHttpServletResponse mr = new MockHttpServletResponse();
+            mr.setCharacterEncoding(StringUtilsLabKey.DEFAULT_CHARSET.displayName());
+            view.render(getViewContext().getRequest(), mr);
+
+            if (mr.getStatus() != HttpServletResponse.SC_OK)
+            {
+                view.render(getViewContext().getRequest(), getViewContext().getResponse());
+                return null;
+            }
+
+            Map<String, Object> resultProperties = new HashMap<>();
+            resultProperties.put("html", mr.getContentAsString());
+            resultProperties.put("requiredJsScripts", includes);
+            resultProperties.put("requiredCssScripts", cssScripts);
+            resultProperties.put("implicitJsIncludes", implicitIncludes);
+            resultProperties.put("moduleContext", PageFlowUtil.getModuleClientContext(getViewContext(), dependencies));
+            return new ApiSimpleResponse(resultProperties);
+        }
+
     }
 
 
