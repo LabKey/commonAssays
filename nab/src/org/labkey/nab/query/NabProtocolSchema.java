@@ -17,10 +17,16 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayDataLinkDisplayColumn;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionResultsQueryView;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
+import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.assay.query.RunListDetailsQueryView;
+import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
@@ -38,12 +44,6 @@ import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayDataLinkDisplayColumn;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.query.RunListDetailsQueryView;
-import org.labkey.api.assay.query.ResultsQueryView;
-import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
@@ -159,9 +159,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
         }
 
         @Override
-        public ActionURL getRunDetailsURL(Object runId)
+        public ActionURL getRunDetailsURL()
         {
-            return new ActionURL(NabAssayController.DetailsAction.class, getContainer()).addParameter("rowId", "" + runId);
+            return new ActionURL(NabAssayController.DetailsAction.class, getContainer());
         }
     }
 
