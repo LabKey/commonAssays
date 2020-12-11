@@ -29,6 +29,7 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.ExportAction;
+import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
@@ -107,13 +108,13 @@ import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.qc.NabWellQCFlag;
 import org.labkey.nab.query.NabProtocolSchema;
@@ -414,43 +415,50 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(DeletePermission.class)
-    public class DeleteRunAction extends SimpleViewAction<DeleteRunForm>
+    public class DeleteRunAction extends FormHandlerAction<DeleteRunForm>
     {
+        private ExpRun _run;
+        private File _file;
+
         @Override
-        public ModelAndView getView(DeleteRunForm deleteRunForm, BindException errors)
+        public void validateCommand(DeleteRunForm form, Errors errors)
         {
-            if (deleteRunForm.getRowId() == 0)
+            if (form.getRowId() == 0)
             {
                 throw new NotFoundException("No run specified");
             }
-            ExpRun run = ExperimentService.get().getExpRun(deleteRunForm.getRowId());
-            if (run == null)
-                throw new NotFoundException("Run " + deleteRunForm.getRowId() + " does not exist.");
-            File file = null;
-            if (deleteRunForm.isReupload())
+            _run = ExperimentService.get().getExpRun(form.getRowId());
+            if (_run == null)
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+
+            if (form.isReupload())
             {
-                file = getDataHandler(run).getDataFile(run);
-                if (file == null)
+                _file = getDataHandler(_run).getDataFile(_run);
+                if (_file == null)
                 {
-                    throw new NotFoundException("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
+                    throw new NotFoundException("Data file for run " + _run.getName() + " was not found.  Deleted from the file system?");
                 }
             }
-
-            run.delete(getUser());
-
-            if (deleteRunForm.isReupload())
-            {
-                ActionURL reuploadURL = new ActionURL(NabUploadWizardAction.class, getContainer());
-                reuploadURL.addParameter("dataFile", file.getPath());
-                throw new RedirectException(reuploadURL);
-            }
-            throw new RedirectException(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), run.getProtocol()));
         }
 
         @Override
-        public void addNavTrail(NavTree root)
+        public boolean handlePost(DeleteRunForm form, BindException errors) throws Exception
         {
-            throw new UnsupportedOperationException("Expected redirect did not occur.");
+            _run.delete(getUser());
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(DeleteRunForm form)
+        {
+            if (form.isReupload())
+            {
+                ActionURL reuploadURL = new ActionURL(NabUploadWizardAction.class, getContainer());
+                reuploadURL.addParameter("dataFile", _file.getPath());
+
+                return reuploadURL;
+            }
+            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _run.getProtocol());
         }
     }
 
