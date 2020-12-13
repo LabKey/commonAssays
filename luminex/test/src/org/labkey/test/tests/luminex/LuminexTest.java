@@ -259,6 +259,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
             resultsFields.add(new PropertyDescriptor("FIBackgroundNegative", "FI-Bkgd-Neg", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Standard", "Stnd for Calc", "string"));
             resultsFields.add(new PropertyDescriptor("EstLogConc_5pl", "Est Log Conc Rumi 5 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("EstConc_5pl", "Est Conc Rumi 5 PL", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("SE_5pl", "SE Rumi 5 PL", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("EstLogConc_4pl", "Est Log Conc Rumi 4 PL", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("EstConc_4pl", "Est Conc Rumi 4 PL", "float").setFormat("0.0"));
