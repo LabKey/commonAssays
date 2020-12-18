@@ -1,4 +1,0 @@
-{table}
-Filename|Component|Version|Source|License|LabKey Dev|Purpose
-jai_imageio-1.1.jar|Java Advanced Imaging Image I/O Tools|1.1|{link:Oracle|http://download.oracle.com/javase/6/docs/technotes/guides/imageio/index.html}|{link:Sun Binary Code License|http://download.java.net/media/jai-imageio/builds/release/1_0_01/LICENSE-jai_imageio.txt}|jeckels|TIFF file metadata parsing
-{table}
