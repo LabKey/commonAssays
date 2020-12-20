@@ -43,7 +43,7 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "0.97.0"
+    "@labkey/components": "1.9.1-fb-label-tooltips.0"
   },
   "devDependencies": {
     "@labkey/build": "0.4.0",
