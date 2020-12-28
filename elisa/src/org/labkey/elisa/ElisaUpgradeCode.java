@@ -31,7 +31,7 @@ public class ElisaUpgradeCode implements UpgradeCode
 {
     private static final Logger _log = Logger.getLogger(ElisaUpgradeCode.class);
 
-    // Invoked by elisa-0.000-20.0000.sql
+    // Invoked by elisa-0.000-20.000.sql
     @SuppressWarnings({"UnusedDeclaration"})
     @DeferredUpgrade
     public static void moveCurveFitData(final ModuleContext context)

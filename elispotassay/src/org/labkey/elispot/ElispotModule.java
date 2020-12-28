@@ -46,7 +46,7 @@ public class ElispotModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override

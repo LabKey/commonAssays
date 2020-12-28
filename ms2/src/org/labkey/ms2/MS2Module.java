@@ -95,12 +95,11 @@ import org.labkey.ms2.search.MSSearchWebpart;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -112,9 +111,7 @@ import java.util.Set;
 public class MS2Module extends SpringModule implements ProteomicsModule
 {
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
-
     public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
-
     public static final String MS2_RUNS_NAME = "MS2 Runs";
     public static final String MS2_MODULE_NAME = "MS2";
 
@@ -127,67 +124,69 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        BaseWebPartFactory runsFactory = new BaseWebPartFactory(MS2_RUNS_NAME)
-        {
-            @Override
-            public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+        return List.of(
+            new BaseWebPartFactory(MS2_RUNS_NAME)
             {
-                QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
-                result.setTitle(MS2_RUNS_NAME);
-                result.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(portalCtx.getContainer()));
-                return result;
-            }
-        };
-        runsFactory.addLegacyNames("MS2 Runs (Enhanced)", "MS2 Runs (Deprecated)", "MS2 Experiment Runs");
+                {
+                    addLegacyNames("MS2 Runs (Enhanced)", "MS2 Runs (Deprecated)", "MS2 Experiment Runs");
+                }
 
-        return new ArrayList<>(Arrays.asList(
-                runsFactory,
-                new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
-                    @Override
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
-                    }
-                },
-                new BaseWebPartFactory(CustomProteinListView.NAME)
+                    QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
+                    result.setTitle(MS2_RUNS_NAME);
+                    result.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(portalCtx.getContainer()));
+                    return result;
+                }
+            },
+            new ProteomicsWebPartFactory(ProteinSearchWebPart.NAME, WebPartFactory.LOCATION_BODY, WebPartFactory.LOCATION_RIGHT)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
-                    @Override
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        CustomProteinListView result = new CustomProteinListView(portalCtx, false);
-                        result.setFrame(WebPartView.FrameType.PORTAL);
-                        result.setTitle(CustomProteinListView.NAME);
-                        result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
-                        return result;
-                    }
-                },
-                new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
+                }
+            },
+            new BaseWebPartFactory(CustomProteinListView.NAME)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
-                    @Override
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        return new MSSearchWebpart();
-                    }
-                },
-                new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
+                    CustomProteinListView result = new CustomProteinListView(portalCtx, false);
+                    result.setFrame(WebPartView.FrameType.PORTAL);
+                    result.setTitle(CustomProteinListView.NAME);
+                    result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
+                    return result;
+                }
+            },
+            new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
-                    @Override
-                    public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                    {
-                        PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
-                        JspView<PepSearchModel> view = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", model);
-                        view.setTitle(WEBPART_PEP_SEARCH);
-                        return view;
-                    }
-                }));
+                    return new MSSearchWebpart();
+                }
+            },
+            new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+                {
+                    PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
+                    JspView<PepSearchModel> view = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", model);
+                    view.setTitle(WEBPART_PEP_SEARCH);
+                    return view;
+                }
+            }
+        );
     }
 
     @Override
