@@ -19,6 +19,7 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
+<%@ page import="org.labkey.api.exp.flag.FlagColumnRenderer" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineStatusUrls" %>
@@ -36,7 +37,6 @@
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.data.FlowDataType" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
@@ -115,7 +115,7 @@
 </style>
 
 <script type="text/javascript">
-    function createRenderer(detailsURL, urlFlagged, countProperty, countLabel)
+    function createRenderer(detailsURL, countProperty, countLabel)
     {
         return function (el, json) {
             var html = "<table border='0'>";
@@ -124,10 +124,10 @@
                 var name = row.Name.value;
                 var url = row.Name.url;
                 var comment = row["Flag/Comment"].value ? " title='" + row["Flag/Comment"].value + "'" : "";
-                var src = row["Flag/Comment"].value ? urlFlagged : "<%=getWebappURL("_.gif")%>";
+                var iconCls = row["Flag/Comment"].value ? <%=q(FlagColumnRenderer.flagEnabledCls())%> : "";
 
                 html += "<tr>" +
-                        "<td><a" + comment + " href='" + url + "'><img src='" + src + "'></a></td>" +
+                        "<td>" + (iconCls ? "<a" + comment + " href='" + url + "'><i class='" + iconCls + "'/></a>" : "") + "</td>" +
                         "<td nowrap><a" + comment + " href='" + url + "'>" + name + "</a><td>";
                 if (countProperty) {
                     html += "<td align='right' nowrap>(" + row[countProperty].value + " " + countLabel + ")</td>";
@@ -165,7 +165,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(fcsFileRunsURL)%>", "<%=h(FlowDataType.FCSFile.urlFlag(true))%>", "FCSFileCount", "files")
+                renderer: createRenderer("<%=h(fcsFileRunsURL)%>", "FCSFileCount", "files")
             });
         });
         </script>
@@ -189,7 +189,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(fcsAnalysisRunsURL)%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
+                renderer: createRenderer("<%=h(fcsAnalysisRunsURL)%>", "FCSAnalysisCount", "wells")
             });
         });
         </script>
@@ -212,7 +212,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(compMatricesURL)%>", "<%=h(FlowDataType.CompensationMatrix.urlFlag(true))%>")
+                renderer: createRenderer("<%=h(compMatricesURL)%>")
             });
         });
         </script>
@@ -234,10 +234,10 @@
                             String name = sample.getName();
                             ActionURL url = sample.detailsURL();
                             HtmlString comment = sample.getComment() != null ? unsafe(" title='" + h(sample.getComment()) + "'") : HtmlString.EMPTY_STRING;
-                            HtmlString src = StringUtils.isNotEmpty(sample.getComment()) ? h(sample.urlFlag(true)) : getWebappURL("/_.gif");
+                            String iconCls = StringUtils.isNotEmpty(sample.getComment()) ? FlagColumnRenderer.flagEnabledCls() : "";
                       %>
                           "<tr>" +
-                          "<td><a<%=comment%> href='<%=h(url)%>'><img src='<%=src%>'></a>" +
+                          "<td><a<%=comment%> href='<%=h(url)%>'><i class=<%=q(iconCls)%>/></a>" +
                           "<td nowrap><a<%=comment%> href='<%=h(url)%>'><%=h(name)%></a>" +
                           "</tr>" +
                       <%
@@ -384,7 +384,7 @@
                               apiVersion: 9.1
                           })
                         },
-                        renderer: createRenderer("<%=h(experiment.urlShow())%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "WellCount", "wells")
+                        renderer: createRenderer("<%=h(experiment.urlShow())%>", "WellCount", "wells")
                     });
                 });
                 </script>
