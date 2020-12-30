@@ -38,10 +38,10 @@ import org.labkey.microarray.matrix.ExpressionMatrixExperimentListener;
 import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class MicroarrayModule extends SpringModule
@@ -62,7 +62,7 @@ public class MicroarrayModule extends SpringModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override
@@ -77,18 +77,18 @@ public class MicroarrayModule extends SpringModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return new ArrayList<>(Arrays.asList(
+        return List.of(
             new BaseWebPartFactory(WEBPART_FEATURE_ANNOTATION_SET)
             {
                 @Override
-                public WebPartView getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     String dataRegionName = MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET + webPart.getIndex();
                     MicroarrayUserSchema schema = new MicroarrayUserSchema(portalCtx.getUser(), portalCtx.getContainer());
                     return schema.createView(portalCtx, dataRegionName, MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET, null);
                 }
             }
-        ));
+        );
     }
 
     @Override

@@ -87,10 +87,9 @@ import org.labkey.flow.webparts.FlowSummaryWebPart;
 import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -98,12 +97,12 @@ public class FlowModule extends SpringModule
 {
     public static final String NAME = "Flow";
 
-    private static String EXPORT_TO_SCRIPT_PATH = "ExportToScriptPath";
-    private static String EXPORT_TO_SCRIPT_COMMAND_LINE = "ExportToScriptCommandLine";
-    private static String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
-    private static String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
-    private static String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
-    private static String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
+    private static final String EXPORT_TO_SCRIPT_PATH = "ExportToScriptPath";
+    private static final String EXPORT_TO_SCRIPT_COMMAND_LINE = "ExportToScriptCommandLine";
+    private static final String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
+    private static final String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
+    private static final String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
+    private static final String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
 
     @Override
     public String getName()
@@ -114,7 +113,7 @@ public class FlowModule extends SpringModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override
@@ -252,13 +251,13 @@ public class FlowModule extends SpringModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(
-                OverviewWebPart.FACTORY,
-                AnalysesWebPart.FACTORY,
-                AnalysisScriptsWebPart.FACTORY,
-                FlowSummaryWebPart.FACTORY,
-                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
-                );
+        return List.of(
+            AnalysesWebPart.FACTORY,
+            AnalysisScriptsWebPart.FACTORY,
+            FlowSummaryWebPart.FACTORY,
+            OverviewWebPart.FACTORY,
+            new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
+        );
     }
 
     @Override
