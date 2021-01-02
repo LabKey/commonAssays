@@ -24,7 +24,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.ImportRunsAction" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportRunsForm" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.util.LinkedHashMap" %>
@@ -61,7 +61,7 @@
 
     if (paths != null && paths.size() != 0)
     {
-        %><labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>">
+        %><labkey:form method="POST" action="<%=new ActionURL(ImportRunsAction.class, c)%>">
         <input type="hidden" name="path" value="<%=h(form.getPath())%>">
         <input type="hidden" name="current" value="<%=form.isCurrent()%>">
         <input type="hidden" name="confirm" value="true">
@@ -94,7 +94,7 @@
         <% } %>
 
         <br />
-        <labkey:button text="Import Selected Runs" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>"/>
+        <%=button("Import Selected Runs").href(urlFor(ImportRunsAction.class)).usePost()%>
         <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
         </labkey:form><%
     }

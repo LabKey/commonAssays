@@ -59,8 +59,8 @@
         <input type="text" name="ff_analysisName" value="<%=h(name)%>">
     </p>
 
-    <labkey:button text="Analyze runs" action="<%=urlFor(AnalyzeSelectedRunsAction.class)%>"/>
-    <labkey:button text="Go back" action="<%=urlFor(ChooseRunsToAnalyzeAction.class)%>"/>
+    <%=button("Analyze runs").href(urlFor(AnalyzeSelectedRunsAction.class)).usePost()%>
+    <%=button("Go back").href(urlFor(ChooseRunsToAnalyzeAction.class)).usePost()%>
     <% for (int runid : form.getSelectedRunIds()) { %>
     <input type="hidden" name="<%=h(DataRegion.SELECT_CHECKBOX_NAME)%>" value="<%=runid%>">
     <% } %>
