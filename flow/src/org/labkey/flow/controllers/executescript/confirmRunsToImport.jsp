@@ -94,7 +94,7 @@
         <% } %>
 
         <br />
-        <%=button("Import Selected Runs").href(urlFor(ImportRunsAction.class)).usePost()%>
+        <%=button("Import Selected Runs").submit(true)%>
         <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
         </labkey:form><%
     }
