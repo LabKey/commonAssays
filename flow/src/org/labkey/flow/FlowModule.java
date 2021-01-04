@@ -117,12 +117,6 @@ public class FlowModule extends SpringModule
     }
 
     @Override
-    public @Nullable UpgradeCode getUpgradeCode()
-    {
-        return new FlowUpgradeCode();
-    }
-
-    @Override
     protected void init()
     {
         DefaultSchema.registerProvider(FlowSchema.SCHEMANAME, new DefaultSchema.SchemaProvider(this)

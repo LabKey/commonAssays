@@ -17,11 +17,7 @@ elisa/src/org/labkey/elisa/actions/PlateConcentrationPropertyHelper.java -text
 elisa/src/org/labkey/elisa/plate/BioTekPlateReader.java -text
 elisa/src/org/labkey/elisa/query/ElisaResultsTable.java -text
 elisa/src/org/labkey/elisa/view/runDetailsView.jsp -text
-elisa/webapp/elisa/runDataPanel.js -text
-elisa/webapp/elisa/runDetailsPanel.js -text
 elispotassay/module.properties -text
-elispotassay/resources/schemas/dbscripts/postgresql/elispotlk-15.10-15.20.sql -text
-elispotassay/resources/schemas/dbscripts/sqlserver/elispotlk-15.10-15.20.sql -text
 elispotassay/resources/schemas/elispotlk.xml -text
 elispotassay/src/org/labkey/elispot/AbstractElispotDataHandler.java -text
 elispotassay/src/org/labkey/elispot/ElispotAssayProvider.java -text
@@ -153,15 +149,10 @@ flow/enginesrc/org/labkey/flow/persist/AttributeSet.java -text
 flow/enginesrc/org/labkey/flow/persist/InputRole.java -text
 flow/enginesrc/org/labkey/flow/persist/ObjectType.java -text
 flow/enginesrc/org/labkey/flow/util/KeywordUtil.java -text
-flow/gwtsrc/org/labkey/flow/FlowUpgradeCode.java -text
 flow/module.properties -text
 flow/resources/flowReports/positivity.R -text
 flow/resources/flowReports/qc.R -text
-flow/resources/schemas/dbscripts/postgresql/flow-0.00-14.20.sql -text
-flow/resources/schemas/dbscripts/postgresql/flow-18.20-18.30.sql -text
 flow/resources/schemas/dbscripts/postgresql/flow-18.30-19.10.sql -text
-flow/resources/schemas/dbscripts/sqlserver/flow-0.00-14.20.sql -text
-flow/resources/schemas/dbscripts/sqlserver/flow-18.20-18.30.sql -text
 flow/resources/schemas/dbscripts/sqlserver/flow-18.30-19.10.sql -text
 flow/resources/schemas/flow.xml -text
 flow/resources/web/Flow/blankGraphWindow.html -text
@@ -522,7 +513,6 @@ luminex/webapp/luminexLeveyJennings.lib.xml -text
 microarray/build.gradle -text
 microarray/module.properties -text
 microarray/resources/ExpressionMatrix/queries/data/PreviewGrid.qview.xml -text
-microarray/resources/credits/jars.txt -text
 microarray/resources/schemas/microarray.xml -text
 microarray/resources/views/geo_export.html -text
 microarray/resources/views/geo_export.view.xml -text
