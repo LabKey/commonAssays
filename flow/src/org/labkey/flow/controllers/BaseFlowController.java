@@ -24,7 +24,6 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.PageFlowUtil;
