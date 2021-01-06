@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.well.EditWellForm" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowDataType" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -131,10 +131,10 @@
 
     <labkey:button text="update"/>
     <%
-        String cancelURL = String.valueOf(well.urlFor(WellController.ShowWellAction.class));
+        ActionURL cancelURL = well.urlFor(WellController.ShowWellAction.class);
         if (form.ff_isBulkEdit)
         {
-            cancelURL = new ActionURL(form.editWellReturnUrl).toString();
+            cancelURL = new ActionURL(form.editWellReturnUrl);
         }
     %>
     <labkey:button text="cancel" href="<%=cancelURL%>"/>
