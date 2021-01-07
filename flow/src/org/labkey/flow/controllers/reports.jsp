@@ -92,7 +92,7 @@ table.reports td {
             <td style='min-width:80px'><%=h(description == null ? " " : description)%></td>
             <%
             if (canEdit){
-                NavTree navtree = new NavTree("manage", (String)null);
+                NavTree navtree = new NavTree("manage", (ActionURL)null);
                 navtree.addChild("Edit", editURL);
                 navtree.addChild("Copy", copyURL);
                 navtree.addChild("Delete", deleteURL);
