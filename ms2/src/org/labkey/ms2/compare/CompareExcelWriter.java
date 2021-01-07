@@ -20,13 +20,12 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.labkey.api.data.ExcelWriter;
-import org.labkey.api.data.ExcelColumn;
 import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.ExcelColumn;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.ResultsFactory;
 
 import java.util.List;
-
-import org.labkey.api.data.Results;
 
 /**
  * User: adam
@@ -39,9 +38,9 @@ public class CompareExcelWriter extends ExcelWriter
     private int _offset = 0;
     private int _colSpan;
 
-    public CompareExcelWriter(Results rs, List<DisplayColumn> displayColumns)
+    public CompareExcelWriter(ResultsFactory factory, List<DisplayColumn> displayColumns)
     {
-        super(rs, displayColumns, ExcelDocumentType.xlsx);
+        super(factory, displayColumns, ExcelDocumentType.xlsx);
     }
 
     public void setMultiColumnCaptions(List<String> multiColumnCaptions)
