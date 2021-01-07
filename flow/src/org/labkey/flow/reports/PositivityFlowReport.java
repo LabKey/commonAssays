@@ -174,7 +174,7 @@ public class PositivityFlowReport extends FilterFlowReport
             FlowProtocol protocol = FlowProtocol.getForContainer(context.getContainer());
             ActionURL currentURL = context.getActionURL();
             ActionURL editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
-            editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+            editICSMetadataURL.addReturnURL(currentURL);
 
             return new HtmlView(
                     "<p class='labkey-error'>Positivity report requires configuring flow experiment metadata for study and background information before running.</p>" +

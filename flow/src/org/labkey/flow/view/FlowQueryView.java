@@ -146,7 +146,7 @@ public class FlowQueryView extends QueryView
                 NavTree showInline = new NavTree("Inline", urlShow.clone().replaceParameter(param("showGraphs"), FlowQuerySettings.ShowGraphs.Inline.name()));
                 showInline.setSelected(showGraphs == FlowQuerySettings.ShowGraphs.Inline);
 
-                NavTree navtree = new NavTree("Show Graphs", (String)null);
+                NavTree navtree = new NavTree("Show Graphs", (ActionURL)null);
                 navtree.addChild(showNone);
                 navtree.addChild(showHover);
                 navtree.addChild(showInline);
@@ -244,10 +244,7 @@ public class FlowQueryView extends QueryView
                 URLHelper url = target.clone();
                 if (entry.getKey().intValue() != 0)
                     url.replaceParameter(FlowParam.experimentId.name(), entry.getKey());
-                button.addMenuItem(entry.getValue(),
-                        url.toString(),
-                        null,
-                        currentId == entry.getKey());
+                button.addMenuItem(entry.getValue(), url, null, currentId == entry.getKey());
             }
             bar.add(button);
         }
