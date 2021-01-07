@@ -61,7 +61,7 @@
     if (protocol != null)
     {
         editICSMetadataURL = protocol.urlFor(EditICSMetadataAction.class);
-        editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+        editICSMetadataURL.addReturnURL(currentURL);
     }
 %>
 
