@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.protein;
 
+import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -99,6 +100,10 @@ public class ProteinController extends SpringActionController
             settings.setAllowChooseQuery(true);
             settings.setAllowChooseView(true);
             _setName = settings.getQueryName();
+
+            // 41640: Expect valid "CustomAnnotation.queryName" URL parameter
+            if (StringUtils.isEmpty(_setName))
+                throw new NotFoundException("Custom Protein List not found.");
 
             QueryView queryView = new QueryView(schema, settings, errors)
             {
