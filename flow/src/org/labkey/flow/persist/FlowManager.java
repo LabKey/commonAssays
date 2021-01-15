@@ -18,10 +18,11 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.collections4.iterators.ArrayIterator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
@@ -42,20 +43,28 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.ExperimentProperty;
+import org.labkey.api.exp.query.SamplesSchema;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
@@ -79,6 +88,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertNotNull;
 import static org.labkey.flow.data.AttributeType.keyword;
 
 public class FlowManager
@@ -385,7 +395,7 @@ public class FlowManager
      * If an existing alias with different casing is found, an exception is thrown.
      * DOES NOT CACHE.  CALLERS SHOULD CLEAR CACHE APPROPRIATELY.
      *
-     * @param containerId Container
+     * @param container Container
      * @param sampleLabel Sample name associated with this attribute -- for error message reporting only
      * @param type attribute type
      * @param attr attribute name
@@ -745,7 +755,7 @@ public class FlowManager
 
 
     /**
-     * Checks for existance of a alias by type and rowId.
+     * Checks for existence of a alias by type and rowId.
      * DOES NOT USE CACHE
      */
     public boolean isAlias(AttributeType type, int rowId)
@@ -1385,6 +1395,170 @@ public class FlowManager
         }
     }
 
+    // Get usage metrics for all flow containers
+    public Map<String, Object> getUsageMetrics()
+    {
+        _log.info("Collecting flow usage metrics");
+        User user = User.getSearchUser();
+
+        Map<String, Object> allMetrics = new HashMap<>();
+        allMetrics.put("flowTempTableCount", getTempTableCount());
+
+        // distinct keyword/statistic/graph count, alias count
+        allMetrics.put("keyword", getAttributeMetrics(AttributeType.keyword));
+        allMetrics.put("statistic", getAttributeMetrics(AttributeType.statistic));
+        allMetrics.put("graph", getAttributeMetrics(AttributeType.graph));
+
+        final FlowModule flowModule = ModuleLoader.getInstance().getModule(FlowModule.class);
+        Set<Container> containers = ContainerManager.getAllChildrenWithModule(ContainerManager.getRoot(), flowModule);
+        for (Container c : containers)
+        {
+            Map<String, Object> containerMetrics = getUsageMetrics(user, c, false);
+            merge(allMetrics, containerMetrics);
+        }
+
+        _log.info("Collected flow usage metrics:\n" + allMetrics);
+        return allMetrics;
+    }
+
+    /**
+     * merge the values from <code>map</code> into the target map.
+     * - numbers are summed
+     * - dates are maxed
+     * - maps are recursively merged
+     */
+    private static void merge(Map<String, Object> into, Map<String, Object> map)
+    {
+        for (Map.Entry<String, Object> kv : map.entrySet())
+        {
+            String key = kv.getKey();
+            Object value = kv.getValue();
+            if (value == null)
+                continue;
+
+            if (value instanceof Number)
+            {
+                // sum
+                into.merge(key, value, (a,b) -> Long.sum(((Number)a).longValue(), ((Number)b).longValue()));
+            }
+            else if (value instanceof Date)
+            {
+                // max
+                into.merge(key, value, (a,b) -> {
+                    Date aDate = (Date)a;
+                    Date bDate = (Date)b;
+                    return aDate.after(bDate) ? aDate : bDate;
+                });
+            }
+            else if (value instanceof Map)
+            {
+                var intoSub = (Map<String, Object>)into.computeIfAbsent(key, k -> new HashMap<String, Object>());
+                merge(intoSub, (Map<String,Object>)value);
+            }
+            else
+            {
+                throw new IllegalStateException("unexpected type " + value.getClass());
+            }
+        }
+    }
+
+    // Get usage metrics in a single container
+    public Map<String, Object> getUsageMetrics(User user, Container c, boolean includeAttributeCounts)
+    {
+        _log.info("Collecting metrics in '" + c.getPath() + "'");
+        Map<String, Object> metrics = new LinkedHashMap<>();
+
+        FlowSchema schema = new FlowSchema(user, c);
+        metrics.put("scriptRuns", getAnalysisScriptRunCount(schema));
+        metrics.put("workspaceRuns", getWorkspaceRunCount(schema));
+        metrics.put("externalRuns", getExternalAnalysisRunCount(schema));
+        metrics.put("fcsFileRuns", getFCSFileOnlyRunCount(schema));
+
+        metrics.put("analysisFolderCount", getAnalysisFolderCount(schema));
+        metrics.put("analysisScriptCount", getAnalysisScriptCount(schema));
+
+        // protocol properties
+        Map<String, Object> protocolMetrics = new LinkedHashMap<>();
+        metrics.put("protocol", protocolMetrics);
+        FlowProtocol protocol = FlowProtocol.getForContainer(c);
+        if (protocol != null)
+        {
+            ExpSampleType st = protocol.getSampleType();
+            if (st != null)
+            {
+                // put sample count at top-level since it isn't really specific to the protocol
+                metrics.put("sampleCount", getSampleCount(c, user, st));
+            }
+
+            ICSMetadata metadata = protocol.getICSMetadata();
+            if (metadata != null)
+            {
+                protocolMetrics.put("hasMetadata", 1);
+                if (metadata.hasCompleteStudyMeta())
+                    protocolMetrics.put("hasStudyMeta", 1);
+                if (metadata.hasCompleteBackground())
+                    protocolMetrics.put("hasCompleteBackground", 1);
+            }
+
+            if (!protocol.getSampleTypeJoinFields().isEmpty())
+                protocolMetrics.put("hasSampleJoin", 1);
+
+            if (protocol.isCaseSensitiveKeywords())
+                protocolMetrics.put("caseSensitiveKeywords", 1);
+            if (protocol.isCaseSensitiveStatsAndGraphs())
+                protocolMetrics.put("caseSensitiveStatsAndGraphs", 1);
+        }
+
+        if (includeAttributeCounts)
+        {
+            // distinct keyword/statistic/graph count, alias count
+            metrics.put("keyword", getAttributeMetrics(AttributeType.keyword));
+            metrics.put("statistic", getAttributeMetrics(AttributeType.statistic));
+            metrics.put("graph", getAttributeMetrics(AttributeType.graph));
+        }
+
+        _log.info("Collected metrics in '" + c.getPath() + "':\n" + metrics);
+        return metrics;
+    }
+
+    // get the count of analysis folders
+    public int getAnalysisFolderCount(FlowSchema schema)
+    {
+        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.Analyses.name()).getObject(Long.class).intValue();
+    }
+
+    // get the count of analysis scripts
+    public int getAnalysisScriptCount(FlowSchema schema)
+    {
+        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.AnalysisScripts.name()).getObject(Long.class).intValue();
+    }
+
+    // get the count of samples in the sample set
+    public int getSampleCount(Container c, User user, ExpSampleType st)
+    {
+        UserSchema schema = QueryService.get().getUserSchema(user, c, SamplesSchema.SCHEMA_SAMPLES);
+        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM samples." + st.getName()).getObject(Long.class).intValue();
+    }
+
+    public int getTempTableCount()
+    {
+        return new SqlSelector(DbScope.getLabKeyScope(), "SELECT COUNT(*) FROM information_schema.tables \n" +
+                "WHERE TABLE_SCHEMA = 'temp' and (table_name LIKE 'ffo%' or table_name LIKE 'fbg%')").getArrayList(Integer.class).get(0);
+    }
+
+    public Map<String, Object> getAttributeMetrics(AttributeType attributeType)
+    {
+        TableInfo table = attributeType.getAttributeTable();
+        return removeRowNum(new SqlSelector(DbScope.getLabKeyScope(), new SQLFragment(
+                "SELECT " +
+                        "COUNT(*) AS Count, " +
+                        "SUM(CASE WHEN a.id != a.rowid THEN 1 ELSE 0 END) AS AliasCount, " +
+                        "COUNT(DISTINCT(a.name)) AS DistinctCount, " +
+                        "COUNT(DISTINCT(LOWER(a.name))) AS DistinctLowerCount " +
+                        "FROM "
+        ).append(table, "a")).getMap());
+    }
+
     public int getObjectCount(Container container, ObjectType type)
     {
         String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
@@ -1462,6 +1636,67 @@ public class FlowManager
             return ((Number)result.getValue()).intValue();
 
         return 0;
+    }
+
+    public Map<String, Object> removeRowNum(Map<String, Object> row)
+    {
+        row.remove("_row");
+        return row;
+    }
+
+    // count of runs created from an Analysis Script
+    public Map<String, Object> getAnalysisScriptRunCount(FlowSchema schema)
+    {
+        return removeRowNum(QueryService.get().selector(schema,
+                "SELECT\n" +
+                "  COUNT(*) AS RunCount,\n" +
+                "  MAX(Created) AS CreatedMax,\n" +
+                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
+                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
+                "  SUM(FCSFileCount) AS FCSFileCount\n" +
+                "FROM flow.Runs\n" +
+                "WHERE AnalysisScript IS NOT NULL").getMap());
+    }
+
+    // count of runs created from a FlowJo Workspace
+    public Map<String, Object> getWorkspaceRunCount(FlowSchema schema)
+    {
+        return removeRowNum(QueryService.get().selector(schema,
+                "SELECT\n" +
+                "  COUNT(*) AS RunCount,\n" +
+                "  MAX(Created) AS CreatedMax,\n" +
+                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
+                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
+                "  SUM(FCSFileCount) AS FCSFileCount\n" +
+                "FROM flow.Runs\n" +
+                "WHERE Workspace IS NOT NULL").getMap());
+    }
+
+    // count of runs created from an analysis archive import
+    public Map<String, Object> getExternalAnalysisRunCount(FlowSchema schema)
+    {
+        return removeRowNum(QueryService.get().selector(schema,
+                "SELECT\n" +
+                "  COUNT(*) AS RunCount,\n" +
+                "  MAX(Created) AS CreatedMax,\n" +
+                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
+                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
+                "  SUM(FCSFileCount) AS FCSFileCount\n" +
+                "FROM flow.Runs\n" +
+                "WHERE AnalysisEngine = '" + AnalysisEngine.Archive.name() + "'").getMap());
+    }
+
+    public Map<String, Object> getFCSFileOnlyRunCount(FlowSchema schema)
+    {
+        return removeRowNum(QueryService.get().selector(schema,
+                "SELECT\n" +
+                "  COUNT(*) AS RunCount,\n" +
+                "  MAX(Created) AS CreatedMax,\n" +
+                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
+                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
+                "  SUM(FCSFileCount) AS FCSFileCount\n" +
+                "FROM flow.Runs\n" +
+                "WHERE ProtocolStep = 'Keywords'").getMap());
     }
 
     public int getRunCount(Container container, ObjectType type)
@@ -1683,4 +1918,14 @@ public class FlowManager
         }
     }
 
+
+    public static class TestCase
+    {
+        @Test
+        public void metrics()
+        {
+            Map<String, Object> metrics = FlowManager.get().getUsageMetrics();
+            assertNotNull(metrics.get("flowTempTableCount"));
+        }
+    }
 }

@@ -23,7 +23,6 @@ import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.audit.DefaultAuditProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -88,9 +87,7 @@ import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class FlowModule extends SpringModule
@@ -295,14 +292,10 @@ public class FlowModule extends SpringModule
         UsageMetricsService svc = UsageMetricsService.get();
         if (null != svc)
         {
-            FlowService fs = FlowService.get();
-            if (null != fs)
+            FlowManager mgr = FlowManager.get();
+            if (null != mgr)
             {
-                svc.registerUsageMetrics(UsageReportingLevel.LOW, NAME, () -> {
-                    Map<String, Object> metric = new HashMap<>();
-                    metric.put("flowTempTableCount", fs.getTempTableCount());
-                    return metric;
-                });
+                svc.registerUsageMetrics(UsageReportingLevel.LOW, NAME, () -> mgr.getUsageMetrics());
             }
         }
     }
@@ -338,7 +331,8 @@ public class FlowModule extends SpringModule
         return Set.of(
             FlowController.TestCase.class,
             FlowProtocol.TestCase.class,
-            PersistTests.class
+            PersistTests.class,
+            FlowManager.TestCase.class
         );
     }
 
