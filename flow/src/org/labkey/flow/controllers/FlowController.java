@@ -16,25 +16,18 @@
 package org.labkey.flow.controllers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.labkey.api.action.FormHandlerAction;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.StringBuilderWriter;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.Module;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
@@ -46,16 +39,11 @@ import org.labkey.api.security.permissions.AbstractActionPermissionTest;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
-import org.labkey.api.util.URLHelper;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -72,28 +60,19 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.AttributeCache;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.script.FlowJob;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+@Marshal(Marshaller.Jackson)
 public class FlowController extends BaseFlowController
 {
     private static final Logger _log = LogManager.getLogger(FlowController.class);
@@ -412,6 +391,23 @@ public class FlowController extends BaseFlowController
         }
     }
 
+    @RequiresPermission(AdminPermission.class)
+    public class MetricsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            if (c.isRoot())
+            {
+                return success(FlowManager.get().getUsageMetrics());
+            }
+            else
+            {
+                return success(FlowManager.get().getUsageMetrics(getUser(), c, true));
+            }
+        }
+    }
 
     public static class TestCase extends AbstractActionPermissionTest
     {
