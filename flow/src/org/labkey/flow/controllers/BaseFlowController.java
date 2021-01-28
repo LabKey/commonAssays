@@ -26,7 +26,6 @@ import org.labkey.api.jsp.JspLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.util.HelpTopic;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
@@ -130,7 +129,7 @@ public abstract class BaseFlowController extends SpringActionController
         NavTree project;
         if (context.getContainer().getFolderType() instanceof FlowFolderType)
         {
-            ActionURL url = PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(context.getContainer());
+            ActionURL url = urlProvider(ProjectUrls.class).getBeginURL(context.getContainer());
             url.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
             project = new NavTree("Dashboard", url);
             if (page.getHelpTopic() == HelpTopic.DEFAULT_HELP_TOPIC)

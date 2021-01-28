@@ -415,7 +415,7 @@ public class AnalysisScriptController extends BaseFlowController
         @Override
         public URLHelper getRedirectURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
+            return urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
     }
 
