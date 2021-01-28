@@ -257,7 +257,7 @@ public class MS2Controller extends SpringActionController
     private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
-        root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+        root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
     }
@@ -316,7 +316,7 @@ public class MS2Controller extends SpringActionController
 
             QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             gridView.setTitle(MS2Module.MS2_RUNS_NAME);
-            gridView.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
+            gridView.setTitleHref(urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
 
             return new VBox(searchView, gridView);
         }
@@ -2832,7 +2832,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", null);
         }
     }
 
@@ -3625,7 +3625,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", null);
         }
     }
 
@@ -3973,7 +3973,6 @@ public class MS2Controller extends SpringActionController
         @Override
         public void validateCommand(MascotSettingsForm target, Errors errors)
         {
-
         }
 
         @Override
@@ -4009,8 +4008,8 @@ public class MS2Controller extends SpringActionController
         public URLHelper getSuccessURL(MascotSettingsForm mascotSettingsForm)
         {
             return getContainer().isRoot() ?
-                    PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL() :
-                    PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
+                    urlProvider(AdminUrls.class).getAdminConsoleURL() :
+                    urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
         }
 
         @Override
@@ -4018,13 +4017,13 @@ public class MS2Controller extends SpringActionController
         {
             if (getViewContext().getContainer().isRoot())
             {
-                root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+                urlProvider(AdminUrls.class).addAdminNavTrail(root, "Mascot Server Configuration", new ActionURL(getClass(), getContainer()));
             }
             else
             {
-                root.addChild("Pipeline Settings", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
+                root.addChild("Pipeline Settings", urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
+                root.addChild("Mascot Server Configuration");
             }
-            root.addChild("Mascot Server Configuration");
         }
     }
 
@@ -4846,7 +4845,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+            root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
             root.addChild("Test Mascot Settings");
         }
     }
@@ -5264,7 +5263,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public URLHelper getSuccessURL(PipelinePathForm pipelinePathForm)
         {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
+            return urlProvider(ProjectUrls.class).getStartURL(getContainer());
         }
     }
 
@@ -6167,7 +6166,7 @@ public class MS2Controller extends SpringActionController
 
         public static MS2UrlsImpl get()
         {
-            return (MS2UrlsImpl) PageFlowUtil.urlProvider(MS2Urls.class);
+            return (MS2UrlsImpl) urlProvider(MS2Urls.class);
         }
     }
 
@@ -6337,7 +6336,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         @Override
@@ -6380,7 +6379,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         @Override

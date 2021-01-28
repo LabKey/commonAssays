@@ -96,7 +96,7 @@ public enum FlowPreference
 
     public String urlUpdate()
     {
-        ActionURL url = new ActionURL(FlowController.SavePerferencesAction.class, ContainerManager.getRoot());
+        ActionURL url = new ActionURL(FlowController.SavePreferencesAction.class, ContainerManager.getRoot());
         url.addParameter(name(), "");
         return url.toString();
     }

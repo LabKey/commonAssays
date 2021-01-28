@@ -93,14 +93,17 @@ public abstract class BaseFlowController extends SpringActionController
         return DEFAULT_HELP_TOPIC;
     }
 
-    // override to append root nav to all paths
+    // override to append root nav to all paths -- except in root
     @Override
     protected void addNavTrail(Controller action, NavTree root)
     {
-        PageConfig page = null;
-        if (action instanceof HasPageConfig)
-            page = ((HasPageConfig)action).getPageConfig();
-        root.addChild(getFlowNavStart(page, getViewContext()));
+        if (!getContainer().isRoot())
+        {
+            PageConfig page = null;
+            if (action instanceof HasPageConfig)
+                page = ((HasPageConfig) action).getPageConfig();
+            root.addChild(getFlowNavStart(page, getViewContext()));
+        }
         super.addNavTrail(action, root);
     }
 
