@@ -143,11 +143,11 @@ import java.util.TreeSet;
 public class NabAssayController extends SpringActionController
 {
     private static final DefaultActionResolver _resolver = new DefaultActionResolver(NabAssayController.class,
-            NabUploadWizardAction.class,
-            GetNabRunsAction.class,
-            GetStudyNabGraphURLAction.class,
-            StudyNabGraphAction.class,
-            GetStudyNabRunsAction.class
+        NabUploadWizardAction.class,
+        GetNabRunsAction.class,
+        GetStudyNabGraphURLAction.class,
+        StudyNabGraphAction.class,
+        GetStudyNabRunsAction.class
     );
 
     public NabAssayController()
@@ -190,7 +190,7 @@ public class NabAssayController extends SpringActionController
         @Override
         public ModelAndView getView(Object o, BindException errors)
         {
-            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            return HttpView.redirect(urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
         @Override
@@ -328,7 +328,7 @@ public class NabAssayController extends SpringActionController
         {
             if (null != _protocol)
             {
-                ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
+                ActionURL runDataURL = urlProvider(AssayUrls.class).getAssayResultsURL(getContainer(), _protocol, _runRowId);
                 root.addChild(_protocol.getName() + " Data", runDataURL);
                 root.addChild("Run " + _runRowId + " Details");
             }
@@ -458,7 +458,7 @@ public class NabAssayController extends SpringActionController
 
                 return reuploadURL;
             }
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _run.getProtocol());
+            return urlProvider(AssayUrls.class).getAssayRunsURL(getContainer(), _run.getProtocol());
         }
     }
 
@@ -869,7 +869,7 @@ public class NabAssayController extends SpringActionController
                     DilutionSummary summary = sampleResult.getDilutionSummary();
                     Map<String, Object> summaryMap = serializeDilutionSummary(form, summary, sampleNum);
 
-                    ActionURL graphUrl = PageFlowUtil.urlProvider(NabUrls.class).urlGraph(getContainer());
+                    ActionURL graphUrl = urlProvider(NabUrls.class).urlGraph(getContainer());
                     graphUrl.addParameter("rowId", form.getRowId())
                             .addParameter("maxSamples", 1)
                             .addParameter("firstSample", sampleNum++);

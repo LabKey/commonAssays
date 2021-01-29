@@ -666,7 +666,7 @@ public class RunController extends BaseFlowController
             {
                 case PipelineFiles:
                 case PipelineZip:
-                    return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null, PipelineService.EXPORT_DIR);
+                    return urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null, PipelineService.EXPORT_DIR);
 
                 case Script:
                     // after exporting the files, execute script as a pipeline job
@@ -693,7 +693,7 @@ public class RunController extends BaseFlowController
                     if (jobGuid != null)
                         jobId = PipelineService.get().getJobId(getUser(), getContainer(), jobGuid);
 
-                    PipelineStatusUrls urls = PageFlowUtil.urlProvider(PipelineStatusUrls.class);
+                    PipelineStatusUrls urls = urlProvider(PipelineStatusUrls.class);
                     return jobId != null ? urls.urlDetails(getContainer(), jobId) : urls.urlBegin(getContainer());
 
                 case Browser:
