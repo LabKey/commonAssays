@@ -54,6 +54,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -82,12 +83,6 @@ public class ProteinExpressionMatrixAssayProvider extends AbstractAssayProvider
     public AssayTableMetadata getTableMetadata(@NotNull ExpProtocol protocol)
     {
         return new AssayTableMetadata(this, protocol, null, FieldKey.fromParts("Run"), FieldKey.fromParts("RowId"));
-    }
-
-    @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        return null;
     }
 
     @Override
