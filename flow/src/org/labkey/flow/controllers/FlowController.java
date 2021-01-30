@@ -42,7 +42,6 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -97,7 +96,7 @@ public class FlowController extends BaseFlowController
         {
             if (getContainer().getFolderType() instanceof FlowFolderType)
             {
-                ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
+                ActionURL startUrl = urlProvider(ProjectUrls.class).getStartURL(getContainer());
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
                 throw new RedirectException(startUrl);
             }
@@ -282,7 +281,7 @@ public class FlowController extends BaseFlowController
         @Override
         public ActionURL getSuccessURL(NewFolderForm newFolderForm)
         {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(destContainer);
+            return urlProvider(ProjectUrls.class).getStartURL(destContainer);
         }
 
         @Override
@@ -342,18 +341,18 @@ public class FlowController extends BaseFlowController
         @Override
         public ActionURL getSuccessURL(FlowAdminForm flowAdminForm)
         {
-            return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
+            return urlProvider(AdminUrls.class).getAdminConsoleURL();
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Flow Module Settings");
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Flow Module Settings", new ActionURL(getClass(), getContainer()));
         }
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SavePerferencesAction extends SimpleViewAction
+    public class SavePreferencesAction extends SimpleViewAction
     {
         @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -423,7 +422,7 @@ public class FlowController extends BaseFlowController
             assertForReadPermission(user,
                 controller.new BeginAction(),
                 controller.new QueryAction(),
-                controller.new SavePerferencesAction()
+                controller.new SavePreferencesAction()
             );
 
             // @RequiresPermission(AdminPermission.class)

@@ -45,7 +45,6 @@ import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GWTView;
 import org.labkey.api.view.JspView;
@@ -111,7 +110,7 @@ public class PipelineController extends SpringActionController
 
     public ActionURL urlProjectStart(Container container)
     {
-        return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(container);
+        return urlProvider(ProjectUrls.class).getStartURL(container);
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -204,7 +203,7 @@ public class PipelineController extends SpringActionController
         @Override
         public ActionURL getSuccessURL(PipelinePathForm form)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
     }
 
@@ -622,7 +621,7 @@ public class PipelineController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("File List", PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer()));
+            root.addChild("File List", urlProvider(PipelineUrls.class).urlBrowse(getContainer()));
             root.addChild("Search MS2 Data");
         }
     }
@@ -680,7 +679,7 @@ public class PipelineController extends SpringActionController
         @Override
         public ActionURL getSuccessURL(SequenceDBRootForm form)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
+            return urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
 
         @Override
@@ -905,7 +904,7 @@ public class PipelineController extends SpringActionController
         @Override
         public ActionURL getSuccessURL(SetDefaultsForm form)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getContainer());
+            return urlProvider(PipelineUrls.class).urlSetup(getContainer());
         }
     }
 
