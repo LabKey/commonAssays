@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
@@ -73,8 +74,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines the Luminex assay type, creates default batch/run/analyte domains, sets up header links.
@@ -116,14 +119,19 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             @Override
             public ExpData getObject(Lsid lsid)
             {
-                return getDataForDataRow(lsid.getObjectId(), null);
+                try
+                {
+                    return getDataForDataRow(Integer.parseInt(lsid.getObjectId()), null);
+                }
+                catch (NumberFormatException ignored) {}
+                return null;
             }
 
             @Override
             @Nullable
             public ActionURL getDisplayURL(Lsid lsid)
             {
-                ExpData data = getDataForDataRow(lsid.getObjectId(), null);
+                ExpData data = getObject(lsid);
                 if (data == null)
                     return null;
                 ExpRun expRun = data.getRun();
@@ -258,34 +266,21 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return PageFlowUtil.urlProvider(AssayUrls.class).getProtocolURL(container, protocol, LuminexUploadWizardAction.class);
     }
 
-    @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        // on Postgres 8.3, we must pass in an integer row ID; passing a string that happens to be all digits isn't
-        // sufficient, since 8.3 no longer does implicit type casting in this situation.
-        Integer dataRowIdInt = null;
-        if (dataRowId instanceof Integer)
-            dataRowIdInt = (Integer) dataRowId;
-        else if (dataRowId instanceof String)
-        {
-            try
-            {
-                dataRowIdInt = Integer.parseInt((String) dataRowId);
-            }
-            catch (NumberFormatException e)
-            {
-                // we'll error out below...
-            }
-        }
-        if (dataRowIdInt == null)
-            throw new IllegalArgumentException("Luminex data rows must have integer primary keys.  PK provided: " + dataRowId);
 
-        Integer dataId = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow(), Collections.singleton("DataId")).getObject(dataRowIdInt, Integer.class);
-        if (dataId == null)
+    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    {
+        Set<ExpData> result = new HashSet<>();
+        List<Integer> dataRowIds = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow(), Collections.singleton("DataId"),
+                new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromParts("RowId"), rowIds)), null).getArrayList(Integer.class);
+        for (Integer dataRowId : dataRowIds)
         {
-            return null;
+            ExpData data = cache.getDataById(dataRowId);
+            if (data != null)
+            {
+                result.add(data);
+            }
         }
-        return ExperimentService.get().getExpData(dataId);
+        return result;
     }
 
     @Override

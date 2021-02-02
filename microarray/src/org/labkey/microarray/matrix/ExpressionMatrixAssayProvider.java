@@ -62,6 +62,7 @@ import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,12 +98,6 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     public AssayRunCreator getRunCreator()
     {
         return new ExpressionMatrixRunCreator(this);
-    }
-
-    @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        return null;
     }
 
     @Override

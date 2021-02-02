@@ -25,7 +25,6 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayProviderSchema;
 import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.actions.PlateUploadForm;
@@ -35,17 +34,13 @@ import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.exp.IdentifiableBase;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.LsidManager;
-import org.labkey.api.exp.OntologyManager;
-import org.labkey.api.exp.OntologyObject;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -165,16 +160,22 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     }
 
     @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
+    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
-        if (!(dataRowId instanceof Integer))
-            return null;
-
-        // dataRowId is NabSpecimen rowId
-        NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen((Integer)dataRowId);
-        if (null != nabSpecimen)
-            return ExperimentService.get().getExpData(nabSpecimen.getDataId());
-        return null;
+        Set<ExpData> result = new HashSet<>();
+        for (Integer rowId : rowIds)
+        {
+            NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen(rowId);
+            if (null != nabSpecimen)
+            {
+                ExpData data = cache.getDataById(nabSpecimen.getDataId());
+                if (data != null)
+                {
+                    result.add(data);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
