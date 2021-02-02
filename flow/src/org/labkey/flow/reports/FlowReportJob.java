@@ -24,9 +24,11 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reports.Report;
 import org.labkey.api.reports.report.RReport;
 import org.labkey.api.reports.report.RReportJob;
 import org.labkey.api.reports.report.ReportDescriptor;
@@ -79,72 +81,80 @@ public class FlowReportJob extends RReportJob
         }
     }
 
-    // UNDONE: be like the base RReport and write the input file before the report job runs
     @Override
-    protected File inputFile(RReport report, @NotNull ViewContext context) throws Exception
+    public Task createPipelineTask(PipelineJob job, Report report, Map<String,String> params)
     {
-        File file = report.createInputDataFile(context);
-
-        // debug logging
-        debug("Executed query:");
-        debug(_report._query);
-
-        return file;
-    }
-
-    @Override
-    protected void processOutputs(RReport report, List<ParamReplacement> outputSubst) throws Exception
-    {
-        super.processOutputs(report, outputSubst);
-
-        List<Tuple3<TsvOutput, Domain, FlowTableType>> tuples = new ArrayList<>();
-
-        // Create the domains in a separate transaction from saving the data.
-        DbSchema schema = ExperimentService.get().getSchema();
-        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
+        return new RunRReportTask(job, (RReport)report, params)
         {
-            for (ParamReplacement output : outputSubst)
+            // UNDONE: be like the base RReport and write the input file before the report job runs
+            @Override
+            protected File inputFile(RReport report, @NotNull ViewContext context) throws Exception
             {
-                if (TsvOutput.ID.equals(output.getId()))
-                {
-                    TsvOutput tsv = (TsvOutput)output;
-                    FlowTableType tableType = tableTypeForOutput(tsv);
-                    if (tableType == null)
-                        continue;
+                File file = report.createInputDataFile(context);
 
-                    Domain domain = ensureDomain(tableType);
-                    if (domain != null)
-                        tuples.add(Tuple3.of(tsv, domain, tableType));
+                // debug logging
+                debug("Executed query:");
+                debug(_report._query);
 
-                    if (getErrors() > 0)
-                        return;
-                }
+                return file;
             }
 
-            transaction.commit();
-        }
-
-        if (getErrors() > 0)
-            return;
-
-        try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
-        {
-            deleteSavedResults();
-
-            for (Tuple3<TsvOutput, Domain, FlowTableType> tuple : tuples)
+            @Override
+            protected void processOutputs(RReport report, List<ParamReplacement> outputSubst) throws Exception
             {
-                saveTsvOutput(tuple.first, tuple.second, tuple.third);
+                super.processOutputs(report, outputSubst);
+
+                List<Tuple3<TsvOutput, Domain, FlowTableType>> tuples = new ArrayList<>();
+
+                // Create the domains in a separate transaction from saving the data.
+                DbSchema schema = ExperimentService.get().getSchema();
+                try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
+                {
+                    for (ParamReplacement output : outputSubst)
+                    {
+                        if (TsvOutput.ID.equals(output.getId()))
+                        {
+                            TsvOutput tsv = (TsvOutput)output;
+                            FlowTableType tableType = tableTypeForOutput(tsv);
+                            if (tableType == null)
+                                continue;
+
+                            Domain domain = ensureDomain(tableType);
+                            if (domain != null)
+                                tuples.add(Tuple3.of(tsv, domain, tableType));
+
+                            if (getErrors() > 0)
+                                return;
+                        }
+                    }
+
+                    transaction.commit();
+                }
+
                 if (getErrors() > 0)
                     return;
-            }
 
-            transaction.commit();
-        }
-        catch (SQLException e)
-        {
-            throw new RuntimeSQLException(e);
-        }
+                try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
+                {
+                    deleteSavedResults();
+
+                    for (Tuple3<TsvOutput, Domain, FlowTableType> tuple : tuples)
+                    {
+                        saveTsvOutput(tuple.first, tuple.second, tuple.third);
+                        if (getErrors() > 0)
+                            return;
+                    }
+
+                    transaction.commit();
+                }
+                catch (SQLException e)
+                {
+                    throw new RuntimeSQLException(e);
+                }
+            }
+        };
     }
+
 
     private FlowTableType tableTypeForOutput(TsvOutput tsv)
     {
