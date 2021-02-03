@@ -60,6 +60,7 @@ import org.labkey.elispot.query.ElispotAntigenDomainKind;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -104,7 +105,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         private String _label;
         private Class _class;
 
-        private PlateReaderType(String label, Class cls)
+        PlateReaderType(String label, Class cls)
         {
             _label = label;
             _class = cls;
@@ -143,9 +144,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         COLORIMETRIC("colorimetric"),
         FLUORESCENT("fluorescent");
 
-        private String _label;
+        private final String _label;
 
-        private DetectionMethodType(String label)
+        DetectionMethodType(String label)
         {
             _label = label;
         }
@@ -172,29 +173,29 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     }
 
     @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
+    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
-        if (!(dataRowId instanceof Integer))
+        Set<ExpData> result = new HashSet<>();
+        for (Integer rowId : rowIds)
         {
-            return null;
-        }
-
-        RunDataRow dataRow = ElispotManager.get().getRunDataRow((Integer) dataRowId);
-        if (dataRow == null)
-        {
-            throw new IllegalStateException("No ELISpot run data row was found with RowId: " + dataRowId);
-        }
-
-        ExpRun expRun = ExperimentService.get().getExpRun(dataRow.getRunId());
-        List<ExpData> dataOutputs = expRun.getDataOutputs();
-        for (ExpData dataOutput : dataOutputs)
-        {
-            if (ElispotDataHandler.NAMESPACE.equals(dataOutput.getLSIDNamespacePrefix()))
+            RunDataRow dataRow = ElispotManager.get().getRunDataRow(rowId);
+            if (dataRow == null)
             {
-                return dataOutput;
+                throw new IllegalStateException("No ELISpot run data row was found with RowId: " + rowId);
             }
+
+            ExpRun expRun = cache.getRun(dataRow.getRunId());
+            List<ExpData> dataOutputs = expRun.getDataOutputs();
+            for (ExpData dataOutput : dataOutputs)
+            {
+                if (ElispotDataHandler.NAMESPACE.equals(dataOutput.getLSIDNamespacePrefix()))
+                {
+                    result.add(dataOutput);
+                }
+            }
+            throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
         }
-        throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
+        return result;
     }
 
     @Override
