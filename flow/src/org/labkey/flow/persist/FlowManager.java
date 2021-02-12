@@ -1398,7 +1398,7 @@ public class FlowManager
     // Get usage metrics for all flow containers
     public Map<String, Object> getUsageMetrics()
     {
-        _log.info("Collecting flow usage metrics");
+        _log.debug("Collecting flow usage metrics");
         User user = User.getSearchUser();
 
         Map<String, Object> allMetrics = new HashMap<>();
@@ -1417,7 +1417,7 @@ public class FlowManager
             merge(allMetrics, containerMetrics);
         }
 
-        _log.info("Collected flow usage metrics:\n" + allMetrics);
+        _log.debug("Collected flow usage metrics:\n" + allMetrics);
         return allMetrics;
     }
 
