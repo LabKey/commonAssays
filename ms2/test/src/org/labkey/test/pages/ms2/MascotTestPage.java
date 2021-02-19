@@ -17,32 +17,28 @@ package org.labkey.test.pages.ms2;
 
 import org.labkey.test.Locator;
 import org.labkey.test.Locators;
-import org.labkey.test.components.ComponentElements;
 import org.labkey.test.pages.LabKeyPage;
 import org.labkey.test.selenium.LazyWebElement;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 
-public class MascotTestPage extends LabKeyPage
+public class MascotTestPage extends LabKeyPage<MascotTestPage.Elements>
 {
-    private final Elements _elements;
     private final MascotConfigPage _configPage;
 
     public MascotTestPage(MascotConfigPage configPage)
     {
-        super(configPage.getTest());
-        _elements = new Elements();
+        super(configPage);
         _configPage = configPage;
 
-        _test.switchToWindow(1);
+        switchToWindow(1);
     }
 
     public String getError()
     {
         try
         {
-            return elements().testError.getText();
+            return elementCache().testError.getText();
         }
         catch (NoSuchElementException ignore)
         {
@@ -52,30 +48,25 @@ public class MascotTestPage extends LabKeyPage
 
     public String getConfigurationText()
     {
-        return elements().configurationTextArea.getText();
+        return elementCache().configurationTextArea.getText();
     }
 
     public MascotConfigPage close()
     {
-        _test.getDriver().close();
-        _test.switchToMainWindow();
+        getDriver().close();
+        switchToMainWindow();
 
         return _configPage;
     }
 
-    private Elements elements()
+    @Override
+    protected Elements newElementCache()
     {
-        return _elements;
+        return new Elements();
     }
 
-    private class Elements extends ComponentElements
+    protected class Elements extends LabKeyPage<?>.ElementCache
     {
-        @Override
-        protected SearchContext getContext()
-        {
-            return getDriver();
-        }
-
         WebElement testError = new LazyWebElement(Locators.labkeyError, this);
         WebElement configurationTextArea = new LazyWebElement(Locator.tag("textarea"), this);
     }
