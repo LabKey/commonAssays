@@ -19,10 +19,8 @@ package org.labkey.test.ms2;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.components.experiment.LineageGraph;
+import org.labkey.test.components.ui.lineage.LineageGraph;
 import org.openqa.selenium.NoSuchElementException;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
