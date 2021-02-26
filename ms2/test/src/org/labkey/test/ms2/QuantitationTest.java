@@ -20,7 +20,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.DailyB;
-import org.labkey.test.components.experiment.LineageGraph;
+import org.labkey.test.components.ui.lineage.LineageGraph;
 
 import java.io.File;
 
