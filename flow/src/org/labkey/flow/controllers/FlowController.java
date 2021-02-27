@@ -419,7 +419,7 @@ public class FlowController extends BaseFlowController
             FlowController controller = new FlowController();
 
             // @RequiresPermission(ReadPermission.class)
-            assertForReadPermission(user,
+            assertForReadPermission(user, false,
                 controller.new BeginAction(),
                 controller.new QueryAction(),
                 controller.new SavePreferencesAction()
