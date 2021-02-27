@@ -1465,7 +1465,7 @@ public class FlowManager
     // Get usage metrics in a single container
     public Map<String, Object> getUsageMetrics(User user, Container c, boolean includeAttributeCounts)
     {
-        _log.info("Collecting metrics in '" + c.getPath() + "'");
+        _log.debug("Collecting metrics in '" + c.getPath() + "'");
         Map<String, Object> metrics = new LinkedHashMap<>();
 
         FlowSchema schema = new FlowSchema(user, c);
@@ -1517,7 +1517,7 @@ public class FlowManager
             metrics.put("graph", getAttributeMetrics(AttributeType.graph));
         }
 
-        _log.info("Collected metrics in '" + c.getPath() + "':\n" + metrics);
+        _log.debug("Collected metrics in '" + c.getPath() + "':\n" + metrics);
         return metrics;
     }
 
