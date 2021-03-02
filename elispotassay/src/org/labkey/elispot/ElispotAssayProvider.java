@@ -186,14 +186,17 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
 
             ExpRun expRun = cache.getRun(dataRow.getRunId());
             List<ExpData> dataOutputs = expRun.getDataOutputs();
+            boolean found = false;
             for (ExpData dataOutput : dataOutputs)
             {
                 if (ElispotDataHandler.NAMESPACE.equals(dataOutput.getLSIDNamespacePrefix()))
                 {
                     result.add(dataOutput);
+                    found = true;
                 }
             }
-            throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
+            if (!found)
+                throw new IllegalStateException("No ELISpot Experiment data row was found for RunId: " + dataRow.getRunId());
         }
         return result;
     }
