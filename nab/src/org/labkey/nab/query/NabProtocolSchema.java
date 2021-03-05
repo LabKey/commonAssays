@@ -104,12 +104,16 @@ public class NabProtocolSchema extends AssayProtocolSchema
         AliasedColumn cellControlAggCol = new AliasedColumn(CELL_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
         cellControlAggCol.setFk(QueryForeignKey.from(this, cf).to(CELL_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
         cellControlAggCol.setHidden(true);
+        cellControlAggCol.setIsUnselectable(true);
+        cellControlAggCol.setKeyField(false); // Ticket 42587
         runTable.addColumn(cellControlAggCol);
 
         // Add hidden aliased column from Run/RowId to expose the virus control aggregates for this run
         AliasedColumn virusControlAggCol = new AliasedColumn(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
         virusControlAggCol.setFk(QueryForeignKey.from(this, cf).to(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
         virusControlAggCol.setHidden(true);
+        virusControlAggCol.setIsUnselectable(true);
+        virusControlAggCol.setKeyField(false); // Ticket 42587
         runTable.addColumn(virusControlAggCol);
 
         return runTable;
