@@ -705,7 +705,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         //verify unchecking a box  removes the flag
         Locator aucCheckBox = Locator.xpath("//div[text()='AUC']/../../td/div/div[contains(@class, 'check')]");
         click(aucCheckBox);
-        clickButton("Save", 0);
+        Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000).click();
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
 
         Locator strikeoutAUC = Locator.xpath("//span[contains(@style, 'line-through') and  text()='AUC']");
@@ -715,7 +715,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         click(strikeoutAUC);
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
         waitAndClick(aucCheckBox);
-        clickButton("Save", 0);
+        Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000).click();
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
         waitForText(expectedFlag);
         assertElementNotPresent(strikeoutAUC);

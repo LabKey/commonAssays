@@ -625,15 +625,15 @@ public final class LuminexGuideSetTest extends LuminexTest
         click(l);
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
 
-        sleep(1500);
-        waitForText("Run QC Flags");
+        _extHelper.waitForExtDialog("Run QC Flags");
 
         for(String flag : flags)
         {
-            Locator aucCheckBox = Locator.xpath("//div[text()='" + flag + "']/../../td/div/div[contains(@class, 'check')]");
+            Locator.XPathLocator aucCheckBox = Locator.xpath("//div[text()='" + flag + "']/../../td/div/div[contains(@class, 'check')]");
             click(aucCheckBox);
+            aucCheckBox.parent().parent("td").withClass("x-grid3-dirty-cell").waitForElement(shortWait());
         }
 
-        clickButton("Save");
+        clickAndWait(Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000));
     }
 }
