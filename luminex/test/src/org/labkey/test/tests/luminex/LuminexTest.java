@@ -40,6 +40,7 @@ import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
+import org.labkey.test.util.LabKeyExpectedConditions;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
 import org.labkey.test.util.PipelineStatusTable;
@@ -705,7 +706,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
         //verify unchecking a box  removes the flag
         Locator aucCheckBox = Locator.xpath("//div[text()='AUC']/../../td/div/div[contains(@class, 'check')]");
         click(aucCheckBox);
-        Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000).click();
+        shortWait().until(LabKeyExpectedConditions
+            .clickUntilStale(Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000)));
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
 
         Locator strikeoutAUC = Locator.xpath("//span[contains(@style, 'line-through') and  text()='AUC']");
@@ -715,7 +717,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
         click(strikeoutAUC);
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
         waitAndClick(aucCheckBox);
-        Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000).click();
+        shortWait().until(LabKeyExpectedConditions
+            .clickUntilStale(Locator.extButtonEnabled("Save").waitForElement(getDriver(), 1000)));
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
         waitForText(expectedFlag);
         assertElementNotPresent(strikeoutAUC);
