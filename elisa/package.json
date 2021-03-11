@@ -6,15 +6,18 @@
     "setup": "npm ci",
     "build": "npm run build-dev",
     "start-link": "cross-env LINK=true npm run start",
-    "start": "cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack-dev-server --config node_modules/@labkey/build/webpack/watch.config.js",
-    "build-dev": "npm run clean && cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/dev.config.js --progress --profile --colors",
-    "build-prod": "npm run clean && cross-env NODE_ENV=production PROD_SOURCE_MAP=source-map LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/prod.config.js --progress --profile --colors",
+    "start": "cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/dev.config.js",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production PROD_SOURCE_MAP=source-map LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/prod.config.js --progress --profile",
     "clean": "rimraf resources/web/elisa/gen",
     "test": "cross-env NODE_ENV=test jest",
     "teamcity": "cross-env NODE_ENV=test jest --testResultsProcessor=jest-teamcity-reporter"
   },
   "jest": {
     "globals": {
+      "ts-jest": {
+        "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.json"
+      },
       "LABKEY": {}
     },
     "moduleFileExtensions": [
@@ -26,40 +29,36 @@
       "node_modules"
     ],
     "setupFilesAfterEnv": [
-      "./test/jest.setup.ts"
+      "<rootDir>/test/js/setup.ts"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/"
     ],
     "testRegex": "(\\.(test|spec))\\.(ts|tsx)$",
-    "preset": "ts-jest",
-    "testMatch": null,
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
     "moduleNameMapper": {
-      "\\.(css|scss)$": "<rootDir>/test/styleMock.ts"
+      "\\.(css|scss)$": "<rootDir>/test/js/styleMock.ts"
     },
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "1.10.0"
+    "@labkey/components": "2.12.0-fb-webpackAliasFromSrc.4"
   },
   "devDependencies": {
-    "@labkey/build": "1.1.1",
+    "@labkey/build": "2.0.1-fb-webpackAliasFromSrc.3",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
     "@labkey/eslint-config-base": "0.0.8",
     "@labkey/eslint-config-react": "0.0.8",
-    "@types/jest": "25.2.3",
-    "babel-jest": "26.0.1",
+    "@types/jest": "26.0.20",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "enzyme-to-json": "3.5.0",
-    "jest": "26.0.1",
-    "jest-cli": "24.9.0",
+    "jest": "26.6.3",
     "jest-teamcity-reporter": "0.9.0",
-    "react-test-renderer": "16.8.6",
-    "ts-jest": "26.0.0"
+    "react-test-renderer": "16.13.1",
+    "ts-jest": "26.5.3"
   }
 }
