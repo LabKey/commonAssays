@@ -44,10 +44,10 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.12.0-fb-webpackAliasFromSrc.4"
+    "@labkey/components": "2.13.0"
   },
   "devDependencies": {
-    "@labkey/build": "2.0.1-fb-webpackAliasFromSrc.3",
+    "@labkey/build": "2.1.0",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
     "@labkey/eslint-config-base": "0.0.8",
