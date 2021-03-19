@@ -39,6 +39,7 @@ import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -149,11 +150,15 @@ public class NabManager extends AbstractNabManager
         Map<TableInfo, ExpProtocol> dataTables = new HashMap<>();
         for (Dataset dataset : datasets)
         {
-            if (dataset.isAssayData() && dataset.canRead(user))
+            if (dataset.isPublishedData() && dataset.canRead(user))
             {
-                ExpProtocol protocol = dataset.getAssayProtocol();
-                if (protocol != null && AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
-                    dataTables.put(dataset.getTableInfo(user), protocol);
+                ExpObject source = dataset.resolvePublishSource();
+                if (source instanceof ExpProtocol)
+                {
+                    ExpProtocol protocol = (ExpProtocol)source;
+                    if (AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
+                        dataTables.put(dataset.getTableInfo(user), protocol);
+                }
             }
         }
 

@@ -19,7 +19,7 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
-<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.study.publish.StudyPublishService" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -39,7 +39,7 @@
     Map<String, String> paths = form.getNewPaths();
     Map<String, String> targetStudies = new LinkedHashMap<>();
 
-    AssayPublishService aps = AssayPublishService.get();
+    StudyPublishService aps = StudyPublishService.get();
 
     if (null != aps)
     {

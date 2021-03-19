@@ -21,7 +21,7 @@
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
-<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.study.publish.StudyPublishService" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
@@ -199,10 +199,10 @@ those results must be put into different analysis folders.
 
 <%
 // Let user select a Target Study only if we are also importing a keywords directory.
-if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && AssayPublishService.get() != null)
+if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPublishService.get() != null)
 {
     // Get set of valid copy to study targets
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
+    Set<Study> validStudies = StudyPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)

@@ -33,7 +33,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.StudyUrls;
-import org.labkey.api.study.assay.AssayPublishService;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -252,7 +252,7 @@ public class FlowQueryView extends QueryView
         super.populateButtonBar(view, bar);
 
         // NOTE: Only add "Copy to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
-        AssayPublishService aps = AssayPublishService.get();
+        StudyPublishService aps = StudyPublishService.get();
         String queryName = getSettings().getQueryName();
         if (null != aps && queryName.equals(FlowTableType.FCSAnalyses.toString()))
         {
