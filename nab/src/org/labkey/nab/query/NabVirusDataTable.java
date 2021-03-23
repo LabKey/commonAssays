@@ -93,10 +93,6 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
             {
                 col.setHidden(true);
             }
-            else if ("Container".equalsIgnoreCase(col.getName()))
-            {
-                ContainerForeignKey.initColumn(col, schema);
-            }
 
             DomainProperty domainProperty = _virusDomain.getPropertyByName(baseColumn.getName());
             if (domainProperty != null)
