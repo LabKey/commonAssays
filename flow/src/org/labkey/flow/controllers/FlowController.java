@@ -347,7 +347,7 @@ public class FlowController extends BaseFlowController
         @Override
         public void addNavTrail(NavTree root)
         {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Flow Module Settings", new ActionURL(getClass(), getContainer()));
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Flow Module Settings", getClass(), getContainer());
         }
     }
 

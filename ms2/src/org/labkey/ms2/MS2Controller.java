@@ -2832,7 +2832,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", getClass(), getContainer());
         }
     }
 
@@ -3625,7 +3625,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", getClass(), getContainer());
         }
     }
 
@@ -4017,7 +4017,7 @@ public class MS2Controller extends SpringActionController
         {
             if (getViewContext().getContainer().isRoot())
             {
-                urlProvider(AdminUrls.class).addAdminNavTrail(root, "Mascot Server Configuration", new ActionURL(getClass(), getContainer()));
+                urlProvider(AdminUrls.class).addAdminNavTrail(root, "Mascot Server Configuration", getClass(), getContainer());
             }
             else
             {
