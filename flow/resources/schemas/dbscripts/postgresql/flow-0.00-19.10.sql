@@ -364,3 +364,7 @@ ALTER TABLE flow.graph
 
 ALTER TABLE flow.graph
     ADD CONSTRAINT FK_Statistic_OriginalGraphId FOREIGN KEY (OriginalGraphId) REFERENCES flow.graphattr (rowid);
+
+/* flow-18.30-19.10.sql */
+
+UPDATE flow.object SET uri = 'file:///' || substr(uri, 7) WHERE uri LIKE 'file:/_%' AND uri NOT LIKE 'file:///%' AND uri IS NOT NULL;
