@@ -26,6 +26,7 @@ import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -404,7 +405,7 @@ public class NabRunDataTable extends NabBaseTable
         }
     }
 
-    private static void updateLabelWithCutoff(BaseColumnInfo column, Integer intCutoff)
+    private static void updateLabelWithCutoff(MutableColumnInfo column, Integer intCutoff)
     {
         if (null != intCutoff)
         {

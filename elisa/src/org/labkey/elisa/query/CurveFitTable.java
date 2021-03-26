@@ -26,17 +26,9 @@ public class CurveFitTable extends FilteredTable<AssayProtocolSchema>
         {
             var newCol = addWrapColumn(col);
 
-            if (newCol.getName().equalsIgnoreCase("Container"))
-            {
-                ContainerForeignKey.initColumn(newCol, userSchema);
-            }
-            else if (newCol.getName().equalsIgnoreCase("RowId") || newCol.getName().equalsIgnoreCase("ProtocolId"))
+            if (newCol.getName().equalsIgnoreCase("RowId") || newCol.getName().equalsIgnoreCase("ProtocolId"))
             {
                 newCol.setHidden(true);
-            }
-            else if (newCol.getName().equalsIgnoreCase("CreatedBy") || newCol.getName().equalsIgnoreCase("ModifiedBy"))
-            {
-                UserIdForeignKey.initColumn(newCol);
             }
         }
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());
