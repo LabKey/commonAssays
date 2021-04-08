@@ -17,14 +17,15 @@
 package org.labkey.flow.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
@@ -91,6 +92,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -248,6 +250,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME);
     }
 
+    /**
+     * Returns a map of Sample property to FieldKey relative to the FCSFile table.
+     */
     public Map<String, FieldKey> getSampleTypeJoinFields()
     {
         String prop = (String) getProperty(FlowProperty.SampleTypeJoin.getPropertyDescriptor());
@@ -515,36 +520,78 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return linked;
     }
 
-    // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
-    public static Map<Pair<Integer, String>, List<Pair<Integer, String>>> getFCSFilesGroupedBySample(User user, Container c)
+    public static class FCSFilesGroupedBySample
     {
-        Map<Pair<Integer, String>, List<Pair<Integer,String>>> ret = new LinkedHashMap<>();
+        public Map<Integer, Map<FieldKey, Object>> samples;
+        public Map<Integer, Map<FieldKey, Object>> fcsFiles;
+        public List<FieldKey> sampleFields;
+        public Collection<FieldKey> fcsFileFields;
+        public Map<Integer, Pair<Integer, String>> fcsFileRuns;
+        public Map<Integer, List<Integer>> linkedSampleIdToFcsFileIds;
+        public int linkedFcsFileCount;
+        public List<Integer> unlinkedFcsFileIds;
+        public List<Integer> unlinkedSampleIds;
+
+    }
+
+    // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
+    public FCSFilesGroupedBySample getFCSFilesGroupedBySample(User user, Container c)
+    {
+        var joinFields = this.getSampleTypeJoinFields();
+        var sampleFields = joinFields.keySet().stream().map(FieldKey::fromParts).collect(toList());
+        var fcsFileFields = joinFields.values();
 
         FlowSchema schema = new FlowSchema(user, c);
-        String sql = "SELECT " +
-                "FCSFiles.RowId As FCSFileRowId,\n" +
-                "FCSFiles.Name As FCSFileName,\n" +
-                "M.RowId AS SampleRowId,\n" +
-                "M.Name AS SampleName\n" +
+        String sql = "SELECT\n" +
+                "  FCSFiles.RowId As FCSFileRowId,\n" +
+                "  FCSFiles.Run.RowId AS FCSFileRunId,\n" +
+                "  FCSFiles.Run.Name AS FCSFileRunName,\n" +
+                "  M.RowId AS SampleRowId,\n" +
                 "FROM FCSFiles\n" +
-                "FULL OUTER JOIN exp.Materials M ON\n" +
+                "FULL OUTER JOIN samples." + SAMPLETYPE_NAME + " M ON\n" +
                 "FCSFiles.Sample = M.RowId\n" +
-                "ORDER BY M.Name";
+                "ORDER BY M.Name, FCSFiles.RowId";
+
+        List<Integer> sampleIds = new ArrayList<>();
+        List<Integer> fcsFileIds = new ArrayList<>();
+        Map<Integer, List<Integer>> samplesToFcsFiles = new LinkedHashMap<>();
+        List<Integer> unlinkedFcsFileIds = new ArrayList<>();
+        Map<Integer, Pair<Integer, String>> fcsFileRuns = new HashMap<>();
+        int linkedFcsFileCount = 0;
+
         try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql))
         {
             for (Map<String, Object> row : rs)
             {
                 Integer sampleRowId = (Integer) row.get("SampleRowId");
-                String sampleName = (String) row.get("SampleName");
-                Pair<Integer, String> samplePair = Pair.of(sampleRowId, sampleName);
-                List<Pair<Integer, String>> fcsFiles = ret.get(samplePair);
-                if (fcsFiles == null)
-                    ret.put(samplePair, fcsFiles = new ArrayList<>());
+                Integer fcsFileRowId = (Integer) row.get("FCSFileRowId");
+                Integer fcsFileRunId = (Integer) row.get("FCSFileRunId");
+                String fcsFileRunName = (String) row.get("FCSFileRunName");
 
-                Integer fcsFileRowId = (Integer) row.get("FCSFIleRowId");
-                String fcsFileName = (String) row.get("FCSFileName");
-                Pair<Integer, String> fcsFilePair = Pair.of(fcsFileRowId, fcsFileName);
-                fcsFiles.add(fcsFilePair);
+                if (sampleRowId != null)
+                {
+                    sampleIds.add(sampleRowId);
+                    if (fcsFileRowId != null)
+                    {
+                        var fcsFiles = samplesToFcsFiles.computeIfAbsent(sampleRowId, k -> new ArrayList<>());
+                        fcsFiles.add(fcsFileRowId);
+                        linkedFcsFileCount++;
+                    }
+                }
+                else
+                {
+                    if (fcsFileRowId != null)
+                        unlinkedFcsFileIds.add(fcsFileRowId);
+                }
+
+                if (fcsFileRowId != null)
+                {
+                    fcsFileIds.add(fcsFileRowId);
+                    if (fcsFileRunId != null)
+                    {
+                        fcsFileRuns.put(fcsFileRowId, Pair.of(fcsFileRunId, fcsFileRunName));
+                    }
+                }
             }
         }
         catch (SQLException e)
@@ -552,6 +599,65 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
+        List<Integer> unlinkedSampleIds = new ArrayList<>(sampleIds);
+        unlinkedSampleIds.removeAll(samplesToFcsFiles.keySet());
+
+        var rowIdFieldKey = FieldKey.fromParts("RowId");
+        var nameFieldKey = FieldKey.fromParts("Name");
+
+        Map<Integer, Map<FieldKey, Object>> samples = new HashMap<>();
+        var sampleColumns = new HashSet<FieldKey>();
+        sampleColumns.add(rowIdFieldKey);
+        sampleColumns.add(nameFieldKey);
+        sampleColumns.addAll(sampleFields);
+        var samplesTable = QueryService.get().getUserSchema(user, c, SamplesSchema.SCHEMA_NAME).getTable(SAMPLETYPE_NAME);
+        var sampleColumnMap = QueryService.get().getColumns(samplesTable, sampleColumns);
+        try (var results = new TableSelector(samplesTable, sampleColumnMap.values(), new SimpleFilter(rowIdFieldKey, sampleIds, CompareType.IN), null).getResults())
+        {
+            while (results.next())
+            {
+                var row = results.getFieldKeyRowMap();
+                Integer sampleId = (Integer)row.get(rowIdFieldKey);
+                samples.put(sampleId, new HashMap<>(row));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        Map<Integer, Map<FieldKey, Object>> fcsFiles = new HashMap<>();
+        var fcsFileColumns = new HashSet<FieldKey>();
+        fcsFileColumns.add(rowIdFieldKey);
+        fcsFileColumns.add(nameFieldKey);
+        fcsFileColumns.addAll(fcsFileFields);
+        var fcsFilesTable = schema.createFCSFileTable("FCSFiles", null);
+        var fcsFileColumnMap = QueryService.get().getColumns(fcsFilesTable, fcsFileColumns);
+        try (var results = new TableSelector(fcsFilesTable, fcsFileColumnMap.values(), new SimpleFilter(rowIdFieldKey, fcsFileIds, CompareType.IN), null).getResults())
+        {
+            while (results.next())
+            {
+                var row = results.getFieldKeyRowMap();
+                Integer fcsFileId = (Integer) row.get(rowIdFieldKey);
+                fcsFiles.put(fcsFileId, new HashMap<>(row));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        ;
+
+        var ret = new FCSFilesGroupedBySample();
+        ret.fcsFileRuns = fcsFileRuns;
+        ret.linkedFcsFileCount = linkedFcsFileCount;
+        ret.linkedSampleIdToFcsFileIds = samplesToFcsFiles;
+        ret.unlinkedFcsFileIds = unlinkedFcsFileIds;
+        ret.unlinkedSampleIds = unlinkedSampleIds;
+        ret.fcsFiles = fcsFiles;
+        ret.samples = samples;
+        ret.sampleFields = sampleFields;
+        ret.fcsFileFields = fcsFileFields;
         return ret;
     }
 
