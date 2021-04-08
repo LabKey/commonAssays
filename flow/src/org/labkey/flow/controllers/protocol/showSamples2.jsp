@@ -81,7 +81,7 @@
     <%=link("Create sample type").href(protocol.urlCreateSampleType())%><br>
 <% } else { %>
 <p>
-There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
+There are <a id="all-samples" href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
 <% if (sampleTypeJoinFields.size() == 0) { %>
 <p>
@@ -127,7 +127,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
         <td style="background-color:#ddd;padding:0.5em;" colspan="<%=colCount%>">
             <b>Linked Samples and FCSFiles</b>
             <small>
-                &mdash; <a href="<%=h(urlFcsFilesWithSamples)%>"><%=linkedFCSFileCount%> FCS Files</a> are joined with samples<br>
+                &mdash; <a id="linked-fcsfiles" href="<%=h(urlFcsFilesWithSamples)%>"><%=linkedFCSFileCount%> FCS Files</a> are joined with samples<br>
             </small>
         </td>
     </tr>
@@ -193,7 +193,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
             <b>Unlinked Samples</b>
             <small>
                 &mdash;
-                <a href="<%=h(urlUnlinkedSamples)%>"><%=unlinkedSampleIds.size()%> samples</a> <%=text(unlinkedSampleIds.size() == 1 ? "is" : "are")%> not joined to any FCS Files<br>
+                <a id="unlinked-samples" href="<%=h(urlUnlinkedSamples)%>"><%=unlinkedSampleIds.size()%> samples</a> <%=text(unlinkedSampleIds.size() == 1 ? "is" : "are")%> not joined to any FCS Files<br>
             </small>
         </td>
     </tr>
@@ -232,7 +232,7 @@ There are <a href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions
             <b>Unlinked FCSFiles</b>
             <small>
                 &mdash;
-                <a href="<%=h(urlFcsFilesWithoutSamples)%>"><%=unlinkedFcsFileIds.size()%> FCS Files</a> are not joined with any samples<br>
+                <a id="unlinked-fcsfiles" href="<%=h(urlFcsFilesWithoutSamples)%>"><%=unlinkedFcsFileIds.size()%> FCS Files</a> are not joined with any samples<br>
             </small>
         </td>
     </tr>

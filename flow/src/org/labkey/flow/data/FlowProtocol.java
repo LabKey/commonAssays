@@ -773,7 +773,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public String getFCSAnalysisName(FlowWell well) throws SQLException
     {
-        FlowSchema schema = new FlowSchema(null, getContainer());
+        FlowSchema schema = new FlowSchema(User.getSearchUser(), getContainer());
         ExpDataTable table = schema.createFCSFileTable("fcsFiles", null);
         ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
         SimpleFilter filter = new SimpleFilter();
