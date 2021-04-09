@@ -459,7 +459,7 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         if (protocol == null && settings == null)
             return getFCSFiles();
-        FlowSchema schema = new FlowSchema(null, getContainer());
+        FlowSchema schema = new FlowSchema(User.getSearchUser(), getContainer());
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles", null);
         ColumnInfo colRowId = table.getColumn("RowId");
