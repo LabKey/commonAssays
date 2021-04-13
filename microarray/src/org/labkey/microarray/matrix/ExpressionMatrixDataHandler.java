@@ -21,11 +21,13 @@ import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RemapCache;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -46,6 +48,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,9 +60,6 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
     public static final String FEATURE_ID_COLUMN_IMPORT_ALIAS = "feature_id";
 
     private static final Logger LOG = LogManager.getLogger(ExpressionMatrixDataHandler.class);
-
-    // CONSIDER: move this flag to the assay design
-//    private static boolean autoCreateSamples = true;
 
     public ExpressionMatrixDataHandler()
     {
@@ -107,6 +107,9 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                 throw new ExperimentException("Could not find run domain for protocol with LSID " + protocol.getLSID());
             }
 
+            RemapCache cache = new RemapCache();
+            Map<Integer, ExpMaterial> materialCache = new HashMap<>();
+
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
             try (TabLoader loader = createTabLoader(dataFile, FEATURE_ID_COLUMN_NAME, new CaseInsensitiveHashSet(FEATURE_ID_COLUMN_IMPORT_ALIAS)))
@@ -116,7 +119,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                 for (ColumnDescriptor col : cols)
                     columnNames.add(col.getColumnName());
 
-                Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, FEATURE_ID_COLUMN_NAME);
+                Map<String, ExpMaterial> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, FEATURE_ID_COLUMN_NAME, cache, materialCache);
 
                 boolean importValues = true;
                 if (runProps.containsKey(ExpressionMatrixAssayProvider.IMPORT_VALUES_COLUMN.getName()))
@@ -146,7 +149,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
     @Override
     public void insertMatrixData(Container c, User user,
-                                            Map<String, Integer> samplesMap, DataLoader loader,
+                                            Map<String, ExpMaterial> samplesMap, DataLoader loader,
                                             Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {
         assert MicroarrayUserSchema.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
@@ -203,7 +206,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                         continue;
 
                     statement.setInt(1, dataRowId);
-                    statement.setInt(2, samplesMap.get(sampleName));
+                    statement.setInt(2, samplesMap.get(sampleName).getRowId());
                     statement.setInt(3, featureId);
                     statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
                     statement.addBatch();
