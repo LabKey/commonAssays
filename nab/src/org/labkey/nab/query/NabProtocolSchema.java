@@ -79,7 +79,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            addLinkedToStudyColumns(table, true);
         }
         return table;
     }

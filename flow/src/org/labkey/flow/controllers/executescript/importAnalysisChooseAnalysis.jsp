@@ -201,7 +201,7 @@ those results must be put into different analysis folders.
 // Let user select a Target Study only if we are also importing a keywords directory.
 if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPublishService.get() != null)
 {
-    // Get set of valid copy to study targets
+    // Get set of valid link to study targets
     Set<Study> validStudies = StudyPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");

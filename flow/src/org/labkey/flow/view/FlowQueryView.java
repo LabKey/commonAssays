@@ -82,7 +82,7 @@ public class FlowQueryView extends QueryView
         setShadeAlternatingRows(true);
         setShowBorders(true);
 
-        // CONSIDER: Only show selectors if user can export, delete, or publish/copy-to-study
+        // CONSIDER: Only show selectors if user can export, delete, or publish/link to study
         setShowRecordSelectors(true);
     }
 
@@ -251,23 +251,23 @@ public class FlowQueryView extends QueryView
 
         super.populateButtonBar(view, bar);
 
-        // NOTE: Only add "Copy to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        // NOTE: Only add "Link to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
         StudyPublishService aps = StudyPublishService.get();
         String queryName = getSettings().getQueryName();
         if (null != aps && queryName.equals(FlowTableType.FCSAnalyses.toString()))
         {
-            // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
+            // UNDONE: refactor ResultsQueryView create "Link to Study" button code so it can be re-used here
             FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
             if (protocol != null && !aps.getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ExpProtocol expProtocol = protocol.getProtocol();
-                ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
+                ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getLinkToStudyURL(getContainer(), expProtocol);
 
                 if (getTable().getContainerFilter() != null && getTable().getContainerFilter().getType() != null)
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
 
                 ActionButton publishButton = new ActionButton(publishURL,
-                        "Copy to Study", ActionButton.Action.POST);
+                        "Link to Study", ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
 

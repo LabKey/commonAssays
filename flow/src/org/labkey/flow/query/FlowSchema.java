@@ -1736,7 +1736,7 @@ public class FlowSchema extends UserSchema
             FlowAssayProvider provider = (FlowAssayProvider)AssayService.get().getProvider(expProtocol);
             if (provider != null)
             {
-                Set<String> studyColumnNames = provider.createProtocolSchema(getUser(), getContainer(), expProtocol, null).addCopiedToStudyColumns(ret, false);
+                Set<String> studyColumnNames = provider.createProtocolSchema(getUser(), getContainer(), expProtocol, null).addLinkedToStudyColumns(ret, false);
                 for (String columnName : studyColumnNames)
                     copiedToStudyColumns.add(new FieldKey(null, columnName));
             }

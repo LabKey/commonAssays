@@ -216,12 +216,12 @@ public final class LuminexUploadAndCopyTest extends LuminexTest
 
         region.setFilter("FI", "Equals", "20");
         click(Locator.name(".toggle"));
-        clickButton("Copy to Study");
+        clickButton("Link to Study");
         selectOptionByText(Locator.name("targetStudy"), "/" + TEST_ASSAY_PRJ_LUMINEX + " (" + TEST_ASSAY_PRJ_LUMINEX + " Study)");
         clickButton("Next");
         setFormElement(Locator.name("participantId"), "ParticipantID");
         setFormElement(Locator.name("visitId"), "100.1");
-        clickButton("Copy to Study");
+        clickButton("Link to Study");
 
         log("Verify that the data was published");
         assertTextPresent(

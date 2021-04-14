@@ -115,7 +115,7 @@ public class FlowWell extends FlowDataObject
             if (getContainer().hasPermission(user, ReadPermission.class))
                 throw new RedirectException(actionURL.clone().setContainer(getContainer()));
 
-            // Check if run has been copied to a study and the user has ReadPermission to the study folder
+            // Check if run has been linked to a study and the user has ReadPermission to the study folder
             FlowRun run = getRun();
             if (run != null)
             {

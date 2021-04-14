@@ -38,7 +38,7 @@ import java.util.Set;
  * Date: 7/5/14
  *
  * Grants users read permission to see flow graph images in a flow dataset that
- * has been copied-to-study even if they don't have read permission to original
+ * has been linked to study even if they don't have read permission to original
  * flow assay container.
  *
  * TODO: This is an expensive check to perform for every image in a grid.
@@ -48,7 +48,7 @@ public class GraphContextualRoles implements HasContextualRoles
     /**
      * Returns a contextual ReaderRole if the user has permission to
      * <b>at least one of</b> the study datasets that the run results have
-     * been copied to.
+     * been linked to.
      *
      * @return a singleton ReaderRole set or null
      */

@@ -358,7 +358,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         LuminexDataTable table = new LuminexDataTable(this, cf);
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            addLinkedToStudyColumns(table, true);
         }
         return table;
     }

@@ -98,7 +98,7 @@ public class GraphColumn extends DataColumn
                     showGraphs = ((FlowQuerySettings)settings).getShowGraphs();
                 else
                 {
-                    // Most likely rendering a flow dataset that has been copied to a study.
+                    // Most likely rendering a flow dataset that has been linked to a study.
                     showGraphs = FlowQuerySettings.ShowGraphs.Thumbnail;
                 }
             }

@@ -145,7 +145,7 @@ public class NabManager extends AbstractNabManager
             return Collections.emptyMap();
 
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
-        // is copied to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
+        // is linked to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
         // can only be one dataset/tableinfo per protocol.
         Map<TableInfo, ExpProtocol> dataTables = new HashMap<>();
         for (Dataset dataset : datasets)

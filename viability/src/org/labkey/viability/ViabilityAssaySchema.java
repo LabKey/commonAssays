@@ -117,9 +117,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
-        // UNDONE: add copy to study columns when copy to study is implemented
+        // UNDONE: add link to study columns when link to study is implemented
         //addCopiedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
         return new ResultsTable(cf);
     }

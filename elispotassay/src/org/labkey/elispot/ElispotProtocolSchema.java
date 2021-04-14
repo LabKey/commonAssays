@@ -100,7 +100,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         ElispotRunDataTable table = new ElispotRunDataTable(this, cf, getProtocol());
         if (includeCopiedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            addLinkedToStudyColumns(table, true);
         }
         return table;
     }
