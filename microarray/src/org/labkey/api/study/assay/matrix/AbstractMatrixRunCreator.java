@@ -17,21 +17,21 @@ package org.labkey.api.study.assay.matrix;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayDataCollector;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.assay.matrix.AbstractMatrixDataHandler;
+import org.labkey.api.data.RemapCache;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DefaultTransformResult;
 import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayDataCollector;
-import org.labkey.api.assay.AssayRunUploadContext;
-import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 
 import java.io.File;
@@ -126,7 +126,12 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
     }
 
     @Override
-    protected void addInputMaterials(AssayRunUploadContext<ProviderType> context, Map<ExpMaterial, String> inputMaterials, ParticipantVisitResolverType resolverType) throws ExperimentException
+    protected void addInputMaterials(AssayRunUploadContext<ProviderType> context,
+                                     Map<ExpMaterial, String> inputMaterials,
+                                     ParticipantVisitResolverType resolverType,
+                                     @NotNull RemapCache cache,
+                                     @NotNull Map<Integer, ExpMaterial> materialCache)
+            throws ExperimentException
     {
         // Attach the materials found in the matrix file to the run
         try
@@ -140,9 +145,8 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
                 for (ColumnDescriptor col : cols)
                     columnNames.add(col.getColumnName());
 
-                Map<String, Integer> samplesMap = AbstractMatrixDataHandler.ensureSamples(context.getContainer(), context.getUser(), columnNames, getIdColumnName());
-                List<? extends ExpMaterial> materials = ExperimentService.get().getExpMaterials(samplesMap.values());
-                for (ExpMaterial material : materials)
+                Map<String, ExpMaterial> samplesMap = AbstractMatrixDataHandler.ensureSamples(context.getContainer(), context.getUser(), columnNames, getIdColumnName(), cache, materialCache);
+                for (ExpMaterial material : samplesMap.values())
                 {
                     // TODO: Check if there is some other role that might be useful (well id)
                     inputMaterials.put(material, getRoleName());
