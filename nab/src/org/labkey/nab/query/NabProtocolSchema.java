@@ -73,11 +73,11 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public @Nullable TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public @Nullable TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         NabRunDataTable table = new NabRunDataTable(this, cf, getProtocol());
 
-        if (includeCopiedToStudyColumns)
+        if (includeLinkedToStudyColumns)
         {
             addLinkedToStudyColumns(table, true);
         }

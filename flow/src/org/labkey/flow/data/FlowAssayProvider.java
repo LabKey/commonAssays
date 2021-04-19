@@ -268,7 +268,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
     {
         // SourceLSID is used by assay to render links back to the original data for rows
-        // that have been copied into a study dataset.
+        // that have been linked to a study dataset.
         // AbstractAssayProvider uses ExpRun's LSID, but FlowAssayProvider uses the ExpData's LSID.
         // We use the ExpData LSID because flow runs use the generic experiment LSID namespace prefix of 'Run'
         // and wouldn't easily resolve to a flow run type.

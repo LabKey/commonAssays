@@ -109,8 +109,8 @@ public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsActi
 
             // Note that we intentionally do NOT filter or check container.  If the user has access to the NAb
             // data linked to the study (verified above), they can get the raw data via the APIs.  This is
-            // consistent with the role-based implementation which allows viewing the NAb details view for copied-
-            // to-study data even if the Nab details view data is in a folder the user cannot read.
+            // consistent with the role-based implementation which allows viewing the NAb details view for linked
+            // to study data even if the Nab details view data is in a folder the user cannot read.
             ExpRun run = NabManager.get().getNAbRunByObjectId(id.getKey());
             if (run != null)
                 runs.add(run);
