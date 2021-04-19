@@ -67,9 +67,9 @@ public class ElisaProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
-        return new ElisaResultsTable(this, cf, includeCopiedToStudyColumns);
+        return new ElisaResultsTable(this, cf, includeLinkedToStudyColumns);
     }
 
     public static DbSchema getSchema()

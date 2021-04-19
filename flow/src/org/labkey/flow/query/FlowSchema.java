@@ -1655,7 +1655,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public ExpDataTable createFCSAnalysisTable(String alias, ContainerFilter cf, FlowDataType type, boolean includeCopiedToStudyColumns)
+    public ExpDataTable createFCSAnalysisTable(String alias, ContainerFilter cf, FlowDataType type, boolean includeLinkedToStudyColumns)
     {
         FlowDataTable ret = createDataTable(alias, type, cf);
 
@@ -1717,16 +1717,16 @@ public class FlowSchema extends UserSchema
             ret.addReportColumns(report, FlowTableType.FCSAnalyses);
         }
 
-        if (includeCopiedToStudyColumns)
-            addCopiedToStudyColumns(ret);
+        if (includeLinkedToStudyColumns)
+            addLinkedToStudyColumns(ret);
 
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, _protocol, colStatistic, colGraph, colBackground));
         return ret;
     }
 
-    private Collection<FieldKey> addCopiedToStudyColumns(AbstractTableInfo ret)
+    private Collection<FieldKey> addLinkedToStudyColumns(AbstractTableInfo ret)
     {
-        List<FieldKey> copiedToStudyColumns = new ArrayList<>(10);
+        List<FieldKey> linkedToStudyColumns = new ArrayList<>(10);
         FlowProtocol protocol = getProtocol();
         if (protocol == null)
             protocol = FlowProtocol.getForContainer(getContainer());
@@ -1738,10 +1738,10 @@ public class FlowSchema extends UserSchema
             {
                 Set<String> studyColumnNames = provider.createProtocolSchema(getUser(), getContainer(), expProtocol, null).addLinkedToStudyColumns(ret, false);
                 for (String columnName : studyColumnNames)
-                    copiedToStudyColumns.add(new FieldKey(null, columnName));
+                    linkedToStudyColumns.add(new FieldKey(null, columnName));
             }
         }
-        return copiedToStudyColumns;
+        return linkedToStudyColumns;
     }
 
     // Rewrite a FieldKey

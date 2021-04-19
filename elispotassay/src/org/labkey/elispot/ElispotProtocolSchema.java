@@ -95,10 +95,10 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public ElispotRunDataTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public ElispotRunDataTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         ElispotRunDataTable table = new ElispotRunDataTable(this, cf, getProtocol());
-        if (includeCopiedToStudyColumns)
+        if (includeLinkedToStudyColumns)
         {
             addLinkedToStudyColumns(table, true);
         }
