@@ -573,6 +573,12 @@ public class LuminexController extends SpringActionController
         }
 
         @Override
+        protected boolean canInsert(User user)
+        {
+            return getContainer().hasPermission(user, DesignAssayPermission.class);
+        }
+
+        @Override
         protected void validatePermission(User user, BindException errors)
         {
             checkPermissions();
