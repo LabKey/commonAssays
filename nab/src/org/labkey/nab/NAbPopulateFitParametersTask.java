@@ -38,7 +38,7 @@ public class NAbPopulateFitParametersTask implements MaintenanceTask
     }
 
     @Override
-    public boolean isConfigurable()
+    public boolean isRecurring()
     {
         return false;
     }
