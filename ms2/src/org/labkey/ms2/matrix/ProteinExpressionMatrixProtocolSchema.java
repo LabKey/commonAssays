@@ -45,7 +45,7 @@ public class ProteinExpressionMatrixProtocolSchema extends AbstractMatrixProtoco
     }
 
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         ProteinSequenceDataTable result = new ProteinSequenceDataTable(this, cf);
         result.setName(AssayProtocolSchema.DATA_TABLE_NAME);

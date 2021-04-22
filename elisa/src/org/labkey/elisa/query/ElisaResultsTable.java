@@ -43,9 +43,9 @@ import java.util.Set;
  */
 public class ElisaResultsTable extends AssayResultTable
 {
-    public ElisaResultsTable(final AssayProtocolSchema schema, ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public ElisaResultsTable(final AssayProtocolSchema schema, ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
-        super(schema, cf, includeCopiedToStudyColumns);
+        super(schema, cf, includeLinkedToStudyColumns);
 
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);

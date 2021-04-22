@@ -46,7 +46,7 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
     
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         FeatureDataTable result = new FeatureDataTable(this, cf);
         result.setName(AssayProtocolSchema.DATA_TABLE_NAME);

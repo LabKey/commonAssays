@@ -43,7 +43,7 @@
 
     if (null != aps)
     {
-        // Get set of valid copy to study targets
+        // Get set of valid link to study targets
         Set<Study> validStudies = aps.getValidPublishTargets(getUser(), ReadPermission.class);
         targetStudies.put("", "[None]");
         for (Study study : validStudies)
@@ -82,7 +82,7 @@
         <% if (!targetStudies.isEmpty()) { %>
             <p>
                 <em>Optionally,</em> select a target study for imported FCS files. The target study will be used
-                as the default copy to study target and, if the flow metadata specifies a specimen ID column, used
+                as the default link to study target and, if the flow metadata specifies a specimen ID column, used
                 to look up specimen information from the target study's specimen repository.
             </p>
             <p class="labkey-indented">

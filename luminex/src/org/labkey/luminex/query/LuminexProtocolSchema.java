@@ -353,12 +353,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public LuminexDataTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public LuminexDataTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         LuminexDataTable table = new LuminexDataTable(this, cf);
-        if (includeCopiedToStudyColumns)
+        if (includeLinkedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            addLinkedToStudyColumns(table, true);
         }
         return table;
     }

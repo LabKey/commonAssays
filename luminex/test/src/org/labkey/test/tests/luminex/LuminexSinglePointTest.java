@@ -73,14 +73,14 @@ public class LuminexSinglePointTest extends LuminexTest
         GetProtocolCommand getProtocolCommand = new GetProtocolCommand("Luminex");
         ProtocolResponse getProtocolResponse = getProtocolCommand.execute(connection, getCurrentContainerPath());
 
-        String autoCopyContainer = getContainerId();
+        String autoLinkContainer = getContainerId();
 
         Protocol newAssayProtocol = getProtocolResponse.getProtocol();
         newAssayProtocol.setName(assayName)
                 .setSaveScriptFiles(true)
                 .setBackgroundUpload(true)
                 .setEditableRuns(true)
-                .setAutoCopyTargetContainerId(autoCopyContainer);
+                .setAutoCopyTargetContainerId(autoLinkContainer);
         SaveProtocolCommand saveProtocolCommand = new SaveProtocolCommand(newAssayProtocol);
         ProtocolResponse saveProtocolResponse = saveProtocolCommand.execute(connection, getCurrentContainerPath());
 
@@ -88,7 +88,7 @@ public class LuminexSinglePointTest extends LuminexTest
         assertTrue(saveProtocolResponse.getProtocol().getBackgroundUpload());
         assertTrue(saveProtocolResponse.getProtocol().getEditableRuns());
         assertTrue(saveProtocolResponse.getProtocol().getAllowTransformationScript());
-        assertEquals(autoCopyContainer, saveProtocolResponse.getProtocol().getAutoCopyTargetContainerId());
+        assertEquals(autoLinkContainer, saveProtocolResponse.getProtocol().getAutoCopyTargetContainerId());
     }
 
     @Test
