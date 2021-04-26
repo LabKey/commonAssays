@@ -295,7 +295,7 @@ public class FlowModule extends SpringModule
             FlowManager mgr = FlowManager.get();
             if (null != mgr)
             {
-                svc.registerUsageMetrics(UsageReportingLevel.ON, NAME, () -> mgr.getUsageMetrics());
+                svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
             }
         }
     }
