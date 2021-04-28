@@ -57,6 +57,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -65,6 +66,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.study.assay.FileLinkDisplayColumn;
 import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
@@ -1736,7 +1738,8 @@ public class FlowSchema extends UserSchema
             FlowAssayProvider provider = (FlowAssayProvider)AssayService.get().getProvider(expProtocol);
             if (provider != null)
             {
-                Set<String> studyColumnNames = provider.createProtocolSchema(getUser(), getContainer(), expProtocol, null).addLinkedToStudyColumns(ret, false);
+                String rowIdName = provider.getTableMetadata(expProtocol).getResultRowIdFieldKey().getName();
+                Set<String> studyColumnNames = StudyPublishService.get().addLinkedToStudyColumns(ret, Dataset.PublishSource.Assay, false, expProtocol.getRowId(), rowIdName, getUser());
                 for (String columnName : studyColumnNames)
                     linkedToStudyColumns.add(new FieldKey(null, columnName));
             }

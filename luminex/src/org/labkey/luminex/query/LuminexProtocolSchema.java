@@ -42,6 +42,8 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -358,7 +360,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         LuminexDataTable table = new LuminexDataTable(this, cf);
         if (includeLinkedToStudyColumns)
         {
-            addLinkedToStudyColumns(table, true);
+            ExpProtocol protocol = getProtocol();
+            String rowIdName = getProvider().getTableMetadata(protocol).getResultRowIdFieldKey().getName();
+            StudyPublishService.get().addLinkedToStudyColumns(table, Dataset.PublishSource.Assay, true, protocol.getRowId(), rowIdName, getUser());
         }
         return table;
     }
