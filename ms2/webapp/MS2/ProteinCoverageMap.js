@@ -19,7 +19,7 @@ if (!LABKEY.ms2.ProteinCoverageMap) {
             });
 
             $("#showFeatures").change(function() {
-                if(this.checked) {
+                if (this.checked) {
                     $(".featureCheckboxItem").each(function() {
                         $(this).prop('checked', true).trigger("change");
                     });
@@ -39,4 +39,3 @@ if (!LABKEY.ms2.ProteinCoverageMap) {
         }
     }
 }
-
