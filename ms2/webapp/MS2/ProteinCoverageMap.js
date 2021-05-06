@@ -8,7 +8,7 @@ if (!LABKEY.ms2.ProteinCoverageMap) {
         // add checkbox change event
         registerSelectAll: function() {
             $(".featureCheckboxItem").change(function() {
-                if(this.checked) {
+                if (this.checked) {
                     // if all are manually checked
                     if ($('.featureCheckboxItem:checked').length === $('.featureCheckboxItem').length) {
                         $("#showFeatures").prop('checked', true);
