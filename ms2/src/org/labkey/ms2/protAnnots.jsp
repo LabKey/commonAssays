@@ -33,7 +33,8 @@
 
 </tr>
 <tr>
-   <td class="labkey-form-label" nowrap>Organism<%= h(bean.seqOrgs.size() == 1 ? "" : "s") %></td>
+   <td class="labkey-form-label" nowrap>Organism<%= h(bean.seqOrgs.size() <= 1 ? "" : "s") %></td>
+
    <td><%
         for(String orgName : bean.seqOrgs)
         { %>
