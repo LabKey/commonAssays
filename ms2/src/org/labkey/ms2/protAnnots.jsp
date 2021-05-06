@@ -29,7 +29,8 @@
    <td class="labkey-form-label" nowrap>Description</td><td><%=h(bean.seqDesc)%></td>
 </tr>
 <tr>
-   <td class="labkey-form-label" nowrap>Gene name<%= h(bean.geneNameLinks.size() == 1 ? "" : "s") %></td><td><%=HtmlString.join(bean.geneNameLinks, HtmlString.unsafe(", "))%></td>
+   <td class="labkey-form-label" nowrap>Gene name<%= h(bean.geneNameLinks.size() <= 1 ? "" : "s") %></td><td><%=HtmlString.join(bean.geneNameLinks, HtmlString.unsafe(", "))%></td>
+
 </tr>
 <tr>
    <td class="labkey-form-label" nowrap>Organism<%= h(bean.seqOrgs.size() == 1 ? "" : "s") %></td>
