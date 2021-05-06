@@ -19,35 +19,24 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.AnnotationView" %>
+<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     AnnotationView.AnnotViewBean bean = ((JspView<AnnotationView.AnnotViewBean>) HttpView.currentView()).getModelBean();
 %>
 <table class="lk-fields-table">
 <tr>
-   <td class="labkey-form-label" nowrap="true">Description</td><td><%=h(bean.seqDesc)%></td>
+   <td class="labkey-form-label" nowrap>Description</td><td><%=h(bean.seqDesc)%></td>
 </tr>
 <tr>
-   <td class="labkey-form-label" nowrap="true">Gene name(s)</td><td><%=HtmlString.join(bean.geneNameLinks, HtmlString.unsafe(", "))%></td>
+   <td class="labkey-form-label" nowrap>Gene name<%= h(bean.geneNameLinks.size() == 1 ? "" : "s") %></td><td><%=HtmlString.join(bean.geneNameLinks, HtmlString.unsafe(", "))%></td>
 </tr>
 <tr>
-   <td class="labkey-form-label" nowrap="true">Organisms</td>
+   <td class="labkey-form-label" nowrap>Organism<%= h(bean.seqOrgs.size() == 1 ? "" : "s") %></td>
    <td><%
-        int nOfOrgs = bean.seqOrgs.size();
-
-        if (1 == nOfOrgs)
-        {
-            for (String orgName : bean.seqOrgs)
-                out.println(h(orgName));
-        }
-        else
+        for(String orgName : bean.seqOrgs)
         { %>
-      <select name="Orgs" size="<%=Math.min(3, nOfOrgs)%>"><%
-            for(String orgName : bean.seqOrgs)
-            { %>
-         <option><%=h(orgName)%></option><%
-            } %>
-      </select><%
+            <%= h(orgName) %><br/> <%
         } %>
    </td>
 </tr>
@@ -55,77 +44,21 @@
 <br>
 <table class="labkey-data-region-legacy labkey-show-borders labkey-prot-annots">
 <tr>
-    <td class="labkey-column-header">Genbank IDs</td>
-    <td class="labkey-column-header">GIs</td>
-    <td class="labkey-column-header">Swiss-Prot Accessions</td>
-    <td class="labkey-column-header">Swiss-Prot Names</td>
-    <td class="labkey-column-header">Ensembl</td>
-    <td class="labkey-column-header">IPI numbers</td>
-    <td class="labkey-column-header">GO Categories</td>
+    <% for (String header : bean.annotations.keySet()) { %>
+       <td class="labkey-column-header"><%= h(header) %></td>
+    <% } %>
 </tr>
 <tr valign="top">
-   <td><%
-    if (bean.genBankLinks.isEmpty()) { %><em>none loaded</em><% }
-    for (HtmlString link : bean.genBankLinks)
+    <% for (Collection<HtmlString> values : bean.annotations.values()) { %>
+        <td><%
+    if (values.isEmpty()) { %><em>none loaded</em><% }
+    for (HtmlString link : values)
     {
         out.print(link);
         out.println(unsafe("<br>"));
     }
     %>
    </td>
-    <td><%
-     if (bean.GIs.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.GIs)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
-    <td><%
-     if (bean.swissProtAccns.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.swissProtAccns)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
-    <td><%
-     if (bean.swissProtNames.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.swissProtNames)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
-    <td><%
-     if (bean.ensemblIds.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.ensemblIds)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
-    <td><%
-     if (bean.IPI.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.IPI)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
-    <td><%
-     if (bean.goCategories.isEmpty()) { %><em>none loaded</em><% }
-     for (HtmlString link : bean.goCategories)
-     {
-         out.print(link);
-         out.println(unsafe("<br>"));
-     }
-     %>
-    </td>
+    <% } %>
 </tr>
 </table>

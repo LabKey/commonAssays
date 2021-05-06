@@ -16,12 +16,15 @@
 
 package org.labkey.ms2;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
+import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.PageFlowUtil;
 
 import java.util.*;
 
@@ -55,13 +58,11 @@ public class Protein
     private static final String PEPTIDE_START_TD_EXPORT_MULTIPLE ="<td class=\"%s\" colspan=%d  bgcolor=\"#CC99FF\" align=\"center\" > %s </td>";
     private static final String PEPTIDE_START_CLASS =" peptide-marker ";
     private static final String PEPTIDE_MULTIPLE_CLASS =" peptide-marker-multiple ";
-    private static final String COLUMN_DIVIDER_CLASS=" tenth-col ";
+    private static final String COLUMN_DIVIDER_CLASS = "tenth-col";
     private static final String PEPTIDE_MIDDLE_TD ="";
     private static final String PEPTIDE_NONE_TD="<td %s />";
-    private static final String PEPTIDE_NONE_CLASS= "";
     private static final String SEQUENCE_CELL_TD="<td %s >%s</td>";
-    private static final String SEQUENCE_CELL_CLASS="";
-    private static final String TABLE_TAG="<div><table id=\"peptideMap\" width=\"%d\" class=\"protein-coverage-map\"  >";
+    private static final String TABLE_TAG="<table id=\"peptideMap\" width=\"%d\" class=\"protein-coverage-map\"  >";
     private static final String TABLE_TAG_EXPORT="<div><table id=\"peptideMap\" border=\"1\"  >";
 
     public static final int DEFAULT_WRAP_COLUMNS = 100;
@@ -203,71 +204,80 @@ public class Protein
      */
     public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
-        return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS);
+        return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS, Collections.emptyList());
     }
 
-    public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols)
+    public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols, List<ProteinFeature> features)
     {
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
 
         List<SequencePos> seqStacks = new ArrayList<>();
 
+        int featureIndex = 0;
+
         // build an arraylist of sequence objects and initialize them with the AA for their position.
-        for (int i=0; i<_sequence.length(); i++)
+        for (int i = 0; i < _sequence.length(); i++)
         {
-            SequencePos pos = new SequencePos(_sequence.charAt(i), i);
+            List<ProteinFeature> aaFeatures = new ArrayList<>();
+            while (featureIndex < features.size() && features.get(featureIndex).getStartIndex() - 1 == i)
+            {
+                aaFeatures.add(features.get(featureIndex));
+                featureIndex++;
+            }
+
+            SequencePos pos = new SequencePos(_sequence.charAt(i), i, aaFeatures);
             seqStacks.add(pos);
         }
 
-        List<Range> ranges= getUncoalescedPeptideRanges(run);
+        List<Range> ranges = getUncoalescedPeptideRanges(run);
 
         // now add the information on on covering peptides.
-        Integer  overallMaxLevels=0;
+        int overallMaxLevels = 0;
         for (Range range : ranges)
         {
-            int maxLevelsInRange=0;
+            int maxLevelsInRange = 0;
 
-            // find out how many levels of peptides have alraady been marked to each sequence position in the range
-            for (int j=range.start; j< (range.start + range.length ); j++)
+            // find out how many levels of peptides have already been marked to each sequence position in the range
+            for (int j = range.start; j < (range.start + range.length ); j++)
                 maxLevelsInRange = Math.max(maxLevelsInRange, seqStacks.get(j).getLevels());
 
             // Need to pass wrapping information to the SequencePos object because it affects the html  to be generated.
-            for (int j=range.start; j< (range.start + range.length ); j++)
+            for (int j = range.start; j < (range.start + range.length ); j++)
             {
                 int nextRowStart = (int) Math.ceil(j/ wrapCols) * wrapCols;
                 int curRowStart = (int) Math.floor(j/ wrapCols) * wrapCols;
-                if (curRowStart==nextRowStart)
+                if (curRowStart == nextRowStart)
                     nextRowStart += wrapCols;
 
                 // add a peptide marker at the array position beyond the current max marker level within the range
                 seqStacks.get(j).addPeptide(range, maxLevelsInRange, j, curRowStart, nextRowStart, showRunViewUrl);
             }
             // keep track of the deepest marker level across the entire sequence regardless of wrapping
-            overallMaxLevels = Math.max( overallMaxLevels, maxLevelsInRange + 1);
+            overallMaxLevels = Math.max(overallMaxLevels, maxLevelsInRange + 1);
         }
 
         StringBuilder sb = new StringBuilder(seqStacks.size() *  overallMaxLevels * 5);
         StringBuilder address;
         StringBuilder seqs;
 
-        sb.append(_forCoverageMapExport?TABLE_TAG_EXPORT:String.format(TABLE_TAG, wrapCols * 10));
-        int colst=0;
+        sb.append(_forCoverageMapExport ? TABLE_TAG_EXPORT : String.format(TABLE_TAG, wrapCols * 10));
+        int colst = 0;
         int lastCol;
-        // now go back and asj each positsion to render their html fo the table
+        // now go back and asj each position to render their html fo the table
         // add in the tr's as needed
-        // 4 types of rows for every wrapCols-long seciton of the protein
+        // 4 types of rows for every wrapCols-long section of the protein
         //      1 address row giving the 0-based ordinal for every 10th position
-        //      1 sequence row shoing the protein AA at each position
+        //      1 sequence row showing the protein AA at each position
         //      0 or more peptide marker rows showing coverage bars
         //      1 spacer row
 
-        while (colst<seqStacks.size())
+        while (colst < seqStacks.size())
         {
-            seqs = new StringBuilder(6* wrapCols);
-            address = new StringBuilder(6* wrapCols);
+            seqs = new StringBuilder(6 * wrapCols);
+            address = new StringBuilder(6 * wrapCols);
 
-            lastCol=Math.min(colst + wrapCols -1, seqStacks.size()-1 );
+            lastCol=Math.min(colst + wrapCols - 1, seqStacks.size() - 1);
             address.append("<tr class=\"address-row\" >");
             seqs.append("<tr class=\"sequence-row\" >");
 
@@ -290,7 +300,7 @@ public class Protein
             sb.append(seqs);
 
             // accumulate the marker row html (generated by the SequencePos objects)
-            for (int i=1; i<  overallMaxLevels; i++)
+            for (int i = 1; i < overallMaxLevels; i++)
             {
                 sb.append("<tr");
                 if (i == 1)
@@ -311,7 +321,7 @@ public class Protein
             colst = lastCol + 1;
 
         }   //  generate the 4 types of rows again for each wrapping level
-        sb.append("</table></div>");
+        sb.append("</table>");
 
         return HtmlString.unsafe(sb.toString());
     }
@@ -325,47 +335,61 @@ public class Protein
         new inner class used to build the proteinCoverageMap.  Reprsents a single AA in the protein sequence
         and any peptides that overlap that sequence position.  When a peptide is added, the necesssary html for
         all the table cells that show that peptide is generated. The html for a non-covered AA in the protein
-        is generated only at reder time.
+        is generated only at render time.
      */
-    private class SequencePos {
-        char _c;
-        Integer _levels =0;
-        HashMap<Integer, String> tdMap =new HashMap<>();
+    private class SequencePos
+    {
+        final char _c;
+        int _levels;
+        final Map<Integer, String> tdMap = new HashMap<>();
 
-        public SequencePos(char c, int curIdx) {
-            _c=c;
-            tdMap.put(0, getTD(SEQUENCE_CELL_TD, SEQUENCE_CELL_CLASS, curIdx, String.valueOf(c) , null)) ;
-            _levels=1;
+        public SequencePos(char c, int curIdx, List<ProteinFeature> features)
+        {
+            _c = c;
+
+            List<String> cssClasses = new ArrayList<>();
+            List<String> tooltip = new ArrayList<>();
+            if (!features.isEmpty())
+            {
+                cssClasses.add("feature-aa");
+            }
+            for (ProteinFeature feature : features)
+            {
+                cssClasses.add("feature-" + feature.getType().replaceAll(" ", ""));
+                tooltip.add(StringUtils.capitalize(feature.getType()));
+            }
+
+            tdMap.put(0, getTD(SEQUENCE_CELL_TD, cssClasses, curIdx, String.valueOf(c),
+                    tooltip.isEmpty() ? null : StringUtils.join(tooltip, ", ")));
+            _levels = 1;
         }
 
-        String getTD(String template, String cssClass, int curIdx, String tdValue , Integer colSpan)
+        String getTD(String template, List<String> cssClasses, int curIdx, String tdValue, String tooltip)
         {
             // add column divider class to put vertical border lines every 10th column
-            if ((curIdx+1) % 10 == 0)
+            if ((curIdx + 1) % 10 == 0)
             {
-                if (cssClass.length()==0)
-                    cssClass = "class=\"" + COLUMN_DIVIDER_CLASS + "\" ";
-                else
-                    cssClass +=  COLUMN_DIVIDER_CLASS;
+                cssClasses.add(COLUMN_DIVIDER_CLASS);
             }
-            String td;
-            if (null!=colSpan)
-                td = String.format(template, cssClass, colSpan, tdValue );
-            else
-                td = String.format(template, cssClass, tdValue );
-            return td;
+            String extraAttributes = cssClasses.isEmpty() ? "" : " class=" + PageFlowUtil.qh(StringUtils.join(cssClasses, " ")) + "\"";
+            if (tooltip != null)
+            {
+                extraAttributes += " title=" + PageFlowUtil.qh(tooltip);
+            }
+            return String.format(template, extraAttributes, tdValue);
         }
 
         int getLevels() {
             return _levels;
         }
 
-        void addPeptide(Range range, Integer newLevel, int curIdx, int curRowStart, int nextRowStart, String showRunViewUrl) {
+        void addPeptide(Range range, Integer newLevel, int curIdx, int curRowStart, int nextRowStart, String showRunViewUrl)
+        {
             String td;
             String label;
-            int colsCurrentRow=range.length;
-            int colsNextRow=0;
-            int colsPreviousRow=0;
+            int colsCurrentRow = range.length;
+            int colsNextRow = 0;
+            int colsPreviousRow = 0;
             if (range.start < curRowStart)  // continuation of a marker from the previous row
             {
                 colsPreviousRow = curRowStart - range.start;
@@ -377,11 +401,11 @@ public class Protein
                 colsCurrentRow = colsCurrentRow - colsNextRow;
             }
             String trimmedPeptide;
-            String onClickScript=null;
-            Double mass;
+            String onClickScript = null;
+            double mass;
             String details = null;
-            String continuationLeft="";
-            String continuationRight="";
+            String continuationLeft = "";
+            String continuationRight = "";
             PeptideCounts counts;
 
             if (!_forCoverageMapExport)
@@ -431,7 +455,7 @@ public class Protein
                 else
                     label= "&lt;";  // will  write the label on the next row
             }
-            String cssClass =PEPTIDE_START_CLASS;
+            String cssClass = PEPTIDE_START_CLASS;
             if (counts.getCountInstances() > 1)
                 cssClass = PEPTIDE_MULTIPLE_CLASS;
 
@@ -453,20 +477,20 @@ public class Protein
                 baseOutput = PEPTIDE_START_TD;
             }
 
-            if ((range.start==curIdx) || (curRowStart==curIdx))
-                td=String.format(baseOutput, cssClass, colsCurrentRow, label);
+            if ((range.start == curIdx) || (curRowStart == curIdx))
+                td = String.format(baseOutput, cssClass, colsCurrentRow, label);
             else
-                td= PEPTIDE_MIDDLE_TD;
+                td = PEPTIDE_MIDDLE_TD;
 
-            tdMap.put(newLevel,td);
+            tdMap.put(newLevel, td);
             _levels = newLevel + 1;
         }
 
         String renderCell(Integer level, int curIdx)
         {
-            String tdout= tdMap.get(level);
+            String tdout = tdMap.get(level);
             if (null == tdout)
-                tdout=getTD(PEPTIDE_NONE_TD, PEPTIDE_NONE_CLASS, curIdx, null, null);
+                tdout = getTD(PEPTIDE_NONE_TD, new ArrayList<>(), curIdx, null, null);
             return tdout;
         }
     }
@@ -478,9 +502,9 @@ public class Protein
     }
     /*
         new class to hold counts of scans matching a single peptide sequence, as well as counts of
-        peptides found with modificiations
+        peptides found with modifications
      */
-    private class PeptideCounts
+    private static class PeptideCounts
     {
         int countScans;
         int countUnmodifiedPeptides;
@@ -772,7 +796,7 @@ public class Protein
             cnt = uniquePeptides.get(peptideToMap);
             if (null == cnt)
             {
-                uniquePeptides.put(peptideToMap,new PeptideCounts());
+                uniquePeptides.put(peptideToMap, new PeptideCounts());
                 cnt = uniquePeptides.get(peptideToMap);
             }
             cnt.addPeptide(peptide, mods);
