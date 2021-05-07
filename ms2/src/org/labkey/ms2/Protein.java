@@ -371,7 +371,7 @@ public class Protein
             {
                 cssClasses.add(COLUMN_DIVIDER_CLASS);
             }
-            String extraAttributes = cssClasses.isEmpty() ? "" : " class=" + PageFlowUtil.qh(StringUtils.join(cssClasses, " ")) + "\"";
+            String extraAttributes = cssClasses.isEmpty() ? "" : " class=\"" + PageFlowUtil.filter(StringUtils.join(cssClasses, " ")) + "\"";
             if (tooltip != null)
             {
                 extraAttributes += " title=" + PageFlowUtil.qh(tooltip);
