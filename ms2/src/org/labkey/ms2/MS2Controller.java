@@ -58,6 +58,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
@@ -3897,7 +3898,7 @@ public class MS2Controller extends SpringActionController
             writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
             writer.write("</div>");
 
-            writer.write(protein.getCoverageMap(run, null, 40).toString());
+            writer.write(protein.getCoverageMap(run, null, 40, Collections.emptyList()).toString());
             return null;
         }
 
@@ -4222,6 +4223,7 @@ public class MS2Controller extends SpringActionController
         public boolean enableAllPeptidesFeature;
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
         public int aaRowWidth;
+        public List<ProteinFeature> features = Collections.emptyList();
     }
 
 

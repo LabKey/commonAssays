@@ -29,7 +29,8 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <script type="text/javascript">
-    LABKEY.requiresCss("ProteinCoverageMap.css");
+    LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
+    LABKEY.requiresCss("MS2/ProteinCoverageMap.js");
     LABKEY.requiresScript("util.js");
 
     function checkAll() {

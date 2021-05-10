@@ -78,6 +78,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -1172,7 +1173,7 @@ public class ProteinManager
 
     public static Set<String> getOrganismsFromId(int id)
     {
-        HashSet<String> retVal = new HashSet<>();
+        Set<String> retVal = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         List<String> rvString = new SqlSelector(getSchema(),
                 "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
                 id).getArrayList(String.class);

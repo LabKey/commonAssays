@@ -18,18 +18,67 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="java.util.TreeSet" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.protein.ProteinFeature" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
 %>
+<%!
+    @Override
+    public void addClientDependencies(ClientDependencies dependencies)
+    {
+        dependencies.add("MS2/ProteinCoverageMap.css");
+        dependencies.add("MS2/ProteinCoverageMap.js");
+        dependencies.add("util.js");
+        dependencies.add("internal/jQuery");
+    }
+%>
 
-<script type="text/javascript">
-LABKEY.requiresCss("ProteinCoverageMap.css");
-LABKEY.requiresScript("util.js");
+<div class="sequencePanel">
+    <div class="coverageMap">
+        <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
+    </div>
+<%
+    if (!bean.features.isEmpty())
+    {
+        String[] colors =
+                { "#e6194b","#3cb44b","#ffe119","#0082c8","#f58231","#911eb4","#46f0f0","#f032e6","#d2f53c","#fabebe",
+                    "#008080","#e6beff","#aa6e28","#fffac8","#800000","#aaffc3","#808000","#ffd8b1","#000080","#000000" };
+        int colorIndex = 0;
+
+        Set<String> uniqueFeatures = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        uniqueFeatures.addAll(bean.features.stream().map(ProteinFeature::getType).collect(Collectors.toSet()));
+
+        %>
+        <div class="featuresControls">
+            <div>
+                <strong>Features</strong>
+            </div>
+            <div>
+                <input id="showFeatures" type="checkbox" name="showFeatures" readonly="readonly" />
+                <label for="showFeatures" style="padding-left: 5px; border-left: 5px solid lightgray">Select All</label>
+            </div>
+            <% for (String uniqueFeature : uniqueFeatures)
+            {
+                String id = "feature-" + StringUtils.replace(uniqueFeature, " ", "");
+                String color = colors.length > colorIndex ? colors[colorIndex++] : "#808080";
+            %>
+            <div>
+                <input type="checkbox" onchange="LABKEY.ms2.ProteinCoverageMap.toggleStyleColor(<%= hq(id) %>, <%= hq(color) %>)"
+                       id="<%= h(id) %>" value="<%= h(id) %>" class="featureCheckboxItem" />
+                <label style="padding-left: 5px; border-left: 5px solid <%= h(color)%>" for="<%= h(id) %>">
+                    <%= h(StringUtils.capitalize(uniqueFeature)) %>
+                </label>
+            </div>
+            <% } %>
+        </div>
+<% } %>
+
+<script type="application/javascript">
+    LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 </script>
-
-<script type="text/javascript">
-    Ext.QuickTips.init();
-</script>
-
-<%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth)%>
