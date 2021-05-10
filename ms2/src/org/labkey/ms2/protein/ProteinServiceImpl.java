@@ -16,7 +16,17 @@
 package org.labkey.ms2.protein;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheLoader;
+import org.labkey.api.cache.CacheManager;
+import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.reader.Readers;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.AnnotationView;
@@ -26,9 +36,24 @@ import org.labkey.ms2.protein.organism.GuessOrgByParsing;
 import org.labkey.ms2.protein.organism.GuessOrgBySharedHash;
 import org.labkey.ms2.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.ms2.protein.organism.OrganismGuessStrategy;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,9 +67,11 @@ import java.util.stream.Collectors;
 public class ProteinServiceImpl implements ProteinService
 {
     private List<OrganismGuessStrategy> _strategies;
-    private List<QueryViewProvider<ProteinSearchForm>> _proteinSearchViewProviders = new CopyOnWriteArrayList<>();
-    private List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
-    private List<FormViewProvider<ProteinSearchForm>> _proteinSearchFormViewProviders = new CopyOnWriteArrayList<>();
+    private final List<QueryViewProvider<ProteinSearchForm>> _proteinSearchViewProviders = new CopyOnWriteArrayList<>();
+    private final List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
+    private final List<FormViewProvider<ProteinSearchForm>> _proteinSearchFormViewProviders = new CopyOnWriteArrayList<>();
+
+    private static final Logger LOG = LogManager.getLogger(ProteinServiceImpl.class);
 
     public ProteinServiceImpl()
     {
@@ -144,21 +171,22 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     @Override
-    public WebPartView getProteinCoverageView(int seqId, String[] peptides, int aaRowWidth, boolean showEntireFragmentInCoverage)
+    public WebPartView<?> getProteinCoverageView(int seqId, String[] peptides, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setPeptides(peptides);
+        bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 
     @Override
-    public WebPartView getAnnotationsView(int seqId)
+    public WebPartView<?> getAnnotationsView(int seqId, Map<String, Collection<HtmlString>> extraAnnotations)
     {
         org.labkey.ms2.Protein protein = ProteinManager.getProtein(seqId);
-        return new AnnotationView(protein);
+        return new AnnotationView(protein, extraAnnotations);
     }
 
     @Override
@@ -197,4 +225,131 @@ public class ProteinServiceImpl implements ProteinService
     {
         return (ProteinServiceImpl) ProteinService.get();
     }
+
+    private static final Cache<String, List<ProteinFeature>> FEATURE_CACHE =
+            CacheManager.getBlockingCache(100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
+
+    @Override
+    public List<ProteinFeature> getProteinFeatures(String accession)
+    {
+        if (accession == null)
+        {
+            return Collections.emptyList();
+        }
+        return FEATURE_CACHE.get(accession);
+    }
+
+    private static class FeatureLoader implements CacheLoader<String, List<ProteinFeature>>
+    {
+        private void setIndices(ProteinFeature f, Element location)
+        {
+            if (location.getElementsByTagName("begin").getLength() == 1)
+            {
+                int begin = Integer.parseInt(((Element) location.getElementsByTagName("begin").item(0)).getAttribute("position"));
+                int end = Integer.parseInt(((Element) location.getElementsByTagName("end").item(0)).getAttribute("position"));
+                f.setStartIndex(begin);
+                f.setEndIndex(end);
+            }
+            else
+            {
+                int loc = Integer.parseInt(((Element) location.getElementsByTagName("position").item(0)).getAttribute("position"));
+                f.setStartIndex(loc);
+                f.setEndIndex(loc);
+            }
+        }
+
+        @Override
+        public List<ProteinFeature> load(@NotNull String accession, @Nullable Object argument)
+        {
+            List<ProteinFeature> result = new ArrayList<>();
+
+            try
+            {
+                String url = "https://www.ebi.ac.uk/proteins/api/features/" + accession;
+
+                URL obj = new URL(url);
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+                con.setRequestProperty("Accept", "application/xml");
+                con.setRequestMethod("GET");
+                int responseCode = con.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK)
+                { // success
+                    StringBuilder response = new StringBuilder();
+                    try (BufferedReader in = Readers.getReader(con.getInputStream()))
+                    {
+                        String inputLine;
+
+                        while ((inputLine = in.readLine()) != null)
+                        {
+                            response.append(inputLine);
+                        }
+                    }
+
+                    DocumentBuilderFactory dbf =
+                            DocumentBuilderFactory.newInstance();
+                    DocumentBuilder db = dbf.newDocumentBuilder();
+                    InputSource is = new InputSource();
+                    is.setCharacterStream(new StringReader(response.toString()));
+
+                    Document doc = db.parse(is);
+                    Element entry = (Element) doc.getFirstChild();
+                    NodeList featureElements = entry.getElementsByTagName("feature");
+                    for (int i = 0; i < featureElements.getLength(); i++)
+                    {
+                        try
+                        {
+                            Element feature = (Element) featureElements.item(i);
+                            ProteinFeature f = new ProteinFeature();
+                            f.setType(feature.getAttribute("type"));
+                            f.setDescription(feature.getAttribute("description"));
+                            Element location = (Element) feature.getElementsByTagName("location").item(0);
+                            if (f.isVariation())
+                            {
+                                if (location.getChildNodes().getLength() == 1)
+                                {
+                                    int loc = Integer.parseInt(((Element) location.getElementsByTagName("position").item(0)).getAttribute("position"));
+                                    f.setStartIndex(loc);
+                                    f.setEndIndex(loc);
+                                    if (feature.getElementsByTagName("original").getLength() == 0 || feature.getElementsByTagName("variation").getLength() == 0)
+                                    {
+                                        continue;
+                                    }
+                                    String original = feature.getElementsByTagName("original").item(0).getFirstChild().getNodeValue();
+                                    String variation = feature.getElementsByTagName("variation").item(0).getFirstChild().getNodeValue();
+                                    f.setOriginal(original);
+                                    f.setVariation(variation);
+                                }
+                                else if (location.getChildNodes().getLength() == 2)
+                                {
+                                    setIndices(f, location);
+                                }
+                            }
+                            else
+                            {
+                                setIndices(f, location);
+                            }
+                            result.add(f);
+                        }
+                        catch (Exception e)
+                        {
+                            // we don't really care at the moment but exception is likely if xml is formatted differently than expected or given in the spec which happens sometimes
+                            LOG.debug("Error parsing Uniprot response", e);
+                        }
+                    }
+                }
+                else
+                {
+                    LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                }
+            }
+            catch (IOException | SAXException | ParserConfigurationException e)
+            {
+                LOG.warn("Failed querying Uniprot for " + accession, e);
+            }
+
+            result.sort(Comparator.comparingInt(ProteinFeature::getStartIndex));
+            return Collections.unmodifiableList(result);
+        }
+    }
+
 }
