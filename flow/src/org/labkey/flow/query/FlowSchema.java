@@ -1741,7 +1741,7 @@ public class FlowSchema extends UserSchema
                 String rowIdName = provider.getTableMetadata(expProtocol).getResultRowIdFieldKey().getName();
                 Set<String> studyColumnNames = StudyPublishService.get().addLinkedToStudyColumns(ret, Dataset.PublishSource.Assay, false, expProtocol.getRowId(), rowIdName, getUser());
                 for (String columnName : studyColumnNames)
-                    linkedToStudyColumns.add(new FieldKey(null, columnName));
+                    linkedToStudyColumns.add(FieldKey.fromParts(columnName));
             }
         }
         return linkedToStudyColumns;
