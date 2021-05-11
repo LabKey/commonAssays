@@ -44,7 +44,7 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.13.0"
+    "@labkey/components": "2.29.0"
   },
   "devDependencies": {
     "@labkey/build": "2.1.0",
