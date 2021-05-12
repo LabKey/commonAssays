@@ -10,6 +10,7 @@ import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -74,38 +75,46 @@ public class NabPopulateFitParametersPipelineJob extends PipelineJob
             {
                 for (ExpRun run : protocol.getExpRuns())
                 {
-                    DilutionAssayRun assayRun = dataHandler.getAssayResults(run, upgradeUser);
-                    if (assayRun != null)
+                    try
                     {
-                        for (DilutionAssayRun.SampleResult result : assayRun.getSampleResults())
+                        DilutionAssayRun assayRun = dataHandler.getAssayResults(run, upgradeUser);
+                        if (assayRun != null)
                         {
-                            DilutionSummary dilutionSummary = result.getDilutionSummary();
-                            ExpMaterial sampleInput = assayRun.getMaterial(dilutionSummary.getFirstWellGroup());
-                            if (sampleInput != null)
+                            for (DilutionAssayRun.SampleResult result : assayRun.getSampleResults())
                             {
-                                NabSpecimen specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
-                                if (specimenRow != null)
+                                DilutionSummary dilutionSummary = result.getDilutionSummary();
+                                ExpMaterial sampleInput = assayRun.getMaterial(dilutionSummary.getFirstWellGroup());
+                                if (sampleInput != null)
                                 {
-                                    if (specimenRow.getFitParameters() == null)
+                                    NabSpecimen specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
+                                    if (specimenRow != null)
                                     {
-                                        NabManager.get().ensureFitParameters(upgradeUser, specimenRow, assayRun, dilutionSummary);
-                                        updateCounter++;
+                                        if (specimenRow.getFitParameters() == null)
+                                        {
+                                            NabManager.get().ensureFitParameters(upgradeUser, specimenRow, assayRun, dilutionSummary);
+                                            updateCounter++;
+                                        }
+                                        else
+                                            completeCounter++;
                                     }
                                     else
-                                        completeCounter++;
+                                        missingCounter++;
                                 }
                                 else
+                                {
+                                    warn("Unable to find sample input for run: run " + run.getRowId() + ", wellgroup " + dilutionSummary.getFirstWellGroup().getName());
                                     missingCounter++;
-                            }
-                            else
-                            {
-                                warn("Unable to find sample input for run: run " + run.getRowId() + ", wellgroup " + dilutionSummary.getFirstWellGroup().getName());
-                                missingCounter++;
+                                }
                             }
                         }
+                        else
+                            warn("Unable to find dilution results for run: " + run.getRowId());
                     }
-                    else
+                    catch (ExperimentException e)
+                    {
                         warn("Unable to find dilution results for run: " + run.getRowId());
+                        warn(e.getMessage());
+                    }
                 }
 
                 transaction.commit();

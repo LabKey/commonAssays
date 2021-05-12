@@ -28,6 +28,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabAssayProvider;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabDataHandler;
@@ -123,6 +124,8 @@ public class NabModule extends DefaultModule
         AssayFlagHandler.registerHandler(new SinglePlateDilutionNabAssayProvider(), handler);
 
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
+
+        SystemMaintenance.addTask(new NAbPopulateFitParametersTask());
     }
 
     @NotNull
