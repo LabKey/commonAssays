@@ -38,6 +38,8 @@ import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.query.RunListDetailsQueryView;
 import org.labkey.api.assay.query.ResultsQueryView;
 import org.labkey.api.assay.query.RunListQueryView;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
@@ -100,7 +102,9 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
         ElispotRunDataTable table = new ElispotRunDataTable(this, cf, getProtocol());
         if (includeLinkedToStudyColumns)
         {
-            addLinkedToStudyColumns(table, true);
+            ExpProtocol protocol = getProtocol();
+            String rowIdName = getProvider().getTableMetadata(protocol).getResultRowIdFieldKey().getName();
+            StudyPublishService.get().addLinkedToStudyColumns(table, Dataset.PublishSource.Assay, true, protocol.getRowId(), rowIdName, getUser());
         }
         return table;
     }

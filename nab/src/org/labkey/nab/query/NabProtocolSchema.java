@@ -44,6 +44,8 @@ import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
@@ -79,7 +81,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
         if (includeLinkedToStudyColumns)
         {
-            addLinkedToStudyColumns(table, true);
+            ExpProtocol protocol = getProtocol();
+            String rowIdName = getProvider().getTableMetadata(protocol).getResultRowIdFieldKey().getName();
+            StudyPublishService.get().addLinkedToStudyColumns(table, Dataset.PublishSource.Assay, true, protocol.getRowId(), rowIdName, getUser());
         }
         return table;
     }
