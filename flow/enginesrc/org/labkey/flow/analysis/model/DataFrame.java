@@ -15,29 +15,30 @@
  */
 package org.labkey.flow.analysis.model;
 
+import Jama.Matrix;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
-import org.labkey.flow.analysis.data.*;
+import org.labkey.flow.analysis.data.FloatArray;
+import org.labkey.flow.analysis.data.IntArray;
+import org.labkey.flow.analysis.data.NumberArray;
+import org.labkey.flow.analysis.data.SubsetNumberArray;
+import org.labkey.flow.util.KeywordUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-
-import Jama.Matrix;
-import org.labkey.flow.util.KeywordUtil;
 
 
 /**
  * User: mbellew
  * Date: May 2, 2005
- * Time: 3:30:51 PM
  * <p/>
- * DataFrams is much like an R data frame (except all data is type float.
+ * DataFrame is much like an R data frame (except all data is type float.)
  * I created this to factor the functionality in class FCS
  */
 public class DataFrame
@@ -315,6 +316,7 @@ public class DataFrame
     }
 
 
+    /** Represents a parameter in the FCS file. */
     public static class Field
     {
         private String _name;
@@ -328,9 +330,12 @@ public class DataFrame
         private int _origIndex;
 
         private int _range;
+        /** Function to transform raw data in FCS file. */
         private ScalingFunction _scalingFunction;
 
         // display/graphing hints (these do not affect the dataframe directly)
+        /** Hint from cytometer on displaying the values. */
+        private FCSHeader.ParameterDisplay _display;
 
         // for FlowJo compatibility use simple log axis (for uncompensated integer mode data)
         private boolean _simpleLogAxis = false;
@@ -363,6 +368,7 @@ public class DataFrame
             _range = other._range;
             _simpleLogAxis = other._simpleLogAxis;
             _scalingFunction = scalingFunction;
+            _display = other._display;
             _description = other.getDescription();
             _precompensated = other._precompensated;
         }
@@ -378,6 +384,7 @@ public class DataFrame
             _name = composeName(_baseName, _prefix, _suffix);
             _range = other._range;
             _scalingFunction = other._scalingFunction;
+            _display = other._display;
             _description = other._description;
             initAliases(false);
         }
@@ -474,6 +481,16 @@ public class DataFrame
         public boolean isLogarithmic()
         {
             return _scalingFunction.isLogarithmic();
+        }
+
+        public void setParameterDisplay(FCSHeader.ParameterDisplay display)
+        {
+            _display = display;
+        }
+
+        public FCSHeader.ParameterDisplay getParameterDisplay()
+        {
+            return _display;
         }
 
         public boolean isPrecompensated()

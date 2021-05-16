@@ -23,9 +23,10 @@ import org.labkey.flow.analysis.data.DoubleArray;
 import static java.lang.Math.max;
 
 /**
+ * ScalingFunction transforms the raw data into scaled data; it is not used for display.
+ *
  * User: mbellew
  * Date: May 2, 2005
- * Time: 3:08:10 PM
  */
 public abstract class ScalingFunction implements Cloneable
 {
@@ -43,10 +44,7 @@ public abstract class ScalingFunction implements Cloneable
 	{
 		ScalingFunction fn;
 		if (decade > 0)
-            //if (fcsVersion == 2.0 || bits < 32)
-                fn = new LogarithmicFunction(decade, scale, range);
-            //else
-            //    fn = new LogicleFunction(4.5, 1.0, -10.0, 0);
+			fn = new LogarithmicFunction(decade, scale, range);
 		else if (scale == 0 || scale == 1)
 			fn = new IdentityFunction();
 		else

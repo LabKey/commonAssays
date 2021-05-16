@@ -19,9 +19,9 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.data.Range;
-import org.labkey.flow.analysis.util.LogAxisFunction;
+import org.labkey.flow.analysis.util.LogRangeFunction;
 import org.labkey.flow.analysis.util.RangeFunction;
-import org.labkey.flow.analysis.util.SimpleLogAxisFunction;
+import org.labkey.flow.analysis.util.SimpleLogRangeFunction;
 
 import java.awt.geom.Rectangle2D;
 import java.text.NumberFormat;
@@ -32,8 +32,9 @@ import java.text.ParsePosition;
 public class FlowLogarithmicAxis extends LogarithmicAxis
 {
     static public final int LOG_LIN_SWITCH = 50;
-    static LogAxisFunction loglinFN = new LogAxisFunction(LOG_LIN_SWITCH);
-    static SimpleLogAxisFunction simpleFN = new SimpleLogAxisFunction();
+    static final LogRangeFunction LOGLIN_FN = new LogRangeFunction(LOG_LIN_SWITCH);
+    static final SimpleLogRangeFunction SIMPLE_LOG_FN = new SimpleLogRangeFunction();
+
     final RangeFunction fn;
 
     private class TickFormat extends NumberFormat
@@ -61,15 +62,20 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     public FlowLogarithmicAxis(String label, boolean simpleLog)
     {
+        this(label, simpleLog ? SIMPLE_LOG_FN : LOGLIN_FN);
+    }
+
+    public FlowLogarithmicAxis(String label, RangeFunction fn)
+    {
         super(label);
         setAllowNegativesFlag(true);
         setNumberFormatOverride(new TickFormat());
-        fn = simpleLog ? simpleFN : loglinFN;
+        this.fn = fn;
     }
 
     public boolean isSimpleLog()
     {
-        return fn == simpleFN;
+        return fn == SIMPLE_LOG_FN;
     }
 
     /**
@@ -79,7 +85,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
     @Override
     protected void setupSmallLogFlag()
     {
-        if (fn == simpleFN)
+        if (isSimpleLog())
         {
             double lowerVal = getRange().getLowerBound();
             this.smallLogFlag
@@ -119,7 +125,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
             tester = tester / 10;
             power++;
         }
-        if (fn == loglinFN && power < 2)
+        if (!isSimpleLog() && power < 2)
             return "";
         if (tester == 1)
             return (neg ? "-" : "") + "10^" + power;
@@ -131,7 +137,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
     @Override
     protected double switchedLog10(double val)
     {
-        return fn == loglinFN ?
+        return !isSimpleLog() ?
                 super.switchedLog10(val) :
                 (this.smallLogFlag) ? s_adjustedLog10(val-1) : s_adjustedLog10(val);
     }

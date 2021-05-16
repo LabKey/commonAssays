@@ -19,13 +19,16 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.chart.axis.ColorBar;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYDotRenderer;
-import org.jfree.data.xy.XYDataset;
 import org.labkey.api.arrays.DoubleArray;
 import org.labkey.api.data.statistics.MathStat;
-import org.labkey.api.view.Stats;
-import org.labkey.flow.analysis.model.*;
+import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.DataFrame;
+import org.labkey.flow.analysis.model.FCSHeader;
+import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.analysis.model.ScalingFunction;
+import org.labkey.flow.analysis.model.Subset;
+import org.labkey.flow.analysis.util.LinearRangeFunction;
+import org.labkey.flow.analysis.util.LogicleRangeFunction;
 import org.labkey.flow.analysis.util.RangeFunction;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
@@ -47,32 +50,25 @@ public class PlotFactory
      * Return a set of buckets usable for binning a dataset.
      * @param minValue min value
      * @param maxValue max value
-     * @param fLogarithmic whether the buckets should be logarithmically spaced
      * @param bucketCount The maximum number of buckets
+     * @param fn function used to space the buckets
      * @return
      */
-    static public double[] getPossibleValues(double minValue, double maxValue, boolean fLogarithmic, boolean simpleLog, int bucketCount)
+    static public double[] getPossibleValues(double minValue, double maxValue, int bucketCount, RangeFunction fn)
     {
         // Allow for ranges smaller than the default bucket count.
         // The Time parameter may be scaled by gain 0.01 reducing the range to 0-40.
         int cBuckets = (int) Math.min(maxValue - minValue, bucketCount);
         double[] ret = new double[cBuckets];
 
-        int i = 0;
+        final double min = fn.compute(minValue);
+        final double max = fn.compute(maxValue);
+        final double width = max - min;
 
-        RangeFunction fn = !fLogarithmic ? null : simpleLog ? FlowLogarithmicAxis.simpleFN : FlowLogarithmicAxis.loglinFN;
-        
-        for (; i < cBuckets; i ++)
+        for (int i = 0; i < cBuckets; i ++)
         {
-            if (fLogarithmic)
-            {
-                double x = (fn.compute(maxValue) - fn.compute(minValue)) * i / cBuckets + fn.compute(minValue);
-                ret[i] = fn.invert(x);
-            }
-            else
-            {
-                ret[i] = minValue + (i * (maxValue - minValue)) / cBuckets;
-            }
+            double x = ((width * i) / cBuckets) + min;
+            ret[i] = fn.invert(x);
         }
         return ret;
     }
@@ -80,49 +76,69 @@ public class PlotFactory
 
     static double[] getPossibleValues(Subset subset, DataFrame.Field field, int maxCount)
     {
-        double max = field.getMaxValue();
+        RangeFunction fn = getRangeFunction(subset, field);
+        double min = fn.getMin();
+        double max = fn.getMin();
+        return getPossibleValues(min, max, maxCount, fn);
+    }
+
+    protected static RangeFunction getRangeFunction(Subset subset, DataFrame.Field field)
+    {
+        // TODO: get transform parameters and range from FlowJo's Sample's <Transformations> element
         double min = field.getMinValue();
+        double max = field.getMaxValue();
 
-        if (field.isTimeChannel())
+        if (displayLogarithmic(field))
         {
-            Subset root = subset;
-            while (root.getParent() != null)
-                root = root.getParent();
-
-            // UNDONE: Share this rootStatsMap
-            Map<String, MathStat> rootStatsMap = new HashMap<>();
-            min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
-
-            max = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Max, field.getName()), rootStatsMap);
+            // TODO: support other: old simple Log, old LinLog, BiEx, ArcSinH, Hyperlog
+            // TODO: use FCSHeader.LogarithmicParameterDisplay display hint to set up Logicle
+            return new LogicleRangeFunction(min, max);
         }
-        boolean logarithmic = displayLogarithmic(subset, field);
-        boolean simpleLog = logarithmic && field.isSimpleLogAxis();
-        return getPossibleValues(min, max, logarithmic, simpleLog, maxCount);
+        else
+        {
+            double gain = subset.getFCSHeader().getParameterGain(field.getOrigIndex());
+            var pd = field.getParameterDisplay();
+            if (pd instanceof FCSHeader.LinearParameterDisplay)
+            {
+                min = ((FCSHeader.LinearParameterDisplay)pd).getLowerBound();
+                max = ((FCSHeader.LinearParameterDisplay)pd).getUpperBound();
+            }
+
+            if (field.isTimeChannel())
+            {
+                Subset root = subset;
+                while (root.getParent() != null)
+                    root = root.getParent();
+
+                // UNDONE: Share this rootStatsMap
+                Map<String, MathStat> rootStatsMap = new HashMap<>();
+                min = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Min, field.getName()), rootStatsMap);
+                max = StatisticSpec.calculate(root, new StatisticSpec(null, StatisticSpec.STAT.Max, field.getName()), rootStatsMap);
+
+                gain = 1.0d;
+            }
+
+            return new LinearRangeFunction(min, max, gain);
+        }
     }
 
-
-    static protected boolean displayLogarithmic(Subset subset, DataFrame.Field field)
+    static protected boolean displayLogarithmic(DataFrame.Field field)
     {
-        String strDisplay = subset.getFCSHeader().getKeyword("P" + (field.getOrigIndex() + 1) + "DISPLAY");
-        if (strDisplay != null)
-        {
-            if ("LOG".equals(strDisplay))
-                return true;
-            if ("LIN".equals(strDisplay))
-                return false;
-        }
+        // FCS3.1 "$PnD" parameter display
+        var pd = field.getParameterDisplay();
+        if (pd instanceof FCSHeader.LogrithmicParameterDisplay)
+            return true;
+
+        // FCS2.0 and FCS3.0
         ScalingFunction scale = field.getScalingFunction();
-        if (scale == null || !scale.isLogarithmic())
-            return false;
-        return true;
+        return scale != null && scale.isLogarithmic();
     }
 
-
-    static private ValueAxis getValueAxis(Subset subset, String name, DataFrame.Field field)
+    static private ValueAxis getValueAxis(String name, RangeFunction fn)
     {
-        if (!displayLogarithmic(subset, field))
-            return new NumberAxis(name);
-        return new FlowLogarithmicAxis(name, field.isSimpleLogAxis());
+        return fn.isLogarithmic() ?
+                new FlowLogarithmicAxis(name, fn) :
+                new FlowLinearAxis(name);
     }
 
 
@@ -182,8 +198,13 @@ public class PlotFactory
         DataFrame data = subset.getDataFrame();
         DataFrame.Field fieldDomain = getField(data, domainAxis);
         DataFrame.Field fieldRange = getField(data, rangeAxis);
-        double[] xValues = getPossibleValues(subset, fieldDomain, MAX_DENSITY_BUCKETS);
-        double[] yValues = getPossibleValues(subset, fieldRange, MAX_DENSITY_BUCKETS);
+
+        RangeFunction fnDomain = getRangeFunction(subset, fieldDomain);
+        RangeFunction fnRange = getRangeFunction(subset, fieldRange);
+
+        double[] xValues = getPossibleValues(fnDomain.getMin(), fnDomain.getMax(), MAX_DENSITY_BUCKETS, fnDomain);
+        double[] yValues = getPossibleValues(fnRange.getMin(), fnRange.getMax(), MAX_DENSITY_BUCKETS, fnRange);
+
         DensityDataset cds = new DensityDataset(
                 DatasetFactory.createXYDataset(subset.getDataFrame(), fieldDomain.getIndex(), fieldRange.getIndex()),
                 xValues,
@@ -191,8 +212,8 @@ public class PlotFactory
         ColorBar bar = new DensityColorBar("");
         bar.setColorPalette(new DensityColorPalette());
         DensityPlot plot = new DensityPlot(cds,
-                getValueAxis(subset, getLabel(subset, domainAxis), fieldDomain),
-                getValueAxis(subset, getLabel(subset, rangeAxis), fieldRange),
+                getValueAxis(getLabel(subset, domainAxis), fnDomain),
+                getValueAxis(getLabel(subset, rangeAxis), fnRange),
                 bar);
         plot.setDomainCrosshairLockedOnData(false);
         plot.setRangeCrosshairLockedOnData(false);
@@ -228,32 +249,15 @@ public class PlotFactory
         return z[index];
     }
     
-    static public XYPlot createScatterPlot(Subset subset, String domainAxis, String rangeAxis)
-    {
-        DataFrame data = subset.getDataFrame();
-        DataFrame.Field fieldDomain = getField(data, domainAxis);
-        DataFrame.Field fieldRange = getField(data, rangeAxis);
-        XYDataset dataset = DatasetFactory.createXYDataset(data, fieldDomain.getIndex(), fieldRange.getIndex());
-        return new XYPlot(dataset, getValueAxis(subset, domainAxis, fieldDomain), getValueAxis(subset, rangeAxis, fieldRange), new XYDotRenderer());
-    }
-
     static public HistPlot createHistogramPlot(Subset subset, String axis)
     {
         DataFrame data = subset.getDataFrame();
         DataFrame.Field field = getField(data, axis);
-        double[] bins = getPossibleValues(subset, field, MAX_HISTOGRAM_BUCKETS);
+        RangeFunction fn = getRangeFunction(subset, field);
+        double[] bins = getPossibleValues(fn.getMin(), fn.getMax(), MAX_HISTOGRAM_BUCKETS, fn);
         HistDataset dataset = new HistDataset(bins, data.getColumn(axis));
 
-        NumberAxis xAxis;
-
-        if (displayLogarithmic(subset, field))
-        {
-            xAxis = new FlowLogarithmicAxis(getLabel(subset, axis), field.isSimpleLogAxis());
-        }
-        else
-        {
-            xAxis = new NumberAxis(getLabel(subset, axis));
-        }
+        ValueAxis xAxis = getValueAxis(getLabel(subset, axis), fn);
 
         ValueAxis yAxis = new NumberAxis("Count");
         double yMax = 0;

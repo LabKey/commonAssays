@@ -19,10 +19,16 @@ package org.labkey.flow.analysis.util;
 /**
  * User: matthewb
  * Date: Sep 13, 2007
- * Time: 2:35:11 PM
  */
 public interface RangeFunction
 {
+    double LOG_10_FACTOR = 1.0/Math.log(10);
+
+    double getMin();
+    double getMax();
+
+    boolean isLogarithmic();
     double compute(double range);
     double invert(double domain);
 }
+
