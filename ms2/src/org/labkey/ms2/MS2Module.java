@@ -17,7 +17,6 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
@@ -48,7 +47,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
-import org.labkey.ms2.matrix.ProteinExpressionMatrixAssayProvider;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
 import org.labkey.ms2.matrix.ProteinExpressionMatrixExperimentListener;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -256,14 +254,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
-
-        AssayService svc = AssayService.get();
-
-        // Assay module might not be present, #29772
-        if (null != svc)
-        {
-            svc.registerAssayProvider(new ProteinExpressionMatrixAssayProvider());
-        }
 
         SearchService ss = SearchService.get();
 
