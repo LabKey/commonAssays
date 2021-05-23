@@ -39,7 +39,6 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.UsageReportingLevel;
 import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -49,6 +48,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.util.LogicleRangeFunction;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetParser;
 import org.labkey.flow.analysis.web.SubsetTests;
@@ -320,7 +320,8 @@ public class FlowModule extends SpringModule
             PopulationName.NameTests.class,
             StatisticSpec.TestCase.class,
             SubsetParser.TestLexer.class,
-            SubsetTests.class
+            SubsetTests.class,
+            LogicleRangeFunction.TestCase.class
         );
     }
 
