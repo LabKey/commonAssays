@@ -17,24 +17,19 @@
 package org.labkey.flow.analysis.chart;
 
 import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.ui.RectangleEdge;
 import org.jfree.data.Range;
-import org.labkey.flow.analysis.util.LogRangeFunction;
+import org.jfree.ui.RectangleEdge;
 import org.labkey.flow.analysis.util.RangeFunction;
 import org.labkey.flow.analysis.util.SimpleLogRangeFunction;
 
 import java.awt.geom.Rectangle2D;
-import java.text.NumberFormat;
 import java.text.FieldPosition;
+import java.text.NumberFormat;
 import java.text.ParsePosition;
 
 
 public class FlowLogarithmicAxis extends LogarithmicAxis
 {
-    static public final int LOG_LIN_SWITCH = 50;
-    static final LogRangeFunction LOGLIN_FN = new LogRangeFunction(LOG_LIN_SWITCH);
-    static final SimpleLogRangeFunction SIMPLE_LOG_FN = new SimpleLogRangeFunction();
-
     final RangeFunction fn;
 
     private class TickFormat extends NumberFormat
@@ -59,12 +54,6 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     }
 
-
-    public FlowLogarithmicAxis(String label, boolean simpleLog)
-    {
-        this(label, simpleLog ? SIMPLE_LOG_FN : LOGLIN_FN);
-    }
-
     public FlowLogarithmicAxis(String label, RangeFunction fn)
     {
         super(label);
@@ -75,7 +64,7 @@ public class FlowLogarithmicAxis extends LogarithmicAxis
 
     public boolean isSimpleLog()
     {
-        return fn == SIMPLE_LOG_FN;
+        return fn instanceof SimpleLogRangeFunction;
     }
 
     /**

@@ -26,16 +26,25 @@ import java.io.Serializable;
  */
 public class SimpleLogRangeFunction implements RangeFunction, Serializable
 {
+    private final double _min;
+    private final double _max;
+
+    public SimpleLogRangeFunction(double min, double max)
+    {
+        this._min = min;
+        this._max = max;
+    }
+
     @Override
     public double getMin()
     {
-        return 0;
+        return _min;
     }
 
     @Override
     public double getMax()
     {
-        return 0;
+        return _max;
     }
 
     @Override

@@ -28,8 +28,10 @@ import org.labkey.flow.analysis.model.FlowException;
 import org.labkey.flow.analysis.model.ScalingFunction;
 import org.labkey.flow.analysis.model.Subset;
 import org.labkey.flow.analysis.util.LinearRangeFunction;
+import org.labkey.flow.analysis.util.LogRangeFunction;
 import org.labkey.flow.analysis.util.LogicleRangeFunction;
 import org.labkey.flow.analysis.util.RangeFunction;
+import org.labkey.flow.analysis.util.SimpleLogRangeFunction;
 import org.labkey.flow.analysis.web.StatisticSpec;
 
 import java.awt.*;
@@ -90,9 +92,23 @@ public class PlotFactory
 
         if (displayLogarithmic(field))
         {
-            // TODO: support other: old simple Log, old LinLog, BiEx, ArcSinH, Hyperlog
-            // TODO: use FCSHeader.LogarithmicParameterDisplay display hint to set up Logicle
-            return new LogicleRangeFunction(min, max);
+            if (field.isSimpleLogAxis())
+            {
+                return new SimpleLogRangeFunction(min, max);
+            }
+            else
+            {
+                // TODO: need a better check for loglin vs. logicle
+                var version = subset.getFCSHeader().getVersionNumber();
+                if (version != null && 2 == version.getMajor())
+                {
+                    return new LogRangeFunction(LogRangeFunction.LOG_LIN_SWITCH, min, max);
+                }
+
+                // TODO: support other: old simple Log, old LinLog, BiEx, ArcSinH, Hyperlog
+                // TODO: use FCSHeader.LogarithmicParameterDisplay display hint to set up Logicle
+                return new LogicleRangeFunction(min, max);
+            }
         }
         else
         {

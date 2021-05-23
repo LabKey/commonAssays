@@ -2,6 +2,7 @@ package org.labkey.flow.analysis.util;
 
 import edu.stanford.facs.transform.Logicle;
 import org.junit.Test;
+import org.labkey.flow.analysis.model.FlowException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,7 +35,15 @@ public class LogicleRangeFunction extends AbstractRangeFunction
     @Override
     public double compute(double range)
     {
-        return _logicle.scale(range);
+        try
+        {
+            return _logicle.scale(range);
+        }
+        catch (IllegalStateException e)
+        {
+            throw new FlowException(String.format("Error scaling '%f' for Logicle(T=%f, W=%f, M=%f, A=%f): " + e.getMessage(),
+                    range, _logicle.T, _logicle.W, _logicle.M, _logicle.A), e);
+        }
     }
 
     @Override

@@ -24,14 +24,18 @@ import java.io.Serializable;
  */
 public class LogRangeFunction implements RangeFunction, Serializable
 {
+    static public final int LOG_LIN_SWITCH = 50;
+
     private final double logLinSwitch;
+    private final double min;
+    private final double max;
 
     // precomputed constants
     private final double intersect;
     private final double scale;
     private final double adjust;
 
-    public LogRangeFunction(double logLinSwitch)
+    public LogRangeFunction(double logLinSwitch, double min, double max)
     {
         if (logLinSwitch < 0)
             throw new IllegalStateException("logLinSwitch not set");
@@ -40,6 +44,9 @@ public class LogRangeFunction implements RangeFunction, Serializable
         intersect = 1/Math.log(10);                 // == log10(E) == .4343
         scale = intersect/logLinSwitch;             // magic slope to make 1st derivative continuous
         adjust = intersect - log10(logLinSwitch);
+
+        this.min = min;
+        this.max = max;
     }
 
     @Override
@@ -51,13 +58,13 @@ public class LogRangeFunction implements RangeFunction, Serializable
     @Override
     public double getMin()
     {
-        return 0;
+        return min;
     }
 
     @Override
     public double getMax()
     {
-        return 0;
+        return max;
     }
 
     @Override
