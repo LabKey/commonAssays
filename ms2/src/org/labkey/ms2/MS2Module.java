@@ -47,8 +47,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
-import org.labkey.ms2.matrix.ProteinExpressionMatrixDataHandler;
-import org.labkey.ms2.matrix.ProteinExpressionMatrixExperimentListener;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
 import org.labkey.ms2.pipeline.MS2PipelineProvider;
 import org.labkey.ms2.pipeline.PipelineController;
@@ -242,10 +240,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
         ExperimentService.get().registerExperimentDataHandler(new PepXmlExperimentDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new ProteinProphetExperimentDataHandler());
-        ExperimentService.get().registerExperimentDataHandler(new ProteinExpressionMatrixDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new MascotDatExperimentDataHandler());
-
-        ExperimentService.get().addExperimentListener(new ProteinExpressionMatrixExperimentListener());
 
         ContainerManager.addContainerListener(new MS2ContainerListener());
         FolderTypeManager.get().registerFolderType(this, new MS2FolderType(this));
