@@ -33,7 +33,7 @@ public class KeywordUtil
     private static final String KEYWORD_SPILL = "SPILL";
     private static final String KEYWORD_SPILLOVER = "$SPILLOVER";
     private static final String KEYWORD_DFC1TO2 = "$DFC1TO2";
-    private static Pattern hiddenKeyword = Pattern.compile("^(" +
+    private static final Pattern hiddenKeyword = Pattern.compile("^(" +
             "\\$BEGINANALYSIS|\\$BEGINDATA|\\$BEGINSTEXT|" +
             "\\$ENDANALYSIS|\\$ENDDATA|\\$ENDSTEXT|" +
             "\\$BYTEORD|\\$DATATYPE|\\$MODE|\\$NEXTDATA|" +
@@ -41,7 +41,7 @@ public class KeywordUtil
             "P\\d+DISPLAY|" +
             "P\\d+BS|" +
             "P\\d+MS|" +
-            "\\$ABRT|\\$BTIM|\\$ETIM|" +
+            "\\$ABRT|\\$TR|\\$BTIM|\\$ETIM|" +
             "\\$CSMODE|\\$CSVBITS|" +
             "\\$CSV\\d+FLAG|" +
             "\\$GATING|\\$LOST|" +
@@ -53,16 +53,12 @@ public class KeywordUtil
             "\\$LASER\\d+.*|" +
             "LASER\\d+.*|" +
             "\\$TIMESTEP|" +
-            "FJ_\\$.*|" +
-            "FJ_FCS_VERSION|" +
-            "BD\\$.*|" +
             "CST .*|" +
             "SPILL|" +
             "\\$SPILLOVER|" +
             "\\$COMP|" +
             "\\$DFC\\d+TO\\d+|" +
             "APPLY COMPENSATION|" +
-            "CREATOR|" +
             "\\$CYT|\\$SYS|" +
             "FSC ASF|" +
             "THRESHOLD|" +
@@ -70,7 +66,52 @@ public class KeywordUtil
             "GUID|" +
             "SETTINGS|" +
             "CYTNUM|" +
+
+            // FlowJo
+            "FJ_\\$.*|" +
+            "FJ_FCS_VERSION|" +
+
+            // BD FACS Aria II
             "CYTOMETER CONFIG .*|" +
+            "CREATOR|" +
+            "BD\\$.*|" +
+
+            // Cytek
+            "CYTEK.*|" +
+            "FJ\\$ACQSTATE|" +
+
+            // NovoCyte FCS files
+            "#NC.*|" +
+
+            // Accuri 6
+            "#CFLOW.*|" +
+            "#P\\d+VirtualGain|" +
+            "#P\\d+MaxUsefulDataChannel|" +
+            "#ATIM|#ACQUISITIONTIMEMILLI|#SPACERS|" +
+
+            // BioConductor flowCore
+            "flowCore_.*|" +
+            "ORIGINALGUID|" +
+            "FCSVersion|" +
+            "transformation|" +
+
+            // MACSQuantify
+            "\\$CYTSN|" +
+
+            // Aurora
+            "USERSETTINGNAME|" +
+            "CHARSET|" +
+            "GROUPNAME|" +
+
+            // inFlux
+            "FIRMWAREVERSION|" +
+            "NOZZLEDIAMETER|" +
+            "NUMSORTWAYS|" +
+            "SHEATHPRESSURE|" +
+            "UPTOPEXBUILD|" +
+            "VOLTAGECHANGED|" +
+            "P\\d+dCHANNELTYPE|" +
+
             "WINDOW EXTENSION)$", Pattern.CASE_INSENSITIVE);
 
     private static final Set<String> sideScatterNames = Sets.newCaseInsensitiveHashSet(

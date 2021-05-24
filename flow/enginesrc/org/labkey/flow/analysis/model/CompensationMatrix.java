@@ -796,6 +796,9 @@ public class CompensationMatrix implements Serializable
         {
             File fcsFile = JunitUtil.getSampleData(null, "flow/FCS/version3_1_spillover.fcs");
             FCS fcs = new FCS(fcsFile);
+            assertEquals(3, fcs.getVersionNumber().getMajor());
+            assertEquals(1, fcs.getVersionNumber().getMinor());
+
             Date d = fcs.getDateTime();
             // verify the date is correct
             assertEquals("2016-07-06 09:50:22", DateUtil.formatDateTime(d, "YYYY-MM-dd HH:mm:ss"));

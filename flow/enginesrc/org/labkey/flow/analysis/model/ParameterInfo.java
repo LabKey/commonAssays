@@ -65,11 +65,10 @@ public class ParameterInfo implements Serializable
 
         ParameterInfo paramInfo = new ParameterInfo(paramName);
         paramInfo._multiplier = 1d;
-        String paramDisplay = keywords.get("P" + (index+1) + "DISPLAY");
-        String paramRange = keywords.get("$P" + (index+1) + "R");
+        String paramDisplay = FCSHeader.getParameterLegacyDisplay(keywords, index);
         if ("LIN".equals(paramDisplay))
         {
-            double range = Double.valueOf(paramRange).doubleValue();
+            double range = FCSHeader.getParameterRange(keywords, index);
             if (range > 4096)
             {
                 paramInfo._multiplier = range/4096;

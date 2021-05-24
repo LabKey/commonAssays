@@ -17,14 +17,16 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.Pair;
+import org.labkey.api.util.VersionNumber;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.flow.util.KeywordUtil;
 import org.xml.sax.ContentHandler;
@@ -54,6 +56,7 @@ public class FCSHeader
     int _parameterCount;
     char chDelimiter;
     String version;
+    VersionNumber _versionNumber;
     File _file;
     CompensationMatrix spillMatrix;
 
@@ -83,9 +86,25 @@ public class FCSHeader
         return _file;
     }
 
+    public String getVersion()
+    {
+        return version;
+    }
+
+    @Nullable
+    public VersionNumber getVersionNumber()
+    {
+        return _versionNumber;
+    }
+
     public String getKeyword(String key)
     {
         return keywords.get(key);
+    }
+
+    public String getCytometer()
+    {
+        return getKeyword("$CYT");
     }
 
     /** Get the i-th parameter name where i is 0-based. */
@@ -208,6 +227,200 @@ public class FCSHeader
         return StringUtils.trimToNull(keywords.get("$P" + (index+1) + "S"));
     }
 
+    public int getParameterBitCount(int i)
+    {
+        return getParameterBitCount(keywords, i);
+    }
+
+    public static int getParameterBitCount(Map<String, String> keywords, int i)
+    {
+        String B = StringUtils.trimToNull(keywords.get("$P" + (i+1) + "B"));
+        if (B == null)
+            throw new IllegalStateException("$P" + (i+i) + "B keyword is required");
+
+        return Integer.parseInt(B);
+    }
+
+    public double getParameterRange(int i)
+    {
+        return getParameterRange(keywords, i);
+    }
+
+    public static double getParameterRange(Map<String, String> keywords, int i)
+    {
+        String R = StringUtils.trimToNull(keywords.get("$P" + (i+1) + "R"));
+        if (R == null)
+            throw new IllegalStateException("$P" + (i+i) + "R keyword is required");
+
+        return Double.parseDouble(R);
+    }
+
+    public Pair<Double, Double> getParameterLogAmplification(int i)
+    {
+        String E = getKeyword("$P" + (i+1) + "E");
+        if (E == null)
+            throw new IllegalStateException("$P" + (i+i) + "E keyword is required");
+
+        double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
+        double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
+        return Pair.of(decade, scale);
+    }
+
+    public double getParameterGain(int i)
+    {
+        return getParameterGain(keywords, i);
+    }
+
+    public static double getParameterGain(Map<String, String> keywords, int i)
+    {
+        double gain = 1.0;
+        String gainStr = StringUtils.trimToNull(keywords.get("$P" + (i+1) + "G"));
+        if (gainStr != null)
+            gain = Double.parseDouble(gainStr);
+        if (gain <= 0)
+            gain = 1.0;
+        return gain;
+    }
+
+    public enum ParameterDisplayType
+    {
+        Linear {
+            @Override
+            public ParameterDisplay create(float lower, float upper)
+            {
+                return new LinearParameterDisplay(lower, upper);
+            }
+        },
+        Logarithmic {
+            @Override
+            public ParameterDisplay create(float decades, float offset)
+            {
+                return new LogrithmicParameterDisplay(decades, offset);
+            }
+        };
+
+        public abstract ParameterDisplay create(float f1, float f2);
+
+        @Nullable
+        public static ParameterDisplayType fromDisplayParameter(@Nullable String display)
+        {
+            if (display == null)
+                return null;
+
+            if (display.equalsIgnoreCase("lin") || display.equalsIgnoreCase("linear"))
+                return ParameterDisplayType.Linear;
+
+            if (display.equalsIgnoreCase("log") || display.equalsIgnoreCase("logarithmic"))
+                return ParameterDisplayType.Logarithmic;
+
+            return null;
+        }
+    }
+
+    public abstract static class ParameterDisplay
+    {
+        protected final float _f1;
+        protected final float _f2;
+
+        public abstract ParameterDisplayType getType();
+
+        protected ParameterDisplay(float f1, float f2)
+        {
+            _f1 = f1;
+            _f2 = f2;
+        }
+    }
+
+    public static class LinearParameterDisplay extends ParameterDisplay
+    {
+        private LinearParameterDisplay(float lower, float upper)
+        {
+            super(lower, upper);
+        }
+
+        @Override
+        public ParameterDisplayType getType() { return ParameterDisplayType.Linear; }
+
+        public float getLowerBound() { return _f1; }
+        public float getUpperBound() { return _f2; }
+    }
+
+    public static class LogrithmicParameterDisplay extends ParameterDisplay
+    {
+        private LogrithmicParameterDisplay(float decades, float offset)
+        {
+            super(decades, offset);
+        }
+
+        @Override
+        public ParameterDisplayType getType() { return ParameterDisplayType.Logarithmic; }
+
+        public float getDecades() { return _f1; }
+        public float getOffset() { return _f2; }
+    }
+
+    /**
+     * Determine the parameter display from the "$PnD" or "PnDISPLAY" keywords.
+     */
+    @Nullable
+    public ParameterDisplay getParameterDisplay(int index)
+    {
+        String pStr = StringUtils.trimToNull(keywords.get("$P" + (index+1) + "D"));
+        if (pStr == null)
+            pStr = getParameterLegacyDisplay(keywords, index);
+        if (pStr == null)
+            return null;
+
+        String[] parts = pStr.split(",");
+        if (parts.length == 0)
+            return null;
+
+        ParameterDisplayType type = ParameterDisplayType.fromDisplayParameter(parts[0]);
+        if (type == ParameterDisplayType.Linear)
+        {
+            float lower = 0.0f;
+            float upper = (float) getParameterRange(index);
+            if (parts.length > 2)
+            {
+                lower = Float.parseFloat(parts[1]);
+                upper = Float.parseFloat(parts[2]);
+            }
+            return new LinearParameterDisplay(lower, upper);
+        }
+        else if (type == ParameterDisplayType.Logarithmic)
+        {
+            if (parts.length > 2)
+            {
+                float decades = Float.parseFloat(parts[1]);
+                float offset = Float.parseFloat(parts[2]);
+                return new LogrithmicParameterDisplay(decades, offset);
+            }
+            else
+            {
+                // unsure about what to use for the log display
+                return new LogrithmicParameterDisplay(5, 1);
+            }
+        }
+
+        return null;
+    }
+
+
+    /** Get the i-th parameter "PnDISPLAY" keyword, where i is 0-based. */
+    public String getParameterLegacyDisplay(int index)
+    {
+        return getParameterLegacyDisplay(keywords, index);
+    }
+
+    /** Get the i-th parameter "PnDISPLAY" keyword, where i is 0-based. */
+    public static String getParameterLegacyDisplay(Map<String, String> keywords, int index)
+    {
+        String s = StringUtils.trimToNull(keywords.get("P" + (index+1) + "DISPLAY"));
+        if (s != null)
+            return s;
+        return StringUtils.trimToNull(keywords.get((index+1) + "DISPLAY"));
+    }
+
     // UNDONE: $SPILL, SPILLOVER, COMP, $COMP
     public static boolean hasSpillKeyword(Map<String, String> keywords)
     {
@@ -236,6 +449,8 @@ public class FCSHeader
             String header = new String(headerBuf);
 
             version = header.substring(0, 6).trim();
+            if (version.startsWith("FCS"))
+                _versionNumber = new VersionNumber(version.substring(3));
             textOffset = Integer.parseInt(header.substring(10, 18).trim());
             textLast = Integer.parseInt(header.substring(18, 26).trim());
             dataOffset = Integer.parseInt(header.substring(26, 34).trim());
@@ -302,43 +517,25 @@ public class FCSHeader
     protected DataFrame createDataFrame(float[][] data, int[] bitCounts)
     {
         boolean datatypeI = "I".equals(getKeyword("$DATATYPE"));
-        boolean facsCalibur = "FACSCalibur".equals(getKeyword("$CYT"));
+        boolean facsCalibur = "FACSCalibur".equals(getCytometer());
 
         CompensationMatrix comp = getSpill();
         int count = getParameterCount();
         DataFrame.Field[] fields = new DataFrame.Field[count];
         for (int i = 0; i < count; i++)
         {
-            String key = "$P" + (i + 1);
             String name = getParameterName(i);
-            int bits = bitCounts != null ? bitCounts[i] : Integer.parseInt(getKeyword(key + "B"));
-            double range = Double.parseDouble(getKeyword(key + "R"));
-            String E = getKeyword(key + "E");
-            double decade = Double.parseDouble(E.substring(0, E.indexOf(',')));
-            double scale = Double.parseDouble(E.substring(E.indexOf(',') + 1));
+            int bits = bitCounts != null ? bitCounts[i] : getParameterBitCount(i);
+            double range = getParameterRange(i);
+
+            var E = getParameterLogAmplification(i);
+            double decade = E.first;
+            double scale = E.second;
             if (scale <= 0)
                 scale = 1;
 
             // Gain linear amplifier
-            double gain = 1.0;
-            String gainStr = getKeyword(key + "G");
-            if (gainStr != null)
-                gain = Double.parseDouble(gainStr);
-            if (gain <= 0)
-                gain = 1.0;
-
-            // UNDONE: Issue 14170: We need to scale the Time channel
-            /*
-            if (KeywordUtil.isTimeChannel(name))
-            {
-                long duration = getDuration();
-                if (duration != 0)
-                {
-                    range = duration;
-                    gain = 1.0;
-                }
-            }
-            */
+            double gain = getParameterGain(i);
 
             boolean simpleLog = false;
             
@@ -360,9 +557,12 @@ public class FCSHeader
                 scale = gain;
             }
 
+            ParameterDisplay display = getParameterDisplay(i);
+
             DataFrame.Field f = new DataFrame.Field(i, name, (int) range);
             f.setDescription(getParameterDescription(i));
             f.setScalingFunction(ScalingFunction.makeFunction(decade, scale, range));
+            f.setParameterDisplay(display);
             f.setSimpleLogAxis(simpleLog);
 
             if (datatypeI)
@@ -422,10 +622,8 @@ public class FCSHeader
             if (buf.length < 58)
                 return false;
 
-            if(!FCS.isSupportedVersion(buf))
-            {
+            if (!FCS.isSupportedVersion(buf))
                 return false;
-            }
 
             String header = new String(buf, 0, 58);
 
@@ -467,11 +665,7 @@ public class FCSHeader
             {
                 String k = e.getKey();
                 String v = e.getValue();
-                if (k.startsWith("$"))
-                    continue;
-                if (k.startsWith("P") && k.endsWith("DISPLAY"))
-                    continue;
-                if (k.equals("SPILL"))
+                if (KeywordUtil.isHidden(k))
                     continue;
                 sb.setLength(0);
                 sb.append(k).append(" ").append(v).append("\n");
