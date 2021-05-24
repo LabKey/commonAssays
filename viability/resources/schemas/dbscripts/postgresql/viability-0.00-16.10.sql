@@ -64,15 +64,3 @@ CREATE TABLE viability.ResultSpecimens
     CONSTRAINT UQ_Viability_ResultSpecimens_ResultIDSpecimenID UNIQUE (ResultID, SpecimenID),
     CONSTRAINT FK_ResultSpecimens_ResultID FOREIGN KEY (ResultID) REFERENCES viability.Results(RowId)
 );
-
-CREATE AGGREGATE viability.array_accum (anyelement)
-(
-    sfunc = array_append,
-    stype = anyarray,
-    initcond = '{}'
-);
-
-/* viability-15.30-16.10.sql */
-
--- No longer used; replaced by built-in PostgreSQL function string_to_array()
-DROP AGGREGATE viability.array_accum(anyelement);
