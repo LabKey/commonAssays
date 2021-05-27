@@ -73,13 +73,12 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
 <input type="hidden" name="resolving" value="<%=form.isResolving()%>">
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=form.getSelectAnalysisEngine()%>">
-<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=h(form.isCreateAnalysis())%>">
+<input type="hidden" name="createAnalysis" id="createAnalysis" value="<%=form.isCreateAnalysis()%>">
 
 <%--
 <% for (int i = 0; form.getEngineOptionFilterKeyword() != null && i < form.getEngineOptionFilterKeyword().length; i++) { %>
@@ -94,7 +93,7 @@
 <% if (form.isCreateAnalysis()) { %>
 <input type="hidden" name="newAnalysisName" id="newAnalysisName" value="<%=h(form.getNewAnalysisName())%>">
 <% } else { %>
-<input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=h(form.getExistingAnalysisId())%>">
+<input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=form.getExistingAnalysisId()%>">
 <% } %>
 
 <input type="hidden" name="targetStudy" id="targetStudy" value="<%=h(form.getTargetStudy())%>">
@@ -133,19 +132,7 @@
     </li>
 
     <%
-        FlowRun keywordRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-        if (keywordRun != null) {
-            String keywordRunPath = pipeRoot.relativePath(new File(keywordRun.getPath()));
-    %>
-    <li style="padding-bottom:0.5em;">
-        <b>Existing FCS File run:</b>
-        <a href="<%=keywordRun.urlShow().addParameter(QueryParam.queryName, FlowTableType.FCSFiles.toString())%>" target="_blank" title="Show FCS File run in a new window"><%=h(keywordRun.getName())%></a>
-    </li>
-    <li style="padding-bottom:0.5em;">
-        <b>FCS File Path:</b> <%=h(keywordRunPath)%>
-    </li>
-    <%
-    } else if (form.isResolving() && !form.getSelectedSamples().getRows().isEmpty()) {
+    if (form.isResolving() && !form.getSelectedSamples().getRows().isEmpty()) {
     %>
     <li style="padding-bottom:0.5em;">
         <b>Existing FCS files:</b>
@@ -162,7 +149,7 @@
             ActionURL url = schema.urlFor(QueryAction.executeQuery, FlowTableType.FCSFiles);
             filter.applyToURL(url, QueryView.DATAREGIONNAME_DEFAULT);
         %>
-        <a href="<%=url%>" target="_blank" title="Show FCS files"><%=h(rowIds.size())%> FCS files</a>
+        <a href="<%=h(url)%>" target="_blank" title="Show FCS files"><%=rowIds.size()%> FCS files</a>
     </li>
     <%
     } else {
@@ -188,7 +175,7 @@
         <% } else { %>
         <b>Existing Analysis Folder:</b>
         <% FlowExperiment experiment = FlowExperiment.fromExperimentId(form.getExistingAnalysisId()); %>
-        <a href="<%=experiment.urlShow()%>" target="_blank"><%=h(experiment.getName())%></a>
+        <a href="<%=h(experiment.urlShow())%>" target="_blank"><%=h(experiment.getName())%></a>
         <% } %>
     </li>
 

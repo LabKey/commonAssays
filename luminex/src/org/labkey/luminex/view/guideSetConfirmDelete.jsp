@@ -56,9 +56,9 @@
 
     <ul>
         <% for (LuminexController.GuideSetsDeleteBean.GuideSet gs : guideSets) { %>
-            <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=h(bean.getProtocol().getRowId())%>','<%=h(gs.getGuideSetId())%>', false)">Guide Set <%= h(gs.getGuideSetId()) %>: <%= h(gs.getComment()) %></a></li>
+            <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=bean.getProtocol().getRowId()%>','<%=gs.getGuideSetId()%>', false)">Guide Set <%=gs.getGuideSetId()%>: <%= h(gs.getComment()) %></a></li>
             <br>
-            Type: <% if(gs.isValueBased()) out.print("Value-based"); else out.print("Run-based"); %>
+            Type: <% if (gs.isValueBased()) {%>Value-based<%} else {%>Run-based<%}%>
             <br><br>
             Current Guide Set: <%=h(gs.getCurrent())%>
             <br>
@@ -114,7 +114,7 @@
         <% } if (successUrl != null) { %>
             <input type="hidden" name="<%=ActionURL.Param.successUrl%>" value="<%= h(successUrl) %>"/>
         <% } if (bean.getProtocol() != null) { %>
-            <input type="hidden" name="rowId" value="<%= h(bean.getProtocol().getRowId()) %>"/>
+            <input type="hidden" name="rowId" value="<%=bean.getProtocol().getRowId()%>"/>
         <% } %>
         <input type="hidden" name="forceDelete" value="true"/>
         <%= button("Confirm Delete").submit(true) %>

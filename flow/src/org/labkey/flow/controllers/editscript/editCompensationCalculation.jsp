@@ -16,11 +16,10 @@
  */
 %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.analysis.model.AutoCompensationScript" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditCompensationCalculationAction" %>
 <%@ page import="java.util.List"%>
-<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Map"%>
 <%@ page import="java.util.TreeMap" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -31,7 +30,7 @@
     int clauseCount = Math.max(form.ff_filter_field.length, 3);
 %>
 <labkey:errors/>
-<script type="text/javascript" src="<%=h(request.getContextPath())%>/Flow/editCompensationCalculation.js"></script>
+<%=getScriptTag("/Flow/editCompensationCalculation.js")%>
 <script type="text/javascript">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
 var parameters = <%=text(javascriptArray(form.parameters))%>
@@ -40,7 +39,7 @@ var AutoComp = {};
     boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
     for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
     {
-        %>AutoComp[<%=PageFlowUtil.jsString(autoComp.getName())%>]={<%
+        %>AutoComp[<%=q(autoComp.getName())%>]={<%
 
         // 'criteria' : [ primarykKeyword, secondaryKeyword, secondaryValue ]
         AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
@@ -55,7 +54,7 @@ var AutoComp = {};
         String and = "\n";
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=text(and)%><%= PageFlowUtil.jsString(param.getParameterName())%> : <%=text(javascriptArray(
+            %><%=text(and)%><%=q(param.getParameterName())%> : <%=text(javascriptArray(
                 param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate()))%><%
             and = ",\n";
         }
@@ -66,8 +65,8 @@ var AutoComp = {};
 %>
 var SS = []; // SUBSETS
 <%
-    Map<Integer, Integer> hashToIndexMap = new TreeMap();
-    Integer index = 0;
+    Map<Integer, Integer> hashToIndexMap = new TreeMap<>();
+    int index = 0;
     for (Map<String, List<String>> valueSubsets : keywordValueSampleMap.values())
     {
         for (List<String> subsets : valueSubsets.values())
@@ -75,8 +74,7 @@ var SS = []; // SUBSETS
             int subsetHash = subsets.hashCode();
             if (!hashToIndexMap.containsKey(subsetHash))
             {
-                hashToIndexMap.put(subsetHash, index);
-                index = index.intValue() + 1;
+                hashToIndexMap.put(subsetHash, index++);
                 %>SS.push(<%=text(javascriptArray(subsets))%>);<%
                 out.println();
             }
@@ -88,13 +86,13 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
     for (Map.Entry<String, Map<String, List<String>>> keywordEntry : keywordValueSampleMap.entrySet())
     {
         String keyword = keywordEntry.getKey();
-        %>KV[<%=PageFlowUtil.jsString(keyword)%>]=o(<%
+        %>KV[<%=q(keyword)%>]=o(<%
         String and="";
         for (Map.Entry<String, List<String>> valueEntry : keywordEntry.getValue().entrySet())
         {
             String value = valueEntry.getKey();
             int subsetHash = valueEntry.getValue().hashCode();
-            %><%=text(and)%><%=PageFlowUtil.jsString(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
+            %><%=text(and)%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
             and = ",";
         }
         %>);<%
@@ -104,7 +102,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
 var keywordValueSubsetListMap = KV; 
 </script>
 
-<labkey:form method="POST" action="<%=formAction(ScriptController.EditCompensationCalculationAction.class)%>">
+<labkey:form method="POST" action="<%=formAction(EditCompensationCalculationAction.class)%>">
 
 <% if (hasAutoCompScripts) { %>
         <labkey:panel title="Choose AutoCompensation script">

@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.flow.persist.AttributeSet;
 
@@ -33,51 +34,48 @@ public interface ISampleInfo
 
     /**
      * Internal sample id used by the workspace or analysis archive.
-     * Not a stable identifier.
-     * @return
+     * Not a stable identifier across imports.
      */
+    @NotNull
     public String getSampleId();
 
     /**
      * The sample name (usually the same as the $FIL keyword, but may be renamed in the workspace.)
-     * @return
+     * The sample name may be null.
      */
+    @Nullable
     public String getSampleName();
 
     /**
      * The $FIL keyword value.
-     * @return
      */
+    @Nullable
     public String getFilename();
 
     /**
      * Get human readable display name (may be sample name, $FIL, or sample id).
-     * @return
      */
+    @NotNull
     public String getLabel();
 
     /**
      * A case-insensitive map of keyword names to values.
-     * @return
      */
     public Map<String, String> getKeywords();
 
     /**
      * The analysis definition which may be null for an analysis archive.
-     * @return
      */
     @Nullable
     public Analysis getAnalysis();
 
     /**
      * The calculated statistics and graphs.
-     * @return
      */
     public AttributeSet getAnalysisResults();
 
     /**
      * The compensation matrix used for analysis.
-     * @return
      */
     public CompensationMatrix getCompensationMatrix();
 }

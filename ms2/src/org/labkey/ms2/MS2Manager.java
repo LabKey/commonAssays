@@ -17,7 +17,8 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
@@ -110,7 +111,7 @@ import java.util.Set;
  */
 public class MS2Manager
 {
-    private static Logger _log = Logger.getLogger(MS2Manager.class);
+    private static Logger _log = LogManager.getLogger(MS2Manager.class);
 
     private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
 
@@ -690,11 +691,11 @@ public class MS2Manager
 
         // Check for DELETE permission on all containers holding the requested runs
         // UI only allows moving from containers with DELETE permissions, but one could hack the request
-        new SqlSelector(getSchema(), selectSQL).forEach(containerId -> {
+        new SqlSelector(getSchema(), selectSQL).forEach(String.class, containerId -> {
             Container c = ContainerManager.getForId(containerId);  // TODO: Switch to ForEachBlock<Container>
             if (!c.hasPermission(user, DeletePermission.class))
                 throw new UnauthorizedException();
-        }, String.class);
+        });
 
         SQLFragment updateSQL = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET Container=? ", newContainer.getId());
         updateSQL.append(runSQL);

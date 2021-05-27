@@ -1,7 +1,6 @@
 {table}
 Library|Version|Source|License|LabKey Dev|Purpose
 Lorikeet Spectrum Viewer|0.3|http://code.google.com/p/lorikeet/|{link:MIT License|http://www.opensource.org/licenses/mit-license.php}|jeckels|MS2 spectra viewer
-JQuery|1.4.2|http://jquery.com/|{link:MIT License|http://jquery.org/license}|jeckels|Dependency of Lorikeet
 JQuery UI|1.8.4|http://docs.jquery.com/UI|{link:MIT License|http://jquery.org/license}|jeckels|Dependency of Lorikeet
 {table}
 

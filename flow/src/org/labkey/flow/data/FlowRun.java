@@ -16,7 +16,8 @@
 
 package org.labkey.flow.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
@@ -58,7 +59,7 @@ import java.util.Map;
 
 public class FlowRun extends FlowObject<ExpRun>
 {
-    private static final Logger _log = Logger.getLogger(FlowRun.class);
+    private static final Logger _log = LogManager.getLogger(FlowRun.class);
 
     public static final Comparator<FlowRun> NAME_COMPARATOR = Comparator.comparing(FlowObject::getName);
 
@@ -458,7 +459,7 @@ public class FlowRun extends FlowObject<ExpRun>
     {
         if (protocol == null && settings == null)
             return getFCSFiles();
-        FlowSchema schema = new FlowSchema(null, getContainer());
+        FlowSchema schema = new FlowSchema(User.getSearchUser(), getContainer());
         schema.setRun(this);
         TableInfo table = schema.createFCSFileTable("FCSFiles", null);
         ColumnInfo colRowId = table.getColumn("RowId");

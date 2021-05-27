@@ -17,7 +17,8 @@ package org.labkey.ms2;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.imagemap.ImageMapUtilities;
@@ -57,6 +58,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
@@ -88,19 +90,20 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.settings.WriteableAppProps;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
-import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.util.element.Option;
+import org.labkey.api.util.element.Option.OptionBuilder;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -189,7 +192,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import static org.labkey.api.util.DOM.STRONG;
 import static org.labkey.api.util.DOM.TABLE;
@@ -205,7 +208,7 @@ import static org.labkey.api.util.DOM.at;
 public class MS2Controller extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
-    private static final Logger _log = Logger.getLogger(MS2Controller.class);
+    private static final Logger _log = LogManager.getLogger(MS2Controller.class);
     /** Bogus view name to use as a marker for showing the standard peptide view instead of a custom view or the .lastFilter view */
     private static final String STANDARD_VIEW_NAME = "~~~~~~StandardView~~~~~~~";
     private static final String MS2_VIEWS_CATEGORY = "MS2Views";
@@ -255,7 +258,7 @@ public class MS2Controller extends SpringActionController
     private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
-        root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+        root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
     }
@@ -314,7 +317,7 @@ public class MS2Controller extends SpringActionController
 
             QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             gridView.setTitle(MS2Module.MS2_RUNS_NAME);
-            gridView.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
+            gridView.setTitleHref(urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
 
             return new VBox(searchView, gridView);
         }
@@ -336,28 +339,28 @@ public class MS2Controller extends SpringActionController
         {
             proteinProphetQueryURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("ProteinProphet", null, view.createVerifySelectedScript(proteinProphetQueryURL, "runs"));
+        compareMenu.addMenuItem("ProteinProphet", view.createVerifySelectedScript(proteinProphetQueryURL, "runs"));
 
         ActionURL peptideQueryURL = new ActionURL(MS2Controller.ComparePeptideQuerySetupAction.class, container);
         if (experimentRunIds)
         {
             peptideQueryURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Peptide", null, view.createVerifySelectedScript(peptideQueryURL, "runs"));
+        compareMenu.addMenuItem("Peptide", view.createVerifySelectedScript(peptideQueryURL, "runs"));
 
         ActionURL searchEngineURL = new ActionURL(MS2Controller.CompareSearchEngineProteinSetupAction.class, container);
         if (experimentRunIds)
         {
             searchEngineURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Search Engine Protein", null, view.createVerifySelectedScript(searchEngineURL, "runs"));
+        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs"));
 
         ActionURL spectraURL = new ActionURL(SpectraCountSetupAction.class, container);
         if (experimentRunIds)
         {
             spectraURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Spectra Count", null, view.createVerifySelectedScript(spectraURL, "runs"));
+        compareMenu.addMenuItem("Spectra Count", view.createVerifySelectedScript(spectraURL, "runs"));
         return compareMenu;
     }
 
@@ -477,7 +480,7 @@ public class MS2Controller extends SpringActionController
     public static class RunSummaryBean
     {
         public MS2Run run;
-        public String modHref;
+        public LinkBuilder modHref;
         public boolean writePermissions;
         public String quantAlgorithm;
     }
@@ -625,47 +628,33 @@ public class MS2Controller extends SpringActionController
         Map<String, String> m = getViewMap(true, getContainer().hasPermission(getUser(), ReadPermission.class));
 
         SelectBuilder select = new SelectBuilder()
-                                        .id("views")
-                                        .name("viewParams")
-                                        .style("width:200");
-
-        List<Option> options = new ArrayList<>();
-
-        List<String> twoLabels = Arrays.asList("<Select a saved view>", "<Standard View>");
+            .id("views")
+            .name("viewParams")
+            .addStyle("width:200");
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from
         // bouncing to the user's defined default
-        for (String label : twoLabels)
-        {
-            options.add(new Option.OptionBuilder()
-                    .value("doNotApplyDefaultView=yes")
-                    .label(label)
-                    .build()
-            );
-        }
+        select.addOptions(Stream.of("<Select a saved view>", "<Standard View>")
+            .map(label->new OptionBuilder(label, "doNotApplyDefaultView=yes")));
 
         String currentViewParams = getViewContext().cloneActionURL().deleteParameter("run").getRawQuery();
 
-        // Use TreeSet to sort by name
-        TreeSet<String> names = new TreeSet<>(m.keySet());
-        for (String name : names)
-        {
-            String viewParams = m.get(name);
-            options.add(new Option.OptionBuilder()
-                .value(viewParams)
-                .selected(selectCurrent && viewParams.equals(currentViewParams))
-                .label(name)
-                .build()
-            );
-        }
-        select.addOptions(options);
+        // Sort by name
+        select.addOptions(m.keySet().stream()
+            .sorted()
+            .map(name->{
+                String viewParams = m.get(name);
+                return new OptionBuilder(name, viewParams)
+                    .selected(selectCurrent && viewParams.equals(currentViewParams));
+            })
+        );
 
         return select;
     }
 
 
-    private String modificationHref(MS2Run run)
+    private LinkBuilder modificationHref(MS2Run run)
     {
         Map<String, String> fixed = new TreeMap<>();
         Map<String, String> var = new TreeMap<>();
@@ -688,7 +677,7 @@ public class MS2Controller extends SpringActionController
 
         onClick.append(", 100); return false;");
 
-        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink").toString();
+        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
     }
 
     private DOM.Renderable appendMods(Map<String, String> mods, String heading)
@@ -838,8 +827,8 @@ public class MS2Controller extends SpringActionController
                 else
                 {
                     previousURL = getViewContext().cloneActionURL();
-                    previousURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex - 1]));
-                    previousURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex - 1));
+                    previousURL.replaceParameter("peptideId", peptideIndex[rowIndex - 1]);
+                    previousURL.replaceParameter("rowIndex", sqlRowIndex - 1);
                 }
 
                 if (rowIndex == (peptideIndex.length - 1))
@@ -847,8 +836,8 @@ public class MS2Controller extends SpringActionController
                 else
                 {
                     nextURL = getViewContext().cloneActionURL();
-                    nextURL.replaceParameter("peptideId", String.valueOf(peptideIndex[rowIndex + 1]));
-                    nextURL.replaceParameter("rowIndex", String.valueOf(sqlRowIndex + 1));
+                    nextURL.replaceParameter("peptideId", peptideIndex[rowIndex + 1]);
+                    nextURL.replaceParameter("rowIndex", sqlRowIndex + 1);
                 }
 
                 showGzURL = getViewContext().cloneActionURL();
@@ -1110,7 +1099,7 @@ public class MS2Controller extends SpringActionController
             bean.chartTitle = chartTitle;
             bean.goChartType = _goChartType;
             bean.filterInfos = filters;
-            bean.imageMap = ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo());
+            bean.imageMap = HtmlString.unsafe(ImageMapUtilities.getImageMap("pie1", pjch.getChartRenderingInfo()));
             bean.foundData = !pjch.getDataset().getExtraInfo().isEmpty();
             bean.queryString = queryString;
             bean.grouping = form.getGrouping();
@@ -1140,7 +1129,7 @@ public class MS2Controller extends SpringActionController
         public Map<String, SimpleFilter> filterInfos;
         public String pieHelperObjName;
         public ActionURL chartURL;
-        public String imageMap;
+        public HtmlString imageMap;
         public boolean foundData;
         public String queryString;
         public String grouping;
@@ -1322,7 +1311,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum DefaultViewType
+    public enum DefaultViewType implements SafeToRenderEnum
     {
         LastViewed("Remember the last view that I looked at and use it the next time I look at a MS2 run"),
         Standard("Use the standard peptide list view"),
@@ -1343,9 +1332,9 @@ public class MS2Controller extends SpringActionController
 
     public static class ManageViewsBean
     {
-        private ActionURL _returnURL;
-        private DefaultViewType _defaultViewType;
-        private Map<String, String> _views;
+        private final ActionURL _returnURL;
+        private final DefaultViewType _defaultViewType;
+        private final Map<String, String> _views;
         private final String _viewName;
 
         public ManageViewsBean(ActionURL returnURL, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
@@ -1516,7 +1505,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public enum PeptideFilteringFormElements implements EnumHasHtmlString<PeptideFilteringFormElements>
+    public enum PeptideFilteringFormElements implements SafeToRenderEnum
     {
         peptideFilterType,
         peptideProphetProbability,
@@ -1532,7 +1521,7 @@ public class MS2Controller extends SpringActionController
         targetURL
     }
 
-    public enum PivotType implements EnumHasHtmlString<PivotType>
+    public enum PivotType implements SafeToRenderEnum
     {
         run, fraction
     }
@@ -1630,7 +1619,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum ProphetFilterType implements EnumHasHtmlString<ProphetFilterType>
+    public enum ProphetFilterType implements SafeToRenderEnum
     {
         none, probability, customView
     }
@@ -2508,8 +2497,7 @@ public class MS2Controller extends SpringActionController
 
         if (exportToExcel)
         {
-            ResultSet rs = rgn.getResultSet();
-            try (CompareExcelWriter ew = new CompareExcelWriter(new ResultsImpl(rs), rgn.getDisplayColumns()))
+            try (CompareExcelWriter ew = new CompareExcelWriter(()->new ResultsImpl(rgn.getResultSet()), rgn.getDisplayColumns()))
             {
                 ew.setAutoSize(true);
                 ew.setSheetName(query.getComparisonDescription());
@@ -2826,15 +2814,15 @@ public class MS2Controller extends SpringActionController
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
 
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
-            setBestNameMenu.addMenuItem("to name from FASTA", null, result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to name from FASTA", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.IPI.toString());
-            setBestNameMenu.addMenuItem("to IPI (if available)", null, result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", null, result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", null, result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.GEN_INFO.toString());
-            setBestNameMenu.addMenuItem("to GI number (if available)", null, result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
+            setBestNameMenu.addMenuItem("to GI number (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
 
             bb.add(setBestNameMenu);
 
@@ -2845,7 +2833,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", getClass(), getContainer());
         }
     }
 
@@ -3638,7 +3626,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            PageFlowUtil.urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", null);
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", getClass(), getContainer());
         }
     }
 
@@ -3711,7 +3699,7 @@ public class MS2Controller extends SpringActionController
                     if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);
                     else
-                        out.write(getFormattedValue(ctx));
+                        getFormattedHtml(ctx).appendTo(out);
                 }
             };
             ActionURL showRunURL = MS2Controller.getShowRunURL(getUser(), ContainerManager.getRoot());
@@ -3910,7 +3898,7 @@ public class MS2Controller extends SpringActionController
             writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
             writer.write("</div>");
 
-            writer.write(protein.getCoverageMap(run, null, 40).toString());
+            writer.write(protein.getCoverageMap(run, null, 40, Collections.emptyList()).toString());
             return null;
         }
 
@@ -3986,7 +3974,6 @@ public class MS2Controller extends SpringActionController
         @Override
         public void validateCommand(MascotSettingsForm target, Errors errors)
         {
-
         }
 
         @Override
@@ -4022,8 +4009,8 @@ public class MS2Controller extends SpringActionController
         public URLHelper getSuccessURL(MascotSettingsForm mascotSettingsForm)
         {
             return getContainer().isRoot() ?
-                    PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL() :
-                    PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
+                    urlProvider(AdminUrls.class).getAdminConsoleURL() :
+                    urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
         }
 
         @Override
@@ -4031,13 +4018,13 @@ public class MS2Controller extends SpringActionController
         {
             if (getViewContext().getContainer().isRoot())
             {
-                root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+                urlProvider(AdminUrls.class).addAdminNavTrail(root, "Mascot Server Configuration", getClass(), getContainer());
             }
             else
             {
-                root.addChild("Pipeline Settings", PageFlowUtil.urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
+                root.addChild("Pipeline Settings", urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
+                root.addChild("Mascot Server Configuration");
             }
-            root.addChild("Mascot Server Configuration");
         }
     }
 
@@ -4183,9 +4170,9 @@ public class MS2Controller extends SpringActionController
 
                         ActionURL url = getViewContext().cloneActionURL();
                         url.deleteParameter("proteinGroupId");
-                        url.replaceParameter("run", Integer.toString(form.run));
-                        url.replaceParameter("groupNumber", Integer.toString(group.getGroupNumber()));
-                        url.replaceParameter("indistinguishableCollectionId", Integer.toString(group.getIndistinguishableCollectionId()));
+                        url.replaceParameter("run", form.run);
+                        url.replaceParameter("groupNumber", group.getGroupNumber());
+                        url.replaceParameter("indistinguishableCollectionId", group.getIndistinguishableCollectionId());
                         url.setContainer(run.getContainer());
 
                         return HttpView.redirect(url);
@@ -4236,6 +4223,7 @@ public class MS2Controller extends SpringActionController
         public boolean enableAllPeptidesFeature;
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
         public int aaRowWidth;
+        public List<ProteinFeature> features = Collections.emptyList();
     }
 
 
@@ -4859,7 +4847,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Admin Console", PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL());
+            root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
             root.addChild("Test Mascot Settings");
         }
     }
@@ -5277,7 +5265,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public URLHelper getSuccessURL(PipelinePathForm pipelinePathForm)
         {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
+            return urlProvider(ProjectUrls.class).getStartURL(getContainer());
         }
     }
 
@@ -6180,7 +6168,7 @@ public class MS2Controller extends SpringActionController
 
         public static MS2UrlsImpl get()
         {
-            return (MS2UrlsImpl) PageFlowUtil.urlProvider(MS2Urls.class);
+            return (MS2UrlsImpl) urlProvider(MS2Urls.class);
         }
     }
 
@@ -6350,7 +6338,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         @Override
@@ -6393,7 +6381,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ActionURL getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
 
         @Override

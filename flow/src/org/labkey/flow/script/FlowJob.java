@@ -16,12 +16,18 @@
 
 package org.labkey.flow.script;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.labkey.api.action.UrlProvider;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.pipeline.PipelineStatusFile;
+import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
@@ -102,19 +108,6 @@ public abstract class FlowJob extends PipelineJob
     }
 
 
-    public int getElapsedTime()
-    {
-        Date start = _start;
-        if (start == null)
-            return 0;
-        Date end = _end;
-        if (end == null)
-        {
-            end = new Date();
-        }
-        return (int) (end.getTime() - start.getTime());
-    }
-
     synchronized public void addStatus(String status)
     {
         info(status);
@@ -130,11 +123,6 @@ public abstract class FlowJob extends PipelineJob
     {
         super.error(message, t);
         setStatus(TaskStatus.error);
-    }
-
-    public boolean isComplete()
-    {
-        return _end != null;
     }
 
     @Override
@@ -172,32 +160,24 @@ public abstract class FlowJob extends PipelineJob
     @Override
     public ActionURL getStatusHref()
     {
-        ActionURL ret = urlRedirect();
-        if (ret != null)
-        {
-            return ret;
-        }
-        return urlStatus().clone();
-    }
-
-    public ActionURL urlRedirect()
-    {
-        if (!isComplete())
-            return null;
         if (hasErrors())
             return null;
         return urlData();
     }
 
+    /** Link to imported data once job has completed */
     public abstract ActionURL urlData();
 
+    /** Link to pipeline status details */
     public ActionURL urlStatus()
     {
         if (_statusHref == null)
         {
-            File statusFile = getLogFile();
-            _statusHref = new ActionURL(FlowController.ShowStatusJobAction.class, getContainer());
-            _statusHref.addParameter(FlowParam.statusFile.toString(), PipelineJobService.statusPathOf(statusFile.toString()));
+            Integer jobId = PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID());
+            if (jobId != null)
+            {
+                _statusHref = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId);
+            }
         }
         return _statusHref;
     }
@@ -205,13 +185,6 @@ public abstract class FlowJob extends PipelineJob
     public String getStatusFilePath()
     {
         return PipelineJobService.statusPathOf(getLogFile().getAbsolutePath());
-    }
-
-    public ActionURL urlCancel()
-    {
-        ActionURL ret = new ActionURL(FlowController.CancelJobAction.class, getContainer());
-        ret.addParameter(FlowParam.statusFile.toString(), getStatusFilePath());
-        return ret;
     }
 
     protected void runPostAnalysisJobs()

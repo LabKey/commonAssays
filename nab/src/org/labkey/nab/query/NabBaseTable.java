@@ -22,8 +22,9 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
@@ -60,7 +61,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
     {
         final AssayProvider provider = AssayService.get().getProvider(_protocol);
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(_protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
 
         var specimenColumn = wrapColumn(getInputMaterialPropertyName(), _rootTable.getColumn("SpecimenLsid"));
         specimenColumn.setLabel("Specimen");
@@ -72,9 +73,9 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
             public TableInfo getLookupTableInfo()
             {
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema, getLookupContainerFilter());
-                if (sampleSet != null)
+                if (sampleType != null)
                 {
-                    materials.setSampleSet(sampleSet, true);
+                    materials.setSampleType(sampleType, true);
                 }
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)

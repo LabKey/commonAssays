@@ -23,7 +23,6 @@ import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.audit.DefaultAuditProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -40,7 +39,6 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.UsageReportingLevel;
 import org.labkey.api.view.DefaultWebPartFactory;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -50,6 +48,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.util.LogicleRangeFunction;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetParser;
 import org.labkey.flow.analysis.web.SubsetTests;
@@ -87,23 +86,20 @@ import org.labkey.flow.webparts.FlowSummaryWebPart;
 import org.labkey.flow.webparts.OverviewWebPart;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 public class FlowModule extends SpringModule
 {
     public static final String NAME = "Flow";
 
-    private static String EXPORT_TO_SCRIPT_PATH = "ExportToScriptPath";
-    private static String EXPORT_TO_SCRIPT_COMMAND_LINE = "ExportToScriptCommandLine";
-    private static String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
-    private static String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
-    private static String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
-    private static String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
+    private static final String EXPORT_TO_SCRIPT_PATH = "ExportToScriptPath";
+    private static final String EXPORT_TO_SCRIPT_COMMAND_LINE = "ExportToScriptCommandLine";
+    private static final String EXPORT_TO_SCRIPT_LOCATION = "ExportToScriptLocation";
+    private static final String EXPORT_TO_SCRIPT_FORMAT = "ExportToScriptFormat";
+    private static final String EXPORT_TO_SCRIPT_TIMEOUT = "ExportToScriptTimeout";
+    private static final String EXPORT_TO_SCRIPT_DELETE_ON_COMPLETE = "ExportToScriptDeleteOnComplete";
 
     @Override
     public String getName()
@@ -114,13 +110,7 @@ public class FlowModule extends SpringModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
-    }
-
-    @Override
-    public @Nullable UpgradeCode getUpgradeCode()
-    {
-        return new FlowUpgradeCode();
+        return 21.000;
     }
 
     @Override
@@ -252,13 +242,13 @@ public class FlowModule extends SpringModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Arrays.asList(
-                OverviewWebPart.FACTORY,
-                AnalysesWebPart.FACTORY,
-                AnalysisScriptsWebPart.FACTORY,
-                FlowSummaryWebPart.FACTORY,
-                new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
-                );
+        return List.of(
+            AnalysesWebPart.FACTORY,
+            AnalysisScriptsWebPart.FACTORY,
+            FlowSummaryWebPart.FACTORY,
+            OverviewWebPart.FACTORY,
+            new DefaultWebPartFactory("Flow Reports", ReportsController.BeginView.class)
+        );
     }
 
     @Override
@@ -302,14 +292,10 @@ public class FlowModule extends SpringModule
         UsageMetricsService svc = UsageMetricsService.get();
         if (null != svc)
         {
-            FlowService fs = FlowService.get();
-            if (null != fs)
+            FlowManager mgr = FlowManager.get();
+            if (null != mgr)
             {
-                svc.registerUsageMetrics(UsageReportingLevel.LOW, NAME, () -> {
-                    Map<String, Object> metric = new HashMap<>();
-                    metric.put("flowTempTableCount", fs.getTempTableCount());
-                    return metric;
-                });
+                svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
             }
         }
     }
@@ -334,7 +320,8 @@ public class FlowModule extends SpringModule
             PopulationName.NameTests.class,
             StatisticSpec.TestCase.class,
             SubsetParser.TestLexer.class,
-            SubsetTests.class
+            SubsetTests.class,
+            LogicleRangeFunction.TestCase.class
         );
     }
 
@@ -345,7 +332,8 @@ public class FlowModule extends SpringModule
         return Set.of(
             FlowController.TestCase.class,
             FlowProtocol.TestCase.class,
-            PersistTests.class
+            PersistTests.class,
+            FlowManager.TestCase.class
         );
     }
 

@@ -15,6 +15,8 @@
  */
 package org.labkey.flow.analysis.model;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveTreeMap;
 
 import java.io.Serializable;
@@ -27,10 +29,22 @@ import java.util.Map;
  */
 public abstract class SampleInfoBase implements ISampleInfo, Serializable
 {
-    protected Map<String, String> _keywords = new CaseInsensitiveTreeMap<>();
-    protected String _sampleId;
-    protected String _sampleName;
-    protected boolean _deleted = false;
+    protected final Map<String, String> _keywords = new CaseInsensitiveTreeMap<>();
+    protected final @NotNull String _sampleId;
+    protected final @Nullable String _sampleName;
+    protected final boolean _deleted;
+
+    protected SampleInfoBase(@NotNull String sampleId, @Nullable String sampleName)
+    {
+        this(sampleId, sampleName, false);
+    }
+
+    protected SampleInfoBase(@NotNull String sampleId, @Nullable String sampleName, boolean deleted)
+    {
+        this._sampleId = sampleId;
+        this._sampleName = sampleName;
+        this._deleted = deleted;
+    }
 
     @Override
     public boolean isDeleted()
@@ -45,19 +59,19 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
     }
 
     @Override
-    public String getSampleName()
+    public @Nullable String getSampleName()
     {
         return _sampleName;
     }
 
     @Override
-    public String getFilename()
+    public @Nullable String getFilename()
     {
         return getKeywords().get("$FIL");
     }
 
     @Override
-    public String getLabel()
+    public @NotNull String getLabel()
     {
         String ret = _sampleName;
         if (ret == null || ret.length() == 0)
@@ -72,6 +86,16 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
     public Map<String, String> getKeywords()
     {
         return Collections.unmodifiableMap(_keywords);
+    }
+
+    public void putKeyword(String keywordName, String keywordValue)
+    {
+        _keywords.put(keywordName, keywordValue);
+    }
+
+    public void putAllKeywords(Map<String, String> keywords)
+    {
+        _keywords.putAll(keywords);
     }
 
     public String toString()

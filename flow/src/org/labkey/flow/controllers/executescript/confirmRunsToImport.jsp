@@ -19,12 +19,12 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
-<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.study.publish.StudyPublishService" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.ImportRunsAction" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportRunsForm" %>
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.util.LinkedHashMap" %>
@@ -39,11 +39,11 @@
     Map<String, String> paths = form.getNewPaths();
     Map<String, String> targetStudies = new LinkedHashMap<>();
 
-    AssayPublishService aps = AssayPublishService.get();
+    StudyPublishService aps = StudyPublishService.get();
 
     if (null != aps)
     {
-        // Get set of valid copy to study targets
+        // Get set of valid link to study targets
         Set<Study> validStudies = aps.getValidPublishTargets(getUser(), ReadPermission.class);
         targetStudies.put("", "[None]");
         for (Study study : validStudies)
@@ -61,7 +61,7 @@
 
     if (paths != null && paths.size() != 0)
     {
-        %><labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>">
+        %><labkey:form method="POST" action="<%=new ActionURL(ImportRunsAction.class, c)%>">
         <input type="hidden" name="path" value="<%=h(form.getPath())%>">
         <input type="hidden" name="current" value="<%=form.isCurrent()%>">
         <input type="hidden" name="confirm" value="true">
@@ -82,7 +82,7 @@
         <% if (!targetStudies.isEmpty()) { %>
             <p>
                 <em>Optionally,</em> select a target study for imported FCS files. The target study will be used
-                as the default copy to study target and, if the flow metadata specifies a specimen ID column, used
+                as the default link to study target and, if the flow metadata specifies a specimen ID column, used
                 to look up specimen information from the target study's specimen repository.
             </p>
             <p class="labkey-indented">
@@ -94,7 +94,7 @@
         <% } %>
 
         <br />
-        <labkey:button text="Import Selected Runs" action="<%=new ActionURL(AnalysisScriptController.ImportRunsAction.class, c)%>"/>
+        <%=button("Import Selected Runs").submit(true)%>
         <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
         </labkey:form><%
     }

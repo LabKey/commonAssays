@@ -20,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
@@ -117,7 +118,7 @@ import static org.labkey.flow.controllers.run.StatusJsonHelper.getStatusUrl;
 
 public class RunController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(RunController.class);
+    private static final Logger _log = LogManager.getLogger(RunController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(RunController.class);
 
@@ -665,7 +666,7 @@ public class RunController extends BaseFlowController
             {
                 case PipelineFiles:
                 case PipelineZip:
-                    return PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null, PipelineService.EXPORT_DIR);
+                    return urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null, PipelineService.EXPORT_DIR);
 
                 case Script:
                     // after exporting the files, execute script as a pipeline job
@@ -692,7 +693,7 @@ public class RunController extends BaseFlowController
                     if (jobGuid != null)
                         jobId = PipelineService.get().getJobId(getUser(), getContainer(), jobGuid);
 
-                    PipelineStatusUrls urls = PageFlowUtil.urlProvider(PipelineStatusUrls.class);
+                    PipelineStatusUrls urls = urlProvider(PipelineStatusUrls.class);
                     return jobId != null ? urls.urlDetails(getContainer(), jobId) : urls.urlBegin(getContainer());
 
                 case Browser:

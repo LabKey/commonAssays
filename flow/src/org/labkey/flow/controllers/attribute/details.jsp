@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.data.FlowDataObject" %>
-<%@ page import="java.util.Collection" %>
-<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
+<%@ page import="org.labkey.flow.data.FlowDataObject" %>
 <%@ page import="org.labkey.flow.persist.AttributeCache" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -36,7 +35,7 @@
 
 <% if (aliased != null) { %>
 <b>Alias of:</b><br>
-<a href='<%=h(detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), String.valueOf(aliased.getRowId())))%>'><%=h(aliased.getName())%></a>
+<a href='<%=h(detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), aliased.getRowId()))%>'><%=h(aliased.getName())%></a>
 <p>
 <% } %>
 
@@ -44,7 +43,7 @@
 <b>Aliases:</b>
 <ul>
     <% for (org.labkey.flow.persist.AttributeCache.Entry alias : aliases) { %>
-    <li><a href='<%=detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), String.valueOf(alias.getRowId()))%>'><%=h(alias.getName())%></a> </li>
+    <li><a href='<%=h(detailsURL.clone().replaceParameter(AttributeController.Param.rowId.name(), alias.getRowId()))%>'><%=h(alias.getName())%></a> </li>
     <% } %>
 </ul>
 <p>
@@ -56,7 +55,7 @@
 <% } else { %>
 <ul>
     <% for (FlowDataObject usage : usages) { %>
-    <li><a href='<%=usage.urlShow()%>'><%=h(usage.getLabel())%></a></li>
+    <li><a href='<%=h(usage.urlShow())%>'><%=h(usage.getLabel())%></a></li>
     <% } %>
 </ul>
 <% } %>

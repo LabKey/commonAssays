@@ -220,7 +220,7 @@
         urlGenerateGraph.addParameter("graph", graphspec.toString());
 
 %>
-<script type="text/javascript" src="<%=getWebappURL("Flow/util.js")%>"></script>
+<%=getScriptTag("Flow/util.js")%>
 <br/>
 <p><img src="<%=h(urlGenerateGraph)%>" onerror="flowImgError(this);"></p>
 <% } %>

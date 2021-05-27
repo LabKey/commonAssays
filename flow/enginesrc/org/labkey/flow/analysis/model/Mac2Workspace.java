@@ -16,6 +16,7 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -41,7 +42,7 @@ public class Mac2Workspace extends MacWorkspace
         {
             for (Element elSample : getElementsByTagName(elSamples, "Sample"))
             {
-                readSample(elSample);
+                SampleInfo sampleInfo = readSample(elSample);
 
                 Element elSampleNode = getElementByTagName(elSample, "SampleNode");
                 readSampleAnalysis(elSampleNode);
@@ -52,9 +53,23 @@ public class Mac2Workspace extends MacWorkspace
     @Override
     protected SampleInfo readSample(Element elSample)
     {
-        SampleInfo ret = new SampleInfo();
-        ret._sampleName = readNameAttribute(elSample);
-        ret._sampleId = elSample.getAttribute("sampleID");
+        String id = elSample.getAttribute("sampleID");
+
+        // read the sample name from the <Sample> element (legacy location for sample name)
+        String name = readNameAttribute(elSample);
+        if (StringUtils.isBlank(name))
+        {
+            // read sample name from the child sample node element: <SampleNode nodeName='name'>
+            Element elSampleNode = getElementByTagName(elSample, "SampleNode");
+            if (elSampleNode != null)
+            {
+                name = readNameAttribute(elSampleNode);
+            }
+        }
+
+        boolean deleted = readSampleDeletedFlag(elSample);
+
+        SampleInfo ret = new SampleInfo(id, name, deleted);
         if (elSample.hasAttribute("compensationID"))
         {
             ret._compensationId = elSample.getAttribute("compensationID");
@@ -63,13 +78,9 @@ public class Mac2Workspace extends MacWorkspace
         {
             readKeywords(ret, elFCSHeader);
         }
-        ret._deleted = readSampleDeletedFlag(elSample);
 
         readParameterInfo(elSample);
-        if (ret._deleted)
-            _deletedInfos.put(ret._sampleId, ret);
-        else
-            _sampleInfos.put(ret._sampleId, ret);
+        addSample(ret);
         return ret;
     }
 

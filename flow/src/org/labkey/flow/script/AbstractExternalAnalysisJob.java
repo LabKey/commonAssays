@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
@@ -32,12 +33,17 @@ import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
+import org.labkey.flow.analysis.model.FlowException;
+import org.labkey.flow.analysis.model.ISampleInfo;
+import org.labkey.flow.analysis.model.IWorkspace;
 import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
 import org.labkey.flow.data.FlowCompensationMatrix;
@@ -59,10 +65,12 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.util.KeywordUtil;
+import org.labkey.flow.util.SampleUtil;
 
 import java.io.File;
 import java.net.URI;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +78,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: kevink
@@ -83,8 +92,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     private final File _runFilePathRoot;
     // Directories of FCS files to be imported.
     private final List<File> _keywordDirs;
-    // Map workspace sample label -> FlowFCSFile (or null if we aren't resolving previously imported FCS files)
-    private Map<String, FlowFCSFile> _selectedFCSFiles;
+    // Map workspace sample ID -> FlowFCSFile (or FlowFCSFile.UNMAPPED if we aren't resolving previously imported FCS files)
+    private SampleIdMap<FlowFCSFile> _selectedFCSFiles;
+    private List<FlowFCSFile> _newFlowWells;
 //    private final List<String> _importGroupNames;
     private final Container _targetStudy;
     private final boolean _failOnError;
@@ -119,7 +129,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             File originalImportedFile,
             File runFilePathRoot,
             List<File> keywordDirs,
-            Map<String, FlowFCSFile> selectedFCSFiles,
+            SampleIdMap<FlowFCSFile> selectedFCSFiles,
             //List<String> importGroupNames,
             Container targetStudy,
             boolean failOnError)
@@ -177,9 +187,88 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         return _originalImportedFile;
     }
 
-    public Map<String,FlowFCSFile> getSelectedFCSFiles()
+    public SampleIdMap<FlowFCSFile> getSelectedFCSFiles()
     {
         return _selectedFCSFiles;
+    }
+
+    // The list of FCSFile that have been imported in this job just before importing the workspace analysis
+    public List<FlowFCSFile> getNewlyImportedFCSFiles()
+    {
+        return _newFlowWells;
+    }
+
+    /**
+     * Resolve the newly imported FCS files against the selected FCS files that have
+     * not been resolved yet.  The keywords in the workspace are used to match against
+     * the importedFCSFiles.
+     */
+    public static SampleIdMap<FlowFCSFile> resolveSelectedFCSFiles(IWorkspace workspace, SampleIdMap<FlowFCSFile> selectedFCSFiles, List<FlowFCSFile> importedFCSFiles)
+    {
+        // Don't bother resolving anything if no FCS files were imported as a part of this job
+        if (importedFCSFiles == null || importedFCSFiles.isEmpty())
+            return selectedFCSFiles;
+
+        // check if we need to resolve anything
+        boolean needsResolving = selectedFCSFiles.isEmpty() || selectedFCSFiles.values().stream().anyMatch(FlowFCSFile::isUnmapped);
+        if (!needsResolving)
+            return selectedFCSFiles;
+
+        // resolved the newly imported FCS files against the keywords in the workspace
+        var resolved = SampleUtil.resolveSamples(workspace.getSamples(), importedFCSFiles);
+        if (resolved.isEmpty())
+            return selectedFCSFiles;
+
+        SampleIdMap<FlowFCSFile> ret = new SampleIdMap<>();
+        if (selectedFCSFiles.isEmpty())
+        {
+            // select all samples from the workspace
+            for (ISampleInfo sample : resolved.keySet())
+            {
+                var pair = resolved.get(sample);
+                collectResolved(ret, sample, pair);
+            }
+        }
+        else
+        {
+            for (String id : selectedFCSFiles.idSet())
+            {
+                ISampleInfo sample = workspace.getSampleById(id);
+                if (sample == null)
+                    throw new FlowException("Selected sample '" + id + "' not found in workspace");
+
+                FlowFCSFile file = selectedFCSFiles.getById(id);
+                if (file.isUnmapped())
+                {
+                    // use the matched fcs file
+                    var pair = resolved.get(sample);
+                    collectResolved(ret, sample, pair);
+                }
+                else
+                {
+                    // use the selected information from the user
+                    ret.put(sample, file);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    private static void collectResolved(SampleIdMap<FlowFCSFile> map, ISampleInfo sample, Pair<FlowFCSFile, List<FlowFCSFile>> match)
+    {
+        if (match.first != null)
+        {
+            // perfect match
+            map.put(sample, match.first);
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder("Failed to find FCS file matching selected sample '" + sample + "' from imported FCS files");
+            if (!match.second.isEmpty())
+                sb.append("\npartial matching FCS files: ").append(match.second.stream().map(FlowFCSFile::toString).collect(Collectors.joining(", ")));
+            throw new FlowException(sb.toString());
+        }
     }
 
     public Container getTargetStudy()
@@ -208,10 +297,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 List<FlowRun> runs = KeywordsTask.importFlowRuns(this, _protocol, getKeywordDirectories(), getTargetStudy());
 
                 // Consider the newly imported files as the resolved FCSFiles, but don't add any new selectedFCSFiles unless there are no selected files.
-                // NOTE: Duplicate samples are ignored.
                 if (_selectedFCSFiles == null)
-                    _selectedFCSFiles = new HashMap<>();
-                boolean addNewFCSFiles = _selectedFCSFiles.isEmpty();
+                    _selectedFCSFiles = new SampleIdMap<>();
+                List<FlowFCSFile> newWells = new ArrayList<>();
                 for (FlowRun run : runs)
                 {
                     for (FlowWell well : run.getWells())
@@ -220,15 +308,12 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                         {
                             FlowFCSFile file = (FlowFCSFile)well;
                             if (file.isOriginalFCSFile())
-                            {
-                                // Only add newly imported FCS Files if there are no selected FCS Files or the selected FCS File isn't resolved yet.
-                                String wellName = well.getName();
-                                if (addNewFCSFiles || (_selectedFCSFiles.containsKey(wellName) && _selectedFCSFiles.get(wellName) == null))
-                                    _selectedFCSFiles.put(wellName, (FlowFCSFile)well);
-                            }
+                                newWells.add(file);
                         }
                     }
                 }
+
+                _newFlowWells = newWells;
             }
 
             if (!hasErrors())
@@ -288,7 +373,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     protected FlowRun saveAnalysis(User user, Container container, FlowExperiment experiment,
                                    String analysisName, File externalAnalysisFile, File originalImportedFile,
                                    File runFilePathRoot,
-                                   Map<String, FlowFCSFile> selectedFCSFiles,
+                                   SampleIdMap<FlowFCSFile> selectedFCSFiles,
                                    SampleIdMap<AttributeSet> keywordsMap,
                                    SampleIdMap<CompensationMatrix> sampleCompMatrixMap,
                                    SampleIdMap<AttributeSet> resultsMap,
@@ -330,6 +415,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             {
                 run.setFilePathRoot(runFilePathRoot);
             }
+            // remember which job created the run so we can show this run on the job details page
+            run.setJobId(PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID()));
             run.save(user);
             if (getAnalysisEngine() != null)
                 run.setProperty(user, FlowProperty.AnalysisEngine.getPropertyDescriptor(), getAnalysisEngine().name());
@@ -359,11 +446,11 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 String sampleLabel = sampleNames.iterator().next();
 
                 iSample++;
-                FlowFCSFile resolvedFCSFile = null;
+                FlowFCSFile resolvedFCSFile = FlowFCSFile.UNMAPPED;
                 if (selectedFCSFiles != null)
                 {
-                    resolvedFCSFile = selectedFCSFiles.get(sampleLabel);
-                    assert resolvedFCSFile == null || resolvedFCSFile.isOriginalFCSFile();
+                    resolvedFCSFile = selectedFCSFiles.getById(sampleId);
+                    assert resolvedFCSFile != null && (resolvedFCSFile.isUnmapped() || resolvedFCSFile.isOriginalFCSFile());
                 }
 
                 // Create a 'fake' FCSFile if there is no resolved original FCSFile, or the extra keywords are not a subset of the resolved FCSFile's keywords:
@@ -372,7 +459,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 // - If there is an 'original' FCSFile and there are additional extra keywords, the 'original' FCSFile is a DataInput of the 'fake' FCSFile (which in turn is a DatInput of the FCSAnalysis.)
                 FlowFCSFile flowFCSFile = resolvedFCSFile;
                 AttributeSet keywordAttrs = keywordsMap.getById(sampleId);
-                if (resolvedFCSFile == null || (keywordAttrs != null && !isSubset(keywordAttrs.getKeywords(), resolvedFCSFile.getKeywords())))
+                if (resolvedFCSFile.isUnmapped() || (keywordAttrs != null && !isSubset(keywordAttrs.getKeywords(), resolvedFCSFile.getKeywords())))
                 {
                     flowFCSFile = createFakeFCSFile(user, container,
                             resolvedFCSFile,
@@ -397,7 +484,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 AttributeSet compAttrs = entry.getValue();
                 assert compAttrs.getType() == ObjectType.compensationMatrix;
 
-                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs);
+                FlowCompensationMatrix flowComp = FlowCompensationMatrix.create(user, container, null, compAttrs, getLogger());
                 ExpProtocolApplication paComp = run.addProtocolApplication(user, FlowProtocolStep.calculateCompensation.getAction(protocol), ExpProtocol.ApplicationType.ProtocolApplication, FlowProtocolStep.calculateCompensation.getName());
                 paComp.addDataInput(user, externalAnalysisData, InputRole.Workspace.toString());
                 flowComp.getData().setSourceApplication(paComp);
@@ -450,7 +537,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
                     addStatus("Saving FCSAnalysis " + iAnalysis + "/" + totAnalysis + ":" + fcsAnalysis.getName());
                     fcsAnalysis.save(user);
-                    AttributeSetHelper.doSave(results, user, fcsAnalysis);
+                    AttributeSetHelper.doSave(results, user, fcsAnalysis, getLogger());
 
                     Analysis analysis = analysisMap.getById(sampleId);
                     if (analysis != null)
@@ -537,7 +624,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 
     // Create a 'fake' FCSFile for the import.
     private FlowFCSFile createFakeFCSFile(User user, Container container,
-                                   FlowFCSFile resolvedFCSFile,
+                                   @NotNull FlowFCSFile resolvedFCSFile,
                                    AttributeSet keywordAttrs,
                                    URI dataFileURI,
                                    ExpRun run,
@@ -554,7 +641,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         paSample.addDataInput(user, externalAnalysisData, InputRole.Workspace.toString());
 
         // Attach the real original FCSFile as an input to the fake well
-        if (resolvedFCSFile != null)
+        if (!resolvedFCSFile.isUnmapped())
         {
             assert resolvedFCSFile.isOriginalFCSFile() : "Original FlowFCSFile is not original: " + (resolvedFCSFile.getData() != null ? resolvedFCSFile.getData().getDataFileUrl() : "<no ExpData>");
             if (resolvedFCSFile.getData() != null)
@@ -575,7 +662,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         if (keywordAttrs == null)
             keywordAttrs = new AttributeSet(ObjectType.fcsKeywords, null);
         assert keywordAttrs.getType() == ObjectType.fcsKeywords;
-        AttributeSetHelper.doSave(keywordAttrs, user, fcsFile);
+        AttributeSetHelper.doSave(keywordAttrs, user, fcsFile, getLogger());
 
         // Attach the experiment sample to the fake FCSFile generated from the workspace.
         SampleKey sampleKey = flowProtocol.makeSampleKey(run.getName(), fcsFile.getName(), keywordAttrs);

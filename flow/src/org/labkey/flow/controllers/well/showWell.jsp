@@ -359,12 +359,12 @@ if (getRun() == null)
 }
 else 
 {
-    %><tr><td>Run Name:</td><td><a href="<%=getRun().urlShow()%>"><%=h(getRun().getName())%></a></td></tr><%
+    %><tr><td>Run Name:</td><td><a href="<%=h(getRun().urlShow())%>"><%=h(getRun().getName())%></a></td></tr><%
 
     FlowExperiment experiment = getRun().getExperiment();
     if (experiment != null)
     {
-        %><tr><td>Analysis Folder:</td><td><a href="<%=experiment.urlShow()%>"><%=h(experiment.getName())%></a></td></tr><%
+        %><tr><td>Analysis Folder:</td><td><a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getName())%></a></td></tr><%
     }
 }
     %><tr><td>Well Name:</td><td><%=h(well.getName())%></td></tr><%
@@ -406,7 +406,7 @@ if (matrix != null)
 
 for (ExpMaterial sample : well.getSamples())
 {
-    %><tr><td><%=h(sample.getSampleSet().getName())%></td>
+    %><tr><td><%=h(sample.getSampleType().getName())%></td>
         <td><a href="<%=h(sample.detailsURL())%>"><%=h(sample.getName())%></a></td>
     </tr><%
 }
@@ -455,7 +455,7 @@ if (getGraphs().length > 0)
     {
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
-        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class))%>&amp;graph=<%=PageFlowUtil.encode(graph.toString())%>" onerror="flowImgError(this);">
+        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>" onerror="flowImgError(this);">
         </span><wbr>
         <%
     }
@@ -582,7 +582,7 @@ else
 
 if (user != null && !user.isGuest() && well instanceof FlowFCSAnalysis)
 {
-    %><a class="labkey-text-link" href="<%=well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells")%>" rel="nofollow">Download Analysis zip</a><br><%
+    %><a class="labkey-text-link" href="<%=h(well.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "wells"))%>" rel="nofollow">Download Analysis zip</a><br><%
 }
 
 if (getRun() != null)

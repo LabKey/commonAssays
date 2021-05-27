@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
@@ -43,7 +44,7 @@ import java.util.*;
  */
 public class MS2PipelineManager
 {
-    private static Logger _log = Logger.getLogger(MS2PipelineProvider.class);
+    private static Logger _log = LogManager.getLogger(MS2PipelineProvider.class);
     private static final String DEFAULT_FASTA_DIR = "databases";
 
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";

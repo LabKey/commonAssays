@@ -18,7 +18,8 @@ package org.labkey.ms2.reader;
 import org.labkey.ms2.reader.SimpleXMLEventRewriter;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -27,7 +28,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class Q3AnalysisSummary extends RelativeQuantAnalysisSummary
 {
-    private static Logger _log = Logger.getLogger(Q3AnalysisSummary.class);
+    private static Logger _log = LogManager.getLogger(Q3AnalysisSummary.class);
     
     private static final float DEFAULT_MASSTOL = .1f;
 

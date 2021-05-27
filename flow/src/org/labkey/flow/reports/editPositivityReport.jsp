@@ -17,18 +17,17 @@
 %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.reports.report.ReportDescriptor" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.flow.controllers.ReportsController" %>
-<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.BeginAction" %>
+<%@ page import="org.labkey.flow.controllers.ReportsController.DeleteAction" %>
+<%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.EditICSMetadataAction" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.ICSMetadata" %>
 <%@ page import="org.labkey.flow.reports.FilterFlowReport" %>
-<%@ page import="org.labkey.flow.reports.FlowReport" %>
 <%@ page import="org.labkey.flow.reports.PositivityFlowReport" %>
 <%@ page import="org.labkey.flow.reports.StatPickerView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -51,8 +50,8 @@
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
-    String retURL = returnURL == null ? buildURL(ReportsController.BeginAction.class) : returnURL.getLocalURIString();
-    String canURL = cancelURL == null ? retURL : cancelURL.getLocalURIString();
+    ActionURL retURL = returnURL == null ? urlFor(BeginAction.class) : returnURL;
+    ActionURL canURL = cancelURL == null ? retURL : cancelURL;
 
     FlowProtocol protocol = FlowProtocol.getForContainer(c);
     ICSMetadata metadata = protocol == null ? null : protocol.getICSMetadata();
@@ -61,8 +60,8 @@
     ActionURL editICSMetadataURL = null;
     if (protocol != null)
     {
-        editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
-        editICSMetadataURL.addParameter(ActionURL.Param.returnUrl, currentURL.toString());
+        editICSMetadataURL = protocol.urlFor(EditICSMetadataAction.class);
+        editICSMetadataURL.addReturnURL(currentURL);
     }
 %>
 
@@ -71,7 +70,7 @@
   The positivity report requires metadata describing the sample and background information
   of the flow experiment before it can be run.
   <br>
-  <labkey:link href="<%=editICSMetadataURL%>" text="Edit Metadata" />
+  <%=link("Edit Metadata").href(editICSMetadataURL)%>
   </p>
 <% } %>
 
@@ -93,10 +92,10 @@
 var form;
 var report =
 {
-    reportId:<%=PageFlowUtil.jsString(reportId)%>,
-    name:<%=PageFlowUtil.jsString(d.getReportName())%>,
-    description:<%=PageFlowUtil.jsString(d.getReportDescription())%>,
-    subset:<%=PageFlowUtil.jsString(d.getProperty("subset"))%>,
+    reportId:<%=q(reportId)%>,
+    name:<%=q(d.getReportName())%>,
+    description:<%=q(d.getReportDescription())%>,
+    subset:<%=q(d.getProperty("subset"))%>,
     filter :
     [<%
     String comma = "";
@@ -109,7 +108,7 @@ var report =
              property:<%=q(f.property)%>,
              value:<%=q(f.value)%>,
              type:<%=q(f.type)%>,
-             op:<%=text(null==f.op?q("eq"):q(f.op))%>}<%
+             op:<%=(null==f.op?q("eq"):q(f.op))%>}<%
         comma =",";
     }
     %>]
@@ -145,7 +144,7 @@ function Form_onDelete()
    ActionURL url = null;
    if (d.getReportId() != null)
    {
-       url = new ActionURL(ReportsController.DeleteAction.class, c).addParameter("reportId", report.getReportId().toString());
+       url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());
        if (returnURL != null)
            url.addReturnURL(returnURL);
    }
@@ -155,10 +154,10 @@ function Form_onDelete()
    }
    else
    {
-       url = new ActionURL(ReportsController.BeginAction.class, c);
+       url = urlFor(BeginAction.class);
    }
    %>
-   window.location = <%=PageFlowUtil.jsString(url.getLocalURIString())%>;
+   window.location = <%=q(url)%>;
 }
 
 Ext.onReady(function() {
@@ -241,7 +240,7 @@ Ext.onReady(function() {
     // sample filters
     //
 
-    if (hasSampleFilters || SampleSet.properties.length > 0)
+    if (hasSampleFilters || SampleType.properties.length > 0)
     {
         for (i = 0; i < sample.length; i++)
         {

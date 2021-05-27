@@ -55,7 +55,7 @@
             Map<String, String[]> groupSamples = new TreeMap<>();
             for (String sampleID : group.getSampleIds())
             {
-                Workspace.SampleInfo sampleInfo = w.getSample(sampleID);
+                Workspace.SampleInfo sampleInfo = w.getSampleById(sampleID);
                 if (sampleInfo != null)
                     groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
             }
@@ -88,7 +88,6 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
@@ -105,7 +104,7 @@
 <script>
     var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
-    var importedGroup = <%=PageFlowUtil.jsString(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
+    var importedGroup = <%=q(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
 
 <%
@@ -114,7 +113,7 @@ if (protocol != null)
     if (protocol.getFCSAnalysisFilterString() != null)
     {
         %>
-        Samples will be filtered by the current protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a>:
+        Samples will be filtered by the current protocol <a href="<%=h(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>" target="_blank">FCS analysis filter</a>:
         <br>
         <div style="padding-left: 2em;">
             <%=h(protocol.getFCSAnalysisFilter().getFilterText())%>
@@ -123,7 +122,7 @@ if (protocol != null)
     }
     else
     {
-        %>No protocol <a href="<%=protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class)%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
+        %>No protocol <a href="<%=h(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>" target="_blank">FCS analysis filter</a> has been defined in this folder.<%
     }
 }
 
@@ -135,7 +134,7 @@ if (groups.size() > 1)
         function onGroupChanged(selectedGroup) {
             importedGroup = selectedGroup || "All Samples";
 
-            var dr = LABKEY.DataRegions[<%= PageFlowUtil.jsString(SamplesConfirmGridView.DATAREGION_NAME) %>];
+            var dr = LABKEY.DataRegions[<%= q(SamplesConfirmGridView.DATAREGION_NAME) %>];
             if (dr) {
                 var group = groups[importedGroup];
                 if (group) {

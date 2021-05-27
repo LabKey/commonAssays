@@ -71,8 +71,8 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             @Override
             public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
             {
-                url.replaceParameter("proteinGroupId", Integer.toString(groupId));
-                url.replaceParameter("seqId", Integer.toString(summary.getSeqId()));
+                url.replaceParameter("proteinGroupId", groupId);
+                url.replaceParameter("seqId", summary.getSeqId());
                 out.write("<a href=\"");
                 out.write(url.toString());
                 out.write("\" target=\"prot\">");

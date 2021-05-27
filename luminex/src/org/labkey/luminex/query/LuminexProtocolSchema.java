@@ -42,6 +42,8 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -165,81 +167,57 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (ANALYTE_TITRATION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                AnalyteTitrationTable result = createAnalyteTitrationTable(cf, true);
-                SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
-                filter.append(getTableInfoAnalytes(), "a");
-                filter.append(" WHERE a.DataId ");
-                filter.append(createDataFilterInClause());
-                filter.append(")");
-                result.addCondition(filter, FieldKey.fromParts("RunId"));
-                return result;
+                return createAnalyteTitrationTable(cf, true);
             }
 
             if (DATA_FILE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
                 ExpDataTable result = createDataFileTable(cf);
-                SQLFragment filter = new SQLFragment("RowId");
-                filter.append(createDataFilterInClause());
-                result.addCondition(filter, FieldKey.fromParts("RowId"));
+                // Filter to just the files associated with this this protocol (container filter is already handled by ExpDataTable)
+                result.addCondition(createDataIdContainerFilterSQL("RowId", null), FieldKey.fromParts("RowId"));
                 return result;
             }
 
             if (WELL_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(cf, true);
+                WellExclusionTable result = createWellExclusionTable(cf, true);
                 result.addCondition(new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.NONBLANK));
-                result.removeColumn(new BaseColumnInfo("Dilution"));
-                SQLFragment filter = new SQLFragment("DataId");
-                filter.append(createDataFilterInClause());
-                result.addCondition(filter, FieldKey.fromParts("DataId"));
+                result.removeColumn(result.getColumn("Dilution"));
                 return result;
             }
 
             if (TITRATION_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(cf, true);
+                WellExclusionTable result = createWellExclusionTable(cf, true);
                 result.setName(TITRATION_EXCLUSION_TABLE_NAME);
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.ISBLANK);
                 result.addCondition(exclusionFilter);
-                result.removeColumn(new BaseColumnInfo("Dilution"));
-                result.removeColumn(new BaseColumnInfo("Type"));
-                result.removeColumn(new BaseColumnInfo("Well"));
-                result.removeColumn(new BaseColumnInfo("Wells"));
-                result.removeColumn(new BaseColumnInfo("Well Role"));
-                SQLFragment filter = new SQLFragment("DataId");
-                filter.append(createDataFilterInClause());
-                result.addCondition(filter, FieldKey.fromParts("DataId"));
+                result.removeColumn(result.getColumn("Dilution"));
+                result.removeColumn(result.getColumn("Type"));
+                result.removeColumn(result.getColumn("Well"));
+                result.removeColumn(result.getColumn("Wells"));
+                result.removeColumn(result.getColumn("Well Role"));
                 return result;
             }
 
             if (SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createWellExclusionTable(cf, true);
+                WellExclusionTable result = createWellExclusionTable(cf, true);
                 result.setName(SINGLEPOINT_UNKNOWN_EXCLUSION_TABLE_NAME);
                 SimpleFilter exclusionFilter = new SimpleFilter(FieldKey.fromParts("Type"), null, CompareType.ISBLANK);
                 exclusionFilter.addCondition(FieldKey.fromParts("Dilution"), null, CompareType.NONBLANK);
                 result.addCondition(exclusionFilter);
-                result.removeColumn(new BaseColumnInfo("Type"));
-                result.removeColumn(new BaseColumnInfo("Well"));
-                result.removeColumn(new BaseColumnInfo("Wells"));
-                result.removeColumn(new BaseColumnInfo("Well Role"));
-                SQLFragment filter = new SQLFragment("DataId");
-                filter.append(createDataFilterInClause());
-                result.addCondition(filter, FieldKey.fromParts("DataId"));
+                result.removeColumn(result.getColumn("Type"));
+                result.removeColumn(result.getColumn("Well"));
+                result.removeColumn(result.getColumn("Wells"));
+                result.removeColumn(result.getColumn("Well Role"));
                 return result;
             }
 
             if (CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                CurveFitTable result = createCurveFitTable(cf, true);
-                SQLFragment filter = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
-                filter.append(getTableInfoAnalytes(), "a");
-                filter.append(" WHERE a.DataId ");
-                filter.append(createDataFilterInClause());
-                filter.append(")");
-                result.addCondition(filter, FieldKey.fromParts("RunId"));
-                return result;
+                return createCurveFitTable(cf, true);
             }
 
             if (GUIDE_SET_CURVE_FIT_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -249,16 +227,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
             if (RUN_EXCLUSION_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                FilteredTable result = createRunExclusionTable(cf, true);
-                SQLFragment filter = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
-                filter.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
-                filter.append(", ");
-                filter.append(ExperimentService.get().getTinfoData(), "d");
-                filter.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
-                filter.append(createDataFilterInClause());
-                filter.append(")");
-                result.addCondition(filter, FieldKey.fromParts("RunId"));
-                return result;
+                return createRunExclusionTable(cf, true);
             }
 
             if (ANALYTE_TITRATION_QC_FLAG_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -323,38 +292,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     private SinglePointControlTable createSinglePointControlTable(ContainerFilter cf, boolean filterTable)
     {
-        SinglePointControlTable result = new SinglePointControlTable(this, cf, filterTable);
-        if (filterTable)
-        {
-            SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
-            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
-            sql.append(", ");
-            sql.append(ExperimentService.get().getTinfoData(), "d");
-            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
-            sql.append(createDataFilterInClause());
-            sql.append(")");
-            result.addCondition(sql);
-        }
-        return result;
+        return new SinglePointControlTable(this, cf, filterTable);
     }
 
     public AnalyteSinglePointControlTable createAnalyteSinglePointControlTable(ContainerFilter cf, boolean filterTable)
     {
-        AnalyteSinglePointControlTable result = new AnalyteSinglePointControlTable(this, cf, filterTable);
-        if (filterTable)
-        {
-            SQLFragment sql = new SQLFragment("SinglePointControlId IN (SELECT RowId FROM ");
-            sql.append(getTableInfoSinglePointControl(), "spc");
-            sql.append(" WHERE RunId IN (SELECT pa.RunId FROM ");
-            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
-            sql.append(", ");
-            sql.append(ExperimentService.get().getTinfoData(), "d");
-            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
-            sql.append(createDataFilterInClause());
-            sql.append("))");
-            result.addCondition(sql);
-        }
-        return result;
+        return new AnalyteSinglePointControlTable(this, cf, filterTable);
     }
 
     private RunExclusionTable createRunExclusionTable(ContainerFilter cf, boolean filterTable)
@@ -364,33 +307,12 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public AnalyteTable createAnalyteTable(ContainerFilter cf, boolean filterTable)
     {
-        AnalyteTable result = new AnalyteTable(this, cf, filterTable);
-
-        if (filterTable)
-        {
-            SQLFragment sql = new SQLFragment("DataId");
-            sql.append(createDataFilterInClause());
-            result.addCondition(sql);
-        }
-        result.setTitleColumn("Name");
-        return result;
+        return new AnalyteTable(this, cf, filterTable);
     }
 
     public TitrationTable createTitrationTable(ContainerFilter cf, boolean filter)
     {
-        TitrationTable result = new TitrationTable(this, cf, filter);
-        if (filter)
-        {
-            SQLFragment sql = new SQLFragment("RunId IN (SELECT pa.RunId FROM ");
-            sql.append(ExperimentService.get().getTinfoProtocolApplication(), "pa");
-            sql.append(", ");
-            sql.append(ExperimentService.get().getTinfoData(), "d");
-            sql.append(" WHERE pa.RowId = d.SourceApplicationId AND d.RowId ");
-            sql.append(createDataFilterInClause());
-            sql.append(")");
-            result.addCondition(sql);
-        }
-        return result;
+        return new TitrationTable(this, cf, filter);
     }
 
     public ExpDataTable createDataFileTable(ContainerFilter cf)
@@ -408,19 +330,16 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         protocol.setHidden(true);
 
         var runCol = ret.addColumn(ExpDataTable.Column.Run);
-        if (getProtocol() != null)
+        runCol.setFk(new LookupForeignKey(ret.getContainerFilter(),"RowId", null)
         {
-            runCol.setFk(new LookupForeignKey(ret.getContainerFilter(),"RowId", null)
+            @Override
+            public TableInfo getLookupTableInfo()
             {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    ExpRunTable result = AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container, null);
-                    result.setContainerFilter(getLookupContainerFilter());
-                    return result;
-                }
-            });
-        }
+                ExpRunTable result = AssayService.get().createRunTable(getProtocol(), AssayService.get().getProvider(getProtocol()), _user, _container, null);
+                result.setContainerFilter(getLookupContainerFilter());
+                return result;
+            }
+        });
 
         Domain domain = LuminexAssayProvider.getExcelRunDomain(getProtocol());
         ret.addColumns(domain, null);
@@ -436,12 +355,14 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public LuminexDataTable createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public LuminexDataTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         LuminexDataTable table = new LuminexDataTable(this, cf);
-        if (includeCopiedToStudyColumns)
+        if (includeLinkedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            ExpProtocol protocol = getProtocol();
+            String rowIdName = getProvider().getTableMetadata(protocol).getResultRowIdFieldKey().getName();
+            StudyPublishService.get().addLinkedToStudyColumns(table, Dataset.PublishSource.Assay, true, protocol.getRowId(), rowIdName, getUser());
         }
         return table;
     }
@@ -520,20 +441,33 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         return result;
     }
 
-    protected SQLFragment createDataFilterInClause()
+    public SQLFragment createDataIdContainerFilterSQL(String dataIdColumnName, @Nullable ContainerFilter cf)
     {
-        SQLFragment filter = new SQLFragment(" IN (SELECT d.RowId FROM ");
+        SQLFragment filter = new SQLFragment(dataIdColumnName);
+        filter.append(" IN (SELECT d.RowId FROM ");
         filter.append(ExperimentService.get().getTinfoData(), "d");
         filter.append(", ");
         filter.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        filter.append(" WHERE d.RunId = r.RowId");
-        if (getProtocol() != null)
+        filter.append(" WHERE d.RunId = r.RowId AND r.ProtocolLSID = ?");
+        filter.add(getProtocol().getLSID());
+        if (cf != null)
         {
-            filter.append(" AND r.ProtocolLSID = ?");
-            filter.add(getProtocol().getLSID());
+            filter.append(" AND ");
+            filter.append(cf.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
         }
         filter.append(") ");
         return filter;
+    }
+
+    public SQLFragment createRunIdContainerFilterSQL(ContainerFilter filter)
+    {
+        SQLFragment sql = new SQLFragment("RunId IN (SELECT r.RowId FROM ");
+        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        sql.append(" WHERE r.ProtocolLSID = ? AND ");
+        sql.add(getProtocol().getLSID());
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
+        sql.append(")");
+        return sql;
     }
 
     public static DbSchema getSchema()
@@ -613,7 +547,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createWellExclusionAnalyteTable(ContainerFilter cf)
     {
-        FilteredTable result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this, cf);
+        FilteredTable<?> result = new FilteredTable<>(getTableInfoWellExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
         result.getMutableColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
@@ -621,7 +555,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
 
     public TableInfo createRunExclusionAnalyteTable(ContainerFilter cf)
     {
-        FilteredTable result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this, cf);
+        FilteredTable<?> result = new FilteredTable<>(getTableInfoRunExclusionAnalyte(), this, cf);
         result.wrapAllColumns(true);
         result.getMutableColumn("AnalyteId").setFk(new AnalyteForeignKey(this, cf));
         return result;
@@ -651,7 +585,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 return new DataColumn(colInfo)
                 {
                     /** RowId -> Name */
-                    private Map<FieldKey, FieldKey> _pdfColumns = new HashMap<>();
+                    private final Map<FieldKey, FieldKey> _pdfColumns = new HashMap<>();
 
                     {
                         TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
@@ -798,7 +732,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
                 // if showing controls and user is viewing data results for a single run, add the Exclusions menu button to button bar
-                if (showControls() && runId != null && NumberUtils.isDigits(runId))
+                if (showControls() && NumberUtils.isDigits(runId))
                 {
                     MenuButton exclusionsMenu = new MenuButton("Exclusions");
                     exclusionsMenu.setDisplayPermission(UpdatePermission.class);

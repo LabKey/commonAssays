@@ -18,12 +18,13 @@ package org.labkey.ms2.protein;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.query.ExprColumn;
+import org.labkey.api.util.SafeToRenderEnum;
 
 /**
  * User: jeckels
  * Date: Apr 3, 2007
  */
-public enum CustomAnnotationType
+public enum CustomAnnotationType implements SafeToRenderEnum
 {
     IPI("IPI", IdentifierType.IPI)
     {
@@ -40,7 +41,7 @@ public enum CustomAnnotationType
             {
                 return "All IPI identifiers must start with 'IPI'.";
             }
-            if (lookupString.indexOf(".") != -1)
+            if (lookupString.contains("."))
             {
                 return "IPI identifiers must not include a version number.";
             }

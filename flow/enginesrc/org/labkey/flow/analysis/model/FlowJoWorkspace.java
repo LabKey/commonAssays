@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.VersionNumber;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
@@ -145,10 +145,24 @@ abstract public class FlowJoWorkspace extends Workspace
 
     protected void postProcess()
     {
-        createAliases();
+        createBooleanAliases();
     }
 
-    private void createAliases()
+    /**
+     * Create backwards compatibility aliases for boolean populations.
+     *
+     * If a population is defined by a boolean gate, any statistics or plots that
+     * reference the population will have an aliases created that represents the
+     * gate's boolean expression for the population.
+     *
+     * For example, if a population named "IFNg_OR_IL2" is defined by the boolean
+     * gate of the populations "IFNg" and "IL2", the "Count" statistic:
+     * <pre>/S/L/Lv/3+/4+/IFNg_OR_IL2:Count</pre>
+     * will have an alias of
+     * <pre>/S/L/Lv/3+/4+/(IFNg+|IL2+):Count</pre>
+     */
+    @Override
+    public void createBooleanAliases()
     {
         Map<SubsetSpec, SubsetSpec> aliases = new HashMap<>();
 
@@ -409,11 +423,11 @@ abstract public class FlowJoWorkspace extends Workspace
     protected Analysis readSampleAnalysis(Element elSampleNode)
     {
         String sampleId = elSampleNode.getAttribute("sampleID");
-        SampleInfo sample = getSample(sampleId);
+        SampleInfo sample = getSampleById(sampleId);
         if (sample == null)
         {
             // Don't read analysis if sample has been marked as 'deleted'
-            sample = getDeletedSample(sampleId);
+            sample = getDeletedSampleById(sampleId);
             if (sample != null)
                 warning(sample, null, null, "Ignoring deleted sample");
             else
@@ -468,7 +482,7 @@ abstract public class FlowJoWorkspace extends Workspace
             // If we are at the root and "count" is unavailable, try to get it from the "$TOT" keyword
             if (subset == null && (count == null || count == 0.0d || count == -1.0d))
             {
-                SampleInfo sampleInfo = getSample(sampleId);
+                SampleInfo sampleInfo = getSampleById(sampleId);
                 if (sampleInfo != null)
                 {
                     String strTot = sampleInfo.getKeywords().get("$TOT");
@@ -735,17 +749,9 @@ abstract public class FlowJoWorkspace extends Workspace
 
     public static class LoadTests extends Assert
     {
-        private File projectRoot()
-        {
-            String projectRootPath =  AppProps.getInstance().getProjectRoot();
-            if (projectRootPath == null)
-                projectRootPath = System.getProperty("user.dir") + "/..";
-            return new File(projectRootPath);
-        }
-
         private Workspace loadWorkspace(String path) throws Exception
         {
-            File file = new File(projectRoot(), "sampledata/" + path);
+            File file = JunitUtil.getSampleData(null, path);
             return Workspace.readWorkspace(file.getName(), path, new FileInputStream(file));
         }
 
@@ -795,7 +801,7 @@ abstract public class FlowJoWorkspace extends Workspace
             assertEquals(11, workspace.getParameterNames().size());
             assertEquals(0, workspace.getWarnings().size());
 
-            SampleInfo sampleInfo = workspace.getSample("2");
+            SampleInfo sampleInfo = workspace.getSampleById("2");
             assertEquals("Specimen_001_stain.fcs", sampleInfo.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
@@ -1004,7 +1010,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 sampleFileName = "931115-C02- Sample 02.fcs";
             }
             String sampleId = mac ? "268435458" : windowsSampleId;
-            SampleInfo sample = workspace.getSample(sampleId);
+            SampleInfo sample = workspace.getSampleById(sampleId);
             assertEquals(sampleFileName, sample.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sample);
@@ -1233,7 +1239,7 @@ abstract public class FlowJoWorkspace extends Workspace
         public void loadSubsets() throws Exception
         {
             Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/subset-parsing.xml");
-            SampleInfo sampleInfo = workspace.getSample("2");
+            SampleInfo sampleInfo = workspace.getSampleById("2");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
             AttributeSet attrs = workspace.getSampleAnalysisResults(sampleInfo);
@@ -1304,7 +1310,7 @@ abstract public class FlowJoWorkspace extends Workspace
         public void loadBooleanSubPopulations() throws Exception
         {
             Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations.xml");
-            SampleInfo sampleInfo = workspace.getSample("1");
+            SampleInfo sampleInfo = workspace.getSampleById("1");
             assertEquals("118795.fcs", sampleInfo.getLabel());
 
             Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
@@ -1346,6 +1352,78 @@ abstract public class FlowJoWorkspace extends Workspace
             checkAlias(results, new StatisticSpec("{A&B}/D:Freq_Of_Parent"), new StatisticSpec("(A&B)/D:Freq_Of_Parent"));
             checkAlias(results, new StatisticSpec("{A&B}/{C|D}:Count"), new StatisticSpec("(A&B)/(C|D):Count"));
             checkAlias(results, new StatisticSpec("{A&B}/{C|D}:Freq_Of_Parent"), new StatisticSpec("(A&B)/(C|D):Freq_Of_Parent"));
+        }
+
+        @Test
+        public void loadBooleanSubPopulations2() throws Exception
+        {
+            // Issue 40840: flow: support for sub-populations of boolean populations
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/boolean-sub-populations2.xml");
+            SampleInfo sampleInfo = workspace.getSampleById("1");
+            assertEquals("test_114_035.fcs", sampleInfo.getLabel());
+
+            Analysis analysis = sampleInfo.getAnalysis();
+
+            Population trucount_pos = analysis.getPopulation(PopulationName.fromString("trucount beads+"));
+            assertEquals(1, trucount_pos.getGates().size());
+
+            Population trucount_neg = analysis.getPopulation(PopulationName.fromString("trucount beads-"));
+            assertEquals(1, trucount_neg.getGates().size());
+            assertTrue(trucount_neg.getGates().get(0) instanceof NotGate);
+
+            Population cd45_less_debris = trucount_neg.getPopulation(PopulationName.fromString("CD45+, less debris"));
+            assertTrue(cd45_less_debris.getGates().get(0) instanceof PolygonGate);
+
+            // Check count stats of the boolean populations.
+            AttributeSet results = sampleInfo.getAnalysisResults();
+            Map<StatisticSpec, Double> stats = results.getStatistics();
+            assertEquals(50009d, stats.get(new StatisticSpec(null, StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(25d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads+"), StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(49984d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-"), StatisticSpec.STAT.Count, null)), DELTA);
+            assertEquals(43991d, stats.get(new StatisticSpec(SubsetSpec.fromParts("trucount beads-", "CD45+, less debris"), StatisticSpec.STAT.Count, null)), DELTA);
+        }
+
+        @Test
+        public void loadDuplicateSamples() throws Exception
+        {
+            // Issue 41224: flow: support duplicate sample names in FlowJo workspace
+            Workspace workspace = loadWorkspace("flow/flowjoquery/Workspaces/duplicate-samples.xml");
+            workspace.createBooleanAliases();
+
+            SampleInfo sample240 = workspace.getSampleById("240");
+            assertEquals("240", sample240.getSampleId());
+            assertEquals("118795.fcs", sample240.getSampleName());
+            assertEquals("1000", sample240.getKeywords().get("$TOT").trim());
+
+            SampleInfo sample241 = workspace.getSampleById("241");
+            assertEquals("241", sample241.getSampleId());
+            assertEquals("118795.fcs", sample241.getSampleName());
+            assertEquals("10000", sample241.getKeywords().get("$TOT").trim());
+
+            List<SampleInfo> samples = workspace.getSampleByLabel("118795.fcs");
+            assertEquals(2, samples.size());
+            assertTrue(samples.contains(sample240));
+            assertTrue(samples.contains(sample241));
+
+            AttributeSet sample240results = sample240.getAnalysisResults();
+            assertEquals(17, sample240results.getStatistics().size());
+            assertEquals(1000d, sample240results.getStatistics().get(new StatisticSpec("Count")), 0.01);
+            assertEquals(2d, sample240results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count")), 0.01);
+
+            AttributeSet sample241results = sample241.getAnalysisResults();
+            assertEquals(19, sample241results.getStatistics().size());
+            assertEquals(10000d, sample241results.getStatistics().get(new StatisticSpec("Count")), 0.01);
+            assertEquals(10d, sample241results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count")), 0.01);
+            assertEquals(10d, sample241results.getStatistics().get(new StatisticSpec("S/Lv/L/3+/4+/bogus_IFNorIL2:Count")), 0.01);
+
+            // Issue 41225: flow: import failure for duplicate aliased statistics
+            // both the IFNorIL2 and "bogus_IFNorIL2" populations have the same boolean gate definition
+            // and so will result in the same aliases being created
+            Set<StatisticSpec> expectedAliases = Set.of(new StatisticSpec("S/Lv/L/3+/4+/(IFNg+|IL2+):Count"));
+            Set<StatisticSpec> aliases1 = sample241results.getStatisticAliases().get(new StatisticSpec("S/Lv/L/3+/4+/IFNorIL2:Count"));
+            Set<StatisticSpec> aliases2 = sample241results.getStatisticAliases().get(new StatisticSpec("S/Lv/L/3+/4+/bogus_IFNorIL2:Count"));
+            assertEquals(expectedAliases, aliases1);
+            assertEquals(expectedAliases, aliases2);
         }
 
         private void checkAlias(AttributeSet attrs, StatisticSpec spec, StatisticSpec expectedAlias)

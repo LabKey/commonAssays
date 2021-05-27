@@ -24,6 +24,7 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.NestableDataRegion;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.ShowRows;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.query.CustomView;
@@ -267,6 +268,11 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
         {
             throw new RuntimeException(e);
         }
+
+        // Show all of the peptides with no offsets for this nested grid
+        settings.setOffset(0);
+        settings.setShowRows(ShowRows.ALL);
+
         PeptideQueryView view = new PeptideQueryView(schema, settings, true, false);
         DataRegion region = view.createDataRegion();
         if (!(region instanceof NestableDataRegion))

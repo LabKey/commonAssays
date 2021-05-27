@@ -59,6 +59,11 @@
                 <isHidden>true</isHidden>
             </column>
             <column columnName="VirusLsid"/>
+            <column columnName="FitParameters">
+                <displayColumnFactory>
+                    <className>org.labkey.api.data.JsonPrettyPrintDisplayColumnFactory</className>
+                </displayColumnFactory>
+            </column>
         </columns>
     </table>
     <table tableName="WellData" tableDbType="TABLE">
@@ -70,10 +75,10 @@
             <column columnName="RunId"/>
             <column columnName="SpecimenLSID"/>
             <column columnName="RunDataId">
-                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
+                <url>query-executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
             </column>
             <column columnName="DilutionDataId">
-                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=DilutionData&amp;query.RowId~eq=${DilutionDataId}</url>
+                <url>query-executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=DilutionData&amp;query.RowId~eq=${DilutionDataId}</url>
             </column>
             <column columnName="Row"/>
             <column columnName="Column"/>
@@ -101,7 +106,7 @@
             </column>
             <column columnName="RunId"/>
             <column columnName="RunDataId">
-                <url>executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
+                <url>query-executeQuery.view?schemaName=${schemaPath}&amp;query.queryName=Data&amp;query.RowId~eq=${RunDataId}</url>
             </column>
             <column columnName="Dilution"/>
             <column columnName="DilutionOrder"/>

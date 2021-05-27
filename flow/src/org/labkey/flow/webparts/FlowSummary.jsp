@@ -18,17 +18,18 @@
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
+<%@ page import="org.labkey.api.exp.flag.FlagColumnRenderer" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineStatusUrls" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
 <%@ page import="org.labkey.api.security.User" %>
-<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
+<%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
-<%@ page import="org.labkey.api.settings.AppProps" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
@@ -36,7 +37,6 @@
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
 <%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.data.FlowDataType" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
@@ -76,8 +76,8 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleSet _sampleSet = _protocol != null ? _protocol.getSampleSet() : null;
-    List<? extends ExpMaterial> _sampleSetSamples = _sampleSet == null ? null : _sampleSet.getSamples(_sampleSet.getContainer());
+    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType() : null;
+    List<? extends ExpMaterial> _sampleTypeSamples = _sampleType == null ? null : _sampleType.getSamples(_sampleType.getContainer());
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -115,7 +115,7 @@
 </style>
 
 <script type="text/javascript">
-    function createRenderer(detailsURL, urlFlagged, countProperty, countLabel)
+    function createRenderer(detailsURL, countProperty, countLabel)
     {
         return function (el, json) {
             var html = "<table border='0'>";
@@ -124,10 +124,10 @@
                 var name = row.Name.value;
                 var url = row.Name.url;
                 var comment = row["Flag/Comment"].value ? " title='" + row["Flag/Comment"].value + "'" : "";
-                var src = row["Flag/Comment"].value ? urlFlagged : "<%=getWebappURL("_.gif")%>";
+                var iconCls = row["Flag/Comment"].value ? <%=q(FlagColumnRenderer.flagEnabledCls())%> : "";
 
                 html += "<tr>" +
-                        "<td><a" + comment + " href='" + url + "'><img src='" + src + "'></a></td>" +
+                        "<td>" + (iconCls ? "<a" + comment + " href='" + url + "'><i class='" + iconCls + "'/></a>" : "") + "</td>" +
                         "<td nowrap><a" + comment + " href='" + url + "'>" + name + "</a><td>";
                 if (countProperty) {
                     html += "<td align='right' nowrap>(" + row[countProperty].value + " " + countLabel + ")</td>";
@@ -145,7 +145,7 @@
     }
 </script>
 
-<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleSet != null) { %>
+<% if (_fcsRunCount > 0 || _fcsAnalysisRunCount > 0 || _compensationMatrixCount > 0 || _sampleType != null) { %>
     <div class="summary-div">
         <h3 class="summary-header">Summary</h3>
 
@@ -165,12 +165,12 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(fcsFileRunsURL)%>", "<%=h(FlowDataType.FCSFile.urlFlag(true))%>", "FCSFileCount", "files")
+                renderer: createRenderer("<%=h(fcsFileRunsURL)%>", "FCSFileCount", "files")
             });
         });
         </script>
         <div id="fcsFileRuns-div">
-            <a href="<%=fcsFileRunsURL%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsFileRunsURL)%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsRunCount > 0) --%>
 
@@ -189,12 +189,12 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=fcsAnalysisRunsURL%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "FCSAnalysisCount", "wells")
+                renderer: createRenderer("<%=h(fcsAnalysisRunsURL)%>", "FCSAnalysisCount", "wells")
             });
         });
         </script>
         <div id="fcsAnalysisRuns-div">
-            <a href="<%=fcsAnalysisRunsURL%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsAnalysisRunsURL)%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
@@ -212,7 +212,7 @@
                       apiVersion: 9.1
                   })
                 },
-                renderer: createRenderer("<%=h(compMatricesURL)%>", "<%=h(FlowDataType.CompensationMatrix.urlFlag(true))%>")
+                renderer: createRenderer("<%=h(compMatricesURL)%>")
             });
         });
         </script>
@@ -221,33 +221,33 @@
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-    <% if (_sampleSetSamples != null && _sampleSetSamples.size() > 0) { %>
+    <% if (_sampleTypeSamples != null && _sampleTypeSamples.size() > 0) { %>
         <script type="text/javascript">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "samples-div",
                 html: "<table border='0'>" +
                       <%
-                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleSetSamples.size(); sampleIndex++)
+                        for (int sampleIndex = 0; sampleIndex < DISPLAY_MAX_ROWS && sampleIndex < _sampleTypeSamples.size(); sampleIndex++)
                         {
-                            ExpMaterial sample = _sampleSetSamples.get(sampleIndex);
+                            ExpMaterial sample = _sampleTypeSamples.get(sampleIndex);
                             String name = sample.getName();
-                            String url = sample.detailsURL().getLocalURIString();
-                            String comment = sample.getComment() != null ? " title='" + h(sample.getComment()) + "'" : "";
-                            String src = StringUtils.isNotEmpty(sample.getComment()) ? sample.urlFlag(true) : AppProps.getInstance().getContextPath() + "/_.gif";
+                            ActionURL url = sample.detailsURL();
+                            HtmlString comment = sample.getComment() != null ? unsafe(" title='" + h(sample.getComment()) + "'") : HtmlString.EMPTY_STRING;
+                            String iconCls = StringUtils.isNotEmpty(sample.getComment()) ? FlagColumnRenderer.flagEnabledCls() : "";
                       %>
                           "<tr>" +
-                          "<td><a<%=comment%> href='<%=h(url)%>'><img src='<%=src%>'></a>" +
+                          "<td><a<%=comment%> href='<%=h(url)%>'><i class=<%=q(iconCls)%>/></a>" +
                           "<td nowrap><a<%=comment%> href='<%=h(url)%>'><%=h(name)%></a>" +
                           "</tr>" +
                       <%
                          }
 
-                         if (_sampleSetSamples.size() > DISPLAY_MAX_ROWS)
+                         if (_sampleTypeSamples.size() > DISPLAY_MAX_ROWS)
                          {
                       %>
                             "<tr>" +
-                            "<td colspan=2><a href='<%=h(_sampleSet.detailsURL())%>'>More...</a></td>" +
+                            "<td colspan=2><a href='<%=h(_sampleType.detailsURL())%>'>More...</a></td>" +
                             "</tr>" +
                       <%
                          }
@@ -257,7 +257,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=h(_sampleSet.getDescription())%>" href="<%=_sampleSet.detailsURL()%>">Samples (<%=_sampleSet.getSamples(_sampleSet.getContainer()).size()%>)</a>
+            <a title="<%=h(_sampleType.getDescription())%>" href="<%=h(_sampleType.detailsURL())%>">Samples (<%=_sampleType.getSamples(_sampleType.getContainer()).size()%>)</a>
         </div>
     <% } %>
 
@@ -299,39 +299,39 @@
                             '<div class="summary-header">Execute Script</div>',
                             <% if (!script.hasStep(FlowProtocolStep.calculateCompensation) && !script.hasStep(FlowProtocolStep.analysis)) { %>
                                 '<div>This blank script must be<br>',
-                                '<a href="<%=script.urlShow()%>">edited</a> before it can be used.</div>',
+                                '<a href="<%=h(script.urlShow())%>">edited</a> before it can be used.</div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation)%>">Compensation</a></div>',
+                                '<div><a href="<%=h(script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation))%>">Compensation</a></div>',
                             <% } %>
                             <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                '<div><a href="<%=script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis)%>">Statistics and Graphs</a></div>',
+                                '<div><a href="<%=h(script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis))%>">Statistics and Graphs</a></div>',
                             <% } %>
                         '</div>',
                         <% if (canEditScript || script.hasStep(FlowProtocolStep.calculateCompensation) || script.hasStep(FlowProtocolStep.analysis)) { %>
                             '<div class="summary-div">',
                                 '<div class="summary-header">Analysis Definition</div>',
                                 <% if (script.hasStep(FlowProtocolStep.calculateCompensation)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.EditCompensationCalculationAction.class)%>">Show Compensation</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditCompensationCalculationAction.class))%>">Show Compensation</a></div>',
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>">Upload FlowJo Compensation</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.UploadCompensationCalculationAction.class))%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.EditAnalysisAction.class)%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditAnalysisAction.class))%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
-                                        '<div><a href="<%=script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis)%>">Rename Populations</a></div>',
+                                        '<div><a href="<%=h(script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis))%>">Rename Populations</a></div>',
                                     <% } %>
                                 <% } else if (canEditScript) { %>
-                                    '<div><a href="<%=script.urlFor(ScriptController.UploadAnalysisAction.class)%>">Upload FlowJo Analysis</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.UploadAnalysisAction.class))%>">Upload FlowJo Analysis</a></div>',
                                 <% } %>
                             '</div>',
                         <% } %>
                         '<div class="summary-div">',
                             '<div class="summary-header">Manage</div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.EditSettingsAction.class)%>">Settings</a></div>',
-                            '<div><a href="<%=script.urlFor(ScriptController.CopyAction.class)%>">Copy</a></div>',
+                            '<div><a href="<%=h(script.urlFor(ScriptController.EditSettingsAction.class))%>">Settings</a></div>',
+                            '<div><a href="<%=h(script.urlFor(ScriptController.CopyAction.class))%>">Copy</a></div>',
                             <% if (runCount == 0) { %>
-                                '<div><a href="<%=script.urlFor(ScriptController.DeleteAction.class)%>">Delete</a></div>',
+                                '<div><a href="<%=h(script.urlFor(ScriptController.DeleteAction.class))%>">Delete</a></div>',
                             <% } %>
                         '</div>',
                         <% if (runCount > 0) { %>
@@ -352,7 +352,7 @@
             });
             </script>
             <div id="script-<%=script.getScriptId()%>-div" style="white-space:nowrap;">
-                <a href="<%=script.urlShow()%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
+                <a href="<%=h(script.urlShow())%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }
@@ -384,7 +384,7 @@
                               apiVersion: 9.1
                           })
                         },
-                        renderer: createRenderer("<%=h(experiment.urlShow())%>", "<%=h(FlowDataType.FCSAnalysis.urlFlag(true))%>", "WellCount", "wells")
+                        renderer: createRenderer("<%=h(experiment.urlShow())%>", "WellCount", "wells")
                     });
                 });
                 </script>
@@ -446,7 +446,7 @@
         <div><%= link("Settings", _protocol.urlShow())%></div>
 
         <%
-        if (_sampleSet != null)
+        if (_sampleType != null)
         {
         %>
             <div><%=link("Show Samples", _protocol.urlShowSamples())%></div>
@@ -456,7 +456,7 @@
         else
         {
         %>
-            <div><%=link("Upload Samples", _protocol.urlCreateSampleSet())%></div>
+            <div><%=link("Upload Samples", _protocol.urlCreateSampleType())%></div>
         <%
         }
         if (_fcsAnalysisCount > 0)

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.util.Pair" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -27,7 +27,7 @@
     {
         for (String header : bean.headers)
         { %>
-    <tr><td colspan=2><%=header%></td></tr><%
+    <tr><td colspan=2><%=h(header)%></td></tr><%
         } %>
     <tr><td colspan=2>&nbsp;</td></tr><%
     }
@@ -36,7 +36,7 @@
     {
         for (Pair<String, String> sqlSummary : bean.sqlSummaries)
         { %>
-    <tr><td><%=sqlSummary.getKey().replaceAll(" ", "&nbsp;")%>:</td><td><%=h(sqlSummary.getValue())%></td></tr><%
+    <tr><td><%=unsafe(h(sqlSummary.getKey()).toString().replaceAll(" ", "&nbsp;"))%>:</td><td><%=h(sqlSummary.getValue())%></td></tr><%
         }
     } %>
   </table>

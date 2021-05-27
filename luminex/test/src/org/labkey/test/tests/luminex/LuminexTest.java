@@ -20,6 +20,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.assay.GetProtocolCommand;
+import org.labkey.remoteapi.assay.Protocol;
+import org.labkey.remoteapi.assay.ProtocolResponse;
+import org.labkey.remoteapi.assay.SaveProtocolCommand;
+import org.labkey.remoteapi.domain.Domain;
+import org.labkey.remoteapi.domain.PropertyDescriptor;
 import org.labkey.remoteapi.query.Filter;
 import org.labkey.remoteapi.query.Row;
 import org.labkey.remoteapi.query.SelectRowsCommand;
@@ -28,12 +34,10 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.components.domain.DomainFormPanel;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
-import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -148,13 +152,13 @@ public abstract class LuminexTest extends BaseWebDriverTest
     }
 
     @BeforeClass
-    public static void initTest()
+    public static void initTest() throws Exception
     {
         ((LuminexTest)getCurrentTest()).doInit();
     }
 
     @LogMethod
-    private void doInit()
+    private void doInit() throws Exception
     {
         // setup a scripting engine to run a java transform script
         QCAssayScriptHelper javaEngine = new QCAssayScriptHelper(this);
@@ -200,64 +204,90 @@ public abstract class LuminexTest extends BaseWebDriverTest
         else
         {
             log("Setting up Luminex assay");
-            clickButton("Manage Assays");
-            ReactAssayDesignerPage assayDesignerPage = _assayHelper.createAssayDesign("Luminex", TEST_ASSAY_LUM)
+
+            GetProtocolCommand getProtocolCommand = new GetProtocolCommand("Luminex");
+            ProtocolResponse getProtocolResponse = getProtocolCommand.execute(createDefaultConnection(), getProjectName());
+
+            Protocol assayProtocol = getProtocolResponse.getProtocol();
+            assayProtocol.setName(TEST_ASSAY_LUM)
                 .setDescription(TEST_ASSAY_LUM_DESC);
 
             // add batch properties for transform and Ruminex version numbers
-            DomainFormPanel batchPanel = assayDesignerPage.goToBatchFields();
-            batchPanel.addField("Network").setLabel("Network").setType(FieldDefinition.ColumnType.String);
-            batchPanel.addField("TransformVersion").setLabel("Transform Script Version").setType(FieldDefinition.ColumnType.String);
-            batchPanel.addField("LabTransformVersion").setLabel("Lab Transform Script Version").setType(FieldDefinition.ColumnType.String);
-            batchPanel.addField("RuminexVersion").setLabel("Ruminex Version").setType(FieldDefinition.ColumnType.String);
-            batchPanel.addField("RVersion").setLabel("R Version").setType(FieldDefinition.ColumnType.String);
+            Domain batchesDomain =  assayProtocol.getDomains().stream().filter(a->a.getName().equals("Batch Fields")).findFirst()
+                    .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Batch Fields] domain"));
+            List<PropertyDescriptor> batchFields = batchesDomain.getFields();   // keep the template-supplied fields, add the following
+            batchFields.add(new PropertyDescriptor("Network", "Network", "string"));
+            batchFields.add(new PropertyDescriptor("TransformVersion", "Transform Script Version", "string"));
+            batchFields.add(new PropertyDescriptor("LabTransformVersion", "Lab Transform Script Version", "string"));
+            batchFields.add(new PropertyDescriptor("RuminexVersion", "Ruminex Version", "string"));
+            batchFields.add(new PropertyDescriptor("RVersion", "R Version", "string"));
+            setFieldsToDomain(batchFields, batchesDomain);
 
             // add run properties for designation of which field to use for curve fit calc in transform
-            DomainFormPanel runPanel = assayDesignerPage.goToRunFields();
-            runPanel.addField("SubtNegativeFromAll").setLabel("Subtract Negative Bead from All Wells").setType(FieldDefinition.ColumnType.Boolean);
-            runPanel.addField("StndCurveFitInput").setLabel("Input Var for Curve Fit Calc of Standards").setType(FieldDefinition.ColumnType.String);
-            runPanel.addField("UnkCurveFitInput").setLabel("Input Var for Curve Fit Calc of Unknowns").setType(FieldDefinition.ColumnType.String);
-            runPanel.addField("CurveFitLogTransform").setLabel("Curve Fit Log Transform").setType(FieldDefinition.ColumnType.Boolean);
-            runPanel.addField("SkipRumiCalculation").setLabel("Skip Ruminex Calculations").setType(FieldDefinition.ColumnType.Boolean);
+            Domain runsDomain =  assayProtocol.getDomains().stream().filter(a->a.getName().equals("Run Fields")).findFirst()
+                    .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Run Fields] domain"));
+            List<PropertyDescriptor> runFields = runsDomain.getFields();
+            runFields.add(new PropertyDescriptor("SubtNegativeFromAll", "Subtract Negative Bead from All Wells", "boolean"));
+            runFields.add(new PropertyDescriptor("StndCurveFitInput", "Input Var for CurveFit Calc of Standards", "string"));
+            runFields.add(new PropertyDescriptor("UnkCurveFitInput", "Input Var for Curve Fit Calc of Unknowns", "string"));
+            runFields.add(new PropertyDescriptor("CurveFitLogTransform", "Curve Fit Log Transform", "boolean"));
+            runFields.add(new PropertyDescriptor("SkipRumiCalculation", "Skip Ruminex Calculations", "boolean"));
 
             // add run properties for use with the Guide Set test
-            runPanel.addField("NotebookNo").setLabel("Notebook Number").setType(FieldDefinition.ColumnType.String);
-            runPanel.addField("AssayType").setLabel("Assay Type").setType(FieldDefinition.ColumnType.String);
-            runPanel.addField("ExpPerformer").setLabel("Experiment Performer").setType(FieldDefinition.ColumnType.String);
+            runFields.add(new PropertyDescriptor("NotebookNo", "Notebook Number", "string"));
+            runFields.add(new PropertyDescriptor("AssayType", "Assay Type", "string"));
+            runFields.add(new PropertyDescriptor("ExpPerformer", "Experiment Performer", "string"));
 
             // add run properties for use with Calculating Positivity
-            runPanel.addField("CalculatePositivity").setLabel("Calculate Positivity").setType(FieldDefinition.ColumnType.Boolean);
-            runPanel.addField("BaseVisit").setLabel("Baseline Visit").setType(FieldDefinition.ColumnType.Decimal);
-            runPanel.addField("PositivityFoldChange").setLabel("Positivity Fold Change").setType(FieldDefinition.ColumnType.Integer);
+            runFields.add(new PropertyDescriptor("CalculatePositivity", "Calculate Positivity", "boolean"));
+            runFields.add(new PropertyDescriptor("BaseVisit", "Baseline Visit", "float"));
+            runFields.add(new PropertyDescriptor("PositivityFoldChange", "Positivity Fold Change", "int"));
+            setFieldsToDomain(runFields, runsDomain);
 
             // add analyte property for tracking lot number
-            DomainFormPanel analytePanel = assayDesignerPage.expandFieldsPanel("Analyte");
-            analytePanel.addField("LotNumber").setLabel("Lot Number").setType(FieldDefinition.ColumnType.String);
-            analytePanel.addField("NegativeControl").setLabel("Negative Control").setType(FieldDefinition.ColumnType.Boolean);
+            Domain analyteDomain = assayProtocol.getDomains().stream().filter(a->a.getName().equals("Analyte Properties")).findFirst()
+                    .orElseThrow(()-> new IllegalStateException("The protocol template did not supply an [Analyte Properties] domain"));
+            List<PropertyDescriptor> analyteFields = analyteDomain.getFields();
+            analyteFields.add(new PropertyDescriptor("LotNumber", "Lot Number", "string"));
+            analyteFields.add(new PropertyDescriptor("NegativeControl", "Negative Control", "boolean"));
+            setFieldsToDomain(analyteFields, analyteDomain);
 
             // add the data properties for the calculated columns, set format to two decimal place for easier testing later
-            DomainFormPanel resultsPanel = assayDesignerPage.goToResultsFields();
-            resultsPanel.addField("FIBackgroundNegative").setLabel("FI-Bkgd-Neg").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Standard").setLabel("Stnd for Calc").setType(FieldDefinition.ColumnType.String);
-            resultsPanel.addField("EstLogConc_5pl").setLabel("Est Log Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("EstConc_5pl").setLabel("Est Conc Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("SE_5pl").setLabel("SE Rumi 5 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("EstLogConc_4pl").setLabel("Est Log Conc Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("EstConc_4pl").setLabel("Est Conc Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("SE_4pl").setLabel("SE Rumi 4 PL").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Slope_4pl").setLabel("Slope_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Lower_4pl").setLabel("Lower_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Upper_4pl").setLabel("Upper_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Inflection_4pl").setLabel("Inflection_4pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Slope_5pl").setLabel("Slope_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Lower_5pl").setLabel("Lower_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Upper_5pl").setLabel("Upper_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Inflection_5pl").setLabel("Inflection_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Asymmetry_5pl").setLabel("Asymmetry_5pl").setType(FieldDefinition.ColumnType.Decimal).setNumberFormat("0.0");
-            resultsPanel.addField("Positivity").setLabel("Positivity").setType(FieldDefinition.ColumnType.String);
+            Domain resultsDomain = assayProtocol.getDomains().stream().filter(a->a.getName().equals("Data Fields")).findFirst()
+                    .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Data Fields] domain"));
+            List<PropertyDescriptor> resultsFields = resultsDomain.getFields();
+            resultsFields.add(new PropertyDescriptor("FIBackgroundNegative", "FI-Bkgd-Neg", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Standard", "Stnd for Calc", "string"));
+            resultsFields.add(new PropertyDescriptor("EstLogConc_5pl", "Est Log Conc Rumi 5 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("EstConc_5pl", "Est Conc Rumi 5 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("SE_5pl", "SE Rumi 5 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("EstLogConc_4pl", "Est Log Conc Rumi 4 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("EstConc_4pl", "Est Conc Rumi 4 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("SE_4pl", "SE Rumi 4 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Slope_4pl", "Slope_4pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Lower_4pl", "Lower_4pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Upper_4pl", "Upper_4pl", "float").setFormat("0.0")); 
+            resultsFields.add(new PropertyDescriptor("Inflection_4pl", "Inflection_4pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Slope_5pl", "Slope_5pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Lower_5pl", "Lower_5pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Upper_5pl", "Upper_5pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Inflection_5pl", "Inflection_5pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Asymmetry_5pl", "Asymmetry_5pl", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Positivity", "Positivity", "string"));
+            setFieldsToDomain(resultsFields, resultsDomain);
 
-            assayDesignerPage.clickFinish();
+            SaveProtocolCommand saveProtocolCommand = new SaveProtocolCommand(assayProtocol);
+            saveProtocolCommand.execute(createDefaultConnection(), getProjectName());
         }
+    }
+
+    private void setFieldsToDomain(List<PropertyDescriptor> fields, Domain domain)
+    {
+        for (PropertyDescriptor field : fields)
+        {
+            log("adding field ["+field.getName()+"] to domain ["+domain.getName()+"]");
+        }
+        domain.setFields(fields);
     }
 
     public void excludeAnalyteForRun(String analyte, boolean firstExclusion, String comment)
@@ -608,7 +638,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
 
     @LogMethod(quiet = true)
-    public void uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
+    public DataRegionTable uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
     {
         createNewAssayRun(assayName, assayRunId);
         checkCheckbox(Locator.name("calculatePositivity"));
@@ -617,6 +647,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         selectPositivityFile(file, expectDuplicateFile);
         setAnalytePropertyValues();
         finishUploadPositivityFile(assayRunId, isBackgroundUpload);
+        return new DataRegionTable("Data", this);
     }
 
     public void finishUploadPositivityFile(String assayRunId, boolean isBackgroundUpload)

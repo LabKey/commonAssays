@@ -16,7 +16,6 @@
 package org.labkey.luminex.query;
 
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
@@ -93,20 +92,18 @@ public class CurveFitTable extends AbstractLuminexTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
+        // Handle both the container and protocol filtering. TitrationId has a more direct pathway
+        // to the container and protocol values so use it instead of AnalyteId
         SQLFragment sql = new SQLFragment("TitrationId IN (SELECT t.RowId FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
-        sql.append(" WHERE t.RunId IN (SELECT r.RowId FROM ");
+        sql.append(" INNER JOIN ");
         sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container"), container));
-        if (getUserSchema().getProtocol() != null)
-        {
-            sql.append(" AND r.ProtocolLSID = ?");
-            sql.add(getUserSchema().getProtocol().getLSID());
-        }
-        sql.append("))");
+        sql.append(" ON t.RunId = r.RowId AND r.ProtocolLSID = ? AND ");
+        sql.add(getUserSchema().getProtocol().getLSID());
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
+        sql.append(")");
         return sql;
     }
 }

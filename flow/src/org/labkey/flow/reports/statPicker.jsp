@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
-<%@ page import="org.labkey.api.exp.api.ExpSampleSet" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -63,13 +63,13 @@
     }
     jsonStats.append("]");
 
-    Collection<String> sampleSetProperties = new ArrayList<>();
+    Collection<String> sampleTypeProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-    ExpSampleSet sampleSet = protocol.getSampleSet();
-    if (sampleSet != null)
+    ExpSampleType sampleType = protocol.getSampleType();
+    if (sampleType != null)
     {
-        for (DomainProperty dp : sampleSet.getDomain().getProperties())
-            sampleSetProperties.add(dp.getName());
+        for (DomainProperty dp : sampleType.getDomain().getProperties())
+            sampleTypeProperties.add(dp.getName());
     }
 
     StringBuilder stats = new StringBuilder();
@@ -392,7 +392,7 @@ var FlowPropertySet = {};
 FlowPropertySet.keywords = <%=toJsonArray(fps.getVisibleKeywords())%>;
 FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
-var SampleSet = {};
-SampleSet.properties = <%=toJsonArray(sampleSetProperties)%>;
+var SampleType = {};
+SampleType.properties = <%=toJsonArray(sampleTypeProperties)%>;
 
 </script>

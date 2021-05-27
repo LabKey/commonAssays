@@ -17,10 +17,16 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayDataLinkDisplayColumn;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionResultsQueryView;
 import org.labkey.api.assay.nab.query.CutoffValueTable;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
+import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.assay.query.RunListDetailsQueryView;
+import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
@@ -34,14 +40,12 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpRunTable;
+import org.labkey.api.query.AliasedColumn;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayDataLinkDisplayColumn;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.query.RunListDetailsQueryView;
-import org.labkey.api.assay.query.ResultsQueryView;
-import org.labkey.api.assay.query.RunListQueryView;
+import org.labkey.api.study.Dataset;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayController;
@@ -62,6 +66,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String NAB_DBSCHEMA_NAME = "nab";
     public static final String NAB_VIRUS_SCHEMA_NAME = "nabvirus";
+    public static final String CELL_CONTROL_AGGREGATES_TABLE_NAME = "CellControlAggregates";
+    public static final String VIRUS_CONTROL_AGGREGATES_TABLE_NAME = "VirusControlAggregates";
 
     public NabProtocolSchema(User user, Container container, @NotNull NabAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
@@ -69,13 +75,15 @@ public class NabProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public @Nullable TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public @Nullable TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         NabRunDataTable table = new NabRunDataTable(this, cf, getProtocol());
 
-        if (includeCopiedToStudyColumns)
+        if (includeLinkedToStudyColumns)
         {
-            addCopiedToStudyColumns(table, true);
+            ExpProtocol protocol = getProtocol();
+            String rowIdName = getProvider().getTableMetadata(protocol).getResultRowIdFieldKey().getName();
+            StudyPublishService.get().addLinkedToStudyColumns(table, Dataset.PublishSource.Assay, true, protocol.getRowId(), rowIdName, getUser());
         }
         return table;
     }
@@ -95,6 +103,23 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
             }
         });
+
+        // Add hidden aliased column from Run/RowId to expose the cell control aggregates for this run
+        AliasedColumn cellControlAggCol = new AliasedColumn(CELL_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
+        cellControlAggCol.setFk(QueryForeignKey.from(this, cf).to(CELL_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
+        cellControlAggCol.setHidden(true);
+        cellControlAggCol.setIsUnselectable(true);
+        cellControlAggCol.setKeyField(false); // Issue 42620
+        runTable.addColumn(cellControlAggCol);
+
+        // Add hidden aliased column from Run/RowId to expose the virus control aggregates for this run
+        AliasedColumn virusControlAggCol = new AliasedColumn(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
+        virusControlAggCol.setFk(QueryForeignKey.from(this, cf).to(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, "RunId", "ControlWellgroup"));
+        virusControlAggCol.setHidden(true);
+        virusControlAggCol.setIsUnselectable(true);
+        virusControlAggCol.setKeyField(false); // Issue 42620
+        runTable.addColumn(virusControlAggCol);
+
         return runTable;
     }
 
@@ -142,9 +167,9 @@ public class NabProtocolSchema extends AssayProtocolSchema
         }
 
         @Override
-        public ActionURL getRunDetailsURL(Object runId)
+        public ActionURL getRunDetailsURL()
         {
-            return new ActionURL(NabAssayController.DetailsAction.class, getContainer()).addParameter("rowId", "" + runId);
+            return new ActionURL(NabAssayController.DetailsAction.class, getContainer());
         }
     }
 
@@ -170,18 +195,17 @@ public class NabProtocolSchema extends AssayProtocolSchema
         {
             if (DilutionManager.CUTOFF_VALUE_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createCutoffValueTable(cf);
+                return new CutoffValueTable(this, cf);
             }
 
             if (DilutionManager.NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return createNAbSpecimenTable(cf);
+                return new NAbSpecimenTable(this, cf);
             }
 
             if (DilutionManager.WELL_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                NabWellDataTable table = new NabWellDataTable(this, cf, getProtocol());
-                return table;
+                return new NabWellDataTable(this, cf, getProtocol());
             }
 
             if (DilutionManager.DILUTION_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
@@ -195,18 +219,18 @@ public class NabProtocolSchema extends AssayProtocolSchema
                 if (virusDomain != null)
                     return new NabVirusDataTable(this, cf, virusDomain);
             }
+
+            if (CELL_CONTROL_AGGREGATES_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return new NabControlAggregatesTable(CELL_CONTROL_AGGREGATES_TABLE_NAME, DilutionManager.CELL_CONTROL_SAMPLE, this, cf, getProtocol(), getProvider());
+            }
+
+            if (VIRUS_CONTROL_AGGREGATES_TABLE_NAME.equalsIgnoreCase(tableType))
+            {
+                return new NabControlAggregatesTable(VIRUS_CONTROL_AGGREGATES_TABLE_NAME, DilutionManager.VIRUS_CONTROL_SAMPLE, this, cf, getProtocol(), getProvider());
+            }
         }
         return super.createProviderTable(tableType, cf);
-    }
-
-    private NAbSpecimenTable createNAbSpecimenTable(ContainerFilter cf)
-    {
-        return new NAbSpecimenTable(this, cf);
-    }
-
-    private CutoffValueTable createCutoffValueTable(ContainerFilter cf)
-    {
-        return new CutoffValueTable(this, cf);
     }
 
     @Override
@@ -216,6 +240,8 @@ public class NabProtocolSchema extends AssayProtocolSchema
         result.add(DilutionManager.CUTOFF_VALUE_TABLE_NAME);
         result.add(DilutionManager.WELL_DATA_TABLE_NAME);
         result.add(DilutionManager.DILUTION_DATA_TABLE_NAME);
+        result.add(CELL_CONTROL_AGGREGATES_TABLE_NAME);
+        result.add(VIRUS_CONTROL_AGGREGATES_TABLE_NAME);
 
         if (getVirusWellGroupDomain() != null)
             result.add(DilutionManager.VIRUS_TABLE_NAME);

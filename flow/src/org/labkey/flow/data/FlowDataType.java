@@ -28,7 +28,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.settings.AppProps;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.persist.ObjectType;
@@ -199,25 +198,6 @@ abstract public class FlowDataType extends AssayDataType
     public boolean isRequireAttrObject()
     {
         return _requireAttrObject;
-    }
-
-    @Override
-    public String urlFlag(boolean flagged)
-    {
-        StringBuilder ret = new StringBuilder();
-        ret.append(AppProps.getInstance().getContextPath());
-        ret.append("/Flow/");
-        if (flagged)
-        {
-            ret.append("flag");
-        }
-        else
-        {
-            ret.append("unflag");
-        }
-        ret.append(_name);
-        ret.append(".gif");
-        return ret.toString();
     }
 
     static public FlowDataType ofNamespace(String namespace)

@@ -56,7 +56,8 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
         if (!_renderedCSS)
         {
             out.write("<script type=\"text/javascript\">\n" +
-            "LABKEY.requiresCss(\"ProteinCoverageMap.css\");\n" +
+            "LABKEY.requiresCss(\"MS2/ProteinCoverageMap.css\");\n" +
+            "LABKEY.requiresScript(\"MS2/ProteinCoverageMap.js\");\n" +
             "LABKEY.requiresScript(\"util.js\");\n" +
             "</script>");
             _renderedCSS = true;

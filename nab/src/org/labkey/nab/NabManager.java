@@ -16,7 +16,14 @@
 
 package org.labkey.nab;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -24,11 +31,15 @@ import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpObject;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -53,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
+
 /**
  * User: brittp
  * Date: Oct 26, 2006
@@ -60,7 +73,7 @@ import java.util.Set;
  */
 public class NabManager extends AbstractNabManager
 {
-    private static final Logger _log = Logger.getLogger(NabManager.class);
+    private static final Logger _log = LogManager.getLogger(NabManager.class);
     private static final NabManager _instance = new NabManager();
 
     private NabManager()
@@ -132,16 +145,20 @@ public class NabManager extends AbstractNabManager
             return Collections.emptyMap();
 
         // Gather a list of readable study dataset TableInfos associated with NAb protocols (these are created when NAb data
-        // is copied to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
+        // is linked to a study).  We use an ArrayList, rather than a set or other dup-removing structure, because there
         // can only be one dataset/tableinfo per protocol.
         Map<TableInfo, ExpProtocol> dataTables = new HashMap<>();
         for (Dataset dataset : datasets)
         {
-            if (dataset.isAssayData() && dataset.canRead(user))
+            if (dataset.isPublishedData() && dataset.canRead(user))
             {
-                ExpProtocol protocol = dataset.getAssayProtocol();
-                if (protocol != null && AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
-                    dataTables.put(dataset.getTableInfo(user), protocol);
+                ExpObject source = dataset.resolvePublishSource();
+                if (source instanceof ExpProtocol)
+                {
+                    ExpProtocol protocol = (ExpProtocol)source;
+                    if (AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
+                        dataTables.put(dataset.getTableInfo(user), protocol);
+                }
             }
         }
 
@@ -202,5 +219,28 @@ public class NabManager extends AbstractNabManager
         {
             throw new RuntimeSQLException(e);
         }
+    }
+
+    /**
+     * Ensure the fit parameter value (as a JSON object) for the given NAb assay run specimen results row.
+     * If not already saved to the DB for the given NAbSpecimen row, save it.
+     * @param user
+     * @param assayRun
+     * @param specimenRow
+     * @param dilutionSummary
+     * @return CurveFit.Parameters as Map
+     * @throws FitFailedException
+     */
+    @Deprecated // primarily used in NabPopulateFitParametersPipelineJob (invoked by nab-20.000-20.001.sql), can be deleted in 23.3.0
+    public Map<String, Object> ensureFitParameters(User user, NabSpecimen specimenRow, @Nullable DilutionAssayRun assayRun, @Nullable DilutionSummary dilutionSummary) throws FitFailedException
+    {
+        if (specimenRow != null && specimenRow.getFitParameters() != null)
+            return new JSONObject(specimenRow.getFitParameters());
+
+        CurveFit.Parameters fitParams = dilutionSummary.getCurveParameters(assayRun.getRenderedCurveFitType());
+        if (user != null)
+            Table.update(user, DilutionManager.getTableInfoNAbSpecimen(), Map.of(FIT_PARAMETERS_PROPERTY_NAME, new JSONObject(fitParams.toMap())), specimenRow.getRowId());
+
+        return fitParams.toMap();
     }
 }

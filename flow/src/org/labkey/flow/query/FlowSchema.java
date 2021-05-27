@@ -29,7 +29,7 @@ import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpMaterialRunInput;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -57,6 +57,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -65,6 +66,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.study.assay.FileLinkDisplayColumn;
 import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
@@ -393,8 +395,6 @@ public class FlowSchema extends UserSchema
         ret.addColumn(ExpRunTable.Column.CreatedBy);
 
         var containerCol = ret.addColumn(ExpRunTable.Column.Folder);
-        containerCol.setHidden(true);
-        ContainerForeignKey.initColumn(containerCol, this, null);
 
         var colLSID = ret.addColumn(ExpRunTable.Column.LSID);
         colLSID.setHidden(true);
@@ -461,6 +461,10 @@ public class FlowSchema extends UserSchema
         addDataCountColumn(ret, "FCSFileCount", ObjectType.fcsKeywords);
         addDataCountColumn(ret, "CompensationControlCount", ObjectType.compensationControl);
         addDataCountColumn(ret, "FCSAnalysisCount", ObjectType.fcsAnalysis);
+
+        PropertyColumn engineCol = new PropertyColumn(FlowProperty.AnalysisEngine.getPropertyDescriptor(), ret.getColumn(ExpRunTable.Column.LSID), getContainer(), getUser(), true);
+        engineCol.setHidden(true);
+        ret.addColumn(engineCol);
 
         return ret;
     }
@@ -668,9 +672,9 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public BaseColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
-            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole,sampleSet);
+            ColumnInfo col = _expData.addMaterialInputColumn(alias,schema,inputRole, sampleType);
             return addExpColumn(col);
         }
 
@@ -832,13 +836,6 @@ public class FlowSchema extends UserSchema
             _type = type;
 
             _fps = new FlowPropertySet(FlowSchema.this.getContainer());
-        }
-
-        @Override
-        public String getPublicName()
-        {
-            // 7471 Let schema explorer resolve lookup table names to "exp.Data" table.
-            return ExpSchema.TableType.Data.toString();
         }
 
         @Override
@@ -1123,11 +1120,11 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
-        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleSet sampleSet)
+        public MutableColumnInfo addMaterialInputColumn(String alias, SamplesSchema schema, String inputRole, ExpSampleType sampleType)
         {
             checkLocked();
             var col = new ExprColumn(this, alias, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".MaterialInputRowId"), JdbcType.INTEGER);
-            col.setFk(schema.materialIdForeignKey(sampleSet, null));
+            col.setFk(schema.materialIdForeignKey(sampleType, null));
             return addColumn(col);
         }
 
@@ -1524,13 +1521,13 @@ public class FlowSchema extends UserSchema
         ret.getMutableColumn(ExpDataTable.Column.Name).setURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         ret.setDetailsURL(new DetailsURL(new ActionURL(WellController.ShowWellAction.class, getContainer()), Collections.singletonMap(FlowParam.wellId.toString(), ExpDataTable.Column.RowId.toString())));
         final ColumnInfo colKeyword = ret.addKeywordColumn("Keyword");
-        ExpSampleSet ss = null;
+        ExpSampleType st = null;
         if (_protocol != null)
         {
-            ss = _protocol.getSampleSet();
+            st = _protocol.getSampleType();
         }
-        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, ss);
-        if (ss == null)
+        var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, st);
+        if (st == null)
         {
             colMaterialInput.setHidden(true);
         }
@@ -1660,7 +1657,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public ExpDataTable createFCSAnalysisTable(String alias, ContainerFilter cf, FlowDataType type, boolean includeCopiedToStudyColumns)
+    public ExpDataTable createFCSAnalysisTable(String alias, ContainerFilter cf, FlowDataType type, boolean includeLinkedToStudyColumns)
     {
         FlowDataTable ret = createDataTable(alias, type, cf);
 
@@ -1722,16 +1719,16 @@ public class FlowSchema extends UserSchema
             ret.addReportColumns(report, FlowTableType.FCSAnalyses);
         }
 
-        if (includeCopiedToStudyColumns)
-            addCopiedToStudyColumns(ret);
+        if (includeLinkedToStudyColumns)
+            addLinkedToStudyColumns(ret);
 
         ret.setDefaultVisibleColumns(new DeferredFCSAnalysisVisibleColumns(ret, _protocol, colStatistic, colGraph, colBackground));
         return ret;
     }
 
-    private Collection<FieldKey> addCopiedToStudyColumns(AbstractTableInfo ret)
+    private Collection<FieldKey> addLinkedToStudyColumns(AbstractTableInfo ret)
     {
-        List<FieldKey> copiedToStudyColumns = new ArrayList<>(10);
+        List<FieldKey> linkedToStudyColumns = new ArrayList<>(10);
         FlowProtocol protocol = getProtocol();
         if (protocol == null)
             protocol = FlowProtocol.getForContainer(getContainer());
@@ -1741,12 +1738,13 @@ public class FlowSchema extends UserSchema
             FlowAssayProvider provider = (FlowAssayProvider)AssayService.get().getProvider(expProtocol);
             if (provider != null)
             {
-                Set<String> studyColumnNames = provider.createProtocolSchema(getUser(), getContainer(), expProtocol, null).addCopiedToStudyColumns(ret, false);
+                String rowIdName = provider.getTableMetadata(expProtocol).getResultRowIdFieldKey().getName();
+                Set<String> studyColumnNames = StudyPublishService.get().addLinkedToStudyColumns(ret, Dataset.PublishSource.Assay, false, expProtocol.getRowId(), rowIdName, getUser());
                 for (String columnName : studyColumnNames)
-                    copiedToStudyColumns.add(new FieldKey(null, columnName));
+                    linkedToStudyColumns.add(FieldKey.fromParts(columnName));
             }
         }
-        return copiedToStudyColumns;
+        return linkedToStudyColumns;
     }
 
     // Rewrite a FieldKey
@@ -2040,7 +2038,7 @@ public class FlowSchema extends UserSchema
                 "    flow.object.fcsid,\n" +
                 "    flow.object.scriptid,\n" +
                 "    flow.object.uri,\n" +
-// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleSet ss)
+// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleType sampleType)
                 "    (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId\n" +
                 "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
                 "FROM exp.data\n" +
@@ -2108,7 +2106,7 @@ public class FlowSchema extends UserSchema
         if (filter.getClauses().size() > 0)
         {
             Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
-            SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), columnMap);
+            SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), "_filter", columnMap);
             SQLFragment t = new SQLFragment("SELECT * FROM (");
             t.append(bgSQL);
             t.append(") _filter_ " );

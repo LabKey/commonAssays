@@ -23,13 +23,13 @@ import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.Parameter;
+import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
-import org.labkey.api.dataiterator.TableInsertDataIterator;
+import org.labkey.api.dataiterator.TableInsertDataIteratorBuilder;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.RawValueColumn;
@@ -92,10 +92,6 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
             else if (NabVirusDomainKind.DATLSID_COLUMN_NAME.equalsIgnoreCase(col.getName()))
             {
                 col.setHidden(true);
-            }
-            else if ("Container".equalsIgnoreCase(col.getName()))
-            {
-                ContainerForeignKey.initColumn(col, schema);
             }
 
             DomainProperty domainProperty = _virusDomain.getPropertyByName(baseColumn.getName());
@@ -223,23 +219,23 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
     @Override
     public DataIteratorBuilder persistRows(DataIteratorBuilder data, DataIteratorContext context)
     {
-        return TableInsertDataIterator.create(data, this, null, context);
+        return new TableInsertDataIteratorBuilder(data, this);
     }
 
     @Override
-    public Parameter.ParameterMap insertStatement(Connection conn, User user) throws SQLException
+    public ParameterMapStatement insertStatement(Connection conn, User user) throws SQLException
     {
         return StatementUtils.insertStatement(conn, this, getContainer(), user, false, true);
     }
 
     @Override
-    public Parameter.ParameterMap updateStatement(Connection conn, User user, Set<String> columns)
+    public ParameterMapStatement updateStatement(Connection conn, User user, Set<String> columns)
     {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Parameter.ParameterMap deleteStatement(Connection conn)
+    public ParameterMapStatement deleteStatement(Connection conn)
     {
         throw new UnsupportedOperationException();
     }

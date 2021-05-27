@@ -26,17 +26,20 @@ import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.exp.query.ExpSchema;
+import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.LookupForeignKey;
@@ -46,6 +49,7 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
@@ -57,6 +61,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
 
 /**
  * User: brittp
@@ -88,6 +94,15 @@ public class NabRunDataTable extends NabBaseTable
         var addedRunIdColumn = addColumn(runIdColumn);
         addedRunIdColumn.setHidden(true);
 
+        // Create an AliasColumn for the results to pull in their DilutionData (note that this will result in row duplication).
+        // This is for a client scenario where they want to be able to access and export the dilution data for copied-to-study NAb results.
+        AliasedColumn dilutionDataCol = new AliasedColumn("DilutionData", wrapColumn(getRealTable().getColumn("RowId")));
+        dilutionDataCol.setFk(QueryForeignKey.from(schema, cf).to("DilutionData", "RunData", "Dilution"));
+        dilutionDataCol.setDescription("Note that bringing this column into view, or any of its children, will result in row duplication "
+                + "for the data/results grid as it will join in all dilution values for the given sample/specimen row.");
+        dilutionDataCol.setHidden(true);
+        addColumn(dilutionDataCol);
+
         Set<String> hiddenProperties = new HashSet<>();
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
         hiddenProperties.add(AbstractAssayProvider.PARTICIPANT_VISIT_RESOLVER_PROPERTY_NAME);
@@ -111,6 +126,7 @@ public class NabRunDataTable extends NabBaseTable
     public Collection<PropertyDescriptor> getExistingDataProperties(ExpProtocol protocol)
     {
         List<PropertyDescriptor> pds = NabProviderSchema.getExistingDataProperties(protocol, _schema.getCutoffValues());
+        pds.addAll(_nabSpecimenTable.getAdditionalDataProperties(protocol));
 
         pds.sort(Comparator.comparing(PropertyDescriptor::getName));
         return pds;
@@ -180,6 +196,10 @@ public class NabRunDataTable extends NabBaseTable
         {
             result = getColumn("FitError");
         }
+        else if ("Fit Parameters".equalsIgnoreCase(name))
+        {
+            result = getColumn(FIT_PARAMETERS_PROPERTY_NAME);
+        }
         // Be backwards compatible with queries that expect there to an "ObjectId" column. It's a different value from
         // the pre-migration value, but it's enough to make the query run and should be sufficient as long as we
         // continue to generate the same number for a given row.
@@ -215,10 +235,10 @@ public class NabRunDataTable extends NabBaseTable
     {
         // add material lookup columns to the view first, so they appear at the left:
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
-        if (sampleSet != null)
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
+        if (sampleType != null)
         {
-            for (DomainProperty pd : sampleSet.getDomain().getProperties())
+            for (DomainProperty pd : sampleType.getDomain().getProperties())
             {
                 visibleColumns.add(FieldKey.fromParts(getInputMaterialPropertyName(), ExpMaterialTable.Column.Property.toString(), pd.getName()));
             }
@@ -252,9 +272,9 @@ public class NabRunDataTable extends NabBaseTable
                         {
                             ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
                             // Make sure we are filtering to the same set of containers
-                            if (sampleSet != null)
+                            if (sampleType != null)
                             {
-                                materials.setSampleSet(sampleSet, true);
+                                materials.setSampleType(sampleType, true);
                             }
                             var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                             if (propertyCol.getFk() instanceof PropertyForeignKey)
@@ -319,7 +339,7 @@ public class NabRunDataTable extends NabBaseTable
         for (ColumnInfo columnInfo : _rootTable.getColumns())
         {
             String columnName = columnInfo.getColumnName().toLowerCase();
-            if (columnName.contains("auc_") || columnName.equals("fiterror"))
+            if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals(FIT_PARAMETERS_PROPERTY_NAME.toLowerCase()))
             {
                 addWrapColumn(columnInfo);
             }
@@ -338,11 +358,13 @@ public class NabRunDataTable extends NabBaseTable
             if (!hiddenCols.contains(lookupCol.getName()))
             {
                 String legalName = ColumnInfo.legalNameFromName(lookupCol.getName());
-                if (null != _rootTable.getColumn(legalName))
+                ColumnInfo col = _rootTable.getColumn(legalName);
+                if (null != col)
                 {
                     // Column is in NabSpecimen
                     FieldKey key = FieldKey.fromString(legalName);
-                    visibleColumns.add(key);
+                    if (!col.isHidden())
+                        visibleColumns.add(key);
                     if (null == getColumn(key))
                         addWrapColumn(_rootTable.getColumn(key));
                 }
@@ -383,7 +405,7 @@ public class NabRunDataTable extends NabBaseTable
         }
     }
 
-    private static void updateLabelWithCutoff(BaseColumnInfo column, Integer intCutoff)
+    private static void updateLabelWithCutoff(MutableColumnInfo column, Integer intCutoff)
     {
         if (null != intCutoff)
         {

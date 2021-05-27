@@ -15,27 +15,25 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
-<%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.util.element.Input.InputBuilder" %>
 <%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
+<%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisAction" %>
+<%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisPage" %>
 <%!
-    private String statOption(StatisticSet option)
+    private InputBuilder<?> statOption(StatisticSet option)
     {
-        StringBuilder ret = new StringBuilder();
-        ret.append("<input type=\"checkbox\" name=\"ff_statisticSet\" value=\"");
-        ret.append(option);
-        ret.append("\"");
-        ret.append(checked(form.ff_statisticSet.contains(option)));
-        ret.append(">");
-        return ret.toString();
+        return input()
+            .type("checkbox")
+            .name("ff_statisticSet")
+            .value(option.name())
+            .checked(form.ff_statisticSet.contains(option));
     }
 %>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=formAction(ScriptController.UploadAnalysisAction.class)%>" enctype="multipart/form-data">
+<labkey:form method="POST" action="<%=formAction(UploadAnalysisAction.class)%>" enctype="multipart/form-data">
     <% if (form._workspaceObject != null)
     { %>
     <input type="hidden" name="token" value="<%=h(form.getToken())%>">

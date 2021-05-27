@@ -16,19 +16,18 @@
 package org.labkey.flow.controllers;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.action.FormViewAction;
+import org.labkey.api.action.Marshal;
+import org.labkey.api.action.Marshaller;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
-import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
-import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
@@ -40,11 +39,9 @@ import org.labkey.api.security.permissions.AbstractActionPermissionTest;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.JobRunner;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -61,12 +58,10 @@ import org.labkey.flow.data.FlowExperiment;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
-import org.labkey.flow.data.FlowStatus;
 import org.labkey.flow.persist.AttributeCache;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
-import org.labkey.flow.script.FlowJob;
-import org.labkey.flow.view.JobStatusView;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.springframework.validation.BindException;
@@ -75,11 +70,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.net.URI;
-import java.nio.file.InvalidPathException;
 
+@Marshal(Marshaller.Jackson)
 public class FlowController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(FlowController.class);
+    private static final Logger _log = LogManager.getLogger(FlowController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(FlowController.class);
 
@@ -101,7 +96,7 @@ public class FlowController extends BaseFlowController
         {
             if (getContainer().getFolderType() instanceof FlowFolderType)
             {
-                ActionURL startUrl = PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer());
+                ActionURL startUrl = urlProvider(ProjectUrls.class).getStartURL(getContainer());
                 startUrl.replaceParameter(DataRegion.LAST_FILTER_PARAM, "true");
                 throw new RedirectException(startUrl);
             }
@@ -194,203 +189,6 @@ public class FlowController extends BaseFlowController
         }
     }
 
-    @RequiresPermission(ReadPermission.class)
-    public class ShowStatusJobAction extends SimpleViewAction<StatusJobForm>
-    {
-        @Override
-        public void validate(StatusJobForm form, BindException errors)
-        {
-            String statusFile = form.getStatusFile();
-            if (statusFile == null)
-            {
-                errors.rejectValue("statusFile", ERROR_MSG, "Status file not specified.");
-                return;
-            }
-            try
-            {
-                new File(statusFile).toPath();
-            }
-            catch (InvalidPathException x)
-            {
-                throw new NotFoundException();
-            }
-        }
-
-        @Override
-        public ModelAndView getView(StatusJobForm form, BindException errors)
-        {
-            if (errors.hasErrors())
-            {
-                return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
-            }
-            else
-            {
-                PipelineStatusFile psf = PipelineService.get().getStatusFile(getContainer(), new File(form.getStatusFile()).toPath());
-                if (psf == null)
-                {
-                    errors.rejectValue("statusFile", ERROR_MSG, "Status not found.");
-                    return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
-                }
-
-                if (PipelineJob.TaskStatus.complete.matches(psf.getStatus()))
-                {
-                    if (form.getRedirect() != null)
-                    {
-                        String redirect = psf.getDataUrl();
-                        if (redirect != null)
-                        {
-                            throw new RedirectException(new ActionURL(psf.getDataUrl()));
-                        }
-                    }
-                }
-
-                if (psf.isActive())
-                {
-                    // Take 1 second longer each time to refresh.
-                    int refresh = form.getRefresh();
-                    if (refresh == 0)
-                    {
-                        if (form.getRedirect() == null)
-                            refresh = 30;
-                        else
-                            refresh = 5;
-                    }
-                    else
-                    {
-                        refresh++;
-                    }
-                    ActionURL helper = getViewContext().cloneActionURL();
-                    helper.replaceParameter("refresh", Integer.toString(refresh));
-                    getViewContext().getResponse().setHeader("Refresh", refresh + ";URL=" + helper.toString());
-                }
-                FlowStatus status = new FlowStatus();
-                status.setPipelineStatusFile(psf);
-                status.setJob(findJob(form.getStatusFile()));
-                return new JobStatusView(status);
-            }
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Status File", new ActionURL(ShowStatusJobAction.class, getContainer()));
-        }
-    }
-
-    public static class StatusJobForm
-    {
-        private String _statusFile;
-        private String _redirect;
-        private int _refresh;
-
-        public String getStatusFile()
-        {
-            return _statusFile;
-        }
-
-        public void setStatusFile(String statusFile)
-        {
-            _statusFile = statusFile;
-        }
-
-        public String getRedirect()
-        {
-            return _redirect;
-        }
-
-        public void setRedirect(String redirect)
-        {
-            _redirect = redirect;
-        }
-
-        public int getRefresh()
-        {
-            return _refresh;
-        }
-
-        public void setRefresh(int refresh)
-        {
-            _refresh = refresh;
-        }
-    }
-
-    FlowJob findJob(String statusFile)
-    {
-        PipelineService service = PipelineService.get();
-        try
-        {
-            PipelineJob job = service.getPipelineQueue().findJobInMemory(getContainer(), statusFile);
-            if (job instanceof FlowJob)
-                return (FlowJob) job;
-        }
-        catch (UnsupportedOperationException e)
-        {
-            // Enterprise pipeline does not have this information
-            // in memory.
-        }
-        return null;
-    }
-
-    @RequiresPermission(UpdatePermission.class)
-    public class CancelJobAction extends SimpleViewAction<CancelJobForm>
-    {
-        @Override
-        public ModelAndView getView(CancelJobForm form, BindException errors)
-        {
-            if (form.getStatusFile() == null)
-            {
-                errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
-            }
-            else
-            {
-                PipelineStatusFile sf = PipelineService.get().getStatusFile(new File(form.getStatusFile()));
-                if (sf == null)
-                {
-                    errors.rejectValue("statusFile", ERROR_MSG, "Job " + form.getStatusFile() + " not found.");
-                }
-                else
-                {
-                    Container c = getContainer();
-                    PipelineService.get().getPipelineQueue().cancelJob(getUser(), c, sf);
-
-                    // Attempting to stay consistent with previously existing code, create a FlowJob
-                    // from the job store, and go to its status href.  This URL is not set in the
-                    // PipelineStatusFile until the job completes.  Apparently FlowJobs have useful
-                    // information to show at this URL, even when the job has not completed.
-                    FlowJob job = (FlowJob) PipelineJobService.get().getJobStore().getJob(sf.getJobId());
-                    if (job != null)
-                        return HttpView.redirect(job.getStatusHref());
-                    else if (sf.getDataUrl() != null)
-                        return HttpView.redirect(sf.getDataUrl());
-                    errors.rejectValue("statusFile", ERROR_MSG, "Data for " + form.getStatusFile() + " not found.");
-                }
-            }
-            return new JspView<>("/org/labkey/flow/view/errors.jsp", form, errors);
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            ActionURL jobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer());
-            root.addChild("Error Cancelling Job", jobsURL);
-        }
-    }
-
-    public static class CancelJobForm
-    {
-        private String _statusFile;
-
-        public String getStatusFile()
-        {
-            return _statusFile;
-        }
-
-        public void setStatusFile(String statusFile)
-        {
-            _statusFile = statusFile;
-        }
-    }
-
     @RequiresPermission(AdminPermission.class)
     public class NewFolderAction extends FormViewAction<NewFolderForm>
     {
@@ -464,7 +262,7 @@ public class FlowController extends BaseFlowController
                 {
                     FlowProtocol destProtocol = FlowProtocol.ensureForContainer(getUser(), destContainer);
                     destProtocol.setFCSAnalysisNameExpr(getUser(), srcProtocol.getFCSAnalysisNameExpr());
-                    destProtocol.setSampleSetJoinFields(getUser(), srcProtocol.getSampleSetJoinFields());
+                    destProtocol.setSampleTypeJoinFields(getUser(), srcProtocol.getSampleTypeJoinFields());
                     destProtocol.setFCSAnalysisFilter(getUser(), srcProtocol.getFCSAnalysisFilterString());
                     destProtocol.setICSMetadata(getUser(), srcProtocol.getICSMetadataString());
                 }
@@ -483,7 +281,7 @@ public class FlowController extends BaseFlowController
         @Override
         public ActionURL getSuccessURL(NewFolderForm newFolderForm)
         {
-            return PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(destContainer);
+            return urlProvider(ProjectUrls.class).getStartURL(destContainer);
         }
 
         @Override
@@ -543,18 +341,18 @@ public class FlowController extends BaseFlowController
         @Override
         public ActionURL getSuccessURL(FlowAdminForm flowAdminForm)
         {
-            return PageFlowUtil.urlProvider(AdminUrls.class).getAdminConsoleURL();
+            return urlProvider(AdminUrls.class).getAdminConsoleURL();
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Flow Module Settings");
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Flow Module Settings", getClass(), getContainer());
         }
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SavePerferencesAction extends SimpleViewAction
+    public class SavePreferencesAction extends SimpleViewAction
     {
         @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
@@ -592,6 +390,23 @@ public class FlowController extends BaseFlowController
         }
     }
 
+    @RequiresPermission(AdminPermission.class)
+    public class MetricsAction extends ReadOnlyApiAction<Object>
+    {
+        @Override
+        public Object execute(Object o, BindException errors) throws Exception
+        {
+            Container c = getContainer();
+            if (c.isRoot())
+            {
+                return success(FlowManager.get().getUsageMetrics());
+            }
+            else
+            {
+                return success(FlowManager.get().getUsageMetrics(getUser(), c, true));
+            }
+        }
+    }
 
     public static class TestCase extends AbstractActionPermissionTest
     {
@@ -607,13 +422,7 @@ public class FlowController extends BaseFlowController
             assertForReadPermission(user,
                 controller.new BeginAction(),
                 controller.new QueryAction(),
-                controller.new ShowStatusJobAction(),
-                controller.new SavePerferencesAction()
-            );
-
-            // @RequiresPermission(UpdatePermission.class)
-            assertForUpdateOrDeletePermission(user,
-                controller.new CancelJobAction()
+                controller.new SavePreferencesAction()
             );
 
             // @RequiresPermission(AdminPermission.class)

@@ -16,14 +16,15 @@
 
 package org.labkey.flow.persist;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.User;
 
 public class FlowContainerListener extends ContainerManager.AbstractContainerListener
 {
-    static final private Logger _log = Logger.getLogger(FlowContainerListener.class);
+    static final private Logger _log = LogManager.getLogger(FlowContainerListener.class);
 
     /**
      * Delete all Flow data from the container.

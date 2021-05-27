@@ -16,7 +16,8 @@
 package org.labkey.microarray;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -66,7 +67,7 @@ import java.util.Map;
 public class MicroarrayManager
 {
     private static final MicroarrayManager _instance = new MicroarrayManager();
-    private static final Logger LOG = Logger.getLogger(MicroarrayManager.class);
+    private static final Logger LOG = LogManager.getLogger(MicroarrayManager.class);
 
     private MicroarrayManager()
     {

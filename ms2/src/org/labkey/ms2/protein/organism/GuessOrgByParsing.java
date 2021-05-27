@@ -16,7 +16,8 @@
 
 package org.labkey.ms2.protein.organism;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.protein.ProteinManager;
@@ -36,7 +37,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
     private Map<String, String> _cache = new HashMap<>();
     private static final DbSchema _schema = ProteinManager.getSchema();
     private static final String CACHED_MISS_VALUE = "GuessOrgByParsing.CACHED_MISS_VALUE";
-    private static Logger _log = Logger.getLogger(GuessOrgByParsing.class);
+    private static Logger _log = LogManager.getLogger(GuessOrgByParsing.class);
 
     private static final String _organismFromTaxIdSql =
                                     "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " +

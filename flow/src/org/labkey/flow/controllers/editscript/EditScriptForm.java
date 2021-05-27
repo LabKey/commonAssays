@@ -16,7 +16,8 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -52,8 +53,8 @@ import java.util.Map;
 
 public class EditScriptForm extends FlowObjectForm<FlowScript>
 {
-    static private Logger _log = Logger.getLogger(EditScriptForm.class);
-    private static int MAX_WELLS_TO_POLL = 15;
+    private static final Logger _log = LogManager.getLogger(EditScriptForm.class);
+    private static final int MAX_WELLS_TO_POLL = 15;
 
     public ScriptDocument analysisDocument;
     public FlowProtocolStep step;
@@ -232,7 +233,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         catch (Throwable t)
         {
             _log.error("Error", t);
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
     }
 

@@ -59,12 +59,12 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public TableInfo createDataTable(ContainerFilter cf, boolean includeCopiedToStudyColumns)
+    public TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
         ExpDataTable ti;
-        ti = flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), cf, FlowDataType.FCSAnalysis, includeCopiedToStudyColumns);
+        ti = flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), cf, FlowDataType.FCSAnalysis, includeLinkedToStudyColumns);
         return ti;
     }
 

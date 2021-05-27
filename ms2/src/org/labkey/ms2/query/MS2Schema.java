@@ -909,7 +909,7 @@ public class MS2Schema extends UserSchema
         sql.append(innerSelect);
         sql.append("\n) AS InnerSubquery ");
 
-        sql.append(filter.getSQLFragment(getDbSchema().getSqlDialect(), map));
+        sql.append(filter.getSQLFragment(getDbSchema().getSqlDialect(), "InnerSubquery", map));
         return sql;
     }
 

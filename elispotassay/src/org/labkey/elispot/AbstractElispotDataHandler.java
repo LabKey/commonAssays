@@ -16,13 +16,14 @@
 
 package org.labkey.elispot;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.plate.Position;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.AbstractExperimentDataHandler;
@@ -31,8 +32,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -224,6 +223,5 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     @Override
     public void deleteData(ExpData data, Container container, User user)
     {
-        OntologyManager.deleteOntologyObject(data.getLSID(), container, true);
     }
 }

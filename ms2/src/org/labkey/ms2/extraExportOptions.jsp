@@ -19,10 +19,10 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <p>
     Choose an export format:<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.Excel%>" checked>Excel (.xlsx)<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.TSV%>">TSV<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.DTA%>">Spectra as DTA<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.PKL%>">Spectra as PKL<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.AMT%>">AMT (Accurate Mass &amp; Time) file<br/>
-    <input type="radio" name="exportFormat" value="<%=MS2ExportType.Bibliospec%>">BiblioSpec spectra library file<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.Excel)%>" checked>Excel (.xlsx)<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.TSV)%>">TSV<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.DTA)%>">Spectra as DTA<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.PKL)%>">Spectra as PKL<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.AMT)%>">AMT (Accurate Mass &amp; Time) file<br/>
+    <input type="radio" name="exportFormat" value="<%=h(MS2ExportType.Bibliospec)%>">BiblioSpec spectra library file<br/>
 </p>

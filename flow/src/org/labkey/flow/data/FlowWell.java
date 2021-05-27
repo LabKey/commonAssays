@@ -16,7 +16,8 @@
 
 package org.labkey.flow.data;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -24,7 +25,7 @@ import org.labkey.api.exp.api.ExpDataRunInput;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -51,7 +52,7 @@ import java.util.Set;
 
 public class FlowWell extends FlowDataObject
 {
-    static private final Logger _log = Logger.getLogger(FlowWell.class);
+    static private final Logger _log = LogManager.getLogger(FlowWell.class);
 
     // For serialization
     protected FlowWell() {}
@@ -114,7 +115,7 @@ public class FlowWell extends FlowDataObject
             if (getContainer().hasPermission(user, ReadPermission.class))
                 throw new RedirectException(actionURL.clone().setContainer(getContainer()));
 
-            // Check if run has been copied to a study and the user has ReadPermission to the study folder
+            // Check if run has been linked to a study and the user has ReadPermission to the study folder
             FlowRun run = getRun();
             if (run != null)
             {
@@ -343,11 +344,11 @@ public class FlowWell extends FlowDataObject
         return getExpObject().getComment();
     }
 
-    public ExpMaterial getSample(ExpSampleSet set)
+    public ExpMaterial getSample(ExpSampleType set)
     {
         for (ExpMaterial material : getSamples())
         {
-            if (set.equals(material.getSampleSet()))
+            if (set.equals(material.getSampleType()))
                 return material;
         }
         return null;

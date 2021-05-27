@@ -52,7 +52,7 @@ DecimalFormat format = new DecimalFormat();
 
 if (errorMessage != null)
 { %>
-    <span class="labkey-error"><%= errorMessage %></span>
+    <span class="labkey-error"><%=h(errorMessage)%></span>
 <%  }
 %>
 <a name="quantitation"></a>
@@ -61,9 +61,9 @@ if (errorMessage != null)
         <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
         <% for (int i = 1; i <= 6; i++)
         {
-            URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", Integer.toString(i)); %>
+            URLHelper chargeUrl = ctx.url.clone().replaceParameter("quantitationCharge", i); %>
             <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
-            <td class="labkey-tab<%= i == currentCharge ? "-selected" : "" %>" style="margin-bottom: 0;"><a href="<%= h(chargeUrl ) %>#quantitation"><%= i %>+</a></td><%
+            <td class="labkey-tab<%=h(i == currentCharge ? "-selected" : "")%>" style="margin-bottom: 0;"><a href="<%= h(chargeUrl ) %>#quantitation"><%= i %>+</a></td><%
         } %>
         <td class="labkey-tab-space" width="100%"></td>
         <td class="labkey-tab-space"><img width="5" src="<%=getWebappURL("_.gif")%>"></td>
@@ -84,11 +84,11 @@ if (errorMessage != null)
                 </tr>
                 <tr>
                     <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Area:</span></td>
-                    <td><span style="font-size: smaller; "><%= format.format(quant.getLightArea()) %></span></td>
+                    <td><span style="font-size: smaller; "><%=h(format.format(quant.getLightArea()))%></span></td>
                 </tr>
             </table>
         </td>
-        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Light Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=h(elutionGraphUrl)%>" alt="Light Elution Graph"/></td>
     </tr>
     <%
         elutionGraphUrl.setAction(MS2Controller.ShowHeavyElutionGraphAction.class);
@@ -107,11 +107,11 @@ if (errorMessage != null)
                 </tr>
                 <tr>
                     <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Area:</span></td>
-                    <td><span style="font-size: smaller; "><%= format.format(quant.getHeavyArea()) %></span></td>
+                    <td><span style="font-size: smaller; "><%=h(format.format(quant.getHeavyArea()))%></span></td>
                 </tr>
             </table>
         </td>
-        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Heavy Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=h(elutionGraphUrl)%>" alt="Heavy Elution Graph"/></td>
     </tr>
     <%
         elutionGraphUrl.setAction(MS2Controller.ShowCombinedElutionGraphAction.class);
@@ -122,14 +122,14 @@ if (errorMessage != null)
                 <tr><td colspan="2" align="center"><strong>Combined</strong></td></tr>
                 <tr>
                     <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Heavy to light ratio:</span></td>
-                    <td><span style="font-size: smaller; "><%= quant.getHeavy2LightRatio()%></span></td>
+                    <td><span style="font-size: smaller; "><%=h(quant.getHeavy2LightRatio())%></span></td>
                 </tr>
                 <tr>
                     <td><span style="font-size: smaller; "><%= p.getCharge() %>+ Light to heavy ratio:</span></td>
-                    <td><span style="font-size: smaller; "><%= quant.getRatio()%></span></td>
+                    <td><span style="font-size: smaller; "><%=h(quant.getRatio())%></span></td>
                 </tr>
             </table>
         </td>
-        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=elutionGraphUrl.getEncodedLocalURIString()%>" alt="Combined Elution Graph"/></td>
+        <td><img height="<%= ElutionGraph.HEIGHT %>" width="<%= ElutionGraph.WIDTH %>" src="<%=h(elutionGraphUrl)%>" alt="Combined Elution Graph"/></td>
     </tr>
 </table>

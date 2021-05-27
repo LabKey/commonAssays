@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayDefaultFlagHandler;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.assay.AssayFlagHandler;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
@@ -27,6 +28,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabAssayProvider;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabDataHandler;
@@ -58,7 +60,13 @@ public class NabModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.001;
+    }
+
+    @Override
+    public @Nullable UpgradeCode getUpgradeCode()
+    {
+        return new NabUpgradeCode();
     }
 
     @Override
@@ -116,6 +124,8 @@ public class NabModule extends DefaultModule
         AssayFlagHandler.registerHandler(new SinglePlateDilutionNabAssayProvider(), handler);
 
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
+
+        SystemMaintenance.addTask(new NAbPopulateFitParametersTask());
     }
 
     @NotNull

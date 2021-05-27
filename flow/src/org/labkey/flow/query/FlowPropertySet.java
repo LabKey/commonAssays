@@ -17,7 +17,8 @@
 package org.labkey.flow.query;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.flow.analysis.model.PopulationName;
@@ -38,7 +39,7 @@ import java.util.Set;
 
 public class FlowPropertySet
 {
-    static private final Logger _log = Logger.getLogger(FlowPropertySet.class);
+    static private final Logger _log = LogManager.getLogger(FlowPropertySet.class);
     private Container _container;
 
     private Collection<AttributeCache.KeywordEntry> _keywords;

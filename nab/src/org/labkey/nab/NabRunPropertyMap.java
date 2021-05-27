@@ -17,6 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -24,6 +25,7 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.exp.api.ExpMaterial;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +71,16 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 sample.put("virusProperties", virusProperties);
 
             DilutionSummary dilutionSummary = result.getDilutionSummary();
-            sample.put("objectId", result.getObjectId());
+            WellGroup wellGroup = dilutionSummary.getFirstWellGroup();
+            ExpMaterial sampleInput = assay.getMaterial(wellGroup);
+            NabSpecimen specimenRow = null;
+            if (sampleInput != null)
+            {
+                specimenRow = NabManager.get().getNabSpecimen(sampleInput.getLSID());
+                sample.put("specimenLsid", sampleInput.getLSID());
+            }
+
+            sample.put("objectId", specimenRow != null ? specimenRow.getRowId() : result.getObjectId());
 
             // add any additional properties associated with this object id
             if (extraObjectIdProps.containsKey(result.getObjectId()))
@@ -80,7 +91,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 }
             }
 
-            sample.put("wellgroupName", dilutionSummary.getFirstWellGroup().getName());
+            sample.put("wellgroupName", wellGroup.getName());
             try
             {
                 if (includeStats)
@@ -99,7 +110,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                 }
                 if (includeFitParameters)
                 {
-                    sample.put("fitParameters", dilutionSummary.getCurveParameters(assay.getRenderedCurveFitType()).toMap());
+                    sample.put("fitParameters", NabManager.get().ensureFitParameters(null, specimenRow, assay, dilutionSummary));
                 }
                 List<Map<String, Object>> replicates = new ArrayList<>();
                 for (WellGroup sampleGroup : dilutionSummary.getWellGroups())

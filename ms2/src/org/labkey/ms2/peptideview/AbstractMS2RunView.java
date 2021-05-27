@@ -16,7 +16,8 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnHeaderType;
@@ -81,7 +82,7 @@ import java.util.Map;
  */
 public abstract class AbstractMS2RunView
 {
-    private static Logger _log = Logger.getLogger(AbstractMS2RunView.class);
+    private static Logger _log = LogManager.getLogger(AbstractMS2RunView.class);
 
     private final Container _container;
     private final User _user;
@@ -137,7 +138,7 @@ public abstract class AbstractMS2RunView
         for (MS2ExportType exportFormat : exportFormats)
         {
             exportUrl.replaceParameter("exportFormat", exportFormat.name());
-            NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), null, dataRegion.getJavascriptFormReference() + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
+            NavTree menuItem = exportAll.addMenuItem(exportFormat.toString(), dataRegion.getJavascriptFormReference() + ".action=\"" + exportUrl.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
             if (exportFormat.getDescription() != null)
             {
                 menuItem.setDescription(exportFormat.getDescription());
@@ -153,7 +154,7 @@ public abstract class AbstractMS2RunView
             if (exportFormat.supportsSelectedOnly())
             {
                 exportUrl.replaceParameter("exportFormat", exportFormat.name());
-                NavTree menuItem = exportSelected.addMenuItem(exportFormat.toString(), null, "if (verifySelected(" + dataRegion.getJavascriptFormReference() + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference() + ".submit(); }");
+                NavTree menuItem = exportSelected.addMenuItem(exportFormat.toString(), "if (verifySelected(" + dataRegion.getJavascriptFormReference() + ", \"" + exportUrl.getLocalURIString() + "\", \"post\", \"" + whatWeAreSelecting + "\")) { " + dataRegion.getJavascriptFormReference() + ".submit(); }");
                 if (exportFormat.getDescription() != null)
                 {
                     menuItem.setDescription(exportFormat.getDescription());
@@ -172,7 +173,7 @@ public abstract class AbstractMS2RunView
             for (ProteinDictionaryHelpers.GoTypes goType : types)
             {
                 ActionURL url = MS2Controller.getPeptideChartURL(getContainer(), goType);
-                goButton.addMenuItem(goType.toString(), null, dataRegion.getJavascriptFormReference() + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
+                goButton.addMenuItem(goType.toString(), dataRegion.getJavascriptFormReference() + ".action=\"" + url.getLocalURIString() + "\"; " + dataRegion.getJavascriptFormReference() + ".submit();");
             }
             result.add(goButton);
         }

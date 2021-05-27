@@ -15,15 +15,13 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.util.EnumHasHtmlString;
+import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
-import org.labkey.flow.data.FlowRun;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: kevink
@@ -36,27 +34,23 @@ public class ImportAnalysisForm
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMETER_SEPARATOR = "\ufe50";
 
-    public enum SelectFCSFileOption implements EnumHasHtmlString<SelectFCSFileOption>
+    public enum SelectFCSFileOption implements SafeToRenderEnum
     {
         None, Included, Previous, Browse
     }
 
-    private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
-    private WorkspaceData workspace = new WorkspaceData();
-    private SelectFCSFileOption selectFCSFilesOption = SelectFCSFileOption.None;
-    private Map<FlowRun, String> existingKeywordRuns = null;
-    private int existingKeywordRunId;
+    private final WorkspaceData workspace = new WorkspaceData();
+    private final SelectedSamples selectedSamples = new SelectedSamples();
 
+    private int step = AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber();
+    private SelectFCSFileOption selectFCSFilesOption = null;
+    private boolean keywordRunsExist = false;
     private String importGroupNames = Workspace.ALL_SAMPLES;
     private boolean resolving = false;
-    private SelectedSamples selectedSamples = new SelectedSamples();
-
     private AnalysisEngine selectAnalysisEngine = null;
-
     private boolean createAnalysis;
     private String newAnalysisName;
     private int existingAnalysisId;
-
     private String targetStudy;
 
     // FCSFile directories selected in the pipeline browser for association with the imported workspace analysis.
@@ -114,20 +108,14 @@ public class ImportAnalysisForm
     }
 
     // not a POSTed parameter - For rending the SELECT_FCSFILES step
-    public void setExistingKeywordRuns(Map<FlowRun, String> keywordRuns)
+    public boolean getKeywordRunsExist()
     {
-        this.existingKeywordRuns = keywordRuns;
+        return keywordRunsExist;
     }
 
-    // not a POSTed parameter
-    public Map<FlowRun, String> getExistingKeywordRuns()
+    protected void setKeywordRunsExist(boolean keywordRunsExist)
     {
-        return existingKeywordRuns;
-    }
-
-    public int getExistingKeywordRunId()
-    {
-        return existingKeywordRunId;
+        this.keywordRunsExist = keywordRunsExist;
     }
 
     public AnalysisEngine getSelectAnalysisEngine()
@@ -153,11 +141,6 @@ public class ImportAnalysisForm
     public void setImportGroupNames(String importGroupNames)
     {
         this.importGroupNames = importGroupNames;
-    }
-
-    public void setExistingKeywordRunId(int existingKeywordRunId)
-    {
-        this.existingKeywordRunId = existingKeywordRunId;
     }
 
     public boolean isCreateAnalysis()

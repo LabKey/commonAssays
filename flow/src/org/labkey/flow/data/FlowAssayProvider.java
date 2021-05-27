@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.ConvertHelper;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.OntologyManager;
@@ -38,6 +37,7 @@ import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.TimepointType;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
@@ -71,9 +71,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: kevink
@@ -243,27 +246,29 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
+    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
-        if (dataRowId == null)
-            return null;
-
-        Integer id = ConvertHelper.convert(dataRowId, Integer.class);
-        if (id == null)
-            return null;
-
-        FlowDataObject fdo = FlowDataObject.fromRowId(id);
-        if (fdo == null)
-            return null;
-
-        return fdo.getData();
+        Set<ExpData> result = new HashSet<>();
+        for (Integer rowId : rowIds)
+        {
+            FlowDataObject fdo = FlowDataObject.fromRowId(rowId);
+            if (fdo != null)
+            {
+                ExpData data = fdo.getData();
+                if (data != null)
+                {
+                    result.add(data);
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
     {
         // SourceLSID is used by assay to render links back to the original data for rows
-        // that have been copied into a study dataset.
+        // that have been linked to a study dataset.
         // AbstractAssayProvider uses ExpRun's LSID, but FlowAssayProvider uses the ExpData's LSID.
         // We use the ExpData LSID because flow runs use the generic experiment LSID namespace prefix of 'Run'
         // and wouldn't easily resolve to a flow run type.
@@ -468,7 +473,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
+    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
     {
         throw new UnsupportedOperationException();
     }
@@ -499,27 +504,33 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Container getAssociatedStudyContainer(ExpProtocol protocol, Object dataId)
+    public Set<Container> getAssociatedStudyContainers(ExpProtocol protocol, Collection<Integer> rowIds)
     {
-        ExpData data = getDataForDataRow(dataId, protocol);
-        if (data == null)
-            return null;
-        ExpRun run = data.getRun();
-        if (run == null)
-            return null;
+        Set<Container> result = new HashSet<>();
+        for (Integer dataRowId : rowIds)
+        {
+            Container container = null;
+            ExpData data = getDataForDataRow(dataRowId, protocol);
+            if (data != null)
+            {
+                ExpRun run = data.getRun();
+                if (run != null)
+                {
+                    Map<String, Object> properties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
+                    String targetStudyId = (String) properties.get(FlowProperty.TargetStudy.getPropertyDescriptor().getPropertyURI());
 
-        Map<String, Object> properties = OntologyManager.getProperties(run.getContainer(), run.getLSID());
-        String targetStudyId = (String) properties.get(FlowProperty.TargetStudy.getPropertyDescriptor().getPropertyURI());
+                    // Issue 24990: Link to Study dropdown for flow resets when re-accessing feature
+                    // If no target study explicitly set for this run, find the most recently used target study.
+                    // The publishChooseStudy.jsp will select the study by default but still allow the user to override this selection.
+                    if (targetStudyId == null)
+                        targetStudyId = FlowRun.findMostRecentTargetStudy(run.getContainer());
 
-        // Issue 24990: Copy-To-Study dropdown for flow resets when re-accessing feature
-        // If no target study explicitly set for this run, find the most recently used target study.
-        // The publishChooseStudy.jsp will select the study by default but still allow the user to override this selection.
-        if (targetStudyId == null)
-            targetStudyId = FlowRun.findMostRecentTargetStudy(run.getContainer());
-
-        if (targetStudyId != null)
-            return ContainerManager.getForId(targetStudyId);
-
-        return null;
+                    if (targetStudyId != null)
+                        container = ContainerManager.getForId(targetStudyId);
+                }
+            }
+            result.add(container);
+        }
+        return result;
     }
 }

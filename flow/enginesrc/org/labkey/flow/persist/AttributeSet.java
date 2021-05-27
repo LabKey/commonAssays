@@ -17,7 +17,8 @@
 package org.labkey.flow.persist;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +52,7 @@ import java.util.TreeSet;
 
 public class AttributeSet implements Serializable
 {
-    private static final Logger LOG = Logger.getLogger(AttributeSet.class);
+    private static final Logger LOG = LogManager.getLogger(AttributeSet.class);
 
     ObjectType _type;
     URI _uri;

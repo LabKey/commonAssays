@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.script;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;

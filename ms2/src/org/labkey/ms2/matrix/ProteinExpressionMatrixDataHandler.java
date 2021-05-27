@@ -16,14 +16,17 @@
 package org.labkey.ms2.matrix;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.RemapCache;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
@@ -53,7 +56,7 @@ import java.util.TreeSet;
 public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 {
     public static final String PROTEIN_SEQ_ID_COLUMN_NAME = "Molecule Identifier";
-    private static final Logger LOG = Logger.getLogger(ProteinExpressionMatrixDataHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ProteinExpressionMatrixDataHandler.class);
 
     public ProteinExpressionMatrixDataHandler()
     {
@@ -101,18 +104,22 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                 throw new ExperimentException("Could not find run domain for protocol with LSID " + protocol.getLSID());
             }
 
+            RemapCache cache = new RemapCache();
+            Map<Integer, ExpMaterial> materialCache = new HashMap<>();
+
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
-            DataLoader loader = createLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME);
+            try (DataLoader loader = createLoader(dataFile, PROTEIN_SEQ_ID_COLUMN_NAME))
+            {
+                ColumnDescriptor[] cols = loader.getColumns();
+                List<String> columnNames = new ArrayList<>(cols.length);
+                for (ColumnDescriptor col : cols)
+                    columnNames.add(col.getColumnName());
 
-            ColumnDescriptor[] cols = loader.getColumns();
-            List<String> columnNames = new ArrayList<>(cols.length);
-            for (ColumnDescriptor col : cols)
-                columnNames.add(col.getColumnName());
+                Map<String, ExpMaterial> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME, cache, materialCache);
 
-            Map<String, Integer> samplesMap = ensureSamples(info.getContainer(), info.getUser(), columnNames, PROTEIN_SEQ_ID_COLUMN_NAME);
-
-            insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
+                insertMatrixData(info.getContainer(), info.getUser(), samplesMap, loader, runProps, data.getRowId());
+            }
         }
         catch (IOException e)
         {
@@ -130,7 +137,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
 
     @Override
     public void insertMatrixData(Container c, User user,
-                                 Map<String, Integer> samplesMap, DataLoader loader,
+                                 Map<String, ExpMaterial> samplesMap, DataLoader loader,
                                  Map<String, String> runProps, Integer dataRowId) throws ExperimentException
     {
         assert MS2Manager.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
@@ -213,7 +220,7 @@ public class ProteinExpressionMatrixDataHandler extends AbstractMatrixDataHandle
                                 continue;
 
                             statement.setInt(1, dataRowId);
-                            statement.setInt(2, samplesMap.get(sampleName));
+                            statement.setInt(2, samplesMap.get(sampleName).getRowId());
                             statement.setInt(3, seqId);
                             statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
                             statement.executeUpdate();

@@ -25,8 +25,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
-    org.labkey.ms2.EditElutionGraphContext ctx = me.getModelBean();
-    String contextPath = request.getContextPath();
+    EditElutionGraphContext ctx = me.getModelBean();
     MS2Peptide p = ctx.getPeptide();
     PeptideQuantitation quant = ctx.getQuantitation();
     DecimalFormat format = new DecimalFormat();
@@ -44,23 +43,23 @@
            </tr>
            <tr>
                <td class="labkey-form-label">Charge</td>
-               <td>+<%=h(p.getCharge())%></td>
+               <td>+<%=p.getCharge()%></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Scan</td>
-               <td>+<%=h(p.getScan())%></td>
+               <td>+<%=p.getScan()%></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Light to heavy ratio</td>
-               <td><strong><div id="ratio"><%= quant.getRatio() %></div></strong></td>
+               <td><strong><div id="ratio"><%=h(quant.getRatio())%></div></strong></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Heavy to light ratio</td>
-               <td><strong><div id="heavy2LightRatio"><%= quant.getHeavy2LightRatio() %></div></strong></td>
+               <td><strong><div id="heavy2LightRatio"><%=h(quant.getHeavy2LightRatio())%></div></strong></td>
            </tr>
            <tr>
                <td class="labkey-form-label">Decimal ratio</td>
-               <td><strong><div id="decimalRatio"><%= decimalRatioFormat.format(quant.getDecimalRatio()) %></div></strong></td>
+               <td><strong><div id="decimalRatio"><%=h(decimalRatioFormat.format(quant.getDecimalRatio()))%></div></strong></td>
            </tr>
            <tr>
                <td/>
@@ -78,7 +77,7 @@
                 <table class="lk-fields-table">
                     <tr>
                         <td>Selected area:</td>
-                        <td><div id="lightArea"><%= format.format(quant.getLightArea()) %></div></td>
+                        <td><div id="lightArea"><%=h(format.format(quant.getLightArea()))%></div></td>
                     </tr>
                     <tr>
                         <td>Scans:</td>
@@ -109,11 +108,11 @@
             {
                 if (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan())
                 {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
                 else
                 {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
             }
             else
@@ -123,7 +122,7 @@
         }
         %>
         </td>
-            <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxLightIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
+            <td><table height="250"><tr><td valign="top" height="100%"><%=h(format.format(ctx.getMaxLightIntensity()))%></td></tr><tr><td valign="bottom">0</td></tr></table></td>
         </tr>
         <tr><td/><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
@@ -136,7 +135,7 @@
                 <table class="lk-fields-table">
                     <tr>
                         <td>Selected area:</td>
-                        <td><div id="heavyArea"><%= format.format(quant.getHeavyArea()) %></div></td>
+                        <td><div id="heavyArea"><%=h(format.format(quant.getHeavyArea()))%></div></td>
                     </tr>
                     <tr>
                         <td>Scans:</td>
@@ -167,11 +166,11 @@
             {
                 if (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan())
                 {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/red.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
                 else
                 {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%= contextPath %>/_images/gray.gif" height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
+                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
                 }
             }
             else
@@ -181,7 +180,7 @@
         }
         %>
         </td>
-        <td><table height="250"><tr><td valign="top" height="100%"><%= format.format(ctx.getMaxHeavyIntensity()) %></td></tr><tr><td valign="bottom">0</td></tr></table></td>
+        <td><table height="250"><tr><td valign="top" height="100%"><%=h(format.format(ctx.getMaxHeavyIntensity()))%></td></tr><tr><td valign="bottom">0</td></tr></table></td>
         </tr>
         <tr><td></td><td><table width="100%"><tr><td><%= quant.getMinDisplayScan() %></td><td align="center"><%= ( quant.getMinDisplayScan() + quant.getMaxDisplayScan() ) / 2 %></td><td align="right"><%= quant.getMaxDisplayScan() %></td></tr></table></td></tr>
         </table>
@@ -250,12 +249,12 @@ function updateRange(prefix)
         {
             if (i >= firstSelected && i <= lastSelected)
             {
-                document[prefix + "ImgScan" + i].src = "<%= contextPath%>" + "/_images/red.gif";
+                document[prefix + "ImgScan" + i].src = "<%=getWebappURL("/_images/red.gif")%>";
                 area += intensities[prefix][i];
             }
             else
             {
-                document[prefix + "ImgScan" + i].src = "<%= contextPath%>" + "/_images/gray.gif";
+                document[prefix + "ImgScan" + i].src = "<%=getWebappURL("/_images/gray.gif")%>";
             }
         }
     }

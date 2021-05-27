@@ -16,7 +16,8 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.SystemUtils" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.LoadGoAction" %>
+<%@ page import="org.labkey.ms2.MS2Controller.MS2UrlsImpl" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -25,7 +26,7 @@
 %>
 <table><tr><td>
 You are about to <%=h(loaded ? "reload" : "load")%> the latest Gene Ontology (GO) annotation files into your
-LabKey database.  If you click "Continue" your LabKey Server will automatically:
+LabKey database. If you click "Continue", this server will automatically:
 
 <ul>
     <li>Download the latest GO annotation files from ftp.geneontology.org</li><%
@@ -55,8 +56,8 @@ switch to the "Manual" tab and follow the instructions there.</span> For more in
 <% } %>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
-<labkey:form action="<%=buildURL(MS2Controller.LoadGoAction.class)%>" method="post">
+<labkey:form action="<%=urlFor(LoadGoAction.class)%>" method="post">
     <%= button("Continue").submit(true) %>
-    <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
+    <%= button("Cancel").href(MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
 </labkey:form>
 </td></tr></table>

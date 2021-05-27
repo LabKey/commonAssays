@@ -18,7 +18,8 @@ package org.labkey.flow.controllers.well;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.MutatingApiAction;
@@ -98,7 +99,7 @@ import static org.labkey.api.util.DOM.at;
 
 public class WellController extends BaseFlowController
 {
-    private static final Logger _log = Logger.getLogger(WellController.class);
+    private static final Logger _log = LogManager.getLogger(WellController.class);
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(WellController.class);
 
@@ -806,10 +807,10 @@ public class WellController extends BaseFlowController
             final TreeSet<String> set = new TreeSet<>();
 
             new SqlSelector(FlowManager.get().getSchema(),
-                "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(value -> {
+                "SELECT DISTINCT value FROM flow.keyword WHERE keywordid = (SELECT rowid FROM flow.KeywordAttr WHERE container=? AND name=?)", context.getContainer(), keyword).forEach(String.class, value -> {
                     if (value != null)
                         set.add(value);
-                }, String.class);
+                });
 
             return set;
         }

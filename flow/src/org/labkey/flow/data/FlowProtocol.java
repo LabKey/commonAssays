@@ -17,13 +17,15 @@
 package org.labkey.flow.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
@@ -37,10 +39,10 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolApplication;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.exp.api.SampleSetService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -90,15 +92,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class FlowProtocol extends FlowObject<ExpProtocol>
 {
-    static private final Logger _log = Logger.getLogger(FlowProtocol.class);
+    static private final Logger _log = LogManager.getLogger(FlowProtocol.class);
     static protected final String DEFAULT_PROTOCOL_NAME = "Flow";
-    static private final String SAMPLESET_NAME = "Samples";
+    static private final String SAMPLETYPE_NAME = "Samples";
 
     static private final boolean DEFAULT_CASE_SENSITIVE_KEYWORDS = true;
     static private final boolean DEFAULT_CASE_SENSITIVE_STATS_AND_GRAPHS = false;
@@ -242,14 +245,17 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return FlowProtocolStep.fromLSID(getContainer(), getLSID());
     }
 
-    public ExpSampleSet getSampleSet()
+    public ExpSampleType getSampleType()
     {
-        return ExperimentService.get().getSampleSet(getContainer(), SAMPLESET_NAME);
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME);
     }
 
-    public Map<String, FieldKey> getSampleSetJoinFields()
+    /**
+     * Returns a map of Sample property to FieldKey relative to the FCSFile table.
+     */
+    public Map<String, FieldKey> getSampleTypeJoinFields()
     {
-        String prop = (String) getProperty(FlowProperty.SampleSetJoin.getPropertyDescriptor());
+        String prop = (String) getProperty(FlowProperty.SampleTypeJoin.getPropertyDescriptor());
 
         if (prop == null)
             return Collections.emptyMap();
@@ -268,16 +274,16 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public String getSampleSetLSID()
+    public String getSampleTypeLSID()
     {
-        String propValue = (String) getProperty(ExperimentProperty.SampleSetLSID.getPropertyDescriptor());
+        String propValue = (String) getProperty(ExperimentProperty.SampleTypeLSID.getPropertyDescriptor());
         if (propValue != null)
             return propValue;
 
-        return ExperimentService.get().generateLSID(getContainer(), ExpSampleSet.class, SAMPLESET_NAME);
+        return ExperimentService.get().generateLSID(getContainer(), ExpSampleType.class, SAMPLETYPE_NAME);
     }
 
-    public void setSampleSetJoinFields(User user, Map<String, FieldKey> values) throws Exception
+    public void setSampleTypeJoinFields(User user, Map<String, FieldKey> values) throws Exception
     {
         List<String> strings = new ArrayList<>();
         for (Map.Entry<String, FieldKey> entry : values.entrySet())
@@ -285,22 +291,22 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             strings.add(PageFlowUtil.encode(entry.getKey()) + "=" + PageFlowUtil.encode(entry.getValue().toString()));
         }
         String value = StringUtils.join(strings.iterator(), "&");
-        setProperty(user, FlowProperty.SampleSetJoin.getPropertyDescriptor(), value);
-        setProperty(user, ExperimentProperty.SampleSetLSID.getPropertyDescriptor(), getSampleSetLSID());
+        setProperty(user, FlowProperty.SampleTypeJoin.getPropertyDescriptor(), value);
+        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID());
         FlowManager.get().flowObjectModified();
     }
 
-    public ActionURL urlCreateSampleSet()
+    public ActionURL urlCreateSampleType()
     {
-        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleSetURL(getContainer());
-        url.addParameter("name", SAMPLESET_NAME);
+        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateSampleTypeURL(getContainer());
+        url.addParameter("name", SAMPLETYPE_NAME);
         url.addParameter("nameReadOnly", true);
         return url;
     }
 
     public ActionURL urlUploadSamples()
     {
-        return PageFlowUtil.urlProvider(ExperimentUrls.class).getImportSamplesURL(getContainer(), SAMPLESET_NAME);
+        return PageFlowUtil.urlProvider(ExperimentUrls.class).getImportSamplesURL(getContainer(), SAMPLETYPE_NAME);
     }
 
     public ActionURL urlShowSamples()
@@ -310,15 +316,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
-        ExpSampleSet ss = getSampleSet();
-        if (ss == null)
+        ExpSampleType st = getSampleType();
+        if (st == null)
             return Collections.emptyMap();
-        Set<String> propertyNames = getSampleSetJoinFields().keySet();
+        Set<String> propertyNames = getSampleTypeJoinFields().keySet();
         if (propertyNames.size() == 0)
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
 
-        ExpMaterialTable sampleTable = schema.getSampleTable(ss, null);
+        ExpMaterialTable sampleTable = schema.getSampleTable(st, null);
         List<ColumnInfo> selectedColumns = new ArrayList<>();
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
@@ -328,11 +334,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             if (lookupColumn != null)
                 selectedColumns.add(lookupColumn);
             else
-                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleSet");
+                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleType");
         }
 
         Map<Integer, ExpMaterial> materialMap = new HashMap<>();
-        List<? extends ExpMaterial> materials = ss.getSamples(getContainer());
+        List<? extends ExpMaterial> materials = st.getSamples(getContainer());
         for (ExpMaterial material : materials)
         {
             materialMap.put(material.getRowId(), material);
@@ -369,14 +375,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         _log.info("updateSampleIds: protocol=" + this.getName() + ", folder=" + this.getContainerPath());
 
         ExperimentService svc = ExperimentService.get();
-        Map<String, FieldKey> joinFields = getSampleSetJoinFields();
+        Map<String, FieldKey> joinFields = getSampleTypeJoinFields();
         _log.debug("joinFields: " + joinFields);
 
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         _log.debug("sampleMap=" + sampleMap.size());
 
-        ExpSampleSet ss = getSampleSet();
-        _log.debug("sampleSet=" + (ss == null ? "<none>" : ss.getName()) + ", lsid=" + (ss == null ? "<none>" : ss.getLSID()));
+        ExpSampleType st = getSampleType();
+        _log.debug("sampleType=" + (st == null ? "<none>" : st.getName()) + ", lsid=" + (st == null ? "<none>" : st.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
@@ -455,9 +461,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 boolean found = false;
                 for (ExpMaterial material : app.getInputMaterials())
                 {
-                    if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), ss.getLSID()))
+                    if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), st.getLSID()))
                     {
-                        _log.debug("   sample's sampleset isn't ours: " + material.getCpasType());
+                        _log.debug("   sample's sampletype isn't ours: " + material.getCpasType());
                         continue;
                     }
                     if (sample != null)
@@ -514,36 +520,78 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return linked;
     }
 
-    // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
-    public static Map<Pair<Integer, String>, List<Pair<Integer, String>>> getFCSFilesGroupedBySample(User user, Container c)
+    public static class FCSFilesGroupedBySample
     {
-        Map<Pair<Integer, String>, List<Pair<Integer,String>>> ret = new LinkedHashMap<>();
+        public Map<Integer, Map<FieldKey, Object>> samples;
+        public Map<Integer, Map<FieldKey, Object>> fcsFiles;
+        public List<FieldKey> sampleFields;
+        public Collection<FieldKey> fcsFileFields;
+        public Map<Integer, Pair<Integer, String>> fcsFileRuns;
+        public Map<Integer, List<Integer>> linkedSampleIdToFcsFileIds;
+        public int linkedFcsFileCount;
+        public List<Integer> unlinkedFcsFileIds;
+        public List<Integer> unlinkedSampleIds;
+
+    }
+
+    // CONSIDER: Use a fancy NestableQueryView to group FCSFiles by Sample
+    public FCSFilesGroupedBySample getFCSFilesGroupedBySample(User user, Container c)
+    {
+        var joinFields = this.getSampleTypeJoinFields();
+        var sampleFields = joinFields.keySet().stream().map(FieldKey::fromParts).collect(toList());
+        var fcsFileFields = joinFields.values();
 
         FlowSchema schema = new FlowSchema(user, c);
-        String sql = "SELECT " +
-                "FCSFiles.RowId As FCSFileRowId,\n" +
-                "FCSFiles.Name As FCSFileName,\n" +
-                "M.RowId AS SampleRowId,\n" +
-                "M.Name AS SampleName\n" +
+        String sql = "SELECT\n" +
+                "  FCSFiles.RowId As FCSFileRowId,\n" +
+                "  FCSFiles.Run.RowId AS FCSFileRunId,\n" +
+                "  FCSFiles.Run.Name AS FCSFileRunName,\n" +
+                "  M.RowId AS SampleRowId,\n" +
                 "FROM FCSFiles\n" +
-                "FULL OUTER JOIN exp.Materials M ON\n" +
+                "FULL OUTER JOIN samples." + SAMPLETYPE_NAME + " M ON\n" +
                 "FCSFiles.Sample = M.RowId\n" +
-                "ORDER BY M.Name";
+                "ORDER BY M.Name, FCSFiles.RowId";
+
+        List<Integer> sampleIds = new ArrayList<>();
+        List<Integer> fcsFileIds = new ArrayList<>();
+        Map<Integer, List<Integer>> samplesToFcsFiles = new LinkedHashMap<>();
+        List<Integer> unlinkedFcsFileIds = new ArrayList<>();
+        Map<Integer, Pair<Integer, String>> fcsFileRuns = new HashMap<>();
+        int linkedFcsFileCount = 0;
+
         try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql))
         {
             for (Map<String, Object> row : rs)
             {
                 Integer sampleRowId = (Integer) row.get("SampleRowId");
-                String sampleName = (String) row.get("SampleName");
-                Pair<Integer, String> samplePair = Pair.of(sampleRowId, sampleName);
-                List<Pair<Integer, String>> fcsFiles = ret.get(samplePair);
-                if (fcsFiles == null)
-                    ret.put(samplePair, fcsFiles = new ArrayList<>());
+                Integer fcsFileRowId = (Integer) row.get("FCSFileRowId");
+                Integer fcsFileRunId = (Integer) row.get("FCSFileRunId");
+                String fcsFileRunName = (String) row.get("FCSFileRunName");
 
-                Integer fcsFileRowId = (Integer) row.get("FCSFIleRowId");
-                String fcsFileName = (String) row.get("FCSFileName");
-                Pair<Integer, String> fcsFilePair = Pair.of(fcsFileRowId, fcsFileName);
-                fcsFiles.add(fcsFilePair);
+                if (sampleRowId != null)
+                {
+                    sampleIds.add(sampleRowId);
+                    if (fcsFileRowId != null)
+                    {
+                        var fcsFiles = samplesToFcsFiles.computeIfAbsent(sampleRowId, k -> new ArrayList<>());
+                        fcsFiles.add(fcsFileRowId);
+                        linkedFcsFileCount++;
+                    }
+                }
+                else
+                {
+                    if (fcsFileRowId != null)
+                        unlinkedFcsFileIds.add(fcsFileRowId);
+                }
+
+                if (fcsFileRowId != null)
+                {
+                    fcsFileIds.add(fcsFileRowId);
+                    if (fcsFileRunId != null)
+                    {
+                        fcsFileRuns.put(fcsFileRowId, Pair.of(fcsFileRunId, fcsFileRunName));
+                    }
+                }
             }
         }
         catch (SQLException e)
@@ -551,13 +599,72 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
+        List<Integer> unlinkedSampleIds = new ArrayList<>(sampleIds);
+        unlinkedSampleIds.removeAll(samplesToFcsFiles.keySet());
+
+        var rowIdFieldKey = FieldKey.fromParts("RowId");
+        var nameFieldKey = FieldKey.fromParts("Name");
+
+        Map<Integer, Map<FieldKey, Object>> samples = new HashMap<>();
+        var sampleColumns = new HashSet<FieldKey>();
+        sampleColumns.add(rowIdFieldKey);
+        sampleColumns.add(nameFieldKey);
+        sampleColumns.addAll(sampleFields);
+        var samplesTable = QueryService.get().getUserSchema(user, c, SamplesSchema.SCHEMA_NAME).getTable(SAMPLETYPE_NAME);
+        var sampleColumnMap = QueryService.get().getColumns(samplesTable, sampleColumns);
+        try (var results = new TableSelector(samplesTable, sampleColumnMap.values(), new SimpleFilter(rowIdFieldKey, sampleIds, CompareType.IN), null).getResults())
+        {
+            while (results.next())
+            {
+                var row = results.getFieldKeyRowMap();
+                Integer sampleId = (Integer)row.get(rowIdFieldKey);
+                samples.put(sampleId, new HashMap<>(row));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        Map<Integer, Map<FieldKey, Object>> fcsFiles = new HashMap<>();
+        var fcsFileColumns = new HashSet<FieldKey>();
+        fcsFileColumns.add(rowIdFieldKey);
+        fcsFileColumns.add(nameFieldKey);
+        fcsFileColumns.addAll(fcsFileFields);
+        var fcsFilesTable = schema.createFCSFileTable("FCSFiles", null);
+        var fcsFileColumnMap = QueryService.get().getColumns(fcsFilesTable, fcsFileColumns);
+        try (var results = new TableSelector(fcsFilesTable, fcsFileColumnMap.values(), new SimpleFilter(rowIdFieldKey, fcsFileIds, CompareType.IN), null).getResults())
+        {
+            while (results.next())
+            {
+                var row = results.getFieldKeyRowMap();
+                Integer fcsFileId = (Integer) row.get(rowIdFieldKey);
+                fcsFiles.put(fcsFileId, new HashMap<>(row));
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+        ;
+
+        var ret = new FCSFilesGroupedBySample();
+        ret.fcsFileRuns = fcsFileRuns;
+        ret.linkedFcsFileCount = linkedFcsFileCount;
+        ret.linkedSampleIdToFcsFileIds = samplesToFcsFiles;
+        ret.unlinkedFcsFileIds = unlinkedFcsFileIds;
+        ret.unlinkedSampleIds = unlinkedSampleIds;
+        ret.fcsFiles = fcsFiles;
+        ret.samples = samples;
+        ret.sampleFields = sampleFields;
+        ret.fcsFileFields = fcsFileFields;
         return ret;
     }
 
 
     public SampleKey makeSampleKey(String runName, String fileName, AttributeSet attrs)
     {
-        Collection<FieldKey> fields = getSampleSetJoinFields().values();
+        Collection<FieldKey> fields = getSampleTypeJoinFields().values();
         if (fields.size() == 0)
             return null;
         FieldKey tableRun = FieldKey.fromParts("Run");
@@ -666,7 +773,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public String getFCSAnalysisName(FlowWell well) throws SQLException
     {
-        FlowSchema schema = new FlowSchema(null, getContainer());
+        FlowSchema schema = new FlowSchema(User.getSearchUser(), getContainer());
         ExpDataTable table = schema.createFCSFileTable("fcsFiles", null);
         ColumnInfo colRowId = table.getColumn(ExpDataTable.Column.RowId);
         SimpleFilter filter = new SimpleFilter();
@@ -764,9 +871,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public String getProtocolSettingsDescription()
     {
         List<String> parts = new ArrayList<>();
-        if (getSampleSetJoinFields().size() != 0)
+        if (getSampleTypeJoinFields().size() != 0)
         {
-            parts.add("Sample set join fields");
+            parts.add("Sample type join fields");
         }
         if (getFCSAnalysisFilterString() != null)
         {
@@ -850,16 +957,16 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertEquals(0, fcsFiles[1].getSamples().size());
 
             // add join fields
-            assertEquals(0, protocol.getSampleSetJoinFields().size());
-            protocol.setSampleSetJoinFields(user, Map.of(
+            assertEquals(0, protocol.getSampleTypeJoinFields().size());
+            protocol.setSampleTypeJoinFields(user, Map.of(
                     "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
                     "WellId", FieldKey.fromParts("Keyword", "WELL ID")
             ));
 
-            // create sample set
-            assertNull(protocol.getSampleSet());
-            String sampleSetLSID = protocol.getSampleSetLSID();
-            assertNull(SampleSetService.get().getSampleSet(sampleSetLSID));
+            // create sample type
+            assertNull(protocol.getSampleType());
+            String sampleTypeLSID = protocol.getSampleTypeLSID();
+            assertNull(SampleTypeService.get().getSampleType(sampleTypeLSID));
 
             List<GWTPropertyDescriptor> props = List.of(
                     new GWTPropertyDescriptor("Name", "string"),
@@ -867,16 +974,16 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     new GWTPropertyDescriptor("WellId", "string"),
                     new GWTPropertyDescriptor("PTID", "string")
             );
-            ExpSampleSet ss = SampleSetService.get().createSampleSet(c, user, SAMPLESET_NAME, null,
+            ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLETYPE_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
-            assertNotNull(protocol.getSampleSet());
+            assertNotNull(protocol.getSampleType());
 
             // import samples:
             //   Name  PTID  WellId  ExprName
             //   one   p01   E01     L02-060329-PV1-R1
             //   two   p02   E02     L02-060329-PV1-R1
             UserSchema schema = QueryService.get().getUserSchema(user, c, "samples");
-            TableInfo table = schema.getTable(SAMPLESET_NAME);
+            TableInfo table = schema.getTable(SAMPLETYPE_NAME);
 
             BatchValidationException errors = new BatchValidationException();
             QueryUpdateService qus = table.getUpdateService();
@@ -896,9 +1003,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 throw errors;
 
             // verify - FCSFile linked to sample
-            DomainProperty exprNameProp = ss.getDomain().getPropertyByName("ExprName");
-            DomainProperty wellIdProp = ss.getDomain().getPropertyByName("WellId");
-            DomainProperty ptidProp = ss.getDomain().getPropertyByName("PTID");
+            DomainProperty exprNameProp = st.getDomain().getPropertyByName("ExprName");
+            DomainProperty wellIdProp = st.getDomain().getPropertyByName("WellId");
+            DomainProperty ptidProp = st.getDomain().getPropertyByName("PTID");
 
             ExpMaterial toBeDeleted = null;
             FlowRun afterSampleImportRun = FlowRun.fromRunId(runId);

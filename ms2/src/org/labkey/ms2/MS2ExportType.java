@@ -20,7 +20,6 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.EnumHasHtmlString;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
@@ -34,7 +33,7 @@ import java.util.List;
 * User: jeckels
 * Date: 8/12/13
 */
-public enum MS2ExportType implements EnumHasHtmlString
+public enum MS2ExportType
 {
     Excel
     {

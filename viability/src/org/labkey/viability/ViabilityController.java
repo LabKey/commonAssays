@@ -17,18 +17,19 @@
 package org.labkey.viability;
 
 import org.labkey.api.action.ConfirmAction;
+import org.labkey.api.action.SimpleRedirectAction;
+import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.actions.ProtocolIdForm;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.actions.ProtocolIdForm;
-import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.view.*;
-import org.labkey.api.action.SpringActionController;
-import org.labkey.api.action.SimpleRedirectAction;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -50,7 +51,7 @@ public class ViabilityController extends SpringActionController
         @Override
         public ActionURL getRedirectURL(Object o)
         {
-            return PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer());
+            return urlProvider(AssayUrls.class).getAssayListURL(getContainer());
         }
     }
 

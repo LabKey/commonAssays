@@ -18,6 +18,8 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.*;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -59,7 +61,7 @@ public class GroupNumberDisplayColumn extends DataColumn
     @Override
     public Object getDisplayValue(RenderContext ctx)
     {
-        return getFormattedValue(ctx);
+        return getFormattedHtml(ctx);
     }
 
     @Override
@@ -69,9 +71,9 @@ public class GroupNumberDisplayColumn extends DataColumn
     }
 
     @Override @NotNull
-    public String getFormattedValue(RenderContext ctx)
+    public HtmlString getFormattedHtml(RenderContext ctx)
     {
-        Map row = ctx.getRow();
+        Map<String, Object> row = ctx.getRow();
         long collectionId;
         long groupNumber;
         if (_fromQuery)
@@ -88,24 +90,24 @@ public class GroupNumberDisplayColumn extends DataColumn
                     sb.append("Could not resolve RowId column, please be sure that it is included in any custom queries. ");
                 }
 
-                return sb.toString();
+                return HtmlString.of(sb);
             }
             else
             {
                 if (row.get(_collectionIdColumn.getAlias()) == null)
                 {
-                    return "";
+                    return HtmlString.EMPTY_STRING;
                 }
                 Number collectionIdObject = (Number) row.get(_collectionIdColumn.getAlias());
                 if (collectionIdObject == null)
                 {
-                    return "";
+                    return HtmlString.EMPTY_STRING;
                 }
                 collectionId = collectionIdObject.longValue();
                 Number groupNumberObject = (Number) row.get(getColumnInfo().getAlias());
                 if (groupNumberObject == null)
                 {
-                    return "";
+                    return HtmlString.EMPTY_STRING;
                 }
                 groupNumber = groupNumberObject.longValue();
             }
@@ -114,20 +116,20 @@ public class GroupNumberDisplayColumn extends DataColumn
         {
             if (row.get(_collectionId) == null)
             {
-                return "";
+                return HtmlString.EMPTY_STRING;
             }
             collectionId = ((Number)row.get(_collectionId)).longValue();
             groupNumber = ((Number)row.get(_groupNumber)).longValue();
         }
 
-        StringBuilder sb = new StringBuilder();
+        HtmlStringBuilder sb = HtmlStringBuilder.of();
         sb.append(groupNumber);
         if (collectionId != 0)
         {
             sb.append("-");
             sb.append(collectionId);
         }
-        return sb.toString();
+        return sb.getHtmlString();
     }
 
     @Override

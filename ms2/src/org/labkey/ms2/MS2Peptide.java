@@ -16,7 +16,8 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.util.Pair;
 import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.ms2.reader.LibraQuantResult;
@@ -28,7 +29,7 @@ import java.util.Map;
 
 public class MS2Peptide
 {
-    private static Logger _log = Logger.getLogger(MS2Peptide.class);
+    private static Logger _log = LogManager.getLogger(MS2Peptide.class);
 
     public static final double pMass = 1.007276;  // Mass of a proton, according to X! Tandem
 

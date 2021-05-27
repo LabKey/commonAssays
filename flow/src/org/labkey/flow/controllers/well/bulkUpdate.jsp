@@ -16,11 +16,12 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.json.JSONArray" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.flow.controllers.well.WellController" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController.BulkUpdateKeywordsAction" %>
+<%@ page import="org.labkey.flow.controllers.well.WellController.UpdateKeywordsForm" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -31,7 +32,7 @@
     }
 %>
 <%
-    WellController.UpdateKeywordsForm form = (WellController.UpdateKeywordsForm)HttpView.currentModel();
+    UpdateKeywordsForm form = (UpdateKeywordsForm)HttpView.currentModel();
     ViewContext context = getViewContext();
 %>
 <span style="color:green;"><%=h(form.message)%></span><br>
@@ -39,31 +40,10 @@
 <div id="updateForm" />
 <script type="text/javascript">
 
-var keywords = [
-<%
-    String comma = "";
-    for (String kw : form.getKeywords(context))
-    {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(kw));
-        out.print("]");
-        comma = ",";
-    }%>
-];
+var keywords = <%=new JSONArray(form.getKeywords(context))%>
 var keywordStore = new Ext.data.SimpleStore({fields:['keyword'], data:keywords}) 
-var values = [
-<%
-    comma = "";
-    for (String v : form.getValues(context, form.keyword))
-    {
-        out.print(comma);
-        out.print("[");
-        out.print(PageFlowUtil.jsString(v));
-        out.print("]");
-        comma = ",";
-    }%>
-];
+var values = <%=new JSONArray(form.getValues(context, form.keyword))%>
+
 var valuesStore = new Ext.data.SimpleStore({fields:['value'], data:values})
 
 var updateFormPanel;
@@ -78,7 +58,7 @@ function keywordCombo_onSelect()
 function form_onSubmit()
 {
     var form = updateFormPanel.getForm();
-    form.getEl().dom.action=<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>;
+    form.getEl().dom.action=<%=q(urlFor(BulkUpdateKeywordsAction.class))%>;
     form.getEl().dom.submit();
 }
 
@@ -108,7 +88,7 @@ Ext.onReady(function(){
                 fieldLabel: 'Keyword',
                 name: 'keyword',
                 forceSelection: true,
-                value: <%=PageFlowUtil.jsString(form.keyword)%>,
+                value: <%=q(form.keyword)%>,
                 displayField:'keyword',
                 typeAhead: true,
                 mode: 'local',
@@ -119,7 +99,7 @@ Ext.onReady(function(){
             %>,
             {
                 xtype:'fieldset',
-                //title:'<%=i%>', collapsible:true, collapsed:<%=i==0?"false":"true"%>,
+                //title:'<%=i%>', collapsible:true, collapsed:<%=i!=0%>,
                 width: 330, autoHeight:true, defaults: {width: 210},
                 defaultType: 'textfield',
                 items:
@@ -133,7 +113,7 @@ Ext.onReady(function(){
                 ]
             } <%}}%>
         ],
-        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:<%=q(buildURL(WellController.BulkUpdateKeywordsAction.class))%>})}}]
+        buttons:[{text: 'Update', type:'submit', handler:function() {updateFormPanel.getForm().submit({url:<%=q(urlFor(BulkUpdateKeywordsAction.class))%>})}}]
     });
 
     keywordCombo.on('select', keywordCombo_onSelect);

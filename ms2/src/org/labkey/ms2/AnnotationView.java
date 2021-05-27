@@ -16,13 +16,17 @@
 package org.labkey.ms2;
 
 import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.lang3.StringUtils;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 import org.labkey.ms2.protein.IdentifierType;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,7 +37,12 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
 {
     public AnnotationView(Protein protein)
     {
-        super("/org/labkey/ms2/protAnnots.jsp", getBean(protein));
+        this(protein, Collections.emptyMap());
+    }
+
+    public AnnotationView(Protein protein, Map<String, Collection<HtmlString>> extraAnnotations)
+    {
+        super("/org/labkey/ms2/protAnnots.jsp", getBean(protein, extraAnnotations));
         setTitle("Annotations for " + protein.getBestName());
     }
 
@@ -41,18 +50,13 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
     {
         public String seqName;
         public String seqDesc;
-        public String geneName;
+        public List<HtmlString> geneNameLinks;
         public Set<String> seqOrgs;
-        public Set<String> genBankUrls;
-        public String[] swissProtNames;
-        public String[] swissProtAccns;
-        public String[] GIs;
-        public String[] ensemblIds;
-        public String[] goCategories;
-        public String[] IPI;
+
+        public Map<String, Collection<HtmlString>> annotations = new LinkedHashMap<>();
     }
 
-    private static AnnotViewBean getBean(Protein protein)
+    private static AnnotViewBean getBean(Protein protein, Map<String, Collection<HtmlString>> extraAnnotations)
     {
         int seqId = protein.getSeqId();
 
@@ -78,14 +82,11 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
         if (null != RefSeqIds)
             allGbIds.addAll(RefSeqIds);
 
-        Set<String> allGbURLs = new HashSet<>();
+        Set<HtmlString> allGbURLs = new HashSet<>();
 
         for (String ident : allGbIds)
         {
-            String url = ProteinManager.makeFullAnchorString(
-                    ProteinManager.makeIdentURLStringWithType(ident, "Genbank"),
-                    "protWindow",
-                    ident);
+            HtmlString url = ProteinManager.makeFullAnchorLink(ProteinManager.makeIdentURLStringWithType(ident, "Genbank"),"protWindow", ident);
             allGbURLs.add(url);
         }
 
@@ -110,15 +111,17 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
         /* info from db into view */
         bean.seqName = SeqName;
         bean.seqDesc = SeqDesc;
-        bean.geneName = StringUtils.join(ProteinManager.makeFullAnchorStringArray(GeneNames, "protWindow", "GeneName"), ", ");
+        bean.geneNameLinks = ProteinManager.makeFullAnchorLinks(GeneNames, "protWindow", "GeneName");
         bean.seqOrgs = ProteinManager.getOrganismsFromId(seqId);
-        bean.genBankUrls = allGbURLs;
-        bean.swissProtNames = ProteinManager.makeFullAnchorStringArray(SwissProtNames, "protWindow", "SwissProt");
-        bean.swissProtAccns = ProteinManager.makeFullAnchorStringArray(SwissProtAccns, "protWindow", "SwissProtAccn");
-        bean.GIs = ProteinManager.makeFullAnchorStringArray(GIs, "protWindow", "GI");
-        bean.ensemblIds = ProteinManager.makeFullAnchorStringArray(EnsemblIDs, "protWindow", "Ensembl");
-        bean.goCategories = ProteinManager.makeFullGOAnchorStringArray(GOCategories, "protWindow");
-        bean.IPI = ProteinManager.makeFullAnchorStringArray(IPIds, "protWindow", "IPI");
+        bean.annotations.put("Genbank IDs", allGbURLs);
+        bean.annotations.put("GIs", ProteinManager.makeFullAnchorLinks(GIs, "protWindow", "GI"));
+        bean.annotations.put("Swiss-Prot Accessions", ProteinManager.makeFullAnchorLinks(SwissProtAccns, "protWindow", "SwissProtAccn"));
+        bean.annotations.put("Swiss-Prot Names", ProteinManager.makeFullAnchorLinks(SwissProtNames, "protWindow", "SwissProt"));
+        bean.annotations.put("Ensembl", ProteinManager.makeFullAnchorLinks(EnsemblIDs, "protWindow", "Ensembl"));
+        bean.annotations.put("IPI Numbers", ProteinManager.makeFullAnchorLinks(IPIds, "protWindow", "IPI"));
+        bean.annotations.put("GO Categories", ProteinManager.makeFullGOAnchorLinks(GOCategories, "protWindow"));
+
+        bean.annotations.putAll(extraAnnotations);
 
         return bean;
     }

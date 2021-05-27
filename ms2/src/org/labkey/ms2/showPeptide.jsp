@@ -16,14 +16,13 @@
  */
 %>
 <%@ page import="org.labkey.api.util.Formats"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager" %>
+<%@ page import="org.labkey.ms2.MS2Manager"%>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
 <%@ page import="org.labkey.ms2.MassType" %>
@@ -66,7 +65,9 @@
 <%
         if (fraction.wasloadedFromGzFile())
         {
-            out.println(" " + MS2GZFileRenderer.getFileNameInGZFile(fraction.getFileName(), p.getScan(), p.getCharge(), "dta") + "<br>");
+            out.print(unsafe(" "));
+            out.print(h(MS2GZFileRenderer.getFileNameInGZFile(fraction.getFileName(), p.getScan(), p.getCharge(), "dta")));
+            out.println(unsafe("<br>"));
         }
 %>
 <%
@@ -77,11 +78,11 @@
         for (String gzFileExtension : gzFileExtensions)
         {
             ctx.showGzUrl.replaceParameter("extension", gzFileExtension);
-            out.print("    ");
+            out.print(unsafe("    "));
             out.println(link("Show " + gzFileExtension.toUpperCase(), ctx.showGzUrl));
         }
     }
-    out.print(text(ctx.modificationHref));
+    out.print(ctx.modificationHref);
 %>
 
     </td></tr>
@@ -119,7 +120,7 @@
                 </tr>
                 <% if (MS2RunType.Mascot.equals(run.getRunType())) { %>
                     <tr>
-                        <td class="labkey-form-label">Query Number</td><td><%= p.getQueryNumber() == null ? "" : p.getQueryNumber() %></td>
+                        <td class="labkey-form-label">Query Number</td><td><%=h(p.getQueryNumber())%></td>
                         <td class="labkey-form-label">Hit Rank</td><td><%= p.getHitRank() %></td>
                     </tr>
                     <tr>
@@ -245,7 +246,7 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
     $(function() {
         /* render the spectrum with the given options */
         $("#lorikeet").specview({
-            sequence: <%= PageFlowUtil.jsString(p.getTrimmedPeptide()) %>,
+            sequence: <%=q(p.getTrimmedPeptide())%>,
             precursorMz: 1,
             staticMods: staticMods,
             variableMods: varMods,
@@ -264,7 +265,7 @@ for (org.labkey.ms2.MS2Modification mod : run.getModifications(org.labkey.ms2.Ma
 {
     if (!mod.getVariable())
     { %>
-        <%= h(staticModIndex == 0 ? "" : ",") %>staticMods[<%= staticModIndex++%>] = { modMass: <%= h(Formats.f4.format(mod.getMassDiff())) %>, aminoAcid: <%= PageFlowUtil.jsString(mod.getAminoAcid())%>}<%
+        <%= h(staticModIndex == 0 ? "" : ",") %>staticMods[<%= staticModIndex++%>] = { modMass: <%= h(Formats.f4.format(mod.getMassDiff())) %>, aminoAcid: <%=q(mod.getAminoAcid())%>}<%
     }
 }
 %>

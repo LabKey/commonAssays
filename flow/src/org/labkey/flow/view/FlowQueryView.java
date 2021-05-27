@@ -33,7 +33,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.StudyUrls;
-import org.labkey.api.study.assay.AssayPublishService;
+import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -82,7 +82,7 @@ public class FlowQueryView extends QueryView
         setShadeAlternatingRows(true);
         setShowBorders(true);
 
-        // CONSIDER: Only show selectors if user can export, delete, or publish/copy-to-study
+        // CONSIDER: Only show selectors if user can export, delete, or publish/link to study
         setShowRecordSelectors(true);
     }
 
@@ -146,7 +146,7 @@ public class FlowQueryView extends QueryView
                 NavTree showInline = new NavTree("Inline", urlShow.clone().replaceParameter(param("showGraphs"), FlowQuerySettings.ShowGraphs.Inline.name()));
                 showInline.setSelected(showGraphs == FlowQuerySettings.ShowGraphs.Inline);
 
-                NavTree navtree = new NavTree("Show Graphs", (String)null);
+                NavTree navtree = new NavTree("Show Graphs", (ActionURL)null);
                 navtree.addChild(showNone);
                 navtree.addChild(showHover);
                 navtree.addChild(showInline);
@@ -243,34 +243,31 @@ public class FlowQueryView extends QueryView
             {
                 URLHelper url = target.clone();
                 if (entry.getKey().intValue() != 0)
-                    url.replaceParameter(FlowParam.experimentId.name(), String.valueOf(entry.getKey()));
-                button.addMenuItem(entry.getValue(),
-                        url.toString(),
-                        null,
-                        currentId == entry.getKey());
+                    url.replaceParameter(FlowParam.experimentId.name(), entry.getKey());
+                button.addMenuItem(entry.getValue(), url, null, currentId == entry.getKey());
             }
             bar.add(button);
         }
 
         super.populateButtonBar(view, bar);
 
-        // NOTE: Only add "Copy to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
-        AssayPublishService aps = AssayPublishService.get();
+        // NOTE: Only add "Link to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        StudyPublishService aps = StudyPublishService.get();
         String queryName = getSettings().getQueryName();
         if (null != aps && queryName.equals(FlowTableType.FCSAnalyses.toString()))
         {
-            // UNDONE: refactor ResultsQueryView create "Copy to Study" button code so it can be re-used here
+            // UNDONE: refactor ResultsQueryView create "Link to Study" button code so it can be re-used here
             FlowProtocol protocol = FlowProtocol.getForContainer(getContainer());
             if (protocol != null && !aps.getValidPublishTargets(getUser(), InsertPermission.class).isEmpty())
             {
                 ExpProtocol expProtocol = protocol.getProtocol();
-                ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getCopyToStudyURL(getContainer(), expProtocol);
+                ActionURL publishURL = PageFlowUtil.urlProvider(StudyUrls.class).getLinkToStudyURL(getContainer(), expProtocol);
 
                 if (getTable().getContainerFilter() != null && getTable().getContainerFilter().getType() != null)
                     publishURL.addParameter("containerFilterName", getTable().getContainerFilter().getType().name());
 
                 ActionButton publishButton = new ActionButton(publishURL,
-                        "Copy to Study", ActionButton.Action.POST);
+                        "Link to Study", ActionButton.Action.POST);
                 publishButton.setDisplayPermission(InsertPermission.class);
                 publishButton.setRequiresSelection(true);
 

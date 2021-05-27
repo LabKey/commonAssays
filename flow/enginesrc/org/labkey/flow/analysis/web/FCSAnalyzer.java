@@ -16,7 +16,8 @@
 
 package org.labkey.flow.analysis.web;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
@@ -51,7 +52,7 @@ public class FCSAnalyzer
 {
     public static final SubsetSpec compSubset = new SubsetSpec(null, PopulationName.fromString("comp"));
 
-    private static final Logger _log = Logger.getLogger(FCSAnalyzer.class);
+    private static final Logger _log = LogManager.getLogger(FCSAnalyzer.class);
     private static final FCSAnalyzer _instance = new FCSAnalyzer();
     private static final int GRAPH_HEIGHT = 300;
     private static final int GRAPH_WIDTH = 300;

@@ -21,7 +21,8 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -140,7 +141,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String NEGATIVE_BEAD_DISPLAY_NAME = "Subtract Negative Bead";
     public static final Double MAX_CURVE_PARAM_VALUE = 10e37; // Issue 15200
 
-    private static final Logger LOGGER = Logger.getLogger(LuminexDataHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(LuminexDataHandler.class);
 
     public static final int MINIMUM_TITRATION_SUMMARY_COUNT = 5;
     public static final int MINIMUM_TITRATION_RAW_COUNT = 10;
@@ -557,8 +558,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexImportHelper helper = new LuminexImportHelper();
-        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, insertRows, Logger.getLogger(LuminexDataHandler.class));
-        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, updateRows, Logger.getLogger(LuminexDataHandler.class));
+        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, insertRows, LogManager.getLogger(LuminexDataHandler.class));
+        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, updateRows, LogManager.getLogger(LuminexDataHandler.class));
     }
 
     /** Inserts or updates an analyte row in the hard table */
@@ -1907,7 +1908,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (match != null)
         {
-            materialInputs.put(match.getMaterial(), null);
+            materialInputs.put(match.getMaterial(true), null);
         }
     }
 
@@ -2132,7 +2133,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexRunContext form = (LuminexRunContext)context;
-        importData(data, run, context.getUser(), Logger.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form, false);
+        importData(data, run, context.getUser(), LogManager.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form, false);
     }
 
     @Override

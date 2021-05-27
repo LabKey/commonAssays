@@ -16,13 +16,15 @@
 
 package org.labkey.nab;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
@@ -53,7 +55,7 @@ import java.util.Map;
  */
 public abstract class NabDataHandler extends DilutionDataHandler
 {
-    public static final Logger LOG = Logger.getLogger(NabDataHandler.class);
+    public static final Logger LOG = LogManager.getLogger(NabDataHandler.class);
 
     public static final DataType NAB_TRANSFORMED_DATA_TYPE = new DataType("AssayRunNabTransformedData"); // a marker data type
     public static final String NAB_DATA_ROW_LSID_PREFIX = "AssayRunNabDataRow";
@@ -197,6 +199,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
             String virusWellGroupName = (String)group.get(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME);
             nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
+            nabSpecimenEntries.put(FIT_PARAMETERS_PROPERTY_NAME, group.get(FIT_PARAMETERS_PROPERTY_NAME));
 
             int nabRowid = 0;
             if (commitData)
@@ -390,5 +393,13 @@ public abstract class NabDataHandler extends DilutionDataHandler
         }
 
         return new Pair<>(row, col);
+    }
+
+    @Override
+    public boolean isValidDataProperty(String propertyName)
+    {
+        return super.isValidDataProperty(propertyName) ||
+            NAbSpecimenTable.PERCENT_NEUT_MAX_PROP.equals(propertyName) ||
+            NAbSpecimenTable.PERCENT_NEUT_INIT_DILUTION_PROP.equals(propertyName);
     }
 }

@@ -18,7 +18,8 @@ package org.labkey.ms2.protein.tools;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
@@ -58,7 +59,7 @@ import java.util.zip.GZIPInputStream;
  */
 public abstract class GoLoader
 {
-    private static final Logger _log = Logger.getLogger(GoLoader.class);
+    private static final Logger _log = LogManager.getLogger(GoLoader.class);
 
     private static final String GOTERM_FILE = "term.txt";
     private static final String GOTERM2TERM_FILE = "term2term.txt";

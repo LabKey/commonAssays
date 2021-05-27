@@ -16,7 +16,8 @@
 
 package org.labkey.ms2.query;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.*;
 import org.labkey.api.util.ResultSetUtil;
 
@@ -36,7 +37,7 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
     private ColumnInfo _groupingColumn;
     private ColumnInfo _peptideColumn;
 
-    private static final Logger LOG = Logger.getLogger(PeptideAggregrationDisplayColumn.class);
+    private static final Logger LOG = LogManager.getLogger(PeptideAggregrationDisplayColumn.class);
     private boolean _loggedError = false;
 
     public PeptideAggregrationDisplayColumn(ColumnInfo groupingColumn, ColumnInfo peptideColumn, String caption)

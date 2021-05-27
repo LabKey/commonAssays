@@ -15,13 +15,16 @@
  */
 package org.labkey.luminex;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.simple.SimpleLogger;
+import org.apache.logging.log4j.util.PropertiesUtil;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.assay.pipeline.AssayRunAsyncContext;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.assay.pipeline.AssayRunAsyncContext;
-import org.apache.log4j.Logger;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.query.LuminexProtocolSchema;
@@ -269,18 +272,18 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         LuminexUnitTestContext testContext = new LuminexUnitTestContext();
         LuminexRunAsyncContext asyncContext;
 
-        private static class StringLogger extends Logger
+        private static class StringLogger extends SimpleLogger
         {
             StringBuilder sb = new StringBuilder();
             private StringLogger()
             {
-                super("");
+                super("", Level.INFO, false, false, false, false, "", null, new PropertiesUtil(PropertiesUtil.getSystemProperties()), null);
             }
 
             @Override
-            public void info(Object append)
+            public void info(String message)
             {
-                sb.append(append);
+                sb.append(message);
                 sb.append("\n");
             }
 

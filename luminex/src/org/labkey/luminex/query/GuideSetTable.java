@@ -50,6 +50,7 @@ import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.util.HtmlString;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.AnalyteTitration;
@@ -118,9 +119,9 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 @NotNull
                 @Override
-                public String getFormattedValue(RenderContext ctx)
+                public HtmlString getFormattedHtml(RenderContext ctx)
                 {
-                    return "details";
+                    return HtmlString.of("details");
                 }
 
                 @Override
@@ -329,7 +330,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
         // Guide sets are scoped to the protocol, not to folders, so filter on ProtocolId instead of Container
         SQLFragment sql = new SQLFragment("ProtocolId = ?");

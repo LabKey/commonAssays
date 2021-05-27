@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocolStep" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.CompensationCalculationPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-
-
 <labkey:errors/>
 <%  CompensationCalculationDef calc = compensationCalculationDef();
     if (calc != null)
@@ -62,9 +58,9 @@
     <br/>
     <p>
         This compensation calculation may be edited in a number of ways:<br>
-        <labkey:link text="Upload a FlowJo workspace" href="<%=form.urlFor(ScriptController.UploadCompensationCalculationAction.class)%>" /><br>
-        <labkey:link text="Switch keywords or gates" href="<%=form.urlFor(ScriptController.ChooseCompensationRunAction.class)%>" /><br>
-        <labkey:link href="<%=form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation)%>" text="Rename gates" /><br>
-        <labkey:link href="<%=form.urlFor(AnalysisScriptController.BeginAction.class)%>" text="Script main page" />
+        <%=link("Upload a FlowJo workspace").href(form.urlFor(ScriptController.UploadCompensationCalculationAction.class))%><br>
+        <%=link("Switch keywords or gates").href(form.urlFor(ScriptController.ChooseCompensationRunAction.class))%><br>
+        <%=link("Rename gates").href(form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation))%><br>
+        <%=link("Script main page").href(form.urlFor(AnalysisScriptController.BeginAction.class))%>
     </p>
 <% } %>

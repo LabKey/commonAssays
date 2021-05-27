@@ -1,14 +1,21 @@
 import org.labkey.gradle.util.BuildUtils
 
+plugins {
+   id 'org.labkey.build.module'
+}
+
 dependencies {
+   external("org.apache.httpcomponents:httpmime:${httpmimeVersion}")
+   external("org.ardverk:patricia-trie:${patriciaTrieVersion}")
+   implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
 
+   BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "pipeline"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
 }
 
-// TODO move resources files into resources directory to avoid this overlap
 sourceSets {
    main {
       resources {

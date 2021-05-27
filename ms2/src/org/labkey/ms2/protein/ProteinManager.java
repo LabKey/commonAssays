@@ -21,7 +21,8 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -47,6 +48,8 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.HashHelpers;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
@@ -75,7 +78,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * User: arauch
@@ -84,7 +89,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProteinManager
 {
-    private static final Logger LOG = Logger.getLogger(ProteinManager.class);
+    private static final Logger LOG = LogManager.getLogger(ProteinManager.class);
     private static final String SCHEMA_NAME = "prot";
 
     public static final int RUN_FILTER = 1;
@@ -1168,7 +1173,7 @@ public class ProteinManager
 
     public static Set<String> getOrganismsFromId(int id)
     {
-        HashSet<String> retVal = new HashSet<>();
+        Set<String> retVal = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         List<String> rvString = new SqlSelector(getSchema(),
                 "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
                 id).getArrayList(String.class);
@@ -1229,44 +1234,38 @@ public class ProteinManager
     }
 
 
-    public static String makeFullAnchorString(String url, String target, String txt)
+    public static HtmlString makeFullAnchorLink(String url, String target, String txt)
     {
-        if (txt == null) return "";
-        String retVal = "";
-        if (url != null) retVal += "<a ";
-        if (url != null && target != null) retVal += "target='" + target + "' ";
-        if (url != null) retVal += "href='" + url + "'>";
-        retVal += txt;
-        if (url != null) retVal += "</a>";
-        return retVal;
+        if (null == txt)
+            return HtmlString.EMPTY_STRING;
+
+        if (null == url)
+            return HtmlString.of(txt);
+
+        return new LinkBuilder(txt).href(url).target(target).clearClasses().getHtmlString();
     }
 
-    public static String[] makeFullAnchorStringArray(Collection<String> idents, String target, String identType)
+    public static List<HtmlString> makeFullAnchorLinks(Collection<String> idents, String target, String identType)
     {
         if (idents == null || idents.isEmpty() || identType == null)
-            return new String[0];
-        String[] retVal = new String[idents.size()];
-        int i = 0;
-        for (String ident : idents)
-            retVal[i++] = makeFullAnchorString(makeIdentURLStringWithType(ident, identType), target, ident);
-        return retVal;
+            return Collections.emptyList();
+
+        return idents.stream()
+            .map(ident->makeFullAnchorLink(makeIdentURLStringWithType(ident, identType), target, ident))
+            .collect(Collectors.toList());
     }
 
-    public static String[] makeFullGOAnchorStringArray(Collection<String> goStrings, String target)
+    public static List<HtmlString> makeFullGOAnchorLinks(Collection<String> goStrings, String target)
     {
-        if (goStrings == null) return new String[0];
-        String[] retVal = new String[goStrings.size()];
-        int i=0;
-        for (String go : goStrings)
-        {
-            String sub = !go.contains(" ") ? go : go.substring(0, go.indexOf(" "));
-            retVal[i++] = makeFullAnchorString(
-                    makeIdentURLStringWithType(sub, "GO"),
-                    target,
-                    go
-            );
-        }
-        return retVal;
+        if (goStrings == null)
+            return Collections.emptyList();
+
+        return goStrings.stream()
+            .map(go->{
+                String sub = !go.contains(" ") ? go : go.substring(0, go.indexOf(" "));
+                return makeFullAnchorLink(makeIdentURLStringWithType(sub, "GO"), target, go);
+            })
+            .collect(Collectors.toList());
     }
 
 

@@ -18,7 +18,8 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.BlockingCache;
@@ -48,7 +49,7 @@ import java.util.Objects;
  */
 abstract public class AttributeCache<A extends Comparable<A>, E extends AttributeCache.Entry<A, E>>
 {
-    private static final Logger LOG = Logger.getLogger(AttributeCache.class);
+    private static final Logger LOG = LogManager.getLogger(AttributeCache.class);
 
     // container id -> list of names (sorted)
     private CacheLoader<String, Attributes<A, E>> BY_CONTAINER_LOADER = new CacheLoader<String, Attributes<A, E>>()

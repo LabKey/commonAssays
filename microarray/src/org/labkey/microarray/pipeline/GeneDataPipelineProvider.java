@@ -16,7 +16,8 @@
 
 package org.labkey.microarray.pipeline;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
@@ -43,7 +44,7 @@ public class GeneDataPipelineProvider extends PipelineProvider
     private static final String GENE_DATA_BASE_URL_PARAMETER_NAME = "org.labkey.microarray.geneDataBaseURL";
     private static final String GENE_DATA_FILE_ROOT_PARAMETER_NAME = "org.labkey.microarray.geneDataFileRoot";
 
-    private static final Logger LOG = Logger.getLogger(GeneDataPipelineProvider.class);
+    private static final Logger LOG = LogManager.getLogger(GeneDataPipelineProvider.class);
 
     public GeneDataPipelineProvider(MicroarrayModule module)
     {

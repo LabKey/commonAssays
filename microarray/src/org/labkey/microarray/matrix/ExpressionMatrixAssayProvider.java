@@ -22,11 +22,18 @@ import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.fhcrc.cpas.exp.xml.SimpleValueType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayPipelineProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayRunCreator;
+import org.labkey.api.assay.AssayTableMetadata;
+import org.labkey.api.assay.actions.AssayRunUploadForm;
+import org.labkey.api.assay.matrix.ColumnMappingProperty;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -40,15 +47,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.actions.AssayRunUploadForm;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayPipelineProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayRunCreator;
-import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.assay.matrix.ColumnMappingProperty;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
@@ -70,7 +69,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
-    {
+{
     public static final String NAME = "Expression Matrix";
     public static final String RESOURCE_NAME = "ExpressionMatrix";
 
@@ -97,12 +96,6 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     public AssayRunCreator getRunCreator()
     {
         return new ExpressionMatrixRunCreator(this);
-    }
-
-    @Override
-    public ExpData getDataForDataRow(Object dataRowId, ExpProtocol protocol)
-    {
-        return null;
     }
 
     @Override
@@ -166,7 +159,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     {
         List<NavTree> result = super.getHeaderLinks(viewContext, protocol, containerFilter);
         result.add(new NavTree("manage feature annotation sets", new ActionURL(FeatureAnnotationSetController.ManageAction.class, viewContext.getContainer())));
-        result.add(new NavTree("manage samples", PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleSetListURL(viewContext.getContainer())));
+        result.add(new NavTree("manage samples", PageFlowUtil.urlProvider(ExperimentUrls.class).getShowSampleTypeListURL(viewContext.getContainer())));
         return result;
     }
 

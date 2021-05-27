@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -22,7 +23,6 @@
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -38,10 +38,10 @@
     MS2Controller.SpectraCountForm form = bean.getForm();
     String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
-<script type="text/javascript" src="<%=getWebappURL("MS2/inlineViewDesigner.js")%>"></script>
+<%=getScriptTag("MS2/inlineViewDesigner.js")%>
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%= bean.getTargetURL() %>" />
+    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>
         Group by:<br/>
         <div class="labkey-indented">
@@ -75,7 +75,7 @@
                 var viewName = viewInfo.views[0].name;
                 // Make sure we're set to use the custom view
                 document.getElementById("customViewRadioButton").checked = true;
-                var viewNamesSelect = document.getElementById(<%= PageFlowUtil.jsString(peptideViewSelectId) %>);
+                var viewNamesSelect = document.getElementById(<%=q(peptideViewSelectId)%>);
                 if (!viewNamesSelect)
                 {
                     window.location.reload();

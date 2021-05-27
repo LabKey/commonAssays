@@ -94,7 +94,7 @@ public class ElispotController extends SpringActionController
         @Override
         public ModelAndView getView(Object o, BindException errors)
         {
-            return HttpView.redirect(PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
+            return HttpView.redirect(urlProvider(AssayUrls.class).getAssayListURL(getContainer()));
         }
 
         @Override
@@ -196,9 +196,9 @@ public class ElispotController extends SpringActionController
             else
                 title = "Details for All Runs";
 
-            ActionURL assayListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
-            ActionURL runListURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
-            ActionURL runDataURL = PageFlowUtil.urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
+            ActionURL assayListURL = urlProvider(AssayUrls.class).getAssayListURL(_run.getContainer());
+            ActionURL runListURL = urlProvider(AssayUrls.class).getAssayRunsURL(_run.getContainer(), _protocol);
+            ActionURL runDataURL = urlProvider(AssayUrls.class).getAssayResultsURL(_run.getContainer(), _protocol, _run.getRowId());
 
             root.addChild("Assay List", assayListURL);
             root.addChild(_protocol.getName() + " Runs", runListURL);
@@ -263,7 +263,7 @@ public class ElispotController extends SpringActionController
         {
             super(protocol, provider, true, true, containerFilter);
 
-            _links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(PageFlowUtil.urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter), AssayProtocolSchema.getLastFilterScope(_protocol))));
+            _links.add(new NavTree("view runs", PageFlowUtil.addLastFilterParameter(urlProvider(AssayUrls.class).getAssayRunsURL(getViewContext().getContainer(), _protocol, _containerFilter), AssayProtocolSchema.getLastFilterScope(_protocol))));
         }
 
 
@@ -557,7 +557,7 @@ public class ElispotController extends SpringActionController
         @Override
         public URLHelper getSuccessURL(Object o)
         {
-            return PageFlowUtil.urlProvider(PipelineUrls.class).urlBegin(getContainer());
+            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
         }
     }
 }

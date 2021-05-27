@@ -29,7 +29,8 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <script type="text/javascript">
-    LABKEY.requiresCss("ProteinCoverageMap.css");
+    LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
+    LABKEY.requiresCss("MS2/ProteinCoverageMap.js");
     LABKEY.requiresScript("util.js");
 
     function checkAll() {
@@ -86,7 +87,7 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<form action="<%=formUrl%>" method="GET" onsubmit="return validate();">
+<form action="<%=h(formUrl)%>" method="GET" onsubmit="return validate();">
     <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
     <% } %>
@@ -109,7 +110,7 @@
     %>
 
     <div>
-        <input type=checkbox name=targetSeqIds value="<%= h(protein.getSeqId())%>" checked>
+        <input type=checkbox name=targetSeqIds value="<%=protein.getSeqId()%>" checked>
 
         <span id="<%= h(divId) %>"></span>
         <span><a href="<%= h(proteinUrl) %>"><%= h(protein.getBestName())%></a></span>

@@ -17,29 +17,30 @@
 package org.labkey.elisa;
 
 import org.json.JSONObject;
-import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.action.ApiSimpleResponse;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.Container;
-import org.labkey.api.reports.Report;
-import org.labkey.api.reports.report.ReportDescriptor;
-import org.labkey.api.reports.report.ReportUrls;
-import org.labkey.api.reports.report.view.ReportUtil;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.actions.AssayRunDetailsAction;
+import org.labkey.api.data.statistics.CurveFit;
+import org.labkey.api.data.statistics.DoublePoint;
+import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.User;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.UniqueID;
-import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.JspView;
-import org.labkey.api.view.NavTree;
-import org.labkey.api.view.WebPartView;
-import org.labkey.api.visualization.GenericChartReport;
-import org.labkey.api.visualization.GenericChartReportDescriptor;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
+import org.labkey.elisa.query.CurveFitDb;
+import org.labkey.elisa.query.ElisaManager;
 import org.springframework.validation.BindException;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.validation.Errors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ElisaController extends SpringActionController
@@ -52,17 +53,12 @@ public class ElisaController extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    public static class GenericReportForm extends ReportUtil.JsonReportForm
+    public static class RunDetailsForm
     {
+        private int _protocolId;
         private int _runId;
-        private String _renderType;
-        private String _dataRegionName;
-        private String _jsonData;
-        private String _autoColumnYName;
-        private String _autoColumnXName;
-        private String _runTableName;
-        private Double[] _fitParams = new Double[0];
-        private String[] _sampleColumns = new String[0];
+        private String _runName;
+        private String _schemaName;
 
         public int getRunId()
         {
@@ -74,109 +70,146 @@ public class ElisaController extends SpringActionController
             _runId = runId;
         }
 
-        public String getRenderType()
+        public String getRunName()
         {
-            return _renderType;
+            return _runName;
         }
 
-        public void setRenderType(String renderType)
+        public void setRunName(String runName)
         {
-            _renderType = renderType;
+            _runName = runName;
         }
 
-        public String getDataRegionName()
+        public String getSchemaName()
         {
-            return _dataRegionName;
+            return _schemaName;
         }
 
-        public void setDataRegionName(String dataRegionName)
+        public void setSchemaName(String schemaName)
         {
-            _dataRegionName = dataRegionName;
+            _schemaName = schemaName;
         }
 
-        public String getJsonData()
+        public int getProtocolId()
         {
-            return _jsonData;
+            return _protocolId;
         }
 
-        public void setJsonData(String jsonData)
+        public void setProtocolId(int protocolId)
         {
-            _jsonData = jsonData;
+            _protocolId = protocolId;
         }
+    }
 
-        public String getAutoColumnYName()
-        {
-            return _autoColumnYName;
-        }
+    @RequiresPermission(ReadPermission.class)
+    public class GetCurveFitXYPairs extends ReadOnlyApiAction<GetCurveFitXYPairsForm>
+    {
+        ExpRun _run;
 
-        public void setAutoColumnYName(String autoColumnYName)
+        @Override
+        public void validateForm(GetCurveFitXYPairsForm form, Errors errors)
         {
-            _autoColumnYName = autoColumnYName;
-        }
+            _run = ExperimentService.get().getExpRun(form.getRunId());
+            if (_run == null)
+                errors.reject(ERROR_MSG, "Unable to find run for ID " + form.getRunId() + ".");
 
-        public String getAutoColumnXName()
-        {
-            return _autoColumnXName;
-        }
-
-        public void setAutoColumnXName(String autoColumnXName)
-        {
-            _autoColumnXName = autoColumnXName;
-        }
-
-        public String getRunTableName()
-        {
-            return _runTableName;
-        }
-
-        public void setRunTableName(String runTableName)
-        {
-            _runTableName = runTableName;
-        }
-
-        public Double[] getFitParams()
-        {
-            return _fitParams;
-        }
-
-        public void setFitParams(Double[] fitParams)
-        {
-            _fitParams = fitParams;
-        }
-
-        public String[] getSampleColumns()
-        {
-            return _sampleColumns;
-        }
-
-        public void setSampleColumns(String[] sampleColumns)
-        {
-            _sampleColumns = sampleColumns;
+            if (form.getNumberOfPoints() < 2)
+                errors.reject(ERROR_MSG, "At least 2 points must be requested.");
+            if (form.getxMin() >= form.getxMax())
+                errors.reject(ERROR_MSG, "xMin must be less than xMax.");
         }
 
         @Override
-        public void bindProperties(Map<String, Object> props)
+        public Object execute(GetCurveFitXYPairsForm form, BindException errors) throws Exception
         {
-            super.bindProperties(props);
+            ExpProtocol protocol = form.getProtocol();
+            AssayProvider provider = AssayService.get().getProvider(protocol);
+            Domain runDomain = provider.getRunDomain(protocol);
+            StatsService.CurveFitType curveFitType = ElisaManager.getRunCurveFitType(runDomain, _run);
+            List<Map<String, Object>> points = new ArrayList<>();
 
-            _renderType = (String)props.get("renderType");
-            _dataRegionName = (String)props.get("dataRegionName");
+            CurveFitDb curveFitDb = ElisaManager.getCurveFit(getContainer(), _run, form.getPlateName(), form.getSpot());
+            if (curveFitDb != null)
+            {
+                CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, new DoublePoint[0]);
+                curveFit.setParameters(new JSONObject(curveFitDb.getFitParameters()));
+                curveFit.setLogXScale(false);
 
-            Object json = props.get("jsonData");
-            if (json != null)
-                _jsonData = json.toString();
+                double stepSize = (form.getxMax() - form.getxMin()) / (form.getNumberOfPoints() - 1);
+                double xVal = form.getxMin();
+                while (xVal <= form.getxMax())
+                {
+                    points.add(Map.of("x", xVal, "y", curveFit.fitCurve(xVal)));
+                    xVal += stepSize;
+                }
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("runId", _run.getRowId());
+            response.put("curveFitMethod", curveFitType.getLabel());
+            response.put("rSquared", curveFitDb != null ? curveFitDb.getrSquared() : "N/A");
+            response.put("fitParameters", curveFitDb != null ? curveFitDb.getFitParameters() : "N/A");
+            response.put("points", points);
+            return new ApiSimpleResponse(response);
+        }
+    }
+
+    public static class GetCurveFitXYPairsForm extends AssayRunDetailsAction.AssayRunDetailsForm
+    {
+        private String _plateName = ManualImportHelper.PLACEHOLDER_PLATE_NAME;
+        private int spot = 1;
+        private double xMin = 0;
+        private double xMax = 100;
+        private int numberOfPoints = 2;
+
+        public String getPlateName()
+        {
+            return _plateName;
         }
 
-        public static JSONObject toJSON(User user, Container container, Report report)
+        public void setPlateName(String plateName)
         {
-            JSONObject json = ReportUtil.JsonReportForm.toJSON(user, container, report);
-            ReportDescriptor descriptor = report.getDescriptor();
+            _plateName = plateName;
+        }
 
-            json.put("renderType", descriptor.getProperty(GenericChartReportDescriptor.Prop.renderType));
-            json.put("dataRegionName", descriptor.getProperty(ReportDescriptor.Prop.dataRegionName));
-            json.put("jsonData", descriptor.getProperty(ReportDescriptor.Prop.json));
+        public int getSpot()
+        {
+            return spot;
+        }
 
-            return json;
+        public void setSpot(int spot)
+        {
+            this.spot = spot;
+        }
+
+        public double getxMin()
+        {
+            return xMin;
+        }
+
+        public void setxMin(double xMin)
+        {
+            this.xMin = xMin;
+        }
+
+        public double getxMax()
+        {
+            return xMax;
+        }
+
+        public void setxMax(double xMax)
+        {
+            this.xMax = xMax;
+        }
+
+        public int getNumberOfPoints()
+        {
+            return numberOfPoints;
+        }
+
+        public void setNumberOfPoints(int numberOfPoints)
+        {
+            this.numberOfPoints = numberOfPoints;
         }
     }
 }

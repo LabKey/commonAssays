@@ -85,7 +85,7 @@ public class MS2RunHierarchyTree extends ContainerTree
                     while (moreRuns)
                     {
                         int run = rs.getInt(1);
-                        runUrl.replaceParameter("run", String.valueOf(run));
+                        runUrl.replaceParameter("run", run);
                         html.append("<tr><td>");
                         html.append("<input type=checkbox name='");
                         html.append(DataRegion.SELECT_CHECKBOX_NAME);

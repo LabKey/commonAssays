@@ -23,8 +23,9 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
@@ -91,7 +92,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
 //        PropertyDescriptor materialProperty = antigenDomain.getPropertyByName("SpecimenLsid").getPropertyDescriptor();
         final boolean hasMaterialSpecimenPropertyColumnDecorator = hasMaterialSpecimenPropertyColumnDecorator();
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
-        final ExpSampleSet sampleSet = ExperimentService.get().getSampleSet(sampleDomainURI);
+        final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
         var materialColumn = getMutableColumn("SpecimenLsid"); //  new PropertyColumn(materialProperty, objectUriColumn, getContainer(), schema.getUser(), false);
         materialColumn.setLabel("Specimen");
         materialColumn.setHidden(true);
@@ -101,9 +102,9 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
             public TableInfo getLookupTableInfo()
             {
                 ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                if (sampleSet != null)
+                if (sampleType != null)
                 {
-                    materials.setSampleSet(sampleSet, true);
+                    materials.setSampleType(sampleType, true);
                 }
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (hasMaterialSpecimenPropertyColumnDecorator && propertyCol.getFk() instanceof PropertyForeignKey)

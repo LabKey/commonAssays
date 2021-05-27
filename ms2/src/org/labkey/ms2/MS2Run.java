@@ -16,7 +16,8 @@
 
 package org.labkey.ms2;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 public abstract class MS2Run implements Serializable
 {
-    private static Logger _log = Logger.getLogger(MS2Run.class);
+    private static Logger _log = LogManager.getLogger(MS2Run.class);
 
     protected final static String[] EMPTY_STRING_ARRAY = new String[0];
 

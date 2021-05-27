@@ -18,6 +18,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.InsertAnnotsAction" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -26,7 +27,7 @@
 %>
 <labkey:errors />
 <br>
-<labkey:form method="post" action="<%=buildURL(MS2Controller.InsertAnnotsAction.class)%>" enctype="multipart/form-data">
+<labkey:form method="post" action="<%=urlFor(InsertAnnotsAction.class)%>" enctype="multipart/form-data">
 <table class="lk-fields-table">
     <tr>
       <td class="labkey-form-label">Full file path</td>
@@ -45,15 +46,15 @@
        </select>
       </td>
     </tr>
-    <tr id="fastaOrganism" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+    <tr id="fastaOrganism" style="display: <%=h("fasta".equals(bean.getFileType()) ? "table-row" : "none")%>;">
        <td class="labkey-form-label">Default Organism</td>
-       <td><input type='text' name='defaultOrganism' size='50' value='<%= bean.getDefaultOrganism() %>'></td>
+       <td><input type='text' name='defaultOrganism' size='50' value='<%=h(bean.getDefaultOrganism())%>'></td>
     </tr>
-    <tr id="fastaGuess" style="display: <%= "fasta".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+    <tr id="fastaGuess" style="display: <%=h("fasta".equals(bean.getFileType()) ? "table-row" : "none")%>;">
        <td></td>
        <td><input type='checkbox' name='shouldGuess' <%=checked("1".equals(bean.getShouldGuess()))%> value='1'> Try to guess organism</td>
     </tr>
-    <tr id="uniprotOnly" style="display: <%= "uniprot".equals(bean.getFileType()) ? "table-row" : "none" %>;">
+    <tr id="uniprotOnly" style="display: <%=h("uniprot".equals(bean.getFileType()) ? "table-row" : "none")%>;">
         <td></td>
         <td>
            <input type='checkbox' name='clearExisting'<%=checked(bean.isClearExisting())%>>Clear existing identifiers and annotations<%= helpPopup("Clear Existing", "By default, LabKey Server will merge protein identifiers and annotations with the ones it has already loaded. By checking this box, you can make the server clear out any existing identifiers and annotations it might have, so that the ones in the new file replace them.")%>

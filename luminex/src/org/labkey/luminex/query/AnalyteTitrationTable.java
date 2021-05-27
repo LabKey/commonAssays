@@ -212,15 +212,20 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
     }
 
     @Override
-    protected SQLFragment createContainerFilterSQL(ContainerFilter filter, Container container)
+    protected SQLFragment createContainerFilterSQL(ContainerFilter filter)
     {
-        SQLFragment sql = new SQLFragment("AnalyteId IN (SELECT RowId FROM ");
+        // Handle both the container and protocol filtering
+        SQLFragment sql = new SQLFragment("AnalyteId IN (SELECT a.RowId FROM ");
         sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
-        sql.append(" WHERE DataId IN (SELECT RowId FROM ");
+        sql.append(" INNER JOIN ");
         sql.append(ExperimentService.get().getTinfoData(), "d");
-        sql.append(" WHERE ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("Container"), container));
-        sql.append("))");
+        sql.append(" ON a.DataId = d.RowId ");
+        sql.append(" INNER JOIN ");
+        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        sql.append(" ON d.RunId = r.RowId AND r.ProtocolLSID = ? AND ");
+        sql.add(getUserSchema().getProtocol().getLSID());
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
+        sql.append(")");
         return sql;
     }
 

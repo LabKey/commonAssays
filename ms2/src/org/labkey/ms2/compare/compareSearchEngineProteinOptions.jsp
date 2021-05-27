@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page extends="org.labkey.api.jsp.JspContext" %>
 <input type="hidden" name="column" value="Protein" />
 <table>
     <tr>

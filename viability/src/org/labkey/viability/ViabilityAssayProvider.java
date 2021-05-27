@@ -242,29 +242,18 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpData getDataForDataRow(Object resultRowId, ExpProtocol protocol)
+    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
-        if (resultRowId == null)
-            return null;
-
-        Integer id;
-        if (resultRowId instanceof Integer)
+        Set<ExpData> result = new HashSet<>();
+        for (Integer rowId : rowIds)
         {
-            id = (Integer)resultRowId;
-        }
-        else
-        {
-            try
+            ExpData data = ViabilityManager.getResultExpData(rowId);
+            if (data != null)
             {
-                id = Integer.parseInt(resultRowId.toString());
-            }
-            catch (NumberFormatException nfe)
-            {
-                return null;
+                result.add(data);
             }
         }
-
-        return ViabilityManager.getResultExpData(id.intValue());
+        return result;
     }
 
     @Override

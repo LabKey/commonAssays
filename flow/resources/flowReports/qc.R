@@ -78,7 +78,7 @@ QC_levey_jennings_by_date <- function(D, image, type="jpeg", width=700, height=7
   s2 = 2 * s
   s3 = 3 * s
 
-  # calcualte min/max ranges for the plot
+  # calculate min/max ranges for the plot
   xmax= ceiling(length * 1.05)
   s4 = 4 * s
   ymin = min(m-s4, min(D$value, na.rm=TRUE))

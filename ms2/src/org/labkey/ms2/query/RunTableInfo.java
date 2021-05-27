@@ -43,13 +43,9 @@ public class RunTableInfo extends FilteredTable<MS2Schema>
         DetailsURL url = new DetailsURL(new ActionURL(MS2Controller.ShowListAction.class, getContainer()));
         url.setContainerContext(new ContainerContext.FieldKeyContext(FieldKey.fromParts("Container")));
         var containerColumn = getMutableColumn("Container");
-        ContainerForeignKey.initColumn(containerColumn, _userSchema, null);
         containerColumn.setURL(url);
-        containerColumn.setHidden(true);
 
         var folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
-        folderColumn.setHidden(false);
-        ContainerForeignKey.initColumn(folderColumn, _userSchema, null);
         folderColumn.setURL(url);
         addColumn(folderColumn);
 

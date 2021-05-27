@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.well.EditWellForm" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowDataType" %>
 <%@ page import="org.labkey.flow.data.FlowWell" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -32,13 +32,13 @@
 <!-- NOTE: form.reportValiditiy not supported on all browsers (cough, IE and old Firefox): https://caniuse.com/#search=reportValidity -->
 <labkey:form method="POST" action="<%=well.urlFor(WellController.EditWellAction.class)%>" onsubmit="return (this.reportValidity ? this.reportValidity() : true);">
     <input name="editWellReturnUrl" type="hidden" value="<%=h(form.editWellReturnUrl)%>"/>
-    <input name="ff_isBulkEdit" type="hidden" value="<%=h(form.ff_isBulkEdit)%>"/>
+    <input name="ff_isBulkEdit" type="hidden" value="<%=form.ff_isBulkEdit%>"/>
     <input name="isUpdate" type="hidden" value="true" />
     <table id="keywordTable" class="lk-fields-table">
         <tr>
             <td>Run Name:</td>
             <td>
-                <a href="<%= new ActionURL(RunController.ShowRunAction.class, getContainer()).addParameter("runId",well.getRun().getRunId())%>"><%=h(well.getRun().getName())%>
+                <a href="<%=h(new ActionURL(RunController.ShowRunAction.class, getContainer()).addParameter("runId",well.getRun().getRunId()))%>"><%=h(well.getRun().getName())%>
                 </a></td>
         </tr>
         <% if (form.ff_isBulkEdit)
@@ -63,7 +63,7 @@
                     for (FlowWell flowWell : wells)
                     {%>
                 <%=h(prefix + flowWell.getName())%>
-                <input type="hidden" name="ff_fileRowId" value="<%=h(flowWell.getRowId())%>">
+                <input type="hidden" name="ff_fileRowId" value="<%=flowWell.getRowId()%>">
                 <% prefix = ", ";
                 }%>
             </td>
@@ -76,7 +76,7 @@
         <tr>
             <td>Well Name:</td>
             <td><input type="text" name="ff_name" value="<%=h(form.ff_name)%>">
-                <input type="hidden" name="ff_fileRowId" value="<%=h(wells.get(0).getRowId())%>"></td>
+                <input type="hidden" name="ff_fileRowId" value="<%=wells.get(0).getRowId()%>"></td>
         </tr>
         <tr>
             <td>Comment:</td>
@@ -131,10 +131,10 @@
 
     <labkey:button text="update"/>
     <%
-        String cancelURL = String.valueOf(well.urlFor(WellController.ShowWellAction.class));
+        ActionURL cancelURL = well.urlFor(WellController.ShowWellAction.class);
         if (form.ff_isBulkEdit)
         {
-            cancelURL = new ActionURL(form.editWellReturnUrl).toString();
+            cancelURL = new ActionURL(form.editWellReturnUrl);
         }
     %>
     <labkey:button text="cancel" href="<%=cancelURL%>"/>

@@ -396,10 +396,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             yAxisScale: this.yAxisScale
         };
 
-        var renderType = LABKEY.LeveyJenningsPlotHelper.renderPlot(plotConfig);
+        LABKEY.LeveyJenningsPlotHelper.renderPlot(plotConfig);
 
-        // export to PDF doesn't work for IE<9
-        this.togglePDFExportBtn(renderType == 'd3');
+        this.togglePDFExportBtn(true);
     },
 
     activateTrendPlotPanel: function(panel) {

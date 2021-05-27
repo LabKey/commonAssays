@@ -15,7 +15,8 @@
  */
 package org.labkey.ms2.reader;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
@@ -31,7 +32,7 @@ public class Q3Handler extends PepXmlAnalysisResultHandler
 {
     public static final String ANALYSIS_TYPE = "q3";
 
-    static Logger _log = Logger.getLogger(PepXmlAnalysisResult.class);
+    static Logger _log = LogManager.getLogger(PepXmlAnalysisResult.class);
 
     @Override
     protected Q3Result getResult(SimpleXMLStreamReader parser) throws XMLStreamException

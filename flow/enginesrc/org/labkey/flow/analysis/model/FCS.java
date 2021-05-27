@@ -17,7 +17,8 @@ package org.labkey.flow.analysis.model;
 
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.util.StringUtilsLabKey;
 
 import java.io.*;
@@ -32,7 +33,7 @@ import java.util.List;
  */
 public class FCS extends FCSHeader
 {
-    static private final Logger _log = Logger.getLogger(FCS.class);
+    static private final Logger _log = LogManager.getLogger(FCS.class);
     boolean bigEndian;
     DataFrame rawData;
     public static List<String> supportedVersions = new ArrayList<>(Arrays.asList("FCS2.0","FCS3.0","FCS3.1"));

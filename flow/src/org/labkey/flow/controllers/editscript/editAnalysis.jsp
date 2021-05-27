@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.flow.analysis.web.SubsetSpec" %>
-<%@ page import="org.labkey.flow.controllers.editscript.ScriptController"%>
+<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
+<%@ page import="org.labkey.flow.analysis.web.SubsetSpec"%>
+<%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
+<%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditAnalysisAction" %>
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.flow.controllers.editscript.AnalysisForm" %>
-<%@ page import="org.labkey.flow.analysis.web.StatisticSpec" %>
 <%@ page extends="org.labkey.flow.controllers.editscript.ScriptController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<% AnalysisForm bean = (AnalysisForm) form; %>
-<%Map<String, String> params = form.getParameters();
+<%
+    AnalysisForm bean = (AnalysisForm) form;
+    Map<String, String> params = form.getParameters();
     Collection<SubsetSpec> subsets = form.getFlowScript().getSubsets();
-
 %>
 <labkey:errors/>
 <script>
     var STATS = [];
     <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
         STATS.push({
-            name: <%= stat.name() %>,
-            shortName: <%= stat.getShortName() %>,
-            longName: <%= stat.getLongName() %>,
+            name: <%=h(stat.name())%>,
+            shortName: <%=h(stat.getShortName())%>,
+            longName: <%=h(stat.getLongName())%>,
             parameterRequired: <%= stat.isParameterRequired() %>
         });
     <% } %>
@@ -146,7 +146,7 @@
     }
 </script>
 
-<labkey:form method="post" action="<%=formAction(ScriptController.EditAnalysisAction.class)%>">
+<labkey:form method="post" action="<%=formAction(EditAnalysisAction.class)%>">
     <p>
         <b>Statistics</b><br>
         Which statistics do you want to calculate? Enter one statistic per line.<br>

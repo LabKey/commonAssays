@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.HtmlString;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.FlowProtocolStep;
 
@@ -43,18 +44,18 @@ public class AnalysisScriptTypeColumn extends DataColumn
     }
 
     @Override @NotNull
-    public String getFormattedValue(RenderContext ctx)
+    public HtmlString getFormattedHtml(RenderContext ctx)
     {
         Object value = getBoundColumn().getValue(ctx);
         if (!(value instanceof Number))
         {
-            return "#ERROR#";
+            return HtmlString.of("#ERROR#");
         }
         int id = ((Number) value).intValue();
         FlowScript script = FlowScript.fromScriptId(id);
         if (script == null)
         {
-            return "#NOT FOUND#";
+            return HtmlString.of("#NOT FOUND#");
         }
         String ret = "";
         String and = "";
@@ -70,6 +71,6 @@ public class AnalysisScriptTypeColumn extends DataColumn
             ret += "Analysis";
             and = " and ";
         }
-        return ret;
+        return HtmlString.of(ret);
     }
 }

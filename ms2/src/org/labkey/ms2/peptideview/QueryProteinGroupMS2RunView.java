@@ -22,6 +22,7 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.NestableDataRegion;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.ShowRows;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.query.FieldKey;
@@ -74,6 +75,10 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
         UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
 
         QuerySettings settings = createQuerySettings(schema);
+
+        // Show all of the member proteins with no offsets for this nested grid
+        settings.setOffset(0);
+        settings.setShowRows(ShowRows.ALL);
 
         ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, expanded, forExport);
 
@@ -140,7 +145,6 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
     @Override
     public void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries)
     {
-
     }
 
     @Override
@@ -158,7 +162,7 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
         {
             throw new RuntimeException(e);
         }
-        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, true, true);
+        ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, true, false);
         NestableDataRegion rgn = (NestableDataRegion)peptideView.createDataRegion();
 
         DataRegion nestedRegion = rgn.getNestedRegion();

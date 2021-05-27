@@ -19,10 +19,10 @@
 <%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.AnalyzeSelectedRunsAction" %>
+<%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController.ChooseRunsToAnalyzeAction" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ChooseRunsToAnalyzeForm" %>
 <%@ page import="org.labkey.flow.data.FlowExperiment" %>
 <%@ page import="java.util.HashSet" %>
@@ -35,7 +35,7 @@
     Container c = getContainer();
 %>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=buildURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class)%>">
+<labkey:form method="POST" action="<%=urlFor(AnalyzeSelectedRunsAction.class)%>">
     <p>What do you want to call the new analysis folder?<br>
         <% String name = form.ff_analysisName;
             if (StringUtils.isEmpty(name))
@@ -59,12 +59,12 @@
         <input type="text" name="ff_analysisName" value="<%=h(name)%>">
     </p>
 
-    <labkey:button text="Analyze runs" action="<%=new ActionURL(AnalysisScriptController.AnalyzeSelectedRunsAction.class, c)%>"/>
-    <labkey:button text="Go back" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, c)%>"/>
+    <%=button("Analyze runs").submit(true)%>
+    <%=button("Go back").href(urlFor(ChooseRunsToAnalyzeAction.class)).usePost()%>
     <% for (int runid : form.getSelectedRunIds()) { %>
-    <input type="hidden" name="<%=DataRegion.SELECT_CHECKBOX_NAME%>" value="<%=runid%>">
+    <input type="hidden" name="<%=h(DataRegion.SELECT_CHECKBOX_NAME)%>" value="<%=runid%>">
     <% } %>
-    <input type="hidden" name="<%=DataRegionSelection.DATA_REGION_SELECTION_KEY%>" value="<%=form.getDataRegionSelectionKey()%>"> 
+    <input type="hidden" name="<%=h(DataRegionSelection.DATA_REGION_SELECTION_KEY)%>" value="<%=h(form.getDataRegionSelectionKey())%>">
     <input type="hidden" name="scriptId" value="<%=form.getProtocol().getScriptId()%>">
     <input type="hidden" name="actionSequence" value="<%=form.getProtocolStep().getDefaultActionSequence()%>">
     <input type="hidden" name="ff_compensationMatrixOption" value="<%=h(form.ff_compensationMatrixOption)%>">

@@ -17,7 +17,6 @@
 %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission"%>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.data.FlowObject" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -29,7 +28,6 @@
     setFlagUrl.addParameter("redirect", false);
 
     boolean canEdit = getViewContext().hasPermission(UpdatePermission.class);
-    String contextPath = getViewContext().getContextPath();
 %>
 <% if (canEdit) { %>
 <span class="extContainer x-form-field-wrap">
@@ -71,7 +69,7 @@ LABKEY.requiresExt3(function() {
 
                 this.statusMessage('loading', "Updating...");
                 Ext.Ajax.request({
-                    url: "<%=setFlagUrl%>&comment=" + encodeURIComponent(textField.getValue()),
+                    url: "<%=unsafe(setFlagUrl.toString())%>&comment=" + encodeURIComponent(textField.getValue()),
                     method : 'POST',
                     success: function (response) {
                         this.statusMessage('success', "Comment updated");
@@ -115,7 +113,7 @@ LABKEY.requiresExt3(function() {
                         'line-height': "18px",
                         display: "block",
                         visibility: "hidden",
-                        background: "transparent url(<%=contextPath%>/_.gif) no-repeat 0 2px"
+                        background: "transparent url(<%=getWebappURL("_.gif")%>) no-repeat 0 2px"
                     }
                 });
                 this.alignStatusIcon();
@@ -125,11 +123,11 @@ LABKEY.requiresExt3(function() {
             switch (status)
             {
                 case 'loading':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/grid/loading.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("grid/loading.gif")%>)");
                     this.statusEl.setStyle("color", "silver");
                     break;
                 case 'success':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/tree/drop-yes.gif)");
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("tree/drop-yes.gif")%>)");
                     this.statusEl.setStyle("color", "green");
                     if (!this.delayHide)
                     {
@@ -138,7 +136,7 @@ LABKEY.requiresExt3(function() {
                     this.delayHide.delay(4000);
                     break;
                 case 'error':
-                    this.statusEl.setStyle("background-image", "url(<%=contextPath%>/<%=PageFlowUtil.extJsRoot()%>/resources/images/default/form/exclamation.gif)")
+                    this.statusEl.setStyle("background-image", "url(<%=getExt3Image("form/exclamation.gif")%>)");
                     this.statusEl.setStyle("color", "red");
                     break;
             }

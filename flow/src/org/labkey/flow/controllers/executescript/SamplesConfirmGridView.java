@@ -15,7 +15,8 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
 import org.labkey.api.collections.NamedObjectList;
@@ -60,6 +61,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +73,7 @@ import java.util.stream.Collectors;
  */
 public class SamplesConfirmGridView extends GridView
 {
-    public static final Logger LOG = Logger.getLogger(SamplesConfirmGridView.class);
+    public static final Logger LOG = LogManager.getLogger(SamplesConfirmGridView.class);
 
     /*package*/ public static String DATAREGION_NAME = "SamplesConfirm";
 
@@ -109,15 +111,21 @@ public class SamplesConfirmGridView extends GridView
         if (hasGroupInfo)
             columns.put(GROUP_NAMES_FIELD_KEY, new BaseColumnInfo(GROUP_NAMES_FIELD_KEY, JdbcType.VARCHAR));
 
+        Set<String> uniqueKeywords = new LinkedHashSet<>();
         for (String keyword : keywords)
         {
             FieldKey fieldKey = new FieldKey(null, keyword);
             var col = new BaseColumnInfo(fieldKey, JdbcType.VARCHAR);
             col.setAlias(fieldKey.getName());
             if (!columns.containsKey(fieldKey))
+            {
+                uniqueKeywords.add(keyword);
                 columns.put(fieldKey, col);
+            }
             else
-                LOG.warn("Duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
+            {
+                LOG.warn("Ignoring duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
+            }
         }
 
         int columnCount = columns.size();
@@ -164,7 +172,7 @@ public class SamplesConfirmGridView extends GridView
 
             // Keywords
             Map<String, String> sampleKeywords = sample.getKeywords();
-            for (String keyword : keywords)
+            for (String keyword : uniqueKeywords)
                 row[i++] = sampleKeywords.get(keyword);
 
             Map<String, Object> rowMap = factory.getRowMap(row);
@@ -236,6 +244,10 @@ public class SamplesConfirmGridView extends GridView
             dr.addDisplayColumn(dc);
         }
 
+        // Add SampleId column
+        dc = new SimpleDisplayColumn("${" + SAMPLE_ID_FIELD_KEY.getName() + "}");
+        dc.setCaption("ID");
+        dr.addDisplayColumn(dc);
 
         // Add SampleName column
         dc = new SimpleDisplayColumn("${" + SAMPLE_NAME_FIELD_KEY.getName() + "}");
@@ -251,7 +263,7 @@ public class SamplesConfirmGridView extends GridView
         }
 
         // Add keyword columns
-        for (String keyword : keywords)
+        for (String keyword : uniqueKeywords)
         {
             dc = new SimpleDisplayColumn("${" + keyword + "}");
             dc.setCaption(keyword);

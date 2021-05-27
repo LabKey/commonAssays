@@ -89,7 +89,12 @@ public class PlotTests extends Assert
 
     private Map<String, GraphSpec> generatePlots(File outDir, Workspace workspace, File fcsFile) throws Exception
     {
-        Workspace.SampleInfo sample = workspace.getSample(fcsFile.getName());
+        List<? extends Workspace.SampleInfo> samples = workspace.getSampleByLabel(fcsFile.getName());
+        if (samples.size() > 1)
+            throw new RuntimeException("Found duplicate samples for '" + fcsFile.getName() + "'");
+        if (samples.isEmpty())
+            throw new RuntimeException("No sample found for '" + fcsFile.getName() + "'");
+        Workspace.SampleInfo sample = samples.get(0);
         Analysis analysis = workspace.getSampleAnalysis(sample);
         CompensationMatrix comp = sample.getCompensationMatrix();
 

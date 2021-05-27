@@ -17,7 +17,7 @@
 package org.labkey.flow.webparts;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.exp.api.ExpSampleSet;
+import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusUrls;
@@ -329,7 +329,7 @@ public class FlowOverview extends Overview
                 statusHTML.append("<br>");
             }
             ActionURL urlFlowComp = FlowTableType.CompensationMatrices.urlFor(getUser(), getContainer(), QueryAction.executeQuery);
-            statusHTML.append("There are <a href=\"").append(h(urlFlowComp.getLocalURIString())).append("\">").append(_compensationMatrixCount).append(" compensation matrices</a>.");
+            statusHTML.append("There are <a href=\"").append(h(urlFlowComp)).append("\">").append(_compensationMatrixCount).append(" compensation matrices</a>.");
             if (_compensationRunCount != 0)
             {
                 ActionURL urlShowRuns = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter("query.CompensationControlCount~neq", 0);
@@ -413,11 +413,11 @@ public class FlowOverview extends Overview
         Step ret = new Step("Assign additional meanings to keywords", status);
         if (protocol != null)
         {
-            ExpSampleSet ss = protocol.getSampleSet();
-            if (ss != null)
+            ExpSampleType st = protocol.getSampleType();
+            if (st != null)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples())).append("\">").append(ss.getSamples(getContainer()).size()).append(" sample descriptions</a> in this folder.");
+                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples())).append("\">").append(st.getSamples(getContainer()).size()).append(" sample descriptions</a> in this folder.");
 
                 ret.setStatusHTML(sb.toString());
 
@@ -426,15 +426,15 @@ public class FlowOverview extends Overview
                     Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples());
                     ret.addAction(uploadAction);
                     
-                    if (protocol.getSampleSetJoinFields().size() != 0)
+                    if (protocol.getSampleTypeJoinFields().size() != 0)
                     {
-                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
+                        Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
                         action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
                         ret.addAction(action);
                     }
                     else
                     {
-                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleSetAction.class));
+                        Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
                         action.setDescriptionHTML("You can specify how these sample descriptions should be linked to FCS files.");
                         ret.addAction(action);
                     }
@@ -442,7 +442,7 @@ public class FlowOverview extends Overview
             }
             else if (_canUpdate)
             {
-                Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleSet());
+                Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleType());
                 action.setDescriptionHTML("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>");
                 ret.addAction(action);
             }

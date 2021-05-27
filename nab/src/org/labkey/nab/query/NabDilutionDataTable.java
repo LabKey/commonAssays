@@ -19,6 +19,7 @@ import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.query.QueryForeignKey;
 
 /**
  * Created by davebradlee on 7/10/15.
@@ -42,17 +43,20 @@ public class NabDilutionDataTable extends NabBaseTable
             String name = col.getName();
             if ("RunDataId".equalsIgnoreCase(name))
                 name = "RunData";
+
             var newCol = addWrapColumn(name, col);
             if (col.isHidden())
-            {
                 newCol.setHidden(col.isHidden());
-            }
+
             if ("MinDilution".equalsIgnoreCase(col.getName()))
             {
                 ColumnInfo maxCol = getRealTable().getColumn("MaxDilution");
                 if (null != maxCol)
                     addWrapColumn(maxCol.getName(), maxCol);
             }
+
+            if ("RunData".equalsIgnoreCase(name))
+                newCol.setFk(QueryForeignKey.from(schema, cf).to("Data", "RowId", "WellGroupName"));
         }
 
         addCondition(getRealTable().getColumn("ProtocolId"), protocol.getRowId());

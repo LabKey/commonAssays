@@ -21,7 +21,7 @@
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
-<%@ page import="org.labkey.api.study.assay.AssayPublishService" %>
+<%@ page import="org.labkey.api.study.publish.StudyPublishService" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
 <%@ page import="org.labkey.flow.controllers.executescript.SelectedSamples" %>
@@ -46,7 +46,6 @@
 %>
 
 <input type="hidden" name="selectFCSFilesOption" id="selectFCSFilesOption" value="<%=form.getSelectFCSFilesOption()%>">
-<input type="hidden" name="existingKeywordRunId" id="existingKeywordRunId" value="<%=h(form.getExistingKeywordRunId())%>">
 <% if (form.getKeywordDir() != null) for (String keywordDir : form.getKeywordDir()) { %>
 <input type="hidden" name="keywordDir" value="<%=h(keywordDir)%>">
 <% } %>
@@ -80,11 +79,6 @@
                 if (keywordDir != null)
                     keywordDirs.add(keywordDir);
             }
-        }
-        else if (form.getExistingKeywordRunId() > 0)
-        {
-            FlowRun keywordsRun = FlowRun.fromRunId(form.getExistingKeywordRunId());
-            keywordDirs.add(new File(keywordsRun.getPath()));
         }
         else if (form.getSelectedSamples().getRows() != null && !form.getSelectedSamples().getRows().isEmpty())
         {
@@ -163,7 +157,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseExistingAnalysis" name="createAnalysis" value="false" checked>
             </td>
             <td>
-                Choose an analysis folder to put the results into:<br>
+                <label for="chooseExistingAnalysis">Choose an analysis folder to put the results into:</label><br>
                 <select name="existingAnalysisId" onfocus="document.forms.importAnalysis.chooseExistingAnalysis.checked = true;">
                     <%
                         FlowExperiment recentAnalysis = FlowExperiment.getMostRecentAnalysis(container);
@@ -177,7 +171,7 @@ those results must be put into different analysis folders.
                         {
                             String disabledReason = disabledAnalyses.get(analysis.getExperimentId());
                     %>
-                    <option value="<%=h(analysis.getExperimentId())%>"
+                    <option value="<%=analysis.getExperimentId()%>"
                             <%=selected(disabledReason == null && analysis.getExperimentId() == selectedId)%>
                             <%=text(disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":"")%>>
                         <%=h(analysis.getName())%>
@@ -194,7 +188,7 @@ those results must be put into different analysis folders.
                 <input type="radio" id="chooseNewAnalysis" name="createAnalysis" value="true">
             </td>
             <td>
-                Create a new analysis folder:<br>
+                <label for="chooseNewAnalysis">Create a new analysis folder:</label><br>
                 <input type="text" name="newAnalysisName" value="<%=h(newAnalysisName)%>" onfocus="document.forms.importAnalysis.chooseNewAnalysis.checked = true;">
                 <br><br>
             </td>
@@ -205,10 +199,10 @@ those results must be put into different analysis folders.
 
 <%
 // Let user select a Target Study only if we are also importing a keywords directory.
-if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && AssayPublishService.get() != null)
+if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPublishService.get() != null)
 {
-    // Get set of valid copy to study targets
-    Set<Study> validStudies = AssayPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
+    // Get set of valid link to study targets
+    Set<Study> validStudies = StudyPublishService.get().getValidPublishTargets(getUser(), ReadPermission.class);
     Map<String, String> targetStudies = new LinkedHashMap<>();
     targetStudies.put("", "[None]");
     for (Study study : validStudies)

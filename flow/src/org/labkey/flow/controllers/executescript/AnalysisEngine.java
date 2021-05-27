@@ -15,13 +15,13 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.labkey.api.util.EnumHasHtmlString;
+import org.labkey.api.util.SafeToRenderEnum;
 
 /**
 * User: kevink
 * Date: 10/21/12
 */
-public enum AnalysisEngine implements EnumHasHtmlString<AnalysisEngine>
+public enum AnalysisEngine implements SafeToRenderEnum
 {
     // LabKey's analysis engine
     LabKey(true),
@@ -32,7 +32,7 @@ public enum AnalysisEngine implements EnumHasHtmlString<AnalysisEngine>
     // Generic external analysis archive
     Archive(false);
 
-    private boolean _requiresPipeline;
+    private final boolean _requiresPipeline;
 
     AnalysisEngine(boolean requiresPipeline)
     {

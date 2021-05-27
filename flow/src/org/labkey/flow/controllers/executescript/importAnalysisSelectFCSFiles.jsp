@@ -33,7 +33,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
-    Map<FlowRun, String> keywordRuns = form.getExistingKeywordRuns();
+    boolean keywordRunsExist = form.getKeywordRunsExist();
     Container container = getContainer();
     PipelineService pipeService = PipelineService.get();
     PipeRoot pipeRoot = pipeService.findPipelineRoot(container);
@@ -58,13 +58,6 @@
     }
 %>
 <script type="text/javascript">
-    function clearExistingRunIdCombo()
-    {
-        var combo = document.forms.importAnalysis.existingKeywordRunId;
-        if (combo && combo.tagName.toLowerCase() === "select")
-            combo.selectedIndex = 0;
-    }
-
     function clearFileBrowserSelection(selectedValue)
     {
         if (fileBrowser && fileBrowser.rendered)
@@ -77,7 +70,6 @@
 
     function clearSelections(selectedValue)
     {
-        //clearExistingRunIdCombo();
         clearFileBrowserSelection(selectedValue);
         return true;
     }
@@ -122,12 +114,12 @@
 <input type="radio" name="selectFCSFilesOption"
        id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
         <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Previous))%>
-        <%=disabled(keywordRuns == null || keywordRuns.isEmpty())%>
+        <%=disabled(!keywordRunsExist)%>
        onclick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
-    <div style="display:inline-block; <%=text(keywordRuns == null || keywordRuns.isEmpty() ? "color:silver;" : "")%>">Previously imported FCS files.</div>
+    <div style="display:inline-block; <%=text(!keywordRunsExist ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 </label>
-<div style="padding-left: 2em; padding-bottom: 1em; <%=text(keywordRuns == null || keywordRuns.isEmpty() ? "color:silver;" : "")%>">
+<div style="padding-left: 2em; padding-bottom: 1em; <%=text(!keywordRunsExist ? "color:silver;" : "")%>">
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
 
@@ -165,10 +157,8 @@
             Ext.get(inputId).dom.value=path;
             if (path)
             {
-                clearExistingRunIdCombo();
                 document.getElementById("<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>").checked = true;
             }
-            // setTitle...
         }
 
         function renderFileBrowser()
@@ -179,7 +169,7 @@
 
                 fileSystem = Ext4.create('File.system.Webdav', {
                     rootPath : <%=q(pipeRoot.getWebdavURL())%>,
-                    rootName : <%=PageFlowUtil.jsString(AppProps.getInstance().getServerName())%>
+                    rootName : <%=q(AppProps.getInstance().getServerName())%>
                     //rootOffset : <%=q(keywordDir)%>
                 });
 

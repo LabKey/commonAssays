@@ -105,7 +105,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         File originalImportedFile,
                         File runFilePathRoot,
                         List<File> keywordDirs,
-                        Map<String, FlowFCSFile> selectedFCSFiles,
+                        SampleIdMap<FlowFCSFile> selectedFCSFiles,
                         //List<String> importGroupNames,
                         Container targetStudy,
                         boolean failOnError)
@@ -151,9 +151,11 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             Workspace workspace = (Workspace)ois.readObject();
 
+            SampleIdMap<FlowFCSFile> selectedFCSFiles = resolveSelectedFCSFiles(workspace, getSelectedFCSFiles(), getNewlyImportedFCSFiles());
+
             return createExperimentRun(getUser(), getContainer(), workspace,
                     getExperiment(), _workspaceName, _workspaceFile, getOriginalImportedFile(),
-                    getRunFilePathRoot(), getSelectedFCSFiles(),
+                    getRunFilePathRoot(), selectedFCSFiles,
                     isFailOnError());
         }
     }
@@ -161,7 +163,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     private FlowRun createExperimentRun(User user, Container container,
                                         Workspace workspace, FlowExperiment experiment,
                                         String workspaceName, File workspaceFile, File originalImportedFile,
-                                        File runFilePathRoot, Map<String, FlowFCSFile> resolvedFCSFiles,
+                                        File runFilePathRoot, SampleIdMap<FlowFCSFile> resolvedFCSFiles,
                                         boolean failOnError) throws Exception
     {
         SampleIdMap<AttributeSet> keywordsMap = new SampleIdMap<>();
@@ -211,7 +213,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             List<String> filteredSampleIDs = new ArrayList<>(sampleIDs.size());
             for (String sampleID : sampleIDs)
             {
-                Workspace.SampleInfo sampleInfo = workspace.getSample(sampleID);
+                Workspace.SampleInfo sampleInfo = workspace.getSampleById(sampleID);
                 if (matchesFilter(fcsFilesTable, analysisFilter, sampleInfo.getLabel(), sampleInfo.getKeywords()))
                 {
                     filteredSampleIDs.add(sampleID);
@@ -229,7 +231,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         }
     }
 
-    private List<String> getSampleIDs(Workspace workspace, Map<String, FlowFCSFile> selectedFCSFile)
+    private List<String> getSampleIDs(Workspace workspace, SampleIdMap<FlowFCSFile> selectedFCSFile)
     {
         List<String> sampleIDs;
         if (selectedFCSFile == null || selectedFCSFile.isEmpty())
@@ -239,10 +241,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         else
         {
             sampleIDs = new ArrayList<>(workspace.getSampleCount());
-            for (Map.Entry<String, FlowFCSFile> entry : selectedFCSFile.entrySet())
+            for (String id : selectedFCSFile.idSet())
             {
-                String sampleLabel = entry.getKey();
-                Workspace.SampleInfo sample = workspace.getSample(sampleLabel);
+                Workspace.SampleInfo sample = workspace.getSampleById(id);
                 if (sample != null)
                     sampleIDs.add(sample.getSampleId());
             }
@@ -255,7 +256,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     private boolean extractAnalysis(Container container,
                                     Workspace workspace,
                                     File runFilePathRoot,
-                                    Map<String, FlowFCSFile> selectedFCSFiles,
+                                    SampleIdMap<FlowFCSFile> selectedFCSFiles,
                                     //List<String> importGroupNames,
                                     boolean failOnError,
                                     SampleIdMap<AttributeSet> keywordsMap,
@@ -276,7 +277,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         int iSample = 0;
         for (String sampleID : sampleIDs)
         {
-            Workspace.SampleInfo sample = workspace.getSample(sampleID);
+            Workspace.SampleInfo sample = workspace.getSampleById(sampleID);
 
             allSampleIds.add(sampleID);
             sampleIdToNameMap.put(sampleID, sample.getLabel());
@@ -284,7 +285,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 return true;
 
             iSample++;
-            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.getLabel();
+            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.toString();
             addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
@@ -294,10 +295,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             File file = null;
             if (selectedFCSFiles != null)
             {
-                FlowFCSFile resolvedFCSFile = selectedFCSFiles.get(sampleID);
-                if (resolvedFCSFile == null)
-                    resolvedFCSFile = selectedFCSFiles.get(sample.getLabel());
-                if (resolvedFCSFile != null)
+                FlowFCSFile resolvedFCSFile = selectedFCSFiles.getById(sampleID);
+                if (!resolvedFCSFile.isUnmapped())
                 {
                     uri = resolvedFCSFile.getFCSURI();
                     if (uri != null)

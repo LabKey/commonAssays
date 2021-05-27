@@ -17,7 +17,8 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
@@ -35,7 +36,7 @@ import java.util.*;
 
 public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegionSelection.DataSelectionKeyForm
 {
-    static private final Logger _log = Logger.getLogger(ChooseRunsToAnalyzeForm.class);
+    static private final Logger _log = LogManager.getLogger(ChooseRunsToAnalyzeForm.class);
 
     static private final String COMPOPTION_EXPERIMENTLSID = "experimentlsid:";
     static private final String COMPOPTION_COMPID = "compid:";

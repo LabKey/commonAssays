@@ -18,21 +18,21 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.SampleInfoMethod;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
+import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.EnumTableInfo;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.module.Module;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayService;
 import org.labkey.nab.NabAssayProvider;
 
 import java.util.Set;
@@ -103,10 +103,12 @@ public class NabProviderSchema extends DilutionProviderSchema
         }
         if (CURVE_FIT_METHOD_TABLE_NAME.equalsIgnoreCase(name))
         {
-            EnumTableInfo<StatsService.CurveFitType> result = new EnumTableInfo<>(StatsService.CurveFitType.class, this, StatsService.CurveFitType::getLabel, false, "List of possible curve fitting methods for the NAb assay.");
-            result.setPublicSchemaName(SCHEMA_NAME);
-            result.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
-            return result;
+            AbstractPlateBasedAssayProvider.CurveFitTableInfo table = new AbstractPlateBasedAssayProvider.CurveFitTableInfo(this, getProvider(),
+                    "List of possible curve fitting methods for the NAb assay.");
+            table.setPublicSchemaName(getSchemaName());
+            table.setPublicName(CURVE_FIT_METHOD_TABLE_NAME);
+
+            return table;
         }
 
         // For backwards compatibility <12.3.  Data tables moved to NabProtocolSchema (assay.Nab.<protocol> schema)

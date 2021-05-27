@@ -42,7 +42,7 @@ public class ViabilityModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 20.000;
+        return 21.000;
     }
 
     @Override
@@ -70,7 +70,10 @@ public class ViabilityModule extends DefaultModule
         ExperimentService.get().registerExperimentDataHandler(new ViabilityTsvDataHandler());
         ExperimentService.get().registerExperimentDataHandler(new GuavaDataHandler());
         AssayService.get().registerAssayProvider(new ViabilityAssayProvider());
-        SpecimenService.get().registerSpecimenChangeListener(new ViabilitySpecimenChangeListener());
+
+        SpecimenService ss = SpecimenService.get();
+        if (null != ss)
+            ss.registerSpecimenChangeListener(new ViabilitySpecimenChangeListener());
     }
 
     @Override
