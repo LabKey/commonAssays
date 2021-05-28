@@ -528,7 +528,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addColumn("Fraction");
         _customizeViewsHelper.removeColumn("IonPercent");
         _customizeViewsHelper.saveDefaultView();
-        peptidesTable.goToView("default");
+        peptidesTable.goToView("Default");
         assertTextPresent("Fraction");
         assertTextNotPresent("K.LLASMLAK.A",
                 "Ion%");
@@ -902,7 +902,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent("gi|34849400|gb|AAP58899.1|");
 
         log("Check default view works");
-        peptidesTable.goToView("default");
+        peptidesTable.goToView("Default");
         assertElementNotPresent(seqIdMassHeader);
         assertTextPresent("gi|34849400|");
 
