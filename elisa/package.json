@@ -6,9 +6,9 @@
     "setup": "npm ci",
     "build": "npm run build-dev",
     "start-link": "cross-env LINK=true npm run start",
-    "start": "cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
-    "build-dev": "npm run clean && cross-env NODE_ENV=development LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
-    "build-prod": "npm run clean && cross-env NODE_ENV=production PROD_SOURCE_MAP=source-map LK_MODULE_CONTAINER=commonAssays LK_MODULE=elisa webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
+    "start": "cross-env NODE_ENV=development webpack serve --config node_modules/@labkey/build/webpack/watch.config.js",
+    "build-dev": "npm run clean && cross-env NODE_ENV=development webpack --config node_modules/@labkey/build/webpack/dev.config.js --color",
+    "build-prod": "npm run clean && cross-env NODE_ENV=production PROD_SOURCE_MAP=source-map webpack --config node_modules/@labkey/build/webpack/prod.config.js --color --progress --profile",
     "clean": "rimraf resources/web/elisa/gen",
     "test": "cross-env NODE_ENV=test jest",
     "teamcity": "cross-env NODE_ENV=test jest --testResultsProcessor=jest-teamcity-reporter"
@@ -44,10 +44,10 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.29.0"
+    "@labkey/components": "2.41.1-fb-remove-build-vars.0"
   },
   "devDependencies": {
-    "@labkey/build": "2.1.0",
+    "@labkey/build": "3.1.0-fb-remove-build-vars.1",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
     "@labkey/eslint-config-base": "0.0.8",
