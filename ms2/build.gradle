@@ -1,12 +1,35 @@
 import org.labkey.gradle.util.BuildUtils
+import org.labkey.gradle.util.ExternalDependency
 
 plugins {
    id 'org.labkey.build.module'
 }
 
 dependencies {
-   external("org.apache.httpcomponents:httpmime:${httpmimeVersion}")
-   external("org.ardverk:patricia-trie:${patriciaTrieVersion}")
+   BuildUtils.addExternalDependency(
+           project,
+           new ExternalDependency(
+                   "org.apache.httpcomponents:httpmime:${httpmimeVersion}",
+                   "Apache HTTP Mime",
+                   "Apache",
+                   "http://hc.apache.org/httpcomponents-client-ga",
+                   ExternalDependency.APACHE_2_LICENSE_NAME,
+                   ExternalDependency.APACHE_2_LICENSE_URL,
+                   "HTTP client for requests of remote servers"
+           )
+   )
+   BuildUtils.addExternalDependency(
+           project,
+           new ExternalDependency(
+                   "org.ardverk:patricia-trie:${patriciaTrieVersion}",
+                   "PATRICIA Trie",
+                   "PATRICIA Trie",
+                   "http://code.google.com/p/patricia-trie/",
+                   ExternalDependency.APACHE_2_LICENSE_NAME,
+                   ExternalDependency.APACHE_2_LICENSE_URL,
+                   "PATRICIA Trie data structure implementation"
+           )
+   )
    implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
 
