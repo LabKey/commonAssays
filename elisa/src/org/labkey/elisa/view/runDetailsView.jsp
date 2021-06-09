@@ -26,7 +26,7 @@
     public void addClientDependencies(ClientDependencies dependencies)
     {
         dependencies.add("vis/vis");
-        dependencies.add("elisa/gen/runDetails");
+        dependencies.add("gen/runDetails");
         //dependencies.add("http://localhost:3001/runDetails.js");
     }
 %>
