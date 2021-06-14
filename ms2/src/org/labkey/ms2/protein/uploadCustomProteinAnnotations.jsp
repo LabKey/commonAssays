@@ -90,7 +90,9 @@
             <td width="100%">
                 <textarea id="annotationsText" style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
                 <script type="text/javascript">
-                    Ext.EventManager.on('annotationsText', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
+                    LABKEY.requiresExt3ClientAPI(function() {
+                        Ext.EventManager.on('annotationsText', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
+                    });
                 </script>
             </td>
         </tr>
