@@ -1,5 +1,0 @@
-{table}
-Filename|Component|Source|License|Purpose
-httpmime-4.5.13.jar|Apache HTTP Mime|{link:Apache|http://hc.apache.org/httpcomponents-client-ga}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|HTTP client for requests of remote servers
-patricia-trie-0.6.jar|PATRICIA Trie|{link:PATRICIA Trie|http://code.google.com/p/patricia-trie/}|{link:Apache 2.0|http://www.apache.org/licenses/LICENSE-2.0}|PATRICIA Trie data structure implementation
-{table}
