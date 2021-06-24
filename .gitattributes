@@ -124,9 +124,7 @@ flow/enginesrc/org/labkey/flow/analysis/model/ValueConstraint.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/Workspace.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/WorkspaceCompensation.java -text
 flow/enginesrc/org/labkey/flow/analysis/model/WorkspaceParser.java -text
-flow/enginesrc/org/labkey/flow/analysis/util/LogAxisFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/util/RangeFunction.java -text
-flow/enginesrc/org/labkey/flow/analysis/util/SimpleLogAxisFunction.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/ChannelData.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/ChannelKey.java -text
 flow/enginesrc/org/labkey/flow/analysis/web/CompHandler.java -text
@@ -152,8 +150,6 @@ flow/enginesrc/org/labkey/flow/util/KeywordUtil.java -text
 flow/module.properties -text
 flow/resources/flowReports/positivity.R -text
 flow/resources/flowReports/qc.R -text
-flow/resources/schemas/dbscripts/postgresql/flow-18.30-19.10.sql -text
-flow/resources/schemas/dbscripts/sqlserver/flow-18.30-19.10.sql -text
 flow/resources/schemas/flow.xml -text
 flow/resources/web/Flow/blankGraphWindow.html -text
 flow/resources/web/Flow/editCompensationCalculation.js -text
@@ -485,7 +481,6 @@ luminex/test/src/org/labkey/test/tests/luminex/LuminexPositivityTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexRTransformTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexSinglePointTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexTest.java -text
-luminex/test/src/org/labkey/test/tests/luminex/LuminexUploadAndCopyTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexValueBasedGuideSetTest.java -text
 luminex/test/src/org/labkey/test/util/luminex/LuminexGuideSetHelper.java -text
 luminex/webapp/luminex/ApplyGuideSetPanel.js -text
@@ -601,10 +596,8 @@ ms2/resources/queries/protein/GOMetabolicProcess.query.xml -text
 ms2/resources/queries/protein/GOMetabolicProcess.sql -text
 ms2/resources/queries/protein/GOMolecularFunction.query.xml -text
 ms2/resources/queries/protein/GOMolecularFunction.sql -text
-ms2/resources/schemas/dbscripts/postgresql/ms2-18.30-19.10.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-18.30-19.10.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
 ms2/resources/schemas/ms2.xml -text
@@ -989,7 +982,6 @@ ms2/test/src/org/labkey/test/tests/ms2/MS2GZTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MS2Test.java -text
 ms2/test/src/org/labkey/test/tests/ms2/MascotTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/PipelineTest.java -text
-ms2/test/src/org/labkey/test/tests/ms2/ProteinExpressionMatrixAssayTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/SequestImportTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemShortTest.java -text
 ms2/test/src/org/labkey/test/tests/ms2/XTandemTest.java -text
@@ -1014,7 +1006,6 @@ ms2/webapp/MS2/lorikeet_0.3/js/jquery.flot.js -text
 ms2/webapp/MS2/lorikeet_0.3/js/jquery.flot.selection.js -text
 ms2/webapp/MS2/lorikeet_0.3/js/peptide.js -text
 ms2/webapp/MS2/lorikeet_0.3/js/specview.js -text
-ms2/webapp/ProteinCoverageMap.css -text
 ms2/webapp/WEB-INF/ms2/ms2Context.xml -text
 ms2/webapp/_images/gray.gif -text
 ms2/webapp/_images/red.gif -text
