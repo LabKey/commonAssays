@@ -1,3 +1,6 @@
 # Generated files
 */resources/credits/dependencies.txt
 */resources/credits/jars.txt
+*/resources/views/gen
+*/resources/web/gen
+*/node_modules
