@@ -42,7 +42,8 @@ public class GraphColumn extends DataColumn
     public static final String SEP = "~~~";
 
     private static final String INCLUDE_UTIL_SCRIPT = "~~~Flow/util.js~~~";
-    private Logger _log = LogManager.getLogger(GraphColumn.class);
+    private static final Logger LOG = LogManager.getLogger(GraphColumn.class);
+
     private FlowQuerySettings.ShowGraphs _showGraphs;
 
     public GraphColumn(ColumnInfo colinfo)
@@ -135,7 +136,7 @@ public class GraphColumn extends DataColumn
             }
             catch (IllegalArgumentException ex)
             {
-                _log.debug(ex.getMessage());
+                LOG.debug(ex.getMessage());
                 out.write("&nbsp;");
                 return;
             }
@@ -144,7 +145,7 @@ public class GraphColumn extends DataColumn
         }
         else
         {
-            _log.debug("error parsing graph spec: expected pair of values, but got '" + String.valueOf(boundValue) + "'");
+            LOG.debug("error parsing graph spec: expected pair of values, but got '" + boundValue + "'");
             out.write("&nbsp;");
             return;
         }
