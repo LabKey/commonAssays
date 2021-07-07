@@ -555,7 +555,7 @@ public abstract class SequestParamsBuilder
             }
             else
             {
-                defaultMods.remove(res);
+                defaultMods.remove(Character.valueOf(res));
                 workList.add(new ResidueMod(res, masses.get(i)));
             }
         }
