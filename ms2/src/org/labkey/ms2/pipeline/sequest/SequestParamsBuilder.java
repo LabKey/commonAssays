@@ -555,9 +555,8 @@ public abstract class SequestParamsBuilder
             }
             else
             {
-                defaultMods.remove(new Character(res));
+                defaultMods.remove(res);
                 workList.add(new ResidueMod(res, masses.get(i)));
-
             }
         }
         if(workList.size() > 6) Collections.singletonList("Sequest will only accept a max of 6 variable modifications.");
