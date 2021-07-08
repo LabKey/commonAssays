@@ -188,10 +188,9 @@ public abstract class ResidueModComposite extends SearchFormComposite
 
         for(String sig : modMap.values())
         {
-            Character res = new Character(sig.charAt(sig.length()-1));
+            Character res = sig.charAt(sig.length()-1);
             if(al.contains(res)) return "Two static residue modifications for the same residue.";
             al.add(res);
-
         }
         return "";
     }
