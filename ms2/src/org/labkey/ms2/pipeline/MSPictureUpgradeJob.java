@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.assay.DefaultAssayRunCreator;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -24,7 +25,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.assay.DefaultAssayRunCreator;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -190,6 +191,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
     }
 
     private void addFiles(ExpRun run, Map<File, String> filesToAdd)
+            throws ValidationException
     {
         ExpProtocolApplication outputProtocolApp = findOutputProtocolApp(run);
         if (outputProtocolApp == null)
