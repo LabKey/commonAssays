@@ -44,7 +44,7 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.56.0-fb-update-react-select.2"
+    "@labkey/components": "2.56.0-fb-update-react-select.3"
   },
   "devDependencies": {
     "@labkey/build": "4.0.0",
