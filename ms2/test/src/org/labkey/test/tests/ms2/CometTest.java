@@ -22,7 +22,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.DailyB;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.ms2.AbstractMS2SearchEngineTest;
 
@@ -30,7 +30,7 @@ import java.io.File;
 
 import static org.junit.Assert.fail;
 
-@Category({MS2.class, DailyB.class})
+@Category({MS2.class, Daily.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class CometTest extends AbstractMS2SearchEngineTest
 {
