@@ -55,9 +55,6 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                                 options={getSelectOptions(measures, columnInfo)}
                                 value={plotOptions.xAxisMeasure}
                                 onChange={(key, value) => setPlotOption('xAxisMeasure', value, false)}
-                                showLabel={false}
-                                formsy={false}
-                                multiple={false}
                                 required={true}
                                 clearable={false}
                             />
@@ -83,9 +80,6 @@ export class PlotOptionsPanel extends PureComponent<Props> {
                                 options={getSelectOptions(measures, columnInfo)}
                                 value={plotOptions.yAxisMeasure}
                                 onChange={(key, value) => setPlotOption('yAxisMeasure', value, false)}
-                                showLabel={false}
-                                formsy={false}
-                                multiple={false}
                                 required={true}
                                 clearable={false}
                             />
