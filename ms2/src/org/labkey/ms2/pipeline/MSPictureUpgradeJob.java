@@ -226,7 +226,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
                     }
                     else
                     {
-                        outputData = DefaultAssayRunCreator.createData(run.getContainer(), file, file.getName(), DATA_TYPE, true, getLogger());
+                        outputData = DefaultAssayRunCreator.createData(run.getContainer(), file, file.getName(), DATA_TYPE, true, true, getLogger());
                         assert outputData.getSourceApplication() == null;
                         // Mark the file as being created by the output step, and attach it
                         // based on its role name
