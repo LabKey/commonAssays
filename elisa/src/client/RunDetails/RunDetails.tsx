@@ -1,6 +1,6 @@
 import React, { PureComponent, ReactNode } from 'react';
-import { Query, Filter } from "@labkey/api";
-import { Alert, LoadingSpinner } from "@labkey/components";
+import { Query, Filter } from '@labkey/api';
+import { Alert, LoadingSpinner } from '@labkey/components';
 
 import {
     CONTROL_COL_NAME, DEFAULT_X_AXIS_PROP, DEFAULT_Y_AXIS_PROP, RUN_COLUMN_NAMES,
