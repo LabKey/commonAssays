@@ -13,6 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* microarray-19.20-19.21.sql */
 
 DROP TABLE microarray.geo_properties;
