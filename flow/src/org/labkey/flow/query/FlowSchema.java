@@ -636,6 +636,12 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
+        public void markPopulated()
+        {
+            _expData.markPopulated();
+        }
+
+        @Override
         public void setExperiment(ExpExperiment experiment)
         {
             _expData.setExperiment(experiment);
@@ -758,6 +764,12 @@ public class FlowSchema extends UserSchema
         {
             ColumnInfo col = _expData.createPropertyColumn(alias);
             return addExpColumn(col);
+        }
+
+        @Override
+        public void addVocabularyDomains()
+        {
+            _expData.addVocabularyDomains();
         }
 
         @Override
@@ -1064,6 +1076,12 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
+        public void markPopulated()
+        {
+            _expData.markPopulated();
+        }
+
+        @Override
         public void setExperiment(ExpExperiment experiment)
         {
             _experiment = experiment;
@@ -1195,6 +1213,12 @@ public class FlowSchema extends UserSchema
         {
             ColumnInfo col = _expData.createPropertyColumn(alias);
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void addVocabularyDomains()
+        {
+            _expData.addVocabularyDomains();
         }
 
         @Override
