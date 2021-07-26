@@ -53,9 +53,6 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                     options={getSelectOptions(plates)}
                                     value={plotOptions.plateName}
                                     onChange={(key, value) => setPlotOption('plateName', value, true)}
-                                    showLabel={false}
-                                    formsy={false}
-                                    multiple={false}
                                     required={true}
                                     clearable={false}
                                 />
@@ -72,9 +69,6 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                     options={getSelectOptions(spots)}
                                     value={plotOptions.spot}
                                     onChange={(key, value) => setPlotOption('spot', value, true)}
-                                    showLabel={false}
-                                    formsy={false}
-                                    multiple={false}
                                     required={true}
                                     clearable={false}
                                 />
@@ -107,10 +101,7 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                         options={getSelectOptions(samples)}
                                         value={plotOptions.samples || []}
                                         onChange={this.onSampleSelection}
-                                        showLabel={false}
-                                        formsy={false}
                                         multiple={true}
-                                        required={false}
                                         clearable={false}
                                     />
                                 </>
@@ -144,10 +135,7 @@ export class DataSelectionsPanel extends PureComponent<Props> {
                                         options={getSelectOptions(controls)}
                                         value={plotOptions.controls || []}
                                         onChange={this.onControlSelection}
-                                        showLabel={false}
-                                        formsy={false}
                                         multiple={true}
-                                        required={false}
                                         clearable={false}
                                     />
                                 </>
