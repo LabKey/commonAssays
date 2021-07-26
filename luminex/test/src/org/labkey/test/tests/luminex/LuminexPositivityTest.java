@@ -24,7 +24,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
-import org.labkey.test.categories.DailyA;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.SetAnalyteDefaultValuesPage;
 import org.labkey.test.util.AbstractAssayHelper;
@@ -47,7 +47,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({DailyA.class, Assays.class})
+@Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 20) // Positivity uploads can take a while
 public final class LuminexPositivityTest extends LuminexTest
 {

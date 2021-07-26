@@ -21,7 +21,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.categories.DailyB;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.components.dumbster.EmailRecordTable;
 import org.labkey.test.ms2.MS2PipelineFolder;
 import org.labkey.test.ms2.params.MS2EmailSuccessParams;
@@ -37,7 +37,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Category({DailyB.class})
+@Category({Daily.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 15)
 public class PipelineTest extends PipelineWebTestBase
 {

@@ -26,7 +26,7 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.TestCredentials;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.DailyB;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.Mascot;
 import org.labkey.test.components.BodyWebPart;
@@ -66,7 +66,7 @@ import static org.junit.Assert.assertTrue;
  *          Rule 5 ">[^ ]* \(.*\)"   (the rule number can be different, but regex must be the same or equivalent)
  *
  */
-@Category({MS2.class, Mascot.class, DailyB.class})
+@Category({MS2.class, Mascot.class, Daily.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 7)
 public class MascotTest extends AbstractMS2SearchEngineTest
 {

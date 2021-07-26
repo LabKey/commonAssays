@@ -22,7 +22,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
 import org.labkey.test.WebTestHelper;
-import org.labkey.test.categories.DailyB;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.ms2.AbstractXTandemTest;
@@ -35,7 +35,7 @@ import java.io.File;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@Category({DailyB.class, MS2.class, XTandem.class})
+@Category({Daily.class, MS2.class, XTandem.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 9)
 public class XTandemTest extends AbstractXTandemTest
 {

@@ -21,7 +21,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
-import org.labkey.test.categories.DailyA;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LabKeyExpectedConditions;
@@ -31,7 +31,7 @@ import org.openqa.selenium.WebElement;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@Category({DailyA.class, Assays.class})
+@Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 12)
 public final class LuminexRTransformTest extends LuminexTest
 {

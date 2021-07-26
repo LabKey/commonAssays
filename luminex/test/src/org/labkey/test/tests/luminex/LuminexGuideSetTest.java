@@ -21,7 +21,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
-import org.labkey.test.categories.DailyA;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
@@ -38,7 +38,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Category({DailyA.class, Assays.class})
+@Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 28)
 public final class LuminexGuideSetTest extends LuminexTest
 {
