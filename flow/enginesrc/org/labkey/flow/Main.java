@@ -409,7 +409,7 @@ public class Main
             // UNDONE: instead of unzipping into temp dir, make zip VirtualFile impl readable.
             try
             {
-                File tmpDir = FileUtil.createTempDirectory("flow");
+                File tmpDir = FileUtil.createTempDirectory("flow").toFile();
                 tmpDir.deleteOnExit();
 
                 ZipUtil.unzipToDirectory(analysisResultsFile, tmpDir);
