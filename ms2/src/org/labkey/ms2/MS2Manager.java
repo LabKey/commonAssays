@@ -89,6 +89,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -102,6 +103,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -378,6 +380,12 @@ public class MS2Manager
                 public File getRoot()
                 {
                     return pepXMLFile.getParentFile(); 
+                }
+
+                @Override
+                public Path getRootPath()
+                {
+                    return Objects.requireNonNull(getRoot()).toPath();
                 }
 
                 @Override
