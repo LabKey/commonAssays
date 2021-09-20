@@ -97,7 +97,7 @@ public class PC75Workspace extends PCWorkspace
         for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
         {
             axes.add(dim.getParameter().getName());
-            lstMin.add(dim.isSetMin() ? dim.getMin() : Double.MIN_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
+            lstMin.add(dim.isSetMin() ? dim.getMin() : -Double.MAX_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
             lstMax.add(dim.isSetMax() ? dim.getMax() : Double.MAX_VALUE);
         }
 
