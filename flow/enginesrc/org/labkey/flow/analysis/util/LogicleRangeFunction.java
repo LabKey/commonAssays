@@ -37,6 +37,11 @@ public class LogicleRangeFunction extends AbstractRangeFunction
     {
         try
         {
+            // We need to prevent placeholder max values (Double.MAX_VALUE or Float.MAX_VALUE) from causing IllegalStateException
+            // one way to do that is to check ==Float.MAX_VALUE or ==Double.MAX_VALUE.
+            // We could also consider filtering out range>_logicle.T
+            if (Math.abs(range) >= Float.MAX_VALUE)
+                return range;
             return _logicle.scale(range);
         }
         catch (IllegalStateException e)
