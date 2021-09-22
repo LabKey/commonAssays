@@ -118,7 +118,7 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
         for (RectangleGateDimensionType dim : xRectangleGate.getDimensionArray())
         {
             axes.add(dim.getFcsDimension().getName());
-            lstMin.add(dim.isSetMin() ? dim.getMin() : Double.MIN_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
+            lstMin.add(dim.isSetMin() ? dim.getMin() : -Double.MAX_VALUE); // XXX: Comment in IntervalGate implies we use Float.MIN/MAX_VALUE instead
             lstMax.add(dim.isSetMax() ? dim.getMax() : Double.MAX_VALUE);
         }
 
