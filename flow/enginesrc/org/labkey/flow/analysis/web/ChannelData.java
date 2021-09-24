@@ -135,10 +135,10 @@ class ChannelData
         List<Polygon> displayPolys = new ArrayList();
         if (polys.size() > 0)
         {
-            double xMin = Double.MAX_VALUE;
-            double xMax = -Double.MAX_VALUE;
-            double yMin = -Double.MAX_VALUE;
-            double yMax = Double.MAX_VALUE;
+            double xMin = Float.MAX_VALUE;
+            double xMax = -Float.MAX_VALUE;
+            double yMin = -Float.MAX_VALUE;
+            double yMax = Float.MAX_VALUE;
             for (Polygon poly : polys)
             {
                 for (Double x : poly.X)

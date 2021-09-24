@@ -1090,7 +1090,7 @@ abstract public class FlowJoWorkspace extends Workspace
                 if ("7.2.5".equals(version))
                     assertEquals(1384.662, bifurcateCD8plusGate.getMax(), 0.001d);
                 else
-                    assertEquals(Double.MAX_VALUE, bifurcateCD8plusGate.getMax(), DELTA);
+                    assertEquals(Float.MAX_VALUE, bifurcateCD8plusGate.getMax(), DELTA);
             }
 
             Population CD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("CD4, CD8 ellipse"));
