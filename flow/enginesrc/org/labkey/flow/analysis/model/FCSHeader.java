@@ -182,7 +182,7 @@ public class FCSHeader
     // turns off strict to allow overflow of jiffy seconds
     private long parseDateTime(String dateStr)
     {
-        return DateUtil.parseDateTime(dateStr, DateUtil.MonthDayOption.MONTH_DAY, false);
+        return DateUtil.parseDateTime(dateStr, DateUtil.MonthDayOption.MONTH_DAY, false, null);
     }
 
     // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
