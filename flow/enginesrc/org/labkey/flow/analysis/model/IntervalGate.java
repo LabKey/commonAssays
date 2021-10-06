@@ -28,7 +28,7 @@ import org.labkey.flow.analysis.data.NumberArray;
  */
 public class IntervalGate extends RegionGate
 {
-    static final double MAX_VALUE = Float.MAX_VALUE;    // using Double.MAX_VALUE is likely to cause errors if anytone tries arithmetic
+    static final double MAX_VALUE = Float.MAX_VALUE;    // using Double.MAX_VALUE is likely to cause errors if anyone tries arithmetic
     String _axis;
     double _min;
     double _max;
