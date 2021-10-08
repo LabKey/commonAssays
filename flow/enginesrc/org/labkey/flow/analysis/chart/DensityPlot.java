@@ -58,15 +58,23 @@ public class DensityPlot extends ContourPlot
         super(dataset, domainAxis, rangeAxis, colorBar);
     }
 
+    static int constrain(double x)
+    {
+        return (int)Math.min((double)Integer.MAX_VALUE/2,Math.max(-(double)Integer.MAX_VALUE/2,x));
+    }
+
     protected void drawLine(Graphics2D g2, Rectangle2D dataArea, double x1, double y1, double x2, double y2)
     {
         int prevX, prevY, nextX, nextY;
         if (x1 == x2 || y1 == y2)
         {
-            prevX = (int)getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
-            prevY = (int)getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
-            nextX = (int)getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM);
-            nextY = (int)getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT);
+            // quick bail on far out rectangle gate edges
+            if (x1==x2 && Math.abs(x1) >= Float.MAX_VALUE || y1==y2 && Math.abs(y1) >= Float.MAX_VALUE)
+                return;
+            prevX = constrain(getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM));
+            prevY = constrain(getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT));
+            nextX = constrain(getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM));
+            nextY = constrain(getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT));
             g2.drawLine(prevX, prevY, nextX, nextY);
             return;
         }
