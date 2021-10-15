@@ -219,7 +219,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description)
+    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description, ExpProtocol.Status status)
     {
         // UNDONE: could just call FlowProtocol.ensureForContainer() ?
         throw new UnsupportedOperationException();
