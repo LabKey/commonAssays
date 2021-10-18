@@ -104,7 +104,7 @@ public class PipelineController extends SpringActionController
     public PageConfig defaultPageConfig()
     {
         PageConfig p = super.defaultPageConfig();
-        p.setHelpTopic(getHelpTopic("ms2"));
+        p.setHelpTopic("ms2");
         return p;
     }
 
@@ -725,9 +725,9 @@ public class PipelineController extends SpringActionController
         }
 
         @Override
-        public HelpTopic getHelpTopic()
+        public String getHelpTopic()
         {
-            return PipelineController.getHelpTopic("MS2-Pipeline/setTandemDefaults");
+            return "pipelineXTandem";
         }
 
         @Override
@@ -753,9 +753,9 @@ public class PipelineController extends SpringActionController
         }
 
         @Override
-        public HelpTopic getHelpTopic()
+        public String getHelpTopic()
         {
-            return PipelineController.getHelpTopic("MS2-Pipeline/setMascotDefaults");
+            return "pipelineMascot";
         }
 
         @Override
@@ -781,9 +781,9 @@ public class PipelineController extends SpringActionController
         }
 
         @Override
-        public HelpTopic getHelpTopic()
+        public String getHelpTopic()
         {
-            return PipelineController.getHelpTopic("pipelineSequest");
+            return "pipelineSequest";
         }
 
         @Override
@@ -809,9 +809,9 @@ public class PipelineController extends SpringActionController
         }
 
         @Override
-        public HelpTopic getHelpTopic()
+        public String getHelpTopic()
         {
-            return PipelineController.getHelpTopic("pipelineComet");
+            return "pipelineComet";
         }
 
         @Override
@@ -842,7 +842,7 @@ public class PipelineController extends SpringActionController
         private AbstractMS2SearchPipelineProvider _provider;
 
         public abstract String getProviderName();
-        public abstract HelpTopic getHelpTopic();
+        public abstract String getHelpTopic();
         public abstract ModelAndView getJspView(SetDefaultsForm form, BindException errors);
 
         @Override

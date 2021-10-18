@@ -46,7 +46,7 @@ import java.util.ArrayList;
 
 public abstract class BaseFlowController extends SpringActionController
 {
-    public static HelpTopic DEFAULT_HELP_TOPIC = new HelpTopic("flowDefault");
+    public static String DEFAULT_HELP_TOPIC = "flowDefault";
 
     protected JspBase getFlowPage(String jspPath)
     {
@@ -87,7 +87,7 @@ public abstract class BaseFlowController extends SpringActionController
         }
     }
 
-    public HelpTopic getHelpTopic()
+    public String getHelpTopic()
     {
         return DEFAULT_HELP_TOPIC;
     }
