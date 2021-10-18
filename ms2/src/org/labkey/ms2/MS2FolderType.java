@@ -21,7 +21,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
@@ -70,9 +69,9 @@ public class MS2FolderType extends MultiPortalFolderType
     }
 
     @Override
-    public HelpTopic getHelpTopic()
+    public String getHelpTopic()
     {
-        return new HelpTopic("ms2");
+        return "ms2";
     }
 
     @Override

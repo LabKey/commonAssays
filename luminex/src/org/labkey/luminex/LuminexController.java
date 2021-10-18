@@ -17,8 +17,8 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -26,6 +26,14 @@ import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.AssayView;
+import org.labkey.api.assay.actions.AssayHeaderView;
+import org.labkey.api.assay.actions.BaseAssayAction;
+import org.labkey.api.assay.actions.ProtocolIdForm;
+import org.labkey.api.assay.security.DesignAssayPermission;
 import org.labkey.api.audit.TransactionAuditProvider;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
@@ -64,17 +72,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.assay.actions.AssayHeaderView;
-import org.labkey.api.assay.actions.BaseAssayAction;
-import org.labkey.api.assay.actions.ProtocolIdForm;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayUrls;
-import org.labkey.api.assay.AssayView;
-import org.labkey.api.assay.security.DesignAssayPermission;
 import org.labkey.api.util.FileStream;
-import org.labkey.api.util.HelpTopic;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -163,7 +161,7 @@ public class LuminexController extends SpringActionController
             queryName = LuminexProtocolSchema.WELL_EXCLUSION_TABLE_NAME;
             result.addView(getExcludedQueryView(schema, queryName, "Well", errors));
 
-            setHelpTopic(new HelpTopic("excludeAnalytes"));
+            setHelpTopic("excludeAnalytes");
 
             return result;
         }
@@ -247,7 +245,7 @@ public class LuminexController extends SpringActionController
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
             settings.setBaseFilter(new SimpleFilter(FieldKey.fromParts("Titration", "IncludeInQcReport"), true));
-            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
+            setHelpTopic("trackLuminexAnalytes");
 
             GraphLinkQueryView view = new GraphLinkQueryView("Titration", "Titration", _protocol, schema, settings, errors);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
@@ -277,7 +275,7 @@ public class LuminexController extends SpringActionController
             AssayView result = new AssayView();
             AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME, LuminexProtocolSchema.ANALYTE_SINGLE_POINT_CONTROL_TABLE_NAME);
-            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
+            setHelpTopic("trackLuminexAnalytes");
 
             GraphLinkQueryView view = new GraphLinkQueryView("SinglePointControl", "SinglePoint", _protocol, schema, settings, errors);
             result.setupViews(view, false, form.getProvider(), form.getProtocol());
@@ -311,7 +309,7 @@ public class LuminexController extends SpringActionController
             VBox result = new VBox();
             result.addView(new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null));
             result.addView(new JspView<>("/org/labkey/luminex/view/leveyJenningsReport.jsp", form));
-            setHelpTopic(new HelpTopic("trackLuminexAnalytes"));
+            setHelpTopic("trackLuminexAnalytes");
             return result;
         }
 
@@ -911,7 +909,7 @@ public class LuminexController extends SpringActionController
             final AssaySchema schema = form.getProvider().createProtocolSchema(getUser(), getContainer(), form.getProtocol(), null);
             QuerySettings settings = new QuerySettings(getViewContext(), LuminexProtocolSchema.GUIDE_SET_TABLE_NAME, LuminexProtocolSchema.GUIDE_SET_TABLE_NAME);
             settings.setBaseSort(new Sort("-RowId")); // Issue 22935
-            setHelpTopic(new HelpTopic("applyGuideSets"));
+            setHelpTopic("applyGuideSets");
 
             final int protocolId = _protocol.getRowId();
             GraphLinkQueryView view = new GraphLinkQueryView(null, null, _protocol, schema, settings, errors)
