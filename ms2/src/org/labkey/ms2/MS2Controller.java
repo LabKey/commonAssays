@@ -92,7 +92,6 @@ import org.labkey.api.util.ContainerContext;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
-import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.Link.LinkBuilder;
@@ -179,7 +178,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -231,7 +229,7 @@ public class MS2Controller extends SpringActionController
 
     private void addRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
+        page.setHelpTopic(null == helpTopic ? "ms2" : helpTopic);
         root.addChild("MS2 Runs", getShowListURL(getContainer()));
         if (null != title)
             root.addChild(title);
@@ -257,7 +255,7 @@ public class MS2Controller extends SpringActionController
 
     private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
-        page.setHelpTopic(new HelpTopic(null == helpTopic ? "ms2" : helpTopic));
+        page.setHelpTopic(null == helpTopic ? "ms2" : helpTopic);
         root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
@@ -953,7 +951,7 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
-            setHelpTopic(new HelpTopic("annotations"));
+            setHelpTopic("annotations");
         }
 
         @Override
@@ -1033,7 +1031,7 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             setTitle("GO Load Status");
-            setHelpTopic(new HelpTopic("annotations"));
+            setHelpTopic("annotations");
         }
     }
 
@@ -3151,8 +3149,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            String helpTopic = "proteinSearch";
-            getPageConfig().setHelpTopic(new HelpTopic(helpTopic));
+            setHelpTopic("proteinSearch");
             root.addChild("Protein Search Results");
         }
     }

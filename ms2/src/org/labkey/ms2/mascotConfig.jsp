@@ -18,7 +18,6 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.api.admin.AdminUrls"%>
 <%@ page import="org.labkey.api.data.Container" %>
-<%@ page import="org.labkey.api.util.HelpTopic" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.ms2.MS2Controller.MascotConfigAction" %>
 <%@ page import="org.labkey.ms2.MS2Controller.MascotTestAction" %>
@@ -62,7 +61,7 @@
     <input type="hidden" name="reset" value="false" id="resetInput" />
     <table class="lk-fields-table">
         <tr>
-            <td colspan=2>Configure Mascot settings (<%=new HelpTopic("configMascot").getSimpleLinkHtml("more info...")%>)</td>
+            <td colspan=2>Configure Mascot settings (<%=helpLink("configMascot", "more info...")%>)</td>
         </tr> <%
             if (inherited) { %>
             <tr>

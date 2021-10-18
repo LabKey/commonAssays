@@ -20,7 +20,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.MultiPortalFolderType;
 import org.labkey.api.security.User;
-import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.controllers.BaseFlowController;
@@ -54,7 +53,7 @@ public class FlowFolderType extends MultiPortalFolderType
     }
 
     @Override
-    public HelpTopic getHelpTopic()
+    public String getHelpTopic()
     {
         return BaseFlowController.DEFAULT_HELP_TOPIC;
     }
