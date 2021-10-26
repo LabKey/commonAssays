@@ -588,6 +588,7 @@ public class FlowSchema extends UserSchema
         @NotNull
         public SQLFragment getFromSQL()
         {
+            checkReadBeforeExecute();
             SQLFragment sqlFlowData = new SQLFragment();
 
             sqlFlowData.append("SELECT " + _expDataAlias + ".*,");
@@ -857,6 +858,12 @@ public class FlowSchema extends UserSchema
         }
 
         @Override
+        public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
+        {
+            return _expData.hasPermission(user, perm);
+        }
+
+        @Override
         public UserSchema getUserSchema()
         {
             return FlowSchema.this;
@@ -1026,6 +1033,7 @@ public class FlowSchema extends UserSchema
             assert _container != null;
             assert _container.getId().equals(getContainer().getId());
 
+            checkReadBeforeExecute();
             SQLFragment where = new SQLFragment();
             SQLFragment filter = _filter.getSQLFragment(getSqlDialect());
             String and = " WHERE ";

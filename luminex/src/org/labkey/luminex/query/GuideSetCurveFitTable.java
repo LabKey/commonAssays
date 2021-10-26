@@ -91,6 +91,7 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     @Override
     public SQLFragment getFromSQL()
     {
+        checkReadBeforeExecute();
         SQLFragment result = new SQLFragment("SELECT AVG(cf.EC50) AS EC50Average,\n");
         result.append(_userSchema.getDbSchema().getSqlDialect().getStdDevFunction());
         result.append("(cf.EC50) AS EC50StdDev, \n");

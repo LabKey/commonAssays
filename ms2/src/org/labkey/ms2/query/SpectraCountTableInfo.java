@@ -235,6 +235,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
     @Override @NotNull
     public SQLFragment getFromSQL()
     {
+        checkReadBeforeExecute();
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT\n");
         sql.append("f.run\n"); // FK

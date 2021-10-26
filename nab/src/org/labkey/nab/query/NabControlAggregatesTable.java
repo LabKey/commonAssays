@@ -57,6 +57,7 @@ public class NabControlAggregatesTable extends VirtualTable<NabProtocolSchema> i
     @Override
     public SQLFragment getFromSQL()
     {
+        checkReadBeforeExecute();
         SQLFragment result = new SQLFragment("SELECT\n")
             .append("w.RunId,\n")
             .append("w.ControlWellgroup,\n")

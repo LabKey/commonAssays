@@ -163,6 +163,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
     @Override @NotNull
     public SQLFragment getFromSQL(String alias)
     {
+        checkReadBeforeExecute();
         String innerAlias = "_innerCPP";
         SQLFragment result = new SQLFragment();
         result.append("(SELECT * FROM ");
