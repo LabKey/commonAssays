@@ -139,7 +139,7 @@ public class FlowPipelineProvider extends PipelineProvider
         }
 
         // UNDONE: walk directory once instead of multiple times
-        File[] workspaces = directory.listFiles(new IsFlowJoWorkspaceFilter());
+        File[] workspaces = directory.listFiles((FileFilter)new IsFlowJoWorkspaceFilter());
         if (includeAll || (workspaces != null && workspaces.length > 0))
         {
             ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, context.getContainer());
