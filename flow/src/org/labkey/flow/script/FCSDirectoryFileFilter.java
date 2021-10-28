@@ -15,13 +15,21 @@
  */
 package org.labkey.flow.script;
 
+import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 import org.labkey.flow.analysis.model.FCS;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Path;
 
-public class FCSDirectoryFileFilter implements FileFilter
+public class FCSDirectoryFileFilter implements FileAnalysisTaskPipeline.FilePathFilter
 {
+    @Override
+    public boolean accept(Path path)
+    {
+        return accept(path.toFile());
+    }
+
     @Override
     public boolean accept(File dir)
     {

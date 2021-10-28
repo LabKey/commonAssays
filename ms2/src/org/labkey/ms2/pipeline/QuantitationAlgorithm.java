@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobException;
-import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
@@ -28,6 +27,7 @@ import org.labkey.ms2.pipeline.client.ParameterNames;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,13 +72,13 @@ public enum QuantitationAlgorithm
                 throw new PipelineJobException("Libra configuration files containing a space are not supported");
             }
             LibraProtocolFactory factory = new LibraProtocolFactory();
-            File result = factory.getProtocolFile(root, libraConfigName, false);
+            Path result = factory.getProtocolFile(root, libraConfigName, false);
             if (!NetworkDrive.exists(result))
             {
                 throw new PipelineJobException("Libra config file does not exist: " + result);
             }
-            wd.inputFile(result, true);
-            return new Pair<>(result, TPPTask.LIBRA_CONFIG_INPUT_ROLE);
+            wd.inputFile(result.toFile(), true);
+            return new Pair<>(result.toFile(), TPPTask.LIBRA_CONFIG_INPUT_ROLE);
     }};
 
     protected List<String> getCommonXpressQ3Params(Map<String, String> params, String pathMzXml)

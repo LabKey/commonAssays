@@ -88,7 +88,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         log("View log file.");
 
         pushLocation();
-        clickAndWait(Locator.linkWithText(LOG_BASE_NAME + ".log"));
+        clickAndWait(Locator.linkContainingText(LOG_BASE_NAME).containing(".log")); //Filename Link has a time stamp
 
         log("Verify log.");
         assertTextPresent("search");
