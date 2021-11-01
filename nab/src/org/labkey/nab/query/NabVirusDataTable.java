@@ -206,7 +206,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
     public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
     {
         if (ReadPermission.class.isAssignableFrom(perm))
-            return _userSchema.getContainer().hasPermission(user, perm);
+            return _userSchema.getContainer().hasPermission(user, perm, _userSchema.getContextualRoles());
         if (DeletePermission.class.isAssignableFrom(perm) || UpdatePermission.class.isAssignableFrom(perm))
             return _provider.isEditableResults(_protocol) && _userSchema.getContainer().hasPermission(user, perm);
         return false;
