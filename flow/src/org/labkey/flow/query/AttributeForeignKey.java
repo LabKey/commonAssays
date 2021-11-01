@@ -52,7 +52,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
     @Override
     public TableInfo getLookupTableInfo()
     {
-        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null)
+        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null, (UserSchema)_sourceSchema)
         {
             @Override
             protected boolean isCaseSensitive()

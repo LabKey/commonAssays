@@ -973,7 +973,7 @@ public class MS2Schema extends UserSchema
             name = "bogusTable";
         }
 
-        rawTable = new VirtualTable(getDbSchema(), name)
+        rawTable = new VirtualTable(getDbSchema(), name, this)
         {
             @NotNull
             @Override
@@ -1016,7 +1016,7 @@ public class MS2Schema extends UserSchema
             public TableInfo getLookupTableInfo()
             {
                 // Create a junction query that connects normalized group ids with protein identifications
-                VirtualTable result = new VirtualTable(getDbSchema(), "InnerTable")
+                VirtualTable result = new VirtualTable(getDbSchema(), "InnerTable", MS2Schema.this)
                 {
                     @NotNull
                     @Override
