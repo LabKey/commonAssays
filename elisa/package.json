@@ -44,10 +44,10 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.60.0"
+    "@labkey/components": "2.90.1"
   },
   "devDependencies": {
-    "@labkey/build": "4.0.0",
+    "@labkey/build": "4.0.1",
     "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.6",
     "@labkey/eslint-config-base": "0.0.8",
