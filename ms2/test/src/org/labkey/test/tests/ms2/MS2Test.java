@@ -1152,7 +1152,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextNotPresent(
                 "R.TQMPAASICVNYK.G");
 
-        log("Test exporting in Query Peptides Comparision");
+        log("Test exporting in Query Peptides Comparison");
         File lastPeptideFile = new DataRegionExportHelper(table).exportText(ColumnHeaderType.Caption, DataRegionExportHelper.TextSeparator.TAB);
         TextSearcher lastPeptideSearcher = new TextSearcher(lastPeptideFile);
         assertTextPresent(lastPeptideSearcher,
