@@ -125,6 +125,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
     @Override @NotNull
     public SQLFragment getFromSQL(String alias)
     {
+        checkReadBeforeExecute();
         if (!_includeSeqId)
             return super.getFromSQL(alias);
 

@@ -148,6 +148,7 @@ public class AnalyteTable extends AbstractLuminexTable
     @Override
     public boolean hasPermission(@NotNull UserPrincipal user, @NotNull Class<? extends Permission> perm)
     {
+        checkedPermissions.add(perm);
         return (perm.equals(UpdatePermission.class) || perm.equals(ReadPermission.class))
                 && _userSchema.getContainer().hasPermission(user, perm);
     }

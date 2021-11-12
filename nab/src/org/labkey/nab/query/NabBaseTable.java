@@ -100,8 +100,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable expRunTable = AssayService.get().createRunTable(_protocol, provider, _schema.getUser(), _schema.getContainer(), getLookupContainerFilter());
-                return expRunTable;
+                return _schema.createRunsTable(getLookupContainerFilter());
             }
 
             @Override

@@ -178,6 +178,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
         @Override
         public SQLFragment getFromSQL(String alias)
         {
+            checkReadBeforeExecute();
             SQLFragment frag = new SQLFragment();
             frag.appendComment("<" + this.getClass().getSimpleName() + ".getFromSQL()>", getSqlDialect());
             frag.append(super.getFromSQL(alias));

@@ -142,6 +142,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
     @Override @NotNull
     public SQLFragment getFromSQL()
     {
+        checkReadBeforeExecute();
         SQLFragment result = new SQLFragment();
         result.append("SELECT InnerPeptide");
         for (MS2Run run : _runs)
