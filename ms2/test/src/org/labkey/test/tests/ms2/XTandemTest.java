@@ -182,8 +182,7 @@ public class XTandemTest extends AbstractXTandemTest
     {
         log("Test peptide details page");
         click(Locator.linkWithText(PEPTIDE2));
-        Object[] windows = getDriver().getWindowHandles().toArray();
-        getDriver().switchTo().window((String)windows[1]);
+        switchToWindow(1);
         waitForText("44.0215"); // Look for b3+ ions, populated bu JavaScript
         assertTextPresent(
                 "gi|4689022|ribosomal_protein_",  // Check for protein
@@ -192,7 +191,7 @@ public class XTandemTest extends AbstractXTandemTest
                 "87.0357",
                 "130.0499");
         getDriver().close();
-        getDriver().switchTo().window((String)windows[0]);
+        switchToMainWindow();
     }
 
     private void verifyPeptideCrosstab()
