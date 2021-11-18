@@ -1556,7 +1556,7 @@ public class FlowSchema extends UserSchema
         ExpSampleType st = null;
         if (_protocol != null)
         {
-            st = _protocol.getSampleType();
+            st = _protocol.getSampleType(getUser());
         }
         var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, st);
         if (st == null)

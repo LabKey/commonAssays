@@ -27,6 +27,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
@@ -54,6 +55,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QueryUpdateService;
@@ -74,6 +76,7 @@ import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.KeywordsJob;
 
 import javax.servlet.http.HttpServletRequest;
@@ -245,9 +248,33 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return FlowProtocolStep.fromLSID(getContainer(), getLSID());
     }
 
-    public ExpSampleType getSampleType()
+    /**
+     * Returns the sample type in scope
+     */
+    public ExpSampleType getSampleType(User user)
     {
-        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME);
+        return SampleTypeService.get().getSampleType(getContainer(), user, SAMPLETYPE_NAME);
+    }
+
+    /**
+     * Construct a container filter appropriate for the sample type in scope and user permissions
+     */
+    public ContainerFilter getContainerFilter(ExpSampleType sampleType, User user)
+    {
+        return new ContainerFilter.SimpleContainerFilter(ExpSchema.getSearchContainers(getContainer(), sampleType, null, user));
+    }
+
+    public ActionURL getSampleTypeDetailsURL(ExpSampleType sampleType, Container container)
+    {
+        ActionURL url = sampleType.detailsURL();
+
+        // set the container filter if the sample type is scoped to the project
+        if (!sampleType.getContainer().equals(container) && sampleType.getContainer().isProject())
+        {
+            url.setContainer(getContainer());
+            url.addParameter("Material." + QueryParam.containerFilterName, ContainerFilter.Type.CurrentPlusProject.name());
+        }
+        return url;
     }
 
     /**
@@ -316,7 +343,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
-        ExpSampleType st = getSampleType();
+        ExpSampleType st = getSampleType(user);
         if (st == null)
             return Collections.emptyMap();
         Set<String> propertyNames = getSampleTypeJoinFields().keySet();
@@ -324,7 +351,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
 
-        TableInfo sampleTable = schema.getTable(st, null);
+        ContainerFilter cf = getContainerFilter(st, user);
+        TableInfo sampleTable = schema.getTable(st, cf);
         List<ColumnInfo> selectedColumns = new ArrayList<>();
         ColumnInfo colRowId = sampleTable.getColumn(ExpMaterialTable.Column.RowId.toString());
         selectedColumns.add(colRowId);
@@ -338,7 +366,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
 
         Map<Integer, ExpMaterial> materialMap = new HashMap<>();
-        List<? extends ExpMaterial> materials = st.getSamples(getContainer());
+        List<? extends ExpMaterial> materials = getSamples(st, user);
         for (ExpMaterial material : materials)
         {
             materialMap.put(material.getRowId(), material);
@@ -370,6 +398,21 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
+    /**
+     * Returns the samples for this sample type, if the sample type is scoped at the project
+     * level and the user has read access then both current and project level samples will be
+     * returned
+     */
+    public List<? extends ExpMaterial> getSamples(ExpSampleType sampleType, User user)
+    {
+        ContainerFilter cf = new ContainerFilter.SimpleContainerFilter(ExpSchema.getSearchContainers(getContainer(), sampleType, null, user));
+        List<ExpMaterial> samples = new ArrayList<>();
+
+        cf.getIds().forEach(id -> samples.addAll(sampleType.getSamples(ContainerManager.getForId(id))));
+
+        return samples;
+    }
+
     public int updateSampleIds(User user)
     {
         _log.info("updateSampleIds: protocol=" + this.getName() + ", folder=" + this.getContainerPath());
@@ -381,7 +424,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         _log.debug("sampleMap=" + sampleMap.size());
 
-        ExpSampleType st = getSampleType();
+        ExpSampleType st = getSampleType(user);
         _log.debug("sampleType=" + (st == null ? "<none>" : st.getName()) + ", lsid=" + (st == null ? "<none>" : st.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
@@ -543,14 +586,24 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
         FlowSchema schema = new FlowSchema(user, c);
         String sql = "SELECT\n" +
-                "  FCSFiles.RowId As FCSFileRowId,\n" +
-                "  FCSFiles.Run.RowId AS FCSFileRunId,\n" +
-                "  FCSFiles.Run.Name AS FCSFileRunName,\n" +
+                "  __FCSFiles.RowId As FCSFileRowId,\n" +
+                "  __FCSFiles.Run.RowId AS FCSFileRunId,\n" +
+                "  __FCSFiles.Run.Name AS FCSFileRunName,\n" +
                 "  M.RowId AS SampleRowId,\n" +
-                "FROM FCSFiles\n" +
-                "FULL OUTER JOIN samples." + SAMPLETYPE_NAME + " M ON\n" +
-                "FCSFiles.Sample = M.RowId\n" +
-                "ORDER BY M.Name, FCSFiles.RowId";
+                "FROM __FCSFiles\n" +
+                "FULL OUTER JOIN __Samples M ON\n" +
+                "__FCSFiles.Sample = M.RowId\n" +
+                "ORDER BY M.Name, __FCSFiles.RowId";
+
+        ExpSampleType sampleType = getSampleType(user);
+        ContainerFilter cf = getContainerFilter(sampleType, user);
+        UserSchema userSchema = QueryService.get().getUserSchema(user, getContainer(), SamplesSchema.SCHEMA_NAME);
+        TableInfo sampleTable = userSchema.getTable(SAMPLETYPE_NAME, cf);
+        TableInfo fcsTable = schema.getTable(FlowTableType.FCSFiles, null);
+
+        Map<String, TableInfo> tableMap = new HashMap<>();
+        tableMap.put("__FCSFiles", fcsTable);
+        tableMap.put("__Samples", sampleTable);
 
         List<Integer> sampleIds = new ArrayList<>();
         List<Integer> fcsFileIds = new ArrayList<>();
@@ -559,7 +612,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<Integer, Pair<Integer, String>> fcsFileRuns = new HashMap<>();
         int linkedFcsFileCount = 0;
 
-        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql))
+        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql, tableMap, false, false))
         {
             for (Map<String, Object> row : rs)
             {
@@ -610,9 +663,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         sampleColumns.add(rowIdFieldKey);
         sampleColumns.add(nameFieldKey);
         sampleColumns.addAll(sampleFields);
-        var samplesTable = QueryService.get().getUserSchema(user, c, SamplesSchema.SCHEMA_NAME).getTable(SAMPLETYPE_NAME);
-        var sampleColumnMap = QueryService.get().getColumns(samplesTable, sampleColumns);
-        try (var results = new TableSelector(samplesTable, sampleColumnMap.values(), new SimpleFilter(rowIdFieldKey, sampleIds, CompareType.IN), null).getResults())
+        var sampleColumnMap = QueryService.get().getColumns(sampleTable, sampleColumns);
+        try (var results = new TableSelector(sampleTable, sampleColumnMap.values(), new SimpleFilter(rowIdFieldKey, sampleIds, CompareType.IN), null).getResults())
         {
             while (results.next())
             {
@@ -964,7 +1016,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             ));
 
             // create sample type
-            assertNull(protocol.getSampleType());
+            assertNull(protocol.getSampleType(user));
             String sampleTypeLSID = protocol.getSampleTypeLSID();
             assertNull(SampleTypeService.get().getSampleType(sampleTypeLSID));
 
@@ -976,7 +1028,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             );
             ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLETYPE_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
-            assertNotNull(protocol.getSampleType());
+            assertNotNull(protocol.getSampleType(user));
 
             // import samples:
             //   Name  PTID  WellId  ExprName

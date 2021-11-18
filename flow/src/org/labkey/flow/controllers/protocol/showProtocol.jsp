@@ -21,22 +21,24 @@
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
 <%@ page import="org.labkey.flow.data.AttributeType" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
+<%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
+    ExpSampleType sampleType = protocol.getSampleType(getUser());
 %>
 <p>
     The Flow Protocol describes sample information and metadata about the experiment.
 </p>
 <p><b>Samples</b><br>
     Upload sample information and match samples with FCSFiles.<br>
-    <% if (protocol.getSampleType() == null) { %>
+    <% if (sampleType == null) { %>
         No samples have been uploaded in this folder.<br>
         <%=link("Create new sample type").href(protocol.urlCreateSampleType())%><br>
     <% } else { %>
-        <%=link("Show sample type").href(protocol.getSampleType().detailsURL())%><br>
+        <%=link("Show sample type").href(protocol.getSampleTypeDetailsURL(sampleType, getContainer()))%><br>
         <%=link("Show samples joined to FCS Files").href(protocol.urlShowSamples())%><br>
         <%=link("Upload more samples from a spreadsheet").href(protocol.urlUploadSamples())%><br>
         <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
