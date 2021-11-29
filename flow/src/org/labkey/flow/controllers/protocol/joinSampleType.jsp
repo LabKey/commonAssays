@@ -24,7 +24,7 @@
 <%
     JoinSampleTypeForm form = (JoinSampleTypeForm) __form;
 
-    if (form.getProtocol().getSampleType() == null)
+    if (form.getProtocol().getSampleType(getUser()) == null)
     {
         %>
         <p>You must first upload a sample type before specifying how to match samples to FCS files.</p>

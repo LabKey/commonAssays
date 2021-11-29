@@ -76,8 +76,9 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType() : null;
-    List<? extends ExpMaterial> _sampleTypeSamples = _sampleType == null ? null : _sampleType.getSamples(_sampleType.getContainer());
+    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType(getUser()) : null;
+    List<? extends ExpMaterial> _sampleTypeSamples = _sampleType == null ? null : _protocol.getSamples(_sampleType, user);
+    ActionURL _sampleTypeDetailsUrl = _sampleType != null ? _protocol.getSampleTypeDetailsURL(_sampleType, getContainer()) : null;
 
     FlowScript[] _scripts = FlowScript.getAnalysisScripts(c);
     Arrays.sort(_scripts);
@@ -247,7 +248,7 @@
                          {
                       %>
                             "<tr>" +
-                            "<td colspan=2><a href='<%=h(_sampleType.detailsURL())%>'>More...</a></td>" +
+                            "<td colspan=2><a href='<%=h(_sampleTypeDetailsUrl)%>'>More...</a></td>" +
                             "</tr>" +
                       <%
                          }
@@ -257,7 +258,7 @@
         });
         </script>
         <div id="samples-div">
-            <a title="<%=h(_sampleType.getDescription())%>" href="<%=h(_sampleType.detailsURL())%>">Samples (<%=_sampleType.getSamples(_sampleType.getContainer()).size()%>)</a>
+            <a title="<%=h(_sampleType.getDescription())%>" href="<%=h(_sampleTypeDetailsUrl)%>">Samples (<%=_sampleTypeSamples.size()%>)</a>
         </div>
     <% } %>
 

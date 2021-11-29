@@ -1483,7 +1483,7 @@ public class FlowManager
         FlowProtocol protocol = FlowProtocol.getForContainer(c);
         if (protocol != null)
         {
-            ExpSampleType st = protocol.getSampleType();
+            ExpSampleType st = protocol.getSampleType(user);
             if (st != null)
             {
                 // put sample count at top-level since it isn't really specific to the protocol
