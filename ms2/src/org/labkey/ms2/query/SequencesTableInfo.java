@@ -62,14 +62,6 @@ import java.util.StringTokenizer;
  */
 public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredTable<SchemaType>
 {
-    // TODO ContainerFilter
-    @Deprecated
-    protected SequencesTableInfo(String name, SchemaType schema)
-    {
-        this(schema, null);
-        setName(name);
-    }
-
     protected SequencesTableInfo(String name, SchemaType schema, ContainerFilter cf)
     {
         this(schema, cf);
@@ -134,8 +126,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                             @Override
                             public TableInfo getLookupTableInfo()
                             {
-                                // TODO ContainerFilter
-                                return new CustomAnnotationTable(annotationSet, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
+                                return new CustomAnnotationTable(annotationSet, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false), cf, false);
                             }
                         });
                         return ret;

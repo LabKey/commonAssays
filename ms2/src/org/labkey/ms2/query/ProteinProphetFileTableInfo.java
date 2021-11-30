@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -29,9 +30,9 @@ import org.labkey.ms2.MS2Controller;
  */
 public class ProteinProphetFileTableInfo extends FilteredTable<MS2Schema>
 {
-    public ProteinProphetFileTableInfo(MS2Schema schema)
+    public ProteinProphetFileTableInfo(MS2Schema schema, ContainerFilter cf)
     {
-        super(MS2Manager.getTableInfoProteinProphetFiles(), schema);
+        super(MS2Manager.getTableInfoProteinProphetFiles(), schema, cf);
         wrapAllColumns(true);
 
         ActionURL url = MS2Controller.getShowRunURL(_userSchema.getUser(), getContainer());
@@ -40,7 +41,7 @@ public class ProteinProphetFileTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return new RunTableInfo(_userSchema);
+                return new RunTableInfo(_userSchema, cf);
             }
         });
     }

@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.query.ExpSchema;
@@ -34,9 +35,9 @@ import org.labkey.ms2.MS2Manager;
  */
 public class RunTableInfo extends FilteredTable<MS2Schema>
 {
-    public RunTableInfo(MS2Schema schema)
+    public RunTableInfo(MS2Schema schema, ContainerFilter cf)
     {
-        super(MS2Manager.getTableInfoRuns(), schema);
+        super(MS2Manager.getTableInfoRuns(), schema, cf);
 
         wrapAllColumns(true);
 

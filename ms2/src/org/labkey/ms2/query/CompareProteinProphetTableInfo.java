@@ -92,7 +92,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                         return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);
+                         return new ProteinGroupTableInfo(_userSchema, getContainerFilter(), false);
                     }
                 };
                 if (!_forExport)
@@ -113,7 +113,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return new ProteinGroupTableInfo(_userSchema, getLookupContainerFilter(), false);
+                    return new ProteinGroupTableInfo(_userSchema, getContainerFilter(), false);
                 }
             });
             addColumn(proteinGroupIdColumn);

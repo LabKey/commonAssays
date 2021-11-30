@@ -194,7 +194,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createPeptideMembershipsTable(getLookupContainerFilter());
+                return _userSchema.createPeptideMembershipsTable(getContainerFilter());
             }
         });
         proteinGroup.setKeyField(false);
@@ -222,7 +222,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         showProteinURL.deleteParameter("protein");
         final String showProteinURLString = showProteinURL.getLocalURIString() + "&seqId=${SeqId}&protein=${Protein}";
 
-        setupProteinColumns(showProteinURLString);
+        setupProteinColumns(showProteinURLString, containerFilter);
 
         ActionURL showPeptideURL = url.clone();
         showPeptideURL.setAction(MS2Controller.ShowPeptideAction.class);
@@ -250,7 +250,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createFractionsTable(getLookupContainerFilter());
+                return _userSchema.createFractionsTable(getContainerFilter());
             }
         });
 
@@ -386,14 +386,14 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
     }
 
-    private void setupProteinColumns(final String showProteinURLString)
+    private void setupProteinColumns(final String showProteinURLString, ContainerFilter containerFilter)
     {
         LookupForeignKey fk = new LookupForeignKey("SeqId")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo sequenceTable = new SequencesTableInfo(ProteinManager.getTableInfoSequences().getName(), _userSchema);
+                SequencesTableInfo<MS2Schema> sequenceTable = new SequencesTableInfo<>(ProteinManager.getTableInfoSequences().getName(), _userSchema, containerFilter);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);

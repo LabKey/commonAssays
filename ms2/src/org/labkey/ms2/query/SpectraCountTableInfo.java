@@ -135,12 +135,12 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         List<FieldKey> defaultCols = new ArrayList<>();
 
         ExprColumn runColumn = new ExprColumn(this, "Run", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + ".Run"), JdbcType.INTEGER);
-        runColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
+        runColumn.setFk(new LookupForeignKey(MS2Controller.getShowRunURL(_userSchema.getUser(), _userSchema.getContainer()), "run", "MS2Details", "Name")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema, getLookupContainerFilter());
+                ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema, getContainerFilter());
                 result.setContainerFilter(ContainerFilter.EVERYTHING);
                 return result;
             }
@@ -189,12 +189,12 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         }
         proteinColumn.setDescription("The protein associated with the peptide identification. Only available if a grouping by protein information, or a target protein has been specified.");
         addColumn(proteinColumn);
-        proteinColumn.setFk(new LookupForeignKey(/*TODO ContainerFilter,*/ new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
+        proteinColumn.setFk(new LookupForeignKey(new ActionURL(MS2Controller.ShowProteinAction.class, ContainerManager.getRoot()), "seqId", "SeqId", "BestName")
         {
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return _userSchema.createSequencesTable(getLookupContainerFilter());
+                return _userSchema.createSequencesTable(getContainerFilter());
             }
         });
 
