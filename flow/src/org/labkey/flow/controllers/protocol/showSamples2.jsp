@@ -19,28 +19,25 @@
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
 <%@ page import="org.labkey.api.query.QueryAction" %>
-<%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.util.URLHelper" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
+<%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController.JoinSampleTypeAction" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolForm" %>
+<%@ page import="org.labkey.flow.controllers.run.RunController" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol" %>
 <%@ page import="org.labkey.flow.data.FlowProtocol.FCSFilesGroupedBySample" %>
 <%@ page import="org.labkey.flow.query.FlowTableType" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="static org.labkey.api.data.CompareType.IN" %>
-<%@ page import="org.labkey.flow.controllers.run.RunController" %>
-<%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
-    ExpSampleType st = protocol.getSampleType();
+    ExpSampleType st = protocol.getSampleType(getUser());
 
     ExperimentUrls expUrls = urlProvider(ExperimentUrls.class);
 
@@ -81,7 +78,7 @@
     <%=link("Create sample type").href(protocol.urlCreateSampleType())%><br>
 <% } else { %>
 <p>
-There are <a id="all-samples" href="<%=h(st.detailsURL())%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
+There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, getContainer()))%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
 <% if (sampleTypeJoinFields.size() == 0) { %>
 <p>

@@ -25,5 +25,5 @@
     <%= form.fileCount%> FCS files were linked to samples in this sample type.
 </p>
 <p><a href="<%=h(form.getProtocol().urlShowSamples())%>">Show linked samples</a><br>
-<a href="<%=h(form.getProtocol().getSampleType().detailsURL())%>">Show all samples</a><br>
+<a href="<%=h(form.getProtocol().getSampleType(getUser()).detailsURL())%>">Show all samples</a><br>
 <a href="<%=h(form.getProtocol().urlFor(ProtocolController.JoinSampleTypeAction.class))%>">Edit join properties</a></p>

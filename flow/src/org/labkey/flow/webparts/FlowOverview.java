@@ -413,11 +413,11 @@ public class FlowOverview extends Overview
         Step ret = new Step("Assign additional meanings to keywords", status);
         if (protocol != null)
         {
-            ExpSampleType st = protocol.getSampleType();
+            ExpSampleType st = protocol.getSampleType(getUser());
             if (st != null)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples())).append("\">").append(st.getSamples(getContainer()).size()).append(" sample descriptions</a> in this folder.");
+                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples())).append("\">").append(protocol.getSamples(st, getUser()).size()).append(" sample descriptions</a> in this folder.");
 
                 ret.setStatusHTML(sb.toString());
 

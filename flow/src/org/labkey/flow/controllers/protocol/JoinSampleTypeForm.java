@@ -69,7 +69,7 @@ public class JoinSampleTypeForm extends ProtocolForm
     {
         LinkedHashMap<String,String> ret = new LinkedHashMap<>();
         ret.put("", "");
-        ExpSampleType sampleType = getProtocol().getSampleType();
+        ExpSampleType sampleType = getProtocol().getSampleType(getUser());
         if (sampleType != null)
         {
             if (sampleType.hasNameAsIdCol())
