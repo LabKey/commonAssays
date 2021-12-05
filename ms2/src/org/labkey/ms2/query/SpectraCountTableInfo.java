@@ -48,17 +48,17 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
     private final SpectraCountConfiguration _config;
     private final ViewContext _context;
 
-    private List<PeptideAggregate> _aggregates = new ArrayList<>();
-    private MS2Controller.SpectraCountForm _form;
+    private final List<PeptideAggregate> _aggregates = new ArrayList<>();
+    private final MS2Controller.SpectraCountForm _form;
 
     private class PeptideAggregate
     {
         private final FieldKey _key;
-        private boolean _max;
-        private boolean _min;
-        private boolean _avg;
-        private boolean _stdDev;
-        private boolean _sum;
+        private final boolean _max;
+        private final boolean _min;
+        private final boolean _avg;
+        private final boolean _stdDev;
+        private final boolean _sum;
 
         private PeptideAggregate(FieldKey key, boolean max, boolean min, boolean avg, boolean stdDev, boolean sum)
         {
