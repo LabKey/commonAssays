@@ -507,7 +507,7 @@ public class MS2Schema extends UserSchema
     public ProteinGroupTableInfo createProteinGroupsForRunTable(ContainerFilter cf, boolean includeFirstProteinColumn)
     {
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, cf, includeFirstProteinColumn);
-        result.addProteinsColumn();
+        result.addProteinsColumn(cf);
         List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
         defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
@@ -706,7 +706,7 @@ public class MS2Schema extends UserSchema
                 sql.append(")");
                 addCondition(sql, containerFieldKey);
             }
-        };
+    };
         result.wrapAllColumns(true);
         result.setTitleColumn("FileName");
 
@@ -740,7 +740,7 @@ public class MS2Schema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return new RunTableInfo(MS2Schema.this);
+                return new RunTableInfo(MS2Schema.this, cf);
             }
         });
 
