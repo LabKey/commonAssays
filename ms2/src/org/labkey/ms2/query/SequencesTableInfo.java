@@ -24,6 +24,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
@@ -32,7 +33,6 @@ import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
@@ -46,7 +46,6 @@ import org.labkey.ms2.protein.CustomAnnotationType;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
-import org.labkey.ms2.protein.query.CustomAnnotationTable;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
 
 import java.util.ArrayList;
@@ -62,14 +61,6 @@ import java.util.StringTokenizer;
  */
 public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredTable<SchemaType>
 {
-    // TODO ContainerFilter
-    @Deprecated
-    protected SequencesTableInfo(String name, SchemaType schema)
-    {
-        this(schema, null);
-        setName(name);
-    }
-
     protected SequencesTableInfo(String name, SchemaType schema, ContainerFilter cf)
     {
         this(schema, cf);
@@ -120,7 +111,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                         SQLFragment sql = new SQLFragment();
 
                         sql.append("(SELECT MIN(CustomAnnotationId) FROM ");
-                        sql.append(ProteinManager.getTableInfoCustomAnnotation());
+                        sql.append(ProteinManager.getTableInfoCustomAnnotation(), "ca");
                         CustomAnnotationType type = annotationSet.lookupCustomAnnotationType();
                         sql.append(" WHERE CustomAnnotationSetId = ? AND LookupString IN (");
                         sql.append(type.getLookupStringSelect(parent));
@@ -129,15 +120,12 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                         ExprColumn ret = new ExprColumn(parent.getParentTable(), displayField,
                             sql, JdbcType.INTEGER, parent);
                         ret.setLabel(annotationSet.getName());
-                        ret.setFk(new LookupForeignKey("CustomAnnotationId")
-                        {
-                            @Override
-                            public TableInfo getLookupTableInfo()
-                            {
-                                // TODO ContainerFilter
-                                return new CustomAnnotationTable(annotationSet, new CustomAnnotationSchema(_userSchema.getUser(), _userSchema.getContainer(), false));
-                            }
-                        });
+                        ForeignKey fk = new QueryForeignKey.Builder(schema, cf).
+                                schema(CustomAnnotationSchema.SCHEMA_WITHOUT_SEQUENCES_NAME).
+                                table(annotationSet.getName()).
+                                key("CustomAnnotationId").
+                                build();
+                        ret.setFk(fk);
                         return ret;
                     }
                 }
@@ -171,7 +159,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         for (CustomAnnotationType type : CustomAnnotationType.values())
         {
             SQLFragment sql = new SQLFragment(type.getFirstSelectForSeqId());
-            ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type.toString(), sql, JdbcType.VARCHAR);
+            ExprColumn firstIdentColumn = new ExprColumn(this, "First" + type, sql, JdbcType.VARCHAR);
             firstIdentColumn.setLabel("First " + type.getDescription());
             addColumn(firstIdentColumn);
         }
@@ -203,39 +191,24 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
     public void addPeptideAggregationColumns()
     {
         var aaColumn = wrapColumn("AACoverage", getRealTable().getColumn("ProtSequence"));
-        aaColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
-                ColumnInfo seqIdColumn = colInfo.getParentTable().getColumn("SeqId");
-                return new QueryAACoverageColumn(colInfo, seqIdColumn, peptideColumn);
-            }
+        aaColumn.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            ColumnInfo seqIdColumn = colInfo.getParentTable().getColumn("SeqId");
+            return new QueryAACoverageColumn(colInfo, seqIdColumn, peptideColumn);
         });
         addColumn(aaColumn);
 
         var totalCount = wrapColumn("Peptides", getRealTable().getColumn("SeqId"));
-        totalCount.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
-                return new PeptideCountCoverageColumn(colInfo, peptideColumn, "Peptides");
-            }
+        totalCount.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            return new PeptideCountCoverageColumn(colInfo, peptideColumn, "Peptides");
         });
         addColumn(totalCount);
 
         var uniqueCount = wrapColumn("UniquePeptides", getRealTable().getColumn("SeqId"));
-        uniqueCount.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
-                return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn, "Unique");
-            }
+        uniqueCount.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn, "Unique");
         });
         addColumn(uniqueCount);
     }
