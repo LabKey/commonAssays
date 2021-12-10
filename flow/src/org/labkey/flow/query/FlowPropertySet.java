@@ -19,8 +19,11 @@ package org.labkey.flow.query;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.junit.Test;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.test.TestWhen;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.flow.analysis.model.PopulationName;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -46,6 +49,8 @@ public class FlowPropertySet
     private Collection<AttributeCache.StatisticEntry> _statistics;
     private Collection<AttributeCache.GraphEntry> _graphs;
     private Map<String, SubsetSpec> _subsetNameAncestorMap;
+    // subsets processed and added to _subsetNameAncestorMap
+    private Set<SubsetSpec> _subsets;
 
     public FlowPropertySet(ExpDataTable table)
     {
@@ -110,8 +115,11 @@ public class FlowPropertySet
     public SubsetSpec simplifySubset(SubsetSpec subset)
     {
         initStatisticsAndGraphs();
-        if (subset == null)
-            return null;
+
+        // do not simplify if this subset was not processed in initStatisticsAndGraphs()
+        if (subset == null || !_subsets.contains(subset))
+            return subset;
+
         PopulationName name = null;
         SubsetExpression expr = null;
         if (subset.isExpression())
@@ -144,6 +152,7 @@ public class FlowPropertySet
         }
         catch (Exception e)
         {
+            assert false : "Error with subset '" + subset + "' and ancestor '" + commonAncestor + "'";
             _log.error("Error with subset '" + subset + "' and ancestor '" + commonAncestor + "'", e);
             return subset;
         }
@@ -155,18 +164,18 @@ public class FlowPropertySet
             return;
         _statistics = AttributeCache.STATS.byContainer(_container);
         _graphs = AttributeCache.GRAPHS.byContainer(_container);
-        Set<SubsetSpec> subsets = new HashSet<>();
+        _subsets = new HashSet<>();
         for (AttributeCache.StatisticEntry stat : _statistics)
         {
             StatisticSpec spec = stat.getAttribute();
-            subsets.add(spec.getSubset());
+            _subsets.add(spec.getSubset());
         }
         for (AttributeCache.GraphEntry graph : _graphs)
         {
             GraphSpec spec = graph.getAttribute();
-            subsets.add(spec.getSubset());
+            _subsets.add(spec.getSubset());
         }
-        _subsetNameAncestorMap = getSubsetNameAncestorMap(subsets);
+        _subsetNameAncestorMap = getSubsetNameAncestorMap(_subsets);
     }
 
     public Collection<AttributeCache.StatisticEntry> getStatistics()
@@ -199,5 +208,30 @@ public class FlowPropertySet
                 visible.add(entry.getAttribute());
         }
         return visible;
+    }
+
+
+    @TestWhen(TestWhen.When.DAILY)
+    public static class TestCase
+    {
+        @Test
+        public void testSimplifySubset()
+        {
+            var subset1 = SubsetSpec.fromParts(StringUtils.split("Trucount beads-/CD45+, less debris/Singlets/CD45+/CD14-/CD3+ T/CD4+ T/CD127low-,CD25+ (Treg)",'/'));
+            var subset2 = SubsetSpec.fromParts(StringUtils.split("trucount beads-/CD45+, less debris/Singlets/CD45+/CD14-/CD3+ T/CD4+ T/CD127low-,CD25+ (Treg)",'/'));
+            SubsetSpec simplify1, simplify2;
+
+            // this tests that we do not hit the assert in the catch block in simplifySubset()
+            FlowPropertySet fps = new FlowPropertySet(JunitUtil.getTestContainer());
+            fps._subsets = Set.of(subset1);
+            fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
+            simplify1 = fps.simplifySubset(subset1);
+            simplify2 = fps.simplifySubset(subset2);
+
+            fps._subsets = Set.of(subset1, subset2);
+            fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
+            simplify1 = fps.simplifySubset(subset1);
+            simplify2 = fps.simplifySubset(subset2);
+        }
     }
 }
