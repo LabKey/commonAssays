@@ -16,6 +16,7 @@
 
 package org.labkey.ms2.query;
 
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.ms2.MS2Manager;
 
@@ -25,9 +26,9 @@ import org.labkey.ms2.MS2Manager;
  */
 public class ITraqProteinQuantitationTable extends FilteredTable<MS2Schema>
 {
-    public ITraqProteinQuantitationTable(MS2Schema schema)
+    public ITraqProteinQuantitationTable(MS2Schema schema, ContainerFilter cf)
     {
-        super(MS2Manager.getTableInfoITraqProteinQuantitation(), schema);
+        super(MS2Manager.getTableInfoITraqProteinQuantitation(), schema, cf);
         wrapAllColumns(true);
         getMutableColumn("ProteinGroupId").setHidden(true);
     }
