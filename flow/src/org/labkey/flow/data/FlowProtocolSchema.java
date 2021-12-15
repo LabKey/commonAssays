@@ -62,8 +62,10 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     public TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
-        // AssayProtocolSchema.createDataTable() hacks on returned TableInfo therefore forWrite==true
-        return flowSchema.getTable(FlowTableType.FCSAnalyses.name(), cf, true, true);
+        //assert protocol == flowSchema.getProtocol();
+        ExpDataTable ti;
+        ti = flowSchema.createFCSAnalysisTable(FlowTableType.FCSAnalyses.name(), cf, FlowDataType.FCSAnalysis, includeLinkedToStudyColumns);
+        return ti;
     }
 
     @Nullable
