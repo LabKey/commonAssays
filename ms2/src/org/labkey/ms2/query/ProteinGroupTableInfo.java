@@ -86,8 +86,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                // TODO ContainerFilter
-                return new ProteinQuantitationTable(_userSchema);
+                return new ProteinQuantitationTable(_userSchema, cf);
             }
         });
         quantitation.setKeyField(false);
@@ -101,8 +100,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                // TODO ContainerFilter
-                return new ITraqProteinQuantitationTable(_userSchema);
+                return new ITraqProteinQuantitationTable(_userSchema, cf);
             }
         });
         iTraqQuantitation.setKeyField(false);
@@ -121,8 +119,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                // TODO ContainerFilter
-                return new ProteinProphetFileTableInfo(_userSchema);
+                return new ProteinProphetFileTableInfo(_userSchema, cf);
             }
         };
         foreignKey.setPrefixColumnCaption(false);
@@ -204,7 +201,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         addCondition(condition, FieldKey.fromParts("RowId"));
     }
 
-    public void addProteinsColumn()
+    public void addProteinsColumn(ContainerFilter cf)
     {
         var proteinGroup = wrapColumn("Proteins", getRealTable().getColumn("RowId"));
         LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ProteinGroupId", null)
@@ -212,9 +209,8 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                // TODO ContainerFilter
                 TableInfo info = MS2Manager.getTableInfoProteinGroupMemberships();
-                FilteredTable result = new FilteredTable<>(info, getUserSchema());
+                FilteredTable<?> result = new FilteredTable<>(info, getUserSchema(), cf);
                 for (ColumnInfo col : info.getColumns())
                 {
                     var newColumn = result.addWrapColumn(col);
