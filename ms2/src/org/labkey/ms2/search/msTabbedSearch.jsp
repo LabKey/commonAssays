@@ -16,8 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.module.ModuleLoader" %>
-<%@ page import="org.labkey.api.util.UniqueID" %>
-<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -30,7 +28,7 @@
 %>
 <%
     boolean targetedMSModuleActive = getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("TargetedMS"));
-    String renderId = "tabbed-search-form-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
+    String renderId = "tabbed-search-form-" + getRequestScopedUID();
 %>
 <div id=<%=q(renderId)%>></div>
 

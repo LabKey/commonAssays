@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.UniqueID" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -33,7 +32,7 @@
 <%
     JspView<ElisaController.RunDetailsForm> me = (JspView<ElisaController.RunDetailsForm>) HttpView.currentView();
     ElisaController.RunDetailsForm form = me.getModelBean();
-    String appId = "run-details-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
+    String appId = "run-details-" + getRequestScopedUID();
 %>
 
 <div id="<%=h(appId)%>"></div>
