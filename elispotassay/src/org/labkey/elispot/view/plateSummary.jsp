@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.UniqueID"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
-<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.elispot.ElispotController" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -34,7 +33,7 @@
     JspView<ElispotController.PlateSummaryBean> me = (JspView<ElispotController.PlateSummaryBean>)HttpView.currentView();
     ElispotController.PlateSummaryBean bean = me.getModelBean();
 
-    String renderId = "plate-summary-div-" + UniqueID.getRequestScopedUID(HttpView.currentRequest());
+    String renderId = "plate-summary-div-" + getRequestScopedUID();
 %>
 
 <style type="text/css">
