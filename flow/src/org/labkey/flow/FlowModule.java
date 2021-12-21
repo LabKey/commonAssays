@@ -72,6 +72,7 @@ import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.FlowKeywordAuditProvider;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.PersistTests;
+import org.labkey.flow.query.FlowPropertySet;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.reports.ControlsQCReport;
 import org.labkey.flow.reports.ControlsQCReportUIProvider;
@@ -321,7 +322,8 @@ public class FlowModule extends SpringModule
             StatisticSpec.TestCase.class,
             SubsetParser.TestLexer.class,
             SubsetTests.class,
-            LogicleRangeFunction.TestCase.class
+            LogicleRangeFunction.TestCase.class,
+            FlowPropertySet.TestCase.class
         );
     }
 
