@@ -60,4 +60,10 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
         result.add(LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME);
         return result;
     }
+
+    @Override
+    public boolean allowTextChoiceProperties()
+    {
+        return false;
+    }
 }
