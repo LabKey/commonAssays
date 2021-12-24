@@ -264,10 +264,11 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
         {
             @Override
-            public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
             {
-                super.fileMoved(srcFile, destFile, user, container);
+                int result = super.fileMoved(srcFile, destFile, user, container);
                 MS2Manager.clearRunCache();
+                return result;
             }
         });
 
@@ -279,10 +280,11 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
         {
             @Override
-            public void fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
             {
-                super.fileMoved(srcFile, destFile, user, container);
+                int result = super.fileMoved(srcFile, destFile, user, container);
                 MS2Manager.clearFractionCache();
+                return result;
             }
         });
         FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
