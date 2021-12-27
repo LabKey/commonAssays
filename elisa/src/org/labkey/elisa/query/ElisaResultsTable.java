@@ -64,30 +64,33 @@ public class ElisaResultsTable extends AssayResultTable
 
         // add a lookup to the material table
         BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
-        specimenColumn.setLabel("Specimen");
-        specimenColumn.setHidden(false);
-
-        specimenColumn.setFk(new LookupForeignKey(getContainerFilter(), "LSID", null)
+        if (specimenColumn != null)
         {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                if (sampleType != null)
-                {
-                    materials.setSampleType(sampleType, true);
-                }
-                var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
-                if (propertyCol.getFk() instanceof PropertyForeignKey)
-                {
-                    ((PropertyForeignKey) propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(_provider, _protocol, schema));
-                }
-                propertyCol.setHidden(false);
-                materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
+            specimenColumn.setLabel("Specimen");
+            specimenColumn.setHidden(false);
 
-                return materials;
-            }
-        });
+            specimenColumn.setFk(new LookupForeignKey(getContainerFilter(), "LSID", null)
+            {
+                @Override
+                public TableInfo getLookupTableInfo()
+                {
+                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
+                    if (sampleType != null)
+                    {
+                        materials.setSampleType(sampleType, true);
+                    }
+                    var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
+                    if (propertyCol.getFk() instanceof PropertyForeignKey)
+                    {
+                        ((PropertyForeignKey) propertyCol.getFk()).addDecorator(new SpecimenPropertyColumnDecorator(_provider, _protocol, schema));
+                    }
+                    propertyCol.setHidden(false);
+                    materials.addColumn(ExpMaterialTable.Column.LSID).setHidden(true);
+
+                    return materials;
+                }
+            });
+        }
 
         visibleColumns.addAll(getDefaultVisibleColumns());
         setDefaultVisibleColumns(visibleColumns);
