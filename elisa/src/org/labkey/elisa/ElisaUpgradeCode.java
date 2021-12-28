@@ -1,6 +1,7 @@
 package org.labkey.elisa;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
@@ -29,7 +30,7 @@ import java.util.Set;
 
 public class ElisaUpgradeCode implements UpgradeCode
 {
-    private static final Logger _log = Logger.getLogger(ElisaUpgradeCode.class);
+    private static final Logger _log = LogManager.getLogger(ElisaUpgradeCode.class);
 
     // Invoked by elisa-0.000-20.000.sql
     @SuppressWarnings({"UnusedDeclaration"})

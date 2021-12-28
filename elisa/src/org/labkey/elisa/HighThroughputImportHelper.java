@@ -1,6 +1,7 @@
 package org.labkey.elisa;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
@@ -32,7 +33,8 @@ import java.util.Set;
 
 public class HighThroughputImportHelper extends AbstractElisaImportHelper
 {
-    private static final Logger LOG = Logger.getLogger(HighThroughputImportHelper.class);
+    private static final Logger LOG = LogManager.getLogger(HighThroughputImportHelper.class);
+
     private Map<String, AnalytePlate> _plateMap = new HashMap<>();
     private PlateTemplate _plateTemplate;
 
