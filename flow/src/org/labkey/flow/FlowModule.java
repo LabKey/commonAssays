@@ -111,7 +111,7 @@ public class FlowModule extends SpringModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 21.001;
+        return 22.000;
     }
 
     @Override
