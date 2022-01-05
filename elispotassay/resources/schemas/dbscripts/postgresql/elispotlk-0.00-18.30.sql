@@ -17,6 +17,9 @@
 /* elispotlk-15.10-15.20.sql */
 
 CREATE SCHEMA elispotlk;
+-- Until 21.11.5, the elispotassay module did not claim ownership of the "elispotantigen" schema. So, deleting that
+-- module and its schema would leave "elispotantigen" behind and any subsequent bootstrap would fail. See #44610.
+SELECT core.fn_dropIfExists('*', 'elispotantigen', 'SCHEMA', NULL);
 CREATE SCHEMA elispotantigen;
 
 CREATE TABLE elispotlk.rundata
