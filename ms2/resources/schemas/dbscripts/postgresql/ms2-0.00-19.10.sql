@@ -1045,13 +1045,6 @@ ALTER TABLE ms2.peptidesdata
 SELECT core.fn_dropifexists('PeptidesData','ms2', 'INDEX','UQ_MS2PeptidesData_FractionScanCharge');
 CREATE UNIQUE INDEX UQ_MS2PeptidesData_FractionScanCharge ON ms2.PeptidesData(Fraction, Scan, EndScan, Charge, HitRank, Decoy, QueryNumber);
 
--- Create a new set of properties for Mascot settings
-INSERT INTO prop.propertysets (category, objectid, userid) SELECT 'MascotConfig' AS Category, EntityId, -1 AS UserId FROM core.containers WHERE parent IS NULL;
-
--- Migrate existing Mascot settings
-UPDATE prop.properties SET "set" = (SELECT MAX("set") FROM prop.propertysets)
-  WHERE name LIKE 'Mascot%' AND "set" = (SELECT "set" FROM prop.propertysets WHERE category = 'SiteConfig' AND userid = -1 AND objectid = (SELECT entityid FROM core.containers WHERE parent IS NULL));
-
 CREATE TABLE ms2.FastaRunMapping (
   Run INT NOT NULL,
   FastaId INT NOT NULL,
