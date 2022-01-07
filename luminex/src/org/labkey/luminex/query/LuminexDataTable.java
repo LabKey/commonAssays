@@ -96,7 +96,6 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         final ExpProtocol protocol = schema.getProtocol();
 
         setName(AssayProtocolSchema.DATA_TABLE_NAME);
-        setPublicSchemaName(AssaySchema.NAME);
 
         _provider = (LuminexAssayProvider)AssayService.get().getProvider(protocol);
 
