@@ -18,15 +18,14 @@ package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.plate.PlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.plate.PlateBasedAssayProvider;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.elispot.pipeline.ElispotPipelineProvider;
 import org.labkey.elispot.query.ElispotAntigenDomainKind;
@@ -73,7 +72,16 @@ public class ElispotModule extends DefaultModule
     @Override
     public Set<String> getSchemaNames()
     {
-        return PageFlowUtil.set(ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME);
+        return Set.of(
+            ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME,
+            ElispotProtocolSchema.ELISPOT_ANTIGEN_SCHEMA_NAME
+        );
+    }
+
+    @Override
+    public @NotNull Collection<String> getProvisionedSchemaNames()
+    {
+        return Set.of(ElispotProtocolSchema.ELISPOT_ANTIGEN_SCHEMA_NAME);
     }
 
     @Override
