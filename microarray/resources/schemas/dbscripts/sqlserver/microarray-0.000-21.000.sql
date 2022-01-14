@@ -16,18 +16,20 @@
 
 /* microarray-0.00-12.10.sql */
 
+-- Tables used for Microarray module
 CREATE SCHEMA microarray;
+GO
 
 CREATE TABLE microarray.geo_properties
 (
-    rowid SERIAL,
+    rowid INT identity(1,1) NOT NULL,
     prop_name VARCHAR(200),
     category VARCHAR(200),
     value TEXT,
     container ENTITYID,
-    created TIMESTAMP,
+    created DATETIME,
     createdby INTEGER,
-    modified TIMESTAMP,
+    modified DATETIME,
     modifiedby INTEGER,
 
     CONSTRAINT PK_geo_properties PRIMARY KEY (rowid)
@@ -43,32 +45,32 @@ UPDATE exp.PropertyDescriptor SET LookupContainer = NULL
 /* microarray-13.30-14.10.sql */
 
 CREATE TABLE microarray.FeatureAnnotationSet (
-  RowId SERIAL,
+  RowId INT IDENTITY (1,1) NOT NULL,
   Container ENTITYID NOT NULL,
   CreatedBy USERID NOT NULL,
-  Created TIMESTAMP NOT NULL,
+  Created DATETIME NOT NULL,
   ModifiedBy USERID NOT NULL,
-  Modified TIMESTAMP NOT NULL,
+  Modified DATETIME NOT NULL,
 
-  "Name" VARCHAR(255) NOT NULL,
-  Vendor VARCHAR(50),
-  Description VARCHAR(2000),
+  "Name" NVARCHAR(255) NOT NULL,
+  Vendor NVARCHAR(50),
+  Description NVARCHAR(2000),
 
   CONSTRAINT PK_FeatureAnnotationSet PRIMARY KEY (RowId),
-  CONSTRAINT FK_FeatureAnnotationSet_Container FOREIGN KEY (Container) REFERENCES core.containers (entityid)
+  CONSTRAINT FK_FeatureAnnotationSet_Container FOREIGN KEY (Container) REFERENCES core.Containers(EntityId)
 );
 
 CREATE TABLE microarray.FeatureAnnotation (
-  RowId SERIAL,
+  RowId INT IDENTITY (1,1) NOT NULL,
   Container ENTITYID NOT NULL,
   CreatedBy USERID NOT NULL,
-  Created TIMESTAMP NOT NULL,
+  Created DATETIME NOT NULL,
   ModifiedBy USERID NOT NULL,
-  Modified TIMESTAMP NOT NULL,
+  Modified DATETIME NOT NULL,
 
   FeatureAnnotationSetId INT NOT NULL,
-  ProbeId VARCHAR(128) NOT NULL,
-  GeneSymbol VARCHAR(2000),
+  ProbeId NVARCHAR(128) NOT NULL,
+  GeneSymbol NVARCHAR(2000),
 
   CONSTRAINT PK_FeatureAnnotation PRIMARY KEY (RowId),
   CONSTRAINT UQ_FeatureAnnotation_ProbeId_FeatureAnnotationSetId UNIQUE (ProbeId, FeatureAnnotationSetId),
@@ -76,7 +78,7 @@ CREATE TABLE microarray.FeatureAnnotation (
 );
 
 CREATE TABLE microarray.FeatureData (
-  RowId SERIAL,
+  RowId INT IDENTITY (1,1) NOT NULL,
   "Value" REAL,
   FeatureId INT NOT NULL,
   SampleId INT NOT NULL,
@@ -89,41 +91,41 @@ CREATE TABLE microarray.FeatureData (
 );
 
 -- Rename ProbeId to FeatureId
-ALTER TABLE microarray.FeatureAnnotation
-  RENAME ProbeId TO FeatureId;
+EXEC sp_rename 'microarray.FeatureAnnotation.ProbeId', 'FeatureId', 'COLUMN';
 
--- Rename UNIQUE constraint
-ALTER TABLE microarray.featureannotation DROP CONSTRAINT uq_featureannotation_probeid_featureannotationsetid;
-CREATE UNIQUE INDEX UQ_FeatureAnnotation_FeatureId_FeatureAnnotationSetId ON microarray.featureannotation(FeatureId, FeatureAnnotationSetId);
+EXEC sp_rename 'microarray.featureannotation.UQ_FeatureAnnotation_ProbeId_FeatureAnnotationSetId', 'UQ_FeatureAnnotation_FeatureId_FeatureAnnotationSetId';
+
 
 -- Restore original GEOMicroarray FeatureAnnotation columns
-ALTER TABLE microarray.FeatureAnnotation ADD UniGeneId VARCHAR(2000);
-ALTER TABLE microarray.FeatureAnnotation ADD GeneId VARCHAR(2000);
-ALTER TABLE microarray.FeatureAnnotation ADD AccessionId VARCHAR(128);
-ALTER TABLE microarray.FeatureAnnotation ADD ReqSeqProteinId VARCHAR(2000);
-ALTER TABLE microarray.FeatureAnnotation ADD ReqSeqTranscriptId VARCHAR(2000);
+ALTER TABLE microarray.FeatureAnnotation ADD UniGeneId NVARCHAR(2000);
+ALTER TABLE microarray.FeatureAnnotation ADD GeneId NVARCHAR(2000);
+ALTER TABLE microarray.FeatureAnnotation ADD AccessionId NVARCHAR(128);
+ALTER TABLE microarray.FeatureAnnotation ADD ReqSeqProteinId NVARCHAR(2000);
+ALTER TABLE microarray.FeatureAnnotation ADD ReqSeqTranscriptId NVARCHAR(2000);
 
 CREATE INDEX IX_FeatureAnnotation_FeatureAnnotationSetId
    ON microarray.FeatureAnnotation (FeatureAnnotationSetId);
 
 -- Issue 19548: Feature annotations in expression matrix are missing columns from GEOMicroarray
 -- Fix typo: rename 'Req' -> 'Ref'
-ALTER TABLE microarray.FeatureAnnotation
-  RENAME ReqSeqProteinId TO RefSeqProteinId;
-
-ALTER TABLE microarray.FeatureAnnotation
-  RENAME ReqSeqTranscriptId TO RefSeqTranscriptId;
+EXEC sp_rename 'microarray.FeatureAnnotation.ReqSeqProteinId', 'RefSeqProteinId', 'COLUMN';
+EXEC sp_rename 'microarray.FeatureAnnotation.ReqSeqTranscriptId', 'RefSeqTranscriptId', 'COLUMN';
 
 /* microarray-14.10-14.20.sql */
 
 CREATE INDEX IX_FeatureData_SampleId ON microarray.featuredata(SampleId);
 CREATE INDEX IX_FeatureData_DataId ON microarray.featuredata(DataId);
 CREATE INDEX IX_FeatureData_FeatureId ON microarray.featuredata(FeatureId);
+GO
 
 ALTER TABLE microarray.FeatureData ADD CONSTRAINT UQ_FeatureData_DataId_FeatureId_SampleId UNIQUE (DataId, FeatureId, SampleId);
 
-DROP INDEX microarray.IX_FeatureData_DataId;
+DROP INDEX IX_FeatureData_DataId ON microarray.FeatureData;
 
 /* microarray-17.20-17.30.sql */
 
-ALTER TABLE microarray.FeatureAnnotationSet ADD COLUMN comment VARCHAR(200);
+ALTER TABLE microarray.FeatureAnnotationSet ADD comment NVARCHAR(200);
+
+/* microarray-19.20-19.30.sql */
+
+DROP TABLE microarray.geo_properties;
