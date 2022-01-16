@@ -64,12 +64,6 @@ public class NabModule extends DefaultModule
     }
 
     @Override
-    public @Nullable UpgradeCode getUpgradeCode()
-    {
-        return new NabUpgradeCode();
-    }
-
-    @Override
     protected void init()
     {
         addController("nabassay", NabAssayController.class);
