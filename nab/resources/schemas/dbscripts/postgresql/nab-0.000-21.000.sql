@@ -183,6 +183,7 @@ DROP FUNCTION nab.ensureIndex();
 
 /* nab-16.30-17.10.sql */
 
-/* nab-16.30-16.31.sql */
-
 ALTER TABLE nab.WellData ADD Excluded BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE nab.nabspecimen ADD COLUMN FitParameters VARCHAR(500);
+SELECT core.executeJavaUpgradeCode('populateFitParameters');

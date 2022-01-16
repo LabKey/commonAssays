@@ -1082,3 +1082,7 @@ ALTER TABLE ms2.itraqpeptidequantitation ADD COLUMN Normalized10 REAL;
 /* ms2-18.30-19.10.sql */
 
 UPDATE ms2.fractions SET MzXmlUrl = 'file:///' || substr(MzXmlUrl, 7) WHERE MzXmlUrl LIKE 'file:/_%' AND MzXmlUrl NOT LIKE 'file:///%' AND MzXmlUrl IS NOT NULL;
+
+/* ms2-19.20-19.30.sql */
+
+DROP TABLE ms2.History;
