@@ -15,6 +15,7 @@
  */
 package org.labkey.nab;
 
+import org.json.JSONObject;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
@@ -50,7 +51,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
 
     public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut, boolean includeFitParameters)
     {
-        this(assay, includeStats, includeWells, calculateNeut, includeFitParameters, Collections.EMPTY_MAP);
+        this(assay, includeStats, includeWells, calculateNeut, includeFitParameters, Collections.emptyMap());
     }
 
     public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut,
@@ -85,10 +86,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
             // add any additional properties associated with this object id
             if (extraObjectIdProps.containsKey(result.getObjectId()))
             {
-                for (Map.Entry<String, Object> entry : extraObjectIdProps.get(result.getObjectId()).entrySet())
-                {
-                    sample.put(entry.getKey(), entry.getValue());
-                }
+                sample.putAll(extraObjectIdProps.get(result.getObjectId()));
             }
 
             sample.put("wellgroupName", wellGroup.getName());
@@ -108,9 +106,9 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                         sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType()));
                     }
                 }
-                if (includeFitParameters)
+                if (includeFitParameters && null != specimenRow)
                 {
-                    sample.put("fitParameters", NabManager.get().ensureFitParameters(null, specimenRow, assay, dilutionSummary));
+                    sample.put("fitParameters", new JSONObject(specimenRow.getFitParameters()));
                 }
                 List<Map<String, Object>> replicates = new ArrayList<>();
                 for (WellGroup sampleGroup : dilutionSummary.getWellGroups())

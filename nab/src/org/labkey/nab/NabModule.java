@@ -18,17 +18,15 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayDefaultFlagHandler;
-import org.labkey.api.data.ContainerManager;
 import org.labkey.api.assay.AssayFlagHandler;
-import org.labkey.api.data.UpgradeCode;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.SystemMaintenance;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabAssayProvider;
 import org.labkey.nab.multiplate.CrossPlateDilutionNabDataHandler;
@@ -38,10 +36,8 @@ import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 import org.labkey.nab.query.NabVirusDomainKind;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -61,12 +57,6 @@ public class NabModule extends DefaultModule
     public @Nullable Double getSchemaVersion()
     {
         return 22.000;
-    }
-
-    @Override
-    public @Nullable UpgradeCode getUpgradeCode()
-    {
-        return new NabUpgradeCode();
     }
 
     @Override
@@ -124,14 +114,12 @@ public class NabModule extends DefaultModule
         AssayFlagHandler.registerHandler(new SinglePlateDilutionNabAssayProvider(), handler);
 
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
-
-        SystemMaintenance.addTask(new NAbPopulateFitParametersTask());
     }
 
     @NotNull
     @Override
     public Set<Class> getUnitTests()
     {
-        return new HashSet<>(Arrays.<Class>asList(PlateParserTests.class));
+        return Set.of(PlateParserTests.class);
     }
 }
