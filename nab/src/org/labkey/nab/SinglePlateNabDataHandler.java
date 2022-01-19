@@ -17,9 +17,7 @@
 package org.labkey.nab;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
@@ -114,8 +112,8 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
             if (ExcelLoader.isExcel(dataFile))
             {
-                final Workbook workbook = ExcelFactory.create(dataFile);
-                for (int i = 0, len = workbook.getNumberOfSheets(); i < len; i++)
+                final ExcelFactory.WorkbookMetadata md = ExcelFactory.getMetadata(dataFile);
+                for (int i = 0, len = md.getSheetNames().size(); i < len; i++)
                 {
                     final int sheetNum = i;
                     Load load = new Load()
@@ -134,7 +132,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
                         DataLoader createLoader(boolean hasColumnHeaders)
                         {
-                            ExcelLoader loader = new ExcelLoader(workbook, hasColumnHeaders, null);
+                            ExcelLoader loader = new ExcelLoader(dataFile, md, hasColumnHeaders, null);
                             loader.setInferTypes(false);
                             loader.setIncludeBlankLines(true);
                             loader.setSheetIndex(sheetNum);
@@ -168,7 +166,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     return values;
             }
         }
-        catch (InvalidFormatException | IOException e)
+        catch (IOException|InvalidFormatException e)
         {
             throw createParseError(dataFile, e.getMessage(), e);
         }
