@@ -213,7 +213,7 @@ public class FlowSchema extends UserSchema
         try
         {
             FlowTableType type = FlowTableType.valueOf(name);
-            AbstractTableInfo table = (AbstractTableInfo)getTable(type, cf);
+            AbstractTableInfo table = (AbstractTableInfo)createTable(type, cf);
             table.setDescription(type.getDescription());
             return table;
         }
@@ -225,7 +225,7 @@ public class FlowSchema extends UserSchema
     }
 
 
-    public TableInfo getTable(FlowTableType type, ContainerFilter cf)
+    private TableInfo createTable(FlowTableType type, ContainerFilter cf)
     {
         switch (type)
         {
@@ -252,6 +252,13 @@ public class FlowSchema extends UserSchema
         }
         return null;
     }
+
+
+    public TableInfo getTable(@NotNull FlowTableType type, ContainerFilter cf)
+    {
+        return getTable(type.toString(), cf);
+    }
+
 
     @Override
     public Set<String> getVisibleTableNames()
@@ -421,7 +428,7 @@ public class FlowSchema extends UserSchema
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return detach().createAnalysisScriptTable("Lookup", getLookupContainerFilter(), true);
+                    return createAnalysisScriptLookup(getLookupContainerFilter());
                 }
             });
 
@@ -438,12 +445,11 @@ public class FlowSchema extends UserSchema
         if (type != FlowDataType.CompensationMatrix && type != FlowDataType.FCSFile)
         {
             var colCompensationMatrix= ret.addDataInputColumn("CompensationMatrix", InputRole.CompensationMatrix.toString());
-            colCompensationMatrix.setFk(new LookupForeignKey(cf,
-                    "RowId", "Name") {
+            colCompensationMatrix.setFk(new LookupForeignKey(cf,"RowId", "Name") {
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return detach().createCompensationMatrixTable("Lookup", getLookupContainerFilter());
+                    return createCompensationMatrixLookup(getLookupContainerFilter());
                 }
             });
         }
@@ -1428,7 +1434,7 @@ public class FlowSchema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return detach().createRunTable("run", getLookupContainerFilter(), type);
+                return createRunLookup(getLookupContainerFilter(), type);
             }
         });
         if (_experiment != null)
@@ -1666,7 +1672,7 @@ public class FlowSchema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return detach().createFCSFileTable("FCSFile", getLookupContainerFilter());
+                return createFCSFileLookup(getLookupContainerFilter());
             }
         });
 
@@ -1700,7 +1706,7 @@ public class FlowSchema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return detach().createAnalysisScriptTable("Lookup", getLookupContainerFilter(), true);
+                return createAnalysisScriptLookup(getLookupContainerFilter());
             }
         });
 
@@ -1711,7 +1717,7 @@ public class FlowSchema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return detach().createCompensationMatrixTable("Lookup", getLookupContainerFilter());
+                return createCompensationMatrixLookup(getLookupContainerFilter());
             }
         });
 
@@ -1737,7 +1743,7 @@ public class FlowSchema extends UserSchema
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    return detach().createFCSFileTable("FCSFile", getLookupContainerFilter(),false);
+                    return createFCSFileLookup(getLookupContainerFilter());
                 }
             });
 
@@ -2195,5 +2201,47 @@ public class FlowSchema extends UserSchema
                 uptodate,
                 indexes,
                 30 * CacheManager.MINUTE);
+    }
+
+
+    // Note this table is not the same as returned by FlowSchema.getTable(), so we're not calling getTable() for backward compatibility
+    TableInfo createAnalysisScriptLookup(ContainerFilter cf)
+    {
+        return getCachedLookupTableInfo("AnalysisScriptLookup#"+(null==cf?"null":cf.getCacheKey()), () -> {
+                var ti = detach().createAnalysisScriptTable("Lookup", cf, true);
+                ti.afterConstruct();
+                ti.setLocked(true);
+                return ti;
+        });
+    }
+
+    // Note this table is not the same as returned by FlowSchema.getTable(), so we're not calling getTable() for backward compatibility
+    TableInfo createRunLookup(ContainerFilter cf, FlowDataType type)
+    {
+        return getCachedLookupTableInfo("RunLookup#" + type.getName() + "#" + (null==cf?"null":cf.getCacheKey()), () -> {
+            var ti = detach().createRunTable("run", cf, type);
+            ((AbstractTableInfo)ti).afterConstruct();
+            ti.setLocked(true);
+            return ti;
+        });
+    }
+
+    // Even though this is the same as normal getTable(), note that detach() might change the schema.  I'm not sure
+    // if that affects the definition of this particular table.
+    TableInfo createCompensationMatrixLookup(ContainerFilter cf)
+    {
+        return getCachedLookupTableInfo("CompensationMatrixLookup#"+(null==cf?"null":cf.getCacheKey()), () ->
+                detach().getTable(FlowTableType.CompensationMatrices.name(), cf));
+    }
+
+    // Note this table is not the same as returned by FlowSchema.getTable(), so we're not calling getTable() for backward compatibility
+    TableInfo createFCSFileLookup(ContainerFilter cf)
+    {
+        return getCachedLookupTableInfo("FCSFileLookup#"+(null==cf?"null":cf.getCacheKey()), () -> {
+            var ti = detach().createFCSFileTable("FCSFile", cf, false);
+            ti.afterConstruct();
+            ti.setLocked(true);
+            return ti;
+        });
     }
 }
