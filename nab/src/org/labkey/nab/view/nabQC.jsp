@@ -27,6 +27,10 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
+<%@ page import="static org.labkey.api.util.DOM.cl" %>
+<%@ page import="static org.labkey.api.util.DOM.DIV" %>
+<%@ page import="static org.labkey.api.util.DOM.createHtml" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -40,6 +44,7 @@
     NabAssayController.NabQCForm bean = me.getModelBean();
     DilutionAssayRun assay = bean.getAssay();
     ObjectMapper jsonMapper = new ObjectMapper();
+    HtmlString errorMsg = HtmlString.EMPTY_STRING;
 
     // run properties array
     List<Map<String, String>> runProperties = new ArrayList<>();
@@ -53,27 +58,47 @@
 
     // control properties
     List<Map<String, String>> controlProperties = new ArrayList<>();
-    for (Plate plate : assay.getPlates())
+    try
     {
-        controlProperties.add(PageFlowUtil.map(
-                "controlRange", Luc5Assay.intString(assay.getControlRange(plate, null)),
-                "virusControlMean", Luc5Assay.intString(assay.getVirusControlMean(plate, null)),
-                "virusControlPlusMinus", Luc5Assay.percentString(assay.getVirusControlPlusMinus(plate, null)),
-                "cellControlMean", Luc5Assay.intString(assay.getCellControlMean(plate, null)),
-                "cellControlPlusMinus", Luc5Assay.percentString(assay.getCellControlPlusMinus(plate, null))));
+        for (Plate plate : assay.getPlates())
+        {
+            controlProperties.add(PageFlowUtil.map(
+                    "controlRange", Luc5Assay.intString(assay.getControlRange(plate, null)),
+                    "virusControlMean", Luc5Assay.intString(assay.getVirusControlMean(plate, null)),
+                    "virusControlPlusMinus", Luc5Assay.percentString(assay.getVirusControlPlusMinus(plate, null)),
+                    "cellControlMean", Luc5Assay.intString(assay.getCellControlMean(plate, null)),
+                    "cellControlPlusMinus", Luc5Assay.percentString(assay.getCellControlPlusMinus(plate, null))));
+        }
+    }
+    catch (Exception e)
+    {
+        errorMsg = createHtml(DIV(cl("labkey-error"), "Error loading QC view: " + e.getMessage()));
     }
 %>
-<div id="nabQCDiv"></div>
-<script type="text/javascript">
-    Ext4.onReady(function() {
-        Ext4.create('LABKEY.ext4.NabQCPanel', {
-            renderTo    : 'nabQCDiv',
-            edit        : <%=bean.isEdit()%>,
-            runId       : <%=bean.getRunId()%>,
-            returnUrl   : <%=q(bean.getReturnUrl(getContainer()))%>,
-            runName     : <%=q(assay.getRunName())%>,
-            runProperties : <%=text(jsonMapper.writeValueAsString(runProperties))%>,
-            controlProperties : <%=text(jsonMapper.writeValueAsString(controlProperties))%>
+
+<%
+    if (errorMsg.length() > 0)
+    {
+%>
+    <%=errorMsg%>
+<%
+    }
+    else
+    {
+%>
+    <div id="nabQCDiv"></div>
+    <script type="text/javascript">
+        Ext4.onReady(function() {
+            Ext4.create('LABKEY.ext4.NabQCPanel', {
+                renderTo    : 'nabQCDiv',
+                edit        : <%=bean.isEdit()%>,
+                runId       : <%=bean.getRunId()%>,
+                returnUrl   : <%=q(bean.getReturnUrl(getContainer()))%>,
+                runName     : <%=q(assay.getRunName())%>,
+                runProperties : <%=text(jsonMapper.writeValueAsString(runProperties))%>,
+                controlProperties : <%=text(jsonMapper.writeValueAsString(controlProperties))%>
+            });
         });
-    });
-</script>
+</script><%
+    }
+%>
