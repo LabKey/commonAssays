@@ -55,7 +55,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
         //assert protocol == flowSchema.getProtocol();
-        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs, cf);
+        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs.name(), cf, true, true);
     }
 
     @Override
