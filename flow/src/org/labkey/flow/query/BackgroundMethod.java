@@ -16,10 +16,10 @@
 
 package org.labkey.flow.query;
 
-import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.snapshot.AbstractTableMethodInfo;
@@ -38,7 +38,7 @@ public class BackgroundMethod extends AbstractTableMethodInfo
     }
 
     @Override
-    public BaseColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
+    public MutableColumnInfo createColumnInfo(TableInfo parentTable, ColumnInfo[] arguments, String alias)
     {
         var ret = super.createColumnInfo(parentTable, arguments, alias);
         ret.setFormat("#,##0.###");

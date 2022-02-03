@@ -137,8 +137,7 @@ public class FlowSchema extends UserSchema
 
     private FlowExperiment _experiment;
     private FlowRun _run;
-//    private FlowScript _script;
-    private FlowProtocol _protocol = null;
+    private final FlowProtocol _protocol;
 
     public FlowSchema(User user, Container container)
     {
@@ -536,7 +535,7 @@ public class FlowSchema extends UserSchema
             var colStatistic = addObjectIdColumn(columnAlias);
             colStatistic.setFk(new StatisticForeignKey(FlowSchema.this, _fps, _type));
             colStatistic.setIsUnselectable(true);
-            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
+            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic), Set.of(colStatistic.getFieldKey()));
             return colStatistic;
         }
 
@@ -545,7 +544,7 @@ public class FlowSchema extends UserSchema
             var colKeyword = addObjectIdColumn(columnAlias);
             colKeyword.setFk(new KeywordForeignKey(FlowSchema.this, _fps));
             colKeyword.setIsUnselectable(true);
-            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
+            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword), Set.of(colKeyword.getFieldKey()));
             return colKeyword;
         }
 
@@ -957,7 +956,7 @@ public class FlowSchema extends UserSchema
             var colStatistic = addObjectIdColumn(columnAlias);
             colStatistic.setFk(new StatisticForeignKey(FlowSchema.this, _fps, _type));
             colStatistic.setIsUnselectable(true);
-            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic));
+            addMethod(columnAlias, new StatisticMethod(getContainer(), colStatistic), Set.of(colStatistic.getFieldKey()));
             return colStatistic;
         }
 
@@ -966,7 +965,7 @@ public class FlowSchema extends UserSchema
             var colKeyword = addObjectIdColumn(columnAlias);
             colKeyword.setFk(new KeywordForeignKey(FlowSchema.this, _fps));
             colKeyword.setIsUnselectable(true);
-            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword));
+            addMethod("Keyword", new KeywordMethod(getContainer(), colKeyword), Set.of(colKeyword.getFieldKey()));
             return colKeyword;
         }
 
@@ -988,27 +987,6 @@ public class FlowSchema extends UserSchema
             return ret;
         }
 
-        ColumnInfo addHasURIColumn(String name)
-        {
-            ColumnInfo underlyingColumn = _flowObject.getColumn("uri");
-            ExprColumn ret = new ExprColumn(this, name, new SQLFragment("(CASE WHEN " + ExprColumn.STR_TABLE_ALIAS + ".uri IS NOT NULL THEN true ELSE false END)"), JdbcType.BOOLEAN);
-//            ret.copyAttributesFrom(underlyingColumn);
-            addColumn(ret);
-            return ret;
-        }
-
-        ColumnInfo addExpColumn(ColumnInfo underlyingColumn)
-        {
-            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
-            ret.copyAttributesFrom(underlyingColumn);
-            ret.setHidden(underlyingColumn.isHidden());
-            if (underlyingColumn.getFk() instanceof RowIdForeignKey)
-                ret.setFk(new RowIdForeignKey(ret));
-            addColumn(ret);
-            return ret;
-        }
-
-
         ColumnInfo addBackgroundColumn(String columnAlias)
         {
             var colBackground = addObjectIdColumn(columnAlias);
@@ -1020,7 +998,7 @@ public class FlowSchema extends UserSchema
             if (metadata == null || !metadata.hasCompleteBackground())
                 colBackground.setHidden(true);
 
-            addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground));
+            addMethod(columnAlias, new BackgroundMethod(FlowSchema.this, colBackground), Set.of(colBackground.getFieldKey()));
             return colBackground;
         }
 
