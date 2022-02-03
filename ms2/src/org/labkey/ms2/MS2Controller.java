@@ -69,6 +69,7 @@ import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.AdminConsoleAction;
@@ -2974,7 +2975,7 @@ public class MS2Controller extends SpringActionController
                 return createProteinSearchView(form, errors);
             }
 
-            for (ProteinService.QueryViewProvider provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            for (QueryViewProvider provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
             {
                 if (provider.getDataRegionName().equals(dataRegion))
                 {
@@ -3137,7 +3138,7 @@ public class MS2Controller extends SpringActionController
                 result.addView(groupsView);
             }
 
-            for (ProteinService.QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            for (QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
             {
                 QueryView queryView = provider.createView(getViewContext(), form, errors);
                 if (queryView != null)
@@ -6192,7 +6193,7 @@ public class MS2Controller extends SpringActionController
             if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
                 return getPeptidesView(pepSearchForm, bindErrors, forExport);
 
-            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            for (QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
             {
                 if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
                 {
@@ -6242,7 +6243,7 @@ public class MS2Controller extends SpringActionController
                 result.addView(pepView);
             }
 
-            for (ProteinService.QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            for (QueryViewProvider<ProteinService.PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
             {
                 QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
                 if (queryView != null)

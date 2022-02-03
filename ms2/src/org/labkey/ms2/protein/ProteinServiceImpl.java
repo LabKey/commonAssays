@@ -25,6 +25,7 @@ import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
