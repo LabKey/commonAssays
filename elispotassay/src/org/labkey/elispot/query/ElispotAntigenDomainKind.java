@@ -15,13 +15,14 @@
  */
 package org.labkey.elispot.query;
 
+import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.assay.AssayDomainKind;
+import org.labkey.api.security.User;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
@@ -102,7 +103,7 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain)
+    public Set<String> getReservedPropertyNames(Domain domain, User user)
     {
         return getAssayReservedPropertyNames();
     }
