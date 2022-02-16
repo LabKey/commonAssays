@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.security.User;
 
 import java.util.Set;
 
@@ -38,7 +39,7 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain)
+    public Set<String> getReservedPropertyNames(Domain domain, User user)
     {
         Set<String> result = getAssayReservedPropertyNames();
         result.add("Name");
