@@ -2000,7 +2000,7 @@ public class FlowSchema extends UserSchema
 //            return eldest.getValue().lastUsed + CacheManager.MINUTE < HeartBeat.currentTimeMillis();
 //        }
 //    };
-    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(CacheManager.UNLIMITED,CacheManager.HOUR, "fast flow objects");
+    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(100_000, CacheManager.HOUR, "fast flow objects");
 
     private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
     {

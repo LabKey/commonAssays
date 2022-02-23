@@ -17,6 +17,7 @@ package org.labkey.flow.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ConfirmAction;
@@ -351,7 +352,7 @@ public class ReportsController extends BaseFlowController
         }
 
         @Override
-        public ActionURL getSuccessURL(IdForm form)
+        public @NotNull ActionURL getSuccessURL(IdForm form)
         {
             return form.getReturnActionURL(new ActionURL(BeginAction.class, getContainer()));
         }
