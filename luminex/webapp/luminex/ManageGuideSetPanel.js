@@ -762,15 +762,13 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
                 guideRunSetStoreData.rows.push(row);    
         }
 
-        if (this.allRunsGrid)
-        {
+        if (this.allRunsGrid && this.allRunsGrid.getStore()) {
             this.allRunsGrid.getStore().loadData(allRunsStoreData);
             this.allRunsGrid.dataLoaded = true;
             this.allRunsGrid.getEl().unmask();
         }
 
-        if (this.guideRunSetGrid)
-        {
+        if (this.guideRunSetGrid && this.guideRunSetGrid.getStore()) {
             this.guideRunSetGrid.getStore().loadData(guideRunSetStoreData);
             this.guideRunSetGrid.dataLoaded = true;
             this.guideRunSetGrid.getEl().unmask();
