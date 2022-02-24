@@ -18,6 +18,7 @@ package org.labkey.flow.controllers.attribute;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.ReturnUrlForm;
@@ -399,7 +400,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public URLHelper getSuccessURL(AttributeForm form)
+        public @NotNull URLHelper getSuccessURL(AttributeForm form)
         {
             return form.getReturnActionURL(new ActionURL(SummaryAction.class, getContainer()));
         }
@@ -446,7 +447,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public URLHelper getSuccessURL(ReturnUrlForm form)
+        public @NotNull URLHelper getSuccessURL(ReturnUrlForm form)
         {
             return form.getReturnActionURL(new ActionURL(ProtocolController.ShowProtocolAction.class, getContainer()));
         }
@@ -543,7 +544,7 @@ public class AttributeController extends BaseFlowController
         }
 
         @Override
-        public URLHelper getSuccessURL(AttributeForm form)
+        public @NotNull URLHelper getSuccessURL(AttributeForm form)
         {
             return form.getReturnActionURL(new ActionURL(SummaryAction.class, getContainer()));
         }

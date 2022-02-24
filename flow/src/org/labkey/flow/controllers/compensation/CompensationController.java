@@ -17,6 +17,7 @@
 package org.labkey.flow.controllers.compensation;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -285,7 +286,7 @@ public class CompensationController extends BaseFlowController
         }
 
         @Override
-        public ActionURL getSuccessURL(ViewForm viewForm)
+        public @NotNull ActionURL getSuccessURL(ViewForm viewForm)
         {
             return urlFor(BeginAction.class);
         }

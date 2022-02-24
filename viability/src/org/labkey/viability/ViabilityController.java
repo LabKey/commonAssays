@@ -16,6 +16,7 @@
 
 package org.labkey.viability;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
@@ -81,7 +82,7 @@ public class ViabilityController extends SpringActionController
         }
 
         @Override
-        public URLHelper getSuccessURL(ProtocolIdForm protocolIdForm)
+        public @NotNull URLHelper getSuccessURL(ProtocolIdForm protocolIdForm)
         {
             return protocolIdForm.getReturnActionURL();
         }
