@@ -1354,9 +1354,10 @@ public class FlowSchema extends UserSchema
                         FieldKey fieldKey = entry.getKey();
                         BaseColumnInfo col = (BaseColumnInfo)entry.getValue();
                         // Add the lookup column FieldKey as a parent to the column's FieldKey
+                        var wrapped = WrappedColumnInfo.wrap(col);
                         FieldKey newFieldKey = FieldKey.remap(fieldKey, lookupColumn.getFieldKey(), null);
-                        col.setFieldKey(newFieldKey);
-                        ret.put(newFieldKey, col);
+                        wrapped.setFieldKey(newFieldKey);
+                        ret.put(newFieldKey, wrapped);
                     }
                 }
             }
