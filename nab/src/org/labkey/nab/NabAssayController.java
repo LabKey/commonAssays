@@ -61,6 +61,7 @@ import org.labkey.api.assay.nab.view.GraphSelectedForm;
 import org.labkey.api.assay.nab.view.MultiGraphAction;
 import org.labkey.api.assay.nab.view.RunDetailOptions;
 import org.labkey.api.assay.nab.view.RunDetailsAction;
+import org.labkey.api.assay.nab.view.RunDetailsHeaderView;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
@@ -107,10 +108,12 @@ import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
@@ -814,11 +817,15 @@ public class NabAssayController extends SpringActionController
             try
             {
                 DilutionAssayRun assay = _getNabAssayRun(run, form.getFitTypeEnum(), getUser());
+                if (RunDetailsHeaderView.canShowQCData(assay))
+                {
+                    form.setContext(getViewContext());
+                    form.setAssay(assay);
 
-                form.setContext(getViewContext());
-                form.setAssay(assay);
-
-                return new JspView<RenderAssayBean>("/org/labkey/nab/view/nabQC.jsp", form);
+                    return new JspView<RenderAssayBean>("/org/labkey/nab/view/nabQC.jsp", form);
+                }
+                else
+                    return new HtmlView(HtmlString.unsafe("<span class='labkey-error'>NAb QC is not available for multi-virus configurations.</span>"));
             }
             catch (ExperimentException e)
             {
