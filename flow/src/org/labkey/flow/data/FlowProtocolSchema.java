@@ -54,6 +54,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     public ExpRunTable createRunsTable(ContainerFilter cf)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
+        getContextualRoles().forEach(flowSchema::addContextualRole);
         //assert protocol == flowSchema.getProtocol();
         return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs.name(), cf, true, true);
     }
@@ -62,6 +63,7 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     public TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
+        getContextualRoles().forEach(flowSchema::addContextualRole);
         // AssayProtocolSchema.createDataTable() hacks on returned TableInfo therefore forWrite==true
         return flowSchema.getTable(FlowTableType.FCSAnalyses.name(), cf, true, true);
     }
