@@ -46,11 +46,10 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
     private void ensureData() throws ExperimentException
     {
-        try
+        _plateTemplate = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+        DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
+        try (DataLoader loader = factory.createLoader(_dataFile, true))
         {
-            _plateTemplate = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
-            DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
-            DataLoader loader = factory.createLoader(_dataFile, true);
             String signalColumnName = "Signal";
 
             ElisaSampleFilePropertyHelper.validateRequiredColumns(loader.getColumns());
