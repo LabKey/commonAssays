@@ -105,9 +105,8 @@ public class LuminexExcelParser
 
             analyteNames.clear();
 
-            try
+            try (Workbook workbook = ExcelFactory.create(dataFile))
             {
-                Workbook workbook = ExcelFactory.create(dataFile);
 
                 for (int sheetIndex = 0; sheetIndex < workbook.getNumberOfSheets(); sheetIndex++)
                 {

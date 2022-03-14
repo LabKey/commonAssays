@@ -15,9 +15,15 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -32,16 +38,10 @@ import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
-import org.labkey.api.assay.nab.NabSpecimen;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +68,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     @Override
     protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
     {
-        DataLoader loader;
+        DataLoader loader = null;
         try
         {
             if (dataFile.getName().toLowerCase().endsWith(".csv"))
@@ -156,6 +156,13 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
         catch (IOException e)
         {
             throw createParseError(dataFile, null, e);
+        }
+        finally
+        {
+            if (loader != null)
+            {
+                loader.close();
+            }
         }
     }
 
