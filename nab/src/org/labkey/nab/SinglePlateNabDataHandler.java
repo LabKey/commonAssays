@@ -19,10 +19,21 @@ package org.labkey.nab;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.PlateUtils;
+import org.labkey.api.assay.plate.Position;
+import org.labkey.api.assay.plate.WellData;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
@@ -48,17 +59,6 @@ import org.labkey.api.reader.ExcelFactory;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.plate.WellData;
-import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayRunUploadContext;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabVirusDomainKind;
@@ -185,36 +185,39 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     protected double[][] parse(File dataFile, Load load, int expectedRows, int expectedCols) throws ExperimentException, IOException
     {
         // First, attempt to parse list-style data using column headers.
-        DataLoader loader = load.createList();
-        ColumnDescriptor[] columns = loader.getColumns();
-        List<Map<String, Object>> rows = loader.load();
-        if (columns != null && columns.length > 0)
+        try (DataLoader loader = load.createList())
         {
-            // Last column is the results column -- only attempt parsing if it has a non-default name, e.g. "column5"
-            String resultColumnHeader = columns[columns.length-1].name;
-            if (!resultColumnHeader.equals("column" + (columns.length-1)))
+            ColumnDescriptor[] columns = loader.getColumns();
+            List<Map<String, Object>> rows = loader.load();
+            if (columns != null && columns.length > 0)
             {
-                List<ExperimentException> errors = new ArrayList<>();
-                List<double[][]> plates = parseList(dataFile, rows, "Well", resultColumnHeader, 1, expectedRows, expectedCols, errors);
-                if (!errors.isEmpty())
+                // Last column is the results column -- only attempt parsing if it has a non-default name, e.g. "column5"
+                String resultColumnHeader = columns[columns.length - 1].name;
+                if (!resultColumnHeader.equals("column" + (columns.length - 1)))
                 {
-                    LOG.warn("Unable to parse list style data from file (retrying using grid method) : " + errors.get(0).getMessage());
-                }
+                    List<ExperimentException> errors = new ArrayList<>();
+                    List<double[][]> plates = parseList(dataFile, rows, "Well", resultColumnHeader, 1, expectedRows, expectedCols, errors);
+                    if (!errors.isEmpty())
+                    {
+                        LOG.warn("Unable to parse list style data from file (retrying using grid method) : " + errors.get(0).getMessage());
+                    }
 
-                if (plates != null && !plates.isEmpty())
-                {
-                    return plates.get(0);
+                    if (plates != null && !plates.isEmpty())
+                    {
+                        return plates.get(0);
+                    }
                 }
             }
-
         }
 
         // Next, attempt to parse grid-style data without column headers.
-        loader = load.createGrid();
-        rows = loader.load();
-        double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols, null);
-        if (matrix != null)
-            return matrix;
+        try (DataLoader loader = load.createGrid())
+        {
+            List<Map<String, Object>> rows = loader.load();
+            double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols, null);
+            if (matrix != null)
+                return matrix;
+        }
 
         return null;
     }

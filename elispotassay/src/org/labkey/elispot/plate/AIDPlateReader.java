@@ -15,13 +15,13 @@
  */
 package org.labkey.elispot.plate;
 
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.PlateUtils;
+import org.labkey.api.assay.plate.TextPlateReader;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.PlateUtils;
-import org.labkey.api.assay.plate.TextPlateReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,11 +60,9 @@ public class AIDPlateReader extends TextPlateReader
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
         {
-            try
+            DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
+            try (DataLoader loader = factory.createLoader(dataFile, false))
             {
-                DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
-                DataLoader loader = factory.createLoader(dataFile, false);
-
                 return PlateUtils.parseGrid(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
             catch (IOException ioe)
@@ -84,11 +82,9 @@ public class AIDPlateReader extends TextPlateReader
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
         {
-            try
+            DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
+            try (DataLoader loader = factory.createLoader(dataFile, false))
             {
-                DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
-                DataLoader loader = factory.createLoader(dataFile, false);
-
                 return PlateUtils.parseAllGrids(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
             catch (IOException ioe)

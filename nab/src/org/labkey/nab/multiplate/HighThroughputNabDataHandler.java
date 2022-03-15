@@ -17,10 +17,16 @@ package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.dilution.WellDataRow;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellData;
+import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
@@ -35,13 +41,6 @@ import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellData;
-import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
-import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
@@ -73,7 +72,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     @Override
     protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
     {
-        DataLoader loader;
+        DataLoader loader = null;
         try
         {
             if (dataFile.getName().toLowerCase().endsWith(".csv"))
@@ -101,6 +100,13 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         catch (IOException e)
         {
             throw createParseError(dataFile, null, e);
+        }
+        finally
+        {
+            if (loader != null)
+            {
+                loader.close();
+            }
         }
     }
 
