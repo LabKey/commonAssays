@@ -17,16 +17,16 @@ package org.labkey.flow.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.query.ExpDataTable;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.query.RunListQueryView;
+import org.labkey.api.security.roles.Role;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
@@ -38,9 +38,12 @@ import org.springframework.validation.BindException;
  */
 public class FlowProtocolSchema extends AssayProtocolSchema
 {
+    private FlowSchema _flowSchema;
+
     public FlowProtocolSchema(User user, Container container, @NotNull FlowAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
         super(user, container, provider, protocol, targetStudy);
+        _flowSchema = new FlowSchema(user, container);
     }
 
     @NotNull
@@ -53,17 +56,13 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     @Override
     public ExpRunTable createRunsTable(ContainerFilter cf)
     {
-        FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
-        //assert protocol == flowSchema.getProtocol();
-        return (ExpRunTable)flowSchema.getTable(FlowTableType.Runs.name(), cf, true, true);
+        return (ExpRunTable)_flowSchema.getTable(FlowTableType.Runs.name(), cf, true, true);
     }
 
     @Override
     public TableInfo createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
-        FlowSchema flowSchema = new FlowSchema(getUser(), getContainer());
-        // AssayProtocolSchema.createDataTable() hacks on returned TableInfo therefore forWrite==true
-        return flowSchema.getTable(FlowTableType.FCSAnalyses.name(), cf, true, true);
+        return _flowSchema.getTable(FlowTableType.FCSAnalyses.name(), cf, true, true);
     }
 
     @Nullable
@@ -72,5 +71,12 @@ public class FlowProtocolSchema extends AssayProtocolSchema
     {
         // UNDONE: Create query view over flow.Runs
         return null;
+    }
+
+    @Override
+    public void addContextualRole(@NotNull Role role)
+    {
+        super.addContextualRole(role);
+        _flowSchema.addContextualRole(role);
     }
 }
