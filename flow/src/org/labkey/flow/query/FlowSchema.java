@@ -54,9 +54,13 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.RowIdForeignKey;
 import org.labkey.api.query.SchemaKey;
 import org.labkey.api.query.UserSchema;
+import org.labkey.api.security.SecurityLogger;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.security.roles.Role;
+import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
@@ -116,7 +120,7 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 
-public class FlowSchema extends UserSchema
+public class FlowSchema extends UserSchema implements UserSchema.HasContextualRoles
 {
     static public final String SCHEMANAME = "flow";
     static public final SchemaKey SCHEMAKEY = SchemaKey.fromParts("flow");
@@ -138,6 +142,7 @@ public class FlowSchema extends UserSchema
     private FlowExperiment _experiment;
     private FlowRun _run;
     private final FlowProtocol _protocol;
+    private Set<Role> _contextualRoles = new HashSet<>();
 
     public FlowSchema(User user, Container container)
     {
@@ -223,6 +228,27 @@ public class FlowSchema extends UserSchema
         return null;
     }
 
+    @Override
+    public boolean canReadSchema()
+    {
+        return true;
+    }
+
+    /** NOTE: this method should not be used for schemas created via QuerySchema.getSchema() (e.g. DefaultSchema.getSchema())
+     * as those might be cached.
+     * This should only be used for locally created Schema.
+     */
+    public void addContextualRole(@NotNull Role role)
+    {
+        assert role == RoleManager.getRole(role.getClass());
+        _contextualRoles.add(role);
+    }
+
+    @Override
+    public @NotNull Set<Role> getContextualRoles()
+    {
+        return _contextualRoles;
+    }
 
     private TableInfo createTable(FlowTableType type, ContainerFilter cf)
     {

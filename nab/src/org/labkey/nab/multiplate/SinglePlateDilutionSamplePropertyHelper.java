@@ -15,15 +15,15 @@
  */
 package org.labkey.nab.multiplate;
 
+import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
+import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.ExcelLoader;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroupTemplate;
-import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.nab.NabAssayProvider;
 
@@ -60,11 +60,10 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
             return null;
 
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
-        try
+        try (ExcelLoader loader = new ExcelLoader(metadataFile, true))
         {
             Map<String, WellGroupTemplate> sampleGroupNames = getSampleWellGroupNameMap();
 
-            ExcelLoader loader = new ExcelLoader(metadataFile, true);
             // issue #19539 -- now addressed by larger default value for _scanAheadLineCount
 
             boolean hasSampleNameCol = false;

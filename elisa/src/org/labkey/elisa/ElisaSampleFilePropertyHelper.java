@@ -47,11 +47,9 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
             throw new ExperimentException("No metadata or data file provided");
 
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
-        try
+        DataLoaderFactory factory = DataLoaderService.get().findFactory(metadataFile, null);
+        try (DataLoader loader = factory.createLoader(metadataFile, true))
         {
-            DataLoaderFactory factory = DataLoaderService.get().findFactory(metadataFile, null);
-            DataLoader loader = factory.createLoader(metadataFile, true);
-
             validateRequiredColumns(loader.getColumns());
 
             for (Map<String, Object> row : loader)
