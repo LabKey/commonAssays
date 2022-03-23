@@ -16,14 +16,17 @@
 
 package org.labkey.viability;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.BaseSelector;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -53,9 +56,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.CPUTimer;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -70,7 +70,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -498,7 +497,7 @@ public class ViabilityManager
     /**
      * Get the ExpData for the viability result row or null.
      * @param resultRowId The row id of the result.
-     * @return The ExpData of the viabilty result row or null.
+     * @return The ExpData of the viability result row or null.
      */
     /*package*/ static ExpData getResultExpData(int resultRowId)
     {
@@ -525,8 +524,8 @@ public class ViabilityManager
                 dataIDs.add(data.getRowId());
 
             TableSelector ts = new TableSelector(ViabilitySchema.getTableInfoResults(),
-                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null);
+                PageFlowUtil.set("RowID", "ObjectID"),
+                new SimpleFilter(FieldKey.fromParts("DataID"), dataIDs, CompareType.IN), null);
 
             ts.forEachMapBatch(1000, (rows) -> {
 
@@ -603,9 +602,10 @@ public class ViabilityManager
             TestContext context = TestContext.get();
 
             Map<String, Object>[] rows = new TableSelector(
-                    ViabilitySchema.getTableInfoResults(),
-                    new HashSet<String>(Arrays.asList("RowID", "ObjectID")),
-                    new SimpleFilter(FieldKey.fromParts("PoolID"), "xxx-", CompareType.STARTS_WITH), null).getMapArray();
+                ViabilitySchema.getTableInfoResults(),
+                PageFlowUtil.set("RowID", "ObjectID"),
+                new SimpleFilter(FieldKey.fromParts("PoolID"), "xxx-", CompareType.STARTS_WITH), null
+            ).getMapArray();
 
             for (Map<String, Object> row : rows)
             {
@@ -624,7 +624,7 @@ public class ViabilityManager
             Container c = JunitUtil.getTestContainer();
             TestContext context = TestContext.get();
             User user = context.getUser();
-            assertTrue("login before running this test", null != user);
+            assertNotNull("login before running this test", user);
             assertFalse("login before running this test", user.isGuest());
 
             int resultId;

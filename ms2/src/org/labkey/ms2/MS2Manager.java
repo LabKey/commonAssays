@@ -17,8 +17,8 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
@@ -1302,11 +1302,11 @@ public class MS2Manager
 
     private static class PeptideIndexCache extends DatabaseCache<String, long[]>
     {
-        private static int CACHE_SIZE = 10;
+        private static final int CACHE_SIZE = 10;
 
         public PeptideIndexCache()
         {
-            super(getSchema().getScope(), CACHE_SIZE, CacheManager.HOUR, "Peptide Index");
+            super(getSchema().getScope(), CACHE_SIZE, CacheManager.HOUR, "Peptide index");
         }
     }
 

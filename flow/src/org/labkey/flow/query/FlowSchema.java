@@ -19,6 +19,10 @@ package org.labkey.flow.query;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.*;
@@ -54,20 +58,14 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.RowIdForeignKey;
 import org.labkey.api.query.SchemaKey;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.security.SecurityLogger;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.study.assay.FileLinkDisplayColumn;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.study.publish.StudyPublishService;
@@ -142,7 +140,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     private FlowExperiment _experiment;
     private FlowRun _run;
     private final FlowProtocol _protocol;
-    private Set<Role> _contextualRoles = new HashSet<>();
+    private final Set<Role> _contextualRoles = new HashSet<>();
 
     public FlowSchema(User user, Container container)
     {
@@ -2027,7 +2025,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 //            return eldest.getValue().lastUsed + CacheManager.MINUTE < HeartBeat.currentTimeMillis();
 //        }
 //    };
-    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(100_000, CacheManager.HOUR, "fast flow objects");
+    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(100_000, CacheManager.HOUR, "Fast flow objects");
 
     private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
     {
