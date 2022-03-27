@@ -21,19 +21,15 @@
       "LABKEY": {}
     },
     "moduleFileExtensions": [
-      "js",
+      "tsx",
       "ts",
-      "tsx"
+      "js"
     ],
-    "moduleDirectories": [
-      "node_modules"
-    ],
+    "preset": "ts-jest",
     "setupFilesAfterEnv": [
       "<rootDir>/test/js/setup.ts"
     ],
-    "testPathIgnorePatterns": [
-      "/node_modules/"
-    ],
+    "testEnvironment": "jsdom",
     "testRegex": "(\\.(test|spec))\\.(ts|tsx)$",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
@@ -44,21 +40,20 @@
     "testResultsProcessor": "jest-teamcity-reporter"
   },
   "dependencies": {
-    "@labkey/components": "2.115.1"
+    "@labkey/components": "2.146.0"
   },
   "devDependencies": {
-    "@labkey/build": "5.0.1",
-    "@types/enzyme": "3.10.5",
+    "@labkey/build": "6.0.0",
+    "@types/enzyme": "3.10.11",
     "@types/enzyme-adapter-react-16": "1.0.6",
-    "@labkey/eslint-config-base": "0.0.8",
-    "@labkey/eslint-config-react": "0.0.8",
-    "@types/jest": "26.0.20",
+    "@labkey/eslint-config-react": "0.0.11",
+    "@types/jest": "27.4.1",
     "enzyme": "3.11.0",
-    "enzyme-adapter-react-16": "1.15.2",
-    "enzyme-to-json": "3.5.0",
-    "jest": "26.6.3",
+    "enzyme-adapter-react-16": "1.15.6",
+    "enzyme-to-json": "3.6.2",
+    "jest": "27.5.1",
     "jest-teamcity-reporter": "0.9.0",
-    "react-test-renderer": "16.13.1",
-    "ts-jest": "26.5.3"
+    "react-test-renderer": "16.14.0",
+    "ts-jest": "27.1.4"
   }
 }
