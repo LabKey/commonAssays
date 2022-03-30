@@ -71,15 +71,9 @@ public class ScriptXarSource extends XarSource
     }
 
     @Override
-    public File getRoot()
-    {
-        return _root;
-    }
-
-    @Override
     public Path getRootPath()
     {
-        return null != getRoot() ? getRoot().toPath() : null;
+        return null != _root ? _root.toPath() : null;
     }
 
     @Override
@@ -94,9 +88,10 @@ public class ScriptXarSource extends XarSource
         return _doc;
     }
 
+
     @Override
-    public File getLogFile()
+    public Path getLogFilePath()
     {
-        return _logFile;
+        return _logFile.toPath();
     }
 }
