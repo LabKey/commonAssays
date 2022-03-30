@@ -371,21 +371,15 @@ public class MS2Manager
             XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
             {
                 @Override
-                public File getLogFile()
+                public Path getLogFilePath()
                 {
                     throw new UnsupportedOperationException();
                 }
 
                 @Override
-                public File getRoot()
-                {
-                    return pepXMLFile.getParentFile(); 
-                }
-
-                @Override
                 public Path getRootPath()
                 {
-                    return Objects.requireNonNull(getRoot()).toPath();
+                    return pepXMLFile.getParentFile().toPath();
                 }
 
                 @Override
