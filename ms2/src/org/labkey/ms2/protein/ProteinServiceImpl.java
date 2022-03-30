@@ -27,6 +27,7 @@ import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
+import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
@@ -233,11 +234,18 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public List<ProteinFeature> getProteinFeatures(String accession)
     {
-        if (accession == null)
+        if (accession != null)
         {
-            return Collections.emptyList();
+            try
+            {
+                return FEATURE_CACHE.get(accession);
+            }
+            catch (DeadlockPreventingException e)
+            {
+                LOG.warn("Timed out trying to fetch features from Uniprot for accession '" + accession + "'");
+            }
         }
-        return FEATURE_CACHE.get(accession);
+        return Collections.emptyList();
     }
 
     private static class FeatureLoader implements CacheLoader<String, List<ProteinFeature>>
