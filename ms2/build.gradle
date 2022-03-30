@@ -30,6 +30,18 @@ dependencies {
                    "PATRICIA Trie data structure implementation"
            )
    )
+   BuildUtils.addExternalDependency(
+           project,
+           new ExternalDependency(
+                   "org.xerial:sqlite-jdbc:${sqliteJdbcVersion}",
+                   "SQLite JDBC Driver",
+                   "bitbucket.org",
+                   "https://bitbucket.org/xerial/sqlite-jdbc/wiki/Home",
+                   ExternalDependency.APACHE_2_LICENSE_NAME,
+                   ExternalDependency.APACHE_2_LICENSE_URL,
+                   "SQLite JDBC Driver"
+           )
+   )
    implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
 
