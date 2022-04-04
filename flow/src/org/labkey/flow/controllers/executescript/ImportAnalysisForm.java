@@ -18,7 +18,9 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.beanutils.BeanUtils;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.BaseViewAction;
+import org.labkey.api.action.HasAllowBindParameter;
 import org.labkey.api.action.HasBindParameters;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
@@ -29,6 +31,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +39,7 @@ import java.util.regex.Pattern;
  * User: kevink
  * Date: Jul 14, 2008 4:06:04 PM
  */
-public class ImportAnalysisForm implements HasBindParameters
+public class ImportAnalysisForm implements HasAllowBindParameter
 {
     public static final String NAME = "importAnalysis";
     
@@ -225,48 +228,20 @@ public class ImportAnalysisForm implements HasBindParameters
     }
 
 
+    private static final Pattern pat = Pattern.compile("((workspace)|(selectedSamples\\.rows\\[.*\\]))(\\.\\w*)");
 
     @Override
-    public @NotNull BindException bindParameters(PropertyValues pvs)
+    public Predicate<String> allowBindParameter()
     {
-        Pattern pat = Pattern.compile("@?workspace\\.(\\w*)");
-        for (var pv : pvs.getPropertyValues())
+        return (name) ->
         {
-            String name = pv.getName();
-            Matcher m = pat.matcher(name);
-            if (m.matches())
-            {
-                try
-                {
-                    BeanUtils.setProperty(workspace, m.group(1), name.startsWith("@") ? Boolean.FALSE : pv.getValue());
-                }
-                catch (InvocationTargetException |IllegalAccessException e)
-                {
-                    continue;
-                }
-            }
-        }
-
-        pat = Pattern.compile("@?selectedSamples\\.rows\\[(\\d*)\\]\\.(\\w*)");
-        for (var pv : pvs.getPropertyValues())
-        {
-            String name = pv.getName();
-            Matcher m = pat.matcher(name);
-            if (m.matches())
-            {
-                var resolvedSample = selectedSamples.getRows().get(m.group(1));
-                try
-                {
-                    if (null != resolvedSample)
-                        BeanUtils.setProperty(resolvedSample, m.group(2), name.startsWith("@") ? Boolean.FALSE : pv.getValue());
-                }
-                catch (InvocationTargetException |IllegalAccessException e)
-                {
-                    continue;
-                }
-            }
-        }
-
-        return BaseViewAction.springBindParameters(this, "form", pvs);
+            if (name.startsWith(SpringActionController.FIELD_MARKER))
+                name = name.substring(SpringActionController.FIELD_MARKER.length());
+            if (HasAllowBindParameter.getDefaultPredicate().test(name))
+                return true;
+            if (pat.matcher(name).matches())
+                return true;
+            return false;
+        };
     }
 }
