@@ -15,24 +15,16 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.jetbrains.annotations.NotNull;
-import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.HasAllowBindParameter;
-import org.labkey.api.action.HasBindParameters;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
-import org.springframework.beans.PropertyValues;
-import org.springframework.validation.BindException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -228,7 +220,7 @@ public class ImportAnalysisForm implements HasAllowBindParameter
     }
 
 
-    private static final Pattern pat = Pattern.compile("((workspace)|(selectedSamples\\.rows\\[.*\\]))(\\.\\w*)");
+    private static final Pattern pat = Pattern.compile("((workspace)|(selectedSamples\\.rows\\[[^\\]]*\\]))(\\.\\w*)");
 
     @Override
     public Predicate<String> allowBindParameter()
