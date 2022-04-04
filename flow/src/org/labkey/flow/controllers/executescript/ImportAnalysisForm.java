@@ -15,19 +15,28 @@
  */
 package org.labkey.flow.controllers.executescript;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.action.BaseViewAction;
+import org.labkey.api.action.HasBindParameters;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
+import org.springframework.beans.PropertyValues;
+import org.springframework.validation.BindException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * User: kevink
  * Date: Jul 14, 2008 4:06:04 PM
  */
-public class ImportAnalysisForm
+public class ImportAnalysisForm implements HasBindParameters
 {
     public static final String NAME = "importAnalysis";
     
@@ -213,5 +222,51 @@ public class ImportAnalysisForm
         for (String s : list.split(PARAMETER_SEPARATOR))
             ret.add(s.trim());
         return ret;
+    }
+
+
+
+    @Override
+    public @NotNull BindException bindParameters(PropertyValues pvs)
+    {
+        Pattern pat = Pattern.compile("@?workspace\\.(\\w*)");
+        for (var pv : pvs.getPropertyValues())
+        {
+            String name = pv.getName();
+            Matcher m = pat.matcher(name);
+            if (m.matches())
+            {
+                try
+                {
+                    BeanUtils.setProperty(workspace, m.group(1), name.startsWith("@") ? Boolean.FALSE : pv.getValue());
+                }
+                catch (InvocationTargetException |IllegalAccessException e)
+                {
+                    continue;
+                }
+            }
+        }
+
+        pat = Pattern.compile("@?selectedSamples\\.rows\\[(\\d*)\\]\\.(\\w*)");
+        for (var pv : pvs.getPropertyValues())
+        {
+            String name = pv.getName();
+            Matcher m = pat.matcher(name);
+            if (m.matches())
+            {
+                var resolvedSample = selectedSamples.getRows().get(m.group(1));
+                try
+                {
+                    if (null != resolvedSample)
+                        BeanUtils.setProperty(resolvedSample, m.group(2), name.startsWith("@") ? Boolean.FALSE : pv.getValue());
+                }
+                catch (InvocationTargetException |IllegalAccessException e)
+                {
+                    continue;
+                }
+            }
+        }
+
+        return BaseViewAction.springBindParameters(this, "form", pvs);
     }
 }
