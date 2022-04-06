@@ -15,6 +15,8 @@
  */
 package org.labkey.flow.controllers.executescript;
 
+import org.labkey.api.action.HasAllowBindParameter;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.controllers.WorkspaceData;
@@ -22,12 +24,14 @@ import org.labkey.flow.controllers.WorkspaceData;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 /**
  * User: kevink
  * Date: Jul 14, 2008 4:06:04 PM
  */
-public class ImportAnalysisForm
+public class ImportAnalysisForm implements HasAllowBindParameter
 {
     public static final String NAME = "importAnalysis";
     
@@ -213,5 +217,23 @@ public class ImportAnalysisForm
         for (String s : list.split(PARAMETER_SEPARATOR))
             ret.add(s.trim());
         return ret;
+    }
+
+
+    private static final Pattern pat = Pattern.compile("((workspace)|(selectedSamples\\.rows\\[[^\\]]*\\]))(\\.\\w*)");
+
+    @Override
+    public Predicate<String> allowBindParameter()
+    {
+        return (name) ->
+        {
+            if (name.startsWith(SpringActionController.FIELD_MARKER))
+                name = name.substring(SpringActionController.FIELD_MARKER.length());
+            if (HasAllowBindParameter.getDefaultPredicate().test(name))
+                return true;
+            if (pat.matcher(name).matches())
+                return true;
+            return false;
+        };
     }
 }
