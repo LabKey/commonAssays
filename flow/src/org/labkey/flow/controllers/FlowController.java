@@ -85,7 +85,7 @@ public class FlowController extends BaseFlowController
 
     public static void registerAdminConsoleLinks()
     {
-        AdminConsole.addLink(SettingsLinkType.Configuration, "flow cytometry", new ActionURL(FlowAdminAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Premium, "flow cytometry", new ActionURL(FlowAdminAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
     }
 
     @RequiresPermission(ReadPermission.class)
