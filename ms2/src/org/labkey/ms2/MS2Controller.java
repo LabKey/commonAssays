@@ -223,9 +223,9 @@ public class MS2Controller extends SpringActionController
 
     public static void registerAdminConsoleLinks()
     {
-        AdminConsole.addLink(SettingsLinkType.Management, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
-        AdminConsole.addLink(SettingsLinkType.Configuration, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
-        AdminConsole.addLink(SettingsLinkType.Management, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Premium, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Premium, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
+        AdminConsole.addLink(SettingsLinkType.Premium, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
     private void addRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
