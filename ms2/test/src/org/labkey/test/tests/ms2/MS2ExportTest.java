@@ -112,8 +112,7 @@ public class MS2ExportTest extends AbstractMS2ImportTest
         DataRegionTable searchRunsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
         searchRunsTable.checkAllOnPage();
         searchRunsTable.clickHeaderButton("MS2 Export");
-
-        assertTextPresent("BiblioSpec");
+        waitForText("BiblioSpec");
         Assert.assertEquals("Wrong number of rows in exported Excel file", 116, getBulkExcelExportRowCount());
 
         Runnable tsvPeptideValidator = () ->

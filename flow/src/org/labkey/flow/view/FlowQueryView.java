@@ -392,7 +392,6 @@ public class FlowQueryView extends QueryView
             children.add(new NavTree(schema.getExperiment().getLabel(), schema.getExperiment().urlShow()));
             ntc.setExtraChildren(children.toArray(new NavTree[0]));
         }
-        ntc.setModuleOwner(ModuleLoader.getInstance().getModule(FlowModule.NAME));
         return ntc;
     }
 
