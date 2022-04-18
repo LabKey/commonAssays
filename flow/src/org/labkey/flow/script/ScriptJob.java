@@ -321,7 +321,7 @@ abstract public class ScriptJob extends FlowExperimentJob
         }
         for (Map.Entry<String, StartingInput> input : _runData._startingMaterialInputs.entrySet())
         {
-            inputRefs.addNewMaterialLSID().setStringValue(input.getKey()); //
+            inputRefs.addNewMaterialLSID().setStringValue(input.getKey());
         }
         ProtocolApplicationBaseType appOutput = addProtocolApplication(run);
         appOutput.setName("Mark run outputs");
