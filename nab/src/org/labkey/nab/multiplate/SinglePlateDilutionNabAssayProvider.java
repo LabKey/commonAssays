@@ -31,7 +31,6 @@ import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.assay.query.ResultsQueryView;
 import org.labkey.api.assay.query.RunListQueryView;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayProvider;
@@ -77,11 +76,11 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
         return "Imports a specially formatted CSV or XLS file that contains data from multiple plates.  This high-throughput NAb " +
                 "assay differs from the standard NAb assay in that samples are identical across plates but with a different virus per plate. " +
                 "Dilutions are assumed to occur within a single plate.  Both NAb assay types measure neutralization in TZM-bl cells as a function of a " +
-                "reduction in Tat-induced luciferase (Luc) reporter gene expression after a single round of infection. Montefiori, D.C. 2004" +
-                PageFlowUtil.helpPopup("NAb", "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/18432938\">" +
+                "reduction in Tat-induced luciferase (Luc) reporter gene expression after a single round of infection. Montefiori, D.C. 2004";
+/*                PageFlowUtil.popupHelp(HtmlString.unsafe("<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/18432938\">" +
                         "Evaluating neutralizing antibodies against HIV, SIV and SHIV in luciferase " +
                         "reporter gene assays</a>.  Current Protocols in Immunology, (Coligan, J.E., " +
-                        "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15.", true);
+                        "A.M. Kruisbeek, D.H. Margulies, E.M. Shevach, W. Strober, and R. Coico, eds.), John Wiley & Sons, 12.11.1-12.11.15."), "Nab").inlineScript().toString(); */
     }
 
     @Override
