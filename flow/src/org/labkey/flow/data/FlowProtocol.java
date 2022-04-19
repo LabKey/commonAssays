@@ -307,7 +307,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (propValue != null)
             return propValue;
 
-        // get sample type lsid for sample with name "Samples"
+        // get lsid for sample type with name "Samples"
         ExpSampleType sampleType = getSampleType(user);
         if (sampleType != null)
             return sampleType.getLSID();
