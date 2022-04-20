@@ -50,7 +50,7 @@
     String selectionType = bean.getSelectionType() == null ? "runs" : bean.getSelectionType();
     ActionURL exportURL = urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", selectionType);
 %>
-<script>
+<script nonce="<%=getScriptNonce()%>">
     function toggleShortNames(checked)
     {
         var checkboxes = document.getElementsByName("useShortStatNames");

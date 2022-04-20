@@ -57,7 +57,7 @@ Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
     <labkey:input type="hidden" id="allowCaseChangeAlias" name="allowCaseChangeAlias" value="false"/>
 </labkey:form>
 
-<script>
+<script nonce="<%=getScriptNonce()%>">
     var errorEl = document.getElementById('form-errors');
     function showError(msg) {
         errorEl.innerHTML = '<div class="labkey-error">' + LABKEY.Utils.encodeHtml(msg) + '</div>';

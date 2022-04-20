@@ -89,7 +89,7 @@
             </td>
             <td width="100%">
                 <textarea id="annotationsText" style="width: 100%" rows="15" cols="50" name="annotationsText"><%= h(bean.getAnnotationsText()) %></textarea>
-                <script type="text/javascript">
+                <script type="text/javascript" nonce="<%=getScriptNonce()%>">
                     <labkey:loadClientDependencies>
                         Ext.EventManager.on('annotationsText', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
                     </labkey:loadClientDependencies>
@@ -103,6 +103,6 @@
     </table>
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     document.forms.proteinListForm.name.focus();
 </script>

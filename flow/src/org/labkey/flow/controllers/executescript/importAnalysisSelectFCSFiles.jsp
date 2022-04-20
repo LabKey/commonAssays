@@ -57,14 +57,14 @@
         %></textarea></p><%
     }
 %>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function clearFileBrowserSelection(selectedValue)
     {
         if (fileBrowser && fileBrowser.rendered)
         {
             fileBrowser.getGrid().getSelectionModel().clearSelections();
             selectRecord(null);
-            fileBrowser.setDisabled(selectedValue !== "<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>");
+            fileBrowser.setDisabled(selectedValue !== <%=q(ImportAnalysisForm.SelectFCSFileOption.Browse)%>);
         }
     }
 
@@ -144,11 +144,11 @@
     <br>
     The sample's keywords stored in the <%=h(workspace.getKindName())%> will be used instead of those from the FCS files.
     <br/><br/>
-    <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value="<%=h(keywordDir)%>"/>
+    <input type="hidden" id="<%=unsafe(inputId)%>" name="<%=unsafe(inputId)%>" value="<%=h(keywordDir)%>"/>
 
 
     <div id="treeDiv"></div>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
         var fileBrowser;
@@ -157,7 +157,7 @@
             Ext.get(inputId).dom.value=path;
             if (path)
             {
-                document.getElementById("<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>").checked = true;
+                document.getElementById(<%=q(ImportAnalysisForm.SelectFCSFileOption.Browse)%>).checked = true;
             }
         }
 

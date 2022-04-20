@@ -54,7 +54,7 @@
 <div id="trackingDataPanel" style="padding-top: 15px;"></div>
 </div>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
         var $h = Ext.util.Format.htmlEncode;
 
@@ -71,17 +71,17 @@
             _protocolName = <%=q(bean.getProtocol().getName())%>;
             _protocolId = <%=bean.getProtocol().getRowId()%>;
 
-            if ("" == _controlType || "" == _controlName)
+            if ("" === _controlType || "" === _controlName)
             {
                 Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: no control name specified.</span>");
                 return;
             }
-            if ('SinglePoint' != _controlType && 'Titration' != _controlType)
+            if ('SinglePoint' !== _controlType && 'Titration' !== _controlType)
             {
                 Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: unsupported control type: '" + _controlType + "'</span>");
                 return;
             }
-            if ("" == _protocolName)
+            if ("" === _protocolName)
             {
                 Ext.get('graphParamsPanel').update("<span class='labkey-error'>Error: no protocol specified.</span>");
                 return;
@@ -105,7 +105,7 @@
                     for (var i=0; i<runFields.length; i++)
                     {
                         var index = missingColumns.indexOf(runFields[i].name.toLowerCase());
-                        if (index != -1) {
+                        if (index !== -1) {
                             missingColumns.splice(index, 1);
                         }
                     }
@@ -118,10 +118,10 @@
 
                     var batchFields = data[0].domains[_protocolName + ' Batch Fields'];
                     for (var i=0; i<batchFields.length; i++) {
-                        if (batchFields[i].fieldKey.toLowerCase() == "network") {
+                        if (batchFields[i].fieldKey.toLowerCase() === "network") {
                             _networkExists = true;
                         }
-                        if (batchFields[i].fieldKey.toLowerCase() == "customprotocol") {
+                        if (batchFields[i].fieldKey.toLowerCase() === "customprotocol") {
                             _protocolExists = true;
                         }
                     }

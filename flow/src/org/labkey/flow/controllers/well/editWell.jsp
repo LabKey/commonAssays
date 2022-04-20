@@ -139,7 +139,7 @@
     %>
     <labkey:button text="cancel" href="<%=cancelURL%>"/>
 </labkey:form>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function ($) {
         $('.add-new-keyword').click(function () {
             var newRow = document.getElementById('keywordTable').insertRow(-1);

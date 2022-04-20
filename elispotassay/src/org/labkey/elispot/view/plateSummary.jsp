@@ -42,7 +42,7 @@
     }
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     Ext4.onReady(function(){
         var panel = Ext4.create('LABKEY.ext4.PlateSummary', {

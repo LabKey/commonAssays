@@ -79,6 +79,6 @@
         </div>
 <% } %>
 
-<script type="application/javascript">
+<script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 </script>

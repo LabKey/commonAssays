@@ -68,7 +68,7 @@
         Peptides that meet the filter criteria in a custom view:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
 
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="<%=getScriptNonce()%>">
             function viewSavedCallback(arg1, viewInfo)
             {
                 // Get the name of the newly saved view
@@ -85,7 +85,7 @@
                     // Check if it already exists in our list
                     for (var i = 0; i < viewNamesSelect.options.length; i++)
                     {
-                        if (viewNamesSelect.options[i].value == viewName)
+                        if (viewNamesSelect.options[i].value === viewName)
                         {
                             // If so, select it
                             viewNamesSelect.options[i].selected = true;

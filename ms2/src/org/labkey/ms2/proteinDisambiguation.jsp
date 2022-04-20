@@ -28,7 +28,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
     LABKEY.requiresCss("MS2/ProteinCoverageMap.js");
     LABKEY.requiresScript("util.js");
@@ -116,9 +116,9 @@
         <span><a href="<%= h(proteinUrl) %>"><%= h(protein.getBestName())%></a></span>
     </div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
-            new LABKEY.ext.CalloutTip( <%= text(props.toString()) %> );
+            new LABKEY.ext.CalloutTip( <%= props %> );
         });
     </script>
 

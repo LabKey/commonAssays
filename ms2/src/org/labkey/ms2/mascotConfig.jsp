@@ -30,7 +30,7 @@
     MascotConfig mascotConfig = MascotConfig.findMascotConfig(container);
     boolean inherited = !mascotConfig.getContainer().equals(container);
 %>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     var testMascot;
 

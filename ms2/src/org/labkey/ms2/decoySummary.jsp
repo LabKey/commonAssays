@@ -130,7 +130,7 @@
         </tr>
     </table>
 </labkey:form>
-<script>
+<script nonce="<%=getScriptNonce()%>">
     function setFilterParameter(desiredFdr) {
         <%
             JSONObject jsonObj = new JSONObject();
@@ -139,8 +139,7 @@
                 jsonObj.put(entry.getKey().toString(), entry.getValue());
             }
         %>
-        // next value is intentionally not HTML escaped -- comes from server and won't be parsed correctly in escaped form
-        var fdrOptionToThresholdMap = JSON.parse( '<%=jsonObj%>' );
+        const fdrOptionToThresholdMap = <%=jsonObj%>;
         if(document.getElementById('isIonCutoff').checked) {
             this.setGteParameter(fdrOptionToThresholdMap[desiredFdr]);
         }

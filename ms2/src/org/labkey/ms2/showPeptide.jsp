@@ -239,7 +239,7 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
 %>
 <!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
 <div id="lorikeet"></div>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     var $ = jQuery.noConflict();
 

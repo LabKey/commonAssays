@@ -31,7 +31,7 @@
     List<String> negativeBeads = bean.getNegativeBeads();
 %>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.requiresCss("fileAddRemoveIcon.css");
 </script>
 
@@ -96,7 +96,7 @@
     </table>
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var rowCount = 1;
     var table = document.getElementById("defaultValues");
 

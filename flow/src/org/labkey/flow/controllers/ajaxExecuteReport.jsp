@@ -32,7 +32,7 @@
         <i aria-hidden="true" class="fa fa-spinner fa-pulse" ></i> Loading...
     </div>
 </labkey:panel>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     let reportView = document.getElementById('report-view');
     LABKEY.Ajax.request({
         url: <%=q(form.url(ReportsController.ExecuteReportAction.class))%>,

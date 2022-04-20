@@ -125,6 +125,6 @@
         </labkey:panel>
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var contextPath = <%=q(contextPath)%>;
 </script>

@@ -29,7 +29,7 @@
     Collection<SubsetSpec> subsets = form.getFlowScript().getSubsets();
 %>
 <labkey:errors/>
-<script>
+<script nonce="<%=getScriptNonce()%>">
     var STATS = [];
     <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
         STATS.push({

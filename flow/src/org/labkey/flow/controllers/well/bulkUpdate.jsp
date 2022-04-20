@@ -38,7 +38,7 @@
 <span style="color:green;"><%=h(form.message)%></span><br>
 <labkey:errors />
 <div id="updateForm" />
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
 var keywords = <%=new JSONArray(form.getKeywords(context))%>
 var keywordStore = new Ext.data.SimpleStore({fields:['keyword'], data:keywords}) 
