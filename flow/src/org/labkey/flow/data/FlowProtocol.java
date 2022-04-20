@@ -301,13 +301,18 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public String getSampleTypeLSID()
+    public String getSampleTypeLSID(User user)
     {
         String propValue = (String) getProperty(ExperimentProperty.SampleTypeLSID.getPropertyDescriptor());
         if (propValue != null)
             return propValue;
 
-        return ExperimentService.get().generateLSID(getContainer(), ExpSampleType.class, SAMPLETYPE_NAME);
+        // get lsid for sample type with name "Samples"
+        ExpSampleType sampleType = getSampleType(user);
+        if (sampleType != null)
+            return sampleType.getLSID();
+
+        return null;
     }
 
     public void setSampleTypeJoinFields(User user, Map<String, FieldKey> values) throws Exception
@@ -319,7 +324,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         String value = StringUtils.join(strings.iterator(), "&");
         setProperty(user, FlowProperty.SampleTypeJoin.getPropertyDescriptor(), value);
-        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID());
+        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID(user));
         FlowManager.get().flowObjectModified();
     }
 
@@ -1008,17 +1013,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertEquals(0, fcsFiles[0].getSamples().size());
             assertEquals(0, fcsFiles[1].getSamples().size());
 
-            // add join fields
-            assertEquals(0, protocol.getSampleTypeJoinFields().size());
-            protocol.setSampleTypeJoinFields(user, Map.of(
-                    "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
-                    "WellId", FieldKey.fromParts("Keyword", "WELL ID")
-            ));
-
             // create sample type
             assertNull(protocol.getSampleType(user));
-            String sampleTypeLSID = protocol.getSampleTypeLSID();
-            assertNull(SampleTypeService.get().getSampleType(sampleTypeLSID));
+            String sampleTypeLSID = protocol.getSampleTypeLSID(user);
+            assertNull(sampleTypeLSID);
 
             List<GWTPropertyDescriptor> props = List.of(
                     new GWTPropertyDescriptor("Name", "string"),
@@ -1029,6 +1027,16 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLETYPE_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
             assertNotNull(protocol.getSampleType(user));
+
+            sampleTypeLSID = protocol.getSampleTypeLSID(user);
+            assertNotNull(sampleTypeLSID);
+
+            // add join fields
+            assertEquals(0, protocol.getSampleTypeJoinFields().size());
+            protocol.setSampleTypeJoinFields(user, Map.of(
+                    "ExprName", FieldKey.fromParts("Keyword", "EXPERIMENT NAME"),
+                    "WellId", FieldKey.fromParts("Keyword", "WELL ID")
+            ));
 
             // import samples:
             //   Name  PTID  WellId  ExprName
