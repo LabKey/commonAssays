@@ -70,7 +70,7 @@
                 <div style="padding-top: 5px"><input type="radio" name="<%=PeptideFilteringFormElements.peptideFilterType%>" id="peptideProphetRadioButton" value="<%=MS2Controller.ProphetFilterType.probability%>" <%=checked(bean.getForm().isPeptideProphetFilter())%>/>Minimum PeptideProphet prob <input onfocus="document.getElementById('peptideProphetRadioButton').checked=true;" type="text" size="4" name="<%=PeptideFilteringFormElements.peptideProphetProbability%>" value="<%=h(bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability())%>" /></div>
                 <div style="padding-top: 5px"><input type="radio" name="<%=PeptideFilteringFormElements.peptideFilterType%>" id="customViewRadioButton" value="<%=MS2Controller.ProphetFilterType.customView%>"<%=checked(bean.getForm().isCustomViewPeptideFilter())%>/>Custom filter:
                     <% String peptideViewSelectId = bean.getPeptideView(ctx).renderViewList(request, out, viewName); %>
-                    <%=link("Create or Edit View").onClick("showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;").id("editPeptidesViewLink") %>
+                    <%=link("Create or Edit View").onClick("showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;") %>
                 </div>
                 <span id="peptidesCustomizeView"></span>
             </td>
