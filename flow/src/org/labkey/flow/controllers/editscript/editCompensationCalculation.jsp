@@ -75,7 +75,7 @@ var SS = []; // SUBSETS
             if (!hashToIndexMap.containsKey(subsetHash))
             {
                 hashToIndexMap.put(subsetHash, index++);
-                %>SS.push(<%=text(javascriptArray(subsets))%>);<%
+                %>SS.push(<%=unsafe(javascriptArray(subsets))%>);<%
                 out.println();
             }
         }
@@ -92,7 +92,7 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
         {
             String value = valueEntry.getKey();
             int subsetHash = valueEntry.getValue().hashCode();
-            %><%=text(and)%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
+            %><%=unsafe(and)%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
             and = ",";
         }
         %>);<%

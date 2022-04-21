@@ -42,7 +42,7 @@
 Upload file from your computer
 <div style="padding: 5px 0 10px 2em;">
     <input type="file" id="workspace.file" name="workspace.file" onchange="selectUploadWorkspace();" style="border: none; background-color: transparent;">
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         function selectUploadWorkspace()
         {
             document.getElementById("uploadWorkspace").checked = true;
@@ -60,7 +60,7 @@ Browse the pipeline
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv"></div>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         var inputId=<%=q(inputId)%>;
         var fileSystem;
         var fileBrowser;

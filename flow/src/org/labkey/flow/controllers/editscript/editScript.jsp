@@ -29,7 +29,7 @@
 <% if (error != null) { %>
 <p class="labkey-error"><%=unsafe(PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>"))%></p>
 <% if (error.getLine() != 0) { %>
-<script>
+<script nonce="<%=getScriptNonce()%>">
     function findOffset(text, line, column)
     {
         var offset = 0;
@@ -65,7 +65,7 @@
 
 
 <textarea id="scriptTextArea" wrap="off" rows="20" cols="80" name="script"><%=h(script.getAnalysisScript())%></textarea>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         LABKEY.requiresExt3ClientAPI(function() {
             Ext.EventManager.on('scriptTextArea', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
         });

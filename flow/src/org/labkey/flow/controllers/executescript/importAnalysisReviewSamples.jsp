@@ -101,7 +101,7 @@
 </p>
 <% } %>
 <hr/>
-<script>
+<script nonce="<%=getScriptNonce()%>">
     var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
     var importedGroup = <%=q(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
@@ -130,7 +130,7 @@ if (groups.size() > 1)
 {
     %>
     <p>
-    <script type="application/javascript">
+    <script type="application/javascript" nonce="<%=getScriptNonce()%>">
         function onGroupChanged(selectedGroup) {
             importedGroup = selectedGroup || "All Samples";
 

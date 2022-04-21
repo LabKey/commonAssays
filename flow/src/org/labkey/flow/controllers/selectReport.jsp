@@ -59,7 +59,7 @@
     <% } %>
     </p>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function Select_onChange(url)
     {
         Ext4.getBody().mask();

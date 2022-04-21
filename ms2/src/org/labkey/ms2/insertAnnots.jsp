@@ -66,6 +66,6 @@
    </tr>
 </table>
 </labkey:form>
-<script for=window event=onload>
+<script for=window event=onload nonce="<%=getScriptNonce()%>">
 try {document.getElementById("fname").focus();} catch(x){}
 </script>

@@ -87,7 +87,7 @@
     {
 %>
     <div id="nabQCDiv"></div>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext4.onReady(function() {
             Ext4.create('LABKEY.ext4.NabQCPanel', {
                 renderTo    : 'nabQCDiv',
@@ -95,8 +95,8 @@
                 runId       : <%=bean.getRunId()%>,
                 returnUrl   : <%=q(bean.getReturnUrl(getContainer()))%>,
                 runName     : <%=q(assay.getRunName())%>,
-                runProperties : <%=text(jsonMapper.writeValueAsString(runProperties))%>,
-                controlProperties : <%=text(jsonMapper.writeValueAsString(controlProperties))%>
+                runProperties : <%=unsafe(jsonMapper.writeValueAsString(runProperties))%>,
+                controlProperties : <%=unsafe(jsonMapper.writeValueAsString(controlProperties))%>
             });
         });
 </script><%

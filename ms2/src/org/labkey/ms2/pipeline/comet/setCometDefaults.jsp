@@ -48,7 +48,7 @@
         <labkey:button text="Set Defaults"/> <labkey:button text="Cancel" href="<%=urlProvider(PipelineUrls.class).urlSetup(c)%>"/>
     </div>
 </labkey:form>
-<script for=window event=onload>
+<script for=window event=onload nonce="<%=getScriptNonce()%>">
 try {document.getElementById("analysisName").focus();} catch(x){}
 Ext.EventManager.on('configureXml', 'keydown', LABKEY.ext.Utils.handleTabsInTextArea);
 </script>

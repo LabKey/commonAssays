@@ -115,29 +115,31 @@
     }
 </style>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function createRenderer(detailsURL, countProperty, countLabel)
     {
+        const h = LABKEY.Utils.encodeHtml;
+
         return function (el, json) {
             var html = "<table border='0'>";
             for (var i = 0; i < <%=DISPLAY_MAX_ROWS%> && i < json.rows.length; i++) {
                 var row = json.rows[i];
                 var name = row.Name.value;
                 var url = row.Name.url;
-                var comment = row["Flag/Comment"].value ? " title='" + row["Flag/Comment"].value + "'" : "";
+                var comment = row["Flag/Comment"].value ? " title='" + h(row["Flag/Comment"].value) + "'" : "";
                 var iconCls = row["Flag/Comment"].value ? <%=q(FlagColumnRenderer.flagEnabledCls())%> : "";
 
                 html += "<tr>" +
-                        "<td>" + (iconCls ? "<a" + comment + " href='" + url + "'><i class='" + iconCls + "'/></a>" : "") + "</td>" +
-                        "<td nowrap><a" + comment + " href='" + url + "'>" + name + "</a><td>";
+                        "<td>" + (iconCls ? "<a" + comment + " href='" + h(url) + "'><i class='" + h(iconCls) + "'/></a>" : "") + "</td>" +
+                        "<td nowrap><a" + comment + " href='" + h(url) + "'>" + h(name) + "</a><td>";
                 if (countProperty) {
-                    html += "<td align='right' nowrap>(" + row[countProperty].value + " " + countLabel + ")</td>";
+                    html += "<td align='right' nowrap>(" + h(row[countProperty].value) + " " + h(countLabel) + ")</td>";
                 }
                 html += "</tr>";
             }
             if (json.rows.length > <%=DISPLAY_MAX_ROWS%>) {
                 html += "<tr>";
-                html += "<td colspan=2><a href='" + detailsURL + "'>More...</a></td>";
+                html += "<td colspan=2><a href='" + h(detailsURL) + "'>More...</a></td>";
                 html += "</tr>";
             }
             html += "</table>";
@@ -151,7 +153,7 @@
         <h3 class="summary-header">Summary</h3>
 
     <% if (_fcsRunCount > 0) { %>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "fcsFileRuns-div",
@@ -176,7 +178,7 @@
     <% } %><%-- end if (_fcsRunCount > 0) --%>
 
     <% if (_fcsAnalysisRunCount > 0) { %>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "fcsAnalysisRuns-div",
@@ -200,7 +202,7 @@
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
     <% if (_compensationMatrixCount > 0) { %>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "compensationMatrices-div",
@@ -223,7 +225,7 @@
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
     <% if (_sampleTypeSamples != null && _sampleTypeSamples.size() > 0) { %>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({
                 target: "samples-div",
@@ -280,7 +282,7 @@
             int runCount = script.getRunCount();
             boolean canEditScript = runCount == 0 && _canUpdate;
             %>
-            <script type="text/javascript">
+            <script type="text/javascript" nonce="<%=getScriptNonce()%>">
             Ext.onReady(function () {
                 var tip = new LABKEY.ext.CalloutTip({
                     target: "script-<%=script.getScriptId()%>-div",
@@ -371,7 +373,7 @@
             if (runCount > 0)
             {
                 %>
-                <script type="text/javascript">
+                <script type="text/javascript" nonce="<%=getScriptNonce()%>">
                 Ext.onReady(function () {
                     var tip = new LABKEY.ext.CalloutTip({
                         target: "script-<%=experiment.getExperimentId()%>-div",

@@ -35,7 +35,7 @@
            id="comment" name="comment" size="65"
            value="<%=h(flowObj.getExpObject().getComment())%>" />
 </span>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 LABKEY.requiresExt3(function() {
     var CommentField = Ext.extend(Ext.form.TextField, {
         initComponent : function () {
@@ -51,11 +51,11 @@ LABKEY.requiresExt3(function() {
 
         handleSpecial : function (self, e) {
             var key = e.getKey();
-            if (key == Ext.EventObject.ESC)
+            if (key === Ext.EventObject.ESC)
             {
                 this.setValue(this._originalValue);
             }
-            else if (key == Ext.EventObject.ENTER)
+            else if (key === Ext.EventObject.ENTER)
             {
                 this.doSubmit();
             }

@@ -69,7 +69,7 @@
     <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnURL()) %>
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function updateForm()
     {
         var radioElements = document.getElementsByName("defaultViewName");

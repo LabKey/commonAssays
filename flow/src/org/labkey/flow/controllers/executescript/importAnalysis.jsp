@@ -43,10 +43,10 @@
     Container container = getContainer();
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
 %>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function endsWith(a,b)
     {
-        return a.length >= b.length && a.indexOf(b) == (a.length-b.length);
+        return a.length >= b.length && a.indexOf(b) === (a.length-b.length);
     }
 </script>
 <style type="text/css">

@@ -55,10 +55,10 @@
     }
 </style>
 
-<!--OUTER-->
+<%--OUTER--%>
 <table class="lk-show-peptide-table">
 
-<!--FIRST ROW-->
+<%--FIRST ROW--%>
 <tr><td colspan="2" valign=top width="850px">
     <table width="100%">
     <tr><td>
@@ -237,9 +237,9 @@ float[] intensities = p.getSpectrumIntensity();
 if (mzs != null && intensities != null && mzs.length == intensities.length && mzs.length > 0)
 {
 %>
-<!-- PLACE HOLDER DIV FOR THE SPECTRUM -->
+<%-- PLACE HOLDER DIV FOR THE SPECTRUM --%>
 <div id="lorikeet"></div>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     var $ = jQuery.noConflict();
 

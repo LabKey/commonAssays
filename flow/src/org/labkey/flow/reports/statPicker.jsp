@@ -28,6 +28,8 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.stream.Stream" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -72,25 +74,14 @@
             sampleTypeProperties.add(dp.getName());
     }
 
-    StringBuilder stats = new StringBuilder();
-    stats.append("{");
-    comma = "";
+    JSONObject statsObj = new JSONObject();
     for (StatisticSpec.STAT stat : StatisticSpec.STAT.values())
     {
-        if (stat == StatisticSpec.STAT.Spill)
-            continue;
-        stats.append(comma);
-        stats.append("\"").append(stat.name()).append("\": {");
-        stats.append("  name: \"").append(stat.name()).append("\"");
-        stats.append(", shortName: \"").append(stat.getShortName()).append("\"");
-        stats.append(", longName: \"").append(stat.getLongName()).append("\"");
-        stats.append("}");
-
-        comma = ",\n";
+        if (stat != StatisticSpec.STAT.Spill)
+            statsObj.put(stat.name(), Map.of("name", stat.name(), "shortName", stat.getShortName(), "longName", stat.getLongName()));
     }
-    stats.append("}");
 %>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 Ext.QuickTips.init();
 
 // Adds a 'subset' attribute used by the test framework
@@ -115,11 +106,11 @@ function statisticsTree(statistics)
         if (!node)
         {
             var text = s.subset;
-            if (s.parent && 0==text.indexOf(s.parent+"/"))
+            if (s.parent && 0===text.indexOf(s.parent+"/"))
                 text = text.substring(s.parent.length+1);
-            if (0==text.indexOf("(") && text.length-1 == text.lastIndexOf(")"))
-                text = text.substring(1,text.length-2);
-            node = new Ext.tree.TreeNode(Ext.apply({},{text:enc(text), qtipCfg:{text:enc(s.subset)}, expanded:true, uiProvider:StatTreeNodeUI, parentNode:null}, s));    // stash original object in data
+            if (0===text.indexOf("(") && text.length-1 === text.lastIndexOf(")"))
+                text = text.substring(1,text.length-1);
+            node = new Ext.tree.TreeNode(Ext.apply({},{text:text, qtipCfg:{text:enc(s.subset)}, expanded:true, uiProvider:StatTreeNodeUI, parentNode:null}, s));    // stash original object in data
             node.attributes.stats = [];
             map[s.subset] = node;
         }
@@ -316,7 +307,7 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
             for (var i = 0; i < FlowPropertySet.statistics.length; i++)
             {
                 var s = FlowPropertySet.statistics[i];
-                if (s.subset == population)
+                if (s.subset === population)
                     stats.push(s.stat);
             }
 
@@ -325,14 +316,12 @@ var StatisticField = Ext.extend(Ext.form.CompositeField,
 
             // Find the statistic by the StatisticSpec enum name, but fallback to the shortName for reports that were created incorrectly.
             var index = this.statCombo.getStore().find('name', stat);
-            if (index == -1)
+            if (index === -1)
                 index = this.statCombo.getStore().find('shortName', stat);
             if (index > -1) {
                 var record = this.statCombo.getStore().getAt(index);
                 this.statCombo.setValue(record.id);
             }
-
-            //this.statCombo.setDisabled(!(stat && stat.length > 0));
         }
         this.updateHiddenValue();
     },
@@ -371,7 +360,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
 });
 Ext.reg('opCombo', OpCombo);
 
-var FlowStatistics = <%=unsafe(stats.toString())%>;
+var FlowStatistics = <%=statsObj%>;
 
 function createStatStore(stats)
 {
@@ -388,11 +377,11 @@ function createStatStore(stats)
     return {stats: items};
 }
 
-var FlowPropertySet = {};
+let FlowPropertySet = {};
 FlowPropertySet.keywords = <%=toJsonArray(fps.getVisibleKeywords())%>;
 FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
 
-var SampleType = {};
+let SampleType = {};
 SampleType.properties = <%=toJsonArray(sampleTypeProperties)%>;
 
 </script>

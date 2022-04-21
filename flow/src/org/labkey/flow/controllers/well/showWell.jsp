@@ -72,7 +72,7 @@
 <style type="text/css">
     .right {text-align:right;}
 </style>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 Ext.QuickTips.init();
 </script>
 <%
@@ -161,7 +161,7 @@ Ext.QuickTips.init();
     }
     jsonKeywords.append("]");
 %>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
 function statisticsTree(statistics)
 {

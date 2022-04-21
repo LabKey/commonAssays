@@ -31,7 +31,7 @@
     List<String> negativeBeads = bean.getNegativeBeads();
 %>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.requiresCss("fileAddRemoveIcon.css");
 </script>
 
@@ -49,7 +49,7 @@
 
 <labkey:form action="<%=getViewContext().getActionURL()%>" method="post">
     <p>Update default values for standard analyte properties.</p>
-    <!-- cheap trick -- watch out for if this is ever nested in any other code -->
+    <%-- cheap trick -- watch out for if this is ever nested in any other code --%>
     <table id="defaultValues" class="lk-default-val">
         <tr>
             <td class="lk-default-val-header">Analyte</td>
@@ -96,7 +96,7 @@
     </table>
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var rowCount = 1;
     var table = document.getElementById("defaultValues");
 

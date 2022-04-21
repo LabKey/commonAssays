@@ -168,7 +168,7 @@
         </tr>
     </table>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     // function to handle click of titration well role checkbox to set the corresponding hidden form element accordingly
     function titrationRoleChecked(el)
     {

@@ -52,7 +52,7 @@
     %>Please review the <%=link("exclusions report", url).target("_blank")%>for more information.
 </span>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 
     function retainExclusionsChanged(el)
     {

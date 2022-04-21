@@ -80,7 +80,7 @@
 
 <div id="featureAnnotationSetForm"></div>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function renderPanel(){
         var onCancel = function(){
             window.location = <%=q(returnUrl)%>;

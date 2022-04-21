@@ -188,7 +188,7 @@
 
 </labkey:form>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 var areas = new Object();
 areas.light = <%= quant.getLightArea() %>;
 areas.heavy = <%= quant.getHeavyArea() %>;
