@@ -58,6 +58,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.PeptideCharacter;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
@@ -3856,6 +3857,20 @@ public class MS2Controller extends SpringActionController
             this.shared = shared;
         }
     }
+
+    private List<PeptideCharacter> buildPeptideCharacters(String... peptides)
+    {
+        List<PeptideCharacter> peptideCharacters = new ArrayList<>();
+
+        for (String peptide: peptides)
+        {
+            PeptideCharacter peptideCharacter = new PeptideCharacter();
+            peptideCharacter.setSequence(peptide);
+            peptideCharacters.add(peptideCharacter);
+        }
+        return peptideCharacters;
+    }
+
 
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinAJAXAction extends SimpleViewAction<DetailsForm>
