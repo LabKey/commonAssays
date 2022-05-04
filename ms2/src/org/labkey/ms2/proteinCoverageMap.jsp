@@ -38,6 +38,19 @@
         dependencies.add("internal/jQuery");
     }
 %>
+<div class="viewSettings">
+    <h5><b>View Settings</b></h5>
+
+    <label for="peptide-setting-select">By:</label>
+    <select name="peptideSettings" id="peptide-setting-select">
+        <option value="intensity">Intensity</option>
+        <option value="confidenceScore">Confidence Score</option>
+    </select>
+
+
+
+</div>
+
 
 <div class="sequencePanel">
     <div class="coverageMap">

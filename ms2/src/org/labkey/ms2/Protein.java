@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
-import org.labkey.api.protein.PeptideCharacter;
+import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
@@ -42,7 +42,7 @@ public class Protein
     private String _bestName;
     private String _bestGeneName;
 
-    private List<PeptideCharacter> _peptideCharacters;
+    private List<PeptideCharacteristic> _peptideCharacteristics;
 
     // TODO: Delete
     private String _lookupString;
@@ -504,9 +504,9 @@ public class Protein
         _computeCoverage = true;
     }
 
-    public void setPeptideCharacters(List<PeptideCharacter> peptideCharacters)
+    public void setPeptideCharacters(List<PeptideCharacteristic> peptideCharacteristics)
     {
-        _peptideCharacters = peptideCharacters;
+        _peptideCharacteristics = peptideCharacteristics;
         _computeCoverage = true;
     }
 
@@ -647,7 +647,7 @@ public class Protein
         if (!_computeCoverage)
             return _coverageRanges;
 
-        if ("".equals(_sequence) || _peptideCharacters == null)     // Optimize case where sequence isn't available (FASTA not loaded)
+        if ("".equals(_sequence) || _peptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
         {
             _computeCoverage = false;
             _coverageRanges = new ArrayList<>(0);
@@ -696,7 +696,7 @@ public class Protein
     {
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
 
-        if ("".equals(_sequence) || _peptideCharacters == null)     // Optimize case where sequence isn't available (FASTA not loaded)
+        if ("".equals(_sequence) || _peptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
             return uncoalescedPeptideRanges;
 
         Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
@@ -786,7 +786,7 @@ public class Protein
     public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
         Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        if (null == _peptideCharacters || _peptideCharacters.size() <= 0)
+        if (null == _peptideCharacteristics || _peptideCharacteristics.size() <= 0)
             return uniquePeptides;
 
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
@@ -794,7 +794,7 @@ public class Protein
         if (run != null && run.getRun() > -1)
             mods = MS2Manager.getModifications(run);
 
-        for (PeptideCharacter peptide : _peptideCharacters)
+        for (PeptideCharacteristic peptide : _peptideCharacteristics)
         {
             String peptideToMap;
             if (run == null)

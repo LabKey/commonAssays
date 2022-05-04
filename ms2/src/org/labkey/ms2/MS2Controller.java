@@ -58,7 +58,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.protein.PeptideCharacter;
+import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
@@ -3858,17 +3858,17 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private List<PeptideCharacter> buildPeptideCharacters(String... peptides)
+    private List<PeptideCharacteristic> buildPeptideCharacters(String... peptides)
     {
-        List<PeptideCharacter> peptideCharacters = new ArrayList<>();
+        List<PeptideCharacteristic> peptideCharacteristics = new ArrayList<>();
 
         for (String peptide: peptides)
         {
-            PeptideCharacter peptideCharacter = new PeptideCharacter();
-            peptideCharacter.setSequence(peptide);
-            peptideCharacters.add(peptideCharacter);
+            PeptideCharacteristic peptideCharacteristic = new PeptideCharacteristic();
+            peptideCharacteristic.setSequence(peptide);
+            peptideCharacteristics.add(peptideCharacteristic);
         }
-        return peptideCharacters;
+        return peptideCharacteristics;
     }
 
 
