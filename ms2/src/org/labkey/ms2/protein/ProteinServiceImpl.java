@@ -179,7 +179,7 @@ public class ProteinServiceImpl implements ProteinService
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
-        bean.protein.setPeptideCharacters(peptideCharacteristics);
+        bean.protein.setPeptideCharacteristics(peptideCharacteristics);
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);

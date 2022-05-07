@@ -24,6 +24,10 @@
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
+<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
+<%@ page import="java.util.StringJoiner" %>
+<%@ page import="java.util.Collections" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -34,28 +38,26 @@
     {
         dependencies.add("MS2/ProteinCoverageMap.css");
         dependencies.add("MS2/ProteinCoverageMap.js");
+        dependencies.add("MS2/PeptideIntensityHeatMap.js");
         dependencies.add("util.js");
         dependencies.add("internal/jQuery");
+        dependencies.add("vis/lib/d3-3.5.17.min.js");
     }
 %>
 <div class="viewSettings">
-    <h5><b>View Settings</b></h5>
+    <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
     <select name="peptideSettings" id="peptide-setting-select">
         <option value="intensity">Intensity</option>
         <option value="confidenceScore">Confidence Score</option>
     </select>
-
-
-
 </div>
-
-
 <div class="sequencePanel">
     <div class="coverageMap">
         <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
     </div>
+    <div class="heatmap"></div>
 <%
     if (!bean.features.isEmpty())
     {
@@ -92,6 +94,12 @@
         </div>
 <% } %>
 
+<%
+        var iValues = new ArrayList<>();
+        bean.protein.getPeptideCharacteristics().forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
+%>
+
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
+    LABKEY.ms2.PeptideIntensityHeatMap.addHeatMap(<%=toJsonArray(iValues)%>);
 </script>

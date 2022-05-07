@@ -504,7 +504,12 @@ public class Protein
         _computeCoverage = true;
     }
 
-    public void setPeptideCharacters(List<PeptideCharacteristic> peptideCharacteristics)
+    public List<PeptideCharacteristic> getPeptideCharacteristics()
+    {
+        return _peptideCharacteristics;
+    }
+
+    public void setPeptideCharacteristics(List<PeptideCharacteristic> peptideCharacteristics)
     {
         _peptideCharacteristics = peptideCharacteristics;
         _computeCoverage = true;

@@ -61,14 +61,19 @@
      vertical-align: bottom;
  }
 
-.sequencePanel {
-    display: flex;
-    flex-wrap: wrap;
+
+.viewSettings {
+    padding-bottom: 10px;
+}
+
+.heatmap {
+    display: inline-block;
 }
 
 .featuresControls {
-
+    display: inline-block;
 }
  .coverageMap {
      padding-right: 20px;
+     display: inline-block;
 }
