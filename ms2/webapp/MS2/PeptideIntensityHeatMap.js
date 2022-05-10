@@ -7,22 +7,6 @@ if (!LABKEY.ms2.PeptideIntensityHeatMap) {
 
         addHeatMap: function (peptideCharacteristics, colors) {
 
-            console.log("here");
-
-            const colors1 = [
-                '#ff0000',
-                '#de582f',
-                '#96edff',
-                '#048eff',
-                    '#CC99FF'
-            ];
-
-            const min = d3.min(peptideCharacteristics);
-            const max = d3.max(peptideCharacteristics);
-            // const colorScale = d3.scale.quantile()
-            //         .domain([min, max])
-            //         .range(colors);
-
             const y_axis = peptideCharacteristics.length * 10;
             const x_axis = 0;
 
