@@ -28,6 +28,14 @@
 <%@ page import="java.util.StringJoiner" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Comparator" %>
+<%@ page import="java.util.Collection" %>
+<%@ page import="java.awt.*" %>
+<%@ page import="org.labkey.api.data.statistics.StatsService" %>
+<%@ page import="org.labkey.api.data.statistics.MathStat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -53,6 +61,53 @@
         <option value="confidenceScore">Confidence Score</option>
     </select>
 </div>
+<%
+
+    List<Double> iValues = new ArrayList<>();
+    var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
+
+    Map<Double, Integer> heatMapColorRGB = new HashMap<>();
+
+    peptideCharacteristics.sort(Comparator.comparing(PeptideCharacteristic::getIntensity).reversed());
+    peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
+    // calculate medianIndex of protein.getPeptideCharacteristics()
+    var count = peptideCharacteristics.size();
+    var medianIndex = 0;
+
+    if (count % 2 == 0)
+    {
+        medianIndex = (count / 2 - 1 + count / 2) / 2;
+    }
+    else
+    {
+        medianIndex = (count -1) / 2;
+    }
+    // assign white color to median
+    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex).getIntensity(), Color.WHITE.getRGB());
+
+    // assign blue colors from median to last -> lighter to darker
+    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex+1).getIntensity(), Color.BLUE.getRGB());
+    for (int i = medianIndex+2; i < count; i++)
+    {
+        var color = heatMapColorRGB.get(peptideCharacteristics.get(i-1).getIntensity());
+        var peptideColor = new Color(color).darker().getRGB();
+        heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
+        peptideCharacteristics.get(i).setIntensityColor("#"+Integer.toHexString(peptideColor).substring(2));
+    }
+    // assign red colors from median to first -> lighter to darker
+    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex-1).getIntensity(), Color.RED.getRGB());
+    for (int i = medianIndex-2; i >= 0; i--)
+    {
+        var color = heatMapColorRGB.get(peptideCharacteristics.get(i+1).getIntensity());
+        var peptideColor = new Color(color).darker().getRGB();
+        heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
+        peptideCharacteristics.get(i).setIntensityColor("#"+Integer.toHexString(peptideColor).substring(2));
+    }
+
+    Map<Double, String> heatMapColorHex = new HashMap<>();
+    heatMapColorRGB.forEach((i,c) -> heatMapColorHex.put(i, "#"+Integer.toHexString(c).substring(2)));
+
+%>
 <div class="sequencePanel">
     <div class="coverageMap">
         <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
@@ -94,12 +149,9 @@
         </div>
 <% } %>
 
-<%
-        var iValues = new ArrayList<>();
-        bean.protein.getPeptideCharacteristics().forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
-%>
+
 
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
-    LABKEY.ms2.PeptideIntensityHeatMap.addHeatMap(<%=toJsonArray(iValues)%>);
+    LABKEY.ms2.PeptideIntensityHeatMap.addHeatMap(<%=toJsonArray(iValues)%>, <%=toJsonObject(heatMapColorHex)%>);
 </script>

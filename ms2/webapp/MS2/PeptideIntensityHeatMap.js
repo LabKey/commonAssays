@@ -5,24 +5,23 @@ if (!LABKEY.ms2) {
 if (!LABKEY.ms2.PeptideIntensityHeatMap) {
     LABKEY.ms2.PeptideIntensityHeatMap = {
 
-        addHeatMap: function (peptideCharacteristics) {
+        addHeatMap: function (peptideCharacteristics, colors) {
+
             console.log("here");
 
-            const colors = [
-                '#3788ba',
-                '#fffec2',
-                '#fddf90',
-                '#f26d4a',
-                '#d34052',
-                '#9a0942',
-                '#ff0000'
+            const colors1 = [
+                '#ff0000',
+                '#de582f',
+                '#96edff',
+                '#048eff',
+                    '#CC99FF'
             ];
 
             const min = d3.min(peptideCharacteristics);
             const max = d3.max(peptideCharacteristics);
-            const colorScale = d3.scale.quantile()
-                    .domain([min, max])
-                    .range(colors);
+            // const colorScale = d3.scale.quantile()
+            //         .domain([min, max])
+            //         .range(colors);
 
             const y_axis = peptideCharacteristics.length * 10;
             const x_axis = 0;
@@ -41,7 +40,7 @@ if (!LABKEY.ms2.PeptideIntensityHeatMap) {
                     .attr("x", function (d, i) { return x_axis; })
                     .attr("height", rectWidth)
                     .attr("width", 20)
-                    .style("fill", (d) => colorScale(d));
+                    .style("fill", (d) => colors[d]);
             svgContainer.selectAll('.text')
                     .data(peptideCharacteristics)
                     .enter().append('text')
