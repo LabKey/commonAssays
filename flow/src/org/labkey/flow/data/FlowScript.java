@@ -60,7 +60,10 @@ public class FlowScript extends FlowDataObject
     {
         if (id == 0)
             return null;
-        return new FlowScript(ExperimentService.get().getExpData(id));
+        ExpData expData = ExperimentService.get().getExpData(id);
+        if (null == expData)
+            return null;
+        return new FlowScript(expData);
     }
 
     static public FlowScript fromLSID(String lsid)
