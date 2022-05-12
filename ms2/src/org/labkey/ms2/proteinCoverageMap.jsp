@@ -39,6 +39,11 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
+    var currentURL = getActionURL();
+    var viewByParam = currentURL.getParameter("viewBy");
+    var runIdParam = currentURL.getParameter("id");
+    var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
+    var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
 %>
 <%!
     @Override
@@ -56,20 +61,29 @@
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select">
-        <option value="intensity">Intensity</option>
-        <option value="confidenceScore">Confidence Score</option>
+    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideIntensityHeatMap.changeView(<%=h(runIdParam)%>)">
+        <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
+        <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
     </select>
 </div>
 <%
 
     List<Double> iValues = new ArrayList<>();
     var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
+    Map<Double, Color> heatMapColorRGB = new HashMap<>();
 
-    Map<Double, Integer> heatMapColorRGB = new HashMap<>();
 
-    peptideCharacteristics.sort(Comparator.comparing(PeptideCharacteristic::getIntensity).reversed());
-    peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
+    if (isIntensityView)
+    {
+        peptideCharacteristics.sort(Comparator.nullsLast(Comparator.comparing(PeptideCharacteristic::getIntensity).reversed()));
+        peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
+    }
+    if (isConfidenceView)
+    {
+        peptideCharacteristics.sort((o1, o2) -> 0);
+        peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getConfidence()));
+    }
+
     // calculate medianIndex of protein.getPeptideCharacteristics()
     var count = peptideCharacteristics.size();
     var medianIndex = 0;
@@ -82,30 +96,85 @@
     {
         medianIndex = (count -1) / 2;
     }
-    // assign white color to median
-    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex).getIntensity(), Color.WHITE.getRGB());
 
     // assign blue colors from median to last -> lighter to darker
-    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex+1).getIntensity(), Color.BLUE.getRGB());
-    for (int i = medianIndex+2; i < count; i++)
+    Color one = Color.WHITE;
+    Color two = new Color(0, 81, 138);
+
+    int r1 = one.getRed();
+    int g1 = one.getGreen();
+    int b1 = one.getBlue();
+    int a1 = one.getAlpha();
+
+    int r2 = two.getRed();
+    int g2 = two.getGreen();
+    int b2 = two.getBlue();
+    int a2 = two.getAlpha();
+
+    int newR = 0;
+    int newG = 0;
+    int newB = 0;
+    int newA = 0;
+
+    double iNorm;
+
+    // assign blue colors from median to last -> lighter to darker
+    for (int i = medianIndex+1; i < count; i++)
     {
-        var color = heatMapColorRGB.get(peptideCharacteristics.get(i-1).getIntensity());
-        var peptideColor = new Color(color).darker().getRGB();
-        heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-        peptideCharacteristics.get(i).setIntensityColor("#"+Integer.toHexString(peptideColor).substring(2));
+        iNorm = i / (double) iValues.size(); //a normalized [0:1] variable
+        newR = (int) (r1 + iNorm * (r2 - r1));
+        newG = (int) (g1 + iNorm * (g2 - g1));
+        newB = (int) (b1 + iNorm * (b2 - b1));
+        newA = (int) (a1 + iNorm * (a2 - a1));
+        var peptideColor = new Color(newR, newG, newB, newA);
+        if (isIntensityView)
+        {
+            heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), new Color(newR, newG, newB, newA));
+            peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+        }
+        if (isConfidenceView)
+        {
+            heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), new Color(newR, newG, newB, newA));
+            peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+        }
     }
+
     // assign red colors from median to first -> lighter to darker
-    heatMapColorRGB.put(peptideCharacteristics.get(medianIndex-1).getIntensity(), Color.RED.getRGB());
-    for (int i = medianIndex-2; i >= 0; i--)
+    one = new Color(187, 78, 78);
+    two = Color.WHITE;
+
+    r1 = one.getRed();
+    g1 = one.getGreen();
+    b1 = one.getBlue();
+    a1 = one.getAlpha();
+
+    r2 = two.getRed();
+    g2 = two.getGreen();
+    b2 = two.getBlue();
+    a2 = two.getAlpha();
+
+    for (int i = medianIndex; i >= 0; i--)
     {
-        var color = heatMapColorRGB.get(peptideCharacteristics.get(i+1).getIntensity());
-        var peptideColor = new Color(color).darker().getRGB();
-        heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-        peptideCharacteristics.get(i).setIntensityColor("#"+Integer.toHexString(peptideColor).substring(2));
+        iNorm = i / (double) iValues.size(); //a normalized [0:1] variable
+        newR = (int) (r1 + iNorm * (r2 - r1));
+        newG = (int) (g1 + iNorm * (g2 - g1));
+        newB = (int) (b1 + iNorm * (b2 - b1));
+        newA = (int) (a1 + iNorm * (a2 - a1));
+        var peptideColor = new Color(newR, newG, newB, newA);
+        if (isIntensityView)
+        {
+            heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), new Color(newR, newG, newB, newA));
+            peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+        }
+        if (isConfidenceView)
+        {
+            heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), new Color(newR, newG, newB, newA));
+            peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+        }
     }
 
     Map<Double, String> heatMapColorHex = new HashMap<>();
-    heatMapColorRGB.forEach((i,c) -> heatMapColorHex.put(i, "#"+Integer.toHexString(c).substring(2)));
+    heatMapColorRGB.forEach((i,c) -> heatMapColorHex.put(i, "#"+Integer.toHexString(c.getRGB()).substring(2)));
 
 %>
 <div class="sequencePanel">

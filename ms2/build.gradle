@@ -43,6 +43,8 @@ dependencies {
            )
    )
    implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
+   compileOnly 'org.projectlombok:lombok:1.18.24'
+   annotationProcessor 'org.projectlombok:lombok:1.18.24'
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
 
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "published", depExtension: "module")

@@ -16,6 +16,8 @@
 
 package org.labkey.ms2;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.apache.logging.log4j.Logger;
@@ -453,7 +455,8 @@ public class Protein
                     if (!_forCoverageMapExport)
                     {
                         details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
-                        label = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
+                        // todo: add contrasting color for visibility on link test
+                        label = helpPopup("Peptide Details", details, false, "<div>" + linkText + "</div>", 200, onClickScript );
                     }
                     label = continuationLeft + label + continuationRight;
                 }
@@ -484,7 +487,7 @@ public class Protein
 
             if ((range.start == curIdx) || (curRowStart == curIdx))
                 // pedtide color property
-                td = String.format(baseOutput, cssClass, "style",  "background-color:" + range.color , colsCurrentRow, label);
+                td = String.format(baseOutput, cssClass, "style",  "background-color:" + range.pepcounts.intensityColor , colsCurrentRow, label);
             else
                 td = PEPTIDE_MIDDLE_TD;
 
@@ -519,15 +522,21 @@ public class Protein
     }
 
     /*
-            new class to hold counts of scans matching a single peptide sequence, as well as counts of
-            peptides found with modifications
-         */
+        new class to hold counts of scans matching a single peptide sequence, as well as counts of
+        peptides found with modifications
+     */
     private static class PeptideCounts
     {
         int countScans;
         int countUnmodifiedPeptides;
         Map<String , Integer> countModifications;
         int countInstances;
+        @Getter @Setter String intensityColor;
+        @Getter @Setter Double intensity;
+        @Getter @Setter String confidenceColor;
+        @Getter @Setter Double confidence;
+        // have color here
+        // have intesity and cscore values as well
 
         public int getCountScans()
         {
@@ -707,15 +716,14 @@ public class Protein
         if ("".equals(_sequence) || _peptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
             return uncoalescedPeptideRanges;
 
-        Map<Pair<String, String>, PeptideCounts> uniqueMap = getUniquePeptides(run);
+        Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
 
         List<Range> ranges = new ArrayList<>(uniqueMap.size());
 
         if (run != null)  // in new style coverage map, we always have a run and are only looking for the trimmed part of the peptide
         {
-            for (Pair<String, String> entry : uniqueMap.keySet())
+            for (String trimmedPeptide : uniqueMap.keySet())
             {
-                var trimmedPeptide = entry.getKey();
                 int start = _sequence.indexOf(trimmedPeptide);
                 if (start <= -1)
                 {
@@ -727,30 +735,29 @@ public class Protein
                 while (start > -1)
                 {
                     instanceNum++;
-                    PeptideCounts cnt = uniqueMap.get(entry);
+                    PeptideCounts cnt = uniqueMap.get(trimmedPeptide);
                     if (null != cnt)
                         cnt.setCountInstances(instanceNum);
-                    ranges.add(new Range(start, trimmedPeptide.length(), cnt, entry.getValue()));
+                    ranges.add(new Range(start, trimmedPeptide.length(), cnt));
                     start = _sequence.indexOf(trimmedPeptide, start + 1);
                 }
             }
         }
         else // old style coverage. uses stripped peptide and matches beginning and end chars
         {
-            for (Pair<String, String> entry : uniqueMap.keySet())
+            for (String peptide : uniqueMap.keySet())
             {
-                var peptide = entry.getKey();
                 if (peptide.charAt(0) == '-')
                 {
                     if (_sequence.startsWith(peptide.substring(1)))
-                        ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(entry), entry.getValue()));
+                        ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
                     else
                         _log.debug("Can't find " + peptide + " at start of sequence");
                 }
                 else if (peptide.charAt(peptide.length() - 1) == '-')
                 {
                     if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
-                        ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(entry), entry.getValue()));
+                        ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(peptide)));
                     else
                         _log.debug("Can't find " + peptide + " at end of sequence");
                 }
@@ -767,9 +774,9 @@ public class Protein
                     while (start > -1)
                     {
                         if (_showEntireFragmentInCoverage)
-                            ranges.add(new Range(start, peptide.length(), uniqueMap.get(entry), entry.getValue()));             // Used when searching all proteins for a particular sequence (when prev/next AAs are not specified)
+                            ranges.add(new Range(start, peptide.length(), uniqueMap.get(peptide)));             // Used when searching all proteins for a particular sequence (when prev/next AAs are not specified)
                         else
-                            ranges.add(new Range(start + 1, peptide.length() - 2, uniqueMap.get(entry), entry.getValue()));     // Used when calculating coverage of peptides having specific prev/next AAs
+                            ranges.add(new Range(start + 1, peptide.length() - 2, uniqueMap.get(peptide)));     // Used when calculating coverage of peptides having specific prev/next AAs
 
                         start = _sequence.indexOf(peptide, start + 1);
                     }
@@ -793,9 +800,9 @@ public class Protein
         Changed to a map to keep track of number of duplicates and counts of modification status
         the keyset of the map becomes the set of unique peptides.
     */
-    public Map<Pair<String,String>, PeptideCounts> getUniquePeptides(MS2Run run)
+    public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
-        Map<Pair<String,String>, PeptideCounts> uniquePeptides = new TreeMap<>((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getKey(), o2.getKey()));
+        Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (null == _peptideCharacteristics || _peptideCharacteristics.size() <= 0)
             return uniquePeptides;
 
@@ -813,11 +820,16 @@ public class Protein
                 peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
 
             PeptideCounts cnt;
-            cnt = uniquePeptides.get(Pair.of(peptideToMap,peptide.getIntensityColor()));
+            cnt = uniquePeptides.get(peptideToMap);
             if (null == cnt)
             {
-                uniquePeptides.put(Pair.of(peptideToMap,peptide.getIntensityColor()), new PeptideCounts());
-                cnt = uniquePeptides.get(Pair.of(peptideToMap,peptide.getIntensityColor()));
+                PeptideCounts peptideCounts = new PeptideCounts();
+                peptideCounts.setIntensity(peptide.getIntensity());
+                peptideCounts.setIntensityColor(peptide.getIntensityColor());
+                peptideCounts.setConfidence(peptide.getConfidence());
+                peptideCounts.setConfidenceColor(peptide.getConfidenceColor());
+                uniquePeptides.put(peptideToMap, peptideCounts);
+                cnt = uniquePeptides.get(peptideToMap);
             }
             cnt.addPeptide(peptide.getSequence(), mods);
         }
@@ -829,7 +841,6 @@ public class Protein
         public int start;
         public int length;
         private PeptideCounts pepcounts;
-        public String color;
 
         Range(int start, int length)
         {
@@ -842,14 +853,6 @@ public class Protein
             this.start = start;
             this.length = length;
             this.pepcounts = counts;
-        }
-
-        public Range(int start, int length, PeptideCounts pepcounts, String color)
-        {
-            this.start = start;
-            this.length = length;
-            this.pepcounts = pepcounts;
-            this.color = color;
         }
 
         @Override
