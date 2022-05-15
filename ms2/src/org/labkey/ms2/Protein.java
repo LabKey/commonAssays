@@ -459,7 +459,7 @@ public class Protein
                     {
                         details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
                         // todo: add contrasting color for visibility on link test
-                        label = helpPopup("Peptide Details", details, false, "<div>" + linkText + "</div>", 200, onClickScript );
+                        label = helpPopup("Peptide Details", details, false, "<div style=color:" + range.pepcounts.foregroundColor +">" + linkText + "</div>", 200, onClickScript );
                     }
                     label = continuationLeft + label + continuationRight;
                 }
@@ -546,6 +546,7 @@ public class Protein
         @Getter @Setter Double intensity;
         @Getter @Setter String confidenceColor;
         @Getter @Setter Double confidence;
+        @Getter @Setter String foregroundColor;
         @Getter @Setter boolean isIntensityView;
         @Getter @Setter boolean isConfidenceView;
         // have color here
@@ -843,6 +844,7 @@ public class Protein
                 peptideCounts.setConfidenceColor(peptide.getConfidenceColor());
                 peptideCounts.setIntensityView(peptide.isIntensityView());
                 peptideCounts.setConfidenceView(peptide.isConfidenceView());
+                peptideCounts.setForegroundColor(peptide.getForegroundColor());
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }

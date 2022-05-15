@@ -124,16 +124,20 @@
         {
 
             var peptideColor = blueGradient.get(i-medianIndex);
+            var peptideCharacteristic = peptideCharacteristics.get(i);
             if (isIntensityView)
             {
                 heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-                peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                peptideCharacteristic.setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
             }
             if (isConfidenceView)
             {
                 heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
-                peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                peptideCharacteristic.setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
             }
+            // for blue - contrasting foreground color is White according to the tool
+            // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+            peptideCharacteristic.setForegroundColor(ColorGradient.getContrast(peptideColor));
         }
 
         // assign red colors from median to first -> lighter to darker
@@ -145,16 +149,18 @@
         for (int i = medianIndex; i >= 0; i--)
         {
             var peptideColor = redGradient.get(i);
+            var peptideCharacteristic = peptideCharacteristics.get(i);
             if (isIntensityView)
             {
                 heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-                peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                peptideCharacteristic.setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
             }
             if (isConfidenceView)
             {
                 heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
-                peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                peptideCharacteristic.setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
             }
+            peptideCharacteristic.setForegroundColor(ColorGradient.getContrast(peptideColor));
         }
 
         heatMapColorRGB.forEach((i, c) -> heatMapColorHex.put(i, "#" + Integer.toHexString(c.getRGB()).substring(2)));
