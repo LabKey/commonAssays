@@ -18,27 +18,30 @@ package org.labkey.ms2;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.jsp.JspBase;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import static org.labkey.api.util.PageFlowUtil.helpPopup;
 
+@Log4j2
 public class Protein
 {
-    private static Logger _log = LogManager.getLogger(Protein.class);
-
     private double _mass;
     private String _sequence;
     private int _seqId;
@@ -484,10 +487,18 @@ public class Protein
             {
                 baseOutput = PEPTIDE_START_TD;
             }
-
+            var color = "";
+            if (range.pepcounts.isIntensityView)
+            {
+                color = range.pepcounts.intensityColor;
+            }
+            else if (range.pepcounts.isConfidenceView)
+            {
+                color = range.pepcounts.confidenceColor;
+            }
             if ((range.start == curIdx) || (curRowStart == curIdx))
                 // pedtide color property
-                td = String.format(baseOutput, cssClass, "style",  "background-color:" + range.pepcounts.intensityColor , colsCurrentRow, label);
+                td = String.format(baseOutput, cssClass, "style",  "background-color:" + color , colsCurrentRow, label);
             else
                 td = PEPTIDE_MIDDLE_TD;
 
@@ -535,6 +546,8 @@ public class Protein
         @Getter @Setter Double intensity;
         @Getter @Setter String confidenceColor;
         @Getter @Setter Double confidence;
+        @Getter @Setter boolean isIntensityView;
+        @Getter @Setter boolean isConfidenceView;
         // have color here
         // have intesity and cscore values as well
 
@@ -752,14 +765,14 @@ public class Protein
                     if (_sequence.startsWith(peptide.substring(1)))
                         ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        _log.debug("Can't find " + peptide + " at start of sequence");
+                        log.debug("Can't find " + peptide + " at start of sequence");
                 }
                 else if (peptide.charAt(peptide.length() - 1) == '-')
                 {
                     if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
                         ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        _log.debug("Can't find " + peptide + " at end of sequence");
+                        log.debug("Can't find " + peptide + " at end of sequence");
                 }
                 else
                 {
@@ -767,7 +780,7 @@ public class Protein
 
                     if (start <= -1)
                     {
-                        _log.debug("Can't find " + peptide + " in middle of sequence");
+                        log.debug("Can't find " + peptide + " in middle of sequence");
                         continue;
                     }
 
@@ -828,6 +841,8 @@ public class Protein
                 peptideCounts.setIntensityColor(peptide.getIntensityColor());
                 peptideCounts.setConfidence(peptide.getConfidence());
                 peptideCounts.setConfidenceColor(peptide.getConfidenceColor());
+                peptideCounts.setIntensityView(peptide.isIntensityView());
+                peptideCounts.setConfidenceView(peptide.isConfidenceView());
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }

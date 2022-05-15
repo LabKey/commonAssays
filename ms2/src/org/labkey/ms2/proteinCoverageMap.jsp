@@ -15,27 +15,21 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView" %>
-<%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="java.util.Set" %>
-<%@ page import="java.util.stream.Collectors" %>
-<%@ page import="java.util.TreeSet" %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
-<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
-<%@ page import="java.util.StringJoiner" %>
-<%@ page import="java.util.Collections" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.Comparator" %>
-<%@ page import="java.util.Collection" %>
+<%@ page import="org.labkey.api.view.HttpView" %>
+<%@ page import="org.labkey.api.view.JspView" %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
+<%@ page import="org.labkey.api.visualization.ColorGradient" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="java.awt.*" %>
-<%@ page import="org.labkey.api.data.statistics.StatsService" %>
-<%@ page import="org.labkey.api.data.statistics.MathStat" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.Set" %>
+<%@ page import="java.util.TreeSet" %>
+<%@ page import="java.util.stream.Collectors" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -72,109 +66,99 @@
     var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
     Map<Double, Color> heatMapColorRGB = new HashMap<>();
 
-
     if (isIntensityView)
     {
-        peptideCharacteristics.sort(Comparator.nullsLast(Comparator.comparing(PeptideCharacteristic::getIntensity).reversed()));
-        peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getIntensity()));
+        peptideCharacteristics.sort((o1, o2) -> {
+            if (o1.getIntensity() == null && o2.getIntensity() == null) return 0;
+            if (o2.getIntensity() == null) return 1;
+            if (o1.getIntensity() == null) return -1;
+            return o2.getIntensity().compareTo(o1.getIntensity());
+        });
+        peptideCharacteristics.forEach(peptideCharacteristic -> {
+            if (peptideCharacteristic.getIntensity() != null)
+            {
+                iValues.add(peptideCharacteristic.getIntensity());
+            }
+        });
     }
     if (isConfidenceView)
     {
-        peptideCharacteristics.sort((o1, o2) -> 0);
-        peptideCharacteristics.forEach(peptideCharacteristic -> iValues.add(peptideCharacteristic.getConfidence()));
-    }
-
-    // calculate medianIndex of protein.getPeptideCharacteristics()
-    var count = peptideCharacteristics.size();
-    var medianIndex = 0;
-
-    if (count % 2 == 0)
-    {
-        medianIndex = (count / 2 - 1 + count / 2) / 2;
-    }
-    else
-    {
-        medianIndex = (count -1) / 2;
-    }
-
-    // assign blue colors from median to last -> lighter to darker
-    Color one = Color.WHITE;
-    Color two = new Color(0, 81, 138);
-
-    int r1 = one.getRed();
-    int g1 = one.getGreen();
-    int b1 = one.getBlue();
-    int a1 = one.getAlpha();
-
-    int r2 = two.getRed();
-    int g2 = two.getGreen();
-    int b2 = two.getBlue();
-    int a2 = two.getAlpha();
-
-    int newR = 0;
-    int newG = 0;
-    int newB = 0;
-    int newA = 0;
-
-    double iNorm;
-
-    // assign blue colors from median to last -> lighter to darker
-    for (int i = medianIndex+1; i < count; i++)
-    {
-        iNorm = i / (double) iValues.size(); //a normalized [0:1] variable
-        newR = (int) (r1 + iNorm * (r2 - r1));
-        newG = (int) (g1 + iNorm * (g2 - g1));
-        newB = (int) (b1 + iNorm * (b2 - b1));
-        newA = (int) (a1 + iNorm * (a2 - a1));
-        var peptideColor = new Color(newR, newG, newB, newA);
-        if (isIntensityView)
-        {
-            heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), new Color(newR, newG, newB, newA));
-            peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
-        }
-        if (isConfidenceView)
-        {
-            heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), new Color(newR, newG, newB, newA));
-            peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
-        }
-    }
-
-    // assign red colors from median to first -> lighter to darker
-    one = new Color(187, 78, 78);
-    two = Color.WHITE;
-
-    r1 = one.getRed();
-    g1 = one.getGreen();
-    b1 = one.getBlue();
-    a1 = one.getAlpha();
-
-    r2 = two.getRed();
-    g2 = two.getGreen();
-    b2 = two.getBlue();
-    a2 = two.getAlpha();
-
-    for (int i = medianIndex; i >= 0; i--)
-    {
-        iNorm = i / (double) iValues.size(); //a normalized [0:1] variable
-        newR = (int) (r1 + iNorm * (r2 - r1));
-        newG = (int) (g1 + iNorm * (g2 - g1));
-        newB = (int) (b1 + iNorm * (b2 - b1));
-        newA = (int) (a1 + iNorm * (a2 - a1));
-        var peptideColor = new Color(newR, newG, newB, newA);
-        if (isIntensityView)
-        {
-            heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), new Color(newR, newG, newB, newA));
-            peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
-        }
-        if (isConfidenceView)
-        {
-            heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), new Color(newR, newG, newB, newA));
-            peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
-        }
+        peptideCharacteristics.sort((o1, o2) -> {
+            if (o1.getConfidence() == null && o2.getConfidence() == null) return 0;
+            if (o2.getConfidence() == null) return 1;
+            if (o1.getConfidence() == null) return -1;
+            return o2.getConfidence().compareTo(o1.getConfidence());
+        });
+        peptideCharacteristics.forEach(peptideCharacteristic -> {
+          if (peptideCharacteristic.getConfidence() != null)
+          {
+              iValues.add(peptideCharacteristic.getConfidence());
+          }
+        });
     }
 
     Map<Double, String> heatMapColorHex = new HashMap<>();
-    heatMapColorRGB.forEach((i,c) -> heatMapColorHex.put(i, "#"+Integer.toHexString(c.getRGB()).substring(2)));
+
+    if (iValues.size() > 1)
+    {
+        // calculate medianIndex of protein.getPeptideCharacteristics()
+        var count = iValues.size();
+        var medianIndex = 0;
+
+        if (count % 2 == 0)
+        {
+            medianIndex = (count / 2 - 1 + count / 2) / 2;
+        }
+        else
+        {
+            medianIndex = (count - 1) / 2;
+        }
+
+        // assign blue colors from median to last -> lighter to darker
+        Color one = Color.WHITE;
+        Color two = new Color(0, 81, 138);
+        List<Color> blueGradient = ColorGradient.createGradient(one, two, (count-medianIndex +1));
+
+        // assign blue colors from median to last -> lighter to darker
+        for (int i = medianIndex + 1; i < count; i++)
+        {
+
+            var peptideColor = blueGradient.get(i-medianIndex);
+            if (isIntensityView)
+            {
+                heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
+                peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+            }
+            if (isConfidenceView)
+            {
+                heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
+                peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+            }
+        }
+
+        // assign red colors from median to first -> lighter to darker
+        one = new Color(187, 78, 78);
+        two = Color.WHITE;
+
+        List<Color> redGradient = ColorGradient.createGradient(one, two, medianIndex+1);
+
+        for (int i = medianIndex; i >= 0; i--)
+        {
+            var peptideColor = redGradient.get(i);
+            if (isIntensityView)
+            {
+                heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
+                peptideCharacteristics.get(i).setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+            }
+            if (isConfidenceView)
+            {
+                heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
+                peptideCharacteristics.get(i).setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+            }
+        }
+
+        heatMapColorRGB.forEach((i, c) -> heatMapColorHex.put(i, "#" + Integer.toHexString(c.getRGB()).substring(2)));
+    }
 
 %>
 <div class="sequencePanel">
@@ -222,5 +206,6 @@
 
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
+
     LABKEY.ms2.PeptideIntensityHeatMap.addHeatMap(<%=toJsonArray(iValues)%>, <%=toJsonObject(heatMapColorHex)%>);
 </script>
