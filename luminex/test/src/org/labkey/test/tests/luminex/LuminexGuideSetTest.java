@@ -621,8 +621,9 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void enableDisableQCFlags(String runName, String... flags)
     {
-        Locator l = Locator.xpath("//a[text()='" + runName + "']/../../td/a[contains(@onclick,'showQCFlag')]");
-        click(l);
+        DataRegionTable drt = new DataRegionTable("Runs", getDriver());
+        int rowIndex = drt.getRowIndexStrict("Name", runName);
+        drt.link(rowIndex, "QCFlags").click();
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
 
         sleep(1500);
