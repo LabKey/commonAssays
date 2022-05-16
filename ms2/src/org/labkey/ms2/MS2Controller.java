@@ -58,7 +58,6 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
