@@ -3858,20 +3858,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private List<PeptideCharacteristic> buildPeptideCharacters(String... peptides)
-    {
-        List<PeptideCharacteristic> peptideCharacteristics = new ArrayList<>();
-
-        for (String peptide: peptides)
-        {
-            PeptideCharacteristic peptideCharacteristic = new PeptideCharacteristic();
-            peptideCharacteristic.setSequence(peptide);
-            peptideCharacteristics.add(peptideCharacteristic);
-        }
-        return peptideCharacteristics;
-    }
-
-
     @RequiresPermission(ReadPermission.class)
     public class ShowProteinAJAXAction extends SimpleViewAction<DetailsForm>
     {
