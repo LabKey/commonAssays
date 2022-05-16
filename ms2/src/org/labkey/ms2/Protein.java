@@ -458,7 +458,6 @@ public class Protein
                     if (!_forCoverageMapExport)
                     {
                         details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
-                        // todo: add contrasting color for visibility on link test
                         label = helpPopup("Peptide Details", details, false, "<div style=color:" + range.pepcounts.foregroundColor +">" + linkText + "</div>", 200, onClickScript );
                     }
                     label = continuationLeft + label + continuationRight;
