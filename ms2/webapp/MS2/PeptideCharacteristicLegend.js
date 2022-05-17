@@ -2,8 +2,8 @@ if (!LABKEY.ms2) {
     LABKEY.ms2 = {};
 }
 
-if (!LABKEY.ms2.PeptideIntensityHeatMap) {
-    LABKEY.ms2.PeptideIntensityHeatMap = {
+if (!LABKEY.ms2.PeptideCharacteristicLegend) {
+    LABKEY.ms2.PeptideCharacteristicLegend = {
 
         addHeatMap: function (peptideCharacteristics, colors) {
 

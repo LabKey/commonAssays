@@ -44,7 +44,7 @@
     {
         dependencies.add("MS2/ProteinCoverageMap.css");
         dependencies.add("MS2/ProteinCoverageMap.js");
-        dependencies.add("MS2/PeptideIntensityHeatMap.js");
+        dependencies.add("MS2/PeptideCharacteristicLegend.js");
         dependencies.add("util.js");
         dependencies.add("internal/jQuery");
         dependencies.add("vis/vis");
@@ -54,7 +54,7 @@
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideIntensityHeatMap.changeView()">
+    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
         <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
         <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
     </select>
@@ -210,5 +210,5 @@
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 
-    LABKEY.ms2.PeptideIntensityHeatMap.addHeatMap(<%=toJsonArray(iValues)%>, <%=toJsonObject(heatMapColorHex)%>);
+    LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(iValues)%>, <%=toJsonObject(heatMapColorHex)%>);
 </script>
