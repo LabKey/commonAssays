@@ -35,7 +35,6 @@
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
     var viewByParam = currentURL.getParameter("viewBy");
-    var runIdParam = currentURL.getParameter("id");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
 %>
@@ -55,7 +54,7 @@
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideIntensityHeatMap.changeView(<%=h(runIdParam)%>)">
+    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideIntensityHeatMap.changeView()">
         <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
         <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
     </select>

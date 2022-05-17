@@ -34,9 +34,11 @@ if (!LABKEY.ms2.PeptideIntensityHeatMap) {
 
         },
 
-        changeView: function (runId) {
+        changeView: function () {
             var viewBy = $("#peptide-setting-select").val();
-            window.location = LABKEY.ActionURL.buildURL('targetedms', 'showProtein' , null, {id: runId, viewBy: viewBy});
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('viewBy', viewBy)
+            window.location = currentUrl.toString();
         }
     }
 
