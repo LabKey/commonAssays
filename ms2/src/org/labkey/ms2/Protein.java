@@ -458,7 +458,8 @@ public class Protein
                     if (!_forCoverageMapExport)
                     {
                         details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
-                        label = helpPopup("Peptide Details", details, false, "<div style=color:" + range.pepcounts.foregroundColor +">" + linkText + "</div>", 200, onClickScript );
+                        label = helpPopup("Peptide Details", details, false, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 200, onClickScript );
+
                     }
                     label = continuationLeft + label + continuationRight;
                 }
@@ -496,7 +497,8 @@ public class Protein
                 color = range.pepcounts.confidenceColor;
             }
             if ((range.start == curIdx) || (curRowStart == curIdx))
-                // pedtide color property
+                // peptide color property
+
                 td = String.format(baseOutput, cssClass, "style",  "background-color:" + color , colsCurrentRow, label);
             else
                 td = PEPTIDE_MIDDLE_TD;
