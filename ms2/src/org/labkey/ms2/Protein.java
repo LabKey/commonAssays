@@ -18,8 +18,9 @@ package org.labkey.ms2;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,9 +40,10 @@ import java.util.TreeMap;
 
 import static org.labkey.api.util.PageFlowUtil.helpPopup;
 
-@Log4j2
 public class Protein
 {
+    private static Logger _log = LogManager.getLogger(Protein.class);
+
     private double _mass;
     private String _sequence;
     private int _seqId;
@@ -61,7 +63,7 @@ public class Protein
 
     private boolean _forCoverageMapExport = false;
 
-    private static final String PEPTIDE_START_TD="<td class=\"%s\" %s=%s colspan=%d > %s </td>";
+    private static final String PEPTIDE_START_TD="<td class=\"%s\" style=\"%s\" colspan=%d > %s </td>";
 
     // In the export cases, we need to in-line the styles since we don't have the external CSS to reference
     private static final String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
@@ -487,19 +489,11 @@ public class Protein
             {
                 baseOutput = PEPTIDE_START_TD;
             }
-            var color = "";
-            if (range.pepcounts.isIntensityView)
-            {
-                color = range.pepcounts.intensityColor;
-            }
-            else if (range.pepcounts.isConfidenceView)
-            {
-                color = range.pepcounts.confidenceColor;
-            }
+
             if ((range.start == curIdx) || (curRowStart == curIdx))
                 // peptide color property
 
-                td = String.format(baseOutput, cssClass, "style",  "background-color:" + color , colsCurrentRow, label);
+                td = String.format(baseOutput, cssClass, "background-color:" + range.pepcounts.peptideColor , colsCurrentRow, label);
             else
                 td = PEPTIDE_MIDDLE_TD;
 
@@ -539,44 +533,15 @@ public class Protein
      */
     private static class PeptideCounts
     {
-        int countScans;
-        int countUnmodifiedPeptides;
-        Map<String , Integer> countModifications;
-        int countInstances;
-        @Getter @Setter String intensityColor;
+        @Getter int countScans;
+        @Getter int countUnmodifiedPeptides;
+        @Getter Map<String , Integer> countModifications;
+        @Getter @Setter int countInstances;
+        @Getter @Setter String peptideColor;
         @Getter @Setter Double intensity;
-        @Getter @Setter String confidenceColor;
         @Getter @Setter Double confidence;
         @Getter @Setter String foregroundColor;
-        @Getter @Setter boolean isIntensityView;
-        @Getter @Setter boolean isConfidenceView;
-        // have color here
-        // have intesity and cscore values as well
-
-        public int getCountScans()
-        {
-            return countScans;
-        }
-
-        public int getCountUnmodifiedPeptides()
-        {
-            return countUnmodifiedPeptides;
-        }
-
-        public Map<String, Integer> getCountModifications()
-        {
-            return countModifications;
-        }
-
-        public int getCountInstances()
-        {
-            return countInstances;
-        }
-
-        public void setCountInstances(int n)
-        {
-            countInstances = n;
-        }
+        
 
         public PeptideCounts()
         {
@@ -767,14 +732,14 @@ public class Protein
                     if (_sequence.startsWith(peptide.substring(1)))
                         ranges.add(new Range(0, peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        log.debug("Can't find " + peptide + " at start of sequence");
+                        _log.debug("Can't find " + peptide + " at start of sequence");
                 }
                 else if (peptide.charAt(peptide.length() - 1) == '-')
                 {
                     if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
                         ranges.add(new Range(_sequence.length() - (peptide.length() - 2), peptide.length() - 2, uniqueMap.get(peptide)));
                     else
-                        log.debug("Can't find " + peptide + " at end of sequence");
+                        _log.debug("Can't find " + peptide + " at end of sequence");
                 }
                 else
                 {
@@ -782,7 +747,7 @@ public class Protein
 
                     if (start <= -1)
                     {
-                        log.debug("Can't find " + peptide + " in middle of sequence");
+                        _log.debug("Can't find " + peptide + " in middle of sequence");
                         continue;
                     }
 
@@ -840,12 +805,9 @@ public class Protein
             {
                 PeptideCounts peptideCounts = new PeptideCounts();
                 peptideCounts.setIntensity(peptide.getIntensity());
-                peptideCounts.setIntensityColor(peptide.getIntensityColor());
                 peptideCounts.setConfidence(peptide.getConfidence());
-                peptideCounts.setConfidenceColor(peptide.getConfidenceColor());
-                peptideCounts.setIntensityView(peptide.isIntensityView());
-                peptideCounts.setConfidenceView(peptide.isConfidenceView());
                 peptideCounts.setForegroundColor(peptide.getForegroundColor());
+                peptideCounts.setPeptideColor(peptide.getColor());
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }

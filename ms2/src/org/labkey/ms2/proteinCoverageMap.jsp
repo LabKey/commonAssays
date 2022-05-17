@@ -48,7 +48,7 @@
         dependencies.add("MS2/PeptideIntensityHeatMap.js");
         dependencies.add("util.js");
         dependencies.add("internal/jQuery");
-        dependencies.add("vis/lib/d3-3.5.17.min.js");
+        dependencies.add("vis/vis");
     }
 %>
 <div class="viewSettings">
@@ -122,22 +122,21 @@
         // assign blue colors from median to last -> lighter to darker
         for (int i = medianIndex + 1; i < count; i++)
         {
-
             var peptideColor = blueGradient.get(i-medianIndex);
             var peptideCharacteristic = peptideCharacteristics.get(i);
+            var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
             if (isIntensityView)
             {
-                heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-                peptideCharacteristic.setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
             }
             if (isConfidenceView)
             {
-                heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
-                peptideCharacteristic.setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
             }
+            peptideCharacteristic.setColor(hexColor);
             // for blue - contrasting foreground color is White according to the tool
             // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-            peptideCharacteristic.setForegroundColor(ColorGradient.getContrast(peptideColor));
+            peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
         }
 
         // assign red colors from median to first -> lighter to darker
@@ -150,20 +149,19 @@
         {
             var peptideColor = redGradient.get(i);
             var peptideCharacteristic = peptideCharacteristics.get(i);
+            var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
             if (isIntensityView)
             {
-                heatMapColorRGB.put(peptideCharacteristics.get(i).getIntensity(), peptideColor);
-                peptideCharacteristic.setIntensityColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
             }
             if (isConfidenceView)
             {
-                heatMapColorRGB.put(peptideCharacteristics.get(i).getConfidence(), peptideColor);
-                peptideCharacteristic.setConfidenceColor("#" + Integer.toHexString(peptideColor.getRGB()).substring(2));
+                heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(),hexColor);
             }
-            peptideCharacteristic.setForegroundColor(ColorGradient.getContrast(peptideColor));
+            peptideCharacteristic.setColor(hexColor);
+            peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
         }
 
-        heatMapColorRGB.forEach((i, c) -> heatMapColorHex.put(i, "#" + Integer.toHexString(c.getRGB()).substring(2)));
     }
 
 %>
