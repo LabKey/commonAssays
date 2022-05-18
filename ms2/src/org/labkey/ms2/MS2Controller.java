@@ -4554,6 +4554,14 @@ public class MS2Controller extends SpringActionController
                     SimpleFilter singleSeqIdFilter = getAllPeptidesFilter(getViewContext(), tempURL, ms2Run, PEPTIDES_FILTER_VIEW_NAME, PEPTIDES_FILTER);
                     ProteinCoverageMapBuilder pcm = new ProteinCoverageMapBuilder(getViewContext(), protein, ms2Run, singleSeqIdFilter, showAllPeptides);
                     pcm.setProteinPeptides(pcm.getPeptidesForFilter(singleSeqIdFilter));
+                    List<PeptideCharacteristic> peptideCharacteristics = new ArrayList<>();
+                    for (String pep : pcm.getPeptidesForFilter(singleSeqIdFilter))
+                    {
+                        var pepCharacteristic = new PeptideCharacteristic();
+                        pepCharacteristic.setSequence(pep);
+                        peptideCharacteristics.add(pepCharacteristic);
+                    }
+                    protein.setPeptideCharacteristics(peptideCharacteristics);
                     pcm.setAllPeptideCounts();
 
                     // add filter to get the total and distinct counts of peptides for the target protein to the ProteinCoverageMapBuilder
