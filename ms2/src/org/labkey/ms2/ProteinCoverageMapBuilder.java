@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import lombok.Builder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
@@ -30,9 +32,11 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -153,6 +157,18 @@ public class ProteinCoverageMapBuilder
             _run.setDescription("Test Run 1");
         }
 
+        private List<PeptideCharacteristic> createPeptideCharacteristics(String[] peptides)
+        {
+            List<PeptideCharacteristic> peptideCharacteristics = new ArrayList<>();
+            for (String peptide : peptides)
+            {
+                var pep = new PeptideCharacteristic();
+                pep.setSequence(peptide);
+                peptideCharacteristics.add(pep);
+            }
+            return peptideCharacteristics;
+        }
+
         @Test
         public void testNoPrevAndNext()
         {
@@ -165,6 +181,7 @@ public class ProteinCoverageMapBuilder
             _protein.setShowEntireFragmentInCoverage(true);
             _protein.setForCoverageMapExport(true);
             _protein.setPeptides(peptides);
+            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides));
 
             String coverage = _protein.getCoverageMap(null, null).toString();
             String expectedHtml = "<div><table id=\"peptideMap\" border=\"1\"  >" +
@@ -184,10 +201,11 @@ public class ProteinCoverageMapBuilder
                     "K.LC'TPTMPSNGTLK.T", "K.LC'TPTMPSNGTLK.T", "K.LIAYNEGSFFIR.G", "R.IINTASPAGLFGNFGQANYSAAK.M", 
                     "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W"};
             String[] peptides2 = {"K.LC'TPTMPSNGTLK.T", "K.LC'TPTMPSNGTLK.T", "K.LIAYNEGSFFIR.G", "R.IINTASPAGLFGNFGQANYSAAK.M",
-                    "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W"};            
+                    "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W"};
 
+            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides1));
             ProteinCoverageMapBuilder pcm1 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
-            pcm1.setProteinPeptides(peptides1);
+
             Set<String> distinct = new HashSet<>(Arrays.asList(peptides1));
             Pair<Integer, Integer> counts = new Pair<>(peptides1.length, distinct.size());
             pcm1.setAllPeptideCounts(counts);
@@ -219,8 +237,8 @@ public class ProteinCoverageMapBuilder
             // add some peptide filter conditions and check the header info line
             f.addCondition(FieldKey.fromParts("Scan"), 100, CompareType.NEQ_OR_NULL);
             f.addCondition(FieldKey.fromParts("PeptideProhet"), 0.9, CompareType.GTE);
+            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides2));
             ProteinCoverageMapBuilder pcm2 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
-            pcm2.setProteinPeptides(peptides2);
             distinct = new HashSet<>(Arrays.asList(peptides2));
             counts = new Pair<>(peptides2.length, distinct.size());
             pcm2.setAllPeptideCounts(counts);

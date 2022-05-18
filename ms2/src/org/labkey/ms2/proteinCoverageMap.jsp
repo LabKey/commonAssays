@@ -63,104 +63,104 @@
 
     List<Double> iValues = new ArrayList<>();
     var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
-    Map<Double, Color> heatMapColorRGB = new HashMap<>();
-
-    if (isIntensityView)
-    {
-        peptideCharacteristics.sort((o1, o2) -> {
-            if (o1.getIntensity() == null && o2.getIntensity() == null) return 0;
-            if (o2.getIntensity() == null) return 1;
-            if (o1.getIntensity() == null) return -1;
-            return o2.getIntensity().compareTo(o1.getIntensity());
-        });
-        peptideCharacteristics.forEach(peptideCharacteristic -> {
-            if (peptideCharacteristic.getIntensity() != null)
-            {
-                iValues.add(peptideCharacteristic.getIntensity());
-            }
-        });
-    }
-    if (isConfidenceView)
-    {
-        peptideCharacteristics.sort((o1, o2) -> {
-            if (o1.getConfidence() == null && o2.getConfidence() == null) return 0;
-            if (o2.getConfidence() == null) return 1;
-            if (o1.getConfidence() == null) return -1;
-            return o2.getConfidence().compareTo(o1.getConfidence());
-        });
-        peptideCharacteristics.forEach(peptideCharacteristic -> {
-          if (peptideCharacteristic.getConfidence() != null)
-          {
-              iValues.add(peptideCharacteristic.getConfidence());
-          }
-        });
-    }
-
     Map<Double, String> heatMapColorHex = new HashMap<>();
-
-    if (iValues.size() > 1)
+    if (peptideCharacteristics != null)
     {
-        // calculate medianIndex of protein.getPeptideCharacteristics()
-        var count = iValues.size();
-        var medianIndex = 0;
 
-        if (count % 2 == 0)
+        if (isIntensityView)
         {
-            medianIndex = (count / 2 - 1 + count / 2) / 2;
+            peptideCharacteristics.sort((o1, o2) -> {
+                if (o1.getIntensity() == null && o2.getIntensity() == null) return 0;
+                if (o2.getIntensity() == null) return 1;
+                if (o1.getIntensity() == null) return -1;
+                return o2.getIntensity().compareTo(o1.getIntensity());
+            });
+            peptideCharacteristics.forEach(peptideCharacteristic -> {
+                if (peptideCharacteristic.getIntensity() != null)
+                {
+                    iValues.add(peptideCharacteristic.getIntensity());
+                }
+            });
         }
-        else
+        if (isConfidenceView)
         {
-            medianIndex = (count - 1) / 2;
-        }
-
-        // assign blue colors from median to last -> lighter to darker
-        Color one = Color.WHITE;
-        Color two = new Color(0, 81, 138);
-        List<Color> blueGradient = ColorGradient.createGradient(one, two, (count-medianIndex +1));
-
-        // assign blue colors from median to last -> lighter to darker
-        for (int i = medianIndex + 1; i < count; i++)
-        {
-            var peptideColor = blueGradient.get(i-medianIndex);
-            var peptideCharacteristic = peptideCharacteristics.get(i);
-            var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-            if (isIntensityView)
-            {
-                heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
-            }
-            if (isConfidenceView)
-            {
-                heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
-            }
-            peptideCharacteristic.setColor(hexColor);
-            // for blue - contrasting foreground color is White according to the tool
-            // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-            peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+            peptideCharacteristics.sort((o1, o2) -> {
+                if (o1.getConfidence() == null && o2.getConfidence() == null) return 0;
+                if (o2.getConfidence() == null) return 1;
+                if (o1.getConfidence() == null) return -1;
+                return o2.getConfidence().compareTo(o1.getConfidence());
+            });
+            peptideCharacteristics.forEach(peptideCharacteristic -> {
+                if (peptideCharacteristic.getConfidence() != null)
+                {
+                    iValues.add(peptideCharacteristic.getConfidence());
+                }
+            });
         }
 
-        // assign red colors from median to first -> lighter to darker
-        one = new Color(187, 78, 78);
-        two = Color.WHITE;
-
-        List<Color> redGradient = ColorGradient.createGradient(one, two, medianIndex+1);
-
-        for (int i = medianIndex; i >= 0; i--)
+        if (iValues.size() > 1)
         {
-            var peptideColor = redGradient.get(i);
-            var peptideCharacteristic = peptideCharacteristics.get(i);
-            var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-            if (isIntensityView)
-            {
-                heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
-            }
-            if (isConfidenceView)
-            {
-                heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(),hexColor);
-            }
-            peptideCharacteristic.setColor(hexColor);
-            peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
-        }
+            // calculate medianIndex of protein.getPeptideCharacteristics()
+            var count = iValues.size();
+            var medianIndex = 0;
 
+            if (count % 2 == 0)
+            {
+                medianIndex = (count / 2 - 1 + count / 2) / 2;
+            }
+            else
+            {
+                medianIndex = (count - 1) / 2;
+            }
+
+            // assign blue colors from median to last -> lighter to darker
+            Color one = Color.WHITE;
+            Color two = new Color(0, 81, 138);
+            List<Color> blueGradient = ColorGradient.createGradient(one, two, (count - medianIndex + 1));
+
+            // assign blue colors from median to last -> lighter to darker
+            for (int i = medianIndex + 1; i < count; i++)
+            {
+                var peptideColor = blueGradient.get(i - medianIndex);
+                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                if (isIntensityView)
+                {
+                    heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
+                }
+                if (isConfidenceView)
+                {
+                    heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
+                }
+                peptideCharacteristic.setColor(hexColor);
+                // for blue - contrasting foreground color is White according to the tool
+                // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+            }
+
+            // assign red colors from median to first -> lighter to darker
+            one = new Color(187, 78, 78);
+            two = Color.WHITE;
+
+            List<Color> redGradient = ColorGradient.createGradient(one, two, medianIndex + 1);
+
+            for (int i = medianIndex; i >= 0; i--)
+            {
+                var peptideColor = redGradient.get(i);
+                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                if (isIntensityView)
+                {
+                    heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
+                }
+                if (isConfidenceView)
+                {
+                    heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
+                }
+                peptideCharacteristic.setColor(hexColor);
+                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+            }
+        }
     }
 
 %>

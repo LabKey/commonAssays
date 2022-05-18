@@ -58,6 +58,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.query.ComparisonCrosstabView;
@@ -4267,6 +4268,17 @@ public class MS2Controller extends SpringActionController
 
                 addView(new HtmlView("<a name=\"Protein" + i + "\"></a>"));
                 protein.setPeptides(peptides);
+                if (peptides != null)
+                {
+                    List<PeptideCharacteristic> peptideCharacteristics = new ArrayList<>();
+                    for (String peptide : peptides)
+                    {
+                        var pep = new PeptideCharacteristic();
+                        pep.setSequence(peptide);
+                        peptideCharacteristics.add(pep);
+                    }
+                    protein.setPeptideCharacteristics(peptideCharacteristics);
+                }
                 protein.setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;

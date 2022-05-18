@@ -491,9 +491,16 @@ public class Protein
             }
 
             if ((range.start == curIdx) || (curRowStart == curIdx))
-                // peptide color property
-
-                td = String.format(baseOutput, cssClass, "background-color:" + range.pepcounts.peptideColor , colsCurrentRow, label);
+            {
+                if (baseOutput.equalsIgnoreCase(PEPTIDE_START_TD))
+                {
+                    td = String.format(baseOutput, cssClass, "background-color:" + range.pepcounts.peptideColor, colsCurrentRow, label);
+                }
+                else
+                {
+                    td = String.format(baseOutput, cssClass, colsCurrentRow, label);
+                }
+            }
             else
                 td = PEPTIDE_MIDDLE_TD;
 
