@@ -168,7 +168,30 @@
     <div class="coverageMap">
         <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
     </div>
-    <div class="heatmap"></div>
+<%
+    var legendLabel = "";
+    var legendScale = "";
+    if (isIntensityView)
+    {
+        legendLabel = "Intensity";
+        legendScale = "(Log 10 base)";
+    }
+    else if (isConfidenceView)
+    {
+        legendLabel = "Confidence Score";
+        legendScale = "-(Log 10 base)";
+    }
+
+%>
+
+    <div class="heatmap">
+        <div>
+            <strong><%=h(legendLabel)%></strong>
+        </div>
+        <div>
+            <strong><%=h(legendScale)%></strong>
+        </div>
+    </div>
 <%
     if (!bean.features.isEmpty())
     {
