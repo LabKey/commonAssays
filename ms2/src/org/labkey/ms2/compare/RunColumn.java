@@ -25,7 +25,7 @@ public class RunColumn
     private final String _label;
     private final String _name;
     private final String _aggregate;
-    private String _formatString;
+    private final String _formatString;
 
     public RunColumn(String label, String name, String aggregate, String formatString)
     {
