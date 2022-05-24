@@ -599,9 +599,9 @@ public class MS2Controller extends SpringActionController
             super("/org/labkey/ms2/currentFilter.jsp", new CurrentFilterBean(headers, sqlSummaries));
         }
 
-        private CurrentFilterView(CompareQuery query, User user)
+        private CurrentFilterView(CompareQuery query)
         {
-            this(new String[]{query.getHeader()}, query.getSQLSummaries(user));
+            this(new String[]{query.getHeader()}, query.getSQLSummaries());
         }
 
         public static class CurrentFilterBean
@@ -2471,13 +2471,7 @@ public class MS2Controller extends SpringActionController
             }
         }
 
-        CompareQuery query = CompareQuery.getCompareQuery(column, currentURL, runs, getUser());
-        if (query == null)
-        {
-            errors.addError(new LabKeyError("You must specify a comparison type"));
-            return new SimpleErrorView(errors);
-        }
-
+        CompareQuery query = new CompareQuery(currentURL, runs, getUser());
         query.checkForErrors(errors);
 
         if (errors.getErrorCount() > 0)
@@ -2510,7 +2504,7 @@ public class MS2Controller extends SpringActionController
                 List<String> headers = new ArrayList<>();
                 headers.add(query.getHeader());
                 headers.add("");
-                for (Pair<String, String> sqlSummary : query.getSQLSummaries(getUser()))
+                for (Pair<String, String> sqlSummary : query.getSQLSummaries())
                 {
                     headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
                 }
@@ -2525,7 +2519,7 @@ public class MS2Controller extends SpringActionController
             rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
-            HttpView filterView = new CurrentFilterView(query, getUser());
+            HttpView filterView = new CurrentFilterView(query);
 
             GridView compareView = new GridView(rgn, errors);
             rgn.setShowPagination(false);

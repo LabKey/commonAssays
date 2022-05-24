@@ -40,6 +40,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.protein.ProteinManager;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;
@@ -55,46 +56,80 @@ import java.util.Set;
  * Date: Oct 3, 2006
  * Time: 10:07:32 AM
  */
-public abstract class CompareQuery extends SQLFragment
+public class CompareQuery extends SQLFragment
 {
     protected ActionURL _currentUrl;
-    protected String _compareColumn;
+    protected final String _compareColumn = "SeqId";
     protected List<RunColumn> _gridColumns = new ArrayList<>();
     protected int _columnsPerRun;
     protected List<MS2Run> _runs;
-    protected int _runCount;
     private int _indent = 0;
     private String _header;
     protected final User _user;
+
+    private final Set<FieldKey> _columns = new HashSet<>();
     protected static final String HEADER_PREFIX = "Numbers below represent ";
 
-    public static CompareQuery getCompareQuery(String compareColumn /* TODO: Get this from url? */, ActionURL currentUrl, List<MS2Run> runs, User user)
-    {
-        if ("Protein".equalsIgnoreCase(compareColumn))
-            return new ProteinCompareQuery(currentUrl, runs, user);
-        else
-            return null;
-    }
-
-    protected CompareQuery(ActionURL currentUrl, String compareColumn, List<MS2Run> runs, User user)
+    public CompareQuery(ActionURL currentUrl, List<MS2Run> runs, User user)
     {
         _currentUrl = currentUrl;
-        _compareColumn = compareColumn;
         _runs = runs;
-        _runCount = _runs.size();
-        _user= user;
+        _user = user;
+
+        boolean total = "1".equals(currentUrl.getParameter("total"));
+        boolean unique = "1".equals(currentUrl.getParameter("unique"));
+
+        StringBuilder header = new StringBuilder(HEADER_PREFIX);
+        if (total)
+        {
+            addGridColumn("Total", "Peptide");
+            header.append("total peptides ");
+        }
+        if (unique)
+        {
+            addGridColumn("Unique", "DISTINCT Peptide");
+            if (total)
+                header.append("and ");
+            header.append("unique peptides ");
+        }
+        if ("1".equals(currentUrl.getParameter("sumLightArea-Protein")))
+        {
+            addGridColumn("SumLightArea", "lightarea", "SUM");
+        }
+        if ("1".equals(currentUrl.getParameter("sumHeavyArea-Protein")))
+        {
+            addGridColumn("SumHeavyArea", "heavyarea", "SUM");
+        }
+        if ("1".equals(currentUrl.getParameter("avgDecimalRatio-Protein")))
+        {
+            addGridColumn("AvgDecimalRatio", "DecimalRatio", "AVG");
+        }
+        if ("1".equals(currentUrl.getParameter("maxDecimalRatio-Protein")))
+        {
+            addGridColumn("MaxDecimalRatio", "DecimalRatio", "MAX");
+        }
+        if ("1".equals(currentUrl.getParameter("minDecimalRatio-Protein")))
+        {
+            addGridColumn("MinDecimalRatio", "DecimalRatio", "MIN");
+        }
+        header.append("mapping to each protein in each run.");
+
+        setHeader(header.toString());
     }
 
-    public abstract String getComparisonDescription();
+    public String getComparisonDescription()
+    {
+        return "Compare Search Engine Proteins";
+    }
+
+    protected void addGridColumn(String label, String name)
+    {
+        _gridColumns.add(new RunColumn(label, name, "COUNT"));
+    }
 
     protected void addGridColumn(String label, String name, String aggregate)
     {
-        _gridColumns.add(new RunColumn(label, name, aggregate));
-    }
-
-    protected void addGridColumn(String label, String name, String aggregate, String formatString)
-    {
-        _gridColumns.add(new RunColumn(label, name, aggregate, formatString));
+        _gridColumns.add(new RunColumn(label, name, aggregate, "0.##"));
     }
 
     public ResultSet createResultSet(boolean export, int maxRows)
@@ -104,47 +139,64 @@ public abstract class CompareQuery extends SQLFragment
 
     protected String getLabelColumn()
     {
-        return _compareColumn;
+        return "BestName";
     }
 
     protected void generateSql(BindException errors)
     {
-        selectColumns(errors);
+        selectColumns();
         selectRows(errors);
-        groupByCompareColumn(errors);
-        sort(errors);
+        groupByCompareColumn();
+        sort();
     }
 
-    protected void selectColumns(BindException errors)
+    protected void addColumn(String name)
     {
+        _columns.add(FieldKey.fromParts(name));
+    }
+
+    protected void selectColumns()
+    {
+        // Use subselect to make it easier to join seqid to prot.sequences for bestname
+        append("SELECT ");
+        append(getLabelColumn());
+        append(" AS Protein, grouped.* FROM");
+        appendNewLine();
+        append("(");
+        indent();
+        appendNewLine();
+
         // SELECT SeqId, Max(Run0Total) AS Run0Total, MAX(Run0Unique) AS Run0Unique..., COUNT(Run) As RunCount,
         append("SELECT ");
+        addColumn(_compareColumn);
         append(_compareColumn);
         append(",");
         indent();
         appendNewLine();
 
-        for (int i = 0; i < _runCount; i++)
+        for (int i = 0; i < _runs.size(); i++)
         {
             for (RunColumn column : _gridColumns)
             {
                 append("MAX(Run");
                 append(i);
                 append(column.getLabel());
-                append(") AS Run");
-                append(i);
-                append(column.getLabel());
+                append(") AS ");
+                String colName = "Run" + i + column.getLabel();
+                append(colName);
+                addColumn(colName);
                 append(", ");
             }
             appendNewLine();
         }
         append("COUNT(Run) AS RunCount,");
+        addColumn("RunCount");
         appendNewLine();
 
         String firstColumnName = _gridColumns.get(0).getLabel();
 
         // Limit "pattern" to first 63 bits otherwise we'll overflow a BIGINT
-        int patternRunCount = Math.min(_runCount, 63);
+        int patternRunCount = Math.min(_runs.size(), 63);
 
         // (CASE WHEN MAX(Run0Total) IS NULL THEN 0 ELSE 8) + (CASE WHEN MAX(Run1Total) IS NULL THEN 4 ELSE 0) + ... AS Pattern
         for (int i = 0; i < patternRunCount; i++)
@@ -159,6 +211,7 @@ public abstract class CompareQuery extends SQLFragment
             append(" END)");
         }
         append(" AS Pattern");
+        addColumn("Pattern");
     }
 
     protected void selectRows(BindException errors)
@@ -176,7 +229,7 @@ public abstract class CompareQuery extends SQLFragment
         append(_compareColumn);
         indent();
 
-        for (int i = 0; i < _runCount; i++)
+        for (int i = 0; i < _runs.size(); i++)
         {
             String separator = "," + getNewLine();
 
@@ -241,16 +294,44 @@ public abstract class CompareQuery extends SQLFragment
         appendNewLine();
         append("GROUP BY Run, ");
         append(_compareColumn);
+
+        SimpleFilter proteinFilter = new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins());
+        // Add to GROUP BY
+        for (FieldKey fieldKey : proteinFilter.getAllFieldKeys())
+        {
+            if (!fieldKey.equals(FieldKey.fromParts("Peptides")) && !fieldKey.equals(FieldKey.fromParts("UniquePeptides")))
+            {
+                append(", ");
+                append(fieldKey.toString());
+            }
+        }
+
+        appendNewLine();
+
+        String proteinHaving = proteinFilter.getWhereSQL(MS2Manager.getTableInfoProteins()).replaceFirst("WHERE", "HAVING");
+        // Can't use SELECT aliases in HAVING clause, so replace names with aggregate functions
+        proteinHaving = proteinHaving.replaceAll("UniquePeptides", "COUNT(DISTINCT Peptide)");
+        proteinHaving = proteinHaving.replaceAll("Peptides", "COUNT(Peptide)");
+        addAll(proteinFilter.getWhereParams(MS2Manager.getTableInfoProteins()));
+        append(proteinHaving);
+
     }
 
     protected String getFromClause()
     {
-        return MS2Manager.getTableInfoPeptides().toString() + " p";        
+        return MS2Manager.getTableInfoPeptides() + " p LEFT OUTER JOIN " +
+                "(SELECT Mass AS SequenceMass, BestName, BestGeneName, SeqId AS SeqSeqId FROM " + ProteinManager.getTableInfoSequences() + ") s ON " +
+                "p.SeqId = s.SeqSeqId ";
     }
 
-    protected abstract void addWhereClauses(SimpleFilter filter);
+    protected void addWhereClauses(SimpleFilter filter)
+    {
+        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, _user);
+        peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
+        filter.addAllClauses(peptideFilter);
+    }
 
-    protected void groupByCompareColumn(BindException errors)
+    protected void groupByCompareColumn()
     {
         outdent();
         appendNewLine();
@@ -260,14 +341,34 @@ public abstract class CompareQuery extends SQLFragment
         // GROUP BY Peptide/SeqId
         append("GROUP BY ");
         append(_compareColumn);
+
+        outdent();
+        appendNewLine();
+        append(") grouped INNER JOIN ");
+        append(ProteinManager.getTableInfoSequences(), "seq");
+        append(" ON grouped.SeqId = seq.SeqId");
     }
 
-    protected void sort(BindException errors)
+    protected void sort()
     {
         appendNewLine();
         // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
         sort.addURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
+
+        // Filter out bogus URL sort columns
+        int index = 0;
+        while (sort.getSortList().size() > index)
+        {
+            if (!_columns.contains(sort.getSortList().get(index).getFieldKey()))
+            {
+                sort.deleteSortColumn(index);
+            }
+            else
+            {
+                index++;
+            }
+        }
 
         // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "Protein"
         // are in the list, in which case SQL server will fail to execute the query.  Therefore, we restrict the number
@@ -316,7 +417,11 @@ public abstract class CompareQuery extends SQLFragment
     }
 
     /** @return link filter */
-    protected abstract String setupComparisonColumnLink(ActionURL linkURL, String columnName, String runPrefix);
+    protected String setupComparisonColumnLink(ActionURL linkURL)
+    {
+        linkURL.setAction(MS2Controller.ShowProteinAction.class);   // Could target the "prot" window instead of using the main window
+        return "protein=${Protein}&seqId=${SeqId}";
+    }
 
     public int getColumnsPerRun()
     {
@@ -333,7 +438,7 @@ public abstract class CompareQuery extends SQLFragment
         TableInfo ti = MS2Manager.getTableInfoCompare();
         ColumnInfo comparisonColumn = getComparisonCommonColumn(ti);
         rgn.addColumn(comparisonColumn);
-        rgn.getDisplayColumn(comparisonColumn.getName()).setLinkTarget(getComparisonColumnLinkTarget());
+        rgn.getDisplayColumn(comparisonColumn.getName()).setLinkTarget("prot");
 
         ActionURL originalLinkURL = _currentUrl.clone();
         originalLinkURL.deleteFilterParameters(DataRegion.SELECT_CHECKBOX_NAME);
@@ -360,7 +465,7 @@ public abstract class CompareQuery extends SQLFragment
                     String runPrefix = "Run" + i;
                     String columnName = runPrefix + column.getLabel();
 
-                    DisplayColumn displayColumn = createColumn(linkURL, column, runPrefix, columnName, ti, md, rgn);
+                    DisplayColumn displayColumn = createColumn(linkURL, column, columnName, ti, md, rgn);
                     if (column.getFormatString() != null)
                     {
                         displayColumn.setFormatString(column.getFormatString());
@@ -394,10 +499,10 @@ public abstract class CompareQuery extends SQLFragment
         return rgn;
     }
 
-    protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String runPrefix, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
+    protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
-        String columnFilter = setupComparisonColumnLink(linkURL, column.getLabel(), runPrefix);
+        String columnFilter = setupComparisonColumnLink(linkURL);
         var ci = new BaseColumnInfo(columnName);
         ci.setParentTable(ti);
         ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
@@ -407,11 +512,20 @@ public abstract class CompareQuery extends SQLFragment
         return dc;
     }
 
-    protected abstract String getComparisonColumnLinkTarget();
+    protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
+    {
+        return ti.getColumn("Protein");
+    }
 
-    protected abstract ColumnInfo getComparisonCommonColumn(TableInfo ti);
-
-    public abstract List<Pair<String, String>> getSQLSummaries(User user);
+    public List<Pair<String, String>> getSQLSummaries()
+    {
+        List<Pair<String, String>> result = new ArrayList<>();
+        SimpleFilter peptideFilter = new SimpleFilter();
+        addWhereClauses(peptideFilter);
+        result.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
+        result.add(new Pair<>("Protein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
+        return result;
+    }
 
     public void checkForErrors(BindException errors)
     {
