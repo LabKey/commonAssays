@@ -30,6 +30,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="java.util.stream.Collectors" %>
+<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
@@ -160,6 +161,7 @@
                 peptideCharacteristic.setColor(hexColor);
                 peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
             }
+            heatMapColorHex.keySet().removeAll(Collections.singleton(null));
         }
     }
 
