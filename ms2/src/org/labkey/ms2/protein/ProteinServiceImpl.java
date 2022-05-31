@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
@@ -212,6 +213,12 @@ public class ProteinServiceImpl implements ProteinService
                 .stream()
                 .map(org.labkey.ms2.Protein::getSeqId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public TableInfo getSequencesTable()
+    {
+        return ProteinManager.getTableInfoSequences();
     }
 
     public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()

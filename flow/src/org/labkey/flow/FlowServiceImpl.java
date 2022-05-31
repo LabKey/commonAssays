@@ -79,10 +79,4 @@ public class FlowServiceImpl implements FlowService
 
         return Collections.emptyList();
     }
-
-    @Override
-    public int getTempTableCount()
-    {
-        return FlowManager.get().getTempTableCount();
-    }
 }
