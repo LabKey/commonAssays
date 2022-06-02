@@ -16,17 +16,27 @@
 
 package org.labkey.ms2;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import static org.labkey.api.util.PageFlowUtil.helpPopup;
 
@@ -41,6 +51,8 @@ public class Protein
     private String _bestName;
     private String _bestGeneName;
 
+    private List<PeptideCharacteristic> _peptideCharacteristics;
+
     // TODO: Delete
     private String _lookupString;
 
@@ -51,7 +63,7 @@ public class Protein
 
     private boolean _forCoverageMapExport = false;
 
-    private static final String PEPTIDE_START_TD="<td class=\"%s\" colspan=%d > %s </td>";
+    private static final String PEPTIDE_START_TD="<td class=\"%s\" style=\"%s\" colspan=%d > %s </td>";
 
     // In the export cases, we need to in-line the styles since we don't have the external CSS to reference
     private static final String PEPTIDE_START_TD_EXPORT ="<td class=\"%s\" colspan=%d  bgcolor=\"#99ccff\" align=\"center\" > %s </td>";
@@ -448,7 +460,8 @@ public class Protein
                     if (!_forCoverageMapExport)
                     {
                         details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
-                        label = helpPopup("Peptide Details", details, false, linkText, 200, onClickScript );
+                        label = helpPopup("Peptide Details", details, false, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 200, onClickScript );
+
                     }
                     label = continuationLeft + label + continuationRight;
                 }
@@ -478,7 +491,16 @@ public class Protein
             }
 
             if ((range.start == curIdx) || (curRowStart == curIdx))
-                td = String.format(baseOutput, cssClass, colsCurrentRow, label);
+            {
+                if (baseOutput.equalsIgnoreCase(PEPTIDE_START_TD))
+                {
+                    td = String.format(baseOutput, cssClass, "background-color:" + range.pepcounts.peptideColor, colsCurrentRow, label);
+                }
+                else
+                {
+                    td = String.format(baseOutput, cssClass, colsCurrentRow, label);
+                }
+            }
             else
                 td = PEPTIDE_MIDDLE_TD;
 
@@ -500,41 +522,33 @@ public class Protein
         _peptides = peptides;
         _computeCoverage = true;
     }
+
+    public List<PeptideCharacteristic> getPeptideCharacteristics()
+    {
+        return _peptideCharacteristics;
+    }
+
+    public void setPeptideCharacteristics(List<PeptideCharacteristic> peptideCharacteristics)
+    {
+        _peptideCharacteristics = peptideCharacteristics;
+        _computeCoverage = true;
+    }
+
     /*
         new class to hold counts of scans matching a single peptide sequence, as well as counts of
         peptides found with modifications
      */
     private static class PeptideCounts
     {
-        int countScans;
-        int countUnmodifiedPeptides;
-        Map<String , Integer> countModifications;
-        int countInstances;
-
-        public int getCountScans()
-        {
-            return countScans;
-        }
-
-        public int getCountUnmodifiedPeptides()
-        {
-            return countUnmodifiedPeptides;
-        }
-
-        public Map<String, Integer> getCountModifications()
-        {
-            return countModifications;
-        }
-
-        public int getCountInstances()
-        {
-            return countInstances;
-        }
-
-        public void setCountInstances(int n)
-        {
-            countInstances = n;
-        }
+        @Getter int countScans;
+        @Getter int countUnmodifiedPeptides;
+        @Getter Map<String , Integer> countModifications;
+        @Getter @Setter int countInstances;
+        @Getter @Setter String peptideColor;
+        @Getter @Setter Double intensity;
+        @Getter @Setter Double confidence;
+        @Getter @Setter String foregroundColor;
+        
 
         public PeptideCounts()
         {
@@ -637,7 +651,7 @@ public class Protein
         if (!_computeCoverage)
             return _coverageRanges;
 
-        if ("".equals(_sequence) || _peptides == null)     // Optimize case where sequence isn't available (FASTA not loaded)
+        if ("".equals(_sequence) || _peptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
         {
             _computeCoverage = false;
             _coverageRanges = new ArrayList<>(0);
@@ -686,7 +700,7 @@ public class Protein
     {
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
 
-        if ("".equals(_sequence) || _peptides == null)     // Optimize case where sequence isn't available (FASTA not loaded)
+        if ("".equals(_sequence) || _peptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
             return uncoalescedPeptideRanges;
 
         Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
@@ -776,7 +790,7 @@ public class Protein
     public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
     {
         Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-        if (null == _peptides || _peptides.length <= 0)
+        if (null == _peptideCharacteristics || _peptideCharacteristics.size() <= 0)
             return uniquePeptides;
 
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
@@ -784,22 +798,27 @@ public class Protein
         if (run != null && run.getRun() > -1)
             mods = MS2Manager.getModifications(run);
 
-        for (String peptide : _peptides)
+        for (PeptideCharacteristic peptide : _peptideCharacteristics)
         {
             String peptideToMap;
             if (run == null)
-                peptideToMap = MS2Peptide.stripPeptideAZDash(peptide);
+                peptideToMap = MS2Peptide.stripPeptideAZDash(peptide.getSequence());
             else
-                peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide));
+                peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
 
             PeptideCounts cnt;
             cnt = uniquePeptides.get(peptideToMap);
             if (null == cnt)
             {
-                uniquePeptides.put(peptideToMap, new PeptideCounts());
+                PeptideCounts peptideCounts = new PeptideCounts();
+                peptideCounts.setIntensity(peptide.getIntensity());
+                peptideCounts.setConfidence(peptide.getConfidence());
+                peptideCounts.setForegroundColor(peptide.getForegroundColor());
+                peptideCounts.setPeptideColor(peptide.getColor());
+                uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }
-            cnt.addPeptide(peptide, mods);
+            cnt.addPeptide(peptide.getSequence(), mods);
         }
         return uniquePeptides;
     }
@@ -822,6 +841,7 @@ public class Protein
             this.length = length;
             this.pepcounts = counts;
         }
+
         @Override
         public int compareTo(Object o)
         {
