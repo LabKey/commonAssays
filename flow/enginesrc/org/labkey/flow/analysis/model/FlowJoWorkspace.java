@@ -217,7 +217,7 @@ abstract public class FlowJoWorkspace extends Workspace
             // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
             StatisticSpec totalSpec = new StatisticSpec(null, StatisticSpec.STAT.Count, null);
             Double total = statistics.get(totalSpec);
-            if (total == null || total == 0.0d || total == -1.0d)
+            if (total == null || total == -1.0d)
             {
                 throw new IllegalStateException("Reading the total event count should be covered by readStats method now");
             }
