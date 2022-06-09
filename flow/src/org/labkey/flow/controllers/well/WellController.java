@@ -360,8 +360,11 @@ public class WellController extends BaseFlowController
                 root.addChild(new NavTree("Edit Keywords"));
                 return;
             }
-            String label = _wells != null && !_wells.isEmpty() ? "Edit " + _wells.get(0).getLabel() : "Well not found";
-            addFlowNavTrail(getPageConfig(), root, _wells.get(0), label);
+            FlowWell well = null;
+            if (_wells != null && !_wells.isEmpty())
+                well = _wells.get(0);
+            String label =  null != well ? "Edit " + well.getLabel() : "Well not found";
+            addFlowNavTrail(getPageConfig(), root, well, label);
         }
     }
 
