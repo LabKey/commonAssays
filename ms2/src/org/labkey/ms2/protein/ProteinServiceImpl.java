@@ -24,6 +24,7 @@ import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.ms.Replicate;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
@@ -183,6 +184,19 @@ public class ProteinServiceImpl implements ProteinService
         bean.protein.setPeptideCharacteristics(peptideCharacteristics);
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
+        return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+    }
+
+    @Override
+    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, List<Replicate> replicates, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
+    {
+        MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
+        bean.protein = ProteinManager.getProtein(seqId);
+        bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
+        bean.protein.setPeptideCharacteristics(peptideCharacteristics);
+        bean.features = getProteinFeatures(accessionForFeatures);
+        bean.aaRowWidth = aaRowWidth;
+        bean.replicates = replicates;
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 

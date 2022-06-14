@@ -50,6 +50,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.ms.Replicate;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
@@ -4217,6 +4218,7 @@ public class MS2Controller extends SpringActionController
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
         public int aaRowWidth;
         public List<ProteinFeature> features = Collections.emptyList();
+        public List<Replicate> replicates = Collections.emptyList();
     }
 
 

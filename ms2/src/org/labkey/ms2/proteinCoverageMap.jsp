@@ -24,20 +24,24 @@
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="java.awt.*" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="java.util.stream.Collectors" %>
-<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
     var viewByParam = currentURL.getParameter("viewBy");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
+    Map<Long, String> replicates = new TreeMap<>();
+    bean.replicates.forEach(rep -> replicates.put(rep.getId(), rep.getName()));
 %>
 <%!
     @Override
@@ -58,6 +62,11 @@
     <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
         <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
         <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
+    </select>
+
+    <label for="peptide-replicate-select">Replicate:</label>
+    <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
+        <labkey:options map="<%=replicates%>" value="<%=bean.replicates.get(0)%>"/>
     </select>
 </div>
 <%
