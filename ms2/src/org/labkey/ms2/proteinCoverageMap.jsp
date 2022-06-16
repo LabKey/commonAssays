@@ -38,10 +38,15 @@
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
     var viewByParam = currentURL.getParameter("viewBy");
+    var replicateIdParam = currentURL.getParameter("replicateId");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
+
     Map<Long, String> replicates = new TreeMap<>();
+    replicates.put(Long.valueOf(0), "All");
     bean.replicates.forEach(rep -> replicates.put(rep.getId(), rep.getName()));
+
+    var selectedReplicate = replicateIdParam != null && !Long.valueOf(replicateIdParam).equals(Long.valueOf(0)) ? Long.valueOf(replicateIdParam) : replicates.get(Long.valueOf(0));
 %>
 <%!
     @Override
@@ -59,14 +64,14 @@
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
+    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('viewBy', 'peptide-setting-select')">
         <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
         <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
     </select>
 
     <label for="peptide-replicate-select">Replicate:</label>
-    <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
-        <labkey:options map="<%=replicates%>" value="<%=bean.replicates.get(0)%>"/>
+    <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('replicateId', 'peptide-replicate-select')">
+        <labkey:options map="<%=replicates%>" value="<%=selectedReplicate%>"/>
     </select>
 </div>
 <%

@@ -34,10 +34,10 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
 
         },
 
-        changeView: function () {
-            var viewBy = $("#peptide-setting-select").val();
+        changeView: function (settingName, elementId) {
+            var viewBy = $("#" + elementId).val();
             var currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('viewBy', viewBy)
+            currentUrl.searchParams.set(settingName, viewBy)
             window.location = currentUrl.toString();
         }
     }
