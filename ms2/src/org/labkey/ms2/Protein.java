@@ -437,7 +437,7 @@ public class Protein
             {
                 if (colsCurrentRow >= colsNextRow)
                 {
-                    String linkText = String.format("%d ", counts.countScans );
+                    String linkText = String.format("%d ", counts.intensityRank );
                     if (colsPreviousRow>0)
                         continuationLeft= " &lt;&lt; ";
                     if (colsNextRow>0)
@@ -545,6 +545,7 @@ public class Protein
         @Getter Map<String , Integer> countModifications;
         @Getter @Setter int countInstances;
         @Getter @Setter String peptideColor;
+        @Getter @Setter int intensityRank;
         @Getter @Setter Double intensity;
         @Getter @Setter Double confidence;
         @Getter @Setter String foregroundColor;
@@ -812,6 +813,7 @@ public class Protein
             {
                 PeptideCounts peptideCounts = new PeptideCounts();
                 peptideCounts.setIntensity(peptide.getIntensity());
+                peptideCounts.setIntensityRank(peptide.getIntensityRank());
                 peptideCounts.setConfidence(peptide.getConfidence());
                 peptideCounts.setForegroundColor(peptide.getForegroundColor());
                 peptideCounts.setPeptideColor(peptide.getColor());

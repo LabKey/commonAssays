@@ -90,12 +90,17 @@
                 if (o1.getIntensity() == null) return -1;
                 return o2.getIntensity().compareTo(o1.getIntensity());
             });
-            peptideCharacteristics.forEach(peptideCharacteristic -> {
+
+            for (int i = 0; i < peptideCharacteristics.size(); i++)
+            {
+                var peptideCharacteristic = peptideCharacteristics.get(i);
                 if (peptideCharacteristic.getIntensity() != null)
                 {
+                    peptideCharacteristic.setIntensityRank(i+1); // ranks are 1 based
                     iValues.add(peptideCharacteristic.getIntensity());
                 }
-            });
+            }
+
         }
         if (isConfidenceView)
         {
