@@ -147,7 +147,7 @@ public class DataFrame
             for (int i = 0; i < cols; i ++)
             {
                 ScalingFunction fn = fields[i].getScalingFunction();
-                out.data[i].set(r, fn.constrain(b.get(i, 0)));
+                out.data[i].set(r, b.get(i, 0));
             }
         }
         return out;

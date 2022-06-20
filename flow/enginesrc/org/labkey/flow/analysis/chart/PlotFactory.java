@@ -107,7 +107,13 @@ public class PlotFactory
 
                 // TODO: support other: old simple Log, old LinLog, BiEx, ArcSinH, Hyperlog
                 // TODO: use FCSHeader.LogarithmicParameterDisplay display hint to set up Logicle
-                return new LogicleRangeFunction(min, max);
+
+                double minValue = 0;
+
+                // Issue 45300: the customer wants to see negative values in plot.
+                // However, we don't have a good answer on how to decide the min limit of the plot.
+                // max/1000 seems reasonable based on the limited example data we have.
+                return new LogicleRangeFunction(max/-1000.0, max);
             }
         }
         else
