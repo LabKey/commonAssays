@@ -10,14 +10,14 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
             const len = peptideCharacteristics.length;
             const min = peptideCharacteristics[0];
             const max = peptideCharacteristics[len-1];
-            const y_axis = len * 10;
+            const y_axis = len/2;
             const x_axis = 0;
 
-            var rectWidth = 30;
+            var rectWidth = 25;
             var count = 0;
 
             var svgContainer = d3.select(".heatmap").append("svg")
-                    .attr("height", rectWidth * len + y_axis)
+                    .attr("height", rectWidth * len + 20)
                     .attr("width", 200);
 
             var rect = svgContainer.selectAll(".rect")
@@ -45,7 +45,7 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
                         }
                         return str;
                     })
-                    .attr("y", (d,i) => y_axis + (rectWidth*i) + 25)
+                    .attr("y", (d,i) => y_axis + (rectWidth*i) + 20)
                     .attr("x", x_axis + 35);
 
         },
