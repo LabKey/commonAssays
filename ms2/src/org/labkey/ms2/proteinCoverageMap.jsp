@@ -94,7 +94,7 @@
             for (int i = 0; i < peptideCharacteristics.size(); i++)
             {
                 var peptideCharacteristic = peptideCharacteristics.get(i);
-                if (peptideCharacteristic.getIntensity() != null)
+                if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
                 {
                     peptideCharacteristic.setIntensityRank(i+1); // ranks are 1 based
                     iValues.add(peptideCharacteristic.getIntensity());
@@ -110,12 +110,15 @@
                 if (o1.getConfidence() == null) return -1;
                 return o2.getConfidence().compareTo(o1.getConfidence());
             });
-            peptideCharacteristics.forEach(peptideCharacteristic -> {
-                if (peptideCharacteristic.getConfidence() != null)
+            for (int i = 0; i < peptideCharacteristics.size(); i++)
+            {
+                var peptideCharacteristic = peptideCharacteristics.get(i);
+                if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
                 {
+                    peptideCharacteristic.setConfidenceRank(i+1);
                     iValues.add(peptideCharacteristic.getConfidence());
                 }
-            });
+            }
         }
 
         if (iValues.size() > 1)

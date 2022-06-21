@@ -33,6 +33,7 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
                     .data(peptideCharacteristics)
                     .enter().append('text')
                     .text((d) => {
+                        // display every 5th value
                         var str = "";
                         if (d.toString() === min.toString() || d.toString() === max.toString() || count === 4) {
                            str = d.toPrecision(3).toString();

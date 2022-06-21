@@ -188,7 +188,7 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     @Override
-    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, List<Replicate> replicates, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
+    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);

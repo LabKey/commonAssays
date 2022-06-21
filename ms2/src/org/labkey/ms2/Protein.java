@@ -437,7 +437,16 @@ public class Protein
             {
                 if (colsCurrentRow >= colsNextRow)
                 {
-                    String linkText = String.format("%d ", counts.intensityRank );
+                    var txt = counts.countInstances;
+                    if (counts.intensityRank != 0)
+                    {
+                        txt = counts.intensityRank;
+                    }
+                    else if (counts.confidenceRank != 0)
+                    {
+                        txt = counts.confidenceRank;
+                    }
+                    String linkText = String.format("%d ", txt);
                     if (colsPreviousRow>0)
                         continuationLeft= " &lt;&lt; ";
                     if (colsNextRow>0)
@@ -546,6 +555,7 @@ public class Protein
         @Getter @Setter int countInstances;
         @Getter @Setter String peptideColor;
         @Getter @Setter int intensityRank;
+        @Getter @Setter int confidenceRank;
         @Getter @Setter Double intensity;
         @Getter @Setter Double confidence;
         @Getter @Setter String foregroundColor;
@@ -815,6 +825,7 @@ public class Protein
                 peptideCounts.setIntensity(peptide.getIntensity());
                 peptideCounts.setIntensityRank(peptide.getIntensityRank());
                 peptideCounts.setConfidence(peptide.getConfidence());
+                peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
                 peptideCounts.setForegroundColor(peptide.getForegroundColor());
                 peptideCounts.setPeptideColor(peptide.getColor());
                 uniquePeptides.put(peptideToMap, peptideCounts);
