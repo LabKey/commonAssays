@@ -469,7 +469,7 @@ public class AnalysisScriptController extends BaseFlowController
 
     public enum ImportAnalysisStep
     {
-        SELECT_ANALYSIS("Select Analysis", "/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp"),
+        SELECT_ANALYSIS("Select Workspace", "/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp"),
         SELECT_FCSFILES("Select FCS Files", "/org/labkey/flow/controllers/executescript/importAnalysisSelectFCSFiles.jsp"),
         REVIEW_SAMPLES("Review Samples", "/org/labkey/flow/controllers/executescript/importAnalysisReviewSamples.jsp"),
         CHOOSE_ANALYSIS("Analysis Folder", "/org/labkey/flow/controllers/executescript/importAnalysisChooseAnalysis.jsp"),
