@@ -6,54 +6,41 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
     LABKEY.ms2.PeptideCharacteristicLegend = {
 
         addHeatMap: function (peptideCharacteristics, colors) {
+            const rectHeight = document.getElementById('peptideMap').clientHeight/(peptideCharacteristics.length+1); // extra 1 for room
+            const svgHeight = rectHeight * peptideCharacteristics.length;
 
-            const len = peptideCharacteristics.length;
-            const min = peptideCharacteristics[0];
-            const max = peptideCharacteristics[len-1];
-            const y_axis = len/2;
-            const x_axis = 0;
-
-            var rectWidth = 25;
-            var count = 0;
-
-            var svgContainer = d3.select(".heatmap").append("svg")
-                    .attr("height", rectWidth * len + 20)
+            const svgContainer = d3.select(".heatmap").append("svg")
+                    .attr("height", svgHeight)
                     .attr("width", 200);
 
-            var rect = svgContainer.selectAll(".rect")
+            const rect = svgContainer.selectAll(".rect")
                     .data(peptideCharacteristics)
                     .enter()
                     .append("rect");
-            rect.attr("y", (d,i) => y_axis + (rectWidth*i))
-                    .attr("x", function (d, i) { return x_axis; })
-                    .attr("height", rectWidth)
+            rect.attr("y", (d,i) => rectHeight*i)
+                    .attr("x", function (d, i) { return 0; })
+                    .attr("height", rectHeight)
                     .attr("width", 20)
                     .style("fill", (d) => colors[d]);
             svgContainer.selectAll('.text')
                     .data(peptideCharacteristics)
                     .enter().append('text')
                     .text((d) => {
-                        // display every 5th value
                         var str = "";
-                        if (d.toString() === min.toString() || d.toString() === max.toString() || count === 4) {
+                        if (d.toString() > 0.0) {
                            str = d.toPrecision(3).toString();
                         }
-                        if (count === 4) {
-                            count = 0;
-                        }
-                        else {
-                            count++;
-                        }
+
                         return str;
                     })
-                    .attr("y", (d,i) => y_axis + (rectWidth*i) + 20)
-                    .attr("x", x_axis + 35);
+                    .attr("y", (d,i) => (rectHeight*i) + rectHeight/2) // place text at the center of rect
+                    .attr("x", 35);
 
         },
 
         changeView: function (settingName, elementId) {
-            var viewBy = $("#" + elementId).val();
-            var currentUrl = new URL(window.location.href);
+            const viewBy = $("#" + elementId).val();
+            const currentUrl = new URL(window.location.href);
             currentUrl.searchParams.set(settingName, viewBy)
             window.location = currentUrl.toString();
         }
