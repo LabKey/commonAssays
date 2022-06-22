@@ -2024,7 +2024,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
         @Override public void containerCreated(Container c, User user) { }
         @Override public void containerMoved(Container c, Container oldParent, User user) { }
-        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return null; }
+        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return Collections.emptyList(); }
         @Override public void propertyChange(PropertyChangeEvent evt) { }
     };
 
