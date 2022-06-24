@@ -16,6 +16,7 @@
 
 package org.labkey.flow.controllers;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.HasPageConfig;
 import org.labkey.api.action.SimpleViewAction;
@@ -65,7 +66,7 @@ public abstract class BaseFlowController extends SpringActionController
         return ret;
     }
 
-    public void checkContainer(FlowObject obj)
+    public void checkContainer(FlowObject<?> obj)
     {
         if (obj != null)
         {
@@ -106,7 +107,7 @@ public abstract class BaseFlowController extends SpringActionController
         super.addNavTrail(action, root);
     }
 
-    public void addFlowNavTrail(PageConfig page, NavTree root, FlowObject object, String title)
+    public void addFlowNavTrail(PageConfig page, NavTree root, @Nullable FlowObject<?> object, String title)
     {
         ArrayList<NavTree> children = new ArrayList<>();
         while (object != null)
@@ -143,7 +144,7 @@ public abstract class BaseFlowController extends SpringActionController
         return project;
     }
 
-    abstract public class FlowMutatingAction<FORM extends FlowObjectForm> extends FormViewAction<FORM>
+    abstract public class FlowMutatingAction<FORM extends FlowObjectForm<?>> extends FormViewAction<FORM>
     {
         FORM _form;
 
@@ -161,7 +162,7 @@ public abstract class BaseFlowController extends SpringActionController
         }
     }
 
-    abstract public class FlowAction<FORM extends FlowObjectForm> extends SimpleViewAction<FORM>
+    abstract public class FlowAction<FORM extends FlowObjectForm<?>> extends SimpleViewAction<FORM>
     {
         FORM _form;
 
@@ -211,28 +212,14 @@ public abstract class BaseFlowController extends SpringActionController
         return getRequest().getParameter(param.toString());
     }
 
-    protected void putParam(ActionURL url, Enum param, String value)
+    protected void putParam(ActionURL url, Enum<?> param, String value)
     {
         url.replaceParameter(param.toString(), value);
     }
 
-    protected void putParam(ActionURL url, Enum param, int value)
+    protected void putParam(ActionURL url, Enum<?> param, int value)
     {
         putParam(url, param, Integer.toString(value));
-    }
-
-    protected boolean hasParameter(String name)
-    {
-        if (getRequest().getParameter(name) != null)
-            return true;
-        if (getRequest().getParameter(name + ".x") != null)
-            return true;
-        return false;
-    }
-
-    public String getContainerPath()
-    {
-        return getActionURL().getExtraPath();
     }
 
     public HttpServletRequest getRequest()
