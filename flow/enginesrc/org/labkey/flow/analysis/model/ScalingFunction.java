@@ -186,7 +186,7 @@ public abstract class ScalingFunction implements Cloneable
 		@Override
         public NumberArray translate(NumberArray from)
 		{
-			return new ConstrainedNumberArray(from, getMinValue(), getMaxValue());
+			return from;
 		}
 	}
 
