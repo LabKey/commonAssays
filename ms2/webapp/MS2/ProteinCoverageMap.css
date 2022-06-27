@@ -86,3 +86,26 @@
      padding-right: 20px;
      display: inline-block;
 }
+
+ .modified-details-table {
+     border:1px solid #000000;
+ }
+ .modified-details-table tr
+ {
+     border-left: 1px solid black;
+     border-right: 1px solid black;
+ }
+
+ .modified-details-table th
+ {
+     padding: 5px;
+     text-align: center;
+     border: 1px solid #000000;
+ }
+
+ .modified-details-table td
+ {
+     padding: 5px;
+     text-align: center;
+     border: 1px solid #000000;
+ }

@@ -422,7 +422,7 @@ public class Protein
             String trimmedPeptide;
             String onClickScript = null;
             double mass;
-            String details = null;
+            StringBuilder details = null;
             String continuationLeft = "";
             String continuationRight = "";
             PeptideCounts counts;
@@ -466,7 +466,7 @@ public class Protein
                     if(!_forCoverageMapExport)
                     {
                         mass = getSequenceMass(_sequence.substring(range.start,(range.start + range.length)));
-                        details = String.format("Mass: %.2f  \nTotal Scans: %d ", mass, counts.countScans);
+                        details = new StringBuilder(String.format("Mass: %.2f <br/> Total Scans: %d", mass, counts.countScans));
                     }
 
                     for (String modStr : counts.getCountModifications().keySet())
@@ -474,23 +474,71 @@ public class Protein
                         String varmod = String.format("%d(%s)", counts.getCountModifications().get(modStr), modStr );
                         linkText += " / " + varmod;
                         if (!_forCoverageMapExport)
-                            details += "\n "+ varmod;
+                            details.append(varmod);
                     }
                     label = linkText;
                     if (!_forCoverageMapExport)
                     {
-                        details += String.format("\nUnmodified: %d", counts.getCountUnmodifiedPeptides());
-                        if (range.pepcounts.intensityRank != 0)
+                        var showIntensity = range.pepcounts.intensityRank != 0;
+                        var showConfidence = range.pepcounts.confidenceRank != 0;
+
+                        details.append(String.format("<br/>Start: %d", range.pepcounts.startIndex));
+                        details.append(String.format("<br/>End: %d", range.pepcounts.endIndex));
+                        details.append(String.format("<br/>Unmodified: %d", counts.getCountUnmodifiedPeptides()));
+                        if (showIntensity)
                         {
-                            details += String.format("\nIntensity Rank: %d", range.pepcounts.intensityRank);
-                            details += String.format("\nLog 10 Base Intensity: %f", range.pepcounts.intensity);
+                            details.append(String.format("<br/>Intensity Rank: %d", range.pepcounts.intensityRank));
+                            details.append(String.format("<br/>Raw Intensity: %f", range.pepcounts.rawIntensity));
+                            details.append(String.format("<br/>Log 10 Base Intensity: %.2f", range.pepcounts.intensity));
                         }
-                        if (range.pepcounts.confidenceRank != 0)
+                        if (showConfidence)
                         {
-                            details += String.format("\nConfidence Score Rank: %d", range.pepcounts.confidenceRank);
-                            details += String.format("\nLog 10 Base Confidence Score: %f", range.pepcounts.confidence);
+                            details.append(String.format("<br/>Confidence Score Rank: %d", range.pepcounts.confidenceRank));
+                            details.append(String.format("<br/>Raw Confidence: %f", range.pepcounts.rawConfidence));
+                            details.append(String.format("<br/>Log 10 Base Confidence Score: %.2f", range.pepcounts.confidence));
                         }
-                        label = helpPopup("Peptide Details", details, false, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
+                        if (range.pepcounts.modifiedSequence != null)
+                        {
+                            details.append("<table class='modified-details-table'>");
+                            details.append("<tr>");
+                            details.append("<th>Modifier</th>");
+                            details.append("<th>Start</th>");
+                            details.append("<th>End</th>");
+                            details.append("<th>Log</th>");
+                            if (showIntensity)
+                            {
+
+                                details.append("<th>Raw Intensity</th>");
+                            }
+                            if (showConfidence)
+                            {
+                                details.append("<th>Raw Confidence</th>");
+                            }
+                            details.append("</tr>");
+                            for (PeptideCharacteristic pep : _modifiedPeptideCharacteristics)
+                            {
+                                if (pep.getSequence().equalsIgnoreCase(range.pepcounts.sequence))
+                                {
+                                    details.append("<tr>");
+                                    details.append("<td>").append(PageFlowUtil.filter(pep.getModifiedSequence())).append("</td>");
+                                    details.append("<td>").append(pep.getStartIndex()).append("</td>");
+                                    details.append("<td>").append(pep.getEndIndex()).append("</td>");
+                                    if (showIntensity)
+                                    {
+                                        details.append(String.format("<td>%.2f</td>", pep.getIntensity()));
+                                        details.append("<td>").append(pep.getRawIntensity()).append("</td>");
+                                    }
+                                    if (showConfidence)
+                                    {
+                                        details.append(String.format("<td>%.2f</td>", pep.getConfidence()));
+                                        details.append("<td>").append(pep.getRawConfidence()).append("</td>");
+                                    }
+                                    details.append("</tr>");
+                                }
+                            }
+                            details.append("</table>");
+                        }
+                        label = helpPopup("Peptide Details", details.toString(), true, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
 
                     }
                     label = continuationLeft + label + continuationRight;
@@ -587,10 +635,16 @@ public class Protein
         @Getter @Setter String peptideColor;
         @Getter @Setter int intensityRank;
         @Getter @Setter int confidenceRank;
+        @Getter @Setter int startIndex;
+        @Getter @Setter int endIndex;
         @Getter @Setter Double intensity;
+        @Getter @Setter Double rawIntensity;
         @Getter @Setter Double confidence;
+        @Getter @Setter Double rawConfidence;
         @Getter @Setter String foregroundColor;
-        
+        @Getter @Setter String sequence;
+        @Getter @Setter String modifiedSequence;
+
 
         public PeptideCounts()
         {
@@ -860,10 +914,14 @@ public class Protein
                 PeptideCounts peptideCounts = new PeptideCounts();
                 peptideCounts.setIntensity(peptide.getIntensity());
                 peptideCounts.setIntensityRank(peptide.getIntensityRank());
+                peptideCounts.setRawIntensity(peptide.getRawIntensity());
                 peptideCounts.setConfidence(peptide.getConfidence());
+                peptideCounts.setRawConfidence(peptide.getRawConfidence());
                 peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
                 peptideCounts.setForegroundColor(peptide.getForegroundColor());
                 peptideCounts.setPeptideColor(peptide.getColor());
+                peptideCounts.setStartIndex(peptide.getStartIndex());
+                peptideCounts.setEndIndex(peptide.getEndIndex());
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }
@@ -887,11 +945,17 @@ public class Protein
         {
             PeptideCounts peptideCounts = new PeptideCounts();
             peptideCounts.setIntensity(peptide.getIntensity());
+            peptideCounts.setRawIntensity(peptide.getRawIntensity());
             peptideCounts.setIntensityRank(peptide.getIntensityRank());
             peptideCounts.setConfidence(peptide.getConfidence());
+            peptideCounts.setRawConfidence(peptide.getRawConfidence());
             peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
             peptideCounts.setForegroundColor(peptide.getForegroundColor());
             peptideCounts.setPeptideColor(peptide.getColor());
+            peptideCounts.setStartIndex(peptide.getStartIndex());
+            peptideCounts.setEndIndex(peptide.getEndIndex());
+            peptideCounts.setSequence(peptide.getSequence());
+            peptideCounts.setModifiedSequence(peptide.getModifiedSequence());
             peptideCounts.addPeptide(peptide.getSequence(), mods);
             Range range = new Range(peptide.getStartIndex(), peptide.getEndIndex() - peptide.getStartIndex(), peptideCounts);
             modifiedPeptides.add(range);

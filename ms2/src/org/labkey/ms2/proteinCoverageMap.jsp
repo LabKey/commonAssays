@@ -181,16 +181,13 @@
                 legendValues.add(start);
                 start = start - 0.01;
             }
-            iValues.sort(Collections.reverseOrder());
-            var count = iValues.size();
-            var sum = (Double) iValues.stream().mapToDouble(Double::doubleValue).sum();
             var max = Collections.max(iValues);
             var min = Collections.min(iValues);
-            var mean = sum/count;
+            var avg = (max+min)/2;
 
-            // only display min, max and mean in the legend
+            // only display min, max and avg in the legend
             legendValues.set(0, max);
-            legendValues.set(5, (max+min)/2);
+            legendValues.set(5, avg);
             legendValues.set(10, min);
 
             int closestToMeanIndex = 0;
@@ -200,7 +197,7 @@
             for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
             {
                 var value = isIntensityView ? peptidesForSequenceMapDisplay.get(i).getIntensity() : peptidesForSequenceMapDisplay.get(i).getConfidence();
-                var diff = Math.abs(value-mean);
+                var diff = Math.abs(value-avg);
                 if (diff < minDiff)
                 {
                     minDiff = diff;
