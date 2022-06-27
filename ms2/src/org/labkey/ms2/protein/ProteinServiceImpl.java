@@ -181,22 +181,23 @@ public class ProteinServiceImpl implements ProteinService
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
-        bean.protein.setPeptideCharacteristics(peptideCharacteristics);
+        bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 
     @Override
-    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates)
+    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates, List<PeptideCharacteristic> modifiedPeptideCharacteristics)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
-        bean.protein.setPeptideCharacteristics(peptideCharacteristics);
+        bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         bean.replicates = replicates;
+        bean.protein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 

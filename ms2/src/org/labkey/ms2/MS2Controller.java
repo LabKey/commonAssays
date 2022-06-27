@@ -4273,7 +4273,7 @@ public class MS2Controller extends SpringActionController
                         pep.setSequence(peptide);
                         peptideCharacteristics.add(pep);
                     }
-                    protein.setPeptideCharacteristics(peptideCharacteristics);
+                    protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                 }
                 protein.setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = protein;
@@ -4557,7 +4557,7 @@ public class MS2Controller extends SpringActionController
                         pepCharacteristic.setSequence(pep);
                         peptideCharacteristics.add(pepCharacteristic);
                     }
-                    protein.setPeptideCharacteristics(peptideCharacteristics);
+                    protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                     pcm.setAllPeptideCounts();
 
                     // add filter to get the total and distinct counts of peptides for the target protein to the ProteinCoverageMapBuilder

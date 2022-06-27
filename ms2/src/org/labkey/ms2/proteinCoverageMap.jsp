@@ -33,6 +33,7 @@
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="java.util.Arrays" %>
+<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -40,8 +41,10 @@
     var currentURL = getActionURL();
     var viewByParam = currentURL.getParameter("viewBy");
     var replicateIdParam = currentURL.getParameter("replicateId");
+    var peptideFormParam = currentURL.getParameter("peptideForm");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
+    var isCombinedOrStacked = peptideFormParam == null || peptideFormParam.equalsIgnoreCase("combined") ? "combined" : peptideFormParam.equalsIgnoreCase("stacked") ? "stacked" : "combined";
 
     Map<Long, String> replicates = new TreeMap<>();
     replicates.put(Long.valueOf(0), "All");
@@ -74,40 +77,74 @@
     <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('replicateId', 'peptide-replicate-select')">
         <labkey:options map="<%=replicates%>" value="<%=selectedReplicate%>"/>
     </select>
+
+
+    <label>Modified forms:</label>
+    <span class="peptideForms">
+        <input type="radio" name="combinedOrStacked" id="combined" value="combined" <%=checked(isCombinedOrStacked.equalsIgnoreCase("combined"))%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')"/>
+        <label for="combined">Combined</label>
+
+        <span class="stackedForm" >
+            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked" <%=checked(isCombinedOrStacked.equalsIgnoreCase("stacked"))%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')"/>
+            <label for="stacked" >Stacked</label>
+        </span>
+    </span>
+
 </div>
 <%
-
-
-    List<Double> values =  new ArrayList<>();
+    // list to store values min, max and mean values displayed on legend
+    List<Double> legendValues =  new ArrayList<>();
     // reason to initialize the values list is for the keys in hexColorMap below
     var start = Double.MIN_VALUE;
     // fixed size heatmap legend
     for (int i = 0; i < 11; i++)
     {
-        values.add(start);
+        legendValues.add(start);
         start = start - 0.01;
     }
+    // helper list of intensity or confidence score values of peptides used for calculations
     List<Double> iValues = new ArrayList<>();
-    var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
-    Map<Double, String> heatMapColorHex = new HashMap<>();
-    if (peptideCharacteristics != null)
-    {
 
+    // combinedPeptideCharacteristics are always used for legend values
+    var combinedPeptideCharacteristics = bean.protein.getCombinedPeptideCharacteristics();
+    // modifiedPeptideCharacteristics are used for stacked view of peptides
+    var modifiedPeptideCharacteristics = bean.protein.getModifiedPeptideCharacteristics();
+    List<PeptideCharacteristic> peptidesForSequenceMapDisplay;
+
+    if (isCombinedOrStacked.equalsIgnoreCase("stacked"))
+    {
+        peptidesForSequenceMapDisplay = modifiedPeptideCharacteristics;
+    }
+    else
+    {
+        peptidesForSequenceMapDisplay = combinedPeptideCharacteristics;
+    }
+    Map<Double, String> heatMapColorHex = new HashMap<>();
+    if (combinedPeptideCharacteristics != null)
+    {
         if (isIntensityView)
         {
-            peptideCharacteristics.sort((o1, o2) -> {
+            // sorting for calculating the intensity rank
+            peptidesForSequenceMapDisplay.sort((o1, o2) -> {
                 if (o1.getIntensity() == null && o2.getIntensity() == null) return 0;
                 if (o2.getIntensity() == null) return 1;
                 if (o1.getIntensity() == null) return -1;
                 return o2.getIntensity().compareTo(o1.getIntensity());
             });
 
-            for (int i = 0; i < peptideCharacteristics.size(); i++)
+            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
             {
-                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
                 if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
                 {
-                    peptideCharacteristic.setIntensityRank(i+1); // ranks are 1 based
+                    peptideCharacteristic.setIntensityRank(i + 1); // ranks are 1 based
+                }
+            }
+
+            for (PeptideCharacteristic peptideCharacteristic : combinedPeptideCharacteristics)
+            {
+                if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
+                {
                     iValues.add(peptideCharacteristic.getIntensity());
                 }
             }
@@ -115,18 +152,27 @@
         }
         if (isConfidenceView)
         {
-            peptideCharacteristics.sort((o1, o2) -> {
+            // sorting for calculating the confidence score ranks
+            peptidesForSequenceMapDisplay.sort((o1, o2) -> {
                 if (o1.getConfidence() == null && o2.getConfidence() == null) return 0;
                 if (o2.getConfidence() == null) return 1;
                 if (o1.getConfidence() == null) return -1;
                 return o2.getConfidence().compareTo(o1.getConfidence());
             });
-            for (int i = 0; i < peptideCharacteristics.size(); i++)
+            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
             {
-                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
                 if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
                 {
-                    peptideCharacteristic.setConfidenceRank(i+1);
+                    peptideCharacteristic.setConfidenceRank(i+1); // ranks are 1 based
+                    iValues.add(peptideCharacteristic.getConfidence());
+                }
+            }
+
+            for (PeptideCharacteristic peptideCharacteristic : combinedPeptideCharacteristics)
+            {
+                if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
+                {
                     iValues.add(peptideCharacteristic.getConfidence());
                 }
             }
@@ -134,23 +180,26 @@
 
         if (iValues.size() > 1)
         {
+            iValues.sort(Collections.reverseOrder());
             var count = iValues.size();
             var sum = (Double) iValues.stream().mapToDouble(Double::doubleValue).sum();
             var max = Collections.max(iValues);
             var min = Collections.min(iValues);
             var mean = sum/count;
 
-            values.set(0, max);
-            values.set(5, (max+min)/2);
-            values.set(10, min);
+            // only display min, max and mean in the legend
+            legendValues.set(0, max);
+            legendValues.set(5, (max+min)/2);
+            legendValues.set(10, min);
 
             int closestToMeanIndex = 0;
             var minDiff = iValues.get(0);
 
-            // calculate closest to mean index of protein.getPeptideCharacteristics() for sequence graph coloring
-            for (int i = 0; i < iValues.size(); i++)
+            // calculate closest to mean index of peptidesForSequenceMapDisplay for sequence graph coloring
+            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
             {
-                var diff = Math.abs(iValues.get(i)-mean);
+                var value = isIntensityView ? peptidesForSequenceMapDisplay.get(i).getIntensity() : peptidesForSequenceMapDisplay.get(i).getConfidence();
+                var diff = Math.abs(value-mean);
                 if (diff < minDiff)
                 {
                     minDiff = diff;
@@ -162,23 +211,23 @@
             Color one = Color.WHITE;
             Color two = new Color(0, 81, 138);
             List<Color> blueGradient = ColorGradient.createGradient(one, two, 6);
-            heatMapColorHex.put(values.get(5), "#" + Integer.toHexString(one.getRGB()).substring(2));
+            heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(one.getRGB()).substring(2));
 
             // to color the heat map legend
-            for (int i = 6; i < values.size(); i++)
+            for (int i = 6; i < legendValues.size(); i++)
             {
                 var peptideColor = blueGradient.get(i - 5);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                heatMapColorHex.put(values.get(i), hexColor);
+                heatMapColorHex.put(legendValues.get(i), hexColor);
             }
 
             // to color the peptide bars in sequence graph
-            blueGradient = ColorGradient.createGradient(one, two, (count - closestToMeanIndex + 1));
+            blueGradient = ColorGradient.createGradient(one, two, (peptidesForSequenceMapDisplay.size() - closestToMeanIndex + 1));
             // assign blue colors from median to last -> lighter to darker
-            for (int i = closestToMeanIndex + 1; i < count; i++)
+            for (int i = closestToMeanIndex + 1; i < peptidesForSequenceMapDisplay.size(); i++)
             {
                 var peptideColor = blueGradient.get(i - closestToMeanIndex);
-                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
                 peptideCharacteristic.setColor(hexColor);
                 // for blue - contrasting foreground color is White according to the tool
@@ -197,7 +246,7 @@
             {
                 var peptideColor = redGradient.get(i);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                heatMapColorHex.put(values.get(i), hexColor);
+                heatMapColorHex.put(legendValues.get(i), hexColor);
             }
 
             // to color the peptide bars in sequence graph
@@ -206,7 +255,7 @@
             for (int i = closestToMeanIndex; i >= 0; i--)
             {
                 var peptideColor = redGradient.get(i);
-                var peptideCharacteristic = peptideCharacteristics.get(i);
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
                 peptideCharacteristic.setColor(hexColor);
                 peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
@@ -285,5 +334,5 @@
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 
-    LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(values)%>, <%=toJsonObject(heatMapColorHex)%>);
+    LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(legendValues)%>, <%=toJsonObject(heatMapColorHex)%>);
 </script>

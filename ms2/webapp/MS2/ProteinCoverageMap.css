@@ -30,6 +30,11 @@
     text-align: left;
 }
 
+ .protein-coverage-map {
+     caption-side: bottom;
+ }
+
+
  .protein-coverage-map tr
  {
      border-left: 1px solid black;
@@ -65,6 +70,10 @@
 .viewSettings {
     padding-bottom: 10px;
 }
+
+ .peptideForms {
+     display: inline-block;
+ }
 
 .heatmap {
     display: inline-block;
