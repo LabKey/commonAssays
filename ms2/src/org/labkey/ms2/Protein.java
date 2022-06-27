@@ -453,6 +453,10 @@ public class Protein
                     {
                         txt = counts.confidenceRank;
                     }
+                    else
+                    {
+                        txt = counts.countScans;
+                    }
                     String linkText = String.format("%d ", txt);
                     if (colsPreviousRow>0)
                         continuationLeft= " &lt;&lt; ";
@@ -739,7 +743,7 @@ public class Protein
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
         if (!_modifiedPeptideCharacteristics.isEmpty())
         {
-            return getModifiedPeptideRanges();
+            return getModifiedPeptideRanges(run);
         }
         else
         {
@@ -868,11 +872,16 @@ public class Protein
         return uniquePeptides;
     }
 
-    public List<Range> getModifiedPeptideRanges()
+    public List<Range> getModifiedPeptideRanges(MS2Run run)
     {
         List<Range> modifiedPeptides = new ArrayList<>();
         if (null == _modifiedPeptideCharacteristics || _modifiedPeptideCharacteristics.size() <= 0)
             return modifiedPeptides;
+
+        // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
+        List<MS2Modification> mods = Collections.emptyList();
+        if (run != null && run.getRun() > -1)
+            mods = MS2Manager.getModifications(run);
 
         for (PeptideCharacteristic peptide : _modifiedPeptideCharacteristics)
         {
@@ -883,6 +892,7 @@ public class Protein
             peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
             peptideCounts.setForegroundColor(peptide.getForegroundColor());
             peptideCounts.setPeptideColor(peptide.getColor());
+            peptideCounts.addPeptide(peptide.getSequence(), mods);
             Range range = new Range(peptide.getStartIndex(), peptide.getEndIndex() - peptide.getStartIndex(), peptideCounts);
             modifiedPeptides.add(range);
         }

@@ -46,6 +46,9 @@
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
     var isCombinedOrStacked = peptideFormParam == null || peptideFormParam.equalsIgnoreCase("combined") ? "combined" : peptideFormParam.equalsIgnoreCase("stacked") ? "stacked" : "combined";
 
+    // list to store values min, max and mean values displayed on legend
+    List<Double> legendValues =  new ArrayList<>();
+
     Map<Long, String> replicates = new TreeMap<>();
     replicates.put(Long.valueOf(0), "All");
     bean.replicates.forEach(rep -> replicates.put(rep.getId(), rep.getName()));
@@ -92,16 +95,7 @@
 
 </div>
 <%
-    // list to store values min, max and mean values displayed on legend
-    List<Double> legendValues =  new ArrayList<>();
-    // reason to initialize the values list is for the keys in hexColorMap below
-    var start = Double.MIN_VALUE;
-    // fixed size heatmap legend
-    for (int i = 0; i < 11; i++)
-    {
-        legendValues.add(start);
-        start = start - 0.01;
-    }
+
     // helper list of intensity or confidence score values of peptides used for calculations
     List<Double> iValues = new ArrayList<>();
 
@@ -165,7 +159,6 @@
                 if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
                 {
                     peptideCharacteristic.setConfidenceRank(i+1); // ranks are 1 based
-                    iValues.add(peptideCharacteristic.getConfidence());
                 }
             }
 
@@ -180,6 +173,14 @@
 
         if (iValues.size() > 1)
         {
+            // reason to initialize the values list is for the keys in hexColorMap below
+            var start = Double.MIN_VALUE;
+            // fixed size heatmap legend
+            for (int i = 0; i < 11; i++)
+            {
+                legendValues.add(start);
+                start = start - 0.01;
+            }
             iValues.sort(Collections.reverseOrder());
             var count = iValues.size();
             var sum = (Double) iValues.stream().mapToDouble(Double::doubleValue).sum();
@@ -272,15 +273,18 @@
 <%
     var legendLabel = "";
     var legendScale = "";
-    if (isIntensityView)
+    if (!legendValues.isEmpty())
     {
-        legendLabel = "Intensity";
-        legendScale = "(Log 10 base)";
-    }
-    else if (isConfidenceView)
-    {
-        legendLabel = "Confidence Score";
-        legendScale = "-(Log 10 base)";
+        if (isIntensityView)
+        {
+            legendLabel = "Intensity";
+            legendScale = "(Log 10 base)";
+        }
+        else if (isConfidenceView)
+        {
+            legendLabel = "Confidence Score";
+            legendScale = "-(Log 10 base)";
+        }
     }
 
 %>
