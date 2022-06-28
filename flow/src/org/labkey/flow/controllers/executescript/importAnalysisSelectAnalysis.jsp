@@ -22,6 +22,7 @@
 <%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
+<%@ page import="org.labkey.api.util.HelpTopic" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -54,8 +55,9 @@ Browse the pipeline
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot) {
         String inputId = "workspace.path";
+        String href = new HelpTopic("flowAnalysisArchiveFormat").getHelpTopicHref();
     %>
-    You can browse the pipeline directories and find the analysis archive or FlowJo workspace to import.<br/><br/>
+    Select either a FlowJo workspace (.wsp and .xml) or an <a href="<%=h(href)%>">analysis archive</a>.<br/><br/>
     <%  if (!form.getWorkspace().getHiddenFields(getViewContext()).containsKey("path")) { %>
     <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
     <%  }  %>

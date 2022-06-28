@@ -2012,19 +2012,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     }
 
 
-    /*
-     * Caching needs to be improved
-     * need better notification of changes per container
-     */
-
-//    private static final Map<String, MaterializedQueryHelper> fastflowCache = new LinkedHashMap<String, MaterializedQueryHelper>(100,0.6F,true)
-//    {
-//        @Override
-//        protected boolean removeEldestEntry(Map.Entry<String, MaterializedQueryHelper> eldest)
-//        {
-//            return eldest.getValue().lastUsed + CacheManager.MINUTE < HeartBeat.currentTimeMillis();
-//        }
-//    };
     private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(100_000, CacheManager.HOUR, "Fast flow objects");
 
     private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
@@ -2037,9 +2024,14 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
         @Override public void containerCreated(Container c, User user) { }
         @Override public void containerMoved(Container c, Container oldParent, User user) { }
-        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return null; }
+        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return Collections.emptyList(); }
         @Override public void propertyChange(PropertyChangeEvent evt) { }
     };
+
+    public static void registerContainerListener()
+    {
+        ContainerManager.addContainerListener(containerListener);
+    }
 
     // Returns fully qualified "schema.table" name
     SQLFragment getFastFlowObjectFromSql(String tableAlias, Container c, int typeid)

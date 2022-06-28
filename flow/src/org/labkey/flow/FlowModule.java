@@ -180,10 +180,12 @@ public class FlowModule extends SpringModule
         WebdavService.get().addExpDataProvider(flowService);
     }
 
+
     private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type)
     {
         return registerModuleProperty(name, description, label, type, null);
     }
+
 
     private ModuleProperty registerModuleProperty(String name, String description, String label, ModuleProperty.InputType type, String defaultValue)
     {
@@ -196,6 +198,7 @@ public class FlowModule extends SpringModule
         addModuleProperty(prop);
         return prop;
     }
+
 
     @Nullable
     public String getExportToScriptPath(Container c)
@@ -284,7 +287,9 @@ public class FlowModule extends SpringModule
             ss.addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
+        FileContentService fcs = FileContentService.get();
+        if (null != fcs)
+            fcs.addFileListener(new TableUpdaterFileListener(FlowManager.get().getTinfoObject(), "uri", TableUpdaterFileListener.Type.uri, "RowId"));
 
         if (null != AuditLogService.get() && AuditLogService.get().getClass() != DefaultAuditProvider.class)
         {
@@ -299,7 +304,10 @@ public class FlowModule extends SpringModule
                 svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
             }
         }
+
+        FlowSchema.registerContainerListener();
     }
+
 
     @Override
     @NotNull
