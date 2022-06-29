@@ -19,7 +19,11 @@ package org.labkey.viability;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayResultTable;
+import org.labkey.api.assay.AssayTableMetadata;
+import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
@@ -44,21 +48,16 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpDataTable;
-import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.study.assay.SpecimenForeignKey;
-import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -297,18 +296,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
 
             var runColumn = addColumn(wrapColumn("Run", getRealTable().getColumn("RunId")));
             runColumn.setHidden(true);
-            runColumn.setFk(new LookupForeignKey(cf, "RowId", null)
-            {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    ExpRunTable expRunTable = AssayService.get().createRunTable(getProtocol(), _provider,
-                            ViabilityAssaySchema.this.getUser(), ViabilityAssaySchema.this.getContainer(), getLookupContainerFilter());
-                    expRunTable.setContainerFilter(getContainerFilter());
-                    return expRunTable;
-                }
-            });
-
+            runColumn.setFk(QueryForeignKey.from(_userSchema, getContainerFilter()).to(AssayProtocolSchema.RUNS_TABLE_NAME, null, null));
 
             var specimenCount = addVisible(wrapColumn("SpecimenCount", getRealTable().getColumn("SpecimenCount")));
 
