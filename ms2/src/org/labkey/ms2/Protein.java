@@ -63,6 +63,7 @@ public class Protein
     private List<Range> _coverageRanges;
     private boolean _computeCoverage = true;
     private boolean _showEntireFragmentInCoverage = false;
+    private boolean _showStakedPeptides = false;
 
     private boolean _forCoverageMapExport = false;
 
@@ -184,6 +185,15 @@ public class Protein
         _bestGeneName = bestGeneName;
     }
 
+    public boolean isShowStakedPeptides()
+    {
+        return _showStakedPeptides;
+    }
+
+    public void setShowStakedPeptides(boolean showStakedPeptides)
+    {
+        _showStakedPeptides = showStakedPeptides;
+    }
 
     static final String startTag = "<font color=\"green\" ><u>";
     static final String endTag = "</u></font>";
@@ -811,6 +821,9 @@ public class Protein
                     _modifiedPeptides.get(pep.getSequence()).add(pep);
                 }
             }
+        }
+        if (_showStakedPeptides)
+        {
             return getModifiedPeptideRanges(run);
         }
         else
@@ -936,6 +949,8 @@ public class Protein
                 peptideCounts.setPeptideColor(peptide.getColor());
                 peptideCounts.setStartIndex(peptide.getStartIndex());
                 peptideCounts.setEndIndex(peptide.getEndIndex());
+                peptideCounts.setSequence(peptide.getSequence());
+                peptideCounts.setModifiedSequence(peptide.getSequence()); // intentionally setting to sequence for combined peptides
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }

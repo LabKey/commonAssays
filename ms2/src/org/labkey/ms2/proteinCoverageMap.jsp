@@ -133,13 +133,6 @@
                 if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
                 {
                     peptideCharacteristic.setIntensityRank(i + 1); // ranks are 1 based
-                }
-            }
-
-            for (PeptideCharacteristic peptideCharacteristic : combinedPeptideCharacteristics)
-            {
-                if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
-                {
                     iValues.add(peptideCharacteristic.getIntensity());
                 }
             }
@@ -160,13 +153,6 @@
                 if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
                 {
                     peptideCharacteristic.setConfidenceRank(i+1); // ranks are 1 based
-                }
-            }
-
-            for (PeptideCharacteristic peptideCharacteristic : combinedPeptideCharacteristics)
-            {
-                if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
-                {
                     iValues.add(peptideCharacteristic.getConfidence());
                 }
             }
@@ -207,25 +193,28 @@
             }
 
             // assign blue colors from mean value to last -> lighter to darker
-            Color one = Color.WHITE;
-            Color two = new Color(0, 81, 138);
-            List<Color> blueGradient = ColorGradient.createGradient(one, two, 6);
-            heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(one.getRGB()).substring(2));
+            Color one = new Color(0, 81, 138);
+            Color two = Color.WHITE;
+            List<Color> blueGradient = ColorGradient.createGradient(one, two, 5);
+            heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(two.getRGB()).substring(2));
 
             // to color the heat map legend
+            Collections.reverse(blueGradient);
             for (int i = 6; i < legendValues.size(); i++)
             {
-                var peptideColor = blueGradient.get(i - 5);
+                var peptideColor = blueGradient.get(i - 6);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
                 heatMapColorHex.put(legendValues.get(i), hexColor);
             }
 
             // to color the peptide bars in sequence graph
             blueGradient = ColorGradient.createGradient(one, two, (peptidesForSequenceMapDisplay.size() - closestToMeanIndex + 1));
+            Collections.reverse(blueGradient);
+
             // assign blue colors from median to last -> lighter to darker
             for (int i = closestToMeanIndex + 1; i < peptidesForSequenceMapDisplay.size(); i++)
             {
-                var peptideColor = blueGradient.get(i - closestToMeanIndex);
+                var peptideColor = blueGradient.get(i - closestToMeanIndex+1);
                 var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
                 var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
                 peptideCharacteristic.setColor(hexColor);
@@ -234,9 +223,10 @@
                 peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
             }
 
+            peptidesForSequenceMapDisplay.get(peptidesForSequenceMapDisplay.size()-1).setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
+
             // assign red colors from median to first -> lighter to darker
             one = new Color(187, 78, 78);
-            two = Color.WHITE;
 
             // to color the heat map legend
             List<Color> redGradient = ColorGradient.createGradient(one, two, 5);
@@ -291,7 +281,7 @@
         <div>
             <strong><%=h(legendLabel)%></strong>
         </div>
-        <div>
+        <div class="heatmap-legendScale">
             <strong><%=h(legendScale)%></strong>
         </div>
     </div>

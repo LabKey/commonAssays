@@ -188,7 +188,7 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     @Override
-    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates, List<PeptideCharacteristic> modifiedPeptideCharacteristics)
+    public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates, List<PeptideCharacteristic> modifiedPeptideCharacteristics, boolean showStackedPeptides)
     {
         MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
@@ -198,6 +198,7 @@ public class ProteinServiceImpl implements ProteinService
         bean.aaRowWidth = aaRowWidth;
         bean.replicates = replicates;
         bean.protein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
+        bean.protein.setShowStakedPeptides(showStackedPeptides);
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
     }
 

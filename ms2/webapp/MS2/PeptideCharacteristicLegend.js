@@ -6,7 +6,8 @@ if (!LABKEY.ms2.PeptideCharacteristicLegend) {
     LABKEY.ms2.PeptideCharacteristicLegend = {
 
         addHeatMap: function (peptideCharacteristics, colors) {
-            const rectHeight = document.getElementById('peptideMap').clientHeight/(peptideCharacteristics.length+1); // extra 1 for room
+            const minHeight = document.getElementById('peptideMap').clientHeight < 220 ? 220 : document.getElementById('peptideMap').clientHeight;
+            const rectHeight = minHeight/(peptideCharacteristics.length+1); // extra 1 for room
             const svgHeight = rectHeight * peptideCharacteristics.length;
 
             const svgContainer = d3.select(".heatmap").append("svg")
