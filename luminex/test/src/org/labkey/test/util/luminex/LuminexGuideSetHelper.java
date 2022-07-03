@@ -39,9 +39,11 @@ import static org.labkey.test.WebDriverWrapper.WAIT_FOR_JAVASCRIPT;
 
 public class LuminexGuideSetHelper
 {
+    private static final Locator GS_WINDOW_LOC =
+            Locator.tag("div").withClasses("x-window", "leveljenningsreport");
     public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte A", "GS Analyte B"};
     private static Map<Integer, String> timestamps = new HashMap<>();
-    LuminexTest _test;
+    final LuminexTest _test;
     
     public Calendar TESTDATE = Calendar.getInstance();
     private int _runNumber;
@@ -87,19 +89,18 @@ public class LuminexGuideSetHelper
         table.clearFilter("GuideSet/Created");
     }
 
-    public void checkManageGuideSetHeader(boolean creating)
+    public void waitForManageGuideSetWindow(boolean creating)
     {
+        WebElement window = _test.shortWait().until(ExpectedConditions.visibilityOfElementLocated(GS_WINDOW_LOC));
         if (creating)
         {
-            _test.waitForText("Create Guide Set...");
-            _test.waitForText("Guide Set Id:");
+            _test.waitForText("Create Guide Set...", "Guide Set Id:");
             _test.assertTextPresent("TBD", 2);
         }
         else
         {
-            _test.waitForText("Manage Guide Set...");
-            _test.waitForText("Guide Set Id:");
-            Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(_test.shortWait()).getText());
+            _test.waitForText("Manage Guide Set...", "Guide Set Id:");
+            Integer id = Integer.parseInt(Locator.id("guideSetIdLabel").waitForElement(window, 10_000).getText());
             _test.assertTextPresentInThisOrder("Created:", timestamps.get(id));
         }
     }
@@ -107,7 +108,10 @@ public class LuminexGuideSetHelper
     @LogMethod
     public void editRunBasedGuideSet(String[] rows, String comment, boolean creating)
     {
-        checkManageGuideSetHeader(creating);
+        waitForManageGuideSetWindow(creating);
+
+        // Wait for runs grid to load
+        _test._extHelper.waitForLoadingMaskToDisappear(30_000);
 
         addRemoveGuideSetRuns(rows);
 
@@ -120,7 +124,7 @@ public class LuminexGuideSetHelper
     @LogMethod
     public void editValueBasedGuideSet(Map<String, Double> metricInputs, @LoggedParam String comment, boolean creating)
     {
-        checkManageGuideSetHeader(creating);
+        waitForManageGuideSetWindow(creating);
 
         if (creating)
             _test.checkRadioButton(Locator.radioButtonByNameAndValue("ValueBased", "true"));
@@ -174,7 +178,7 @@ public class LuminexGuideSetHelper
     {
         _test._ext4Helper.waitForMaskToDisappear();
         _test._extHelper.waitForExt3MaskToDisappear(WebDriverWrapper.WAIT_FOR_JAVASCRIPT);
-        _test.waitForElementToDisappear(Locator.xpath("//div[contains(@class, 'x-window')][contains(@class, 'leveljenningsreport')]"));
+        _test.waitForElementToDisappear(GS_WINDOW_LOC);
         waitForLeveyJenningsTrendPlot();
         // Wait for the grid to populate as well.
         _test.waitForElements(Locator.xpath("//div[contains(@class, 'x-grid3-row-checker')]"));
@@ -261,8 +265,8 @@ public class LuminexGuideSetHelper
     {
         for(String row: rows)
         {
-            _test.waitForElement(Locator.id(row));
-            _test.click(Locator.tagWithId("span", row));
+            WebElement rowEl = _test.waitForElement(Locator.id(row));
+            rowEl.click();
         }
     }
 
