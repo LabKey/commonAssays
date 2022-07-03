@@ -54,6 +54,7 @@ public class Protein
     private List<PeptideCharacteristic> _combinedPeptideCharacteristics;
     // _modifiedPeptideCharacteristics contains peptides and their modified forms
     private List<PeptideCharacteristic> _modifiedPeptideCharacteristics;
+    private Map<String, List<PeptideCharacteristic>> _modifiedPeptides;
 
     // TODO: Delete
     private String _lookupString;
@@ -482,13 +483,13 @@ public class Protein
                         var showIntensity = range.pepcounts.intensityRank != 0;
                         var showConfidence = range.pepcounts.confidenceRank != 0;
 
-                        details.append(String.format("<br/>Start: %d", range.pepcounts.startIndex));
-                        details.append(String.format("<br/>End: %d", range.pepcounts.endIndex));
+                        details.append(String.format("<br/>Start: %d", range.pepcounts.startIndex + 1));
+                        details.append(String.format("<br/>End: %d", range.pepcounts.endIndex + 1));
                         details.append(String.format("<br/>Unmodified: %d", counts.getCountUnmodifiedPeptides()));
                         if (showIntensity)
                         {
                             details.append(String.format("<br/>Intensity Rank: %d", range.pepcounts.intensityRank));
-                            details.append(String.format("<br/>Raw Intensity: %f", range.pepcounts.rawIntensity));
+                            details.append(String.format("<br/>Raw Intensity: %.3E", range.pepcounts.rawIntensity));
                             details.append(String.format("<br/>Log 10 Base Intensity: %.2f", range.pepcounts.intensity));
                         }
                         if (showConfidence)
@@ -499,30 +500,27 @@ public class Protein
                         }
                         if (range.pepcounts.modifiedSequence != null)
                         {
-                            details.append("<table class='modified-details-table'>");
-                            details.append("<tr>");
-                            details.append("<th>Modifier</th>");
-                            details.append("<th>Start</th>");
-                            details.append("<th>End</th>");
-                            details.append("<th>Log</th>");
-                            if (showIntensity)
+                            if (!_modifiedPeptides.isEmpty() && _modifiedPeptides.get(range.pepcounts.getSequence()).size() > 1)
                             {
+                                details.append("<table class='modified-details-table'>");
+                                details.append("<tr>");
+                                details.append("<th>Modified Forms</th>");
+                                details.append("<th>Log</th>");
+                                if (showIntensity)
+                                {
 
-                                details.append("<th>Raw Intensity</th>");
-                            }
-                            if (showConfidence)
-                            {
-                                details.append("<th>Raw Confidence</th>");
-                            }
-                            details.append("</tr>");
-                            for (PeptideCharacteristic pep : _modifiedPeptideCharacteristics)
-                            {
-                                if (pep.getSequence().equalsIgnoreCase(range.pepcounts.sequence))
+                                    details.append("<th>Raw Intensity</th>");
+                                }
+                                if (showConfidence)
+                                {
+                                    details.append("<th>Raw Confidence</th>");
+                                }
+                                details.append("</tr>");
+
+                                for (PeptideCharacteristic pep : _modifiedPeptides.get(range.pepcounts.getSequence()))
                                 {
                                     details.append("<tr>");
                                     details.append("<td>").append(PageFlowUtil.filter(pep.getModifiedSequence())).append("</td>");
-                                    details.append("<td>").append(pep.getStartIndex()).append("</td>");
-                                    details.append("<td>").append(pep.getEndIndex()).append("</td>");
                                     if (showIntensity)
                                     {
                                         details.append(String.format("<td>%.2f</td>", pep.getIntensity()));
@@ -535,8 +533,9 @@ public class Protein
                                     }
                                     details.append("</tr>");
                                 }
+                                details.append("</table>");
                             }
-                            details.append("</table>");
+
                         }
                         label = helpPopup("Peptide Details", details.toString(), true, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
 
@@ -797,6 +796,21 @@ public class Protein
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
         if (!_modifiedPeptideCharacteristics.isEmpty())
         {
+            _modifiedPeptides = new HashMap<>();
+            // build the modifiedPeptideMap
+            for (PeptideCharacteristic pep : _modifiedPeptideCharacteristics)
+            {
+                if (_modifiedPeptides.get(pep.getSequence()) == null)
+                {
+                    List<PeptideCharacteristic> peps = new ArrayList<>();
+                    peps.add(pep);
+                    _modifiedPeptides.put(pep.getSequence(), peps);
+                }
+                else
+                {
+                    _modifiedPeptides.get(pep.getSequence()).add(pep);
+                }
+            }
             return getModifiedPeptideRanges(run);
         }
         else

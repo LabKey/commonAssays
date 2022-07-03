@@ -34,6 +34,7 @@
 <%@ page import="java.util.stream.Collectors" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
+<%@ page import="org.labkey.api.ms.Replicate" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
