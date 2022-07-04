@@ -474,10 +474,16 @@ public class Protein
                     if (colsNextRow>0)
                         continuationRight=" &gt;&gt; ";
 
+                    details = new StringBuilder();
+
                     if(!_forCoverageMapExport)
                     {
                         mass = getSequenceMass(_sequence.substring(range.start,(range.start + range.length)));
-                        details = new StringBuilder(String.format("Mass: %.2f <br/> Total Scans: %d", mass, counts.countScans));
+                        details.append(String.format("Mass: %.2f ", mass));
+                        if (_combinedPeptideCharacteristics.isEmpty()) // ms2 usage
+                        {
+                            details.append(String.format("<br/> Total Scans: %d", counts.countScans));
+                        }
                     }
 
                     for (String modStr : counts.getCountModifications().keySet())
@@ -904,6 +910,31 @@ public class Protein
         }
     }
 
+    private PeptideCounts createPeptideCounts(PeptideCharacteristic peptide, boolean isCombinedPeptides)
+    {
+        PeptideCounts peptideCounts = new PeptideCounts();
+        peptideCounts.setIntensity(peptide.getIntensity());
+        peptideCounts.setIntensityRank(peptide.getIntensityRank());
+        peptideCounts.setRawIntensity(peptide.getRawIntensity());
+        peptideCounts.setConfidence(peptide.getConfidence());
+        peptideCounts.setRawConfidence(peptide.getRawConfidence());
+        peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
+        peptideCounts.setForegroundColor(peptide.getForegroundColor());
+        peptideCounts.setPeptideColor(peptide.getColor());
+        peptideCounts.setStartIndex(peptide.getStartIndex());
+        peptideCounts.setEndIndex(peptide.getEndIndex());
+        peptideCounts.setSequence(peptide.getSequence());
+        if (isCombinedPeptides)
+        {
+            peptideCounts.setModifiedSequence(peptide.getSequence()); // intentionally setting to sequence for combined peptides
+        }
+        else
+        {
+            peptideCounts.setModifiedSequence(peptide.getModifiedSequence());
+        }
+        return peptideCounts;
+    }
+
     /*
          Method extracted from getCoverageRanges.
          Old style coverage list:  Get rid of variable modification chars and '.',
@@ -938,19 +969,7 @@ public class Protein
             cnt = uniquePeptides.get(peptideToMap);
             if (null == cnt)
             {
-                PeptideCounts peptideCounts = new PeptideCounts();
-                peptideCounts.setIntensity(peptide.getIntensity());
-                peptideCounts.setIntensityRank(peptide.getIntensityRank());
-                peptideCounts.setRawIntensity(peptide.getRawIntensity());
-                peptideCounts.setConfidence(peptide.getConfidence());
-                peptideCounts.setRawConfidence(peptide.getRawConfidence());
-                peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
-                peptideCounts.setForegroundColor(peptide.getForegroundColor());
-                peptideCounts.setPeptideColor(peptide.getColor());
-                peptideCounts.setStartIndex(peptide.getStartIndex());
-                peptideCounts.setEndIndex(peptide.getEndIndex());
-                peptideCounts.setSequence(peptide.getSequence());
-                peptideCounts.setModifiedSequence(peptide.getSequence()); // intentionally setting to sequence for combined peptides
+                PeptideCounts peptideCounts = createPeptideCounts(peptide, true);
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }
@@ -972,19 +991,7 @@ public class Protein
 
         for (PeptideCharacteristic peptide : _modifiedPeptideCharacteristics)
         {
-            PeptideCounts peptideCounts = new PeptideCounts();
-            peptideCounts.setIntensity(peptide.getIntensity());
-            peptideCounts.setRawIntensity(peptide.getRawIntensity());
-            peptideCounts.setIntensityRank(peptide.getIntensityRank());
-            peptideCounts.setConfidence(peptide.getConfidence());
-            peptideCounts.setRawConfidence(peptide.getRawConfidence());
-            peptideCounts.setConfidenceRank(peptide.getConfidenceRank());
-            peptideCounts.setForegroundColor(peptide.getForegroundColor());
-            peptideCounts.setPeptideColor(peptide.getColor());
-            peptideCounts.setStartIndex(peptide.getStartIndex());
-            peptideCounts.setEndIndex(peptide.getEndIndex());
-            peptideCounts.setSequence(peptide.getSequence());
-            peptideCounts.setModifiedSequence(peptide.getModifiedSequence());
+            PeptideCounts peptideCounts = createPeptideCounts(peptide, false);
             peptideCounts.addPeptide(peptide.getSequence(), mods);
             Range range = new Range(peptide.getStartIndex(), peptide.getEndIndex() - peptide.getStartIndex(), peptideCounts);
             modifiedPeptides.add(range);

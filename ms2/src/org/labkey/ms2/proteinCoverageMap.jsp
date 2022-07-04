@@ -45,7 +45,9 @@
     var peptideFormParam = currentURL.getParameter("peptideForm");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
-    var isCombinedOrStacked = peptideFormParam == null || peptideFormParam.equalsIgnoreCase("combined") ? "combined" : peptideFormParam.equalsIgnoreCase("stacked") ? "stacked" : "combined";
+    var isCombined = peptideFormParam == null ||
+            peptideFormParam.equalsIgnoreCase(PeptideCharacteristic.COMBINED_PEPTIDE) ||
+            (!peptideFormParam.equalsIgnoreCase(PeptideCharacteristic.STACKED_PEPTIDE));
 
     // list to store values min, max and mean values displayed on legend
     List<Double> legendValues =  new ArrayList<>();
@@ -85,11 +87,11 @@
 
     <label>Modified forms:</label>
     <span class="peptideForms">
-        <input type="radio" name="combinedOrStacked" id="combined" value="combined" <%=checked(isCombinedOrStacked.equalsIgnoreCase("combined"))%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')"/>
+        <input type="radio" name="combinedOrStacked" id="combined" value="combined" <%=checked(isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')"/>
         <label for="combined">Combined</label>
 
         <span class="stackedForm" >
-            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked" <%=checked(isCombinedOrStacked.equalsIgnoreCase("stacked"))%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')"/>
+            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked" <%=checked(!isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')"/>
             <label for="stacked" >Stacked</label>
         </span>
     </span>
@@ -106,13 +108,13 @@
     var modifiedPeptideCharacteristics = bean.protein.getModifiedPeptideCharacteristics();
     List<PeptideCharacteristic> peptidesForSequenceMapDisplay;
 
-    if (isCombinedOrStacked.equalsIgnoreCase("stacked"))
+    if (isCombined)
     {
-        peptidesForSequenceMapDisplay = modifiedPeptideCharacteristics;
+        peptidesForSequenceMapDisplay = combinedPeptideCharacteristics;
     }
     else
     {
-        peptidesForSequenceMapDisplay = combinedPeptideCharacteristics;
+        peptidesForSequenceMapDisplay = modifiedPeptideCharacteristics;
     }
     Map<Double, String> heatMapColorHex = new HashMap<>();
     if (combinedPeptideCharacteristics != null)
@@ -268,8 +270,7 @@
             legendLabel = "Intensity";
             legendScale = "(Log 10 base)";
         }
-        else if (isConfidenceView)
-        {
+        else {
             legendLabel = "Confidence Score";
             legendScale = "-(Log 10 base)";
         }
