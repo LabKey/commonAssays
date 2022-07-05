@@ -70,6 +70,10 @@
         dependencies.add("vis/vis");
     }
 %>
+<%
+    if (bean.showViewSettings)
+    {
+%>
 <div class="viewSettings">
     <h5><b>View Settings </b></h5>
 
@@ -98,7 +102,7 @@
 
 </div>
 <%
-
+    }
     // helper list of intensity or confidence score values of peptides used for calculations
     List<Double> iValues = new ArrayList<>();
 

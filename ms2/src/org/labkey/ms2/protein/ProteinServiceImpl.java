@@ -197,6 +197,7 @@ public class ProteinServiceImpl implements ProteinService
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         bean.replicates = replicates;
+        bean.showViewSettings = true;
         bean.protein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
         bean.protein.setShowStakedPeptides(showStackedPeptides);
         return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);

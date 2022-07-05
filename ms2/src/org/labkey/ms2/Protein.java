@@ -516,7 +516,9 @@ public class Protein
                         }
                         if (range.pepcounts.modifiedSequence != null)
                         {
-                            if (!_modifiedPeptides.isEmpty() && _modifiedPeptides.get(range.pepcounts.getSequence()).size() > 1)
+                            if (_modifiedPeptides != null &&
+                                    !_modifiedPeptides.isEmpty() &&
+                                    _modifiedPeptides.get(range.pepcounts.getSequence()).size() > 1)
                             {
                                 details.append("<table class='modified-details-table'>");
                                 details.append("<tr>");
@@ -810,7 +812,7 @@ public class Protein
     private List<Range> getUncoalescedPeptideRanges(MS2Run run)
     {
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
-        if (!_modifiedPeptideCharacteristics.isEmpty())
+        if (_modifiedPeptideCharacteristics != null && !_modifiedPeptideCharacteristics.isEmpty())
         {
             _modifiedPeptides = new HashMap<>();
             // build the modifiedPeptideMap
