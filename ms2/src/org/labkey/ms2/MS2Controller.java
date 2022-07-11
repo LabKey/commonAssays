@@ -4216,6 +4216,7 @@ public class MS2Controller extends SpringActionController
         public String showRunUrl;
         public boolean enableAllPeptidesFeature;
         public boolean showViewSettings;
+        public boolean showLegendAndLabel = true;
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
         public int aaRowWidth;
         public List<ProteinFeature> features = Collections.emptyList();

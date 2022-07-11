@@ -40,6 +40,7 @@
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
+    var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");
     var replicateIdParam = currentURL.getParameter("replicateId");
     var peptideFormParam = currentURL.getParameter("peptideForm");
@@ -176,86 +177,94 @@
             }
             var max = Collections.max(iValues);
             var min = Collections.min(iValues);
-            var avg = (max+min)/2;
+            var avg = (max + min) / 2;
 
-            // only display min, max and avg in the legend
-            legendValues.set(0, max);
-            legendValues.set(5, avg);
-            legendValues.set(10, min);
-
-            int closestToMeanIndex = 0;
-            var minDiff = iValues.get(0);
-
-            // calculate closest to mean index of peptidesForSequenceMapDisplay for sequence graph coloring
-            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
+            if (max == min)
             {
-                var value = isIntensityView ? peptidesForSequenceMapDisplay.get(i).getIntensity() : peptidesForSequenceMapDisplay.get(i).getConfidence();
-                var diff = Math.abs(value-avg);
-                if (diff < minDiff)
+                displayLegend = false;
+            }
+            else
+            {
+
+                // only display min, max and avg in the legend
+                legendValues.set(0, max);
+                legendValues.set(5, avg);
+                legendValues.set(10, min);
+
+                int closestToMeanIndex = 0;
+                var minDiff = iValues.get(0);
+
+                // calculate closest to mean index of peptidesForSequenceMapDisplay for sequence graph coloring
+                for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
                 {
-                    minDiff = diff;
-                    closestToMeanIndex = i;
+                    var value = isIntensityView ? peptidesForSequenceMapDisplay.get(i).getIntensity() : peptidesForSequenceMapDisplay.get(i).getConfidence();
+                    var diff = Math.abs(value - avg);
+                    if (diff < minDiff)
+                    {
+                        minDiff = diff;
+                        closestToMeanIndex = i;
+                    }
                 }
+
+                // assign blue colors from mean value to last -> lighter to darker
+                Color one = new Color(0, 81, 138);
+                Color two = Color.WHITE;
+                List<Color> blueGradient = ColorGradient.createGradient(one, two, 5);
+                heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(two.getRGB()).substring(2));
+
+                // to color the heat map legend
+                Collections.reverse(blueGradient);
+                for (int i = 6; i < legendValues.size(); i++)
+                {
+                    var peptideColor = blueGradient.get(i - 6);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    heatMapColorHex.put(legendValues.get(i), hexColor);
+                }
+
+                // to color the peptide bars in sequence graph
+                blueGradient = ColorGradient.createGradient(one, two, (peptidesForSequenceMapDisplay.size() - closestToMeanIndex + 1));
+                Collections.reverse(blueGradient);
+
+                // assign blue colors from median to last -> lighter to darker
+                for (int i = closestToMeanIndex + 1; i < peptidesForSequenceMapDisplay.size(); i++)
+                {
+                    var peptideColor = blueGradient.get(i - closestToMeanIndex + 1);
+                    var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    peptideCharacteristic.setColor(hexColor);
+                    // for blue - contrasting foreground color is White according to the tool
+                    // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+                    peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+                }
+
+                peptidesForSequenceMapDisplay.get(peptidesForSequenceMapDisplay.size() - 1).setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
+
+                // assign red colors from median to first -> lighter to darker
+                one = new Color(187, 78, 78);
+
+                // to color the heat map legend
+                List<Color> redGradient = ColorGradient.createGradient(one, two, 5);
+
+                for (int i = 4; i >= 0; i--)
+                {
+                    var peptideColor = redGradient.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    heatMapColorHex.put(legendValues.get(i), hexColor);
+                }
+
+                // to color the peptide bars in sequence graph
+                redGradient = ColorGradient.createGradient(one, two, closestToMeanIndex + 1);
+
+                for (int i = closestToMeanIndex; i >= 0; i--)
+                {
+                    var peptideColor = redGradient.get(i);
+                    var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    peptideCharacteristic.setColor(hexColor);
+                    peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+                }
+                heatMapColorHex.keySet().removeAll(Collections.singleton(null));
             }
-
-            // assign blue colors from mean value to last -> lighter to darker
-            Color one = new Color(0, 81, 138);
-            Color two = Color.WHITE;
-            List<Color> blueGradient = ColorGradient.createGradient(one, two, 5);
-            heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(two.getRGB()).substring(2));
-
-            // to color the heat map legend
-            Collections.reverse(blueGradient);
-            for (int i = 6; i < legendValues.size(); i++)
-            {
-                var peptideColor = blueGradient.get(i - 6);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                heatMapColorHex.put(legendValues.get(i), hexColor);
-            }
-
-            // to color the peptide bars in sequence graph
-            blueGradient = ColorGradient.createGradient(one, two, (peptidesForSequenceMapDisplay.size() - closestToMeanIndex + 1));
-            Collections.reverse(blueGradient);
-
-            // assign blue colors from median to last -> lighter to darker
-            for (int i = closestToMeanIndex + 1; i < peptidesForSequenceMapDisplay.size(); i++)
-            {
-                var peptideColor = blueGradient.get(i - closestToMeanIndex+1);
-                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                peptideCharacteristic.setColor(hexColor);
-                // for blue - contrasting foreground color is White according to the tool
-                // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
-            }
-
-            peptidesForSequenceMapDisplay.get(peptidesForSequenceMapDisplay.size()-1).setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
-
-            // assign red colors from median to first -> lighter to darker
-            one = new Color(187, 78, 78);
-
-            // to color the heat map legend
-            List<Color> redGradient = ColorGradient.createGradient(one, two, 5);
-
-            for (int i = 4; i >= 0; i--)
-            {
-                var peptideColor = redGradient.get(i);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                heatMapColorHex.put(legendValues.get(i), hexColor);
-            }
-
-            // to color the peptide bars in sequence graph
-            redGradient = ColorGradient.createGradient(one, two, closestToMeanIndex + 1);
-
-            for (int i = closestToMeanIndex; i >= 0; i--)
-            {
-                var peptideColor = redGradient.get(i);
-                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                peptideCharacteristic.setColor(hexColor);
-                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
-            }
-            heatMapColorHex.keySet().removeAll(Collections.singleton(null));
         }
     }
 
@@ -280,17 +289,19 @@
         }
     }
 
+    if (displayLegend)
+    {
 %>
-
-    <div class="heatmap">
-        <div>
-            <strong><%=h(legendLabel)%></strong>
+        <div class="heatmap">
+            <div>
+                <strong><%=h(legendLabel)%></strong>
+            </div>
+            <div class="heatmap-legendScale">
+                <strong><%=h(legendScale)%></strong>
+            </div>
         </div>
-        <div class="heatmap-legendScale">
-            <strong><%=h(legendScale)%></strong>
-        </div>
-    </div>
 <%
+    }
     if (!bean.features.isEmpty())
     {
         String[] colors =
@@ -331,5 +342,9 @@
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 
-    LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(legendValues)%>, <%=toJsonObject(heatMapColorHex)%>);
+    <% if (displayLegend)
+        {
+    %>
+        LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(legendValues)%>, <%=toJsonObject(heatMapColorHex)%>);
+    <% } %>
 </script>
