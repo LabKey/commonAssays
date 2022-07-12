@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2;
 
-import lombok.Builder;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,7 +180,7 @@ public class ProteinCoverageMapBuilder
             _protein.setShowEntireFragmentInCoverage(true);
             _protein.setForCoverageMapExport(true);
             _protein.setPeptides(peptides);
-            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides));
+            _protein.setCombinedPeptideCharacteristics(createPeptideCharacteristics(peptides));
 
             String coverage = _protein.getCoverageMap(null, null).toString();
             String expectedHtml = "<div><table id=\"peptideMap\" border=\"1\"  >" +
@@ -203,7 +202,7 @@ public class ProteinCoverageMapBuilder
             String[] peptides2 = {"K.LC'TPTMPSNGTLK.T", "K.LC'TPTMPSNGTLK.T", "K.LIAYNEGSFFIR.G", "R.IINTASPAGLFGNFGQANYSAAK.M",
                     "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W", "R.VIGQLFEVGGGWC'GQTR.W"};
 
-            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides1));
+            _protein.setCombinedPeptideCharacteristics(createPeptideCharacteristics(peptides1));
             ProteinCoverageMapBuilder pcm1 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
 
             Set<String> distinct = new HashSet<>(Arrays.asList(peptides1));
@@ -237,7 +236,7 @@ public class ProteinCoverageMapBuilder
             // add some peptide filter conditions and check the header info line
             f.addCondition(FieldKey.fromParts("Scan"), 100, CompareType.NEQ_OR_NULL);
             f.addCondition(FieldKey.fromParts("PeptideProhet"), 0.9, CompareType.GTE);
-            _protein.setPeptideCharacteristics(createPeptideCharacteristics(peptides2));
+            _protein.setCombinedPeptideCharacteristics(createPeptideCharacteristics(peptides2));
             ProteinCoverageMapBuilder pcm2 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
             distinct = new HashSet<>(Arrays.asList(peptides2));
             counts = new Pair<>(peptides2.length, distinct.size());

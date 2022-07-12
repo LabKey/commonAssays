@@ -24,20 +24,40 @@
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="java.awt.*" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="java.util.TreeMap" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="java.util.stream.Collectors" %>
-<%@ page import="java.util.Collections" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
+<%@ page import="org.labkey.api.ms.Replicate" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
     MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
+    var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");
+    var replicateIdParam = currentURL.getParameter("replicateId");
+    var peptideFormParam = currentURL.getParameter("peptideForm");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
+    var isCombined = peptideFormParam == null ||
+            peptideFormParam.equalsIgnoreCase(PeptideCharacteristic.COMBINED_PEPTIDE) ||
+            (!peptideFormParam.equalsIgnoreCase(PeptideCharacteristic.STACKED_PEPTIDE));
+
+    // list to store values min, max and mean values displayed on legend
+    List<Double> legendValues =  new ArrayList<>();
+
+    Map<Long, String> replicates = new TreeMap<>();
+    replicates.put(Long.valueOf(0), "All");
+    bean.replicates.forEach(rep -> replicates.put(rep.getId(), rep.getName()));
+
+    var selectedReplicate = replicateIdParam != null && !Long.valueOf(replicateIdParam).equals(Long.valueOf(0)) ? Long.valueOf(replicateIdParam) : replicates.get(Long.valueOf(0));
 %>
 <%!
     @Override
@@ -51,117 +71,200 @@
         dependencies.add("vis/vis");
     }
 %>
+<%
+    if (bean.showViewSettings)
+    {
+%>
 <div class="viewSettings">
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView()">
+    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('viewBy', 'peptide-setting-select')">
         <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
         <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
     </select>
+
+    <label for="peptide-replicate-select">Replicate:</label>
+    <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('replicateId', 'peptide-replicate-select')">
+        <labkey:options map="<%=replicates%>" value="<%=selectedReplicate%>"/>
+    </select>
+
+
+    <label>Modified forms:</label>
+    <span class="peptideForms">
+        <input type="radio" name="combinedOrStacked" id="combined" value="combined" <%=checked(isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')"/>
+        <label for="combined">Combined</label>
+
+        <span class="stackedForm" >
+            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked" <%=checked(!isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')"/>
+            <label for="stacked" >Stacked</label>
+        </span>
+    </span>
+
 </div>
 <%
-
+    }
+    // helper list of intensity or confidence score values of peptides used for calculations
     List<Double> iValues = new ArrayList<>();
-    var peptideCharacteristics = bean.protein.getPeptideCharacteristics();
-    Map<Double, String> heatMapColorHex = new HashMap<>();
-    if (peptideCharacteristics != null)
-    {
 
+    // combinedPeptideCharacteristics are always used for legend values
+    var combinedPeptideCharacteristics = bean.protein.getCombinedPeptideCharacteristics();
+    // modifiedPeptideCharacteristics are used for stacked view of peptides
+    var modifiedPeptideCharacteristics = bean.protein.getModifiedPeptideCharacteristics();
+    List<PeptideCharacteristic> peptidesForSequenceMapDisplay;
+
+    if (isCombined)
+    {
+        peptidesForSequenceMapDisplay = combinedPeptideCharacteristics;
+    }
+    else
+    {
+        peptidesForSequenceMapDisplay = modifiedPeptideCharacteristics;
+    }
+    Map<Double, String> heatMapColorHex = new HashMap<>();
+    if (combinedPeptideCharacteristics != null)
+    {
         if (isIntensityView)
         {
-            peptideCharacteristics.sort((o1, o2) -> {
+            // sorting for calculating the intensity rank
+            peptidesForSequenceMapDisplay.sort((o1, o2) -> {
                 if (o1.getIntensity() == null && o2.getIntensity() == null) return 0;
                 if (o2.getIntensity() == null) return 1;
                 if (o1.getIntensity() == null) return -1;
                 return o2.getIntensity().compareTo(o1.getIntensity());
             });
-            peptideCharacteristics.forEach(peptideCharacteristic -> {
-                if (peptideCharacteristic.getIntensity() != null)
+
+            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
+            {
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                if (peptideCharacteristic.getIntensity() != null && peptideCharacteristic.getIntensity() != 0)
                 {
+                    peptideCharacteristic.setIntensityRank(i + 1); // ranks are 1 based
                     iValues.add(peptideCharacteristic.getIntensity());
                 }
-            });
+            }
+
         }
         if (isConfidenceView)
         {
-            peptideCharacteristics.sort((o1, o2) -> {
+            // sorting for calculating the confidence score ranks
+            peptidesForSequenceMapDisplay.sort((o1, o2) -> {
                 if (o1.getConfidence() == null && o2.getConfidence() == null) return 0;
                 if (o2.getConfidence() == null) return 1;
                 if (o1.getConfidence() == null) return -1;
                 return o2.getConfidence().compareTo(o1.getConfidence());
             });
-            peptideCharacteristics.forEach(peptideCharacteristic -> {
-                if (peptideCharacteristic.getConfidence() != null)
+            for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
+            {
+                var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                if (peptideCharacteristic.getConfidence() != null && peptideCharacteristic.getConfidence() != 0)
                 {
+                    peptideCharacteristic.setConfidenceRank(i+1); // ranks are 1 based
                     iValues.add(peptideCharacteristic.getConfidence());
                 }
-            });
+            }
         }
 
         if (iValues.size() > 1)
         {
-            // calculate medianIndex of protein.getPeptideCharacteristics()
-            var count = iValues.size();
-            var medianIndex = 0;
-
-            if (count % 2 == 0)
+            // reason to initialize the values list is for the keys in hexColorMap below
+            var start = Double.MIN_VALUE;
+            // fixed size heatmap legend
+            for (int i = 0; i < 11; i++)
             {
-                medianIndex = (count / 2 - 1 + count / 2) / 2;
+                legendValues.add(start);
+                start = start - 0.01;
+            }
+            var max = Collections.max(iValues);
+            var min = Collections.min(iValues);
+            var avg = (max + min) / 2;
+
+            if (max == min)
+            {
+                displayLegend = false;
             }
             else
             {
-                medianIndex = (count - 1) / 2;
+
+                // only display min, max and avg in the legend
+                legendValues.set(0, max);
+                legendValues.set(5, avg);
+                legendValues.set(10, min);
+
+                int closestToMeanIndex = 0;
+                var minDiff = iValues.get(0);
+
+                // calculate closest to mean index of peptidesForSequenceMapDisplay for sequence graph coloring
+                for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
+                {
+                    var value = isIntensityView ? peptidesForSequenceMapDisplay.get(i).getIntensity() : peptidesForSequenceMapDisplay.get(i).getConfidence();
+                    var diff = Math.abs(value - avg);
+                    if (diff < minDiff)
+                    {
+                        minDiff = diff;
+                        closestToMeanIndex = i;
+                    }
+                }
+
+                // assign blue colors from mean value to last -> lighter to darker
+                Color one = new Color(0, 81, 138);
+                Color two = Color.WHITE;
+                List<Color> blueGradient = ColorGradient.createGradient(one, two, 5);
+                heatMapColorHex.put(legendValues.get(5), "#" + Integer.toHexString(two.getRGB()).substring(2));
+
+                // to color the heat map legend
+                Collections.reverse(blueGradient);
+                for (int i = 6; i < legendValues.size(); i++)
+                {
+                    var peptideColor = blueGradient.get(i - 6);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    heatMapColorHex.put(legendValues.get(i), hexColor);
+                }
+
+                // to color the peptide bars in sequence graph
+                blueGradient = ColorGradient.createGradient(one, two, (peptidesForSequenceMapDisplay.size() - closestToMeanIndex + 1));
+                Collections.reverse(blueGradient);
+
+                // assign blue colors from median to last -> lighter to darker
+                for (int i = closestToMeanIndex + 1; i < peptidesForSequenceMapDisplay.size(); i++)
+                {
+                    var peptideColor = blueGradient.get(i - closestToMeanIndex + 1);
+                    var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    peptideCharacteristic.setColor(hexColor);
+                    // for blue - contrasting foreground color is White according to the tool
+                    // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+                    peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+                }
+
+                peptidesForSequenceMapDisplay.get(peptidesForSequenceMapDisplay.size() - 1).setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
+
+                // assign red colors from median to first -> lighter to darker
+                one = new Color(187, 78, 78);
+
+                // to color the heat map legend
+                List<Color> redGradient = ColorGradient.createGradient(one, two, 5);
+
+                for (int i = 4; i >= 0; i--)
+                {
+                    var peptideColor = redGradient.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    heatMapColorHex.put(legendValues.get(i), hexColor);
+                }
+
+                // to color the peptide bars in sequence graph
+                redGradient = ColorGradient.createGradient(one, two, closestToMeanIndex + 1);
+
+                for (int i = closestToMeanIndex; i >= 0; i--)
+                {
+                    var peptideColor = redGradient.get(i);
+                    var peptideCharacteristic = peptidesForSequenceMapDisplay.get(i);
+                    var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
+                    peptideCharacteristic.setColor(hexColor);
+                    peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
+                }
+                heatMapColorHex.keySet().removeAll(Collections.singleton(null));
             }
-
-            // assign blue colors from median to last -> lighter to darker
-            Color one = Color.WHITE;
-            Color two = new Color(0, 81, 138);
-            List<Color> blueGradient = ColorGradient.createGradient(one, two, (count - medianIndex + 1));
-
-            // assign blue colors from median to last -> lighter to darker
-            for (int i = medianIndex + 1; i < count; i++)
-            {
-                var peptideColor = blueGradient.get(i - medianIndex);
-                var peptideCharacteristic = peptideCharacteristics.get(i);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                if (isIntensityView)
-                {
-                    heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
-                }
-                if (isConfidenceView)
-                {
-                    heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
-                }
-                peptideCharacteristic.setColor(hexColor);
-                // for blue - contrasting foreground color is White according to the tool
-                // https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
-            }
-
-            // assign red colors from median to first -> lighter to darker
-            one = new Color(187, 78, 78);
-            two = Color.WHITE;
-
-            List<Color> redGradient = ColorGradient.createGradient(one, two, medianIndex + 1);
-
-            for (int i = medianIndex; i >= 0; i--)
-            {
-                var peptideColor = redGradient.get(i);
-                var peptideCharacteristic = peptideCharacteristics.get(i);
-                var hexColor = "#" + Integer.toHexString(peptideColor.getRGB()).substring(2);
-                if (isIntensityView)
-                {
-                    heatMapColorHex.put(peptideCharacteristics.get(i).getIntensity(), hexColor);
-                }
-                if (isConfidenceView)
-                {
-                    heatMapColorHex.put(peptideCharacteristics.get(i).getConfidence(), hexColor);
-                }
-                peptideCharacteristic.setColor(hexColor);
-                peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
-            }
-            heatMapColorHex.keySet().removeAll(Collections.singleton(null));
         }
     }
 
@@ -173,28 +276,32 @@
 <%
     var legendLabel = "";
     var legendScale = "";
-    if (isIntensityView)
+    if (!legendValues.isEmpty())
     {
-        legendLabel = "Intensity";
-        legendScale = "(Log 10 base)";
-    }
-    else if (isConfidenceView)
-    {
-        legendLabel = "Confidence Score";
-        legendScale = "-(Log 10 base)";
+        if (isIntensityView)
+        {
+            legendLabel = "Intensity";
+            legendScale = "(Log 10 base)";
+        }
+        else {
+            legendLabel = "Confidence Score";
+            legendScale = "-(Log 10 base)";
+        }
     }
 
+    if (displayLegend)
+    {
 %>
-
-    <div class="heatmap">
-        <div>
-            <strong><%=h(legendLabel)%></strong>
+        <div class="heatmap">
+            <div>
+                <strong><%=h(legendLabel)%></strong>
+            </div>
+            <div class="heatmap-legendScale">
+                <strong><%=h(legendScale)%></strong>
+            </div>
         </div>
-        <div>
-            <strong><%=h(legendScale)%></strong>
-        </div>
-    </div>
 <%
+    }
     if (!bean.features.isEmpty())
     {
         String[] colors =
@@ -235,5 +342,9 @@
 <script type="application/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 
-    LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(iValues)%>, <%=toJsonObject(heatMapColorHex)%>);
+    <% if (displayLegend)
+        {
+    %>
+        LABKEY.ms2.PeptideCharacteristicLegend.addHeatMap(<%=toJsonArray(legendValues)%>, <%=toJsonObject(heatMapColorHex)%>);
+    <% } %>
 </script>
