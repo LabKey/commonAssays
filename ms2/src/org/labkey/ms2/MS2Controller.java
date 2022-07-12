@@ -50,6 +50,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.ms.Replicate;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
@@ -4214,9 +4215,12 @@ public class MS2Controller extends SpringActionController
         public MS2Run run;
         public String showRunUrl;
         public boolean enableAllPeptidesFeature;
+        public boolean showViewSettings;
+        public boolean showLegendAndLabel = true;
         public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
         public int aaRowWidth;
         public List<ProteinFeature> features = Collections.emptyList();
+        public List<Replicate> replicates = Collections.emptyList();
     }
 
 
@@ -4271,7 +4275,7 @@ public class MS2Controller extends SpringActionController
                         pep.setSequence(peptide);
                         peptideCharacteristics.add(pep);
                     }
-                    protein.setPeptideCharacteristics(peptideCharacteristics);
+                    protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                 }
                 protein.setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = protein;
@@ -4555,7 +4559,7 @@ public class MS2Controller extends SpringActionController
                         pepCharacteristic.setSequence(pep);
                         peptideCharacteristics.add(pepCharacteristic);
                     }
-                    protein.setPeptideCharacteristics(peptideCharacteristics);
+                    protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                     pcm.setAllPeptideCounts();
 
                     // add filter to get the total and distinct counts of peptides for the target protein to the ProteinCoverageMapBuilder
