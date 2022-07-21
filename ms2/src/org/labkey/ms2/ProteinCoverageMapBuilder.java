@@ -235,7 +235,7 @@ public class ProteinCoverageMapBuilder
 
             // add some peptide filter conditions and check the header info line
             f.addCondition(FieldKey.fromParts("Scan"), 100, CompareType.NEQ_OR_NULL);
-            f.addCondition(FieldKey.fromParts("PeptideProhet"), 0.9, CompareType.GTE);
+            f.addCondition(FieldKey.fromParts("PeptideProphet"), 0.9, CompareType.GTE);
             _protein.setCombinedPeptideCharacteristics(createPeptideCharacteristics(peptides2));
             ProteinCoverageMapBuilder pcm2 = new ProteinCoverageMapBuilder(null, _protein, _run, f, false);
             distinct = new HashSet<>(Arrays.asList(peptides2));
@@ -243,7 +243,7 @@ public class ProteinCoverageMapBuilder
             pcm2.setAllPeptideCounts(counts);
             exportHtml = pcm2.getProteinExportHtml();
 
-            assertTrue("Unexpected peptide filter text", exportHtml.contains("Peptide Filter: &nbsp; (SeqId = -1) AND (Scan &lt;&gt; 100) AND (PeptideProhet &gt;= 0.9)"));
+            assertTrue("Unexpected peptide filter text", exportHtml.contains("Peptide Filter: &nbsp; (SeqId = -1) AND (Scan &lt;&gt; 100) AND (PeptideProphet &gt;= 0.9)"));
             assertTrue("Unexpected total peptide count text", !exportHtml.contains("peptides matching sequence"));
             assertTrue("Unexpected total peptide count text", exportHtml.contains("7 Total qualifying peptides in run"));
             assertTrue("Unexpected distinct peptide count text", exportHtml.contains("4 Distinct qualifying peptides in run"));
