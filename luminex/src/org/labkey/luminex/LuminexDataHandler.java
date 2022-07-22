@@ -487,7 +487,15 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 // now add the dataRows to the rows list to be persisted
                 for (LuminexDataRow dataRow : dataRows)
-                    rows.put(new DataRowKey(dataRow), dataRow.toMap(analyte));
+                {
+                    DataRowKey rowKey = new DataRowKey(dataRow);
+
+                    // Issue 45918: If samples/unknowns are not run in replicate, persist the row that has the bead count to the DB
+                    if (rows.containsKey(rowKey) && dataRow.getBeadCount() == null)
+                        continue;
+
+                    rows.put(rowKey, dataRow.toMap(analyte));
+                }
             }
 
             List<Integer> dataIds = new ArrayList<>();
