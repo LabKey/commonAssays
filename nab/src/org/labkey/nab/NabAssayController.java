@@ -664,11 +664,9 @@ public class NabAssayController extends SpringActionController
                     virusGroups.add(group);
             }
 
-            try (ExcelWriter xl = new SampleTemplateWriter(getContainer(), sampleDomain, sampleGroups, virusDomain, virusGroups))
-            {
-                xl.setFilenamePrefix("metadata");
-                xl.renderWorkbook(response);
-            }
+            ExcelWriter xl = new SampleTemplateWriter(getContainer(), sampleDomain, sampleGroups, virusDomain, virusGroups);
+            xl.setFilenamePrefix("metadata");
+            xl.renderWorkbook(response);
         }
     }
 
