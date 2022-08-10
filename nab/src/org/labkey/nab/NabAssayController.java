@@ -586,7 +586,7 @@ public class NabAssayController extends SpringActionController
                 String header = headers.get(column);
                 Cell cell = firstRow.getCell(column, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 cell.setCellValue(header);
-                cell.setCellStyle(getBoldFormat());
+                cell.setCellStyle(getBoldFormat(sheet.getWorkbook()));
             }
 
             // Render the rows (i.e. well group names, virus group names, and default property values):

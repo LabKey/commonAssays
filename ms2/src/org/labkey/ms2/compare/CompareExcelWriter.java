@@ -72,7 +72,7 @@ public class CompareExcelWriter extends ExcelWriter
             }
             Cell cell = row.getCell(column, MissingCellPolicy.CREATE_NULL_AS_BLANK);
             cell.setCellValue(caption);
-            cell.setCellStyle(getBoldFormat());
+            cell.setCellStyle(getBoldFormat(sheet.getWorkbook()));
             column += _colSpan;
         }
 
