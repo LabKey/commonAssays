@@ -2512,7 +2512,7 @@ public class MS2Controller extends SpringActionController
                 }
                 headers.add("");
                 ew.setHeaders(headers);
-                ew.write(getViewContext().getResponse());
+                ew.renderWorkbook(getViewContext().getResponse());
             }
         }
         else

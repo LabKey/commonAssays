@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -547,9 +548,9 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public void renderSheet(int sheetNumber)
+        public void renderSheet(Workbook workbook, int sheetNumber)
         {
-            Sheet sheet = _workbook.createSheet(getSheetName(sheetNumber));
+            Sheet sheet = workbook.createSheet(getSheetName(sheetNumber));
             sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
 
             // Render the header row and collect default values for the sample/virus property columns:
@@ -677,7 +678,7 @@ public class NabAssayController extends SpringActionController
             try (ExcelWriter xl = new SampleTemplateWriter(getContainer(), getUser(), sampleDomain, sampleGroups, virusDomain, virusGroups))
             {
                 xl.setFilenamePrefix("metadata");
-                xl.write(response);
+                xl.renderWorkbook(response);
             }
         }
     }
