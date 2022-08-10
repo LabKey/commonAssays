@@ -530,25 +530,23 @@ public class NabAssayController extends SpringActionController
 
     private static class SampleTemplateWriter extends ExcelWriter
     {
-        private Container _container;
-        private User _user;
-        private Domain _sampleDomain;
-        private List<WellGroupTemplate> _sampleGroups;
-        private Domain _virusDomain;
-        private List<WellGroupTemplate> _virusGroups;
+        private final Container _container;
+        private final Domain _sampleDomain;
+        private final List<WellGroupTemplate> _sampleGroups;
+        private final Domain _virusDomain;
+        private final List<WellGroupTemplate> _virusGroups;
 
-        public SampleTemplateWriter(Container container, User user, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
+        public SampleTemplateWriter(Container container, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
         {
             _sampleDomain = sampleDomain;
             _sampleGroups = sampleGroups;
             _virusDomain = virusDomain;
             _virusGroups = virusGroups;
             _container = container;
-            _user = user;
         }
 
         @Override
-        public void renderSheet(Workbook workbook, int sheetNumber)
+        protected void renderSheet(Workbook workbook, int sheetNumber)
         {
             Sheet sheet = workbook.createSheet(getSheetName(sheetNumber));
             sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
@@ -675,7 +673,7 @@ public class NabAssayController extends SpringActionController
                     virusGroups.add(group);
             }
 
-            try (ExcelWriter xl = new SampleTemplateWriter(getContainer(), getUser(), sampleDomain, sampleGroups, virusDomain, virusGroups))
+            try (ExcelWriter xl = new SampleTemplateWriter(getContainer(), sampleDomain, sampleGroups, virusDomain, virusGroups))
             {
                 xl.setFilenamePrefix("metadata");
                 xl.renderWorkbook(response);
