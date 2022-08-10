@@ -466,15 +466,6 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    private int[] toArray(Collection<Integer> integerList)
-    {
-        int[] arr = new int[integerList.size()];
-        int i = 0;
-        for (Integer cutoff : integerList)
-            arr[i++] = cutoff.intValue();
-        return arr;
-    }
-
     @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
