@@ -37,14 +37,14 @@ import java.util.Map;
 public class ProteinDisplayColumnFactory implements DisplayColumnFactory
 {
     private final Container _container;
-    private final String _url;
+    private final ActionURL _url;
 
     public ProteinDisplayColumnFactory(Container container)
     {
         this(container, null);
     }
 
-    public ProteinDisplayColumnFactory(Container container, String url)
+    public ProteinDisplayColumnFactory(Container container, ActionURL url)
     {
         _container = container;
         _url = url;
