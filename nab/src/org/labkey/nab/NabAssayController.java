@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -465,15 +466,6 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    private int[] toArray(Collection<Integer> integerList)
-    {
-        int[] arr = new int[integerList.size()];
-        int i = 0;
-        for (Integer cutoff : integerList)
-            arr[i++] = cutoff.intValue();
-        return arr;
-    }
-
     @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
@@ -529,27 +521,25 @@ public class NabAssayController extends SpringActionController
 
     private static class SampleTemplateWriter extends ExcelWriter
     {
-        private Container _container;
-        private User _user;
-        private Domain _sampleDomain;
-        private List<WellGroupTemplate> _sampleGroups;
-        private Domain _virusDomain;
-        private List<WellGroupTemplate> _virusGroups;
+        private final Container _container;
+        private final Domain _sampleDomain;
+        private final List<WellGroupTemplate> _sampleGroups;
+        private final Domain _virusDomain;
+        private final List<WellGroupTemplate> _virusGroups;
 
-        public SampleTemplateWriter(Container container, User user, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
+        public SampleTemplateWriter(Container container, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
         {
             _sampleDomain = sampleDomain;
             _sampleGroups = sampleGroups;
             _virusDomain = virusDomain;
             _virusGroups = virusGroups;
             _container = container;
-            _user = user;
         }
 
         @Override
-        public void renderSheet(int sheetNumber)
+        protected void renderSheet(Workbook workbook, int sheetNumber)
         {
-            Sheet sheet = _workbook.createSheet(getSheetName(sheetNumber));
+            Sheet sheet = workbook.createSheet(getSheetName(sheetNumber));
             sheet.getPrintSetup().setPaperSize(PrintSetup.LETTER_PAPERSIZE);
 
             // Render the header row and collect default values for the sample/virus property columns:
@@ -585,7 +575,7 @@ public class NabAssayController extends SpringActionController
                 String header = headers.get(column);
                 Cell cell = firstRow.getCell(column, MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 cell.setCellValue(header);
-                cell.setCellStyle(getBoldFormat());
+                cell.setCellStyle(getBoldFormat(sheet.getWorkbook()));
             }
 
             // Render the rows (i.e. well group names, virus group names, and default property values):
@@ -674,11 +664,9 @@ public class NabAssayController extends SpringActionController
                     virusGroups.add(group);
             }
 
-            try (ExcelWriter xl = new SampleTemplateWriter(getContainer(), getUser(), sampleDomain, sampleGroups, virusDomain, virusGroups))
-            {
-                xl.setFilenamePrefix("metadata");
-                xl.write(response);
-            }
+            ExcelWriter xl = new SampleTemplateWriter(getContainer(), sampleDomain, sampleGroups, virusDomain, virusGroups);
+            xl.setFilenamePrefix("metadata");
+            xl.renderWorkbook(response);
         }
     }
 

@@ -2492,28 +2492,26 @@ public class MS2Controller extends SpringActionController
 
         if (exportToExcel)
         {
-            try (CompareExcelWriter ew = new CompareExcelWriter(()->new ResultsImpl(rgn.getResultSet()), rgn.getDisplayColumns()))
+            CompareExcelWriter ew = new CompareExcelWriter(()->new ResultsImpl(rgn.getResultSet()), rgn.getDisplayColumns());
+            ew.setAutoSize(true);
+            ew.setSheetName(query.getComparisonDescription());
+            ew.setFooter(query.getComparisonDescription());
+
+            // Set up the row display the run descriptions (which can span more than one data column)
+            ew.setOffset(offset);
+            ew.setColSpan(gridColumns.size());
+            ew.setMultiColumnCaptions(runCaptions);
+
+            List<String> headers = new ArrayList<>();
+            headers.add(query.getHeader());
+            headers.add("");
+            for (Pair<String, String> sqlSummary : query.getSQLSummaries())
             {
-                ew.setAutoSize(true);
-                ew.setSheetName(query.getComparisonDescription());
-                ew.setFooter(query.getComparisonDescription());
-
-                // Set up the row display the run descriptions (which can span more than one data column)
-                ew.setOffset(offset);
-                ew.setColSpan(gridColumns.size());
-                ew.setMultiColumnCaptions(runCaptions);
-
-                List<String> headers = new ArrayList<>();
-                headers.add(query.getHeader());
-                headers.add("");
-                for (Pair<String, String> sqlSummary : query.getSQLSummaries())
-                {
-                    headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
-                }
-                headers.add("");
-                ew.setHeaders(headers);
-                ew.write(getViewContext().getResponse());
+                headers.add(sqlSummary.getKey() + ": " + sqlSummary.getValue());
             }
+            headers.add("");
+            ew.setHeaders(headers);
+            ew.renderWorkbook(getViewContext().getResponse());
         }
         else
         {
