@@ -416,13 +416,6 @@ public class CompareQuery extends SQLFragment
         return _gridColumns;
     }
 
-    /** @return link filter */
-    protected String setupComparisonColumnLink(ActionURL linkURL)
-    {
-        linkURL.setAction(MS2Controller.ShowProteinAction.class);   // Could target the "prot" window instead of using the main window
-        return "protein=${Protein}&seqId=${SeqId}";
-    }
-
     public int getColumnsPerRun()
     {
         return _columnsPerRun;
@@ -502,13 +495,17 @@ public class CompareQuery extends SQLFragment
     protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
-        String columnFilter = setupComparisonColumnLink(linkURL);
         var ci = new BaseColumnInfo(columnName);
         ci.setParentTable(ti);
         ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
         ci.setLabel(column.getLabel());
         DataColumn dc = new DataColumn(ci);
-        dc.setURL(linkURL.getLocalURIString() + "&" + columnFilter);
+
+        linkURL.setAction(MS2Controller.ShowProteinAction.class)   // Could target the "prot" window instead of using the main window
+            .addParameter("protein", "${Protein}")
+            .addParameter("seqId", "${SeqId}");
+        dc.setURL(linkURL);
+
         return dc;
     }
 

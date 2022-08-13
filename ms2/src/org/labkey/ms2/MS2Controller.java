@@ -2745,9 +2745,9 @@ public class MS2Controller extends SpringActionController
             rgn.getDisplayColumn("fileType").setWidth("20");
             rgn.getDisplayColumn("insertId").setCaption("ID");
             rgn.getDisplayColumn("insertId").setWidth("5");
-            ActionURL showURL = new ActionURL(ShowAnnotInsertDetailsAction.class, getContainer());
-            String detailURL = showURL.getLocalURIString() + "insertId=${InsertId}";
-            rgn.getDisplayColumn("insertId").setURL(detailURL);
+            ActionURL showURL = new ActionURL(ShowAnnotInsertDetailsAction.class, getContainer())
+                .addParameter("insertId", "${InsertId}");
+            rgn.getDisplayColumn("insertId").setURL(showURL);
             rgn.setShowRecordSelectors(true);
 
             ButtonBar bb = new ButtonBar();
@@ -2780,7 +2780,8 @@ public class MS2Controller extends SpringActionController
         {
             DataRegion rgn = new DataRegion();
             rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
-            String runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot()) + "?" + MS2Manager.getDataRegionNameRuns() + ".FastaId~eq=${FastaId}";
+            ActionURL runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot())
+                .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
             rgn.getDisplayColumn("Runs").setURL(runsURL);
             rgn.setShowRecordSelectors(true);
 

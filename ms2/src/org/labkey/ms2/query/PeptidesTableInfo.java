@@ -218,29 +218,22 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
         ActionURL showProteinURL = url.clone();
         showProteinURL.setAction(MS2Controller.ShowProteinAction.class);
-        showProteinURL.deleteParameter("seqId");
-        showProteinURL.deleteParameter("protein");
-        final String showProteinURLString = showProteinURL.getLocalURIString() + "&seqId=${SeqId}&protein=${Protein}";
+        showProteinURL.replaceParameter("seqId", "${SeqId}");
+        showProteinURL.replaceParameter("protein", "${Protein}");
 
-        setupProteinColumns(showProteinURLString, containerFilter);
+        setupProteinColumns(showProteinURL, containerFilter);
 
         ActionURL showPeptideURL = url.clone();
         showPeptideURL.setAction(MS2Controller.ShowPeptideAction.class);
-        showPeptideURL.deleteParameter("peptideId");
-        String showPeptideURLString = showPeptideURL.getLocalURIString() + "&peptideId=${RowId}";
-        DisplayColumnFactory factory = new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                DataColumn dataColumn = new DataColumn(colInfo);
-                dataColumn.setLinkTarget("peptide");
-                return dataColumn;
-            }
+        showPeptideURL.replaceParameter("peptideId", "${RowId}");
+        DisplayColumnFactory factory = colInfo -> {
+            DataColumn dataColumn = new DataColumn(colInfo);
+            dataColumn.setLinkTarget("peptide");
+            return dataColumn;
         };
-        getMutableColumn("Scan").setURL(StringExpressionFactory.createURL(showPeptideURLString));
+        getMutableColumn("Scan").setURL(StringExpressionFactory.createURL(showPeptideURL));
         getMutableColumn("Scan").setDisplayColumnFactory(factory);
-        getMutableColumn("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURLString));
+        getMutableColumn("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURL));
         getMutableColumn("Peptide").setDisplayColumnFactory(factory);
 
         addScoreColumns();
@@ -386,7 +379,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         }
     }
 
-    private void setupProteinColumns(final String showProteinURLString, ContainerFilter containerFilter)
+    private void setupProteinColumns(final ActionURL showProteinURL, ContainerFilter containerFilter)
     {
         LookupForeignKey fk = new LookupForeignKey("SeqId")
         {
@@ -398,8 +391,8 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
-                fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer(), showProteinURLString));
-                fastaNameColumn.setURL(StringExpressionFactory.createURL(showProteinURLString));
+                fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer(), showProteinURL));
+                fastaNameColumn.setURL(StringExpressionFactory.createURL(showProteinURL));
 
                 sequenceTable.addPeptideAggregationColumns();
 
@@ -409,10 +402,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         fk.setPrefixColumnCaption(false);
         getMutableColumn("SeqId").setFk(fk);
 
-        getMutableColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURLString));
+        getMutableColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURL));
         getMutableColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
         getMutableColumn("SeqId").setLabel("Search Engine Protein");
-        getMutableColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURLString));
+        getMutableColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURL));
         getMutableColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
     }
 

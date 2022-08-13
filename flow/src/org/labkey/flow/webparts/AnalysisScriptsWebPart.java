@@ -112,7 +112,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
             super(col);
             _actionName = actionName;
             ActionURL actionURL = new ActionURL(action, AnalysisScriptsWebPart.this.getContainer());
-            setURL(actionURL + "scriptId=${RowId}");
+            setURL(actionURL.addParameter("scriptId", "${RowId}"));
             setCaption("");
             setWidth("40");
         }

@@ -230,7 +230,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                     {
                         url.addParameter("run", Integer.toString(_runs.get(0).getRun()));
                     }
-                    result1.setURL(url.getLocalURIString() + "&proteinGroupId=${RowId}&seqId=${" + colInfo.getName() + "}");
+                    result1.setURL(url.addParameter("proteinGroupId", "${RowId}").addParameter("seqId", "${" + colInfo.getName() + "}"));
                     return result1;
                 });
                 result.addColumn(proteinColumn);
