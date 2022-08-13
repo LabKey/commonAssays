@@ -94,6 +94,7 @@ public enum FlowPreference
         }
     }
 
+    // Note: URL has one parameter, so ? is guaranteed to be present. Subsequent parameter concatenation is okay.
     public String urlUpdate()
     {
         ActionURL url = new ActionURL(FlowController.SavePreferencesAction.class, ContainerManager.getRoot());

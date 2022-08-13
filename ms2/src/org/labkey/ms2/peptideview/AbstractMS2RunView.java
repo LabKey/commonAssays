@@ -123,7 +123,7 @@ public abstract class AbstractMS2RunView
         groupURL.setAction(MS2Controller.GetProteinGroupingPeptidesAction.class);
         groupURL.deleteParameter("proteinGroupingId");
 
-        return groupURL.toString() + "&proteinGroupingId=";
+        return groupURL.addParameter("proteinGroupingId", null).toString();
     }
     
     protected ButtonBar createButtonBar(String whatWeAreSelecting, DataRegion dataRegion)
