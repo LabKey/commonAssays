@@ -1084,7 +1084,7 @@ public class MS2Schema extends UserSchema
             settings.getColumnAxis().setCaption("Runs");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
             colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer())
-                .addParameter("run=", CrosstabMember.VALUE_TOKEN));
+                .addParameter("run", CrosstabMember.VALUE_TOKEN));
         }
 
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
