@@ -440,7 +440,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         var analysisFolder = ret.addColumn(ExpRunTable.Column.RunGroups);
         analysisFolder.setLabel("Analysis Folder");
         ActionURL url = new ActionURL(RunController.ShowRunsAction.class, getContainer()).addParameter(FlowQueryView.DATAREGIONNAME_DEFAULT + ".sort", "ProtocolStep");
-        analysisFolder.setURL(StringExpressionFactory.create(url.getLocalURIString() + "&experimentId=${experimentId}"));
+        analysisFolder.setURL(StringExpressionFactory.create(url.addParameter("experimentId", "${experimentId}").toString()));
 
         if (type != FlowDataType.FCSFile)
         {

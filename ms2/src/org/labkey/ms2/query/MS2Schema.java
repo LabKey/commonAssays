@@ -90,7 +90,7 @@ public class MS2Schema extends UserSchema
     public static final String IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX = "MS2.ImportedSearch";
     public static final String SAMPLE_PREP_PROTOCOL_OBJECT_PREFIX = "MS2.PreSearch.";
 
-    private ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
+    private final ProteinGroupProteins _proteinGroupProteins = new ProteinGroupProteins();
     private List<MS2Run> _runs;
 
     private static final Set<String> TABLE_NAMES;
@@ -1074,14 +1074,17 @@ public class MS2Schema extends UserSchema
             settings.setInstanceCountCaption("Num Fractions");
             settings.getColumnAxis().setCaption("Fractions");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
-            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&fraction=" + CrosstabMember.VALUE_TOKEN + "&" + MS2Manager.getDataRegionNamePeptides() + ".Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer())
+                .addParameter("fraction", CrosstabMember.VALUE_TOKEN)
+                .addParameter(MS2Manager.getDataRegionNamePeptides() + ".Fraction~eq", CrosstabMember.VALUE_TOKEN));
         }
         else
         {
             settings.setInstanceCountCaption("Found In Runs");
             settings.getColumnAxis().setCaption("Runs");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "run=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer())
+                .addParameter("run", CrosstabMember.VALUE_TOKEN));
         }
 
         settings.getRowAxis().addDimension(normalizedIdCol.getFieldKey());
@@ -1238,16 +1241,11 @@ public class MS2Schema extends UserSchema
 
         CrosstabDimension rowDim = settings.getRowAxis().addDimension(FieldKey.fromParts("SeqId"));
         ActionURL showProteinURL = new ActionURL(MS2Controller.ShowProteinAction.class, getContainer());
-        rowDim.setUrl(showProteinURL.getLocalURIString() + "&seqId=${SeqId}");
-        ((BaseColumnInfo)rowDim.getSourceColumn()).setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                DisplayColumn dc = new DataColumn(colInfo);
-                dc.setLinkTarget("prot");
-                return dc;
-            }
+        rowDim.setUrl(showProteinURL.addParameter("seqId", "${SeqId}"));
+        ((BaseColumnInfo)rowDim.getSourceColumn()).setDisplayColumnFactory(colInfo -> {
+            DisplayColumn dc = new DataColumn(colInfo);
+            dc.setLinkTarget("prot");
+            return dc;
         });
 
         CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
@@ -1260,14 +1258,17 @@ public class MS2Schema extends UserSchema
             settings.setInstanceCountCaption("Num Fractions");
             settings.getColumnAxis().setCaption("Fractions");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("PeptideMemberships", "PeptideId", "Fraction"));
-            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&fraction=" + CrosstabMember.VALUE_TOKEN + "&" + MS2Manager.getDataRegionNamePeptides() + ".Fraction~eq=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer())
+                .addParameter("fraction", CrosstabMember.VALUE_TOKEN)
+                .addParameter(MS2Manager.getDataRegionNamePeptides() + ".Fraction~eq", CrosstabMember.VALUE_TOKEN));
         }
         else
         {
             settings.setInstanceCountCaption("Num Runs");
             settings.getColumnAxis().setCaption("Runs");
             colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts("ProteinGroupId", "ProteinProphetFileId", "Run"));
-            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer()).getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
+            colDim.setUrl(MS2Controller.getShowRunURL(getUser(), getContainer())
+                .addParameter("run", CrosstabMember.VALUE_TOKEN));
         }
 
         CrosstabTable result;
@@ -1394,7 +1395,7 @@ public class MS2Schema extends UserSchema
             // in all other cases do the usual thing of linking to the MS2 show run page
             linkUrlOnRunColuumn = MS2Controller.getShowRunURL(getUser(), getContainer());
         }
-        colDim.setUrl(linkUrlOnRunColuumn.getLocalURIString() + "&run=" + CrosstabMember.VALUE_TOKEN);
+        colDim.setUrl(linkUrlOnRunColuumn.addParameter("run", CrosstabMember.VALUE_TOKEN));
 
         CrosstabMeasure scansMeasure = settings.addMeasure(FieldKey.fromParts("RowId"), CrosstabMeasure.AggregateFunction.COUNT, "Total");
         CrosstabMeasure avgPepProphMeasure = settings.addMeasure(FieldKey.fromParts("PeptideProphet"), CrosstabMeasure.AggregateFunction.AVG, "Avg PepProphet");
