@@ -16,7 +16,6 @@
 package org.labkey.ms2.protein;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +31,7 @@ import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.AnnotationView;
@@ -76,7 +76,7 @@ public class ProteinServiceImpl implements ProteinService
     private final List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
     private final List<FormViewProvider<ProteinSearchForm>> _proteinSearchFormViewProviders = new CopyOnWriteArrayList<>();
 
-    private static final Logger LOG = LogManager.getLogger(ProteinServiceImpl.class);
+    private static final Logger LOG = LogHelper.getLogger(ProteinServiceImpl.class, "Shares protein-related functionality outside the MS2 module");
 
     public ProteinServiceImpl()
     {
@@ -373,7 +373,14 @@ public class ProteinServiceImpl implements ProteinService
                 }
                 else
                 {
-                    LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                    if (responseCode != 404)
+                    {
+                        LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                    }
+                    else
+                    {
+                        LOG.debug("HTTP GET failed to " + url + " with error code " + responseCode);
+                    }
                 }
             }
             catch (IOException | SAXException | ParserConfigurationException e)
