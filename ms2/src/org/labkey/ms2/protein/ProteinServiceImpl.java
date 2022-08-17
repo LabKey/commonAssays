@@ -16,7 +16,6 @@
 package org.labkey.ms2.protein;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +31,7 @@ import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.AnnotationView;
@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -76,7 +77,7 @@ public class ProteinServiceImpl implements ProteinService
     private final List<QueryViewProvider<PeptideSearchForm>> _peptideSearchViewProviders = new CopyOnWriteArrayList<>();
     private final List<FormViewProvider<ProteinSearchForm>> _proteinSearchFormViewProviders = new CopyOnWriteArrayList<>();
 
-    private static final Logger LOG = LogManager.getLogger(ProteinServiceImpl.class);
+    private static final Logger LOG = LogHelper.getLogger(ProteinServiceImpl.class, "Shares protein-related functionality outside the MS2 module");
 
     public ProteinServiceImpl()
     {
@@ -292,9 +293,18 @@ public class ProteinServiceImpl implements ProteinService
             }
         }
 
+        private static final Pattern ACCESSION_REGEX = Pattern.compile("[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}");
+
         @Override
         public List<ProteinFeature> load(@NotNull String accession, @Nullable Object argument)
         {
+            // Don't bother querying for features if the accession isn't of the expected UniProt format, as described
+            // at https://www.uniprot.org/help/accession_numbers
+            if (!ACCESSION_REGEX.matcher(accession).matches())
+            {
+                return Collections.emptyList();
+            }
+
             List<ProteinFeature> result = new ArrayList<>();
 
             try
@@ -373,7 +383,14 @@ public class ProteinServiceImpl implements ProteinService
                 }
                 else
                 {
-                    LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                    if (responseCode != 404)
+                    {
+                        LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                    }
+                    else
+                    {
+                        LOG.debug("HTTP GET failed to " + url + " with error code " + responseCode);
+                    }
                 }
             }
             catch (IOException | SAXException | ParserConfigurationException e)
