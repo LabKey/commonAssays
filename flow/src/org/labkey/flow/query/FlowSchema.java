@@ -1375,13 +1375,16 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 {
                     for (Map.Entry<FieldKey, ColumnInfo> entry : lookupTable.getExtendedColumns(includeHidden).entrySet())
                     {
-                        FieldKey fieldKey = entry.getKey();
-                        BaseColumnInfo col = (BaseColumnInfo)entry.getValue();
+                        MutableColumnInfo mutableColumnInfo;
+                        if (entry.getValue() instanceof BaseColumnInfo col)
+                            mutableColumnInfo = WrappedColumnInfo.wrap(col);
+                        else
+                            mutableColumnInfo = (MutableColumnInfo)entry.getValue();
                         // Add the lookup column FieldKey as a parent to the column's FieldKey
-                        var wrapped = WrappedColumnInfo.wrap(col);
+                        FieldKey fieldKey = entry.getKey();
                         FieldKey newFieldKey = FieldKey.remap(fieldKey, lookupColumn.getFieldKey(), null);
-                        wrapped.setFieldKey(newFieldKey);
-                        ret.put(newFieldKey, wrapped);
+                        mutableColumnInfo.setFieldKey(newFieldKey);
+                        ret.put(newFieldKey, mutableColumnInfo);
                     }
                 }
             }
