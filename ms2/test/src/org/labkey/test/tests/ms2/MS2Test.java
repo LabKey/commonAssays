@@ -867,6 +867,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent(RUN_GROUP1_NAME2,
                 RUN_GROUP2_NAME,
                 DEFAULT_EXPERIMENT);
+        log(getCurrentRelativeURL()); // Track down MS2Test failure -- are there any parameters that are causing "X!TandemSearches" to be selected?
         new DataRegionTable("XTandemSearchRuns", getDriver()).checkCheckbox(1);
         clickButton("Remove");
 
