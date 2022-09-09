@@ -9,18 +9,6 @@ dependencies {
    BuildUtils.addExternalDependency(
            project,
            new ExternalDependency(
-                   "org.apache.httpcomponents:httpmime:${httpmimeVersion}",
-                   "Apache HTTP Mime",
-                   "Apache",
-                   "http://hc.apache.org/httpcomponents-client-ga",
-                   ExternalDependency.APACHE_2_LICENSE_NAME,
-                   ExternalDependency.APACHE_2_LICENSE_URL,
-                   "HTTP client for requests of remote servers"
-           )
-   )
-   BuildUtils.addExternalDependency(
-           project,
-           new ExternalDependency(
                    "org.ardverk:patricia-trie:${patriciaTrieVersion}",
                    "PATRICIA Trie",
                    "PATRICIA Trie",
