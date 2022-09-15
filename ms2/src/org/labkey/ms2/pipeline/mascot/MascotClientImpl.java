@@ -19,14 +19,14 @@ package org.labkey.ms2.pipeline.mascot;
 import org.apache.commons.beanutils.converters.BooleanConverter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.logging.log4j.Logger;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -1196,7 +1196,7 @@ public class MascotClientImpl implements SearchClient
             {
                 try (CloseableHttpResponse response = httpclient.execute(post))
                 {
-                    if (-1 == response.getStatusLine().getStatusCode())
+                    if (-1 == response.getCode())
                         continue;
 
                     boolean uploadFinished = false;
