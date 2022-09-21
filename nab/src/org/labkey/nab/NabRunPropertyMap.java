@@ -15,7 +15,7 @@
  */
 package org.labkey.nab;
 
-import org.json.JSONObject;
+import org.json.old.JSONObject;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
