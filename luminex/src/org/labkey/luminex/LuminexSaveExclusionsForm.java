@@ -16,8 +16,8 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.json.old.JSONArray;
+import org.json.old.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.action.NullSafeBindException;

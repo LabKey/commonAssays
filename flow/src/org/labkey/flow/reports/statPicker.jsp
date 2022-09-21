@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.json.JSONArray" %>
+<%@ page import="org.json.old.JSONArray" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
@@ -28,7 +28,7 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.stream.Stream" %>
-<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.json.old.JSONObject" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
