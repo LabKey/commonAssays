@@ -16,15 +16,15 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.action.SimpleApiJsonForm;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -39,7 +39,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
     private Integer _assayId;
     private String _tableName;
     private Integer _runId;
-    private List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
+    private final List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
 
     private transient ExpProtocol _protocol;
 
@@ -52,7 +52,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
     {
         super.bindProperties(properties);
 
-        JSONObject json = getJsonObject();
+        JSONObject json = getNewJsonObject();
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
@@ -111,17 +111,17 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
 
     private String getStringPropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getString(propName) : null;
+        return json.has(propName) ? json.getString(propName) : null;
     }
 
     private Integer getIntPropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getInt(propName) : null;
+        return json.has(propName) ? json.getInt(propName) : null;
     }
 
     private Double getDoublePropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getDouble(propName) : null;
+        return json.has(propName) ? json.getDouble(propName) : null;
     }
 
     public ExpProtocol getProtocol(Container c)
