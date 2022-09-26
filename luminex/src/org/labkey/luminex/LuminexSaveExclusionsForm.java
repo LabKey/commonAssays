@@ -111,7 +111,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
 
     private String getStringPropIfExists(JSONObject json, String propName)
     {
-        return json.has(propName) ? json.getString(propName) : null;
+        return json.has(propName) ? json.get(propName).toString() : null;
     }
 
     private Integer getIntPropIfExists(JSONObject json, String propName)
