@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -542,7 +543,7 @@ public class Protein
                                     if (showIntensity)
                                     {
                                         details.append(String.format("<td>%.2f</td>", pep.getIntensity()));
-                                        details.append("<td>").append(pep.getRawIntensity()).append("</td>");
+                                        details.append("<td>").append(String.format("%.3E",pep.getRawIntensity())).append("</td>");
                                     }
                                     if (showConfidence)
                                     {
@@ -814,7 +815,7 @@ public class Protein
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
         if (_modifiedPeptideCharacteristics != null && !_modifiedPeptideCharacteristics.isEmpty())
         {
-            _modifiedPeptides = new HashMap<>();
+            _modifiedPeptides = new LinkedHashMap<>();
             // build the modifiedPeptideMap
             for (PeptideCharacteristic pep : _modifiedPeptideCharacteristics)
             {
