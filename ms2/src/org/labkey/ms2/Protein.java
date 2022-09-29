@@ -543,7 +543,7 @@ public class Protein
                                     if (showIntensity)
                                     {
                                         details.append(String.format("<td>%.2f</td>", pep.getIntensity()));
-                                        details.append("<td>").append(pep.getRawIntensity()).append("</td>");
+                                        details.append("<td>").append(String.format("%.3E",pep.getRawIntensity())).append("</td>");
                                     }
                                     if (showConfidence)
                                     {
