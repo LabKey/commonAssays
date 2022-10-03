@@ -897,7 +897,7 @@ public class RunController extends BaseFlowController
     }
 
 
-    public static class AttachmentForm extends RunForm
+    public static class AttachmentForm extends RunForm implements BaseDownloadAction.InlineDownloader
     {
         public String getName()
         {
