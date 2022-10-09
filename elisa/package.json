@@ -50,7 +50,7 @@
     ]
   },
   "dependencies": {
-    "@labkey/components": "2.218.2"
+    "@labkey/components": "2.231.0"
   },
   "devDependencies": {
     "@labkey/build": "6.2.1",
