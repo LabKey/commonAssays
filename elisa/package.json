@@ -50,7 +50,7 @@
     ]
   },
   "dependencies": {
-    "@labkey/components": "2.230.1-fb-46282-viewVsDownload-ui-config.0"
+    "@labkey/components": "2.231.0"
   },
   "devDependencies": {
     "@labkey/build": "6.2.1",
