@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.peptideview;
 
-import org.labkey.api.reports.report.CustomRReport;
+import org.labkey.api.reports.report.r.CustomRReport;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
