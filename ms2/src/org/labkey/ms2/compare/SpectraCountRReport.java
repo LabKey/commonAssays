@@ -19,7 +19,7 @@ package org.labkey.ms2.compare;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Results;
 import org.labkey.api.query.QuerySettings;
-import org.labkey.api.reports.report.RReport;
+import org.labkey.api.reports.report.r.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;

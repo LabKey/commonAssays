@@ -35,7 +35,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.reports.ReportService;
-import org.labkey.api.reports.report.RReport;
+import org.labkey.api.reports.report.r.RReport;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.ScriptReportDescriptor;
 import org.labkey.api.util.DateUtil;
