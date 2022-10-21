@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -32,9 +33,6 @@
 <%@ page import="java.util.TreeMap" %>
 <%@ page import="java.util.TreeSet" %>
 <%@ page import="java.util.stream.Collectors" %>
-<%@ page import="java.util.Arrays" %>
-<%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
-<%@ page import="org.labkey.api.ms.Replicate" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -42,7 +40,11 @@
     var currentURL = getActionURL();
     var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");
-    var replicateIdParam = currentURL.getParameter("replicateId");
+    var replicateIdParam = 0L;
+    try {
+        replicateIdParam = Long.valueOf(currentURL.getParameter("replicateId"));
+    }
+    catch (NumberFormatException ignore) {}
     var peptideFormParam = currentURL.getParameter("peptideForm");
     var isIntensityView = viewByParam == null || viewByParam.equalsIgnoreCase("intensity");
     var isConfidenceView = viewByParam != null && viewByParam.equalsIgnoreCase("confidenceScore");
@@ -54,10 +56,10 @@
     List<Double> legendValues =  new ArrayList<>();
 
     Map<Long, String> replicates = new TreeMap<>();
-    replicates.put(Long.valueOf(0), "All");
+    replicates.put(0L, "All");
     bean.replicates.forEach(rep -> replicates.put(rep.getId(), rep.getName()));
 
-    var selectedReplicate = replicateIdParam != null && !Long.valueOf(replicateIdParam).equals(Long.valueOf(0)) ? Long.valueOf(replicateIdParam) : replicates.get(Long.valueOf(0));
+    var selectedReplicate = replicates.containsKey(replicateIdParam) ? replicateIdParam : 0L;
 %>
 <%!
     @Override
@@ -179,7 +181,7 @@
             var min = Collections.min(iValues);
             var avg = (max + min) / 2;
 
-            if (max == min)
+            if (max.equals(min))
             {
                 displayLegend = false;
             }
