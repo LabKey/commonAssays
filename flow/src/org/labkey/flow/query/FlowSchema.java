@@ -822,7 +822,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
 
         @Override
-        public BaseColumnInfo addColumns(Domain domain, String legacyName, ContainerFilter cf)
+        public BaseColumnInfo addColumns(Domain domain, String legacyName, @Nullable ContainerFilter cf)
         {
             var col = _expData.addColumns(domain, legacyName, cf);
             return addExpColumn(col);
@@ -1258,7 +1258,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
 
         @Override
-        public MutableColumnInfo addColumns(Domain domain, String legacyName, ContainerFilter cf)
+        public MutableColumnInfo addColumns(Domain domain, String legacyName, @Nullable ContainerFilter cf)
         {
             var col = _expData.addColumns(domain, legacyName, cf);
             col.setHidden(false);
