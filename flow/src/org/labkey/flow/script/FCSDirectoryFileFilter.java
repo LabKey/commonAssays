@@ -15,6 +15,9 @@
  */
 package org.labkey.flow.script;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 import org.labkey.flow.analysis.model.FCS;
 
@@ -24,6 +27,8 @@ import java.nio.file.Path;
 
 public class FCSDirectoryFileFilter implements FileAnalysisTaskPipeline.FilePathFilter
 {
+    private static final Logger LOG = LogManager.getLogger(PipelineService.class);
+
     @Override
     public boolean accept(Path path)
     {
@@ -34,9 +39,13 @@ public class FCSDirectoryFileFilter implements FileAnalysisTaskPipeline.FilePath
     public boolean accept(File dir)
     {
         if (!dir.isDirectory())
+        {
+            LOG.debug("FCSDirectoryFileFilter : rejecting file because it is not a directory: " + dir.getPath());
             return false;
+        }
 
         File[] fcsFiles = dir.listFiles((FileFilter) FCS.FCSFILTER);
+        LOG.debug("FCSDirectoryFileFilter : found " + (fcsFiles != null ? fcsFiles.length : 0) + " fcs files in : " + dir.getPath());
         return null != fcsFiles && 0 != fcsFiles.length;
     }
 }
