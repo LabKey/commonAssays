@@ -86,7 +86,6 @@ import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.FlowSummaryWebPart;
 import org.labkey.flow.webparts.OverviewWebPart;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -355,14 +354,5 @@ public class FlowModule extends SpringModule
     public static String getLongProductName()
     {
         return "LabKey Server";
-    }
-
-    @NotNull
-    @Override
-    protected Collection<String> getInternalJarFilenames()
-    {
-        Collection<String> result = new ArrayList<>(super.getInternalJarFilenames());
-        result.add("flow-engine.jar");
-        return result;
     }
 }
