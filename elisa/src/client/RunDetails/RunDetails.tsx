@@ -24,8 +24,6 @@ import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
 import { CurveFitPanel } from "./components/CurveFitPanel";
 
-import './RunDetails.scss';
-
 export interface AppContext {
     protocolId: number,
     runId: number,
