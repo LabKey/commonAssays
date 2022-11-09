@@ -49,6 +49,7 @@ import org.labkey.api.view.HttpPostRedirectView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
@@ -154,6 +155,10 @@ public class AnalysisScriptController extends BaseFlowController
         protected ModelAndView chooseAnalysisName(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             nav = new Pair<>("Choose new analysis name", Action.chooseAnalysisName);
+            if (form.getProtocol() == null)
+            {
+                throw new NotFoundException("Invalid protocol specified");
+            }
             return new JspView<>("/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp", form, errors);
         }
 
