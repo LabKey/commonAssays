@@ -45,6 +45,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.BadRequestException;
 import org.labkey.api.view.HttpPostRedirectView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -154,6 +155,10 @@ public class AnalysisScriptController extends BaseFlowController
         protected ModelAndView chooseAnalysisName(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             nav = new Pair<>("Choose new analysis name", Action.chooseAnalysisName);
+            if (form.getProtocol() == null || form.getProtocolStep() == null)
+            {
+                throw new BadRequestException("Invalid wizard state");
+            }
             return new JspView<>("/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp", form, errors);
         }
 
