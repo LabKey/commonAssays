@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.json.old.JSONArray" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.collections.LabKeyCollectors" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.exp.api.ExpSampleType" %>
 <%@ page import="org.labkey.api.exp.property.DomainProperty" %>
@@ -27,9 +28,8 @@
 <%@ page import="org.labkey.flow.query.FlowPropertySet" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collection" %>
-<%@ page import="java.util.stream.Stream" %>
-<%@ page import="org.json.old.JSONObject" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.stream.Stream" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -353,7 +353,7 @@ var OpCombo = Ext.extend(Ext.form.ComboBox, {
                 CompareType.GT, CompareType.LT, CompareType.GTE, CompareType.LTE, CompareType.CONTAINS, CompareType.STARTS_WITH,
                 CompareType.DOES_NOT_CONTAIN, CompareType.DOES_NOT_START_WITH, CompareType.IN)
             .map(ct -> new String[] {ct.getPreferredUrlKey(), ct.getDisplayValue()})
-            .collect(JSONArray.collector())%>
+            .collect(LabKeyCollectors.toJSONArray())%>
 
         OpCombo.superclass.constructor.call(this, config);
     }
