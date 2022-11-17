@@ -20,11 +20,11 @@ import org.json.old.JSONArray;
 import org.json.old.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.NullSafeBindException;
-import org.labkey.api.action.SimpleApiJsonForm;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -34,12 +34,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
+public class LuminexSaveExclusionsForm implements CustomApiForm
 {
     private Integer _assayId;
     private String _tableName;
     private Integer _runId;
-    private List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
+
+    private final List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
 
     private transient ExpProtocol _protocol;
 
@@ -50,9 +51,7 @@ public class LuminexSaveExclusionsForm extends SimpleApiJsonForm
     @Override
     public void bindProperties(Map<String, Object> properties)
     {
-        super.bindProperties(properties);
-
-        JSONObject json = getJsonObject();
+        JSONObject json = (org.json.old.JSONObject)properties;
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
