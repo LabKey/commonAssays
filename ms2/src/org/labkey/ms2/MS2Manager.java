@@ -103,7 +103,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1548,13 +1547,13 @@ public class MS2Manager
                 .append("(SELECT count(rowId) targets, score1 \n")
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE  f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanFALSE()).append("\n")
-                .append(" and p.hitrank = 1")
+                .append(" and p.hitrank = 1\n")
                 .append("GROUP BY p.score1) t\n")
                 .append("FULL OUTER JOIN\n")
                 .append("(SELECT count(rowId) decoys, score1 \n")
                 .append("FROM ms2.fractions f join ms2.peptidesdata p on f.fraction = p.fraction\n")
                 .append("WHERE f.run = ? and p.decoy = ").append(schema.getSqlDialect().getBooleanTRUE()).append("\n")
-                .append(" and p.hitrank = 1")
+                .append(" and p.hitrank = 1\n")
                 .append("GROUP BY p.score1) d ON t.score1 = d.score1\n")
                 .append("ORDER BY coalesce(t.score1, d.score1) DESC");
         sql.add(run);
