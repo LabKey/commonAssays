@@ -1399,26 +1399,29 @@ public class FlowManager
     public Map<String, Object> getUsageMetrics()
     {
         _log.debug("Collecting flow usage metrics");
-        User user = User.getSearchUser();
 
-        Map<String, Object> allMetrics = new HashMap<>();
-        allMetrics.put("flowTempTableCount", getTempTableCount());
+        return DbScope.getLabKeyScope().executeWithRetryReadOnly( (tx) -> {
+            User user = User.getSearchUser();
 
-        // distinct keyword/statistic/graph count, alias count
-        allMetrics.put("keyword", getAttributeMetrics(AttributeType.keyword));
-        allMetrics.put("statistic", getAttributeMetrics(AttributeType.statistic));
-        allMetrics.put("graph", getAttributeMetrics(AttributeType.graph));
+            Map<String, Object> allMetrics = new HashMap<>();
+            allMetrics.put("flowTempTableCount", getTempTableCount());
 
-        final FlowModule flowModule = ModuleLoader.getInstance().getModule(FlowModule.class);
-        Set<Container> containers = ContainerManager.getAllChildrenWithModule(ContainerManager.getRoot(), flowModule);
-        for (Container c : containers)
-        {
-            Map<String, Object> containerMetrics = getUsageMetrics(user, c, false);
-            merge(allMetrics, containerMetrics);
-        }
+            // distinct keyword/statistic/graph count, alias count
+            allMetrics.put("keyword", getAttributeMetrics(AttributeType.keyword));
+            allMetrics.put("statistic", getAttributeMetrics(AttributeType.statistic));
+            allMetrics.put("graph", getAttributeMetrics(AttributeType.graph));
 
-        _log.debug("Collected flow usage metrics:\n" + allMetrics);
-        return allMetrics;
+            final FlowModule flowModule = ModuleLoader.getInstance().getModule(FlowModule.class);
+            Set<Container> containers = ContainerManager.getAllChildrenWithModule(ContainerManager.getRoot(), flowModule);
+            for (Container c : containers)
+            {
+                Map<String, Object> containerMetrics = getUsageMetrics(user, c, false);
+                merge(allMetrics, containerMetrics);
+            }
+
+            _log.debug("Collected flow usage metrics:\n" + allMetrics);
+            return allMetrics;
+        });
     }
 
     /**
