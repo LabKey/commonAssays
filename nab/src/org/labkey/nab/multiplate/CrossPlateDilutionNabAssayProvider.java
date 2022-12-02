@@ -75,40 +75,6 @@ public class CrossPlateDilutionNabAssayProvider extends HighThroughputNabAssayPr
     @Override
     public NabProtocolSchema createProtocolSchema(User user, Container container, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {
-        return new NabProtocolSchema(user, container, this, protocol, targetStudy)
-        {
-            Map<String, Object> _extraParams = new HashMap<>();
-
-            @Override
-            protected RunListQueryView createRunsQueryView(ViewContext context, QuerySettings settings, BindException errors)
-            {
-                NabRunListQueryView queryView = new NabRunListQueryView(this, settings);
-                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
-
-                return queryView;
-            }
-
-            @Override
-            protected ResultsQueryView createDataQueryView(ViewContext context, QuerySettings settings, BindException errors)
-            {
-                NabResultsQueryView queryView = new NabResultsQueryView(getProtocol(), context, settings);
-                queryView.setExtraDetailsUrlParams(getDetailUrlParams());
-
-                return queryView;
-            }
-
-            private Map<String, Object> getDetailUrlParams()
-            {
-                if (_extraParams.isEmpty())
-                {
-                    _extraParams.put("maxSamplesPerGraph", 20);
-                    _extraParams.put("graphWidth", 600);
-                    _extraParams.put("graphHeight", 550);
-                    _extraParams.put("graphsPerRow", 1);
-                    _extraParams.put("sampleNoun", "Virus");
-                }
-                return _extraParams;
-            }
-        };
+        return generateAlternateProtocolSchema(user, container, protocol, targetStudy);
     }
 }
