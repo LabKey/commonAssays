@@ -33,6 +33,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.Analysis;
@@ -123,7 +124,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         if (name == null)
             name = "workspace";
         _workspaceName = name;
-        _workspaceFile = File.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
+        _workspaceFile = FileUtil.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
 
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(_workspaceFile));
         oos.writeObject(workspaceData.getWorkspaceObject());

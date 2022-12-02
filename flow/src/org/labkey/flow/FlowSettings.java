@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class FlowSettings
         File file;
         try
         {
-            file = File.createTempFile("FlowAnalysis", "tmp");
+            file = FileUtil.createTempFile("FlowAnalysis", "tmp");
         }
         catch (IOException e)
         {
