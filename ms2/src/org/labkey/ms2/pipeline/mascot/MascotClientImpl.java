@@ -36,6 +36,7 @@ import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -1543,7 +1544,7 @@ public class MascotClientImpl implements SearchClient
             if (!new File(paramFile).exists())
             {
                 InputStream is = getClass().getClassLoader().getResourceAsStream(mascotDefaultsPath);
-                File file = File.createTempFile("MascotDefaults", ".xml");
+                File file = FileUtil.createTempFile("MascotDefaults", ".xml");
                 file.deleteOnExit();
                 FileUtils.copyInputStreamToFile(is, file);
                 paramFile = file.getAbsolutePath();

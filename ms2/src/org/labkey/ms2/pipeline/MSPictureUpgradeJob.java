@@ -27,6 +27,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Module;
@@ -63,7 +64,7 @@ public class MSPictureUpgradeJob extends PipelineJob implements Serializable
     {
         super(null, info, root);
 
-        File logFile = File.createTempFile("attachMSPicture", ".log", root.ensureSystemDirectory());
+        File logFile = FileUtil.createTempFile("attachMSPicture", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
     }
 

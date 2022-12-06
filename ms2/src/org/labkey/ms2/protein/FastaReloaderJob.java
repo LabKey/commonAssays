@@ -19,6 +19,7 @@ package org.labkey.ms2.protein;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.protein.fasta.FastaFile;
@@ -41,7 +42,7 @@ public class FastaReloaderJob extends PipelineJob
     {
         super(ProteinAnnotationPipelineProvider.NAME, info, root);
         _fastaIds = fastaIds;
-        setLogFile(File.createTempFile("FastaReload", ".log", AppProps.getInstance().getFileSystemRoot()));
+        setLogFile(FileUtil.createTempFile("FastaReload", ".log", AppProps.getInstance().getFileSystemRoot()));
     }
 
     @Override

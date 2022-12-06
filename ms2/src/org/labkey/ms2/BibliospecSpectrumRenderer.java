@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewContext;
@@ -72,7 +73,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
     public void render(SpectrumIterator iter) throws IOException
     {
         String shortName = _context.getContainer().getName() + "SpectraLibrary";
-        File tempFile = File.createTempFile(shortName, ".blib");
+        File tempFile = FileUtil.createTempFile(shortName, ".blib");
         try
         {
             Class.forName("org.sqlite.JDBC");

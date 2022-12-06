@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Fraction;
@@ -52,7 +53,7 @@ public class ImportScanCountsUpgradeJob extends PipelineJob implements Serializa
     {
         super(null, info, root);
 
-        File logFile = File.createTempFile("importScanCounts", ".log", root.ensureSystemDirectory());
+        File logFile = FileUtil.createTempFile("importScanCounts", ".log", root.ensureSystemDirectory());
         setLogFile(logFile);
     }
 
