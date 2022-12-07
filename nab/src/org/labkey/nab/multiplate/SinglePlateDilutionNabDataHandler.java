@@ -46,6 +46,7 @@ import org.labkey.nab.NabManager;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +58,7 @@ import java.util.Map;
  */
 public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHandler
 {
-    public static final AssayDataType SINGLE_PLATE_DILUTION_DATA_TYPE = new AssayDataType("SinglePlateDilutionAssayRunNabData", new FileType(".csv"));
+    public static final AssayDataType SINGLE_PLATE_DILUTION_DATA_TYPE = new AssayDataType("SinglePlateDilutionAssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx", ".csv"), ".csv"));
 
     @Override
     public DataType getDataType()
@@ -113,14 +114,14 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 int plateCol = location.getValue();
 
                 Object dataValue = rowData.get(resultColumnHeader);
-                if (dataValue == null || !(dataValue instanceof Integer))
+                if (!(dataValue instanceof Integer))
                 {
                     throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
                             "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
                 }
 
                 Object virusName = rowData.get(virusNameColumnHeader);
-                if (virusName == null || !(virusName instanceof String))
+                if (!(virusName instanceof String))
                 {
                     throw createParseError(dataFile, "No valid virus name value found on line " + line + ".  Expected string " +
                             "result values  (\"" + virusNameColumnHeader + "\") found: " + virusName);

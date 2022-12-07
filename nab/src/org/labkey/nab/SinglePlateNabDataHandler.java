@@ -80,7 +80,7 @@ import java.util.Set;
  */
 public class SinglePlateNabDataHandler extends NabDataHandler implements TransformDataHandler
 {
-    public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx"), ".xls"));
+    public static final AssayDataType NAB_DATA_TYPE = new AssayDataType("AssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx", ".csv", ".tsv"), ".xls"));
 
     @Override
     protected String getPreferredDataFileExtension()
