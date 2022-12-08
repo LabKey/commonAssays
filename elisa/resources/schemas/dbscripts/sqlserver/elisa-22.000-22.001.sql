@@ -1,3 +1,4 @@
+-- elisa-0.000-20.000.sql somehow failed to run on multiple server, so try adding it again if it doesn't exist. Issue 46855
 IF NOT EXISTS(SELECT * FROM sys.Schemas WHERE name = 'elisa')
     BEGIN
         EXEC ('CREATE SCHEMA elisa');
