@@ -39,6 +39,7 @@ import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elispot.ElispotAssayProvider;
@@ -71,7 +72,7 @@ public class BackgroundSubtractionJob extends PipelineJob
     {
         super(provider, info, root);
 
-        File logFile = File.createTempFile("backgroundSubtractionJob", ".log", root.getLogDirectory());
+        File logFile = FileUtil.createTempFile("backgroundSubtractionJob", ".log", root.getLogDirectory());
         setLogFile(logFile);
 
         _runs = runs;

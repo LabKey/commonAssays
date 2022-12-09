@@ -29,6 +29,7 @@ import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ import java.util.Map;
  */
 public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandler
 {
-    public static final AssayDataType NAB_HIGH_THROUGHPUT_DATA_TYPE = new AssayDataType("HighThroughputAssayRunNabData", new FileType(".csv"));
+    public static final AssayDataType NAB_HIGH_THROUGHPUT_DATA_TYPE = new AssayDataType("HighThroughputAssayRunNabData", new FileType(Arrays.asList(".xls", ".xlsx", ".csv"), ".csv"));
 
     @Override
     public DataType getDataType()
