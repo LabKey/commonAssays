@@ -57,7 +57,8 @@ public class TitrationTable extends AbstractLuminexTable
         String bTRUE = getSchema().getSqlDialect().getBooleanTRUE();
         String bFALSE = getSchema().getSqlDialect().getBooleanFALSE();
         SQLFragment qcReportSQL = new SQLFragment();
-        qcReportSQL.append("(CASE WHEN Standard=").append(bTRUE).append(" OR QCControl=").append(bTRUE);
+        qcReportSQL.append("(CASE WHEN ").append(ExprColumn.STR_TABLE_ALIAS).append(".Standard=").append(bTRUE)
+                .append(" OR ").append(ExprColumn.STR_TABLE_ALIAS).append(".QCControl=").append(bTRUE);
         qcReportSQL.append(" THEN ").append(bTRUE).append(" ELSE ").append(bFALSE).append(" END)");
         addColumn(new ExprColumn(this, "IncludeInQcReport", qcReportSQL, JdbcType.BOOLEAN));
 
