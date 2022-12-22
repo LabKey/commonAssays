@@ -63,6 +63,7 @@ public class ElisaResultsTable extends AssayResultTable
         }
 
         // add a lookup to the material table
+        assert initialColumnsAreAdded(); // super() above should have initialized the columns
         BaseColumnInfo specimenColumn = (BaseColumnInfo)_columnMap.get(ElisaDataHandler.ELISA_INPUT_MATERIAL_DATA_PROPERTY);
         if (specimenColumn != null)
         {
