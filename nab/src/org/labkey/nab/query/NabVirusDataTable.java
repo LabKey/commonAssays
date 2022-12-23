@@ -22,14 +22,13 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
-import org.labkey.api.dataiterator.TableInsertDataIteratorBuilder;
+import org.labkey.api.dataiterator.TableInsertUpdateDataIteratorBuilder;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.RawValueColumn;
@@ -221,7 +220,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
     @Override
     public DataIteratorBuilder persistRows(DataIteratorBuilder data, DataIteratorContext context)
     {
-        return new TableInsertDataIteratorBuilder(data, this);
+        return new TableInsertUpdateDataIteratorBuilder(data, this);
     }
 
     @Override

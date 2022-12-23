@@ -32,7 +32,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
-import org.labkey.api.dataiterator.TableInsertDataIteratorBuilder;
+import org.labkey.api.dataiterator.TableInsertUpdateDataIteratorBuilder;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
@@ -47,7 +47,6 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
@@ -461,7 +460,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     @Override
     public DataIteratorBuilder persistRows(DataIteratorBuilder data, DataIteratorContext context)
     {
-        return new TableInsertDataIteratorBuilder(data, this);
+        return new TableInsertUpdateDataIteratorBuilder(data, this);
     }
 
     @Override
