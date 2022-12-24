@@ -28,7 +28,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UpdateableTableInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
-import org.labkey.api.dataiterator.TableInsertUpdateDataIteratorBuilder;
+import org.labkey.api.dataiterator.TableInsertDataIteratorBuilder;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.RawValueColumn;
@@ -220,7 +220,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
     @Override
     public DataIteratorBuilder persistRows(DataIteratorBuilder data, DataIteratorContext context)
     {
-        return new TableInsertUpdateDataIteratorBuilder(data, this);
+        return new TableInsertDataIteratorBuilder(data, this);
     }
 
     @Override
