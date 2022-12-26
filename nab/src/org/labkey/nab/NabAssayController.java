@@ -1222,7 +1222,7 @@ public class NabAssayController extends SpringActionController
 
     public static class QCControlInfo implements CustomApiForm
     {
-        private List<WellExclusion> _exclusions = new ArrayList<>();
+        private final List<WellExclusion> _exclusions = new ArrayList<>();
         private int _runId;
 
         public int getRunId()
