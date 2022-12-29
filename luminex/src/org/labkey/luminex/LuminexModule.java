@@ -21,13 +21,12 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayDefaultFlagHandler;
 import org.labkey.api.assay.AssayFlagHandler;
 import org.labkey.api.assay.AssayQCFlagColumn;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
@@ -46,7 +45,7 @@ public class LuminexModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 22.001;
+        return 23.000;
     }
 
     @Override
