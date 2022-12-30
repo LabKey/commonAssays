@@ -47,7 +47,7 @@ public class ElisaModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 22.001;
+        return 23.000;
     }
 
     @Override
