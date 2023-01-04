@@ -24,16 +24,16 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.Nullable;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
-import org.labkey.api.action.CustomApiForm;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.NewCustomApiForm;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
@@ -110,6 +110,7 @@ import org.labkey.api.security.roles.Role;
 import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -1217,10 +1218,10 @@ public class NabAssayController extends SpringActionController
 
     private static String getKey(Object plate, Object row, Object col)
     {
-        return String.format("%s-%s-%s", String.valueOf(plate), String.valueOf(row), String.valueOf(col));
+        return String.format("%s-%s-%s", plate, row, col);
     }
 
-    public static class QCControlInfo implements CustomApiForm
+    public static class QCControlInfo implements NewCustomApiForm
     {
         private final List<WellExclusion> _exclusions = new ArrayList<>();
         private int _runId;
@@ -1236,25 +1237,25 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public void bindProperties(Map<String, Object> props)
+        public void bindJson(JSONObject json)
         {
-            Object excludedProp = props.get("excluded");
-            Object runId = props.get("runId");
+            JSONArray excludedProp = json.optJSONArray("excluded");
+            int runId = json.optInt("runId", -1);
 
-            if (runId instanceof Integer)
+            if (-1 != runId)
             {
-                _runId = (Integer)runId;
+                _runId = runId;
             }
 
             if (excludedProp != null)
             {
-                for (JSONObject excluded : ((JSONArray) excludedProp).toJSONObjectArray())
+                for (JSONObject excluded : JsonUtil.toJSONObjectList(excludedProp))
                 {
                     _exclusions.add(new WellExclusion(excluded.getInt("plate"),
-                            excluded.getInt("row"),
-                            excluded.getInt("col"),
-                            excluded.getString("comment"),
-                            excluded.getString("specimen")));
+                        excluded.getInt("row"),
+                        excluded.getInt("col"),
+                        excluded.getString("comment"),
+                        excluded.getString("specimen")));
                 }
             }
         }

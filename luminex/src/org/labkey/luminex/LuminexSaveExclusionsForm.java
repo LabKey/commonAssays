@@ -51,7 +51,7 @@ public class LuminexSaveExclusionsForm implements CustomApiForm
     @Override
     public void bindProperties(Map<String, Object> properties)
     {
-        JSONObject json = (org.json.old.JSONObject)properties;
+        JSONObject json = (JSONObject)properties;
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
