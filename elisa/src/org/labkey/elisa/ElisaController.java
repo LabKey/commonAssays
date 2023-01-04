@@ -16,7 +16,7 @@
 
 package org.labkey.elisa;
 
-import org.json.old.JSONObject;
+import org.json.JSONObject;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
@@ -150,6 +150,7 @@ public class ElisaController extends SpringActionController
             response.put("rSquared", curveFitDb != null ? curveFitDb.getrSquared() : "N/A");
             response.put("fitParameters", curveFitDb != null ? curveFitDb.getFitParameters() : "N/A");
             response.put("points", points);
+
             return new ApiSimpleResponse(response);
         }
     }
