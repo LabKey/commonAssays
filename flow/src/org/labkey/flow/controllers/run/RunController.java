@@ -430,10 +430,17 @@ public class RunController extends BaseFlowController
             if ((runId == null || runId.length == 0) && (wellId == null || wellId.length == 0))
             {
                 Set<String> selection = DataRegionSelection.getSelected(getViewContext(), form.getDataRegionSelectionKey(), true);
-                if (form.getSelectionType() == null || form.getSelectionType().equals("runs"))
-                    runId = PageFlowUtil.toInts(selection);
-                else
-                    wellId = PageFlowUtil.toInts(selection);
+                try
+                {
+                    if (form.getSelectionType() == null || form.getSelectionType().equals("runs"))
+                        runId = PageFlowUtil.toInts(selection);
+                    else
+                        wellId = PageFlowUtil.toInts(selection);
+                }
+                catch (NumberFormatException x)
+                {
+                    // fall through to generic error
+                }
             }
 
             if (runId != null && runId.length > 0)
