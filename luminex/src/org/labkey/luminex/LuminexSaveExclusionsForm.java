@@ -108,7 +108,7 @@ public class LuminexSaveExclusionsForm implements NewCustomApiForm
 
     private String getStringPropIfExists(JSONObject json, String propName)
     {
-        return json.has(propName) ? json.getString(propName) : null;
+        return json.optString(propName, null);
     }
 
     private Integer getIntPropIfExists(JSONObject json, String propName)
