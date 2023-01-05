@@ -186,3 +186,7 @@ DROP FUNCTION nab.ensureIndex();
 ALTER TABLE nab.WellData ADD Excluded BOOLEAN NOT NULL DEFAULT FALSE;
 
 ALTER TABLE nab.nabspecimen ADD COLUMN FitParameters VARCHAR(500);
+
+/* 21.xxx SQL scripts */
+
+CREATE INDEX IDX_DilutionData_RunDataId ON nab.DilutionData(RunDataId);
