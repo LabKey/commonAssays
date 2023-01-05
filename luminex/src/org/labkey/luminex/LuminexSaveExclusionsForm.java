@@ -16,11 +16,11 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.EnumUtils;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.action.CustomApiForm;
+import org.labkey.api.action.NewCustomApiForm;
 import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
@@ -32,9 +32,8 @@ import org.springframework.validation.ObjectError;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class LuminexSaveExclusionsForm implements CustomApiForm
+public class LuminexSaveExclusionsForm implements NewCustomApiForm
 {
     private Integer _assayId;
     private String _tableName;
@@ -49,9 +48,8 @@ public class LuminexSaveExclusionsForm implements CustomApiForm
     {}
 
     @Override
-    public void bindProperties(Map<String, Object> properties)
+    public void bindJson(org.json.JSONObject json)
     {
-        JSONObject json = (JSONObject)properties;
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
@@ -59,7 +57,7 @@ public class LuminexSaveExclusionsForm implements CustomApiForm
         _tableName = getStringPropIfExists(json, "tableName");
         _runId = getIntPropIfExists(json, "runId");
 
-        JSONArray commands = (JSONArray)json.get("commands");
+        JSONArray commands = json.getJSONArray("commands");
         for (int i = 0; i < commands.length(); i++)
         {
             JSONObject commandJSON = commands.getJSONObject(i);
@@ -110,17 +108,17 @@ public class LuminexSaveExclusionsForm implements CustomApiForm
 
     private String getStringPropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getString(propName) : null;
+        return json.has(propName) ? json.getString(propName) : null;
     }
 
     private Integer getIntPropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getInt(propName) : null;
+        return json.has(propName) ? json.getInt(propName) : null;
     }
 
     private Double getDoublePropIfExists(JSONObject json, String propName)
     {
-        return json.containsKey(propName) ? json.getDouble(propName) : null;
+        return json.has(propName) ? json.getDouble(propName) : null;
     }
 
     public ExpProtocol getProtocol(Container c)
@@ -191,7 +189,7 @@ public class LuminexSaveExclusionsForm implements CustomApiForm
             command.setCommand("insert");
             errors = new NullSafeBindException(form, "form");
             form.validate(errors);
-            assertTrue("No validation errors expected", !errors.hasErrors());
+            assertFalse("No validation errors expected", errors.hasErrors());
         }
     }
 }
