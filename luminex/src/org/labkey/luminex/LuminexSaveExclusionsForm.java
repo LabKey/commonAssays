@@ -48,13 +48,13 @@ public class LuminexSaveExclusionsForm implements NewCustomApiForm
     {}
 
     @Override
-    public void bindJson(org.json.JSONObject json)
+    public void bindJson(JSONObject json)
     {
         if (json == null)
             throw new IllegalArgumentException("Empty request");
 
         _assayId = getIntPropIfExists(json, "assayId");
-        _tableName = getStringPropIfExists(json, "tableName");
+        _tableName = json.optString("tableName", null);
         _runId = getIntPropIfExists(json, "runId");
 
         JSONArray commands = json.getJSONArray("commands");
@@ -62,16 +62,16 @@ public class LuminexSaveExclusionsForm implements NewCustomApiForm
         {
             JSONObject commandJSON = commands.getJSONObject(i);
             LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
-            command.setCommand(getStringPropIfExists(commandJSON, "command"));
+            command.setCommand(commandJSON.optString("command", null));
             command.setKey(getIntPropIfExists(commandJSON, "key"));
             command.setDataId(getIntPropIfExists(commandJSON, "dataId"));
-            command.setDescription(getStringPropIfExists(commandJSON, "description"));
-            command.setType(getStringPropIfExists(commandJSON, "type"));
+            command.setDescription(commandJSON.optString("description", null));
+            command.setType(commandJSON.optString("type", null));
             command.setDilution(getDoublePropIfExists(commandJSON, "dilution"));
-            command.setAnalyteRowIds(getStringPropIfExists(commandJSON, "analyteRowIds"));
-            command.setAnalyteNames(getStringPropIfExists(commandJSON, "analyteNames"));
-            command.setComment(getStringPropIfExists(commandJSON, "comment"));
-            command.setWell(getStringPropIfExists(commandJSON, "well"));
+            command.setAnalyteRowIds(commandJSON.optString("analyteRowIds", null));
+            command.setAnalyteNames(commandJSON.optString("analyteNames", null));
+            command.setComment(commandJSON.optString("comment", null));
+            command.setWell(commandJSON.optString("well", null));
             addCommand(command);
         }
     }
@@ -104,11 +104,6 @@ public class LuminexSaveExclusionsForm implements NewCustomApiForm
     private void addCommand(LuminexSingleExclusionCommand command)
     {
         _commands.add(command);
-    }
-
-    private String getStringPropIfExists(JSONObject json, String propName)
-    {
-        return json.optString(propName, null);
     }
 
     private Integer getIntPropIfExists(JSONObject json, String propName)
