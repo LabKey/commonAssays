@@ -21,8 +21,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
-import org.json.old.JSONArray;
-import org.json.old.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.flow.analysis.model.SampleIdMap;
@@ -156,16 +156,17 @@ public class ExportAnalysisManifest
         List<FCSFile> fcsFiles = new ArrayList<>();
         for (String id : sampleIdMap.idSet())
         {
-            FCSFile fcsFile = new FCSFile(id,sampleIdMap.getNameForId(id),sampleIdMap.getById(id));
+            FCSFile fcsFile = new FCSFile(id, sampleIdMap.getNameForId(id), sampleIdMap.getById(id));
             fcsFiles.add(fcsFile);
         }
         addExportedFile("FCSFiles", fcsFiles);
     }
 
-    private class FCSFile{
-        private String id;
-        private String sample;
-        private String path;
+    private static class FCSFile
+    {
+        private final String id;
+        private final String sample;
+        private final String path;
 
         public FCSFile(String id, String sample, String path)
         {
@@ -189,12 +190,12 @@ public class ExportAnalysisManifest
             return path;
         }
     }
+
     public static class TestCase extends Assert
     {
         @Test
         public void testJSONManifest()
         {
-
             //test exported by
             JSONObject expected = new JSONObject();
             String eW = "Edie Windsor";
@@ -239,7 +240,5 @@ public class ExportAnalysisManifest
 
             assertEquals("Wrong JSON", expected.toString(), exportManifest.toJSON());
         }
-
     }
-
 }
