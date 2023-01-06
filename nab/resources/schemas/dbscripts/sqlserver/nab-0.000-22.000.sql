@@ -195,3 +195,7 @@ ALTER TABLE nab.WellData ADD Excluded BIT NOT NULL DEFAULT 0;
 
 ALTER TABLE nab.NAbSpecimen ADD FitParameters NVARCHAR(500);
 GO
+
+/* 21.xxx SQL scripts */
+
+CREATE INDEX IDX_DilutionData_RunDataId ON nab.DilutionData(RunDataId);

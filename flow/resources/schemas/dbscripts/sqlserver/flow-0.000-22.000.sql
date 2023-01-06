@@ -363,3 +363,9 @@ ALTER TABLE flow.graph
 /* flow-18.30-19.10.sql */
 
 UPDATE flow.object SET uri = 'file:///' + substring(uri, 7, 400) WHERE uri LIKE 'file:/_%' AND uri NOT LIKE 'file:///%' AND uri IS NOT NULL;
+
+/* 21.xxx SQL scripts */
+
+ALTER TABLE flow.StatisticAttr ALTER COLUMN Name NVARCHAR(400) NOT NULL;
+ALTER TABLE flow.GraphAttr ALTER COLUMN Name NVARCHAR(400) NOT NULL;
+GO
