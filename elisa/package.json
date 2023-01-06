@@ -40,7 +40,7 @@
     }
   },
   "dependencies": {
-    "@labkey/components": "2.276.1-fb-react-select-0123.3"
+    "@labkey/components": "2.277.0-fb-react-select-0123.0"
   },
   "devDependencies": {
     "@labkey/build": "6.8.1-fb-react-select-0123.2",
