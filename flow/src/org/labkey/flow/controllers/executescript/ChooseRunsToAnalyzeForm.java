@@ -198,7 +198,14 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
     public int[] getSelectedRunIds()
     {
         Set<String> values = DataRegionSelection.getSelected(getViewContext(), false);
-        return PageFlowUtil.toInts(values);
+        try
+        {
+            return PageFlowUtil.toInts(values);
+        }
+        catch (NumberFormatException x)
+        {
+            return new int[0];
+        }
     }
 
     public String getAnalysisLSID()
