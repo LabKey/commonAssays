@@ -467,7 +467,6 @@ luminex/test/src/org/labkey/test/pages/luminex/ExclusionReportPage.java -text
 luminex/test/src/org/labkey/test/pages/luminex/LeveyJenningsPlotWindow.java -text
 luminex/test/src/org/labkey/test/pages/luminex/LuminexImportWizard.java -text
 luminex/test/src/org/labkey/test/pages/luminex/SetAnalyteDefaultValuesPage.java -text
-luminex/test/src/org/labkey/test/tests/luminex/AssayTransformWarningTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexAsyncImportTest.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexEC50Test.java -text
 luminex/test/src/org/labkey/test/tests/luminex/LuminexExcludableWellsTest.java -text
@@ -667,7 +666,6 @@ ms2/src/org/labkey/ms2/compare/CompareDataRegion.java -text
 ms2/src/org/labkey/ms2/compare/CompareExcelWriter.java -text
 ms2/src/org/labkey/ms2/compare/CompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/MS2ReportUIProvider.java -text
-ms2/src/org/labkey/ms2/compare/ProteinCompareQuery.java -text
 ms2/src/org/labkey/ms2/compare/RunColumn.java -text
 ms2/src/org/labkey/ms2/compare/SpectraCountQueryView.java -text
 ms2/src/org/labkey/ms2/compare/SpectraCountRReport.java -text

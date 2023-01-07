@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/* flow-0.00-11.30.sql */
+/* flow-0.00-8.10.sql */
 
-CREATE SCHEMA flow;
-GO
+CREATE SCHEMA Flow;
 
 CREATE TABLE flow.Attribute
 (
-    RowId INT IDENTITY(1,1) NOT NULL,
-    Name NVARCHAR(256) COLLATE Latin1_General_BIN NOT NULL,
+    RowId SERIAL NOT NULL,
+    Name VARCHAR(256) NOT NULL,
 
     CONSTRAINT PK_Attribute PRIMARY KEY (RowId),
     CONSTRAINT UQ_Attribute UNIQUE(Name)
@@ -30,31 +29,34 @@ CREATE TABLE flow.Attribute
 
 CREATE TABLE flow.Object
 (
-    RowId INT IDENTITY(1,1) NOT NULL,
+    RowId SERIAL NOT NULL,
     Container ENTITYID NOT NULL,
     DataId INT,
     TypeId INT NOT NULL,
-    Uri VARCHAR(400),
-    CompId INT,
-    ScriptId INT,
-    FcsId INT,
+    URI VARCHAR(400),
+    CompId INT4,
+    ScriptId INT4,
+    FcsId INT4,
 
-    CONSTRAINT PK_Object PRIMARY KEY (RowId),
-    CONSTRAINT UQ_Object UNIQUE(DataId),
-    CONSTRAINT FK_Object_Data FOREIGN KEY(DataId) REFERENCES exp.Data(RowId)
+    CONSTRAINT FK_Object_Data FOREIGN KEY(DataId) REFERENCES exp.Data(RowId),
+    CONSTRAINT PK_Object PRIMARY KEY(RowId),
+    CONSTRAINT UQ_Object UNIQUE(DataId)
 );
-CREATE INDEX flow_object_typeid ON flow.object (container, typeid);
+CREATE INDEX flow_object_typeid ON flow.object (container, typeid, dataid);
+CLUSTER flow_object_typeid ON flow.object;
 
 CREATE TABLE flow.Keyword
 (
     ObjectId INT NOT NULL,
     KeywordId INT NOT NULL,
-    Value NTEXT,
+    Value TEXT,
 
-    CONSTRAINT PK_Keyword PRIMARY KEY CLUSTERED (ObjectId, KeywordId),
+    CONSTRAINT PK_Keyword PRIMARY KEY (ObjectId, KeywordId),
     CONSTRAINT FK_Keyword_Object FOREIGN KEY(ObjectId) REFERENCES flow.Object(RowId),
     CONSTRAINT FK_Keyword_Attribute FOREIGN KEY (KeywordId) REFERENCES flow.Attribute(RowId)
 );
+
+CLUSTER PK_Keyword ON flow.Keyword;
 
 CREATE TABLE flow.Statistic
 (
@@ -62,17 +64,19 @@ CREATE TABLE flow.Statistic
     StatisticId INT NOT NULL,
     Value FLOAT NOT NULL,
 
-    CONSTRAINT PK_Statistic PRIMARY KEY CLUSTERED (ObjectId, StatisticId),
+    CONSTRAINT PK_Statistic PRIMARY KEY (ObjectId, StatisticId),
     CONSTRAINT FK_Statistic_Object FOREIGN KEY (ObjectId) REFERENCES flow.Object(RowId),
     CONSTRAINT FK_Statistic_Attribute FOREIGN KEY (StatisticId) REFERENCES flow.Attribute(RowId)
 );
 
+CLUSTER PK_Statistic ON flow.Statistic;
+
 CREATE TABLE flow.Graph
 (
-    RowId INT IDENTITY(1,1) NOT NULL,
+    RowId SERIAL NOT NULL,
     ObjectId INT NOT NULL,
     GraphId INT NOT NULL,
-    Data IMAGE,
+    Data BYTEA,
 
     CONSTRAINT PK_Graph PRIMARY KEY(RowId),
     CONSTRAINT UQ_Graph UNIQUE(ObjectId, GraphId),
@@ -82,77 +86,75 @@ CREATE TABLE flow.Graph
 
 CREATE TABLE flow.Script
 (
-    RowId INT IDENTITY(1,1) NOT NULL,
+    RowId SERIAL NOT NULL,
     ObjectId INT NOT NULL,
-    Text NTEXT,
+    Text TEXT,
 
     CONSTRAINT PK_Script PRIMARY KEY(RowId),
     CONSTRAINT UQ_Script UNIQUE(ObjectId),
     CONSTRAINT FK_Script_Object FOREIGN KEY (ObjectId) REFERENCES flow.Object(RowId)
 );
 
+/* flow-10.10-10.20.sql */
+
 /**
  * the query to find the in use statistic/graph/keyword ids is way too expensive
  * so keep track of the in us attributes per container/type
  *
  * there three tables are basically a materialized view over flow.Object and
- * the respective data table (statistic,keyword,graph) 
+ * the respective data table (statistic,keyword,graph)
  */
 
 CREATE TABLE flow.StatisticAttr
 (
-  container ENTITYID NOT NULL,
-  id INT NOT NULL,
-  CONSTRAINT "PK_StatistiAttr" UNIQUE (container, id)
-)
-go
+    Container ENTITYID NOT NULL,
+    Id INT NOT NULL,
+    CONSTRAINT "PK_StatisticAttr" UNIQUE (Container, Id)
+);
 
-INSERT INTO flow.StatisticAttr (container, id)
-SELECT DISTINCT OBJ.container, PROP.statisticid AS id
-FROM flow.object OBJ INNER JOIN flow.statistic PROP ON OBJ.rowid = PROP.objectid
-go
+INSERT INTO flow.StatisticAttr (Container, Id)
+SELECT DISTINCT OBJ.Container, PROP.statisticid as id
+FROM flow.object OBJ INNER JOIN
+    flow.statistic PROP ON OBJ.rowid = PROP.objectid;
+
 
 CREATE TABLE flow.KeywordAttr
 (
-  container ENTITYID NOT NULL,
-  id INT NOT NULL,
-  CONSTRAINT "PK_KeywordAttr" UNIQUE (container, id)
-)
-go
+    Container ENTITYID NOT NULL,
+    Id INT NOT NULL,
+    CONSTRAINT "PK_KeywordAttr" UNIQUE (Container, Id)
+);
 
-INSERT INTO flow.KeywordAttr (container, id)
-SELECT DISTINCT OBJ.container, PROP.keywordid AS id
+INSERT INTO flow.KeywordAttr (Container, Id)
+SELECT DISTINCT OBJ.Container, PROP.keywordid as id
 FROM flow.object OBJ INNER JOIN
-  flow.keyword PROP ON OBJ.rowid = PROP.objectid
-go
-
+    flow.keyword PROP ON OBJ.rowid = PROP.objectid;
 
 
 CREATE TABLE flow.GraphAttr
 (
-  container ENTITYID NOT NULL,
-  id INT NOT NULL,
-  CONSTRAINT "PK_GraphAttr" UNIQUE (container, id)
-)
-go
+    Container ENTITYID NOT NULL,
+    Id INT NOT NULL,
+    CONSTRAINT "PK_GraphAttr" UNIQUE (Container, Id)
+);
 
-INSERT INTO flow.GraphAttr (container, id)
-SELECT DISTINCT OBJ.container, PROP.graphid AS id
+INSERT INTO flow.GraphAttr (Container, Id)
+SELECT DISTINCT OBJ.Container, PROP.graphid as Id
 FROM flow.object OBJ INNER JOIN
-  flow.graph PROP ON OBJ.rowid = PROP.objectid
-go
+    flow.graph PROP ON OBJ.rowid = PROP.objectid;
+
+/* flow-11.10-11.20.sql */
 
 -- KeywordAttr ------------------
 
 -- Add RowId and Name to KeywordAttr
 ALTER TABLE flow.KeywordAttr
-    ADD RowId INT IDENTITY(1,1) NOT NULL,
-    Name NVARCHAR(256);
-
-GO
+    ADD COLUMN RowId SERIAL NOT NULL,
+    ADD COLUMN Name VARCHAR(256);
 
 ALTER TABLE flow.KeywordAttr DROP CONSTRAINT "PK_KeywordAttr";
 ALTER TABLE flow.KeywordAttr ADD CONSTRAINT PK_KeywordAttr PRIMARY KEY (RowId);
+
 
 -- Copy 'Attribute.Name' into 'KeywordAttr.Name'
 UPDATE flow.KeywordAttr
@@ -160,12 +162,13 @@ UPDATE flow.KeywordAttr
     FROM flow.Attribute
     WHERE Attribute.RowId = KeywordAttr.Id;
 
-ALTER TABLE flow.KeywordAttr ALTER COLUMN Name NVARCHAR(256) NOT NULL;
+ALTER TABLE flow.KeywordAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.KeywordAttr ADD CONSTRAINT UQ_KeywordAttr UNIQUE (Container, Name);
 
 -- Drop the PK_Keyword for the next update and add it again afterwards.
 ALTER TABLE flow.Keyword DROP CONSTRAINT PK_Keyword;
 ALTER TABLE flow.Keyword DROP CONSTRAINT FK_Keyword_Attribute;
+
 
 -- Change 'Keyword.KeywordId' to point at 'KeywordAttr.RowId'
 UPDATE flow.Keyword
@@ -179,6 +182,7 @@ SET KeywordId =
 --ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword UNIQUE (ObjectId, KeywordId);
 ALTER TABLE flow.Keyword ADD CONSTRAINT FK_Keyword_KeywordAttr FOREIGN KEY (KeywordId) REFERENCES flow.KeywordAttr (RowId);
 
+
 -- Change meaning of 'KeywordAttr.Id' from FK Attribute.RowId to self KeywordAttr.RowId and equal to Keyword.KeywordId
 -- When KeywordAttr.Id == RowId, the Name column is the preferred name otherwise it is an alias.
 UPDATE flow.KeywordAttr SET Id = RowId;
@@ -188,13 +192,12 @@ UPDATE flow.KeywordAttr SET Id = RowId;
 
 -- Add RowId and Name to StatisticAttr
 ALTER TABLE flow.StatisticAttr
-    ADD RowId INT IDENTITY(1,1) NOT NULL,
-    Name NVARCHAR(256);
+    ADD COLUMN RowId SERIAL NOT NULL,
+    ADD COLUMN Name VARCHAR(256);
 
-GO
-
-ALTER TABLE flow.StatisticAttr DROP CONSTRAINT "PK_StatistiAttr";
+ALTER TABLE flow.StatisticAttr DROP CONSTRAINT "PK_StatisticAttr";
 ALTER TABLE flow.StatisticAttr ADD CONSTRAINT PK_StatisticAttr PRIMARY KEY (RowId);
+
 
 -- Copy 'Attribute.Name' into 'StatisticAttr.Name'
 UPDATE flow.StatisticAttr
@@ -202,12 +205,13 @@ UPDATE flow.StatisticAttr
     FROM flow.Attribute
     WHERE Attribute.RowId = StatisticAttr.Id;
 
-ALTER TABLE flow.StatisticAttr ALTER COLUMN Name NVARCHAR(256) NOT NULL;
+ALTER TABLE flow.StatisticAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.StatisticAttr ADD CONSTRAINT UQ_StatisticAttr UNIQUE (Container, Name);
 
 -- Drop the PK_Statistic for the next update and add it again afterwards.
 ALTER TABLE flow.Statistic DROP CONSTRAINT PK_Statistic;
 ALTER TABLE flow.Statistic DROP CONSTRAINT FK_Statistic_Attribute;
+
 
 -- Change 'Statistic.StatisticId' to point at 'StatisticAttr.RowId'
 UPDATE flow.Statistic
@@ -221,6 +225,7 @@ SET StatisticId =
 --ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic UNIQUE (ObjectId, StatisticId);
 ALTER TABLE flow.Statistic ADD CONSTRAINT FK_Statistic_StatisticAttr FOREIGN KEY (StatisticId) REFERENCES flow.StatisticAttr (RowId);
 
+
 -- Change meaning of 'StatisticAttr.Id' from FK Attribute.RowId to self StatisticAttr.RowId and equal to Statistic.StatisticId
 -- When StatisticAttr.Id == RowId, the Name column is the preferred name otherwise it is an alias.
 UPDATE flow.StatisticAttr SET Id = RowId;
@@ -230,13 +235,12 @@ UPDATE flow.StatisticAttr SET Id = RowId;
 
 -- Add RowId and Name to GraphAttr
 ALTER TABLE flow.GraphAttr
-    ADD RowId INT IDENTITY(1,1) NOT NULL,
-    Name NVARCHAR(256);
-
-GO
+    ADD COLUMN RowId SERIAL NOT NULL,
+    ADD COLUMN Name VARCHAR(256);
 
 ALTER TABLE flow.GraphAttr DROP CONSTRAINT "PK_GraphAttr";
 ALTER TABLE flow.GraphAttr ADD CONSTRAINT PK_GraphAttr PRIMARY KEY (RowId);
+
 
 -- Copy 'Attribute.Name' into 'GraphAttr.Name'
 UPDATE flow.GraphAttr
@@ -244,13 +248,14 @@ UPDATE flow.GraphAttr
     FROM flow.Attribute
     WHERE Attribute.RowId = GraphAttr.Id;
 
-ALTER TABLE flow.GraphAttr ALTER COLUMN Name NVARCHAR(256) NOT NULL;
+ALTER TABLE flow.GraphAttr ALTER COLUMN Name SET NOT NULL;
 ALTER TABLE flow.GraphAttr ADD CONSTRAINT UQ_GraphAttr UNIQUE (Container, Name);
 
 -- Drop the PK_Graph for the next update and add it again afterwards.
 ALTER TABLE flow.Graph DROP CONSTRAINT PK_Graph;
 ALTER TABLE flow.Graph DROP CONSTRAINT UQ_Graph;
 ALTER TABLE flow.Graph DROP CONSTRAINT FK_Graph_Attribute;
+
 
 -- Change 'Graph.GraphId' to point at 'GraphAttr.RowId'
 UPDATE flow.Graph
@@ -264,24 +269,31 @@ SET GraphId =
 --ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph UNIQUE (ObjectId, GraphId);
 ALTER TABLE flow.Graph ADD CONSTRAINT FK_Graph_GraphAttr FOREIGN KEY (GraphId) REFERENCES flow.GraphAttr (RowId);
 
+
 -- Change meaning of 'GraphAttr.Id' from FK Attribute.RowId to self GraphAttr.RowId and equal to Graph.GraphId
 -- When GraphAttr.Id == RowId, the Name column is the preferred name otherwise it is an alias.
 UPDATE flow.GraphAttr SET Id = RowId;
 
 -- Change 'PK_*' unique constraints to actually be primary key constraint.
-EXEC core.fn_dropifexists 'Keyword', 'flow', 'constraint', 'PK_Keyword';
-ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword PRIMARY KEY CLUSTERED (ObjectId, KeywordId);
+SELECT core.fn_dropifexists('Keyword', 'flow', 'constraint', 'PK_Keyword');
+ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword PRIMARY KEY (ObjectId, KeywordId);
+CLUSTER PK_Keyword ON flow.keyword;
 
-EXEC core.fn_dropifexists 'Statistic', 'flow', 'constraint', 'PK_Statistic';
-ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic PRIMARY KEY CLUSTERED (ObjectId, StatisticId);
+SELECT core.fn_dropifexists('Statistic', 'flow', 'constraint', 'PK_Statistic');
+ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic PRIMARY KEY (ObjectId, StatisticId);
+CLUSTER PK_Statistic ON flow.statistic;
 
 ALTER TABLE flow.Graph DROP COLUMN rowid;
-EXEC core.fn_dropifexists 'Graph', 'flow', 'constraint', 'PK_Graph';
-EXEC core.fn_dropifexists 'Graph', 'flow', 'constraint', 'UQ_Graph';
-ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph PRIMARY KEY CLUSTERED (ObjectId, GraphId);
+SELECT core.fn_dropifexists('Graph', 'flow', 'constraint', 'PK_Graph');
+SELECT core.fn_dropifexists('Graph', 'flow', 'constraint', 'UQ_Graph');
+ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph PRIMARY KEY (ObjectId, GraphId);
+CLUSTER PK_Graph ON flow.graph;
+
 
 -- flow.Attribute table no longer used
-EXEC core.fn_dropifexists 'Attribute', 'flow', 'TABLE', NULL;
+SELECT core.fn_dropifexists('Attribute', 'flow', 'TABLE', NULL);
+
+/* flow-11.20-11.30.sql */
 
 -- removed obsolete DELETE statement that cleaned up orphaned exp.data objects
 
@@ -294,21 +306,18 @@ CREATE INDEX IX_Graph_GraphId ON flow.Graph (GraphId);
 /* flow-13.10-13.20.sql */
 
 -- Drop the NOT NULL constraint on the keyword value column
-ALTER TABLE flow.keyword ALTER COLUMN value NTEXT NULL;
-GO
+ALTER TABLE flow.keyword ALTER COLUMN value DROP NOT NULL;
 
 -- Keyword values are trimmed to null on import as of r27096.
 UPDATE flow.keyword
 SET value = NULL
-WHERE 0 = LEN(LTRIM(RTRIM(CAST(value AS NVARCHAR(MAX)))));
+WHERE 0 = LENGTH(TRIM(value));
 
 /* flow-14.10-14.20.sql */
 
 -- add original keyword id
 ALTER TABLE flow.keyword
-    ADD OriginalKeywordId INT;
-
-GO
+    ADD COLUMN OriginalKeywordId INT;
 
 -- copy keywordid to originalkeywordid, then update keywordid to the preferred keywordattr.id
 UPDATE flow.keyword SET OriginalKeywordId = KeywordId;
@@ -317,7 +326,7 @@ UPDATE flow.keyword SET KeywordId = (
 );
 
 ALTER TABLE flow.keyword
-    ALTER COLUMN OriginalKeywordId INT NOT NULL;
+    ALTER COLUMN OriginalKeywordId SET NOT NULL;
 
 ALTER TABLE flow.keyword
     ADD CONSTRAINT FK_Keyword_OriginalKeywordId FOREIGN KEY (OriginalKeywordId) REFERENCES flow.keywordattr (rowid);
@@ -325,9 +334,7 @@ ALTER TABLE flow.keyword
 
 -- add original statistic id
 ALTER TABLE flow.statistic
-    ADD OriginalStatisticId INT;
-
-GO
+    ADD COLUMN OriginalStatisticId INT;
 
 -- copy statisticid to originalstatisticid, then update statisticid to the preferred statisticattr.id
 UPDATE flow.statistic SET OriginalStatisticId = StatisticId;
@@ -336,7 +343,7 @@ UPDATE flow.statistic SET StatisticId = (
 );
 
 ALTER TABLE flow.statistic
-    ALTER COLUMN OriginalStatisticId INT NOT NULL;
+    ALTER COLUMN OriginalStatisticId SET NOT NULL;
 
 ALTER TABLE flow.statistic
     ADD CONSTRAINT FK_Statistic_OriginalStatisticId FOREIGN KEY (OriginalStatisticId) REFERENCES flow.statisticattr (rowid);
@@ -344,9 +351,7 @@ ALTER TABLE flow.statistic
 
 -- add original graph id
 ALTER TABLE flow.graph
-    ADD OriginalGraphId INT;
-
-GO
+    ADD COLUMN OriginalGraphId INT;
 
 -- copy graphid to originalgraphid, then update graphid to the preferred graphattr.id
 UPDATE flow.graph SET OriginalGraphId = GraphId;
@@ -355,11 +360,16 @@ UPDATE flow.graph SET GraphId = (
 );
 
 ALTER TABLE flow.graph
-    ALTER COLUMN OriginalGraphId INT NOT NULL;
+    ALTER COLUMN OriginalGraphId SET NOT NULL;
 
 ALTER TABLE flow.graph
     ADD CONSTRAINT FK_Statistic_OriginalGraphId FOREIGN KEY (OriginalGraphId) REFERENCES flow.graphattr (rowid);
 
 /* flow-18.30-19.10.sql */
 
-UPDATE flow.object SET uri = 'file:///' + substring(uri, 7, 400) WHERE uri LIKE 'file:/_%' AND uri NOT LIKE 'file:///%' AND uri IS NOT NULL;
+UPDATE flow.object SET uri = 'file:///' || substr(uri, 7) WHERE uri LIKE 'file:/_%' AND uri NOT LIKE 'file:///%' AND uri IS NOT NULL;
+
+/* 21.xxx SQL scripts */
+
+ALTER TABLE flow.StatisticAttr ALTER COLUMN Name TYPE VARCHAR(400);
+ALTER TABLE flow.GraphAttr ALTER COLUMN Name TYPE VARCHAR(400);
