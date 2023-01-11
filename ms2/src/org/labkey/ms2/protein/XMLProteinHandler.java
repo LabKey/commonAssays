@@ -16,20 +16,18 @@
 
 package org.labkey.ms2.protein;
 
+import org.labkey.ms2.protein.tools.REProperties;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.SAXException;
-import org.xml.sax.Attributes;
-import org.xml.sax.XMLReader;
-import org.labkey.ms2.protein.tools.REProperties;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * User: brittp
@@ -94,10 +92,10 @@ public class XMLProteinHandler extends DefaultHandler
     protected static final boolean DEFAULT_DYNAMIC_VALIDATION = false;
 
     /* when there is a tag and all its children that we don't want to process, we put it */
-    /* in this list.  The name must be unique within the entire parse tree.  Currently   */
+    /* in this list. The name must be unique within the entire parse tree. Currently,    */
     /* the VALUE part of hashtable is ignored.                                           */
     private String skipMe = null;
-    private XMLProteinLoader _loader;
+    private final XMLProteinLoader _loader;
     public static final String PROGRAM_PREFIX = "XMLProteinLoader";
 
     public XMLProteinHandler(Connection conn, XMLProteinLoader loader) throws SAXException, IOException
