@@ -31,7 +31,6 @@ import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.CheckedInputStream;
 import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.FTPUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HtmlView;

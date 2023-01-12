@@ -24,7 +24,6 @@ import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.gwt.client.model.GWTComparisonGroup;
 import org.labkey.api.gwt.client.model.GWTComparisonMember;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
-import org.labkey.api.query.ComparisonCrosstabView;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.util.PageFlowUtil;

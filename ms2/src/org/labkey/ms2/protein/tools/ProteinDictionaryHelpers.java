@@ -15,17 +15,18 @@
  */
 package org.labkey.ms2.protein.tools;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.reader.TabLoader;
+import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
-import org.labkey.api.webdav.ModuleStaticResolverImpl;
+import org.labkey.api.webdav.WebdavResolver;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.ms2.protein.ProteinManager;
 
@@ -151,8 +152,7 @@ public class ProteinDictionaryHelpers
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        // Use the static resolver directly so that we work in both production and dev builds
-        WebdavResource r = ModuleStaticResolverImpl.get().lookup(Path.parse(FILE));
+        WebdavResource r = ServiceRegistry.get(WebdavResolver.class).lookup(Path.parse(FILE));
         InputStream is;
         if (null != r)
         {
@@ -163,7 +163,7 @@ public class ProteinDictionaryHelpers
         is = ViewServlet.getViewServletContext().getResourceAsStream(FILE);
         if (is == null)
         {
-            throw new FileNotFoundException("Unable to find " + FILE + "  This seems to be caused in some cases when Tomcat redeploys the webapp when running. Please try restarting Tomcat.");
+            throw new FileNotFoundException("Unable to find " + FILE + ". This can be caused when Tomcat redeploys the webapp when running. Please try restarting Tomcat.");
         }
         return is;
     }
