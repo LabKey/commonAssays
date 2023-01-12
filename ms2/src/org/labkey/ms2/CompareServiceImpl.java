@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.gwt.server.BaseRemoteService;
-import org.labkey.api.query.ComparisonCrosstabView;
+import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;

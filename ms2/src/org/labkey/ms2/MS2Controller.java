@@ -62,7 +62,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.query.ComparisonCrosstabView;
+import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
