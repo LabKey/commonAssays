@@ -304,7 +304,7 @@ public class WellExclusionTable extends AbstractExclusionTable
             }
 
             @Override
-            public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, @Nullable Map<Enum, Object> configParameters, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
+            public List<Map<String, Object>> updateRows(User user, Container container, List<Map<String, Object>> rows, List<Map<String, Object>> oldKeys, BatchValidationException errors, @Nullable Map<Enum, Object> configParameters, Map<String, Object> extraScriptContext) throws InvalidKeyException, BatchValidationException, QueryUpdateServiceException, SQLException
             {
                 // Only allow one thread to be running a Luminex transform script and importing its results at a time
                 // See issue 17424
@@ -312,9 +312,8 @@ public class WellExclusionTable extends AbstractExclusionTable
                 {
                     try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
-                        List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, configParameters, extraScriptContext);
+                        List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
 
-                        BatchValidationException errors = new BatchValidationException();
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
                             rerunTransformScripts(errors);
 
