@@ -443,7 +443,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public void deleteProtocol(ExpProtocol protocol, User user)
+    public void deleteProtocol(ExpProtocol protocol, User user, @Nullable final String auditUserComment)
     {
         // Do nothing. Flow protocol can't be deleted.
     }

@@ -441,9 +441,8 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         return url;
     }
 
-
     @Override
-    public void deleteProtocol(ExpProtocol protocol, User user) throws ExperimentException
+    public void deleteProtocol(ExpProtocol protocol, User user, @Nullable final String auditUserComment) throws ExperimentException
     {
         // Clear out the guide sets that are FK'd to the protocol
         SQLFragment deleteGuideSetSQL = new SQLFragment("DELETE FROM ");
@@ -452,7 +451,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
         deleteGuideSetSQL.add(protocol.getRowId());
         new SqlExecutor(LuminexProtocolSchema.getSchema()).execute(deleteGuideSetSQL);
 
-        super.deleteProtocol(protocol, user);
+        super.deleteProtocol(protocol, user, auditUserComment);
     }
 
     @Override
