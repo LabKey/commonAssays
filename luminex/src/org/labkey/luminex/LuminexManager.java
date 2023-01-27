@@ -617,7 +617,7 @@ public class LuminexManager
                             logVerb = " inserted into ";
                             break;
                         case "update":
-                            results = qus.updateRows(user, c, rows, keys, options, additionalContext);
+                            results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
                             logVerb = " updated in ";
                             break;
                         case "delete":
