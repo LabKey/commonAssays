@@ -957,15 +957,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         if (!wellGroup.getWellData(false).isEmpty())
         {
             LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
-            CurveFit rumi5PLFit = importRumiCurveFit(StatsService.CurveFitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
-            if (rumi5PLFit != null)
+
+            CurveFit drc4PLFit = importDRCCurveFit(StatsService.CurveFitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
+            if (drc4PLFit != null)
             {
-                newCurveFits.add(rumi5PLFit);
-            }
-            CurveFit rumi4PLFit = importRumiCurveFit(StatsService.CurveFitType.FOUR_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
-            if (rumi4PLFit != null)
-            {
-                newCurveFits.add(rumi4PLFit);
+                newCurveFits.add(drc4PLFit);
             }
 
             // Do the trapezoidal AUC calculation
@@ -1055,9 +1051,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return null;
     }
 
-    /** @return null if we can't find matching Rumi curve fit data */
+    /** @return null if we can't find matching drc curve fit data */
     @Nullable
-    private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits)
+    private CurveFit importDRCCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits)
     {
         if (fitType != StatsService.CurveFitType.FIVE_PARAMETER && fitType != StatsService.CurveFitType.FOUR_PARAMETER)
         {
