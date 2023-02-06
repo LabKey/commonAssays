@@ -255,7 +255,6 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
                     .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Data Fields] domain"));
             List<PropertyDescriptor> resultsFields = resultsDomain.getFields();
             resultsFields.add(new PropertyDescriptor("FIBackgroundNegative", "FI-Bkgd-Neg", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Standard", "Stnd for Calc", "string")); // TODO remove this?
             resultsFields.add(new PropertyDescriptor("Slope_4pl", "Slope_4pl", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Lower_4pl", "Lower_4pl", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Upper_4pl", "Upper_4pl", "float").setFormat("0.0")); 
