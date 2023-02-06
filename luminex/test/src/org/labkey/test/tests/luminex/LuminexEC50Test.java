@@ -58,8 +58,7 @@ public class LuminexEC50Test extends LuminexTest
     public void testEC50()
     {
         LuminexRTransformTest rTransformTest = new LuminexRTransformTest();
-        rTransformTest.uploadRunWithoutRumiCalc();
-        rTransformTest.reImportRunWithRumiCalc();
+        rTransformTest.uploadRun();
 
         createNewAssayRun(TEST_ASSAY_LUM, EC50_RUN_NAME);
         checkCheckbox(Locator.name("curveFitLogTransform"));

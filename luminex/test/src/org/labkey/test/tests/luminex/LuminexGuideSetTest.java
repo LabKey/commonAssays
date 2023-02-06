@@ -54,7 +54,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.TESTDATE.add(Calendar.DATE, -GUIDE_SET_FILES.length);
     }
 
-    //requires drc, Ruminex, rlabkey and xtable packages installed in R
+    //requires drc, rlabkey and xtable packages installed in R
     @Test
     public void testGuideSet()
     {

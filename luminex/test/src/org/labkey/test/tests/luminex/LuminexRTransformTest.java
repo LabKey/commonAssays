@@ -41,17 +41,6 @@ public final class LuminexRTransformTest extends LuminexTest
     private static final String ANALYTE3 = "Blank";
     private static final String ANALYTE4 = "MyNegative";
 
-    private static final String[] RTRANS_FIBKGDNEG_VALUES = {"-50.5", "-70.0", "25031.5", "25584.5", "391.5", "336.5", "263.8", "290.8",
-            "35.2", "35.2", "63.0", "71.0", "-34.0", "-33.0", "-29.8", "-19.8", "-639.8", "-640.2", "26430.8", "26556.2", "-216.2", "-204.2", "-158.5",
-            "-208.0", "-4.0", "-4.0", "194.2", "198.8", "-261.2", "-265.2", "-211.5", "-213.0"};
-    private static final String[] RTRANS_ESTLOGCONC_VALUES_5PL = {"-6.9", "-6.9", "4.3", "4.3", "0.4", "0.4", "-0.0", "-0.0", "-6.9", "-6.9",
-            "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "4.2", "4.2", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9",
-            "-6.9", "-0.6", "-0.6", "-6.9", "-6.9", "-6.9", "-6.9"};
-
-    private static final String[] RTRANS_ESTLOGCONC_VALUES_4PL = {"-6.9", "-6.9", "5.0", "5.0", "0.4", "0.4", "0.1", "0.1", "-6.9", "-6.9",
-            "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "5.5", "5.5", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9", "-6.9",
-            "-0.8", "-0.8", "-6.9", "-6.9", "-6.9", "-6.9"};
-
     @BeforeClass
     public static void updateAssayDefinition()
     {
@@ -66,25 +55,16 @@ public final class LuminexRTransformTest extends LuminexTest
         assayDesigner.clickFinish();
     }
 
-    //requires drc, Ruminex and xtable packages installed in R
+    //requires drc and xtable packages installed in R
     @Test
     public void testRTransform()
     {
         log("Uploading Luminex run with a R transform script");
-
-        uploadRunWithoutRumiCalc();
-        verifyPDFsGenerated(false);
+        uploadRun();
+        verifyPDFsGenerated();
         verifyScriptVersions();
         verifyLotNumber();
-        verifyRumiCalculatedValues(false, ANALYTE3);
         verifyAnalyteProperties(new String[]{ANALYTE3, ANALYTE3, " ", " "});
-
-        reImportRunWithRumiCalc();
-        verifyPDFsGenerated(true);
-        verifyScriptVersions();
-        verifyLotNumber();
-        verifyRumiCalculatedValues(true, ANALYTE4);
-        verifyAnalyteProperties(new String[]{ANALYTE4, ANALYTE4, " ", " "});
     }
 
     private void verifyAnalyteProperties(String[] expectedNegBead)
@@ -96,65 +76,6 @@ public final class LuminexRTransformTest extends LuminexTest
         {
             assertEquals(expectedNegBead[i], table.getDataAsText(i, "Negative Bead"));
         }
-    }
-
-    private void verifyRumiCalculatedValues(boolean hasRumiCalcData, String negativeBead)
-    {
-        DataRegionTable table = new DataRegionTable("Data", this);
-        table.setFilter("FIBackgroundNegative", "Is Not Blank", null);
-        waitForElement(Locator.paginationText(1, 80, 80));
-        table.setFilter("Type", "Equals", "C9"); // issue 20457
-        assertEquals(4, table.getDataRowCount());
-        for(int i = 0; i < table.getDataRowCount(); i++)
-        {
-            assertEquals(table.getDataAsText(i, "FI-Bkgd"), table.getDataAsText(i, "FI-Bkgd-Neg"));
-        }
-        table.clearFilter("Type");
-        table.setFilter("Type", "Starts With", "X"); // filter to just the unknowns
-        waitForElement(Locator.paginationText(1, 32, 32));
-        assertTextPresent(negativeBead, 32);
-        // check values in the fi-bkgd-neg column
-        for(int i = 0; i < RTRANS_FIBKGDNEG_VALUES.length; i++)
-        {
-            assertEquals(RTRANS_FIBKGDNEG_VALUES[i], table.getDataAsText(i, "FI-Bkgd-Neg"));
-        }
-        table.clearFilter("FIBackgroundNegative");
-
-        table.setFilter("EstLogConc_5pl", "Is Not Blank", null);
-        if (!hasRumiCalcData)
-        {
-            waitForText("No data to show.");
-            assertEquals(0, table.getDataRowCount());
-        }
-        else
-        {
-            waitForElement(Locator.paginationText(1, 32, 32));
-            // check values in the est log conc 5pl column
-            for(int i = 0; i < RTRANS_ESTLOGCONC_VALUES_5PL.length; i++)
-            {
-                assertEquals(RTRANS_ESTLOGCONC_VALUES_5PL[i], table.getDataAsText(i, "Est Log Conc Rumi 5 PL"));
-            }
-        }
-        table.clearFilter("EstLogConc_5pl");
-
-        table.setFilter("EstLogConc_4pl", "Is Not Blank", null);
-        if (!hasRumiCalcData)
-        {
-            waitForText("No data to show.");
-            assertEquals(0, table.getDataRowCount());
-        }
-        else
-        {
-            waitForElement(Locator.paginationText(1, 32, 32));
-            // check values in the est log conc 4pl column
-            for(int i = 0; i < RTRANS_ESTLOGCONC_VALUES_4PL.length; i++)
-            {
-                assertEquals(RTRANS_ESTLOGCONC_VALUES_4PL[i], table.getDataAsText(i, "Est Log Conc Rumi 4 PL"));
-            }
-        }
-        table.clearFilter("EstLogConc_4pl");
-
-        table.clearFilter("Type");
     }
 
     private void verifyLotNumber()
@@ -174,13 +95,12 @@ public final class LuminexRTransformTest extends LuminexTest
     {
         assertTextPresent(TEST_ASSAY_LUM + " Runs");
         DataRegionTable table = new DataRegionTable("Runs", this);
-        assertEquals("Unexpected Transform Script Version number", "10.1.20180903", table.getDataAsText(0, "Transform Script Version"));
+        assertEquals("Unexpected Transform Script Version number", "11.0.20230206", table.getDataAsText(0, "Transform Script Version"));
         assertEquals("Unexpected Lab Transform Script Version number", "3.1.20180903", table.getDataAsText(0, "Lab Transform Script Version"));
-        assertEquals("Unexpected Ruminex Version number", "0.0.9", table.getDataAsText(0, "Ruminex Version"));
         assertNotNull(table.getDataAsText(0, "R Version"));
     }
 
-    private void verifyPDFsGenerated(boolean hasStandardPDFs)
+    private void verifyPDFsGenerated()
     {
         DataRegionTable.DataRegion(getDriver()).find(); // Make sure page is loaded
         WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
@@ -188,16 +108,11 @@ public final class LuminexRTransformTest extends LuminexTest
         mouseOver(curvePng);
         curvePng.click();
         assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_4PL.pdf"));
-        assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_5PL.pdf"));
-        if (hasStandardPDFs)
-        {
-            assertElementPresent(Locator.linkWithText("WithAltNegativeBead.Standard1_5PL.pdf"));
-            assertElementPresent(Locator.linkWithText("WithAltNegativeBead.Standard1_4PL.pdf"));
-        }
+        assertElementPresent(Locator.linkWithText("WithAltNegativeBead.Standard1_4PL.pdf"));
     }
 
     @LogMethod
-    public void uploadRunWithoutRumiCalc()
+    public void uploadRun()
     {
         goToProjectHome();
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
@@ -209,8 +124,6 @@ public final class LuminexRTransformTest extends LuminexTest
         checkCheckbox(Locator.name("subtNegativeFromAll"));
         setFormElement(Locator.name("stndCurveFitInput"), "FI");
         setFormElement(Locator.name("unkCurveFitInput"), "FI-Bkgd-Neg");
-        checkCheckbox(Locator.name("curveFitLogTransform"));
-        checkCheckbox(Locator.name("skipRumiCalculation"));
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         clickButton("Next", defaultWaitForPage * 2);
 
@@ -227,26 +140,6 @@ public final class LuminexRTransformTest extends LuminexTest
         checkCheckbox(Locator.name("_analyte_" + ANALYTE3 + "_NegativeControl"));
         selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE3);
         selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE3);
-        clickButton("Save and Finish");
-    }
-
-    @LogMethod
-    public void reImportRunWithRumiCalc()
-    {
-        goToProjectHome();
-        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
-
-        // all batch, run, analyte properties should be remembered from the first upload
-        DataRegionTable table = new DataRegionTable("Runs", this);
-        table.checkCheckbox(0);
-        clickButton("Re-import run");
-        clickButton("Next");
-        uncheckCheckbox(Locator.name("skipRumiCalculation"));
-        clickButton("Next", defaultWaitForPage * 2);
-        // switch to using MyNegative bead for subtraction
-        checkCheckbox(Locator.name("_analyte_" + ANALYTE4 + "_NegativeControl"));
-        selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE4);
-        selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE4);
         clickButton("Save and Finish");
     }
 

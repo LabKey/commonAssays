@@ -213,14 +213,13 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
             assayProtocol.setName(TEST_ASSAY_LUM)
                 .setDescription(TEST_ASSAY_LUM_DESC);
 
-            // add batch properties for transform and Ruminex version numbers
+            // add batch properties for transform and R version numbers
             Domain batchesDomain =  assayProtocol.getDomains().stream().filter(a->a.getName().equals("Batch Fields")).findFirst()
                     .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Batch Fields] domain"));
             List<PropertyDescriptor> batchFields = batchesDomain.getFields();   // keep the template-supplied fields, add the following
             batchFields.add(new PropertyDescriptor("Network", "Network", "string"));
             batchFields.add(new PropertyDescriptor("TransformVersion", "Transform Script Version", "string"));
             batchFields.add(new PropertyDescriptor("LabTransformVersion", "Lab Transform Script Version", "string"));
-            batchFields.add(new PropertyDescriptor("RuminexVersion", "Ruminex Version", "string"));
             batchFields.add(new PropertyDescriptor("RVersion", "R Version", "string"));
             setFieldsToDomain(batchFields, batchesDomain);
 
@@ -231,8 +230,6 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
             runFields.add(new PropertyDescriptor("SubtNegativeFromAll", "Subtract Negative Bead from All Wells", "boolean"));
             runFields.add(new PropertyDescriptor("StndCurveFitInput", "Input Var for CurveFit Calc of Standards", "string"));
             runFields.add(new PropertyDescriptor("UnkCurveFitInput", "Input Var for Curve Fit Calc of Unknowns", "string"));
-            runFields.add(new PropertyDescriptor("CurveFitLogTransform", "Curve Fit Log Transform", "boolean"));
-            runFields.add(new PropertyDescriptor("SkipRumiCalculation", "Skip Ruminex Calculations", "boolean"));
 
             // add run properties for use with the Guide Set test
             runFields.add(new PropertyDescriptor("NotebookNo", "Notebook Number", "string"));
@@ -258,22 +255,11 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
                     .orElseThrow(()-> new IllegalStateException("The protocol template did not supply a [Data Fields] domain"));
             List<PropertyDescriptor> resultsFields = resultsDomain.getFields();
             resultsFields.add(new PropertyDescriptor("FIBackgroundNegative", "FI-Bkgd-Neg", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Standard", "Stnd for Calc", "string"));
-            resultsFields.add(new PropertyDescriptor("EstLogConc_5pl", "Est Log Conc Rumi 5 PL", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("EstConc_5pl", "Est Conc Rumi 5 PL", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("SE_5pl", "SE Rumi 5 PL", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("EstLogConc_4pl", "Est Log Conc Rumi 4 PL", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("EstConc_4pl", "Est Conc Rumi 4 PL", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("SE_4pl", "SE Rumi 4 PL", "float").setFormat("0.0"));
+            resultsFields.add(new PropertyDescriptor("Standard", "Stnd for Calc", "string")); // TODO remove this?
             resultsFields.add(new PropertyDescriptor("Slope_4pl", "Slope_4pl", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Lower_4pl", "Lower_4pl", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Upper_4pl", "Upper_4pl", "float").setFormat("0.0")); 
             resultsFields.add(new PropertyDescriptor("Inflection_4pl", "Inflection_4pl", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Slope_5pl", "Slope_5pl", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Lower_5pl", "Lower_5pl", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Upper_5pl", "Upper_5pl", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Inflection_5pl", "Inflection_5pl", "float").setFormat("0.0"));
-            resultsFields.add(new PropertyDescriptor("Asymmetry_5pl", "Asymmetry_5pl", "float").setFormat("0.0"));
             resultsFields.add(new PropertyDescriptor("Positivity", "Positivity", "string"));
             setFieldsToDomain(resultsFields, resultsDomain);
 
