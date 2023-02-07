@@ -141,7 +141,6 @@ public final class LuminexAsyncImportTest extends LuminexTest
         assertFormElementEquals(Locator.name("conjugate"), conjugate);
         assertFormElementEquals(Locator.name("stndCurveFitInput"), stndCurveFitInput);
         assertFormElementEquals(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-        uncheckCheckbox(Locator.name("curveFitLogTransform"));
         assertFormElementEquals(Locator.name("notebookNo"), notebookNo);
         assertFormElementEquals(Locator.name("assayType"), assayType);
         assertFormElementEquals(Locator.name("expPerformer"), expPerformer);
@@ -169,7 +168,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         assertTextPresentInThisOrder("----- Start Run Properties -----", "----- End Run Properties -----");
         assertTextPresent("Uploaded Files", "Assay ID", "Isotype", "Conjugate", "Test Date", "Replaces Previous File", "Date file was modified",
                 "Specimen Type", "Additive", "Derivative", "Subtract Negative Bead", "Calc of Standards", "Calc of Unknown",
-                "Curve Fit Log", "Notebook Number", "Assay Type", "Experiment Performer", "Calculate Positivity",
+                "Notebook Number", "Assay Type", "Experiment Performer", "Calculate Positivity",
                 "Baseline Visit", "Positivity Fold Change");
 
         //Check for Batch Properties

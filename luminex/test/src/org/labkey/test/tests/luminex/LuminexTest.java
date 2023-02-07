@@ -599,7 +599,6 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
             setFormElement(Locator.name("conjugate"), conjugate);
             setFormElement(Locator.name("stndCurveFitInput"), stndCurveFitInput);
             setFormElement(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-            uncheckCheckbox(Locator.name("curveFitLogTransform"));
             setFormElement(Locator.name("notebookNo"), notebookNo);
             setFormElement(Locator.name("assayType"), assayType);
             setFormElement(Locator.name("expPerformer"), expPerformer);
