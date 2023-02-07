@@ -714,9 +714,8 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
         //make sure all the columns we want are viable
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.showHiddenItems();
-        _customizeViewsHelper.addColumn("Five ParameterCurveFit/FailureFlag");
         _customizeViewsHelper.addColumn("Four ParameterCurveFit/FailureFlag");
-        _customizeViewsHelper.addColumn("Five ParameterCurveFit/EC50");
+        _customizeViewsHelper.addColumn("Four ParameterCurveFit/EC50");
         _customizeViewsHelper.saveCustomView();
 
         assertTextPresent("Titration QC Report");
@@ -733,14 +732,6 @@ public abstract class LuminexTest extends BaseWebDriverTest implements PostgresO
         for (String flag : fourParamFlag)
         {
             assertEquals(" ", flag);
-        }
-
-        List<String> fiveParamFlag = drt.getColumnDataAsText("Five Parameter Curve Fit Failure Flag");
-        List<String> fiveParamData = drt.getColumnDataAsText("Five Parameter Curve Fit EC50");
-
-        for (int i=0; i < fiveParamData.size(); i++)
-        {
-            assertTrue("Row " + i + " was flagged as 5PL failure but had EC50 data", ((fiveParamFlag.get(i).equals(" ")) ^ (fiveParamData.get(i).equals(" "))));
         }
 
         //verify link to Levey-Jennings plot

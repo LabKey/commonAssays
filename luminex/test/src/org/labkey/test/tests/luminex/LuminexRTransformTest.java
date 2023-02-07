@@ -28,8 +28,11 @@ import org.labkey.test.util.LabKeyExpectedConditions;
 import org.labkey.test.util.LogMethod;
 import org.openqa.selenium.WebElement;
 
+import java.io.File;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 12)
@@ -105,10 +108,9 @@ public final class LuminexRTransformTest extends LuminexTest
         DataRegionTable.DataRegion(getDriver()).find(); // Make sure page is loaded
         WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
         shortWait().until(LabKeyExpectedConditions.animationIsDone(curvePng));
-        mouseOver(curvePng);
-        curvePng.click();
-        assertElementPresent(Locator.linkContainingText(".Standard1_Control_Curves_4PL.pdf"));
-        assertElementPresent(Locator.linkWithText("WithAltNegativeBead.Standard1_4PL.pdf"));
+        File curvePdf = clickAndWaitForDownload(curvePng);
+        assertTrue("Curve PDF has wrong name: " + curvePdf.getName(),
+                curvePdf.getName().endsWith(".Standard1_Control_Curves_4PL.pdf"));
     }
 
     @LogMethod

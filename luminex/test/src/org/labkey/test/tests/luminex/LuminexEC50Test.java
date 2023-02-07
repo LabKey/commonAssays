@@ -118,9 +118,9 @@ public class LuminexEC50Test extends LuminexTest
         assertTrue("Unexpected analyte for Four Parameter curve fit failure", values.size() == 1 && values.get(0).equals("ENV6"));
         table.clearFilter("CurveType");
 
-        // expect four 5PL curve fit failures
+        // expect no 5PL curve fits
         table.setFilter("CurveType", "Equals", "Five Parameter");
-        assertEquals("Unexpected number of Five Parameter curve fit failure flags", 4, table.getDataRowCount());
+        assertEquals("Unexpected number of Five Parameter curve fit rows", 0, table.getDataRowCount());
         table.clearFilter("CurveType");
 
         table.clearFilter("FailureFlag");
