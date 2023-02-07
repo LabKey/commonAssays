@@ -185,6 +185,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
     @Override
     public void runMoved(ExpData newData, Container container, Container targetContainer, String oldRunLSID, String newRunLSID, User user, int oldDataRowID) throws ExperimentException
     {
+        super.runMoved(newData, container, targetContainer, oldRunLSID, newRunLSID, user, oldDataRowID);
         updateRunLSID(newData, container, targetContainer, newRunLSID, user);
     }
 
