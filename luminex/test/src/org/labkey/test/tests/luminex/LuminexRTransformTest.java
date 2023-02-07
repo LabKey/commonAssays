@@ -140,6 +140,10 @@ public final class LuminexRTransformTest extends LuminexTest
         checkCheckbox(Locator.name("_analyte_" + ANALYTE3 + "_NegativeControl"));
         selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE3);
         selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE3);
+        // switch to using MyNegative bead for subtraction
+        checkCheckbox(Locator.name("_analyte_" + ANALYTE4 + "_NegativeControl"));
+        selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE4);
+        selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE4);
         clickButton("Save and Finish");
     }
 

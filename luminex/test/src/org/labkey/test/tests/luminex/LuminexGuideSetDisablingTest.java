@@ -133,8 +133,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
         metricInputs.put("EC504PLAverage", 42158.22);
         metricInputs.put("EC504PLStdDev", 4833.76);
-        metricInputs.put("EC505PLAverage", 40987.31);
-        metricInputs.put("EC505PLStdDev", 4280.84);
         metricInputs.put("AUCAverage", 85268.04);
         metricInputs.put("AUCStdDev", 738.55);
         metricInputs.put("MaxFIAverage", 32507.27);
@@ -187,7 +185,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         clickButtonContainingText("Details", 0);
         waitForElement(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC504PLCheckBox"));
-        click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
         click(SAVE_BTN);
@@ -216,10 +213,8 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams(RUN_BASED_ANALYTE);
         final String plate1_AUC = "64608.73";
         final String plate2_AUC = "61889.88";
-        final String plate1_EC50_5PL = "2.66";
-        final String plate2_EC50_5PL = "5.67";
 
-        validateFlaggedForQC(plate1_EC50_5PL, plate1_AUC, plate2_AUC);
+        validateFlaggedForQC(plate1_AUC, plate2_AUC);
 
         clickButtonContainingText("Details", 0);
         // toggle off the AUC QC flag and then validate errors
@@ -227,13 +222,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         click(Locator.checkboxByName("AUCCheckBox"));
         saveGuideSetParameters();
 
-        validateFlaggedForQC(plate1_EC50_5PL);
-
         // toggle off the rest of the QC flags and then validate errors
         clickButtonContainingText("Details", 0);
         waitForElement(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC504PLCheckBox"));
-        click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         saveGuideSetParameters();
 
@@ -243,12 +235,11 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         clickButtonContainingText("Details", 0);
         waitForElement(Locator.checkboxByName("EC504PLCheckBox"));
         click(Locator.checkboxByName("EC504PLCheckBox"));
-        click(Locator.checkboxByName("EC505PLCheckBox"));
         click(Locator.checkboxByName("MFICheckBox"));
         click(Locator.checkboxByName("AUCCheckBox"));
         saveGuideSetParameters();
 
-        validateFlaggedForQC(plate2_AUC, plate1_EC50_5PL, plate1_AUC);
+        validateFlaggedForQC(plate2_AUC, plate1_AUC);
     }
 
     private void saveGuideSetParameters()
@@ -287,10 +278,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         clickGuideSetDetailsByComment(RUN_BASED_COMMENT);
         validateGuideSetRunDetails("Run-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
-            {"5.284", "0.323", "2" },
-            {"5.339", "0.540", "2" },
-            {"32086.500", "331.633", "2" },
-            {"63299.346", "149.318", "2" },
+            {"5.284", "0.323", "2" }, // EC50 4PL
+            {"N/A", "N/A", "0" }, // EC50 5PL
+            {"32086.500", "331.633", "2" }, // MFI
+            {"63299.346", "149.318", "2" }, // AUC
         });
         // validate checkboxes are not displayed
         assertTextPresent("# Runs");
@@ -301,10 +292,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         clickGuideSetDetailsByComment(VALUE_BASED_COMMENT);
         validateGuideSetRunDetails("Value-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
-            {"42158.220", "4833.760"},
-            {"40987.310", "4280.840"},
-            {"32507.270", "189.830"},
-            {"85268.040", "738.550"}
+            {"42158.220", "4833.760"}, // EC50 4PL
+            {"N/A", "N/A", "0" }, // EC50 5PL
+            {"32507.270", "189.830"}, // MFI
+            {"85268.040", "738.550"} // AUC
         });
         // validate checkboxes are not displayed
         assertTextNotPresent("# Runs");
