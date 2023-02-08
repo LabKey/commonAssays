@@ -479,10 +479,9 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
         //assert ec50 and HMFI red text present
         waitForText(newQcFlags);
-        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='27950.49' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]"));
+        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]")); // EC50
+        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]")); // AUC
+        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]")); // High MFI
         //verify new flags present in run list
         goToTestAssayHome();
         drt = new DataRegionTable("Runs", getDriver());

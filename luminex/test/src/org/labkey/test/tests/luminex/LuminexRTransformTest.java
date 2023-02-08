@@ -67,7 +67,7 @@ public final class LuminexRTransformTest extends LuminexTest
         verifyPDFsGenerated();
         verifyScriptVersions();
         verifyLotNumber();
-        verifyAnalyteProperties(new String[]{ANALYTE3, ANALYTE3, " ", " "});
+        verifyAnalyteProperties(new String[]{ANALYTE4, ANALYTE4, " ", " "});
     }
 
     private void verifyAnalyteProperties(String[] expectedNegBead)
@@ -109,8 +109,7 @@ public final class LuminexRTransformTest extends LuminexTest
         WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
         shortWait().until(LabKeyExpectedConditions.animationIsDone(curvePng));
         File curvePdf = clickAndWaitForDownload(curvePng);
-        assertTrue("Curve PDF has wrong name: " + curvePdf.getName(),
-                curvePdf.getName().endsWith(".Standard1_Control_Curves_4PL.pdf"));
+        assertEquals("Curve PDF has wrong name: " + curvePdf.getName(), "WithAltNegativeBead.Standard1_Control_Curves_4PL.pdf", curvePdf.getName());
     }
 
     @LogMethod
