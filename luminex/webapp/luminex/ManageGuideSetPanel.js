@@ -67,7 +67,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
         var columns = 'RowId, CurrentGuideSet, Comment, Created, ValueBased';
         Ext.each(this.metrics, function(metric){
-            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+            if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
                 columns += ', ' + metric.name + 'Average, ' + metric.name + 'StdDev';
         }, this);
 
@@ -549,7 +549,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var values = {};
 
         Ext.each(this.metrics, function(metric){
-            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+            if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
             {
                 var numFld = this.getMetricMeanValuesPanel().getComponent(metric.name + 'Average');
                 values[numFld.getName()] = numFld.getValue();
