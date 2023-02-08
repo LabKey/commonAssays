@@ -21,6 +21,8 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
     assayName: null,
     currentGuideSetId: null,
     canEdit: false,
+    has4PLCurveFit: false,
+    has5PLCurveFit: false,
 
     statics: {
         viewTpl: new Ext4.XTemplate(
@@ -56,24 +58,28 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                 '</tpl>',
             '</tr>',
             '<tpl if="ControlType ==\'Titration\'">',
-                '<tr class="labkey-alternate-row">',
-                    '<td>EC50 4PL</td>',
-                    '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
-                    '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
-                    '<tpl if="ValueBased &lt; 1">',
-                    '<td align="right">{EC504PLRunCount}</td>',
-                    '<td align="center"><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
+                '<tpl if="CurveType_4PL != null">',
+                    '<tr class="labkey-alternate-row">',
+                        '<td>EC50 4PL</td>',
+                        '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
+                        '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
+                        '<tpl if="ValueBased &lt; 1">',
+                        '<td align="right">{EC504PLRunCount}</td>',
+                        '<td align="center"><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
+                        '</tpl>',
+                    '</tr>',
+                '</tpl>',
+                '<tpl if="CurveType_5PL != null">',
+                    '<tr class="labkey-row">',
+                        '<td>EC50 5PL</td>',
+                        '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
+                        '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
+                        '<tpl if="ValueBased &lt; 1">',
+                        '<td align="right">{EC505PLRunCount}</td>',
+                        '<td align="center"><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
-                '</tr>',
-                '<tr class="labkey-row">',
-                    '<td>EC50 5PL</td>',
-                    '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
-                    '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
-                    '<tpl if="ValueBased &lt; 1">',
-                    '<td align="right">{EC505PLRunCount}</td>',
-                    '<td align="center"><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
-                    '</tpl>',
-                '</tr>',
+                    '</tr>',
+                '</tpl>',
             '</tpl>',
             '<tr class="labkey-alternate-row">',
                 '<td>MFI</td>',
@@ -215,6 +221,8 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     {name: 'EC505PLRunCount', type: 'int'},
                     {name: 'AUCRunCount', type: 'int'},
                     {name: 'ControlType'},
+                    {name: 'CurveType_4PL'},
+                    {name: 'CurveType_5PL'},
                     {name: 'UserCanEdit', type: 'boolean', defaultValue: this.canEdit}
                 ]
             });
@@ -236,6 +244,9 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         sql: 'SELECT RowId, AnalyteName, Conjugate, Isotype, Comment, Created, ValueBased, ' +
                              'ControlName, EC504PLEnabled, EC505PLEnabled, AUCEnabled, MaxFIEnabled, ' +
                              'MaxFIRunCount, EC504PLRunCount, EC505PLRunCount, AUCRunCount, ControlType, ' +
+                             // if defined checks for curve fit types
+                             'IFDEFINED("Four ParameterCurveFit".CurveType) AS CurveType_4PL, ' +
+                             'IFDEFINED("Five ParameterCurveFit".CurveType) AS CurveType_5PL,' +
                              // handle value-based vs run-based
                              'CASE ValueBased WHEN true THEN EC504PLAverage ELSE "Four ParameterCurveFit".EC50Average END "EC504PLAverage", ' +
                              'CASE ValueBased WHEN true THEN EC504PLStdDev ELSE "Four ParameterCurveFit".EC50StdDev END "EC504PLStdDev", ' +
@@ -267,6 +278,9 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     var record = Ext4.create('Luminex.model.GuideSet', response.rows[0]);
                     this.add(record);
 
+                    this.has4PLCurveFit = record.get("CurveType_4PL") != null;
+                    this.has5PLCurveFit = record.get("CurveType_5PL") != null;
+
                     // Now that store is loaded, set combos (if not value based)
                     var form = document.forms['GuideSetForm'];
                     if (!record.get("ValueBased"))
@@ -275,8 +289,8 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
                         if(record.get("ControlType") == "Titration")
                         {
-                            form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
-                            form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
+                            if (this.has4PLCurveFit) form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
+                            if (this.has5PLCurveFit) form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
                             form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
                         }
                     }

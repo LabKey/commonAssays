@@ -116,6 +116,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
         addColumn(wrapColumn(getRealTable().getColumn("IncludeInGuideSetCalculation")));
 
+        List<String> curveTypes = _userSchema.getCurveTypes();
         addCurveTypeColumns();
 
         var ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
@@ -144,8 +145,10 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
                         NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
                         ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
-                        ljPlotsNav.addChild("EC50 - 4PL", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
-                        ljPlotsNav.addChild("EC50 - 5PL Rumi", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
+                        if (curveTypes.contains(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
+                            ljPlotsNav.addChild("EC50 - 4PL", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
+                        if (curveTypes.contains(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
+                            ljPlotsNav.addChild("EC50 - 5PL Rumi", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
                         ljPlotsNav.addChild("AUC", String.format(jsFuncCall, protocolId, analyte, titration, "AUC"));
                         ljPlotsNav.addChild("High MFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
 
@@ -187,8 +190,10 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Conjugate"));
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50"));
-        defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
+        if (curveTypes.contains(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
+            defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FOUR_PARAMETER.getLabel() + "CurveFit", "EC50"));
+        if (curveTypes.contains(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
+            defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
         defaultCols.add(FieldKey.fromParts("MaxFI"));
         defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
         setDefaultVisibleColumns(defaultCols);

@@ -62,7 +62,9 @@
         var defaultRowSize = 30;
 
         // local variables for storing the selected graph parameters
-        var _protocolId, _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate, _protocolExists = false, _networkExists = false;
+        var _protocolId, _protocolName, _controlName, _controlType, _analyte, _isotype, _conjugate,
+                _protocolExists = false, _networkExists = false,
+                _has4PLCurveFit = false, _has5PLCurveFit = false;
 
         function init()
         {
@@ -87,12 +89,27 @@
                 return;
             }
 
-            var getByNameQueryComplete = false, executeSqlQueryComplete = false;
+            var getByNameQueryComplete = false, executeSqlQueryComplete = false, getCurveFitTypes = false;
             var loader = function() {
                 if (getByNameQueryComplete && executeSqlQueryComplete) {
                     initializeReportPanels();
                 }
             };
+
+            // Query to see if 4PL and/or 5PL curve fit data exists for this assay
+            LABKEY.Query.selectDistinctRows({
+                schemaName: 'assay.Luminex.' + _protocolName,
+                queryName: 'CurveFit',
+                column: 'CurveType',
+                scope: this,
+                success: function(results){
+                    var curveTypes = results.values;
+                    _has4PLCurveFit = curveTypes.indexOf('Four Parameter') > -1;
+                    _has5PLCurveFit = curveTypes.indexOf('Five Parameter') > -1;
+                    getCurveFitTypes = true;
+                    loader();
+                }
+            });
 
             // Query the assay design to check for the required columns for the L-J report and the existance of Network and Protocol columns
             LABKEY.Assay.getByName({
@@ -208,6 +225,8 @@
                 assayName: _protocolName,
                 networkExists: _networkExists,
                 protocolExists: _protocolExists,
+                has4PLCurveFit: _has4PLCurveFit,
+                has5PLCurveFit: _has5PLCurveFit,
                 listeners: {
                     'currentGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
@@ -233,6 +252,8 @@
                 defaultRowSize: defaultRowSize,
                 networkExists: _networkExists,
                 protocolExists: _protocolExists,
+                has4PLCurveFit: _has4PLCurveFit,
+                has5PLCurveFit: _has5PLCurveFit,
                 listeners: {
                     'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
                         trendPlotPanel.setTrendPlotLoading();
@@ -254,6 +275,8 @@
                 defaultRowSize: defaultRowSize,
                 networkExists: _networkExists,
                 protocolExists: _protocolExists,
+                has4PLCurveFit: _has4PLCurveFit,
+                has5PLCurveFit: _has5PLCurveFit,
                 listeners: {
                     'appliedGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
