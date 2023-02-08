@@ -395,10 +395,10 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
         assertElementPresent(Locator.id("EC504PLTrendPlotDiv"));
 
-        // check5PL  ec50 trending plot
-        click(Locator.tagWithText("span", "EC50 - 5PL Rumi"));
-        _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent(Locator.id("EC505PLTrendPlotDiv"));
+        // check 5PL ec50 trending plot tab not shown
+        assertElementNotPresent(Locator.linkWithText("EC50 - 5PL Rumi"));
+        assertTextNotPresent("EC50 - 5PL Rumi");
+        assertElementNotPresent(Locator.id("EC505PLTrendPlotDiv"));
 
         // check auc trending plot
         click(Locator.tagWithText("span", "AUC"));
