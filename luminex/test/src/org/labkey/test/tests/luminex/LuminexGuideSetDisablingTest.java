@@ -279,7 +279,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         validateGuideSetRunDetails("Run-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
             {"5.284", "0.323", "2" }, // EC50 4PL
-            {"N/A", "N/A", "0" }, // EC50 5PL
             {"32086.500", "331.633", "2" }, // MFI
             {"63299.346", "149.318", "2" }, // AUC
         });
@@ -293,7 +292,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         validateGuideSetRunDetails("Value-based", "Titration");
         validateGuideSetMetricsDetails(new String[][]{
             {"42158.220", "4833.760"}, // EC50 4PL
-            {"N/A", "N/A", "0" }, // EC50 5PL
             {"32507.270", "189.830"}, // MFI
             {"85268.040", "738.550"} // AUC
         });
