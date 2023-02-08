@@ -594,10 +594,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String[] newColumns = {"AnalyteTitration/MaxFIQCFlagsEnabled", "AnalyteTitration/MaxFI",
                 "AnalyteTitration/Four ParameterCurveFit/EC50", "AnalyteTitration/Four ParameterCurveFit/AUC",
                 "AnalyteTitration/Four ParameterCurveFit/EC50QCFlagsEnabled",
-                "AnalyteTitration/Four ParameterCurveFit/AUCQCFlagsEnabled",
-                "AnalyteTitration/Five ParameterCurveFit/EC50", "AnalyteTitration/Five ParameterCurveFit/AUC",
-                "AnalyteTitration/Five ParameterCurveFit/EC50QCFlagsEnabled",
-                "AnalyteTitration/Five ParameterCurveFit/AUCQCFlagsEnabled"};
+                "AnalyteTitration/Four ParameterCurveFit/AUCQCFlagsEnabled"};
         for(String column : newColumns)
         {
             _customizeViewsHelper.addColumn(column);
