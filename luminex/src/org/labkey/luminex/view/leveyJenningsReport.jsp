@@ -91,7 +91,7 @@
 
             var getByNameQueryComplete = false, executeSqlQueryComplete = false, getCurveFitTypes = false;
             var loader = function() {
-                if (getByNameQueryComplete && executeSqlQueryComplete) {
+                if (getByNameQueryComplete && executeSqlQueryComplete && getCurveFitTypes) {
                     initializeReportPanels();
                 }
             };
