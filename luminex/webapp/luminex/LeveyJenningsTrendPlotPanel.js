@@ -505,7 +505,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
     getTitrationSinglePointControlItems: function() {
         if (this.controlType == "Titration") {
-            return([this.ec504plPanel, this.ec505plPanel, this.aucPanel, this.mfiPanel]);
+            var panels = [];
+            if (this.has4PLCurveFit) panels.push(this.ec504plPanel);
+            if (this.has5PLCurveFit) panels.push(this.ec505plPanel);
+            panels.push(this.aucPanel);
+            panels.push(this.mfiPanel);
+            return(panels);
         } else if (this.controlType = "SinglePoint") {
             return([this.singlePointControlPanel]);
         }

@@ -83,8 +83,6 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         _guideSetHelper.createGuideSet(true);
         metricInputs.put("EC504PLAverage", 179.60);
         metricInputs.put("EC504PLStdDev", 22.48);
-        metricInputs.put("EC505PLAverage", 249.04);
-        metricInputs.put("EC505PLStdDev", 12.41);
         metricInputs.put("AUCAverage", 8701.37);
         metricInputs.put("AUCStdDev", 466.82);
         metricInputs.put("MaxFIAverage", 11457.15);
@@ -98,8 +96,6 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         _guideSetHelper.createGuideSet(true);
         metricInputs.put("EC504PLAverage", 43426.10);
         metricInputs.put("EC504PLStdDev", 794.96);
-        metricInputs.put("EC505PLAverage", 45242.19);
-        metricInputs.put("EC505PLStdDev", 10007.113);
         metricInputs.put("AUCAverage", 80851.74);
         metricInputs.put("AUCStdDev", 6523.05);
         metricInputs.put("MaxFIAverage", 30992.25);
@@ -131,8 +127,6 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         // The automation library clears a txt box before entering a new value, so we need to update both the Avg and the StdDev.
         _guideSetHelper.setUpLeveyJenningsGraphParams(LuminexGuideSetHelper.GUIDE_SET_ANALYTE_NAMES[0]);
         clickButtonContainingText("Edit", 0);
-        metricInputs.put("EC505PLAverage", 325.0);
-        metricInputs.put("EC505PLStdDev", 100.0);
         metricInputs.put("AUCAverage", 7800.0);
         metricInputs.put("AUCStdDev", 466.82);
         metricInputs.put("MaxFIAverage", 10200.0);
@@ -144,8 +138,6 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
         _guideSetHelper.createGuideSet(false);
         metricInputs.put("EC504PLAverage", 42158.38);
         metricInputs.put("EC504PLStdDev", 4833.95);
-        metricInputs.put("EC505PLAverage", 44249.59);
-        metricInputs.put("EC505PLStdDev", 8084.973);
         metricInputs.put("AUCAverage", 85267.94);
         metricInputs.put("AUCStdDev", 738.53);
         metricInputs.put("MaxFIAverage", 32507.27);

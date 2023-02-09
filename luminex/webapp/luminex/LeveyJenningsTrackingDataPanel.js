@@ -187,9 +187,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         if (this.controlType == "Titration")
         {
             cols.splice(2, 0, {header: 'Titration', dataIndex: 'Titration', hidden: true, renderer: this.encodingRenderer});
-            cols.push({header: 'EC50 4PL', dataIndex: 'EC504PL', width: 75, renderer: this.outOfRangeRenderer("EC504PLQCFlagsEnabled"), scope: this, align: 'right'});
+            cols.push({header: 'EC50 4PL', dataIndex: 'EC504PL', width: 75, renderer: this.outOfRangeRenderer("EC504PLQCFlagsEnabled"), scope: this, align: 'right', hidden: !this.has4PLCurveFit});
             cols.push({header: 'EC50 4PL QC Flags Enabled', dataIndex: 'EC504PLQCFlagsEnabled', hidden: true});
-            cols.push({header: 'EC50 5PL', dataIndex: 'EC505PL', width: 75, renderer: this.outOfRangeRenderer("EC505PLQCFlagsEnabled"), scope: this, align: 'right'});
+            cols.push({header: 'EC50 5PL', dataIndex: 'EC505PL', width: 75, renderer: this.outOfRangeRenderer("EC505PLQCFlagsEnabled"), scope: this, align: 'right', hidden: !this.has5PLCurveFit});
             cols.push({header: 'EC50 5PL QC Flags Enabled', dataIndex: 'EC505PLQCFlagsEnabled', hidden: true});
             cols.push({header: 'AUC', dataIndex: 'AUC', width: 75, renderer: this.outOfRangeRenderer("AUCQCFlagsEnabled"), scope: this, align: 'right'});
             cols.push({header: 'AUC  QC Flags Enabled', dataIndex: 'AUCQCFlagsEnabled', hidden: true});
