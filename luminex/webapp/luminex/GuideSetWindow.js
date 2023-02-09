@@ -22,6 +22,10 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
     currentGuideSetId: null,
     canEdit: false,
 
+    // These values will be set in the constructor via the LABKEY.Query.selectDistinctRows call
+    has4PLCurveFit: false,
+    has5PLCurveFit: false,
+
     statics: {
         viewTpl: new Ext4.XTemplate(
             '<style>table.gsDetails th {font-weight:bold;padding:3px;vertical-align: top;}</style>',
@@ -56,24 +60,28 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                 '</tpl>',
             '</tr>',
             '<tpl if="ControlType ==\'Titration\'">',
-                '<tr class="labkey-alternate-row">',
-                    '<td>EC50 4PL</td>',
-                    '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
-                    '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
-                    '<tpl if="ValueBased &lt; 1">',
-                    '<td align="right">{EC504PLRunCount}</td>',
-                    '<td align="center"><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
+                '<tpl if="has4PLCurveFit == true">',
+                    '<tr class="labkey-alternate-row">',
+                        '<td>EC50 4PL</td>',
+                        '<td align="right">{[this.formatNumber(values.EC504PLAverage)]}</td>',
+                        '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
+                        '<tpl if="ValueBased &lt; 1">',
+                        '<td align="right">{EC504PLRunCount}</td>',
+                        '<td align="center"><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
+                        '</tpl>',
+                    '</tr>',
+                '</tpl>',
+                '<tpl if="has5PLCurveFit == true">',
+                    '<tr class="labkey-row">',
+                        '<td>EC50 5PL</td>',
+                        '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
+                        '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
+                        '<tpl if="ValueBased &lt; 1">',
+                        '<td align="right">{EC505PLRunCount}</td>',
+                        '<td align="center"><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
-                '</tr>',
-                '<tr class="labkey-row">',
-                    '<td>EC50 5PL</td>',
-                    '<td align="right">{[this.formatNumber(values.EC505PLAverage)]}</td>',
-                    '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
-                    '<tpl if="ValueBased &lt; 1">',
-                    '<td align="right">{EC505PLRunCount}</td>',
-                    '<td align="center"><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
-                    '</tpl>',
-                '</tr>',
+                    '</tr>',
+                '</tpl>',
             '</tpl>',
             '<tr class="labkey-alternate-row">',
                 '<td>MFI</td>',
@@ -176,9 +184,23 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
         this.assayName = config['assayName'];
         this.addEvents('aftersave');
         this.callParent([config]);
-        // wait till after constructed so that currentGuideSetId is set and assayName
-        this.getGuideSetStore().load();
-        this.show();
+
+        // Query to see if 4PL and/or 5PL curve fit data exists for this assay
+        LABKEY.Query.selectDistinctRows({
+            schemaName: 'assay.Luminex.'+LABKEY.QueryKey.encodePart(this.assayName),
+            queryName: 'CurveFit',
+            column: 'CurveType',
+            scope: this,
+            success: function(results){
+                var curveTypes = results.values;
+                this.has4PLCurveFit = curveTypes.indexOf('Four Parameter') > -1;
+                this.has5PLCurveFit = curveTypes.indexOf('Five Parameter') > -1;
+
+                // wait till after constructed so that currentGuideSetId is set and assayName
+                this.getGuideSetStore().load();
+                this.show();
+            }
+        });
     },
 
     // NOTE: consider putting store/model into seperate file...
@@ -215,12 +237,15 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     {name: 'EC505PLRunCount', type: 'int'},
                     {name: 'AUCRunCount', type: 'int'},
                     {name: 'ControlType'},
+                    {name: 'has4PLCurveFit', type: 'boolean'},
+                    {name: 'has5PLCurveFit', type: 'boolean'},
                     {name: 'UserCanEdit', type: 'boolean', defaultValue: this.canEdit}
                 ]
             });
 
             var assayName = this.assayName;
             var currentGuideSetId = this.currentGuideSetId;
+            var gsWindow = this;
 
             Ext4.define('Luminex.store.GuideSet', {
                 extend: 'Ext.data.Store',
@@ -263,6 +288,10 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         return;
                     }
 
+                    // add in the has4PLCurveFit and has5PLCurveFit info to the record so that it can be used in the tpl
+                    response.rows[0]['has4PLCurveFit'] = gsWindow.has4PLCurveFit;
+                    response.rows[0]['has5PLCurveFit'] = gsWindow.has5PLCurveFit;
+
                     this.removeAll();
                     var record = Ext4.create('Luminex.model.GuideSet', response.rows[0]);
                     this.add(record);
@@ -275,8 +304,8 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
                         if(record.get("ControlType") == "Titration")
                         {
-                            form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
-                            form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
+                            if (gsWindow.has4PLCurveFit) form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
+                            if (gsWindow.has5PLCurveFit) form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
                             form.elements['AUCCheckBox'].initial = record.get("AUCEnabled");
                         }
                     }

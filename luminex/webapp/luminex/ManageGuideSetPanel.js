@@ -30,12 +30,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
 
     labelStyleStr : 'padding: 0; margin: 0;',
 
-    metrics : [
-        {name: 'EC504PL', label: 'EC50 4PL', includeForSinglePointControl: false},
-        {name: 'EC505PL', label: 'EC50 5PL (Rumi)', includeForSinglePointControl: false},
-        {name: 'AUC', label: 'AUC', includeForSinglePointControl: false},
-        {name: 'MaxFI', label: 'High MFI', includeForSinglePointControl: true}
-    ],
+    metrics : [],
 
     constructor : function(config){
         // check that the config properties needed are present
@@ -63,9 +58,16 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
     initComponent : function() {
         LABKEY.ManageGuideSetPanel.superclass.initComponent.call(this);
 
+        this.metrics = [
+            {name: 'EC504PL', label: 'EC50 4PL', includeForSinglePointControl: false, hidden: !this.has4PLCurveFit},
+            {name: 'EC505PL', label: 'EC50 5PL (Rumi)', includeForSinglePointControl: false, hidden: !this.has5PLCurveFit},
+            {name: 'AUC', label: 'AUC', includeForSinglePointControl: false, hidden: false},
+            {name: 'MaxFI', label: 'High MFI', includeForSinglePointControl: true, hidden: false}
+        ];
+
         var columns = 'RowId, CurrentGuideSet, Comment, Created, ValueBased';
         Ext.each(this.metrics, function(metric){
-            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+            if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
                 columns += ', ' + metric.name + 'Average, ' + metric.name + 'StdDev';
         }, this);
 
@@ -219,8 +221,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             allRunsCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
             if (this.isTitrationControlType())
             {
-                allRunsCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
-                allRunsCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+                allRunsCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has4PLCurveFit});
+                allRunsCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has5PLCurveFit});
                 allRunsCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
                 allRunsCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
             }
@@ -300,8 +302,8 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         guideRunSetCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
         if (this.isTitrationControlType())
         {
-            guideRunSetCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
-            guideRunSetCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            guideRunSetCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has4PLCurveFit});
+            guideRunSetCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has5PLCurveFit});
             guideRunSetCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
             guideRunSetCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
         }
@@ -492,7 +494,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
 
             Ext.each(this.metrics, function(metric){
-                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
                     this.metricLabelsPanel.add(this.createLabelField(metric.label + ':'));
             }, this);
         }
@@ -510,7 +512,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
 
             Ext.each(this.metrics, function(metric){
-                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
                     this.metricMeanValuesPanel.add(this.createNumberField(metric.name + 'Average'));
             }, this);
         }
@@ -528,7 +530,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
             });
 
             Ext.each(this.metrics, function(metric){
-                if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+                if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
                 {
                     // issue 20152: don't allow std dev if average is blank
                     var stdDevField = this.createNumberField(metric.name + 'StdDev');
@@ -547,7 +549,7 @@ LABKEY.ManageGuideSetPanel = Ext.extend(Ext.FormPanel, {
         var values = {};
 
         Ext.each(this.metrics, function(metric){
-            if (this.isTitrationControlType() || metric.includeForSinglePointControl)
+            if ((this.isTitrationControlType() || metric.includeForSinglePointControl) && !metric.hidden)
             {
                 var numFld = this.getMetricMeanValuesPanel().getComponent(metric.name + 'Average');
                 values[numFld.getName()] = numFld.getValue();

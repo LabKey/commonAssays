@@ -44,7 +44,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 {
     public LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     public static final File[] GUIDE_SET_FILES = {TEST_ASSAY_LUM_FILE5, TEST_ASSAY_LUM_FILE6, TEST_ASSAY_LUM_FILE7, TEST_ASSAY_LUM_FILE8, TEST_ASSAY_LUM_FILE9};
-    public static final String[] INITIAL_EXPECTED_FLAGS = {"AUC, EC50-4, HMFI, PCV", "AUC, EC50-4, EC50-5, HMFI", "EC50-5, HMFI", "", "PCV"};
+    public static final String[] INITIAL_EXPECTED_FLAGS = {"AUC, EC50-4, HMFI, PCV", "AUC, EC50-4, HMFI", "HMFI", "", "PCV"};
 
     private final String GUIDE_SET_5_COMMENT = "analyte 2 guide set run removed";
 
@@ -54,7 +54,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.TESTDATE.add(Calendar.DATE, -GUIDE_SET_FILES.length);
     }
 
-    //requires drc, Ruminex, rlabkey and xtable packages installed in R
+    //requires drc, rlabkey and xtable packages installed in R
     @Test
     public void testGuideSet()
     {
@@ -284,7 +284,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkWithText("Text View"));
         waitForElement(Locator.css(".labkey-protocol-applications")); // bottom section of the "Text View" tab for the run details page
         waitForElements(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_4PL.pdf"), 3);
-        assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_5PL.pdf"), 3);
+        assertElementNotPresent(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_5PL.pdf"));
         assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".xls"), 4);
         assertElementPresent(Locator.linkWithText("Guide Set plate " + index + ".labkey_luminex_transform.Rout"), 3);
 
@@ -395,10 +395,10 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
         assertElementPresent(Locator.id("EC504PLTrendPlotDiv"));
 
-        // check5PL  ec50 trending plot
-        click(Locator.tagWithText("span", "EC50 - 5PL Rumi"));
-        _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        assertElementPresent(Locator.id("EC505PLTrendPlotDiv"));
+        // check 5PL ec50 trending plot tab not shown
+        assertElementNotPresent(Locator.linkWithText("EC50 - 5PL Rumi"));
+        assertTextNotPresent("EC50 - 5PL Rumi");
+        assertElementNotPresent(Locator.id("EC505PLTrendPlotDiv"));
 
         // check auc trending plot
         click(Locator.tagWithText("span", "AUC"));
@@ -474,20 +474,19 @@ public final class LuminexGuideSetTest extends LuminexTest
         //	- QC Flags added for EC50 and HMFI
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        String newQcFlags = "AUC, EC50-4, EC50-5, HMFI";
+        String newQcFlags = "AUC, EC50-4, HMFI";
         assertTextNotPresent(newQcFlags);
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
         //assert ec50 and HMFI red text present
         waitForText(newQcFlags);
-        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='27950.49' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]"));
-        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]"));
+        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]")); // EC50
+        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]")); // AUC
+        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]")); // High MFI
         //verify new flags present in run list
         goToTestAssayHome();
         drt = new DataRegionTable("Runs", getDriver());
         drt.goToView("QC Flags View");
-        assertTextPresent("AUC, EC50-4, EC50-5, HMFI, PCV");
+        assertTextPresent("AUC, EC50-4, HMFI, PCV");
 
         //5. For GS Analyte B, apply the guide set for plate 5a back to the current guide set
         //	- the EC50 and HMFI QC Flags that were added in step 4 are removed
@@ -537,8 +536,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void assertQCFlagsNotPresent()
     {
-        // NOTE: don't check EC50-5 as it is inconsistent
-        for(String flag : new String[] {"AUC", "HMFI", "EC50-4", "PCV"})
+        for (String flag : new String[] {"AUC", "HMFI", "EC50-4", "EC50-5", "PCV"})
         {
             assertElementNotPresent(Locator.xpath("//a[contains(text(),'" + flag + "')]"));
         }
@@ -596,10 +594,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String[] newColumns = {"AnalyteTitration/MaxFIQCFlagsEnabled", "AnalyteTitration/MaxFI",
                 "AnalyteTitration/Four ParameterCurveFit/EC50", "AnalyteTitration/Four ParameterCurveFit/AUC",
                 "AnalyteTitration/Four ParameterCurveFit/EC50QCFlagsEnabled",
-                "AnalyteTitration/Four ParameterCurveFit/AUCQCFlagsEnabled",
-                "AnalyteTitration/Five ParameterCurveFit/EC50", "AnalyteTitration/Five ParameterCurveFit/AUC",
-                "AnalyteTitration/Five ParameterCurveFit/EC50QCFlagsEnabled",
-                "AnalyteTitration/Five ParameterCurveFit/AUCQCFlagsEnabled"};
+                "AnalyteTitration/Four ParameterCurveFit/AUCQCFlagsEnabled"};
         for(String column : newColumns)
         {
             _customizeViewsHelper.addColumn(column);

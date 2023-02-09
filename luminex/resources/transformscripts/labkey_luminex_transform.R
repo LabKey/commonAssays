@@ -5,16 +5,9 @@
 #
 # Transform script for Luminex Assay.
 #
-# First, the script subtracts the FI-Bkgd value for the negative bead from the FI-Bkgd value
+# The script subtracts the FI-Bkgd value for the negative bead from the FI-Bkgd value
 # for the other analytes within a given run data file. It also converts FI-Bkgd and FI-Bkgd-Neg
 # values that are <= 0 to 1 (as per the lab's request).
-#
-# Next, the script calculates curve fit parameters for each titration/analyte combination using both
-# 4PL and 5PL curve fits (from the fit.drc function in the Ruminex package (developed by Youyi at SCHARP).
-#
-# Then, the script calculates new estimated concentration values for unknown samples using the
-# rumi function. The rumi function takes a dataframe as input and uses the given Standard curve data to
-# calculate est.log.conc an se for the unknowns.
 #
 # CHANGES :
 #  - 2.1.20111216 : Issue 13696: Luminex transform script should use excel file titration "Type" for EC50 and Conc calculations
@@ -37,17 +30,16 @@
 #  - 9.2.20141103 : Issue 21268: Add OtherControl titrations to PDF output of curves from transform script
 #  - 10.0.20150910 : Changes for LabKey server 15.2. Issue 23230: Luminex transform script error when standard or QC control name has a slash in it
 #  - 10.1.20180903 : Use transform script helper functions from Rlabkey package
+#  - 11.0.20230206 : Remove Ruminex package usage and calculations
 #
 # Author: Cory Nathe, LabKey
-transformVersion = "10.1.20180903";
+transformVersion = "11.0.20230206";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
 
 source("${srcDirectory}/youtil.R");
-# Ruminex package available from https://www.labkey.org/Documentation/wiki-page.view?name=configureLuminexScript
-suppressMessages(library(Ruminex));
-ruminexVersion = installed.packages()["Ruminex","Version"];
+suppressMessages(library(drc));
 
 suppressMessages(library(Rlabkey));
 
@@ -247,7 +239,6 @@ bothRawAndSummary = any(run.data$summary == "true") & any(run.data$summary == "f
 runprop.output.file = labkey.transform.getRunPropertyValue(run.props, "transformedRunPropertiesFile");
 fileConn<-file(runprop.output.file);
 writeLines(c(paste("TransformVersion",transformVersion,sep="\t"),
-    paste("RuminexVersion",ruminexVersion,sep="\t"),
     paste("RVersion",rVersion,sep="\t")), fileConn);
 close(fileConn);
 
@@ -264,30 +255,9 @@ run.data$Upper_4pl = NA;
 run.data$Inflection_4pl = NA;
 run.data$EC50_4pl = NA;
 run.data$Flag_4pl = NA;
-run.data$Slope_5pl = NA;
-run.data$Lower_5pl = NA;
-run.data$Upper_5pl = NA;
-run.data$Inflection_5pl = NA;
-run.data$Asymmetry_5pl = NA;
-run.data$EC50_5pl = NA;
-run.data$Flag_5pl = NA;
 
 # get the unique analyte values
 analytes = unique(run.data$name);
-
-# determine if the curve fits should be done with or without log transform
-curveFitLogTransform = TRUE;
-if (any(run.props$name == "CurveFitLogTransform")) {
-    propVal = labkey.transform.getRunPropertyValue(run.props, "CurveFitLogTransform");
-    if (!is.na(propVal) & propVal != "1") curveFitLogTransform = FALSE;
-}
-
-# set the weighting variance variable for use in the non-log tranform curve fits
-drm.weights.var.power = -1.8;
-if (any(run.props$name == "WeightingPower")) {
-    propVal = labkey.transform.getRunPropertyValue(run.props, "WeightingPower");
-    if (!is.na(propVal) & propVal != "") drm.weights.var.power = as.numeric(propVal);
-}
 
 # loop through the possible titrations and to see if it is a standard, qc control, or titrated unknown
 if (nrow(titration.data) > 0)
@@ -303,8 +273,8 @@ if (nrow(titration.data) > 0)
     {
        titrationName = as.character(titrationDataRow$Name);
 
-       # 2 types of curve fits for the EC50 calculations, with separate PDFs for the QC Curves
-       fitTypes = c("4pl", "5pl");
+       # use 4pl curve fit for the EC50 calculations, with separate PDFs for the QC Curves
+       fitTypes = c("4pl");
        for (typeIndex in 1:length(fitTypes))
        {
           # we want to create PDF plots of the curves for QC Controls
@@ -413,75 +383,11 @@ if (nrow(titration.data) > 0)
                     if (all(is.na(run.data[runDataIndex,]$EC50_4pl))) {
                         run.data[runDataIndex,]$Flag_4pl = TRUE;
                     }
-                } else if (fitTypes[typeIndex] == "5pl")
-                {
-                    tryCatch({
-                            if (curveFitLogTransform) {
-                                formula = log(fi)~dose
-                                weighting = FALSE
-                            } else {
-                                formula = fi~dose
-                                weighting = TRUE
-                                dat.avg=aggregate(dat$fi, by = list(dat$name, dat$dose, dat$dataId), mean)
-                                names(dat.avg) = c("name", "dose","dataId", "fi.avg")
-                                dat = merge(dat, dat.avg, by=c("name", "dose", "dataId"), all.x=T, all.y=T)
-                            }
-                            fit = fit.drc(formula, data=dat, weighting=weighting, force.fit=TRUE, fit.4pl=FALSE);
-                            run.data[runDataIndex,]$Slope_5pl = maxValueConversion(as.numeric(coef(fit))[1]);
-                            run.data[runDataIndex,]$Lower_5pl = maxValueConversion(as.numeric(coef(fit))[2]);
-                            run.data[runDataIndex,]$Upper_5pl = maxValueConversion(as.numeric(coef(fit))[3]);
-                            run.data[runDataIndex,]$Inflection_5pl = maxValueConversion(as.numeric(coef(fit))[4]);
-                            run.data[runDataIndex,]$Asymmetry_5pl = maxValueConversion(as.numeric(coef(fit))[5]);
-
-                            if (curveFitLogTransform) {
-                                yLabel = paste("log(",yLabel,")", sep="");
-                                y = log((exp(run.data[runDataIndex,]$Lower_5pl) + exp(run.data[runDataIndex,]$Upper_5pl)) / 2)
-                            } else {
-                                y = (run.data[runDataIndex,]$Lower_5pl + run.data[runDataIndex,]$Upper_5pl) / 2;
-                            }
-                            ec50 = unname(getConc(fit, y))[3];
-                            if (is.nan(ec50) | ec50 > 10e6) {
-                                writeErrorOrWarning("warn", paste("Warning: EC50 5pl value out of acceptable range (either outside standards MFI or greater than 10e6) for ", titrationName, " ", analyteName, ".", sep=""));
-                            } else {
-                                run.data[runDataIndex,]$EC50_5pl = ec50;
-                            }
-
-                            # plot the curve fit for the QC Controls
-                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
-                                plot(fit, type="all", main=analyteName, cex=.5, ylab=yLabel, xlab=xLabel);
-                            }
-                        },
-                        error = function(e) {
-                            print(e);
-
-                            # plot the individual data points for the QC Controls
-                            if (curveFitLogTransform) {
-                                yLabel = paste("log(",yLabel,")", sep="");
-                                logAxes = "xy"
-                            } else {
-                                logAxes = "x";
-                            }
-                            if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
-                                plot(fi ~ dose, data = dat, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel);
-                            }
-                        }
-                    );
-
-                    # set the failure flag if there is no EC50 value at this point
-                    if (all(is.na(run.data[runDataIndex,]$EC50_5pl))) {
-                        run.data[runDataIndex,]$Flag_5pl = TRUE;
-                    }
                 }
             } else {
                 # create an empty plot indicating that there is no data available
                 if (titrationDataRow$QCControl == "true" | titrationDataRow$OtherControl == "true") {
-                    if (curveFitLogTransform) {
-                        yLabel = paste("log(",yLabel,")", sep="");
-                        logAxes = "xy"
-                    } else {
-                        logAxes = "x";
-                    }
-                    plot(NA, NA, log=logAxes, cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
+                    plot(NA, NA, log="x", cex=.5, las=1, main=paste("FAILED:", analyteName, sep=" "), ylab=yLabel, xlab=xLabel, xlim=c(1,1), ylim=c(0,1));
                     text(1, 0.5, "Data Not Available");
                 }
             }
@@ -496,247 +402,7 @@ if (nrow(titration.data) > 0)
   }
 }
 
-################################## STEP 4: CALCULATE EST CONC #################################
-
-# initialize the columns to be calculated
-run.data$EstLogConc_5pl = NA;
-run.data$EstConc_5pl = NA;
-run.data$SE_5pl = NA;
-
-run.data$EstLogConc_4pl = NA;
-run.data$EstConc_4pl = NA;
-run.data$SE_4pl = NA;
-
-run.data$Standard = NA;
-run.data$well_role = ""; # initialize to empty string and set to Standard accordingly, well_role used by Rumi function
-
-# determine if the Ruminex curve fits should be run
-runRumiCalculation = TRUE;
-if (any(run.props$name == "SkipRumiCalculation")) {
-    propVal = labkey.transform.getRunPropertyValue(run.props, "SkipRumiCalculation");
-    if (!is.na(propVal) & propVal == "1") runRumiCalculation = FALSE;
-}
-
-if (runRumiCalculation)
-{
-    # get the analyte associated standard/titration information from the analyte data file and put it into the run.data object
-    for (index in 1:nrow(analyte.data))
-    {
-        # hold on to the run data for the given analyte
-        run.analyte.data = subset(run.data, as.character(name) == as.character(analyte.data$Name[index]));
-
-        # some analytes may have > 1 standard selected
-        stndSet = unlist(strsplit(as.character(analyte.data$titrations[index]), ","));
-
-        # if there are more than 1 standard for this analyte, duplicate run.data records for that analyte and set standard accordingly
-        if (length(stndSet) > 0)
-        {
-            for (stndIndex in 1:length(stndSet))
-            {
-                if (stndIndex == 1)
-                {
-                    run.data$Standard[as.character(run.data$name) == as.character(analyte.data$Name[index])] = stndSet[stndIndex];
-                    run.data$well_role[as.character(run.data$name) == as.character(analyte.data$Name[index]) & run.data$description == stndSet[stndIndex]] = "Standard";
-                } else
-                {
-                    temp.data = run.analyte.data;
-                    temp.data$Standard = stndSet[stndIndex];
-                    temp.data$well_role[temp.data$description == stndSet[stndIndex]] = "Standard";
-                    temp.data$lsid = NA; # lsid will be set by the server
-                    run.data = rbind(run.data, temp.data);
-                }
-            }
-        }
-    }
-
-    # get the unique standards (not including NA or empty string)
-    standards = setdiff(unique(run.data$Standard), c(NA, ""));
-
-    # setup the dataframe needed for the call to rumi
-    dat = subset(run.data, select=c("dataFile", "Standard", "lsid", "well", "description", "name", "expConc", "fi", "fiBackground", "FIBackgroundNegative", "dilution", "well_role", "summary", "FlaggedAsExcluded", "isStandard", "isQCControl", "isOtherControl", "isUnknown"));
-
-    # if both raw and summary data are available, just use the raw data for the calc
-    if (bothRawAndSummary) {
-        dat = subset(dat, summary == "false");
-    }
-
-    # remove any excluded standard replicate groups
-    dat = subset(dat, (isStandard & tolower(FlaggedAsExcluded) == "false") | !isStandard);
-
-    if (any(dat$isStandard) & length(standards) > 0)
-    {
-        # change column name from "name" to "analyte"
-        colnames(dat)[colnames(dat) == "name"] = "analyte";
-
-        # change column name from expConc to expected_conc
-        colnames(dat)[colnames(dat) == "expConc"] = "expected_conc";
-
-        # set the sample_id to be description||dilution or description||expected_conc
-        dat$sample_id[!is.na(dat$expected_conc)] = paste(dat$description[!is.na(dat$expected_conc)], "||", dat$expected_conc[!is.na(dat$expected_conc)], sep="");
-        dat$sample_id[is.na(dat$expected_conc)] = paste(dat$description[is.na(dat$expected_conc)], "||", dat$dilution[is.na(dat$expected_conc)], sep="");
-
-        # choose the FI column for standards and qc controls based on the run property provided by the user, default to the original FI value
-        if (any(run.props$name == "StndCurveFitInput"))
-        {
-            fiCol = getCurveFitInputCol(run.props, "StndCurveFitInput", "fi")
-            dat$fi[dat$isStandard] = dat[dat$isStandard, fiCol]
-            dat$fi[dat$isQCControl] = dat[dat$isQCControl, fiCol]
-            dat$fi[dat$isOtherControl] = dat[dat$isOtherControl, fiCol]
-        }
-
-        # choose the FI column for unknowns based on the run property provided by the user, default to the original FI value
-        if (any(dat$isUnknown))
-        {
-            if (any(run.props$name == "UnkCurveFitInput"))
-            {
-                fiCol = getCurveFitInputCol(run.props, "UnkCurveFitInput", "fi")
-                dat$fi[dat$isUnknown] = dat[dat$isUnknown, fiCol]
-            }
-        }
-
-        # subset the dat object to just those records that have an FI
-        dat = subset(dat, !is.na(fi));
-
-        # loop through the selected standards in the data.frame and call the rumi function once for each
-        # this will also create one pdf for each standard
-        for (s in 1:length(standards))
-        {
-            stndVal = as.character(standards[s]);
-
-            # subset the data for those analytes set to use the given standard curve
-            # note: also need to subset the standard records for only those where description matches the given standard
-            standard.dat = subset(dat, Standard == stndVal & (!isStandard | (isStandard & description == stndVal)));
-
-            # LabKey Issue 13034: replicate standard records as unknowns so that Rumi will calculated estimated concentrations
-            tempStnd.dat = subset(standard.dat, well_role=="Standard");
-            if (nrow(tempStnd.dat) > 0)
-            {
-                tempStnd.dat$well_role = "";
-                tempStnd.dat$sample_id = paste(tempStnd.dat$description, "||", tempStnd.dat$expected_conc, sep="");
-                standard.dat=rbind(standard.dat, tempStnd.dat);
-            }
-
-            # LabKey Issue 13033: check if we need to "add" standard data for any analytes if this is a subclass assay
-            #              (i.e. standard data from "Anti-Human" analyte to be used for other analytes)
-            selectedAnalytes = unique(standard.dat$analyte);
-            subclass.dat = subset(dat, well_role == "Standard" & description == stndVal & !is.na(lsid));
-            subclass.dat = subset(subclass.dat, regexpr("^blank", analyte, ignore.case=TRUE) == -1);
-            # if we only have standard data for one analyte, it is the subclass standard data to be used
-            if (length(unique(subclass.dat$analyte)) == 1)
-            {
-                subclassAnalyte = subclass.dat$analyte[1];
-                for (a in 1:length(selectedAnalytes))
-                {
-                    analyteStnd.dat = subset(standard.dat, well_role == "Standard" & analyte == selectedAnalytes[a]);
-                    # if there is no standard data for this analyte/standard, "use" the subclass analyte standard data
-                    if (nrow(analyteStnd.dat) == 0)
-                    {
-                        print(paste("Using ", subclassAnalyte, " standard data for analyte ", selectedAnalytes[a], sep=""));
-                        subclass.dat$sample_id = NA;
-                        subclass.dat$analyte = selectedAnalytes[a];
-                        standard.dat = rbind(standard.dat, subclass.dat);
-                    }
-                }
-            }
-
-            # set the assay_id (this value will be used in the PDF plot header)
-            standard.dat$assay_id = stndVal;
-
-            # check to make sure there are expected_conc values in the standard data frame that will be passed to Rumi
-            if (any(!is.na(standard.dat$expected_conc)))
-            {
-                # use the decided upon conversion function for handling of negative values
-                standard.dat$fi = sapply(standard.dat$fi, fiConversion);
-
-                # LabKey issue 13445: Don't calculate estimated concentrations for analytes where max(FI) is < 1000
-                agg.dat = subset(standard.dat, well_role == "Standard");
-                if (nrow(agg.dat) > 0)
-                {
-                    agg.dat = aggregate(agg.dat$fi, by = list(Standard=agg.dat$Standard,Analyte=agg.dat$analyte), FUN = max);
-                    for (aggIndex in 1:nrow(agg.dat))
-                    {
-                        # remove the rows from the standard.dat object where the max FI < 1000
-                        if (agg.dat$x[aggIndex] < 1000)
-                        {
-                            writeErrorOrWarning("warn", paste("Warning: Max(FI) is < 1000 for ", agg.dat$Standard[aggIndex], " ", agg.dat$Analyte[aggIndex], ", not calculating estimated concentrations for this standard/analyte.", sep=""));
-                            standard.dat = subset(standard.dat, !(Standard == agg.dat$Standard[aggIndex] & analyte == agg.dat$Analyte[aggIndex]));
-                        }
-                    }
-                }
-
-                # check to make sure that we still have some standard data to pass to the rumi function calculations
-                if (nrow(standard.dat) == 0 | !any(standard.dat$isStandard))
-                {
-                    next();
-                }
-
-                # call the rumi function to calculate new estimated log concentrations using 5PL for the unknowns
-                mypdf(file=paste(convertToFileName(stndVal), "5PL", sep="_"), mfrow=c(2,2));
-                fits = rumi(standard.dat, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
-                fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
-                dev.off();
-
-                # put the calculated values back into the run.data dataframe by matching on analyte, description, expConc OR dilution, and standard
-                if (nrow(fits) > 0)
-                {
-                    for (index in 1:nrow(fits))
-                    {
-                        a = fits$analyte[index];
-                        dil = fits$dilution[index];
-                        desc = fits$description[index];
-                        exp = fits$expected_conc[index];
-
-                        elc = fits$"est.log.conc"[index];
-                        ec = fits$"est.conc"[index];
-                        se = fits$"se"[index];
-
-                        if (!is.na(exp)) {
-                            runDataIndex = run.data$name == a & run.data$expConc == exp & run.data$description == desc & run.data$Standard == stndVal
-                        } else {
-                            runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal
-                        }
-                        run.data$EstLogConc_5pl[runDataIndex] = elc;
-                        run.data$EstConc_5pl[runDataIndex] = ec;
-                        run.data$SE_5pl[runDataIndex] = se;
-                    }
-                }
-
-                # call the rumi function to calculate new estimated log concentrations using 4PL for the unknowns
-                mypdf(file=paste(convertToFileName(stndVal), "4PL", sep="_"), mfrow=c(2,2));
-                fits = rumi(standard.dat, fit.4pl=TRUE, force.fit=TRUE, log.transform=curveFitLogTransform, plot.se.profile=curveFitLogTransform, verbose=TRUE);
-                fits$"est.conc" = 2.71828183 ^ fits$"est.log.conc";
-                dev.off();
-
-                # put the calculated values back into the run.data dataframe by matching on analyte, description, dilution, and standard
-                if (nrow(fits) > 0)
-                {
-                    for (index in 1:nrow(fits))
-                    {
-                        a = fits$analyte[index];
-                        dil = fits$dilution[index];
-                        desc = fits$description[index];
-                        exp = fits$expected_conc[index];
-
-                        elc = fits$"est.log.conc"[index];
-                        ec = fits$"est.conc"[index];
-                        se = fits$"se"[index];
-
-                        if (!is.na(exp)) {
-                            runDataIndex = run.data$name == a & run.data$expConc == exp & run.data$description == desc & run.data$Standard == stndVal
-                        } else {
-                            runDataIndex = run.data$name == a & run.data$dilution == dil & run.data$description == desc & run.data$Standard == stndVal
-                        }
-                        run.data$EstLogConc_4pl[runDataIndex] = elc;
-                        run.data$EstConc_4pl[runDataIndex] = ec;
-                        run.data$SE_4pl[runDataIndex] = se;
-                    }
-                }
-            }
-        }
-    }
-}
-
-#####################  STEP 5: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
+#####################  STEP 4: WRITE THE RESULTS TO THE OUTPUT FILE LOCATION #####################
 
 # write the new set of run data out to an output file
 write.table(run.data, file=run.output.file, sep="\t", na="", row.names=FALSE, quote=FALSE);

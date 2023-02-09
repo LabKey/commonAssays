@@ -1055,7 +1055,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return null;
     }
 
-    /** @return null if we can't find matching Rumi curve fit data */
+    /** @return null if we can't find matching Rumi/drc curve fit data */
     @Nullable
     private CurveFit importRumiCurveFit(StatsService.CurveFitType fitType, LuminexDataRow dataRow, LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, CurveFit[] existingCurveFits)
     {
