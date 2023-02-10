@@ -44,7 +44,6 @@ import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
 import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.QCAssayScriptHelper;
 import org.labkey.test.util.RReportHelper;
 import org.openqa.selenium.WebElement;
@@ -63,7 +62,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
-public abstract class LuminexTest extends BaseWebDriverTest implements PostgresOnlyTest
+public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
