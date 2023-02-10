@@ -243,10 +243,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         }
 
         // create a new store now that the graph params are selected and bind it to the grid
-        var controlTypeColName = this.controlType == "SinglePoint" ? "SinglePointControl" : this.controlType;
-        var orderByClause = " ORDER BY Analyte.Data.AcquisitionDate DESC, " + controlTypeColName + ".Run.Created DESC"
-                            + " LIMIT " + (hasReportFilter ? "10000" : this.defaultRowSize);
-
         var storeConfig = {
             assayName: this.assayName,
             controlName: this.controlName,
@@ -254,9 +250,9 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
             analyte: this.analyte,
             isotype: this.isotype,
             conjugate: this.conjugate,
+            maxRows: !hasReportFilter ? this.defaultRowSize : undefined,
             scope: this,
             loadListener: this.storeLoaded,
-            orderBy: orderByClause
         };
 
         if (whereClause != "")

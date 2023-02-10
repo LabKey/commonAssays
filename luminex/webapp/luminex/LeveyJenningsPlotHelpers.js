@@ -76,27 +76,12 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         + whereClause;
     }
 
-    if (config.orderBy)
-        sql += config.orderBy;
-
-    // NOTE: watch out for this case. mixing with other params might end badly (consider override)
-    // used in LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow
-    if (config.centerDate)
-    {
-        var finalSql = "( " + sql;
-        finalSql += " AND Analyte.Data.AcquisitionDate >= CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate ASC, "+controlTypeColName+".Run.Created ASC LIMIT 30 )";
-        finalSql += " UNION ( " + sql;
-        finalSql += " AND Analyte.Data.AcquisitionDate < CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
-
-        sql = finalSql; // swap back
-    }
-
     var store = new LABKEY.ext.Store({
         autoLoad: false,
         schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
         sql: sql,
+        sort: '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
+        maxRows: config.maxRows ? config.maxRows : -1,
         containerFilter: LABKEY.Query.containerFilter.allFolders,
         scope: config.scope
     });
@@ -269,7 +254,6 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
     var _getConfig = function(assayName)
     {
         // note make sure to mix assayName into config...
-
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
             queryName: 'Analyte'+controlType,
@@ -291,7 +275,6 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
                     runId: row[controlType+'/Run'],
-                    centerDate: row['Analyte/Data/AcquisitionDate']
                 };
 
                 _createWindow(config);
