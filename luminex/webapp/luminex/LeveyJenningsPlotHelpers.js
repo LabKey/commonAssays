@@ -80,7 +80,7 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         autoLoad: false,
         schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
         sql: sql,
-        sort: '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
+        sort: config.sort ? config.sort : '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
         maxRows: config.maxRows ? config.maxRows : -1,
         containerFilter: LABKEY.Query.containerFilter.allFolders,
         scope: config.scope
@@ -275,6 +275,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
                     runId: row[controlType+'/Run'],
+                    sort: 'Analyte/Data/AcquisitionDate, ' + controlType + '/Run/Created',
                 };
 
                 _createWindow(config);
