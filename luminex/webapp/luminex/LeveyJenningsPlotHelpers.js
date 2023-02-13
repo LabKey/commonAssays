@@ -37,6 +37,8 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
             "    CASE WHEN gs.ValueBased=true THEN gs.AUCStdDev ELSE cf.AUCStdDev END AS GuideSetAUCStdDev,\n" +
             "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIAverage ELSE gs.TitrationMaxFIAverage END AS GuideSetHighMFIAverage,\n" +
             "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIStdDev ELSE gs.TitrationMaxFIStdDev END AS GuideSetHighMFIStdDev,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIAverage ELSE gs.SinglePointControlFIAverage END AS GuideSetMFIAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIStdDev ELSE gs.SinglePointControlFIStdDev END AS GuideSetMFIStdDev\n" +
             "FROM GuideSet gs\n" +
             "LEFT JOIN (\n" +
             "    SELECT\n" +
@@ -46,7 +48,7 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
             "        MIN(CASE WHEN CurveType = 'Four Parameter' THEN EC50Average ELSE NULL END) AS EC504PLAverage,\n" +
             "        MIN(CASE WHEN CurveType = 'Four Parameter' THEN EC50StdDev ELSE NULL END) AS EC504PLStdDev,\n" +
             "        MIN(CASE WHEN CurveType = 'Five Parameter' THEN EC50Average ELSE NULL END) AS EC505PLAverage,\n" +
-            "        MIN(CASE WHEN CurveType = 'Five Parameter' THEN EC50StdDev ELSE NULL END) AS EC505PLStdDev,\n" +
+            "        MIN(CASE WHEN CurveType = 'Five Parameter' THEN EC50StdDev ELSE NULL END) AS EC505PLStdDev\n" +
             "    FROM GuideSetCurveFit\n" +
             "    GROUP BY GuideSetId\n" +
             ") cf ON gs.RowId = cf.GuideSetId";
@@ -96,9 +98,10 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
     {
         sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
             //columns needed for guide set ranges (value based or run based)
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.SinglePointControlFIAverage END AS GuideSetMFIAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.SinglePointControlFIStdDev END AS GuideSetMFIStdDev"
+        + ", gs.GuideSetMFIAverage"
+        + ", gs.GuideSetMFIStdDev"
         + " FROM AnalyteSinglePointControl "
+        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId"
         + whereClause;
     }
 
