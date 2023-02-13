@@ -265,7 +265,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.grid.GridPanel, {
         this.store.on('exception', function(store, type, action, options, response){
             var errorJson = Ext.util.JSON.decode(response.responseText);
             if (errorJson.exception) {
-                Ext.get('EC504PLTrendPlotDiv').update("<span class='labkey-error'>" + errorJson.exception + "</span>");
+                Ext.get(document.querySelector('.ljTrendPlot').id).update("<span class='labkey-error'>" + errorJson.exception + "</span>");
             }
         });
 
