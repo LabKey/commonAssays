@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
--- Empty script to match the postgres upgrade script numbering
+-- Empty script to match the postgres upgrade script ms2-22.000-22.001, which has changes only applicable to postgres db

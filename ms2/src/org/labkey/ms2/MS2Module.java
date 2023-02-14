@@ -120,7 +120,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 22.000;
+        return 22.001;
     }
 
     @Override
