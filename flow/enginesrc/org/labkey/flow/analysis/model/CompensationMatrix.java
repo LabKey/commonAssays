@@ -801,7 +801,7 @@ public class CompensationMatrix implements Serializable
 
             Date d = fcs.getDateTime();
             // verify the date is correct
-            assertEquals("2016-07-06 09:50:22", DateUtil.formatDateTime(d, "YYYY-MM-dd HH:mm:ss"));
+            assertEquals("2016-07-06 09:50:22", DateUtil.formatDateTime(d, "yyyy-MM-dd HH:mm:ss"));
             CompensationMatrix compensationMatrix = fromSpillKeyword(fcs.getKeywords());
             Assert.assertEquals(compensationMatrix,compensationMatrix);
             String[] expectedNames = {"FITC-A","PE-A","Alexa Fluor 700-A","PerCP-Cy5-5-A","APC-Cy7-A","BV 421-A","BV 510-A"};
