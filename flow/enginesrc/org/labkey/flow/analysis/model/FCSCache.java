@@ -16,11 +16,11 @@
 
 package org.labkey.flow.analysis.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.cache.Wrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class FCSCache
         {
             super(CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<URI, FCSHeader>(){
                 @Override
-                public FCSHeader load(URI uri, Object argument)
+                public FCSHeader load(@NotNull URI uri, Object argument)
                 {
                     // should CacheLoader.load() declare throw Exception?
                     try
@@ -58,7 +58,7 @@ public class FCSCache
 
 
         @Override
-        public FCSHeader load(URI uri, Object argument)
+        public FCSHeader load(@NotNull URI uri, Object argument)
         {
             // should CacheLoader.load() declare throw Exception?
             try
@@ -81,7 +81,7 @@ public class FCSCache
         {
             super(CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<URI, FCS>(){
                 @Override
-                public FCS load(URI uri, Object argument)
+                public FCS load(@NotNull URI uri, Object argument)
                 {
                     // should CacheLoader.load() declare throw Exception?
                     try
