@@ -18,8 +18,11 @@ package org.labkey.viability;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.labkey.api.assay.AssayDataType;
+import org.labkey.api.assay.AssayRunUploadContext;
+import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -33,12 +36,8 @@ import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayRunUploadContext;
-import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
