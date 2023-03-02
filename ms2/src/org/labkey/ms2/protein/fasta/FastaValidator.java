@@ -32,7 +32,7 @@ public class FastaValidator
     {
     }
 
-    //** Determine if any
+    /** Determine if FASTA file has any duplicate protein names **/
     public List<String> validate(File fastaFile)
     {
         List<String> errors = new ArrayList<>();
