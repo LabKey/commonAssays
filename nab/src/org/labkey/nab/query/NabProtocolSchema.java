@@ -141,7 +141,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         return CUTOFF_CACHE.get(Integer.toString(protocol.getRowId()), null, new CacheLoader<String, Set<Double>>()
         {
             @Override
-            public Set<Double> load(String key, @Nullable Object argument)
+            public Set<Double> load(@NotNull String key, @Nullable Object argument)
             {
                 return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
             }

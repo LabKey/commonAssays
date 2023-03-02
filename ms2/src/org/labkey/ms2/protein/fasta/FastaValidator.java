@@ -15,9 +15,7 @@
  */
 package org.labkey.ms2.protein.fasta;
 
-import org.ardverk.collection.ByteArrayKeyAnalyzer;
-import org.ardverk.collection.PatriciaTrie;
-import org.labkey.api.util.StringUtilsLabKey;
+import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -25,36 +23,28 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: adam
- * Date: Jan 12, 2008
- * Time: 7:43:36 PM
- */
 public class FastaValidator
 {
     /** Use a trie to get space-efficient storage */
-    private final PatriciaTrie _proteinNames = new PatriciaTrie<>(ByteArrayKeyAnalyzer.VARIABLE);
+    private final PatriciaTrie<String> _proteinNames = new PatriciaTrie<>();
 
     public FastaValidator()
     {
     }
 
+    /** Determine if FASTA file has any duplicate protein names **/
     public List<String> validate(File fastaFile)
     {
         List<String> errors = new ArrayList<>();
         Format lineFormat = DecimalFormat.getIntegerInstance();
         ProteinFastaLoader curLoader = new ProteinFastaLoader(fastaFile);
 
-        //noinspection ForLoopReplaceableByForEach
         for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
             Protein protein = proteinIterator.next();
-
-            // Use UTF-8 encoding so that we only use a single byte for ASCII characters
             String lookupString = protein.getLookup().toLowerCase();
-            byte[] lookup = lookupString.getBytes(StringUtilsLabKey.DEFAULT_CHARSET);
 
-            if (_proteinNames.containsKey(lookup))
+            if (_proteinNames.containsKey(lookupString))
             {
                 errors.add("Line " + lineFormat.format(proteinIterator.getLastHeaderLineNum()) + ": " + lookupString + " is a duplicate protein name");
 
@@ -66,7 +56,7 @@ public class FastaValidator
             }
             else
             {
-                _proteinNames.put(lookup, null);
+                _proteinNames.put(lookupString, null);
             }
         }
 

@@ -18,8 +18,8 @@ package org.labkey.flow.persist;
 
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.BlockingCache;
@@ -55,7 +55,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     private CacheLoader<String, Attributes<A, E>> BY_CONTAINER_LOADER = new CacheLoader<String, Attributes<A, E>>()
     {
         @Override
-        public Attributes<A, E> load(String containerId, @Nullable Object argument)
+        public Attributes<A, E> load(@NotNull String containerId, @Nullable Object argument)
         {
             LOG.debug("Loading " + _type + " by containerId: " + containerId);
             Collection<FlowEntry> entries = FlowManager.get().getAttributeEntries(containerId, _type);
