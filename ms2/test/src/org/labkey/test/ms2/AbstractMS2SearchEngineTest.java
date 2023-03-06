@@ -151,7 +151,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         popLocation();
 
         log("Verify experiment view");
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "bov_sample/" + SAMPLE_BASE_NAME + " (test2)"));
+        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "bov_sample/" + SAMPLE_BASE_NAME + " (test2) (CAexample_mini.mzXML)"));
 
         log("Verify experiment run view.");
         String dataHref = Locator.imageMapLinkByTitle("graphmap", "Data: CAexample_mini.mzXML").findElement(getDriver()).getAttribute("href");
