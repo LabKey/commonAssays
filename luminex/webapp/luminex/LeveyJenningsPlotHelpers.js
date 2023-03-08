@@ -27,6 +27,32 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         whereClause += config.whereClause;
     }
 
+    // this version of the guide set range values SQL will prevent the need for multiple LEFT OUTER JOINs to the GuideSetCurveFit table
+    var guideSetRangeValuesSQL = "SELECT gs.RowId, gs.Created, gs.ValueBased,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.EC504PLAverage ELSE cf.EC504PLAverage END AS GuideSetEC504PLAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.EC504PLStdDev ELSE cf.EC504PLStdDev END AS GuideSetEC504PLStdDev,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.EC505PLAverage ELSE cf.EC505PLAverage END AS GuideSetEC505PLAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.EC505PLStdDev ELSE cf.EC505PLStdDev END AS GuideSetEC505PLStdDev,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.AUCAverage ELSE cf.AUCAverage END AS GuideSetAUCAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.AUCStdDev ELSE cf.AUCStdDev END AS GuideSetAUCStdDev,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIAverage ELSE gs.TitrationMaxFIAverage END AS GuideSetHighMFIAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIStdDev ELSE gs.TitrationMaxFIStdDev END AS GuideSetHighMFIStdDev,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIAverage ELSE gs.SinglePointControlFIAverage END AS GuideSetMFIAverage,\n" +
+            "    CASE WHEN gs.ValueBased=true THEN gs.MaxFIStdDev ELSE gs.SinglePointControlFIStdDev END AS GuideSetMFIStdDev\n" +
+            "FROM GuideSet gs\n" +
+            "LEFT JOIN (\n" +
+            "    SELECT\n" +
+            "        GuideSetId,\n" +
+            "        MIN(CASE WHEN CurveType = 'Trapezoidal' THEN AUCAverage ELSE NULL END) AS AUCAverage,\n" +
+            "        MIN(CASE WHEN CurveType = 'Trapezoidal' THEN AUCStdDev ELSE NULL END) AS AUCStdDev,\n" +
+            "        MIN(CASE WHEN CurveType = 'Four Parameter' THEN EC50Average ELSE NULL END) AS EC504PLAverage,\n" +
+            "        MIN(CASE WHEN CurveType = 'Four Parameter' THEN EC50StdDev ELSE NULL END) AS EC504PLStdDev,\n" +
+            "        MIN(CASE WHEN CurveType = 'Five Parameter' THEN EC50Average ELSE NULL END) AS EC505PLAverage,\n" +
+            "        MIN(CASE WHEN CurveType = 'Five Parameter' THEN EC50StdDev ELSE NULL END) AS EC505PLStdDev\n" +
+            "    FROM GuideSetCurveFit\n" +
+            "    GROUP BY GuideSetId\n" +
+            ") cf ON gs.RowId = cf.GuideSetId";
+
     // generate sql for the data store (columns depend on the control type)
     // issue 22267 : add IFDEFINED to "optional" assay design fields
     var sql = "SELECT Analyte"
@@ -45,9 +71,10 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
             + ", IFDEFINED(" + controlTypeColName + ".Run.NotebookNo)"
             + ", IFDEFINED(" + controlTypeColName + ".Run.AssayType)"
             + ", IFDEFINED(" + controlTypeColName + ".Run.ExpPerformer)"
-            + ", GuideSet.Created AS GuideSetCreated"
+            + ", GuideSet AS GuideSetId"
+            + ", gs.Created AS GuideSetCreated"
             + ", IncludeInGuideSetCalculation"
-            + ", GuideSet.ValueBased AS GuideSetValueBased";
+            + ", gs.ValueBased AS GuideSetValueBased";
     if (config.controlType == "Titration")
     {
         sql += ", \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled"
@@ -55,48 +82,35 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         + ", TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled"
         + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
             //columns needed for guide set ranges (value based or run based)
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLAverage ELSE GuideSet.\"Four ParameterCurveFit\".EC50Average END AS GuideSetEC504PLAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC504PLStdDev ELSE GuideSet.\"Four ParameterCurveFit\".EC50StdDev END AS GuideSetEC504PLStdDev"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLAverage ELSE GuideSet.\"Five ParameterCurveFit\".EC50Average END AS GuideSetEC505PLAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.EC505PLStdDev ELSE GuideSet.\"Five ParameterCurveFit\".EC50StdDev END AS GuideSetEC505PLStdDev"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCAverage ELSE GuideSet.TrapezoidalCurveFit.AUCAverage END AS GuideSetAUCAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.AUCStdDev ELSE GuideSet.TrapezoidalCurveFit.AUCStdDev END AS GuideSetAUCStdDev"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.TitrationMaxFIAverage END AS GuideSetHighMFIAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.TitrationMaxFIStdDev END AS GuideSetHighMFIStdDev"
+        + ", gs.GuideSetEC504PLAverage"
+        + ", gs.GuideSetEC504PLStdDev"
+        + ", gs.GuideSetEC505PLAverage"
+        + ", gs.GuideSetEC505PLStdDev"
+        + ", gs.GuideSetAUCAverage"
+        + ", gs.GuideSetAUCStdDev"
+        + ", gs.GuideSetHighMFIAverage"
+        + ", gs.GuideSetHighMFIStdDev"
         + " FROM AnalyteTitration "
+        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId"
         + whereClause;
     }
     else if (config.controlType == "SinglePoint")
     {
         sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
             //columns needed for guide set ranges (value based or run based)
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIAverage ELSE GuideSet.SinglePointControlFIAverage END AS GuideSetMFIAverage"
-        + ", CASE WHEN GuideSet.ValueBased=true THEN GuideSet.MaxFIStdDev ELSE GuideSet.SinglePointControlFIStdDev END AS GuideSetMFIStdDev"
+        + ", gs.GuideSetMFIAverage"
+        + ", gs.GuideSetMFIStdDev"
         + " FROM AnalyteSinglePointControl "
+        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId"
         + whereClause;
-    }
-
-    if (config.orderBy)
-        sql += config.orderBy;
-
-    // NOTE: watch out for this case. mixing with other params might end badly (consider override)
-    // used in LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow
-    if (config.centerDate)
-    {
-        var finalSql = "( " + sql;
-        finalSql += " AND Analyte.Data.AcquisitionDate >= CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate ASC, "+controlTypeColName+".Run.Created ASC LIMIT 30 )";
-        finalSql += " UNION ( " + sql;
-        finalSql += " AND Analyte.Data.AcquisitionDate < CAST('" + config.centerDate + "' AS DATE)";
-        finalSql += " ORDER BY Analyte.Data.AcquisitionDate DESC, "+controlTypeColName+".Run.Created DESC LIMIT 30 )";
-
-        sql = finalSql; // swap back
     }
 
     var store = new LABKEY.ext.Store({
         autoLoad: false,
         schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
         sql: sql,
+        sort: config.sort ? config.sort : '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
+        maxRows: config.maxRows ? config.maxRows : -1,
         containerFilter: LABKEY.Query.containerFilter.allFolders,
         scope: config.scope
     });
@@ -269,7 +283,6 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
     var _getConfig = function(assayName)
     {
         // note make sure to mix assayName into config...
-
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
             queryName: 'Analyte'+controlType,
@@ -291,7 +304,7 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                     scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
                     runId: row[controlType+'/Run'],
-                    centerDate: row['Analyte/Data/AcquisitionDate']
+                    sort: 'Analyte/Data/AcquisitionDate, ' + controlType + '/Run/Created',
                 };
 
                 _createWindow(config);
