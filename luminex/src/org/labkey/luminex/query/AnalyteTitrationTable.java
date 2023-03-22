@@ -141,7 +141,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         int analyte = (int)ctx.get("analyte");
                         int titration = (int)ctx.get("titration");
 
-                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s')";
+                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration')";
 
                         NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
                         ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);

@@ -105,8 +105,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
     },
 
     configurePlotDataStore: function(baseFilters) {
-        // create a new store now that the graph params are selected
-        var storeConfig = {
+        this.storeLoading();
+        this.store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore({
             assayName: this.assayName,
             controlName: this.controlName,
             controlType: this.controlType,
@@ -117,19 +117,13 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
             maxRows: !this.hasReportFilter() ? this.defaultRowSize : undefined,
             scope: this,
             loadListener: this.storeLoaded,
-        };
-
-        this.store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(storeConfig);
-
+        });
         this.store.on('exception', function(store, type, action, options, response){
             var errorJson = Ext.util.JSON.decode(response.responseText);
             if (errorJson.exception) {
                 Ext.get(document.querySelector('.ljTrendPlot').id).update("<span class='labkey-error'>" + errorJson.exception + "</span>");
             }
         });
-
-        this.storeLoading();
-        this.store.load();
     },
 
     storeLoading: function() {
@@ -186,8 +180,6 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
                 }
             }
         });
-
-        this.configurePlotDataStore(filters);
 
         // enable the trending data grid
         this.enable();

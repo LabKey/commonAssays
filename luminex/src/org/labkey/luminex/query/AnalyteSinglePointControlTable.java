@@ -140,7 +140,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                         int analyte = (int)ctx.get("analyte");
                         int singlePointControl = (int)ctx.get("singlePointControl");
 
-                        String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')\">";
+                        String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePoint')\">";
 
                         out.write( String.format(linkTag, protocolId, analyte, singlePointControl, "MFI") );
                         out.write( String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png") );

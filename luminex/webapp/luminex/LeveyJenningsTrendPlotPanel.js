@@ -43,6 +43,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
     },
 
     initComponent : function() {
+        this.guideSetRangeStore = LABKEY.LeveyJenningsPlotHelper.getGuideSetRangesStore({
+            assayName: this.assayName,
+            scope: this,
+            loadListener: function() {
+                this.guideSetRangeStoreLoadComplete = true;
+                this.updateTrendPlot();
+            },
+        });
+
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({
             text: 'Y-Axis Scale:',
@@ -173,32 +182,41 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
     plotDataLoaded: function(store, hasReportFilter)
     {
-        this.updateTrendPlot(store);
-        this.fbar.setVisible(!hasReportFilter && store.getTotalCount() >= this.defaultRowSize);
+        // stash the store's records so that they can be re-used on tab change
+        if (store) {
+            this.trendDataStore = store;
+        }
+
+        this.plotDataLoadComplete = true;
+        this.fbar.setVisible(!hasReportFilter && this.trendDataStore.getTotalCount() >= this.defaultRowSize);
+        this.updateTrendPlot();
     },
 
     setTrendPlotLoading: function() {
+        this.plotDataLoadComplete = false;
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
         Ext.get(trendDiv).update('Loading plot...');
         this.togglePDFExportBtn(false);
     },
 
-    updateTrendPlot: function(store)
+    updateTrendPlot: function()
     {
-        this.togglePDFExportBtn(false);
-
-        // stash the store's records so that they can be re-used on tab change
-        if (store) {
-            this.trendDataStore = store;
+        // if we are still loading either the guide set range data or the plot data, return without rendering
+        if (!this.guideSetRangeStoreLoadComplete || !this.plotDataLoadComplete) {
+            return;
         }
+
+        this.togglePDFExportBtn(false);
 
         var plotType = this.trendTabPanel.getActiveTab().itemId;
         var trendDiv = plotType + 'TrendPlotDiv';
         var plotConfig = {
-            store: this.trendDataStore,
-            plotType: plotType,
             renderDiv: trendDiv,
+            dataStore: this.trendDataStore,
+            guideSetRangeStore: this.guideSetRangeStore,
+            controlType: this.controlType,
+            plotType: plotType,
             assayName: this.assayName,
             controlName: this.controlName,
             analyte: this.analyte,

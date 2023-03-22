@@ -6,12 +6,69 @@
 Ext.namespace('LABKEY', 'Luminex.panel');
 LABKEY.LeveyJenningsPlotHelper = {};
 
+LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = {
+    EC504PL: 'EC50 - 4PL',
+    EC505PL: 'EC50 - 5PL Rumi',
+    AUC: 'AUC',
+    HighMFI: 'High MFI',
+    MFI: 'MFI' // not sure why we cannot get these named right.
+};
+
+LABKEY.LeveyJenningsPlotHelper.TitrationColumnsMap = {
+    "GuideSetId": "GuideSet",
+    "AcquisitionDate": "Analyte/Data/AcquisitionDate",
+    "LotNumber": "Analyte/Properties/LotNumber",
+    "RunRowId": "Titration/Run/RowId",
+    "Network": "Titration/Run/Batch/Network",
+    "NotebookNo": "Analyte/Data/Run/NotebookNo",
+    "AssayType": "Analyte/Data/Run/AssayType",
+    "ExpPerformer": "Analyte/Data/Run/ExpPerformer",
+    "EC504PL": "Four ParameterCurveFit/EC50",
+    "EC505PL": "Five ParameterCurveFit/EC50",
+    "AUC": "TrapezoidalCurveFit/AUC",
+    "HighMFI": "MaxFI",
+};
+
+LABKEY.LeveyJenningsPlotHelper.SinglePointControlColumnsMap = {
+    "GuideSetId": "GuideSet",
+    "AcquisitionDate": "Analyte/Data/AcquisitionDate",
+    "LotNumber": "Analyte/Properties/LotNumber",
+    "RunRowId": "SinglePointControl/Run/RowId",
+    "Network": "SinglePointControl/Run/Batch/Network",
+    "NotebookNo": "SinglePointControl/Run/NotebookNo",
+    "AssayType": "SinglePointControl/Run/AssayType",
+    "ExpPerformer": "SinglePointControl/Run/ExpPerformer",
+    "MFI": "AverageFiBkgd",
+};
+
 LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 {
-    var controlTypeColName = config.controlType === "SinglePoint" ? "SinglePointControl" : config.controlType;
+    var isSinglePointControl = config.controlType === 'SinglePoint';
+    var controlTypeColName = isSinglePointControl ? 'SinglePointControl' : config.controlType;
+    var columnsMap = isSinglePointControl ? LABKEY.LeveyJenningsPlotHelper.SinglePointControlColumnsMap : LABKEY.LeveyJenningsPlotHelper.TitrationColumnsMap;
 
-    // this version of the guide set range values SQL will prevent the need for multiple LEFT OUTER JOINs to the GuideSetCurveFit table
-    var guideSetRangeValuesSQL = "SELECT gs.RowId, gs.Created, gs.ValueBased,\n" +
+    var store = new LABKEY.ext.Store({
+        autoLoad: true,
+        schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
+        queryName: isSinglePointControl ? 'AnalyteSinglePointControl' : 'AnalyteTitration',
+        columns: Object.values(columnsMap).join(','),
+        filterArray: config.filters,
+        sort: config.sort ? config.sort : '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
+        maxRows: config.maxRows ? config.maxRows : -1,
+        containerFilter: LABKEY.Query.containerFilter.allFolders,
+        scope: config.scope
+    });
+
+    if (config.loadListener) {
+        store.addListener('load', config.loadListener, config.scope);
+    }
+
+    return store;
+};
+
+LABKEY.LeveyJenningsPlotHelper.getGuideSetRangesStore = function(config)
+{
+    var sql = "SELECT gs.RowId, gs.Created, gs.ValueBased,\n" +
             "    CASE WHEN gs.ValueBased=true THEN gs.EC504PLAverage ELSE cf.EC504PLAverage END AS GuideSetEC504PLAverage,\n" +
             "    CASE WHEN gs.ValueBased=true THEN gs.EC504PLStdDev ELSE cf.EC504PLStdDev END AS GuideSetEC504PLStdDev,\n" +
             "    CASE WHEN gs.ValueBased=true THEN gs.EC505PLAverage ELSE cf.EC505PLAverage END AS GuideSetEC505PLAverage,\n" +
@@ -36,102 +93,47 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
             "    GROUP BY GuideSetId\n" +
             ") cf ON gs.RowId = cf.GuideSetId";
 
-    // generate sql for the data store (columns depend on the control type)
-    // issue 22267 : add IFDEFINED to "optional" assay design fields
-    var sql = "SELECT Analyte"
-            + ", " + controlTypeColName + ".Run.Created" // NOTE: necessary for union case
-            + ", Analyte.Data.AcquisitionDate"
-            + ", IFDEFINED(Analyte.Properties.LotNumber)"
-            + ", " + controlTypeColName
-            + ", IFDEFINED(" + controlTypeColName + ".Run.Isotype)"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.Conjugate)"
-            + ", " + controlTypeColName + ".Run.RowId AS RunRowId"
-            + ", " + controlTypeColName + ".Run.Name AS RunName"
-            + ", " + controlTypeColName + ".Run.Folder.Name AS FolderName"
-            + ", " + controlTypeColName + ".Run.Folder.EntityId"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.Batch.Network)"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.Batch.CustomProtocol)"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.NotebookNo)"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.AssayType)"
-            + ", IFDEFINED(" + controlTypeColName + ".Run.ExpPerformer)"
-            + ", GuideSet AS GuideSetId"
-            + ", gs.Created AS GuideSetCreated"
-            + ", IncludeInGuideSetCalculation"
-            + ", gs.ValueBased AS GuideSetValueBased";
-    if (config.controlType === "Titration")
-    {
-        sql += ", \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled"
-        + ", \"Five ParameterCurveFit\".EC50 AS EC505PL, \"Five ParameterCurveFit\".EC50QCFlagsEnabled AS EC505PLQCFlagsEnabled"
-        + ", TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled"
-        + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
-        //columns needed for guide set ranges (value based or run based)
-        + ", gs.GuideSetEC504PLAverage"
-        + ", gs.GuideSetEC504PLStdDev"
-        + ", gs.GuideSetEC505PLAverage"
-        + ", gs.GuideSetEC505PLStdDev"
-        + ", gs.GuideSetAUCAverage"
-        + ", gs.GuideSetAUCStdDev"
-        + ", gs.GuideSetHighMFIAverage"
-        + ", gs.GuideSetHighMFIStdDev"
-        + " FROM AnalyteTitration "
-        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId";
-    }
-    else if (config.controlType === "SinglePoint")
-    {
-        sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
-        //columns needed for guide set ranges (value based or run based)
-        + ", gs.GuideSetMFIAverage"
-        + ", gs.GuideSetMFIStdDev"
-        + " FROM AnalyteSinglePointControl "
-        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId";
-    }
-
     var store = new LABKEY.ext.Store({
-        autoLoad: false,
+        autoLoad: true,
         schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
         sql: sql,
-        filterArray: config.filters,
-        sort: config.sort ? config.sort : '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
-        maxRows: config.maxRows ? config.maxRows : -1,
+        maxRows: -1,
         containerFilter: LABKEY.Query.containerFilter.allFolders,
         scope: config.scope
     });
 
-    // not assuming scope for now...
     if (config.loadListener)
         store.addListener('load', config.loadListener, config.scope);
 
     return store;
 };
 
-// consider reducing scope of this object...?
-LABKEY.LeveyJenningsPlotHelper.PlotTypeMap = {
-    EC504PL: 'EC50 - 4PL',
-    EC505PL: 'EC50 - 5PL Rumi',
-    AUC: 'AUC',
-    HighMFI: 'High MFI',
-    MFI: 'MFI' // not sure why we cannot get these named right.
-};
-
 LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 {
     var plotData = [];
-    var records = config.store.getRange();
+    var records = config.dataStore.getRange();
     var otherHoverProps = ['Network', 'AssayType', 'ExpPerformer', 'AcquisitionDate'];
+    var columnsMap = config.controlType === 'SinglePoint' ? LABKEY.LeveyJenningsPlotHelper.SinglePointControlColumnsMap : LABKEY.LeveyJenningsPlotHelper.TitrationColumnsMap;
 
     var _pushData = function(record)
     {
         var data = {
-            xLabel: record.get('NotebookNo'),
-            pointColor: record.get('LotNumber'),
-            value: record.get(config.plotType),
-            gsMean: record.get('GuideSet' + config.plotType + 'Average'),
-            gsStdDev: record.get('GuideSet' + config.plotType + 'StdDev')
+            xLabel: record.get(columnsMap['NotebookNo']),
+            pointColor: record.get(columnsMap['LotNumber']),
+            value: record.get(columnsMap[config.plotType]),
         };
+
+        // merge in the guide set range mean and stdDev values
+        var gsRecordIndex = config.guideSetRangeStore ? config.guideSetRangeStore.findExact('RowId', record.get(columnsMap['GuideSetId'])) : -1;
+        if (gsRecordIndex > -1) {
+            var gsRecord = config.guideSetRangeStore.getAt(gsRecordIndex);
+            data['gsMean'] = gsRecord.get('GuideSet' + config.plotType + 'Average');
+            data['gsStdDev'] = gsRecord.get('GuideSet' + config.plotType + 'StdDev');
+        }
 
         // add some other values to the data object for the hover display
         Ext.each(otherHoverProps, function(prop) {
-            var val = record.get(prop);
+            var val = record.get(columnsMap[prop]);
 
             // convert values that are date objects to a display string format
             if (val != null && LABKEY.Utils.isDate(val)) {
@@ -152,7 +154,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 
         for (var i = 0; i < records.length; i++)
         {
-            if (records[i].get('RunRowId') == config.runId)
+            if (records[i].get(columnsMap['RunRowId']) == config.runId)
             {
                 index = i;
                 break;
@@ -215,7 +217,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
         colorRange: ['black', 'red', 'green', 'blue', 'purple', 'orange', 'grey', 'brown'],
         hoverTextFn: function(row){
             var display = 'Notebook: ' + row.xLabel
-                    + '\nLot Number: ' + row.pointColor
+                    + '\nLot Number: ' + (row.pointColor ? row.pointColor : '')
                     + '\n' + config.plotType + ': ' + row.value;
 
             // add any of the non-null extra display values to the hover
@@ -251,8 +253,7 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
 // plotType: EC504PL, EC505PL, AUC, HighMFI
 LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId, analyteId, typeId, plotType, controlType)
 {
-    if (controlType == null)
-        controlType = 'Titration';
+    var controlTypeColName = controlType === 'SinglePoint' ? 'SinglePointControl' : controlType;
 
     LABKEY.Assay.getById({
         id: protocolId,
@@ -267,20 +268,20 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
         // note make sure to mix assayName into config...
         LABKEY.Query.selectRows({
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
-            queryName: 'Analyte'+controlType,
-            columns: [controlType+'/Name', 'Analyte/Name', controlType+'/Run/Isotype', controlType+'/Run/Conjugate', controlType+'/Run', 'Analyte/Data/AcquisitionDate'],
+            queryName: 'Analyte'+controlTypeColName,
+            columns: [controlTypeColName+'/Name', 'Analyte/Name', controlTypeColName+'/Run/Isotype', controlTypeColName+'/Run/Conjugate', controlTypeColName+'/Run', 'Analyte/Data/AcquisitionDate'],
             filterArray: [
                 LABKEY.Filter.create('Analyte', analyteId),
-                LABKEY.Filter.create(controlType, typeId)
+                LABKEY.Filter.create(controlTypeColName, typeId)
             ],
             success: function(data) {
                 var row = data.rows[0];
 
                 const filters = [
                     LABKEY.Filter.create('Analyte/Name', row['Analyte/Name']),
-                    LABKEY.Filter.create(controlType + '/Name', row[controlType+'/Name']),
-                    LABKEY.Filter.create(controlType + '/Run/Isotype', row[controlType+'/Run/Isotype']),
-                    LABKEY.Filter.create(controlType + '/Run/Conjugate', row[controlType+'/Run/Conjugate']),
+                    LABKEY.Filter.create(controlTypeColName + '/Name', row[controlTypeColName+'/Name']),
+                    LABKEY.Filter.create(controlTypeColName + '/Run/Isotype', row[controlTypeColName+'/Run/Isotype']),
+                    LABKEY.Filter.create(controlTypeColName + '/Run/Conjugate', row[controlTypeColName+'/Run/Conjugate']),
                 ];
                 if (controlType === 'Titration') {
                     filters.push(LABKEY.Filter.create('Titration/IncludeInQcReport', true));
@@ -288,16 +289,16 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
 
                 var config = {
                     assayName: assayName,
-                    controlName: row[controlType+'/Name'],
-                    controlType: controlType === "SinglePointControl" ? "SinglePoint" : "Titration",
+                    controlName: row[controlTypeColName+'/Name'],
+                    controlType: controlType,
                     analyte: row['Analyte/Name'],
-                    isotype: row[controlType+'/Run/Isotype'],
-                    conjugate: row[controlType+'/Run/Conjugate'],
+                    isotype: row[controlTypeColName+'/Run/Isotype'],
+                    conjugate: row[controlTypeColName+'/Run/Conjugate'],
                     yAxisScale: 'linear',
                     plotType: plotType,
-                    runId: row[controlType+'/Run'],
+                    runId: row[controlTypeColName+'/Run'],
                     filters: filters,
-                    sort: 'Analyte/Data/AcquisitionDate, ' + controlType + '/Run/Created',
+                    sort: 'Analyte/Data/AcquisitionDate, ' + controlTypeColName + '/Run/Created',
                     scope: this, // shouldn't matter but might blow up without it.
                 };
 
@@ -327,17 +328,31 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
                 },
                 listeners : {
                     afterrender: function() {
-
                         window.getEl().mask("Loading...", "x-mask-loading");
+                        var dataStoreLoaded = false;
+                        var guideSetStoreLoaded = false;
 
                         config.loadListener = function(store) {
-                            config.store = store;
-                            LABKEY.LeveyJenningsPlotHelper.renderPlot(config);
-                            window.getEl().unmask();
+                            dataStoreLoaded = true;
+                            config.dataStore = store;
+                            if (guideSetStoreLoaded) {
+                                LABKEY.LeveyJenningsPlotHelper.renderPlot(config);
+                                window.getEl().unmask();
+                            }
                         };
+                        LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(config);
 
-                        var store = LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore(config);
-                        store.load()
+                        LABKEY.LeveyJenningsPlotHelper.getGuideSetRangesStore({
+                            assayName: config.assayName,
+                            loadListener: function(store) {
+                                guideSetStoreLoaded = true;
+                                config.guideSetRangeStore = store;
+                                if (dataStoreLoaded) {
+                                    LABKEY.LeveyJenningsPlotHelper.renderPlot(config);
+                                    window.getEl().unmask();
+                                }
+                            },
+                        });
                     }
                 }
             }]
