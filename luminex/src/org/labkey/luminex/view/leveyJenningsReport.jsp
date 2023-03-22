@@ -21,7 +21,6 @@
 */
 
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -41,6 +40,13 @@
     LeveyJenningsForm bean = me.getModelBean();
 %>
 
+<style>
+    .lj-report-title {
+        font-size: 110%;
+        font-weight: bold;
+    }
+</style>
+
 <div class="leveljenningsreport">
 <table>
     <tr>
@@ -58,7 +64,7 @@
 
         var $h = Ext.util.Format.htmlEncode;
 
-        // the default number of records to return for the report when no start and end date are provided
+        // the default number of records to return for the report when no filters have been applied
         var defaultRowSize = 30;
 
         // local variables for storing the selected graph parameters
@@ -231,7 +237,7 @@
                     'currentGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
                     },
                     'exportPdfBtnClicked': function() {
                         trendPlotPanel.exportToPdf();
@@ -255,10 +261,6 @@
                 has4PLCurveFit: _has4PLCurveFit,
                 has5PLCurveFit: _has5PLCurveFit,
                 listeners: {
-                    'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
-                        trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
-                    },
                     'togglePdfBtn': function(toEnable) {
                         guideSetPanel.toggleExportBtn(toEnable);
                     }
@@ -281,12 +283,14 @@
                     'appliedGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
-                                trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
                     },
-                    'trackingDataLoaded': function(store) {
-                        trendPlotPanel.trackingDataLoaded(store);
-                    }
+                    'plotDataLoading': function(store) {
+                        trendPlotPanel.plotDataLoading(store);
+                    },
+                    'plotDataLoaded': function(store, hasReportFilter) {
+                        trendPlotPanel.plotDataLoaded(store, hasReportFilter);
+                    },
                 }
             });
         }

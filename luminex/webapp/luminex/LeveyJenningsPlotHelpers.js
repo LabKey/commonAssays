@@ -6,26 +6,9 @@
 Ext.namespace('LABKEY', 'Luminex.panel');
 LABKEY.LeveyJenningsPlotHelper = {};
 
-// NOTE: we should be able to avoid passing around values.
-// NOTE: consider setting this up to be config based... potential defaulting values here...
 LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
 {
-    var controlTypeColName = config.controlType == "SinglePoint" ? "SinglePointControl" : config.controlType;
-    var whereClause = " WHERE Analyte.Name='" + config.analyte.replace(/'/g, "''") + "'"
-            + " AND " + controlTypeColName + ".Name='" + config.controlName.replace(/'/g, "''") + "'"
-            + (config.isotype ? " AND " + controlTypeColName + ".Run.Isotype='" + config.isotype.replace(/'/g, "''") + "'"
-                    : " AND " + controlTypeColName + ".Run.Isotype IS NULL")
-            + (config.conjugate ? " AND " + controlTypeColName + ".Run.Conjugate='" + config.conjugate.replace(/'/g, "''") + "'"
-                    : " AND " + controlTypeColName + ".Run.Conjugate IS NULL");
-
-    if (config.controlType == "Titration") {
-        whereClause += " AND Titration.IncludeInQcReport=true";
-    }
-
-    // add on any filtering (from LeveyJenningsTrackingDataPanel.js)
-    if (config.whereClause) {
-        whereClause += config.whereClause;
-    }
+    var controlTypeColName = config.controlType === "SinglePoint" ? "SinglePointControl" : config.controlType;
 
     // this version of the guide set range values SQL will prevent the need for multiple LEFT OUTER JOINs to the GuideSetCurveFit table
     var guideSetRangeValuesSQL = "SELECT gs.RowId, gs.Created, gs.ValueBased,\n" +
@@ -75,13 +58,13 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
             + ", gs.Created AS GuideSetCreated"
             + ", IncludeInGuideSetCalculation"
             + ", gs.ValueBased AS GuideSetValueBased";
-    if (config.controlType == "Titration")
+    if (config.controlType === "Titration")
     {
         sql += ", \"Four ParameterCurveFit\".EC50 AS EC504PL, \"Four ParameterCurveFit\".EC50QCFlagsEnabled AS EC504PLQCFlagsEnabled"
         + ", \"Five ParameterCurveFit\".EC50 AS EC505PL, \"Five ParameterCurveFit\".EC50QCFlagsEnabled AS EC505PLQCFlagsEnabled"
         + ", TrapezoidalCurveFit.AUC, TrapezoidalCurveFit.AUCQCFlagsEnabled"
         + ", MaxFI AS HighMFI, MaxFIQCFlagsEnabled AS HighMFIQCFlagsEnabled"
-            //columns needed for guide set ranges (value based or run based)
+        //columns needed for guide set ranges (value based or run based)
         + ", gs.GuideSetEC504PLAverage"
         + ", gs.GuideSetEC504PLStdDev"
         + ", gs.GuideSetEC505PLAverage"
@@ -91,24 +74,23 @@ LABKEY.LeveyJenningsPlotHelper.getTrackingDataStore = function(config)
         + ", gs.GuideSetHighMFIAverage"
         + ", gs.GuideSetHighMFIStdDev"
         + " FROM AnalyteTitration "
-        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId"
-        + whereClause;
+        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId";
     }
-    else if (config.controlType == "SinglePoint")
+    else if (config.controlType === "SinglePoint")
     {
         sql += ", AverageFiBkgd AS MFI, AverageFiBkgdQCFlagsEnabled AS MFIQCFlagsEnabled"
-            //columns needed for guide set ranges (value based or run based)
+        //columns needed for guide set ranges (value based or run based)
         + ", gs.GuideSetMFIAverage"
         + ", gs.GuideSetMFIStdDev"
         + " FROM AnalyteSinglePointControl "
-        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId"
-        + whereClause;
+        + " LEFT JOIN (" + guideSetRangeValuesSQL + ") AS gs ON GuideSet = gs.RowId";
     }
 
     var store = new LABKEY.ext.Store({
         autoLoad: false,
         schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(config.assayName),
         sql: sql,
+        filterArray: config.filters,
         sort: config.sort ? config.sort : '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
         maxRows: config.maxRows ? config.maxRows : -1,
         containerFilter: LABKEY.Query.containerFilter.allFolders,
@@ -293,18 +275,30 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
             ],
             success: function(data) {
                 var row = data.rows[0];
+
+                const filters = [
+                    LABKEY.Filter.create('Analyte/Name', row['Analyte/Name']),
+                    LABKEY.Filter.create(controlType + '/Name', row[controlType+'/Name']),
+                    LABKEY.Filter.create(controlType + '/Run/Isotype', row[controlType+'/Run/Isotype']),
+                    LABKEY.Filter.create(controlType + '/Run/Conjugate', row[controlType+'/Run/Conjugate']),
+                ];
+                if (controlType === 'Titration') {
+                    filters.push(LABKEY.Filter.create('Titration/IncludeInQcReport', true));
+                }
+
                 var config = {
                     assayName: assayName,
                     controlName: row[controlType+'/Name'],
-                    controlType: controlType == "SinglePointControl" ? "SinglePoint" : "Titration",
+                    controlType: controlType === "SinglePointControl" ? "SinglePoint" : "Titration",
                     analyte: row['Analyte/Name'],
                     isotype: row[controlType+'/Run/Isotype'],
                     conjugate: row[controlType+'/Run/Conjugate'],
                     yAxisScale: 'linear',
-                    scope: this, // shouldn't matter but might blow up without it.
                     plotType: plotType,
                     runId: row[controlType+'/Run'],
+                    filters: filters,
                     sort: 'Analyte/Data/AcquisitionDate, ' + controlType + '/Run/Created',
+                    scope: this, // shouldn't matter but might blow up without it.
                 };
 
                 _createWindow(config);

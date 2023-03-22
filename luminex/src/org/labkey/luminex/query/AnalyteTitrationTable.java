@@ -196,6 +196,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
         defaultCols.add(FieldKey.fromParts("MaxFI"));
         defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "QCFlags"));
         setDefaultVisibleColumns(defaultCols);
     }
 

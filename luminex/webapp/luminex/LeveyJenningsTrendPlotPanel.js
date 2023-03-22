@@ -14,7 +14,7 @@ Ext.namespace('LABKEY');
 /**
  * Class to create a tab panel for displaying the R plot for the trending of EC50, AUC, and High MFI values for the selected graph parameters.
  *
- * @params titration
+ * @params titration or single point control
  * @params assayName
  */
 LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
@@ -29,7 +29,6 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         Ext.apply(config, {
             items: [],
             header: false,
-            bodyStyle: 'background-color:#EEEEEE',
             labelAlign: 'left',
             width: 865,
             border: false,
@@ -38,26 +37,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             yAxisScale: 'linear'
         });
 
-        this.addEvents('reportFilterApplied', 'togglePdfBtn');
+        this.addEvents('togglePdfBtn');
 
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.constructor.call(this, config);
     },
 
     initComponent : function() {
-        var labelStyle = 'font-size: 13px; padding-top: 4px;';
-        this.ANY_FIELD = '[ANY]';  // constant value used for turning filtering off
-
-        this.startDate = null;
-        this.endDate = null;
-        this.network = null;
-        this.networkAny = true;  // false - turns on the filter in R and in Data Panel
-        this.protocol = null;
-        this.protocolAny = true; // false - turns on the filter in R and in Data Panel
-
         // initialize the y-axis scale combo for the top toolbar
         this.scaleLabel = new Ext.form.Label({
             text: 'Y-Axis Scale:',
-            style: labelStyle
         });
         this.scaleCombo = new Ext.form.ComboBox({
             id: 'scale-combo-box',
@@ -82,190 +70,14 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
             }
         });
 
-        // initialize the date range selection fields for the top toolbar
-        this.startDateLabel = new Ext.form.Label({
-            text: 'Start Date:',
-            style: labelStyle
-        });
-        this.startDateField = new Ext.form.DateField({
-            id: 'start-date-field',
-            format:  'Y-m-d', // TODO use LABKEY.extDefaultDateFormat?
-            listeners: {
-                scope: this,
-                'valid': function (df) {
-                    if (df.getValue() != '')
-                        this.applyFilterButton.enable();
-                },
-                'invalid': function (df, msg) {
-                    this.applyFilterButton.disable();
-                }
-            }
-        });
-        this.endDateLabel = new Ext.form.Label({
-            text: 'End Date:',
-            style: labelStyle
-        });
-        this.endDateField = new Ext.form.DateField({
-            id: 'end-date-field',
-            format:  'Y-m-d', // TODO use LABKEY.extDefaultDateFormat?
-            listeners: {
-                scope: this,
-                'valid': function (df) {
-                    if (df.getValue() != '')
-                        this.applyFilterButton.enable();
-                },
-                'invalid': function (df, msg) {
-                    this.applyFilterButton.disable();
-                }
-            }
-        });
-
-        // Only create the network store and combobox if the Network column exists
-        if (this.networkExists) {
-            // Add Network field for filtering
-            this.networkLabel = new Ext.form.Label({
-                text: 'Network:',
-                style: labelStyle
-            });
-            this.networkCombobox = new Ext.form.ComboBox({
-                id: 'network-combo-box',
-                width: 75,
-                listWidth: 180,
-                store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
-                editable: false,
-                triggerAction: 'all',
-                mode: 'local',
-                valueField: 'value',
-                displayField: 'display',
-                tpl: '<tpl for="."><div class="x-combo-list-item">{display:htmlEncode}</div></tpl>',
-                listeners: {
-                    scope: this,
-                    'select': function(combo, record, index) {
-                        if (combo.getValue() == this.ANY_FIELD) {
-                            this.networkAny = true;
-                            this.network = null;
-                        } else {
-                            this.networkAny = false;
-                            this.network = combo.getValue();
-                        }
-                        this.applyFilterButton.enable();
-                    }
-                }
-            });
-
-            this.networkCombobox.getStore().on('load', function(store, records, options) {
-                if (this.network != undefined && store.findExact('value', this.network) > -1)
-                {
-                    this.networkCombobox.setValue(this.network);
-                    this.networkCombobox.fireEvent('select', this.networkCombobox);
-                    this.networkCombobox.enable();
-                }
-                else
-                {
-                    this.network = undefined;
-                }
-            }, this);
-        }
-
-        // Only create the protocol if the CustomProtocol column exists
-        if (this.protocolExists) {
-            // Add Protocol field for filtering
-            this.protocolLabel = new Ext.form.Label({
-                text: 'Protocol:',
-                style: labelStyle
-            });
-            this.protocolCombobox = new Ext.form.ComboBox({
-                id: 'protocol-combo-box',
-                width: 75,
-                listWidth: 180,
-                store: new Ext.data.ArrayStore({fields: ['value', 'display']}),
-                editable: false,
-                triggerAction: 'all',
-                mode: 'local',
-                valueField: 'value',
-                displayField: 'display',
-                tpl: '<tpl for="."><div class="x-combo-list-item">{display:htmlEncode}</div></tpl>',
-                listeners: {
-                    scope: this,
-                    'select': function(combo, record, index) {
-                        this.protocol = combo.getValue();
-                        this.applyFilterButton.enable();
-
-                        if (combo.getValue() == this.ANY_FIELD) {
-                            this.protocolAny = true;
-                            this.protocol = null;
-                        } else {
-                            this.protocolAny = false;
-                            this.protocol = combo.getValue();
-                        }
-                        this.applyFilterButton.enable();
-                    }
-                }
-            });
-
-            this.protocolCombobox.getStore().on('load', function(store, records, options) {
-                if (this.protocol != undefined && store.findExact('value', this.protocol) > -1)
-                {
-                    this.protocolCombobox.setValue(this.protocol);
-                    this.protocolCombobox.fireEvent('select', this.protocolCombobox);
-                    this.protocolCombobox.enable();
-                }
-                else
-                {
-                    this.protocol = undefined;
-                }
-            }, this);
-        }
-
-        // initialize the refesh graph button
-        this.applyFilterButton = new Ext.Button({
-            disabled: true,
-            text: 'Apply',
-            handler: this.applyGraphFilter,
-            scope: this
-        });
-
-        // initialize the clear graph button
-        this.clearFilterButton = new Ext.Button({
-            disabled: true,
-            text: 'Clear',
-            handler: function() {
-                this.clearGraphFilter(false);
-            },
-            scope: this
-        });
-
-        var tbspacer = {xtype: 'tbspacer', width: 5};
-
-        var items = [
-            this.scaleLabel, tbspacer,
-            this.scaleCombo, tbspacer,
-            '->',
-            this.startDateLabel, tbspacer,
-            this.startDateField, tbspacer,
-            this.endDateLabel, tbspacer,
-            this.endDateField, tbspacer
-        ];
-        if (this.networkExists) {
-            items.push(this.networkLabel);
-            items.push(tbspacer);
-            items.push(this.networkCombobox);
-            items.push(tbspacer);
-
-        }
-        if (this.protocolExists) {
-            items.push(this.protocolLabel);
-            items.push(tbspacer);
-            items.push(this.protocolCombobox);
-            items.push(tbspacer);
-        }
-        items.push(this.applyFilterButton);
-        items.push(tbspacer);
-        items.push(this.clearFilterButton);
-
         this.tbar = new Ext.Toolbar({
-            style: 'border: solid 1px #d0d0d0; padding: 5px 10px;',
-            items: items
+            style: 'background-color: #ffffff; padding: 5px 10px; border-color: #d0d0d0; border-width: 1px 1px 0 1px;',
+            items: [
+                '->',
+                this.scaleLabel,
+                {xtype: 'tbspacer', width: 5},
+                this.scaleCombo,
+            ]
         });
 
         // initialize the tab panel that will show the trend plots
@@ -321,6 +133,7 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
 
         this.trendTabPanel = new Ext.TabPanel({
+            style: 'border-style: solid; border-width: 0 1px; border-color: #d0d0d0;',
             autoScroll: true,
             activeTab: 0,
             defaults: {
@@ -332,7 +145,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.items.push(this.trendTabPanel);
 
+        this.fbar = [
+            {xtype: 'label', text: 'The default plot is showing the most recent ' + this.defaultRowSize + ' data points.'},
+        ];
+
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.initComponent.call(this);
+
+        this.fbar.hide();
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
@@ -342,28 +161,20 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.isotype = isotype;
         this.conjugate = conjugate;
 
-        // remove any previously entered values from the start date, end date, network, etc. fileds
-        this.clearGraphFilter(true);
-
-        // show the trending tab panel and date range selection toolbar
         this.enable();
 
         this.setTrendPlotLoading();
     },
 
-    trackingDataLoaded: function(store)
+    plotDataLoading: function()
     {
-        if (this.networkExists)
-        {
-            this.networkCombobox.getStore().loadData(this.getArrayStoreData(store.collect("Network", true), this.networkCombobox.getValue()));
-        }
+        this.setTrendPlotLoading();
+    },
 
-        if (this.protocolExists)
-        {
-            this.protocolCombobox.getStore().loadData(this.getArrayStoreData(store.collect("CustomProtocol", true), this.protocolCombobox.getValue()));
-        }
-
+    plotDataLoaded: function(store, hasReportFilter)
+    {
         this.updateTrendPlot(store);
+        this.fbar.setVisible(!hasReportFilter && store.getTotalCount() >= this.defaultRowSize);
     },
 
     setTrendPlotLoading: function() {
@@ -422,96 +233,15 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
     },
 
-    applyGraphFilter: function() {
-        // make sure that at least one filter field is not null
-        if (this.startDateField.getRawValue() == '' && this.endDateField.getRawValue() == '' && this.networkCombobox.getRawValue() == '' && this.protocolCombobox.getRawValue() == '')
-        {
-            Ext.Msg.show({
-                title:'ERROR',
-                msg: 'Please enter a value for filtering.',
-                buttons: Ext.Msg.OK,
-                icon: Ext.MessageBox.ERROR
-            });
-        }
-        // verify that the start date is not after the end date
-        else if (this.startDateField.getValue() > this.endDateField.getValue() && this.endDateField.getValue() != '')
-        {
-            Ext.Msg.show({
-                title:'ERROR',
-                msg: 'Please enter an end date that does not occur before the start date.',
-                buttons: Ext.Msg.OK,
-                icon: Ext.MessageBox.ERROR
-            });
-        }
-        else
-        {
-            // get date values without the time zone info
-            this.startDate = this.startDateField.getRawValue();
-            this.endDate = this.endDateField.getRawValue();
-            this.clearFilterButton.enable();
-
-            this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
-        }
-    },
-
-    clearGraphFilter: function(clearOnly) {
-        this.startDate = null;
-        this.startDateField.reset();
-        this.endDate = null;
-        this.endDateField.reset();
-        this.applyFilterButton.disable();
-        this.clearFilterButton.disable();
-        this.network = null;
-        if (this.networkCombobox) {
-            this.networkCombobox.reset();
-            this.networkCombobox.setValue(this.ANY_FIELD);
-            this.networkAny = true;
-            this.network = null;
-        }
-        this.protocol = null;
-        if (this.protocolCombobox) {
-            this.protocolCombobox.reset();
-            this.protocolCombobox.setValue(this.ANY_FIELD);
-            this.protocolAny = true;
-            this.protocol = null;
-        }
-
-        if (clearOnly)
-            return;
-
-        this.fireEvent('reportFilterApplied', this.startDate, this.endDate, this.network, this.networkAny, this.protocol, this.protocolAny);
-    },
-
-    getStartDate: function() {
-        return this.startDate ? this.startDate : null;
-    },
-
-    getEndDate: function() {
-        return this.endDate ? this.endDate : null;
-    },
-
-    getArrayStoreData: function(arr, prevVal) {
-        // if there is a previously selected combo value, make sure it exists in the array data
-        if (prevVal && prevVal != '[ANY]' && arr.indexOf(prevVal) == -1){
-            arr.push(prevVal);
-        }
-
-        var storeData = [ [this.ANY_FIELD, this.ANY_FIELD] ];
-        Ext.each(arr.sort(), function(value){
-            storeData.push([value, value == null ? '[Blank]' : value]);
-        });
-        return storeData;
-    },
-
     getTitrationSinglePointControlItems: function() {
-        if (this.controlType == "Titration") {
+        if (this.controlType === "Titration") {
             var panels = [];
             if (this.has4PLCurveFit) panels.push(this.ec504plPanel);
             if (this.has5PLCurveFit) panels.push(this.ec505plPanel);
             panels.push(this.aucPanel);
             panels.push(this.mfiPanel);
             return(panels);
-        } else if (this.controlType = "SinglePoint") {
+        } else if (this.controlType === "SinglePoint") {
             return([this.singlePointControlPanel]);
         }
         return null;
