@@ -385,9 +385,14 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         _query = query.toString();
-        ResultSet rs = QueryService.get().select(flow, _query);
-        convertDateColumn((CachedResultSet) rs, "Xdatetime", "datetime");
-        rs = filterDateRange((CachedResultSet) rs, "datetime", startDate, endDate);
+        Results results = QueryService.get().getSelectBuilder(flow, _query)
+                        .select(null, true);
+        // This still breaks encapsulation, but it's better than a direct cast.
+        CachedResultSet rs = results.getWrapped(CachedResultSet.class);
+        if (null == rs)
+            throw new IllegalStateException("expected cached result set");
+        convertDateColumn(rs, "Xdatetime", "datetime");
+        rs = filterDateRange(rs, "datetime", startDate, endDate);
         return rs;
     }
 
