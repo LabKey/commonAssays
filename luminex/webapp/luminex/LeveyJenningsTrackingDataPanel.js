@@ -127,7 +127,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
     },
 
     storeLoading: function() {
-        this.fireEvent('plotDataLoading', this.store);
+        this.fireEvent('plotDataLoading', this.store, this.hasGuideSetUpdate);
+
+        // reset hasGuideSetUpdate so that other grid filter changes won't trigger this as well
+        this.hasGuideSetUpdate = false;
     },
 
     storeLoaded: function() {
@@ -135,8 +138,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
-    graphParamsSelected: function (analyte, isotype, conjugate)
+    graphParamsSelected: function (analyte, isotype, conjugate, hasGuideSetUpdate)
     {
+        this.hasGuideSetUpdate = hasGuideSetUpdate;
+
         // store the params locally
         this.analyte = analyte;
         this.isotype = isotype;

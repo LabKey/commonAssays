@@ -202,7 +202,7 @@
 
                         guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
                         trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
-                        trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
+                        trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
                     },
                     'graphParamsChanged': function(){
                         guideSetPanel.disable();
@@ -237,7 +237,7 @@
                     'currentGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, true);
                     },
                     'exportPdfBtnClicked': function() {
                         trendPlotPanel.exportToPdf();
@@ -283,10 +283,10 @@
                     'appliedGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate);
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, true);
                     },
-                    'plotDataLoading': function(store) {
-                        trendPlotPanel.plotDataLoading(store);
+                    'plotDataLoading': function(store, hasGuideSetUpdates) {
+                        trendPlotPanel.plotDataLoading(store, hasGuideSetUpdates);
                     },
                     'plotDataLoaded': function(store, hasReportFilter) {
                         trendPlotPanel.plotDataLoaded(store, hasReportFilter);

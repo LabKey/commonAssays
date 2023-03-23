@@ -175,8 +175,13 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         this.setTrendPlotLoading();
     },
 
-    plotDataLoading: function()
+    plotDataLoading: function(store, hasGuideSetUpdates)
     {
+        if (hasGuideSetUpdates) {
+            this.guideSetRangeStoreLoadComplete = false;
+            this.guideSetRangeStore.load();
+        }
+
         this.setTrendPlotLoading();
     },
 
