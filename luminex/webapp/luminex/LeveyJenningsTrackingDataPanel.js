@@ -140,6 +140,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
     graphParamsSelected: function (analyte, isotype, conjugate, hasGuideSetUpdate)
     {
+        var shouldClearSelections = true;
         this.hasGuideSetUpdate = hasGuideSetUpdate;
 
         // store the params locally
@@ -178,9 +179,31 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
             frame: 'none',
             filters: filters,
             sort: '-Analyte/Data/AcquisitionDate, -' + controlTypeColName + '/Run/Created',
+            scope: this,
+            buttonBar: {
+                includeStandardButtons: false,
+                items:[
+                    LABKEY.QueryWebPart.standardButtons.views,
+                    LABKEY.QueryWebPart.standardButtons.exportRows,
+                    LABKEY.QueryWebPart.standardButtons.print,
+                    {
+                        text: 'Apply Guide Set',
+                        requiresSelection: true,
+                        // permissions?
+                        handler: this.applyGuideSetClicked,
+                    },
+                ],
+            },
             listeners: {
                 scope: this,
-                success: function(qwp) {
+                success: function(dataRegion) {
+                    // clear selections on each graph param change so we don't inadvertently get selections
+                    // row selections from a different analyte/isotype/conjugate
+                    if (shouldClearSelections) {
+                        dataRegion.clearSelected();
+                        shouldClearSelections = false;
+                    }
+
                     this.configurePlotDataStore(filters);
                 }
             }
@@ -190,70 +213,73 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
         this.enable();
     },
 
-    // applyGuideSetClicked: function ()
-    // {
-    //     // get the selected record list from the grid
-    //     var selection = this.selModel.getSelections();
-    //     var selectedRecords = [];
-    //     // Copy so that it's available in the scope for the callback function
-    //     var controlType = this.controlType;
-    //     Ext.each(selection, function (record)
-    //     {
-    //         var newItem = {Analyte: record.get("Analyte")};
-    //         if (controlType == 'Titration')
-    //         {
-    //             newItem.ControlId = record.get("Titration");
-    //         }
-    //         else
-    //         {
-    //             newItem.ControlId = record.get("SinglePointControl");
-    //         }
-    //         selectedRecords.push(newItem);
-    //     });
-    //
-    //     // create a pop-up window to display the apply guide set UI
-    //     var win = new Ext.Window({
-    //         layout: 'fit',
-    //         width: 1115,
-    //         height: 500,
-    //         closeAction: 'close',
-    //         modal: true,
-    //         padding: 15,
-    //         cls: 'extContainer leveljenningsreport',
-    //         bodyStyle: 'background-color: white;',
-    //         title: 'Apply Guide Set...',
-    //         items: [new LABKEY.ApplyGuideSetPanel({
-    //             assayName: this.assayName,
-    //             controlName: this.controlName,
-    //             controlType: this.controlType,
-    //             analyte: this.analyte,
-    //             isotype: this.isotype,
-    //             conjugate: this.conjugate,
-    //             selectedRecords: selectedRecords,
-    //             networkExists: this.networkExists,
-    //             protocolExists: this.protocolExists,
-    //             listeners: {
-    //                 scope: this,
-    //                 'closeApplyGuideSetPanel': function (hasUpdated)
-    //                 {
-    //                     if (hasUpdated)
-    //                         this.fireEvent('appliedGuideSetUpdated');
-    //                     win.close();
-    //                 }
-    //             }
-    //         })]
-    //     });
-    //
-    //     // for testing, narrow window puts left aligned buttons off of the page
-    //     win.on('show', function(cmp) {
-    //         var posArr = cmp.getPosition();
-    //         if (posArr[0] < 0)
-    //             cmp.setPosition(0, posArr[1]);
-    //     });
-    //
-    //     win.show(this);
-    // },
-    //
+    applyGuideSetClicked: function (dataRegion, a, b, c)
+    {
+        var scope = dataRegion.scope;
+        var isSinglePoint = scope.controlType === 'SinglePoint';
+
+        // get the selected record list from the grid
+        dataRegion.getSelected({
+            success: function(response) {
+                var selectedRecords = [];
+                for (var i = 0; i < response.selected.length; i++) {
+                    var keys = response.selected[i].split(',');
+                    if (keys.length === 3) {
+                        // AnalyteTitration selection keys = [Analyte RowId, Titration RowId, Titration RowId]
+                        // AnalyteSinglePointControl selection keys = [SinglePointControl RowId, Analyte RowId, SinglePointControl RowId]
+                        var analyteId = isSinglePoint ? keys[1] : keys[0];
+                        var controlId = isSinglePoint ? keys[0] : keys[1];
+                        selectedRecords.push({ Analyte: analyteId, ControlId: controlId });
+                    }
+                }
+
+                // create a pop-up window to display the apply guide set UI
+                var win = new Ext.Window({
+                    layout: 'fit',
+                    width: 1115,
+                    height: 500,
+                    closeAction: 'close',
+                    modal: true,
+                    padding: 15,
+                    cls: 'extContainer leveljenningsreport',
+                    bodyStyle: 'background-color: white;',
+                    title: 'Apply Guide Set...',
+                    items: [new LABKEY.ApplyGuideSetPanel({
+                        selectedRecords: selectedRecords,
+                        assayName: scope.assayName,
+                        controlName: scope.controlName,
+                        controlType: scope.controlType,
+                        analyte: scope.analyte,
+                        isotype: scope.isotype,
+                        conjugate: scope.conjugate,
+                        networkExists: scope.networkExists,
+                        protocolExists: scope.protocolExists,
+                        listeners: {
+                            'closeApplyGuideSetPanel': function (hasUpdated)
+                            {
+                                if (hasUpdated)
+                                    scope.fireEvent('appliedGuideSetUpdated');
+                                win.close();
+                            }
+                        }
+                    })]
+                });
+
+                // for testing, narrow window puts left aligned buttons off of the page
+                win.on('show', function(cmp) {
+                    var posArr = cmp.getPosition();
+                    if (posArr[0] < 0)
+                        cmp.setPosition(0, posArr[1]);
+                });
+
+                win.show(scope);
+            },
+            failure: function() {
+                console.error('Unable to get the tracking data region selections.');
+            }
+        });
+    },
+
     // viewCurvesClicked: function ()
     // {
     //     // create a pop-up window to display the plot
