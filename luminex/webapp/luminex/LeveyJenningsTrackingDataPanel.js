@@ -186,6 +186,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
         dataRegion.getSelected({
             success: function(response) {
                 var selectedRecords = scope.parseGridSelectionKeys(response.selected, false);
+                if (selectedRecords.length === 0) {
+                    LABKEY.Utils.alert('Error', 'Please select rows in the tracking data grid before clicking the "Apply Guide Set" button.');
+                    return;
+                }
 
                 // create a pop-up window to display the apply guide set UI
                 var win = new Ext.Window({
@@ -241,6 +245,10 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
         dataRegion.getSelected({
             success: function(response) {
                 var analyteIds = scope.parseGridSelectionKeys(response.selected, true);
+                if (analyteIds.length === 0) {
+                    LABKEY.Utils.alert('Error', 'Please select rows in the tracking data grid before clicking the "View 4PL Curves" button.');
+                    return;
+                }
 
                 LABKEY.Query.selectRows({
                     schemaName: "assay.Luminex." + LABKEY.QueryKey.encodePart(_protocolName),
