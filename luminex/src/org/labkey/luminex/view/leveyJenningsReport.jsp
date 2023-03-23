@@ -270,7 +270,6 @@
             // initialize the grid panel to display the tracking data
             var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
                 renderTo: 'trackingDataPanel',
-                cls: 'extContainer',
                 controlName: _controlName,
                 controlType: _controlType,
                 assayName: _protocolName,
