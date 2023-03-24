@@ -195,15 +195,7 @@
                 controlType: _controlType,
                 assayName: _protocolName,
                 listeners: {
-                    'applyGraphBtnClicked': function(analyte, isotype, conjugate){
-                        _analyte = analyte;
-                        _isotype = isotype;
-                        _conjugate = conjugate;
-
-                        guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
-                        trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
-                        trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
-                    },
+                    'applyGraphBtnClicked': graphParamsSelected,
                     'graphParamsChanged': function(){
                         guideSetPanel.disable();
                         trendPlotPanel.disable();
@@ -292,6 +284,21 @@
                     },
                 }
             });
+
+            function graphParamsSelected(analyte, isotype, conjugate){
+                _analyte = analyte;
+                _isotype = isotype;
+                _conjugate = conjugate;
+
+                guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
+                trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
+                trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
+            }
+
+            var urlParams = LABKEY.ActionURL.getParameters();
+            if (urlParams.hasOwnProperty("analyte") && urlParams.hasOwnProperty("isotype") && urlParams.hasOwnProperty("conjugate")) {
+                graphParamsSelected(urlParams.analyte, urlParams.isotype, urlParams.conjugate);
+            }
         }
 
         Ext.onReady(init);
