@@ -89,6 +89,13 @@ public class LuminexGuideSetHelper
         table.clearFilter("GuideSet/Created");
     }
 
+    public DataRegionTable getTrackingDataRegion()
+    {
+        DataRegionTable table = new DataRegionTable.DataRegionFinder(_test.getDriver()).find();
+        table.setAsync(true);
+        return table;
+    }
+
     public void waitForManageGuideSetWindow(boolean creating)
     {
         WebElement window = _test.shortWait().until(ExpectedConditions.visibilityOfElementLocated(GS_WINDOW_LOC));
@@ -180,8 +187,6 @@ public class LuminexGuideSetHelper
         _test._extHelper.waitForExt3MaskToDisappear(WebDriverWrapper.WAIT_FOR_JAVASCRIPT);
         _test.waitForElementToDisappear(GS_WINDOW_LOC);
         waitForLeveyJenningsTrendPlot();
-        // Wait for the grid to populate as well.
-        _test.waitForElements(Locator.xpath("//div[contains(@class, 'x-grid3-row-checker')]"));
     }
 
     public void goToLeveyJenningsGraphPage(String assayName, String titrationName)
@@ -207,10 +212,11 @@ public class LuminexGuideSetHelper
     @LogMethod
     public void applyGuideSetToRun(@LoggedParam String[] networks, @LoggedParam String comment, boolean useCurrent)
     {
+        DataRegionTable table = getTrackingDataRegion();
         for (String network : networks)
-            _test.click(ExtHelper.locateGridRowCheckbox(network));
+            table.checkCheckbox(table.getRowIndex("Network", network));
 
-        WebElement applyGuideSetButton = _test.scrollIntoView(Locator.button("Apply Guide Set"));
+        WebElement applyGuideSetButton = _test.scrollIntoView(Locator.lkButton("Apply Guide Set"));
         _test.doAndWaitForPageSignal(applyGuideSetButton::click, "guideSetSelectionChange");
 
         WebElement applyGuideSetWindow = ExtHelper.Locators.window("Apply Guide Set...").waitForElement(_test.getDriver(), WAIT_FOR_JAVASCRIPT);

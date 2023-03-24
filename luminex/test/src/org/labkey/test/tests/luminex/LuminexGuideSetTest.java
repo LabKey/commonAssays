@@ -33,6 +33,7 @@ import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -209,62 +210,56 @@ public final class LuminexGuideSetTest extends LuminexTest
     @LogMethod
     private void applyStartAndEndDateFilter()
     {
-        String colValuePrefix = "NETWORK";
-
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        // check that all 5 runs are present in the grid by clicking on them
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
-        }
+        // check that all 5 runs are present in the grid and plot
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+
         // set start and end date filter
-        setFormElement(Locator.name("start-date-field"), "2011-03-26");
-        setFormElement(Locator.name("end-date-field"), "2011-03-28");
-        waitAndClick(Locator.extButtonEnabled("Apply").index(1));
+        table.setFilter("Analyte/Data/AcquisitionDate", "Is Greater Than or Equal To", "2011-03-26", "Is Less Than or Equal To", "2011-03-28");
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
+
         // check that only 3 runs are now present
-        waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colValuePrefix + "1"), WAIT_FOR_JAVASCRIPT);
-        for (int i = 2; i <= 4; i++)
-        {
-            waitForElement(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
-        }
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + "5"));
+        assertEquals("Initial grid row count not as expected", 3, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 3, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+        List<String> rowNetworkValues = table.getColumnDataAsText("Titration/Run/Batch/Network");
+        assertEquals("Filtered grid row value not as expected", "NETWORK4", rowNetworkValues.get(0));
+        assertEquals("Filtered grid row value not as expected", "NETWORK3", rowNetworkValues.get(1));
+        assertEquals("Filtered grid row value not as expected", "NETWORK2", rowNetworkValues.get(2));
+
+        // Clear the filter and check that all rows reappear
+        table.clearAllFilters();
+        _guideSetHelper.waitForLeveyJenningsTrendPlot();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
     }
 
     @LogMethod
     private void applyNetworkProtocolFilter()
     {
-        String colNetworkPrefix = "NETWORK";
-        String colProtocolPrefix = "PROTOCOL";
-
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        // check that all 5 runs are present in the grid by clicking on them
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + i));
-        }
+        // check that all 5 runs are present in the grid and plot
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+
         // set network and protocol filter
-        _extHelper.selectComboBoxItem(Locator.xpath("//input[@id='network-combo-box']/.."), colNetworkPrefix + "3");
-        _extHelper.selectComboBoxItem(Locator.xpath("//input[@id='protocol-combo-box']/.."), colProtocolPrefix + "3");
-
-        waitAndClick(Locator.extButtonEnabled("Apply").index(1));
+        table.setFilter("Titration/Run/Batch/Network", "Equals", "NETWORK3");
+        table.setFilter("Titration/Run/Batch/CustomProtocol", "Equals", "PROTOCOL3");
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        // check that only 1 runs are now present
-        waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"), WAIT_FOR_JAVASCRIPT);
-        waitForElement(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "3"));
 
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "2"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "4"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "5"));
+        // check that only 1 run is now present
+        assertEquals("Initial grid row count not as expected", 1, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 1, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+        assertEquals("Filtered grid row value not as expected", "NETWORK3", table.getColumnDataAsText("Titration/Run/Batch/Network").get(0));
+        assertEquals("Filtered grid row value not as expected", "PROTOCOL3", table.getColumnDataAsText("Titration/Run/Batch/CustomProtocol").get(0));
 
         // Clear the filter and check that all rows reappear
-        waitAndClick(Locator.extButtonEnabled("Clear"));
+        table.clearAllFilters();
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + i));
-        }
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
     }
 
     private void applyLogYAxisScale()
@@ -413,15 +408,16 @@ public final class LuminexGuideSetTest extends LuminexTest
         // TODO: add more validation of the plot SVG
 
         //verify QC flags
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertTrue(table.getColumnLabels().contains("QC Flags"));
         //this locator finds an EC50 flag, then makes sure there's red text outlining
-        Locator.XPathLocator l = Locator.xpath("//td/div[contains(@style,'red')]/../../td/div/a[contains(text(),'EC50-4')]");
+        Locator.XPathLocator l = Locator.xpath("//td/span[contains(@style,'red')]/../../td/a[contains(text(),'EC50-4')]");
         assertElementPresent(l,2);
-        assertTextPresent("QC Flags");
 
         // Verify as much of the Curve Comparison window as we can - most of its content is in the image, so it's opaque to the test
         for (int i = 1; i <= 5; i++)
         {
-            click(ExtHelper.locateGridRowCheckbox("NETWORK" + i));
+            table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
@@ -479,9 +475,9 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
         //assert ec50 and HMFI red text present
         waitForText(newQcFlags);
-        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]")); // EC50
-        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]")); // AUC
-        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]")); // High MFI
+        assertElementPresent(Locator.xpath("//span[text()='28040.51' and contains(@style,'red')]")); // EC50
+        assertElementPresent(Locator.xpath("//span[text()='79121.45' and contains(@style,'red')]")); // AUC
+        assertElementPresent(Locator.xpath("//span[text()='32145.80' and contains(@style,'red')]")); // High MFI
         //verify new flags present in run list
         goToTestAssayHome();
         drt = new DataRegionTable("Runs", getDriver());
