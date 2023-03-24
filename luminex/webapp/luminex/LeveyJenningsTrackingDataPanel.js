@@ -212,6 +212,8 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
                         conjugate: scope.conjugate,
                         networkExists: scope.networkExists,
                         protocolExists: scope.protocolExists,
+                        has4PLCurveFit: scope.has4PLCurveFit,
+                        has5PLCurveFit: scope.has5PLCurveFit,
                         listeners: {
                             'closeApplyGuideSetPanel': function (hasUpdated)
                             {
