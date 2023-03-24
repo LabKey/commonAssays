@@ -337,7 +337,6 @@ public final class LuminexGuideSetTest extends LuminexTest
         DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
         table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", network));
         clickButton("Apply Guide Set", 0);
-        waitForElement(ExtHelper.locateGridRowCheckbox(network));
         waitForElement(ExtHelper.locateGridRowCheckbox(comment));
         sleep(1000);
         // deselect the current guide set to test error message
