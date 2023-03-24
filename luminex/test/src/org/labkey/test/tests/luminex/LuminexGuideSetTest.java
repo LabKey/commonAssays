@@ -140,7 +140,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         excludeReplicateGroupFromRun("Guide Set plate 5", "A6,B6", 2, 1);
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        assertTextPresent("28040.51");
+        assertTextPresent("28040.512");
     }
 
     private void excludeReplicateGroupFromRun(String run, String wells, int jobCount, int jobInfoCount)
@@ -475,9 +475,9 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
         //assert ec50 and HMFI red text present
         waitForText(newQcFlags);
-        assertElementPresent(Locator.xpath("//span[text()='28040.51' and contains(@style,'red')]")); // EC50
-        assertElementPresent(Locator.xpath("//span[text()='79121.45' and contains(@style,'red')]")); // AUC
-        assertElementPresent(Locator.xpath("//span[text()='32145.80' and contains(@style,'red')]")); // High MFI
+        assertElementPresent(Locator.xpath("//span[text()='28040.512' and contains(@style,'red')]")); // EC50
+        assertElementPresent(Locator.xpath("//span[text()='79121.445' and contains(@style,'red')]")); // AUC
+        assertElementPresent(Locator.xpath("//span[text()='32145.8' and contains(@style,'red')]")); // High MFI
         //verify new flags present in run list
         goToTestAssayHome();
         drt = new DataRegionTable("Runs", getDriver());
