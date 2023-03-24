@@ -334,7 +334,8 @@ public final class LuminexGuideSetTest extends LuminexTest
     @LogMethod
     private void verifyGuideSetToRun(String network, String comment)
     {
-        click(ExtHelper.locateGridRowCheckbox(network));
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", network));
         clickButton("Apply Guide Set", 0);
         waitForElement(ExtHelper.locateGridRowCheckbox(network));
         waitForElement(ExtHelper.locateGridRowCheckbox(comment));
