@@ -171,7 +171,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                     sql.append(") = 0 THEN NULL ELSE ");
                     sql.append(ExprColumn.STR_TABLE_ALIAS);
                     sql.append(".AbsoluteIntensity");
-                    sql.append(i);
+                    sql.appendValue(i);
                     sql.append(" / ");
                     sql.append(sumSQL);
                     sql.append(" END");
@@ -447,7 +447,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 sql.append("' THEN ");
                 sql.append(ExprColumn.STR_TABLE_ALIAS);
                 sql.append(".score");
-                sql.append(typeInfo.getValue());
+                sql.appendValue(typeInfo.getValue());
             }
             sql.append(" ELSE NULL END");
 

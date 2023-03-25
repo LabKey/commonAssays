@@ -72,7 +72,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
             {
                 seqIdCondition.append(separator);
                 separator = ", ";
-                seqIdCondition.append(run.getRun());
+                seqIdCondition.appendValue(run.getRun());
             }
             seqIdCondition.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId)");
             addCondition(seqIdCondition);
@@ -81,7 +81,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
             {
                 SQLFragment sql = new SQLFragment();
                 sql.append("Run");
-                sql.append(run.getRun());
+                sql.appendValue(run.getRun());
                 sql.append("ProteinGroupId");
                 ExprColumn proteinGroupIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, JdbcType.INTEGER);
                 proteinGroupIdColumn.setLabel(run.getDescription());
@@ -142,7 +142,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
             patternSQL.append(separator);
             separator = " + ";
             patternSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE ");
-            patternSQL.append(1 << offset);
+            patternSQL.appendValue(1 << offset);
             patternSQL.append(" END ");
             offset++;
             if (offset >= 64)
@@ -173,9 +173,9 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         {
             result.append(",\n");
             result.append("MAX(Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("ProteinGroupId) AS Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("ProteinGroupId");
         }
         result.append("\nFROM (SELECT SeqId AS InnerSeqId");
@@ -183,10 +183,10 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         {
             result.append(",\n");
             result.append("\tCASE WHEN Run=");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             // There should only be one matching protein group, but we have to aggregate to get it past the GROUP BY clause
             result.append(" THEN MAX(pg.RowId) ELSE NULL END AS Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("ProteinGroupId");
         }
         result.append( "\nFROM ");
@@ -205,7 +205,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         {
             result.append(separator);
             separator = ", ";
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
         }
         result.append(") AND ppf.RowId = pg.ProteinProphetFileId AND pg.RowId = pgm.ProteinGroupId AND pep.RowId = pm.PeptideId AND pm.ProteinGroupId = pg.RowId\n");
         result.append("GROUP BY Run, SeqId) x GROUP BY InnerSeqId)\n");

@@ -179,7 +179,7 @@ public class CompareQuery extends SQLFragment
             for (RunColumn column : _gridColumns)
             {
                 append("MAX(Run");
-                append(i);
+                appendValue(i);
                 append(column.getLabel());
                 append(") AS ");
                 String colName = "Run" + i + column.getLabel();
@@ -204,10 +204,10 @@ public class CompareQuery extends SQLFragment
             if (i > 0)
                 append("+");
             append("(CASE WHEN MAX(Run");
-            append(i);
+            appendValue(i);
             append(firstColumnName);
             append(") IS NULL THEN 0 ELSE ");
-            append(Math.round(Math.pow(2, patternRunCount - i - 1)));
+            appendValue(Math.round(Math.pow(2, patternRunCount - i - 1)));
             append(" END)");
         }
         append(" AS Pattern");
@@ -243,7 +243,7 @@ public class CompareQuery extends SQLFragment
                 append("(");
                 append(column.getName());
                 append(") ELSE NULL END AS Run");
-                append(i);
+                appendValue(i);
                 append(column.getLabel());
                 separator = ", ";
             }

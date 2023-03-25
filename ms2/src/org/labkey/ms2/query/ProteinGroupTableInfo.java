@@ -374,7 +374,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             {
                 sql.append(separator);
                 separator = ", ";
-                sql.append(seqId);
+                sql.appendValue(seqId);
             }
         }
         sql.append("))");
@@ -431,7 +431,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             for (MS2Run run : runs)
             {
                 sql.append(separator);
-                sql.append(run.getRun());
+                sql.appendValue(run.getRun());
                 separator = ", ";
             }
             sql.append(")");

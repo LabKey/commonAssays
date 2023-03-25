@@ -97,7 +97,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
         SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic WHERE flow.Statistic.ObjectId = ");
         ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         ret.append(" AND flow.Statistic.StatisticId = ");
-        ret.append(attrId);
+        ret.appendValue(attrId);
         ret.append(")");
 
         //SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic, flow.StatisticAttr WHERE flow.Statistic.ObjectId = ");
