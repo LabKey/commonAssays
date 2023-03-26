@@ -103,8 +103,6 @@ import java.util.Set;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
- * User: jeckels
- * Date: Jul 31, 2007
  */
 public class LuminexController extends SpringActionController
 {
@@ -601,15 +599,18 @@ public class LuminexController extends SpringActionController
             final List<String> positivityThresholds = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
             final List<String> negativeBeads = AnalyteDefaultValueService.getAnalyteProperty(analytes, getContainer(), protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
 
-            try (TSVWriter writer = new TSVWriter(){
+            try (TSVWriter writer = new TSVWriter()
+            {
                 @Override
-                protected void write()
+                protected int write()
                 {
                     _pw.println("Analyte\t" + LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME + "\t" + LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
                     for (int i=0; i<analytes.size(); i++)
                     {
                         _pw.println( String.format("%s\t%s\t%s", analytes.get(i), positivityThresholds.get(i), negativeBeads.get(i)));
                     }
+
+                    return analytes.size();
                 }
             })
             {
