@@ -490,28 +490,33 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, true);
         assertTextNotPresent(newQcFlags);
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),2);
 
         //6. Create new Guide Set for GS Analyte B that includes plate 5 (but not plate 5a)
-        //	- the AUC QC Flag for plate 5 is removed
+        //	- the AUC QC Flag for plate 5 is removed for GS Analyte B but still exists for GS Analyte A
         Locator.XPathLocator aucLink =  Locator.xpath("//a[contains(text(),'AUC')]");
         waitForElement(aucLink);
         int aucCount = getElementCount(aucLink);
         _guideSetHelper.createGuideSet(false);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1"}, "Guide set includes plate 5", true);
-        assertEquals("Wrong count for AUC flag links", aucCount-1, (getElementCount(aucLink)));
+        assertEquals("Wrong count for AUC flag links", aucCount, (getElementCount(aucLink)));
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),1);
 
         //7. Switch to GS Analyte A, and edit the current guide set to include plate 3
         //	- the QC Flag for plate 3 (the run included) and the other plates (4, 5, and 5a) are all removed as all values are within the guide set ranges
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte A");
-        assertExpectedAnalyte1QCFlagsPresent();
+        assertExpectedAnalyte1QCFlagsInitial();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),7);
         clickButtonContainingText("Edit", 0);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_3"}, "edited analyte 1", false);
-        assertQCFlagsNotPresent();
+        assertExpectedAnalyte1QCFlagsUpdated();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),0);
 
         //8. Edit the GS Analyte A guide set and remove plate 3
         //	- the QC Flags for plates 3, 4, 5, and 5a return (HMFI for all 4 and AUC for plates 4, 5, and 5a)
         removePlate3FromGuideSet();
-        assertExpectedAnalyte1QCFlagsPresent();
+        assertExpectedAnalyte1QCFlagsInitial();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),7);
     }
 
     @LogMethod
@@ -524,18 +529,17 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.waitForGuideSetExtMaskToDisappear();
     }
 
-    private void assertExpectedAnalyte1QCFlagsPresent()
+    private void assertExpectedAnalyte1QCFlagsInitial()
     {
         waitForElements(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
         waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
     }
 
-    private void assertQCFlagsNotPresent()
+    private void assertExpectedAnalyte1QCFlagsUpdated()
     {
-        for (String flag : new String[] {"AUC", "HMFI", "EC50-4", "EC50-5", "PCV"})
-        {
+        for (String flag : new String[] {"HMFI", "EC50-4", "EC50-5"})
             assertElementNotPresent(Locator.xpath("//a[contains(text(),'" + flag + "')]"));
-        }
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 1); // for GS Analyte B
     }
 
     private void importPlateFiveAgain()
