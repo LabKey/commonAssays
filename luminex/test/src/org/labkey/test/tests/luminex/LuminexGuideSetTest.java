@@ -20,6 +20,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -275,7 +276,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         // verify that the PDF of curves file was generated along with the xls file and the Rout file
         DataRegionTable table = new DataRegionTable("Runs", getDriver());
         table.setFilter("Name", "Equals", "Guide Set plate " + index);
-        clickAndWait(Locator.tagWithAttribute("img", "src", "/labkey/experiment/images/graphIcon.gif"));
+        clickAndWait(Locator.tagWithAttribute("img", "src", WebTestHelper.getContextPath() + "/experiment/images/graphIcon.gif"));
         clickAndWait(Locator.linkWithText("Text View"));
         waitForElement(Locator.css(".labkey-protocol-applications")); // bottom section of the "Text View" tab for the run details page
         waitForElements(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_4PL.pdf"), 3);
