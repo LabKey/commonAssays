@@ -19,6 +19,7 @@ LABKEY.LeveyJenningsPlotHelper.TitrationColumnsMap = {
     "AcquisitionDate": "Analyte/Data/AcquisitionDate",
     "LotNumber": "Analyte/Properties/LotNumber",
     "RunRowId": "Titration/Run/RowId",
+    "AssayId": "Titration/Run/Name",
     "Network": "Titration/Run/Batch/Network",
     "NotebookNo": "Analyte/Data/Run/NotebookNo",
     "AssayType": "Analyte/Data/Run/AssayType",
@@ -34,6 +35,7 @@ LABKEY.LeveyJenningsPlotHelper.SinglePointControlColumnsMap = {
     "AcquisitionDate": "Analyte/Data/AcquisitionDate",
     "LotNumber": "Analyte/Properties/LotNumber",
     "RunRowId": "SinglePointControl/Run/RowId",
+    "AssayId": "SinglePointControl/Run/Name",
     "Network": "SinglePointControl/Run/Batch/Network",
     "NotebookNo": "SinglePointControl/Run/NotebookNo",
     "AssayType": "SinglePointControl/Run/AssayType",
@@ -122,6 +124,11 @@ LABKEY.LeveyJenningsPlotHelper.renderPlot = function(config)
             pointColor: record.get(columnsMap['LotNumber']),
             value: record.get(columnsMap[config.plotType]),
         };
+
+        // fall back to using the AssayId if the NotebookNo prop doesn't exist
+        if (!record.get(columnsMap['NotebookNo'])) {
+            data.xLabel = record.get(columnsMap['AssayId']);
+        }
 
         // merge in the guide set range mean and stdDev values
         var gsRecordIndex = config.guideSetRangeStore ? config.guideSetRangeStore.findExact('RowId', record.get(columnsMap['GuideSetId'])) : -1;
