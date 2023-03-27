@@ -539,7 +539,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     {
         for (String flag : new String[] {"HMFI", "EC50-4", "EC50-5"})
             assertElementNotPresent(Locator.xpath("//a[contains(text(),'" + flag + "')]"));
-        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 1); // for GS Analyte B
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 7);
     }
 
     private void importPlateFiveAgain()
