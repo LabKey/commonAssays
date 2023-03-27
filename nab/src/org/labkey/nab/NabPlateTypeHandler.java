@@ -79,6 +79,12 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
+    public boolean canCreateNewGroups(WellGroup.Type type)
+    {
+        return type != WellGroup.Type.CONTROL;
+    }
+
+    @Override
     public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
