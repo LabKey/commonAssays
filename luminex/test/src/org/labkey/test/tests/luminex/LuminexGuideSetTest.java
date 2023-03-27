@@ -532,7 +532,7 @@ public final class LuminexGuideSetTest extends LuminexTest
     private void assertExpectedAnalyte1QCFlagsInitial()
     {
         waitForElements(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
-        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 9);
     }
 
     private void assertExpectedAnalyte1QCFlagsUpdated()
