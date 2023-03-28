@@ -272,8 +272,8 @@ LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow = function(protocolId,
 
     var _getConfig = function(assayName)
     {
-        // note make sure to mix assayName into config...
         LABKEY.Query.selectRows({
+            containerFilter: LABKEY.Query.containerFilter.allFolders,
             schemaName: 'assay.Luminex.' + LABKEY.QueryKey.encodePart(assayName),
             queryName: 'Analyte'+controlTypeColName,
             columns: [controlTypeColName+'/Name', 'Analyte/Name', controlTypeColName+'/Run/Isotype', controlTypeColName+'/Run/Conjugate', controlTypeColName+'/Run', 'Analyte/Data/AcquisitionDate'],
