@@ -174,7 +174,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Name"));
-        defaultCols.add(FieldKey.fromParts("LJPlots"));
+        defaultCols.add(FieldKey.fromParts("L-J Plots"));
         defaultCols.add(FieldKey.fromParts("Titration"));
         defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
         defaultCols.add(FieldKey.fromParts("Titration", "QCControl"));

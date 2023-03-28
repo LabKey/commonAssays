@@ -165,7 +165,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Name"));
-        defaultCols.add(FieldKey.fromParts("LJPlots"));
+        defaultCols.add(FieldKey.fromParts("L-J Plots"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Name"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "Network"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "CustomProtocol"));
