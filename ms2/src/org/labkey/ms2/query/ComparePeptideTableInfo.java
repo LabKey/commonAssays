@@ -63,7 +63,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
             {
                 SQLFragment sql = new SQLFragment();
                 sql.append("Run");
-                sql.append(run.getRun());
+                sql.appendValue(run.getRun());
                 sql.append("PeptideId");
                 ExprColumn peptideIdColumn = new ExprColumn(this, "Run" + run.getRun(), sql, JdbcType.INTEGER);
                 peptideIdColumn.setLabel(run.getDescription());
@@ -121,7 +121,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
             patternSQL.append(separator);
             separator = " + ";
             patternSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE ");
-            patternSQL.append(1 << offset);
+            patternSQL.appendValue(1 << offset);
             patternSQL.append(" END ");
             offset++;
             if (offset >= 64)
@@ -149,9 +149,9 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
         {
             result.append(",\n");
             result.append("MAX(Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("PeptideId) AS Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("PeptideId");
         }
         result.append("\nFROM (SELECT Peptide AS InnerPeptide");
@@ -159,9 +159,9 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
         {
             result.append(",\n");
             result.append("\tCASE WHEN Run=");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append(" THEN MAX(p.RowId) ELSE NULL END AS Run");
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
             result.append("PeptideId");
         }
         result.append( "\nFROM ");
@@ -180,7 +180,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
         {
             result.append(separator);
             separator = ", ";
-            result.append(run.getRun());
+            result.appendValue(run.getRun());
         }
         result.append(") AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide");
         return result;

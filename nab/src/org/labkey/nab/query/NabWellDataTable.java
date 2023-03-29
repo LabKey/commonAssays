@@ -116,7 +116,7 @@ public class NabWellDataTable extends NabBaseTable
         for (int i = 0; i < rowCount; i++)
         {
             char chr = (char)('A' + i);
-            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").append(i + 1).append(" THEN '").append(chr).append("'");
+            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").appendValue(i + 1).append(" THEN '").append(chr).append("'");
         }
         rowSql.append("\nELSE '' END) ");
         SQLFragment colSql = new SQLFragment("CAST(");

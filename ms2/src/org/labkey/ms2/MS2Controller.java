@@ -4501,7 +4501,7 @@ public class MS2Controller extends SpringActionController
                 String sep = "";
                 for (MS2Run run : runs)
                 {
-                    sql.append(sep).append(run.getRun());
+                    sql.append(sep).appendValue(run.getRun());
                     sep = ",";
                 }
                 sql.append(") ");
@@ -4516,7 +4516,7 @@ public class MS2Controller extends SpringActionController
                 {
                     // add the PeptideProphet probability filter to the where clause
                     sql.append(" AND x.PeptideProphet >= ");
-                    sql.append(form.getPeptideProphetProbability());
+                    sql.appendValue(form.getPeptideProphetProbability());
                 }
                 sql.append(" GROUP BY x.SeqId, x.Run ORDER BY x.Run, x.SeqId");
                 idPairs = new SqlSelector(MS2Manager.getSchema(), sql).getArray(SeqRunIdPair.class);

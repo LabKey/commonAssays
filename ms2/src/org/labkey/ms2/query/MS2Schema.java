@@ -268,7 +268,7 @@ public class MS2Schema extends UserSchema
             public SQLFragment getScanCountSqlFragment(int msLevel)
             {
                 SQLFragment sql = new SQLFragment("(SELECT SUM(MS");
-                sql.append(msLevel);
+                sql.appendValue(msLevel);
                 sql.append("ScanCount) FROM ");
                 sql.append(MS2Manager.getTableInfoFractions(), "f");
                 sql.append(" WHERE f.Run = ");
@@ -593,7 +593,7 @@ public class MS2Schema extends UserSchema
                 SQLFragment sql = new SQLFragment("ProteinGroupID IN (SELECT pg.RowId FROM ");
                 sql.append(MS2Manager.getTableInfoProteinGroups() + " pg ");
                 sql.append("WHERE pg.GroupProbability >= ");
-                sql.append(form.getProteinProphetProbability());
+                sql.appendValue(form.getProteinProphetProbability());
                 sql.append(")");
                 result.addCondition(sql, FieldKey.fromParts("ProteinGroupId"));
             }
@@ -650,7 +650,7 @@ public class MS2Schema extends UserSchema
             {
                 sql.append(separator);
                 separator = ", ";
-                sql.append(run.getRun());
+                sql.appendValue(run.getRun());
             }
         }
         sql.append(")");
@@ -1178,7 +1178,7 @@ public class MS2Schema extends UserSchema
                 {
                     insertSQL.append(separator);
                     separator = ", ";
-                    insertSQL.append(run.getRun());
+                    insertSQL.appendValue(run.getRun());
                 }
                 insertSQL.append(") ) AS x");
 

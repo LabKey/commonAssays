@@ -351,7 +351,7 @@ public class ViabilityManager
             updateFrag.append("FROM ").append(tempTableName).append(" agg\n");
             // The EXISTS clause excludes rows that are the same in both tables and handles NULLs correctly
             updateFrag.append("WHERE\n");
-            updateFrag.append("  ProtocolId = ").append(protocol.getRowId()).append(" AND\n");
+            updateFrag.append("  ProtocolId = ").appendValue(protocol.getRowId()).append(" AND\n");
             updateFrag.append("  RowId = agg.ResultId AND\n");
             updateFrag.append("  EXISTS (\n");
             updateFrag.append("    SELECT results.RowId, results.SpecimenCount, results.SpecimenMatchCount, results.OriginalCells, results.SpecimenMatches\n");

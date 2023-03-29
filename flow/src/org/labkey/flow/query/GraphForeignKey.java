@@ -98,7 +98,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
         sql.append(sepAndGraphSpec);
         sql.append(" END");
         sql.append("\nFROM flow.Graph WHERE flow.Graph.GraphId = ");
-        sql.append(attrId);
+        sql.appendValue(attrId);
         sql.append("\nAND flow.Graph.ObjectId = ");
         sql.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sql.append(")");

@@ -708,7 +708,7 @@ public class FlowManager
                 .append("  FROM ").append(valueTable, "v").append("\n")
                 .append("  INNER JOIN flow.object obj ON v.objectId = obj.rowId\n")
                 .append("  WHERE obj.container = ?\n").add(containerId)
-                .append("    AND v.").append(valueTableAttrIdColumn).append(" IN (").append(currentRowId).append(", ").append(newRowId).append(")").append("\n")
+                .append("    AND v.").append(valueTableAttrIdColumn).append(" IN (").appendValue(currentRowId).append(", ").appendValue(newRowId).append(")").append("\n")
                 .append("  GROUP BY v.objectId\n")
                 .append(") X\n")
                 .append("WHERE X.usages > 1");
@@ -719,8 +719,8 @@ public class FlowManager
         SQLFragment sql = new SQLFragment()
                 .append("UPDATE ").append(valueTable)
                 .append(" SET ").append(valueTableAttrIdColumn)
-                .append(" = ").append(newRowId)
-                .append(" WHERE ").append(valueTableAttrIdColumn).append(" = ").append(currentRowId);
+                .append(" = ").appendValue(newRowId)
+                .append(" WHERE ").append(valueTableAttrIdColumn).append(" = ").appendValue(currentRowId);
 
         return new SqlExecutor(getSchema()).execute(sql);
     }
@@ -992,7 +992,7 @@ public class FlowManager
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").append(entry._rowId).append("\n")
+                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(entry._rowId).append("\n")
                 .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -1028,7 +1028,7 @@ public class FlowManager
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").append(entry._rowId).append("\n");
+                .append("  AND val.").append(valueTableOriginalAttrIdColumn).append(" = ").appendValue(entry._rowId).append("\n");
 
         final List<FlowDataObject> usages = new ArrayList<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -1064,7 +1064,7 @@ public class FlowManager
                 .append(valueTable, "val").append(", ")
                 .append(getTinfoObject(), "fo").append("\n")
                 .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").append(rowId).append("\n");
+                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
 
         final Map<Integer, Collection<FlowDataObject>> usages = new HashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -1092,7 +1092,7 @@ public class FlowManager
         String comma = "";
         for (ExpData data : datas)
         {
-            sql.append(comma).append(data.getRowId());
+            sql.append(comma).appendValue(data.getRowId());
             comma = ",";
         }
         sql.append(")");

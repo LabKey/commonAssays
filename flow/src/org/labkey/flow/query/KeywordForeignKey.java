@@ -76,7 +76,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
         SQLFragment ret = new SQLFragment("(SELECT CAST(flow.Keyword.Value AS VARCHAR(4000)) FROM flow.Keyword WHERE flow.Keyword.ObjectId = ");
         ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         ret.append(" AND flow.Keyword.KeywordId = ");
-        ret.append(attrId);
+        ret.appendValue(attrId);
         ret.append(")");
 
         //SQLFragment ret = new SQLFragment("(SELECT CAST(flow.Keyword.Value AS VARCHAR(4000)) FROM flow.Keyword, flow.KeywordAttr WHERE flow.Keyword.ObjectId = ");

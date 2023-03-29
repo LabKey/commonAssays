@@ -1057,7 +1057,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 //            }
             if (null != _experiment)
             {
-                where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList WHERE RunList.experimentId = ").append(_experiment.getRowId()).append(")\n");
+                where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList WHERE RunList.experimentId = ").appendValue(_experiment.getRowId()).append(")\n");
                 and = " AND ";
             }
             if (_runSpecified)
@@ -1068,7 +1068,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 }
                 else
                 {
-                    where.append(and).append("RunId = ").append(_run.getRowId());
+                    where.append(and).append("RunId = ").appendValue(_run.getRowId());
                 }
                 //and = " AND ";
             }
@@ -1903,7 +1903,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         ret.setDetailsURL(detailsUrl);
         ret.getMutableColumn(ExpExperimentTable.Column.Name).setURL(detailsUrl);
         SQLFragment lsidCondition = new SQLFragment("LSID <> ");
-        lsidCondition.appendStringLiteral(FlowExperiment.getExperimentRunExperimentLSID(getContainer()));
+        lsidCondition.appendValue(FlowExperiment.getExperimentRunExperimentLSID(getContainer()));
         ret.addCondition(lsidCondition);
         return ret;
     }
@@ -2079,7 +2079,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
                 "FROM exp.data\n" +
                 "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n");
-        select.append(" WHERE flow.Object.container = ").append(c).append(" AND TypeId = ").append(String.valueOf(typeid));
+        select.append(" WHERE flow.Object.container = ").appendValue(c).append(" AND TypeId = ").append(String.valueOf(typeid));
         List<String> indexes = Arrays.asList(
                 "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId);\n",
                 "CREATE INDEX ix_objid_${NAME} ON temp.${NAME} (ObjectId);"

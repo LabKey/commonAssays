@@ -471,7 +471,7 @@ public class ProteinManager
         missingCountSQL.append(") Mapping WHERE OldSeqId IN (\n");
         missingCountSQL.append("(SELECT p.SeqId FROM " + MS2Manager.getTableInfoPeptides() + " p, " + MS2Manager.getTableInfoRuns() + " r WHERE p.run = r.Run AND r.FastaId = " + oldFastaId + ")\n");
         missingCountSQL.append("UNION\n");
-        missingCountSQL.append("(SELECT pgm.SeqId FROM ").append(MS2Manager.getTableInfoProteinGroupMemberships()).append(" pgm, ").append(MS2Manager.getTableInfoProteinGroups()).append(" pg, ").append(MS2Manager.getTableInfoProteinProphetFiles()).append(" ppf, ").append(MS2Manager.getTableInfoRuns()).append(" r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = ").append(oldFastaId).append("))\n");
+        missingCountSQL.append("(SELECT pgm.SeqId FROM ").append(MS2Manager.getTableInfoProteinGroupMemberships()).append(" pgm, ").append(MS2Manager.getTableInfoProteinGroups()).append(" pg, ").append(MS2Manager.getTableInfoProteinProphetFiles()).append(" ppf, ").append(MS2Manager.getTableInfoRuns()).append(" r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = ").appendValue(oldFastaId).append("))\n");
         missingCountSQL.append("AND NewSeqId IS NULL");
 
         int missingCount = new SqlSelector(getSchema(), missingCountSQL).getObject(Integer.class);
@@ -729,7 +729,7 @@ public class ProteinManager
                 if (null != _values[i])
                 {
                     sql.append(" WHEN ");
-                    sql.append(i + 1);
+                    sql.appendValue(i + 1);
                     sql.append(" THEN ");
                     sql.append(generalFormat.format(_values[i]));
                 }
