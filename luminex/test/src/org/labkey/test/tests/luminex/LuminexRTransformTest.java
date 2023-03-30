@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -105,7 +106,7 @@ public final class LuminexRTransformTest extends LuminexTest
     private void verifyPDFsGenerated()
     {
         DataRegionTable.DataRegion(getDriver()).find(); // Make sure page is loaded
-        WebElement curvePng = Locator.tagWithAttribute("img", "src", "/labkey/_images/sigmoidal_curve.png").findElement(getDriver());
+        WebElement curvePng = Locator.tagWithAttribute("img", "src", WebTestHelper.getContextPath() + "/_images/sigmoidal_curve.png").findElement(getDriver());
         shortWait().until(LabKeyExpectedConditions.animationIsDone(curvePng));
         File curvePdf = clickAndWaitForDownload(curvePng);
         assertEquals("Curve PDF has wrong name: " + curvePdf.getName(), "WithAltNegativeBead.Standard1_Control_Curves_4PL.pdf", curvePdf.getName());
