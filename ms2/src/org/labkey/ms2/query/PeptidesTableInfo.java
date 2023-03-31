@@ -308,9 +308,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 {
                     sql.append(separator);
                     separator = ", ";
-                    sql.append("'");
-                    sql.append(runType.toString());
-                    sql.append("'");
+                    sql.appendValue(runType.toString());
                 }
                 sql.append(")");
             }
@@ -442,9 +440,8 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             sql.append(".Fraction) ");
             for (Pair<MS2RunType, Integer> typeInfo : entry.getValue())
             {
-                sql.append(" WHEN '");
-                sql.append(typeInfo.getKey().toString());
-                sql.append("' THEN ");
+                sql.append(" WHEN ").appendValue(typeInfo.getKey().toString());
+                sql.append(" THEN ");
                 sql.append(ExprColumn.STR_TABLE_ALIAS);
                 sql.append(".score");
                 sql.appendValue(typeInfo.getValue());
