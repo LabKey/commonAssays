@@ -116,7 +116,7 @@ public class NabWellDataTable extends NabBaseTable
         for (int i = 0; i < rowCount; i++)
         {
             char chr = (char)('A' + i);
-            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").appendValue(i + 1).append(" THEN '").append(chr).append("'");
+            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").appendValue(i + 1).append(" THEN ").appendStringLiteral(String.valueOf(chr));
         }
         rowSql.append("\nELSE '' END) ");
         SQLFragment colSql = new SQLFragment("CAST(");
@@ -198,8 +198,8 @@ public class NabWellDataTable extends NabBaseTable
                     for (Map.Entry<String, Object> wellGroupEntry : propertyEntry.getValue().entrySet())
                     {
                         String value = null != wellGroupEntry.getValue() ? wellGroupEntry.getValue().toString() : "";
-                        sql.append("\nWHEN ").append(wellgroupNameColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("='")
-                                .append(wellGroupEntry.getKey()).append("' THEN '").append(value).append("'");
+                        sql.append("\nWHEN ").append(wellgroupNameColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=")
+                                .appendValue(wellGroupEntry.getKey()).append(" THEN '").append(value).append("'");
                     }
                     sql.append("\nELSE '' END) ");
                     String columnName = propertyEntry.getKey();
