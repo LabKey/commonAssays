@@ -25,6 +25,7 @@ import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
@@ -110,13 +111,14 @@ public class NabWellDataTable extends NabBaseTable
 
     private void addWellNameColumn(int rowCount)
     {
+        SqlDialect dialect = getSqlDialect();
         ColumnInfo row = getColumn("Row");
         ColumnInfo column = getColumn("Column");
         SQLFragment rowSql = new SQLFragment("(CASE ");
         for (int i = 0; i < rowCount; i++)
         {
             char chr = (char)('A' + i);
-            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").appendValue(i + 1).append(" THEN ").appendStringLiteral(String.valueOf(chr));
+            rowSql.append("\nWHEN ").append(row.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=").appendValue(i + 1).append(" THEN ").appendStringLiteral(String.valueOf(chr),dialect);
         }
         rowSql.append("\nELSE '' END) ");
         SQLFragment colSql = new SQLFragment("CAST(");
