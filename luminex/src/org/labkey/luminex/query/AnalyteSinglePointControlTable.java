@@ -140,7 +140,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                         int analyte = (int)ctx.get("analyte");
                         int singlePointControl = (int)ctx.get("singlePointControl");
 
-                        String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePointControl')\">";
+                        String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePoint')\">";
 
                         out.write( String.format(linkTag, protocolId, analyte, singlePointControl, "MFI") );
                         out.write( String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png") );
@@ -165,7 +165,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Name"));
-        defaultCols.add(FieldKey.fromParts("LJPlots"));
+        defaultCols.add(FieldKey.fromParts("L-J Plots"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Name"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "Network"));
         defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "Batch", "CustomProtocol"));
@@ -180,7 +180,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         defaultCols.add(FieldKey.fromParts("Analyte", "Properties", "LotNumber"));
         defaultCols.add(FieldKey.fromParts("GuideSet", "Created"));
         defaultCols.add(FieldKey.fromParts("AverageFiBkgd"));
-        defaultCols.add(FieldKey.fromParts("AverageFiBkgdQCFlagsEnabled"));
+        defaultCols.add(FieldKey.fromParts("SinglePointControl", "Run", "QCFlags"));
         setDefaultVisibleColumns(defaultCols);
     }
 

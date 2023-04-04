@@ -141,7 +141,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         int analyte = (int)ctx.get("analyte");
                         int titration = (int)ctx.get("titration");
 
-                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s')";
+                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration')";
 
                         NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
                         ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
@@ -174,7 +174,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         // set the default columns for this table to be those used for the QC Report
         List<FieldKey> defaultCols = new ArrayList<>();
         defaultCols.add(FieldKey.fromParts("Titration", "Run", "Name"));
-        defaultCols.add(FieldKey.fromParts("LJPlots"));
+        defaultCols.add(FieldKey.fromParts("L-J Plots"));
         defaultCols.add(FieldKey.fromParts("Titration"));
         defaultCols.add(FieldKey.fromParts("Titration", "Standard"));
         defaultCols.add(FieldKey.fromParts("Titration", "QCControl"));
@@ -196,6 +196,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             defaultCols.add(FieldKey.fromParts(StatsService.CurveFitType.FIVE_PARAMETER.getLabel() + "CurveFit", "EC50"));
         defaultCols.add(FieldKey.fromParts("MaxFI"));
         defaultCols.add(FieldKey.fromParts("TrapezoidalCurveFit", "AUC"));
+        defaultCols.add(FieldKey.fromParts("Titration", "Run", "QCFlags"));
         setDefaultVisibleColumns(defaultCols);
     }
 

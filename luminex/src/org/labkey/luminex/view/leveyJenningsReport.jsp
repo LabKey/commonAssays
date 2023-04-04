@@ -21,7 +21,6 @@
 */
 
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -41,6 +40,13 @@
     LeveyJenningsForm bean = me.getModelBean();
 %>
 
+<style>
+    .lj-report-title {
+        font-size: 110%;
+        font-weight: bold;
+    }
+</style>
+
 <div class="leveljenningsreport">
 <table>
     <tr>
@@ -58,7 +64,7 @@
 
         var $h = Ext.util.Format.htmlEncode;
 
-        // the default number of records to return for the report when no start and end date are provided
+        // the default number of records to return for the report when no filters have been applied
         var defaultRowSize = 30;
 
         // local variables for storing the selected graph parameters
@@ -189,15 +195,7 @@
                 controlType: _controlType,
                 assayName: _protocolName,
                 listeners: {
-                    'applyGraphBtnClicked': function(analyte, isotype, conjugate){
-                        _analyte = analyte;
-                        _isotype = isotype;
-                        _conjugate = conjugate;
-
-                        guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
-                        trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
-                        trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate, null, null);
-                    },
+                    'applyGraphBtnClicked': graphParamsSelected,
                     'graphParamsChanged': function(){
                         guideSetPanel.disable();
                         trendPlotPanel.disable();
@@ -231,7 +229,7 @@
                     'currentGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate());
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, true);
                     },
                     'exportPdfBtnClicked': function() {
                         trendPlotPanel.exportToPdf();
@@ -255,10 +253,6 @@
                 has4PLCurveFit: _has4PLCurveFit,
                 has5PLCurveFit: _has5PLCurveFit,
                 listeners: {
-                    'reportFilterApplied': function(startDate, endDate, network, networkAny, protocol, protocolAny) {
-                        trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, startDate, endDate, network, networkAny, protocol, protocolAny);
-                    },
                     'togglePdfBtn': function(toEnable) {
                         guideSetPanel.toggleExportBtn(toEnable);
                     }
@@ -268,7 +262,6 @@
             // initialize the grid panel to display the tracking data
             var trackingDataPanel = new LABKEY.LeveyJenningsTrackingDataPanel({
                 renderTo: 'trackingDataPanel',
-                cls: 'extContainer',
                 controlName: _controlName,
                 controlType: _controlType,
                 assayName: _protocolName,
@@ -281,14 +274,31 @@
                     'appliedGuideSetUpdated': function() {
                         guideSetPanel.toggleExportBtn(false);
                         trendPlotPanel.setTrendPlotLoading();
-                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, trendPlotPanel.getStartDate(), trendPlotPanel.getEndDate(),
-                                trendPlotPanel.network, trendPlotPanel.networkAny, trendPlotPanel.protocol, trendPlotPanel.protocolAny);
+                        trackingDataPanel.graphParamsSelected(_analyte, _isotype, _conjugate, true);
                     },
-                    'trackingDataLoaded': function(store) {
-                        trendPlotPanel.trackingDataLoaded(store);
-                    }
+                    'plotDataLoading': function(store, hasGuideSetUpdates) {
+                        trendPlotPanel.plotDataLoading(store, hasGuideSetUpdates);
+                    },
+                    'plotDataLoaded': function(store, hasReportFilter) {
+                        trendPlotPanel.plotDataLoaded(store, hasReportFilter);
+                    },
                 }
             });
+
+            function graphParamsSelected(analyte, isotype, conjugate){
+                _analyte = analyte;
+                _isotype = isotype;
+                _conjugate = conjugate;
+
+                guideSetPanel.graphParamsSelected(analyte, isotype, conjugate);
+                trendPlotPanel.graphParamsSelected(analyte, isotype, conjugate);
+                trackingDataPanel.graphParamsSelected(analyte, isotype, conjugate);
+            }
+
+            var urlParams = LABKEY.ActionURL.getParameters();
+            if (urlParams.hasOwnProperty("analyte") && urlParams.hasOwnProperty("isotype") && urlParams.hasOwnProperty("conjugate")) {
+                graphParamsSelected(urlParams.analyte, urlParams.isotype, urlParams.conjugate);
+            }
         }
 
         Ext.onReady(init);
