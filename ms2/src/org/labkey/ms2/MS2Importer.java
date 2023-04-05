@@ -587,7 +587,7 @@ public abstract class MS2Importer
                 new SQLFragment("TrimmedPeptide"), new SQLFragment("CASE WHEN (NextAA = ' ' OR NextAA = '-') THEN '' ELSE CAST(NextAA AS VARCHAR) END"));
         SQLFragment positionSQL = MS2Manager.getSqlDialect().getStringIndexOfFunction(searchSQL, new SQLFragment("ProtSequence"));
 
-        _updateSequencePositionSql = new SQLFragment("UPDATE ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(" SET SequencePosition = COALESCE(\n" +
+        _updateSequencePositionSql = new SQLFragment("UPDATE ").appendIdentifier(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(" SET SequencePosition = COALESCE(\n" +
                 "       CASE WHEN PrevAA = ' ' OR PrevAA = '-' THEN\n" +
                 "           CASE WHEN NextAA = ' ' OR NextAA = '-' THEN\n" +
                 "               CASE WHEN ").append(positionSQL).append(" = 1 AND " + MS2Manager.getSqlDialect().getClobLengthFunction() + "( ProtSequence ) = " + MS2Manager.getSqlDialect().getVarcharLengthFunction() + "( TrimmedPeptide ) THEN 1 END\n" +
@@ -602,7 +602,7 @@ public abstract class MS2Importer
                 "           END\n" +
                 "       END\n" +
                 ", 0)\n" +
-                "FROM ").append(ProteinManager.getTableInfoSequences().getSelectName()).append(" ps\n" +
+                "FROM ").appendIdentifier(ProteinManager.getTableInfoSequences().getSelectName()).append(" ps\n" +
                 "WHERE ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(".SeqId = ps.SeqId AND ").append(MS2Manager.getTableInfoPeptidesData().getSelectName()).append(".Fraction = ?");
         _updateSequencePositionSql.add(null); // fractionid
     }
