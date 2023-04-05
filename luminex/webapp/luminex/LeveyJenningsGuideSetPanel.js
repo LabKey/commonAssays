@@ -16,7 +16,7 @@ var $h = Ext.util.Format.htmlEncode;
  * Class to create a small panel for displaying the current guide set info for the selected graph parameters
  *   and to give the user access to the edit guide set and create new guide set buttons
  *
- * @params titration
+ * @params titration on single point control
  * @params assayName
  */
 LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
@@ -59,7 +59,7 @@ LABKEY.LeveyJenningsGuideSetPanel = Ext.extend(Ext.FormPanel, {
         this.paramsDisplayField = new Ext.form.DisplayField({
             hideLabel: true,
             value: "",
-            style: "font-size:110%; font-weight:bold",
+            cls: "lj-report-title",
             width: 738,
             border: true
         });

@@ -20,6 +20,7 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -33,6 +34,7 @@ import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -139,7 +141,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         excludeReplicateGroupFromRun("Guide Set plate 5", "A6,B6", 2, 1);
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        assertTextPresent("28040.51");
+        assertTextPresent("28040.512");
     }
 
     private void excludeReplicateGroupFromRun(String run, String wells, int jobCount, int jobInfoCount)
@@ -209,62 +211,56 @@ public final class LuminexGuideSetTest extends LuminexTest
     @LogMethod
     private void applyStartAndEndDateFilter()
     {
-        String colValuePrefix = "NETWORK";
-
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        // check that all 5 runs are present in the grid by clicking on them
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
-        }
+        // check that all 5 runs are present in the grid and plot
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+
         // set start and end date filter
-        setFormElement(Locator.name("start-date-field"), "2011-03-26");
-        setFormElement(Locator.name("end-date-field"), "2011-03-28");
-        waitAndClick(Locator.extButtonEnabled("Apply").index(1));
+        table.setFilter("Analyte/Data/AcquisitionDate", "Is Greater Than or Equal To", "2011-03-26", "Is Less Than or Equal To", "2011-03-28");
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
+
         // check that only 3 runs are now present
-        waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colValuePrefix + "1"), WAIT_FOR_JAVASCRIPT);
-        for (int i = 2; i <= 4; i++)
-        {
-            waitForElement(ExtHelper.locateGridRowCheckbox(colValuePrefix + i));
-        }
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colValuePrefix + "5"));
+        assertEquals("Initial grid row count not as expected", 3, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 3, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+        List<String> rowNetworkValues = table.getColumnDataAsText("Titration/Run/Batch/Network");
+        assertEquals("Filtered grid row value not as expected", "NETWORK4", rowNetworkValues.get(0));
+        assertEquals("Filtered grid row value not as expected", "NETWORK3", rowNetworkValues.get(1));
+        assertEquals("Filtered grid row value not as expected", "NETWORK2", rowNetworkValues.get(2));
+
+        // Clear the filter and check that all rows reappear
+        table.clearAllFilters();
+        _guideSetHelper.waitForLeveyJenningsTrendPlot();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
     }
 
     @LogMethod
     private void applyNetworkProtocolFilter()
     {
-        String colNetworkPrefix = "NETWORK";
-        String colProtocolPrefix = "PROTOCOL";
-
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
-        // check that all 5 runs are present in the grid by clicking on them
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + i));
-        }
+        // check that all 5 runs are present in the grid and plot
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+
         // set network and protocol filter
-        _extHelper.selectComboBoxItem(Locator.xpath("//input[@id='network-combo-box']/.."), colNetworkPrefix + "3");
-        _extHelper.selectComboBoxItem(Locator.xpath("//input[@id='protocol-combo-box']/.."), colProtocolPrefix + "3");
-
-        waitAndClick(Locator.extButtonEnabled("Apply").index(1));
+        table.setFilter("Titration/Run/Batch/Network", "Equals", "NETWORK3");
+        table.setFilter("Titration/Run/Batch/CustomProtocol", "Equals", "PROTOCOL3");
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        // check that only 1 runs are now present
-        waitForElementToDisappear(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"), WAIT_FOR_JAVASCRIPT);
-        waitForElement(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "3"));
 
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "1"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "2"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "4"));
-        assertElementNotPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + "5"));
+        // check that only 1 run is now present
+        assertEquals("Initial grid row count not as expected", 1, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 1, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
+        assertEquals("Filtered grid row value not as expected", "NETWORK3", table.getColumnDataAsText("Titration/Run/Batch/Network").get(0));
+        assertEquals("Filtered grid row value not as expected", "PROTOCOL3", table.getColumnDataAsText("Titration/Run/Batch/CustomProtocol").get(0));
 
         // Clear the filter and check that all rows reappear
-        waitAndClick(Locator.extButtonEnabled("Clear"));
+        table.clearAllFilters();
         _guideSetHelper.waitForLeveyJenningsTrendPlot();
-        for (int i = 1; i <= 5; i++)
-        {
-            assertElementPresent(ExtHelper.locateGridRowCheckbox(colNetworkPrefix + i));
-        }
+        assertEquals("Initial grid row count not as expected", 5, table.getDataRowCount());
+        assertEquals("Initial plot data point count not as expected", 5, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
     }
 
     private void applyLogYAxisScale()
@@ -280,7 +276,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         // verify that the PDF of curves file was generated along with the xls file and the Rout file
         DataRegionTable table = new DataRegionTable("Runs", getDriver());
         table.setFilter("Name", "Equals", "Guide Set plate " + index);
-        clickAndWait(Locator.tagWithAttribute("img", "src", "/labkey/experiment/images/graphIcon.gif"));
+        clickAndWait(Locator.tagWithAttribute("img", "src", WebTestHelper.getContextPath() + "/experiment/images/graphIcon.gif"));
         clickAndWait(Locator.linkWithText("Text View"));
         waitForElement(Locator.css(".labkey-protocol-applications")); // bottom section of the "Text View" tab for the run details page
         waitForElements(Locator.linkWithText("Guide Set plate " + index + ".Standard1_Control_Curves_4PL.pdf"), 3);
@@ -339,9 +335,9 @@ public final class LuminexGuideSetTest extends LuminexTest
     @LogMethod
     private void verifyGuideSetToRun(String network, String comment)
     {
-        click(ExtHelper.locateGridRowCheckbox(network));
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", network));
         clickButton("Apply Guide Set", 0);
-        waitForElement(ExtHelper.locateGridRowCheckbox(network));
         waitForElement(ExtHelper.locateGridRowCheckbox(comment));
         sleep(1000);
         // deselect the current guide set to test error message
@@ -413,15 +409,16 @@ public final class LuminexGuideSetTest extends LuminexTest
         // TODO: add more validation of the plot SVG
 
         //verify QC flags
+        DataRegionTable table = _guideSetHelper.getTrackingDataRegion();
+        assertTrue(table.getColumnLabels().contains("QC Flags"));
         //this locator finds an EC50 flag, then makes sure there's red text outlining
-        Locator.XPathLocator l = Locator.xpath("//td/div[contains(@style,'red')]/../../td/div/a[contains(text(),'EC50-4')]");
+        Locator.XPathLocator l = Locator.xpath("//td/span[contains(@style,'red')]/../../td/a[contains(text(),'EC50-4')]");
         assertElementPresent(l,2);
-        assertTextPresent("QC Flags");
 
         // Verify as much of the Curve Comparison window as we can - most of its content is in the image, so it's opaque to the test
         for (int i = 1; i <= 5; i++)
         {
-            click(ExtHelper.locateGridRowCheckbox("NETWORK" + i));
+            table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
@@ -479,9 +476,9 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, false);
         //assert ec50 and HMFI red text present
         waitForText(newQcFlags);
-        assertElementPresent(Locator.xpath("//div[text()='28040.51' and contains(@style,'red')]")); // EC50
-        assertElementPresent(Locator.xpath("//div[text()='79121.45' and contains(@style,'red')]")); // AUC
-        assertElementPresent(Locator.xpath("//div[text()='32145.80' and contains(@style,'red')]")); // High MFI
+        assertElementPresent(Locator.xpath("//span[text()='28040.512' and contains(@style,'red')]")); // EC50
+        assertElementPresent(Locator.xpath("//span[text()='79121.445' and contains(@style,'red')]")); // AUC
+        assertElementPresent(Locator.xpath("//span[text()='32145.8' and contains(@style,'red')]")); // High MFI
         //verify new flags present in run list
         goToTestAssayHome();
         drt = new DataRegionTable("Runs", getDriver());
@@ -494,28 +491,33 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
         _guideSetHelper.applyGuideSetToRun("NETWORK5", GUIDE_SET_5_COMMENT, true);
         assertTextNotPresent(newQcFlags);
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),2);
 
         //6. Create new Guide Set for GS Analyte B that includes plate 5 (but not plate 5a)
-        //	- the AUC QC Flag for plate 5 is removed
+        //	- the AUC QC Flag for plate 5 is removed for GS Analyte B but still exists for GS Analyte A
         Locator.XPathLocator aucLink =  Locator.xpath("//a[contains(text(),'AUC')]");
         waitForElement(aucLink);
         int aucCount = getElementCount(aucLink);
         _guideSetHelper.createGuideSet(false);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_1"}, "Guide set includes plate 5", true);
-        assertEquals("Wrong count for AUC flag links", aucCount-1, (getElementCount(aucLink)));
+        assertEquals("Wrong count for AUC flag links", aucCount, (getElementCount(aucLink)));
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),1);
 
         //7. Switch to GS Analyte A, and edit the current guide set to include plate 3
         //	- the QC Flag for plate 3 (the run included) and the other plates (4, 5, and 5a) are all removed as all values are within the guide set ranges
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte A");
-        assertExpectedAnalyte1QCFlagsPresent();
+        assertExpectedAnalyte1QCFlagsInitial();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),7);
         clickButtonContainingText("Edit", 0);
         _guideSetHelper.editRunBasedGuideSet(new String[]{"allRunsRow_3"}, "edited analyte 1", false);
-        assertQCFlagsNotPresent();
+        assertExpectedAnalyte1QCFlagsUpdated();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),0);
 
         //8. Edit the GS Analyte A guide set and remove plate 3
         //	- the QC Flags for plates 3, 4, 5, and 5a return (HMFI for all 4 and AUC for plates 4, 5, and 5a)
         removePlate3FromGuideSet();
-        assertExpectedAnalyte1QCFlagsPresent();
+        assertExpectedAnalyte1QCFlagsInitial();
+        assertElementPresent(Locator.xpath("//td/span[contains(@style,'red')]"),7);
     }
 
     @LogMethod
@@ -528,18 +530,17 @@ public final class LuminexGuideSetTest extends LuminexTest
         _guideSetHelper.waitForGuideSetExtMaskToDisappear();
     }
 
-    private void assertExpectedAnalyte1QCFlagsPresent()
+    private void assertExpectedAnalyte1QCFlagsInitial()
     {
         waitForElements(Locator.xpath("//a[contains(text(),'HMFI')]"), 4);
-        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 3);
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 9);
     }
 
-    private void assertQCFlagsNotPresent()
+    private void assertExpectedAnalyte1QCFlagsUpdated()
     {
-        for (String flag : new String[] {"AUC", "HMFI", "EC50-4", "EC50-5", "PCV"})
-        {
+        for (String flag : new String[] {"HMFI", "EC50-4", "EC50-5"})
             assertElementNotPresent(Locator.xpath("//a[contains(text(),'" + flag + "')]"));
-        }
+        waitForElements(Locator.xpath("//a[contains(text(),'AUC')]"), 7);
     }
 
     private void importPlateFiveAgain()

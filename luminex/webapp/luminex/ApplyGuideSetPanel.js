@@ -110,8 +110,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         selectedHeaderCols.push({header:'Acquisition Date', dataIndex:'Analyte/Data/AcquisitionDate', renderer: this.dateRenderer, width:100});
         if (this.controlType == 'Titration')
         {
-            selectedHeaderCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
-            selectedHeaderCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right'});
+            selectedHeaderCols.push({header:'EC50 4PL', dataIndex:'Four ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has4PLCurveFit});
+            selectedHeaderCols.push({header:'EC50 5PL', dataIndex:'Five ParameterCurveFit/EC50', width:75, renderer: this.numberRenderer, align: 'right', hidden: !this.has5PLCurveFit});
             selectedHeaderCols.push({header:'AUC', dataIndex:'TrapezoidalCurveFit/AUC', width:75, renderer: this.numberRenderer, align: 'right'});
             selectedHeaderCols.push({header:'High MFI', dataIndex:'MaxFI', width:75, renderer: this.numberRenderer, align: 'right'});
         }
@@ -216,8 +216,8 @@ LABKEY.ApplyGuideSetPanel = Ext.extend(Ext.FormPanel, {
         ];
         if (this.controlType == 'Titration')
         {
-            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'AverageEC504PL', renderer: this.numberRenderer, align: 'right', sortable: false});
-            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'AverageEC505PL', renderer: this.numberRenderer, align: 'right', sortable: false});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 4PL', dataIndex: 'AverageEC504PL', renderer: this.numberRenderer, align: 'right', sortable: false, hidden: !this.has4PLCurveFit});
+            guideSetColumnModelColumns.push({header: 'Avg EC50 5PL', dataIndex: 'AverageEC505PL', renderer: this.numberRenderer, align: 'right', sortable: false, hidden: !this.has5PLCurveFit});
             guideSetColumnModelColumns.push({header: 'Avg AUC', dataIndex: 'AverageAUC', renderer: this.numberRenderer, align: 'right', sortable: false});
             guideSetColumnModelColumns.push({header: 'Avg High MFI', dataIndex: 'AverageMFI', renderer: this.numberRenderer, align: 'right', sortable: false});
         }
