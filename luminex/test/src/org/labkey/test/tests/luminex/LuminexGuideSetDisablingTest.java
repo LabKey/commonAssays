@@ -208,10 +208,10 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
     {
         // note: this uses the run based guide set
 
-        // simular to verifyHighlightUpdatesAfterQCFlagChange (but not quite the same... not sure how this other place works)
+        // similar to verifyHighlightUpdatesAfterQCFlagChange (but not quite the same... not sure how this other place works)
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, CONTROL_NAME);
         _guideSetHelper.setUpLeveyJenningsGraphParams(RUN_BASED_ANALYTE);
-        final String plate1_AUC = "64608.73";
+        final String plate1_AUC = "64608.734";
         final String plate2_AUC = "61889.88";
 
         validateFlaggedForQC(plate1_AUC, plate2_AUC);
@@ -244,23 +244,17 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
 
     private void saveGuideSetParameters()
     {
-        // Wait for grid to refresh before checking QC flags
-        doAndWaitForElementToRefresh(() -> click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save")),
-                Locator.tagWithId("div", "trackingDataPanel").append(Locator.byClass("x-grid3-row-table")), shortWait());
+        click(Ext4Helper.Locators.windowButton(GUIDE_SET_WINDOW_NAME, "Save"));
         _guideSetHelper.waitForGuideSetExtMaskToDisappear();
     }
 
     private void validateFlaggedForQC(String... texts)
     {
-        // NOTE: We sometimes get a bad value here which we are investigating. For now the test will ignore such a value.
-        List<String> badVals = Arrays.asList("8.08", "7.90");
-
-        Locator redCellLoc = Locator.tagWithId("div", "trackingDataPanel").append(Locator.tagWithClass("div", "x-grid3-cell-inner").withPredicate("contains(@style,'red')"));
-        List<WebElement> qcFlaggedCells = redCellLoc.findElements(getDriver());
+        Locator redCellLoc = Locator.tagWithClass("table", "labkey-data-region").append(Locator.xpath("//span[contains(@style,'red')]"));
+        List<WebElement> qcFlaggedCells = isElementPresent(redCellLoc) ? redCellLoc.findElements(getDriver()) : Collections.emptyList();
 
         List<String> expectedQcFlaggedValues = new ArrayList<>(Arrays.asList(texts));
         List<String> qcFlaggedValues = getTexts(qcFlaggedCells);
-        qcFlaggedValues.removeAll(badVals);
 
         Collections.sort(expectedQcFlaggedValues);
         Collections.sort(qcFlaggedValues);
