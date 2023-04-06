@@ -22,13 +22,12 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.ForeignKey;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -231,6 +230,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
+        SqlDialect d = ProteinManager.getSqlDialect();
         List<Container> containers = ContainerManager.getAllChildren(c, u);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (SELECT SeqId FROM ");
@@ -243,13 +243,13 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         sql.add(Boolean.FALSE);
         if (includeSubfolders)
         {
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers)));
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
         }
         else
         {
-            sql.append("('");
-            sql.append(c.getId());
-            sql.append("')");
+            sql.append("(");
+            sql.appendValue(c,d);
+            sql.append(")");
         }
         sql.append(")");
         addCondition(sql);
