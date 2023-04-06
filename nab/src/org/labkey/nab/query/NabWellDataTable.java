@@ -201,7 +201,7 @@ public class NabWellDataTable extends NabBaseTable
                     {
                         String value = null != wellGroupEntry.getValue() ? wellGroupEntry.getValue().toString() : "";
                         sql.append("\nWHEN ").append(wellgroupNameColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS)).append("=")
-                                .appendValue(wellGroupEntry.getKey()).append(" THEN '").append(value).append("'");
+                                .appendValue(wellGroupEntry.getKey()).append(" THEN ").appendValue(value);
                     }
                     sql.append("\nELSE '' END) ");
                     String columnName = propertyEntry.getKey();
