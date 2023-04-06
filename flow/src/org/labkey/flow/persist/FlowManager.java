@@ -895,9 +895,9 @@ public class FlowManager
                 .append("SELECT attr3.rowid, attr3.container, attr3.name, attr3.id\n")
                 .append("FROM ").append(attrTable, "attr3").append("\n")
                 .append("WHERE attr3.container = ?\n")
-                .append("AND attr3.rowid NOT IN (\n")
-                .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
-                .append("    SELECT attr2.rowid\n")
+                .append("AND attr3.rowid NOT IN (\n");
+        sql.appendComment("Second query: all rowids in use; maps used ids back to alias or primary rowid", attrTable.getSqlDialect());
+        sql.append("    SELECT attr2.rowid\n")
                 .append("    FROM ").append(attrTable, "attr2").append("\n")
                 .append("    WHERE attr2.id IN (\n")
                 .append("        -- First query: all ids in use\n")
