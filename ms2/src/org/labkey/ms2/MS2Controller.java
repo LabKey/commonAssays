@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -62,6 +63,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.util.ReturnURLString;
 import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -1586,11 +1588,25 @@ public class MS2Controller extends SpringActionController
             }
 
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
-            SequencesTableInfo tableInfo = schema.createSequencesTable(null);
+            SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
             MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
             tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
-            ActionURL targetURL = new ActionURL(form.getTargetURL());
+            ActionURL targetURL;
+            try
+            {
+                // Handle bogus values for targetURL
+                targetURL = new ReturnURLString(form.getTargetURL()).getActionURL();
+                if (targetURL == null)
+                {
+                    throw new NotFoundException("Bad target URL");
+                }
+            }
+            catch (ConversionException e)
+            {
+                throw new NotFoundException("Bad target URL");
+            }
+
             targetURL.addParameters(params);
 
             // Track all of the unique sequences
