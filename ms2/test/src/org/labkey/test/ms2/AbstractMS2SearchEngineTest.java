@@ -133,9 +133,7 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 
         log("Verify graph view");
         pushLocation();
-        Locator.linkWithSpan("Toggle Beta Graph (new!)").waitForElement(getDriver(), 4000)
-                .click();
-        LineageGraph graphComponent = new LineageGraph.LineageGraphFinder(getDriver()).waitFor();
+        LineageGraph graphComponent = LineageGraph.showLineageGraph(getDriver());
 
         // navigate to the details page for CAexample_mini.mzXML.image..itms.png
         graphComponent.getDetailGroup("Data Children")
