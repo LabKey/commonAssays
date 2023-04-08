@@ -396,7 +396,7 @@ public class FlowManager
      * DOES NOT CACHE.  CALLERS SHOULD CLEAR CACHE APPROPRIATELY.
      *
      * @param container Container
-     * @param sampleLabel Sample name associated with this attribute -- for error message reporting only
+     * @param sampleLabel Sample name associated with this attribute - for error message reporting only
      * @param type attribute type
      * @param attr attribute name
      * @param aliasId RowId of aliased attribute or -1 to set alias to itself.
@@ -891,16 +891,16 @@ public class FlowManager
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("-- Outermost query: get all rowids not in use\n")
+                // Outermost query: get all rowids not in use
                 .append("SELECT attr3.rowid, attr3.container, attr3.name, attr3.id\n")
                 .append("FROM ").append(attrTable, "attr3").append("\n")
                 .append("WHERE attr3.container = ?\n")
                 .append("AND attr3.rowid NOT IN (\n")
-                .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
+                // Second query: all rowids in use; maps used ids back to alias or primary rowid
                 .append("    SELECT attr2.rowid\n")
                 .append("    FROM ").append(attrTable, "attr2").append("\n")
                 .append("    WHERE attr2.id IN (\n")
-                .append("        -- First query: all ids in use\n")
+                // First query: all ids in use
                 .append("        SELECT attr.id\n")
                 .append("        FROM ").append(attrTable, "attr").append("\n")
                 .append("        WHERE attr.container = ?\n")
@@ -948,16 +948,16 @@ public class FlowManager
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("-- Outermost query: get all rowids not in use\n")
+                // Outermost query: get all rowids not in use
                 .append("DELETE\n")
                 .append("FROM ").append(attrTable).append("\n")
                 .append("WHERE container = ?\n")
                 .append("AND rowid NOT IN (\n")
-                .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
+                // Second query: all rowids in use; maps used ids back to alias or primary rowid
                 .append("    SELECT attr2.rowid\n")
                 .append("    FROM ").append(attrTable, "attr2").append("\n")
                 .append("    WHERE attr2.id IN (\n")
-                .append("        -- First query: all ids in use\n")
+                // First query: all ids in use
                 .append("        SELECT attr.id\n")
                 .append("        FROM ").append(attrTable, "attr").append("\n")
                 .append("        WHERE attr.container = ?\n")

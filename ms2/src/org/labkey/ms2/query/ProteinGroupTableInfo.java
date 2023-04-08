@@ -28,6 +28,7 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -334,6 +335,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
+        SqlDialect d = MS2Manager.getSqlDialect();
         SQLFragment sql = new SQLFragment();
         sql.append("ProteinProphetFileId IN (SELECT ppf.RowId FROM ");
         sql.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
@@ -344,13 +346,13 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         if (includeSubfolders)
         {
             List<Container> containers = ContainerManager.getAllChildren(c, u);
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers)));
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
         }
         else
         {
-            sql.append("('");
-            sql.append(c.getId());
-            sql.append("')");
+            sql.append("(");
+            sql.appendValue(c,d);
+            sql.append(")");
         }
         sql.append(")");
         addCondition(sql);
