@@ -47,7 +47,6 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.study.assay.SpecimenForeignKey;
@@ -176,14 +175,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         addColumn(wrapColumn(getRealTable().getColumn("Summary")));
         var titrationColumn = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
-        titrationColumn.setFk(new LookupForeignKey(cf, "RowId", null)
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _userSchema.createTitrationTable(getLookupContainerFilter(), false);
-            }
-        });
+        titrationColumn.setFk(new LuminexProtocolSchema.TitrationForeignKey(_userSchema, cf));
 
         var analyteTitrationColumn = wrapColumn("AnalyteTitration", getRealTable().getColumn("AnalyteId"));
         analyteTitrationColumn.setIsUnselectable(true);
@@ -209,6 +201,8 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
 
         var singlePointControlCol = addColumn(wrapColumn("SinglePointControl", getRealTable().getColumn("SinglePointControlId")));
         singlePointControlCol.setHidden(true);
+        singlePointControlCol.setFk(new LuminexProtocolSchema.SinglePointControlForeignKey(_userSchema, cf));
+
         var analyteSinglePointControlColumn = wrapColumn("AnalyteSinglePointControl", getRealTable().getColumn("AnalyteId"));
         analyteSinglePointControlColumn.setIsUnselectable(true);
         LookupForeignKey aspcFK = new LookupForeignKey(cf, null, null)
