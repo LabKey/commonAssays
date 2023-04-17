@@ -20,7 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.action.NewCustomApiForm;
+import org.labkey.api.action.ApiJsonForm;
 import org.labkey.api.action.NullSafeBindException;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
@@ -33,7 +33,7 @@ import org.springframework.validation.ObjectError;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LuminexSaveExclusionsForm implements NewCustomApiForm
+public class LuminexSaveExclusionsForm implements ApiJsonForm
 {
     private Integer _assayId;
     private String _tableName;

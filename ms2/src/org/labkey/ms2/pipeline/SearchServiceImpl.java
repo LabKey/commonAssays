@@ -17,8 +17,8 @@
 package org.labkey.ms2.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
@@ -275,7 +275,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
         PipeRoot root = getPipelineRoot();
 
-        String[] protocols = provider.getProtocolFactory().getProtocolNames(root, root.resolvePath(path), false);
+        String[] protocols = provider.getProtocolFactory().getProtocolNames(root, root.resolvePath(path).toPath(), false);
         for(String protName:protocols)
         {
             if(!protName.equals("default"))
