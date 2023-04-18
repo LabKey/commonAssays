@@ -356,7 +356,7 @@ public class PipelineController extends SpringActionController
                         getContainer(), getUser());
                 if (protocolNameLast != null && !"".equals(protocolNameLast))
                 {
-                    String[] protocolNames = protocolFactory.getProtocolNames(_root, _dirData, false);
+                    String[] protocolNames = protocolFactory.getProtocolNames(_root, _dirData.toPath(), false);
                     // Make sure it is still around.
                     if (Arrays.asList(protocolNames).contains(protocolNameLast))
                         form.setProtocol(protocolNameLast);
