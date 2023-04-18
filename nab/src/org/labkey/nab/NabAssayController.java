@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.labkey.api.action.ApiJsonForm;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
@@ -33,7 +34,6 @@ import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.Marshal;
 import org.labkey.api.action.Marshaller;
 import org.labkey.api.action.MutatingApiAction;
-import org.labkey.api.action.NewCustomApiForm;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
@@ -1221,7 +1221,7 @@ public class NabAssayController extends SpringActionController
         return String.format("%s-%s-%s", plate, row, col);
     }
 
-    public static class QCControlInfo implements NewCustomApiForm
+    public static class QCControlInfo implements ApiJsonForm
     {
         private final List<WellExclusion> _exclusions = new ArrayList<>();
         private int _runId;

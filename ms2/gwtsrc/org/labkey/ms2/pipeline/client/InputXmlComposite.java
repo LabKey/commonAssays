@@ -31,7 +31,7 @@ import org.labkey.api.gwt.client.util.StringUtils;
  */
 public abstract class InputXmlComposite extends SearchFormComposite
 {
-    protected TextAreaWrapable inputXmlTextArea = new TextAreaWrapable();
+    protected TextAreaWrappable inputXmlTextArea = new TextAreaWrappable();
     protected Hidden inputXmlHidden = new Hidden();
     protected HTML inputXmlHtml = new HTML();
     protected HorizontalPanel instance = new HorizontalPanel();
@@ -82,7 +82,6 @@ public abstract class InputXmlComposite extends SearchFormComposite
             instance.remove(inputXmlHtml);
             instance.add(inputXmlTextArea);
         }
-
     }
 
     @Override
@@ -133,13 +132,12 @@ public abstract class InputXmlComposite extends SearchFormComposite
         throw new UnsupportedOperationException();
     }
 
-    private class TextAreaWrapable extends TextArea
+    private static class TextAreaWrappable extends TextArea
     {
         public void setWrap(String wrapOption)
         {
-                Element textArea = getElement();
-                DOM.setElementAttribute(textArea,"wrap",wrapOption);
-
+            Element textArea = getElement();
+            DOM.setElementAttribute(textArea,"wrap", wrapOption);
         }
     }
 }
