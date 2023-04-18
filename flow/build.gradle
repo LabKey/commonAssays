@@ -39,6 +39,6 @@ project.tasks.register("engineJar", Jar) {
         jar.dependsOn(project.tasks.schemasCompile)
 }
 
-project.tasks.engineJar.dependsOn(project.engineClasses)
-project.tasks.assemble.dependsOn(project.tasks.engineJar)
-project.tasks.module.dependsOn(project.tasks.engineJar)
+project.tasks.named('engineJar').configure { dependsOn(project.engineClasses) }
+project.tasks.named('assemble').configure { dependsOn(project.tasks.engineJar) }
+project.tasks.named('module').configure { dependsOn(project.tasks.engineJar) }
