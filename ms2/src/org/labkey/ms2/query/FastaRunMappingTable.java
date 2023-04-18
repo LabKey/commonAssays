@@ -53,9 +53,9 @@ public class FastaRunMappingTable extends FilteredTable<MS2Schema>
         SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
         sql.append(MS2Manager.getTableInfoRuns(), "r");
         sql.append(" WHERE r.Deleted = ? AND ");
-        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container"), _userSchema.getContainer()));
-        sql.append(")");
         sql.add(false);
+        sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
+        sql.append(")");
         addCondition(sql, CONTAINER_FIELD_KEY);
     }
 }
