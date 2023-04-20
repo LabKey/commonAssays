@@ -1026,13 +1026,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             return colBackground;
         }
 
-
-        @Override
-        public String getSelectName()
-        {
-            return null;
-        }
-
         /* TableInfo */
         @Override
         @NotNull
