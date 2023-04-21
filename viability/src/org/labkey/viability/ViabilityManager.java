@@ -238,7 +238,7 @@ public class ViabilityManager
             oprops.add(new ObjectProperty(obj.getObjectURI(), c, propertyURI, value));
         }
 
-        OntologyManager.insertProperties(c, obj.getObjectURI(), oprops.toArray(new ObjectProperty[oprops.size()])); // how to skip
+        OntologyManager.insertProperties(c, obj.getObjectURI(), oprops.toArray(new ObjectProperty[oprops.size()]));
     }
 
 
