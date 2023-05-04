@@ -117,6 +117,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.requireNonNull;
+
 
 public class FlowSchema extends UserSchema implements UserSchema.HasContextualRoles
 {
@@ -157,7 +160,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         this(user, container, FlowProtocol.getForContainer(container));
         setExperiment(FlowExperiment.fromURL(url, request, actionContainer, getUser()));
         setRun(FlowRun.fromURL(url, actionContainer, getUser()));
-//        setScript(FlowScript.fromURL(url, request));
     }
 
     // FlowSchema.createView()
@@ -168,25 +170,17 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         if (from._experiment != null)
         {
             _experiment = from._experiment;
-            assert _experiment.getExperimentId() == getIntParam(context.getRequest(), FlowParam.experimentId);
+            assert null != context.getRequest() && _experiment.getExperimentId() == getIntParam(context.getRequest(), FlowParam.experimentId);
         }
 
         if (from._run != null)
         {
             _run = from._run;
-            assert _run.getRunId() == getIntParam(context.getRequest(), FlowParam.runId);
+            assert  null != context.getRequest() && _run.getRunId() == getIntParam(context.getRequest(), FlowParam.runId);
         }
-
-//        if (from._script != null)
-//        {
-//            _script = from._script;
-//            assert _script.getScriptId() == getIntParam(context.getRequest(), FlowParam.scriptId);
-//        }
 
         if (null == _experiment)
             setExperiment(FlowExperiment.fromURL(context.getActionURL(), context.getRequest(),context.getContainer(), getUser()));
-//        if (null == _script)
-//            setScript(FlowScript.fromURL(context.getActionURL(), context.getRequest()));
         if (null == _run)
             setRun(FlowRun.fromURL(context.getActionURL(), context.getContainer(), getUser()));
     }
@@ -250,30 +244,19 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
     private TableInfo createTable(FlowTableType type, ContainerFilter cf)
     {
-        switch (type)
-        {
-            case FCSFiles:
-                return createFCSFileTable(type.toString(), cf);
-            case FCSAnalyses:
-                return createFCSAnalysisTable(type.toString(), cf, FlowDataType.FCSAnalysis, true);
-            case CompensationControls:
-                return createCompensationControlTable(type.toString(), cf);
-            case Runs:
-                return createRunTable(type.toString(), cf, null);
-            case CompensationMatrices:
-                return createCompensationMatrixTable(type.toString(), cf);
-            case AnalysisScripts:
-                return createAnalysisScriptTable(type.toString(), cf, false);
-            case Analyses:
-                return createAnalysesTable(type.toString(), cf);
-            case Statistics:
-                return createStatisticsTable(type.toString());
-            case Keywords:
-                return createKeywordsTable(type.toString());
-            case Graphs:
-                return createGraphsTable(type.toString());
-        }
-        return null;
+        return switch (type)
+                {
+                    case FCSFiles -> createFCSFileTable(type.toString(), cf);
+                    case FCSAnalyses -> createFCSAnalysisTable(type.toString(), cf, FlowDataType.FCSAnalysis, true);
+                    case CompensationControls -> createCompensationControlTable(type.toString(), cf);
+                    case Runs -> createRunTable(type.toString(), cf, null);
+                    case CompensationMatrices -> createCompensationMatrixTable(type.toString(), cf);
+                    case AnalysisScripts -> createAnalysisScriptTable(type.toString(), cf, false);
+                    case Analyses -> createAnalysesTable(type.toString(), cf);
+                    case Statistics -> createStatisticsTable(type.toString());
+                    case Keywords -> createKeywordsTable(type.toString());
+                    case Graphs -> createGraphsTable(type.toString());
+                };
     }
 
 
@@ -293,11 +276,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 ret.add(tt.toString());
         }
         return ret;
-    }
-
-    public QueryDefinition getQueryDef(FlowTableType qt)
-    {
-        return getQueryDef(qt.name());
     }
 
     @Override
@@ -321,11 +299,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         _run = run;
     }
 
-//    public void setScript(FlowScript script)
-//    {
-//        _script = script;
-//    }
-
     public FlowExperiment getExperiment()
     {
         return _experiment;
@@ -335,11 +308,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     {
         return _run;
     }
-
-//    public FlowScript getScript()
-//    {
-//        return _script;
-//    }
 
     public ActionURL urlFor(QueryAction action, FlowTableType type)
     {
@@ -372,25 +340,13 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         {
             _experiment.addParams(url);
         }
-//        if (_script != null)
-//        {
-//            _script.addParams(url);
-//        }
     }
 
     @Override
-    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    public @NotNull QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
     {
         return new FlowQueryView(new FlowSchema(context, this), (FlowQuerySettings) settings, errors);
     }
-
-/*    private SQLFragment sqlObjectTypeId(SQLFragment sqlDataId)
-    {
-        SQLFragment ret = new SQLFragment("(SELECT flow.Object.TypeId FROM flow.Object WHERE flow.Object.DataId = (");
-        ret.append(sqlDataId);
-        ret.append("))");
-        return sqlDataId;
-    } */
 
     public ExpRunTable createRunTable(String alias, ContainerFilter cf, FlowDataType type)
     {
@@ -400,10 +356,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         {
             ret.setExperiment(_experiment.getExpObject());
         }
-//        if (_script != null)
-//        {
-//            ret.setInputData(_script.getExpObject());
-//        }
 
         FlowProtocol protocol = getProtocol();
         if (protocol != null)
@@ -514,11 +466,13 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                         Container c = ContainerManager.getForId(targetStudyId);
                         if (c != null)
                         {
-                            Study study = StudyService.get().getStudy(c);
-                            if (study != null)
+                            var ss = StudyService.get();
+                            Study study = null == ss ? null : ss.getStudy(c);
+                            var urlProvider = PageFlowUtil.urlProvider(ProjectUrls.class);
+                            if (study != null && urlProvider != null)
                             {
                                 out.write("<a href=\"");
-                                out.write(PageFlowUtil.filter(PageFlowUtil.urlProvider(ProjectUrls.class).getBeginURL(c)));
+                                out.write(PageFlowUtil.filter(urlProvider.getBeginURL(c)));
                                 out.write("\">");
                                 out.write(study.getLabel().replaceAll(" ", "&nbsp;"));
                                 out.write("</a>");
@@ -613,6 +567,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
 
         /* TableInfo */
+        @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
         @Override
         @NotNull
         public SQLFragment getFromSQL()
@@ -849,7 +804,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         @Override
         public FieldKey getContainerFieldKey()
         {
-            return ((AbstractTableInfo)_expData).getContainerFieldKey();
+            return (_expData).getContainerFieldKey();
         }
 
     }
@@ -1026,13 +981,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             return colBackground;
         }
 
-
-        @Override
-        public String getSelectName()
-        {
-            return null;
-        }
-
         /* TableInfo */
         @Override
         @NotNull
@@ -1050,11 +998,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 where.append(" ").append(filter);
                 and = " AND ";
             }
-//            if (null != _type)
-//            {
-//                sqlFlowData.append(and).append("TypeId = ").append(_type.getObjectType().getTypeId());
-//                and = " AND ";
-//            }
             if (null != _experiment)
             {
                 where.append(and).append("RunId IN (SELECT RunList.ExperimentRunId FROM exp.RunList WHERE RunList.experimentId = ").appendValue(_experiment.getRowId()).append(")\n");
@@ -1871,8 +1814,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
     public FlowDataTable createWorkspaceTable(String alias, ContainerFilter cf)
     {
-        FlowDataTable ret = createDataTable(alias, FlowDataType.Workspace, cf);
-        return ret;
+        return createDataTable(alias, FlowDataType.Workspace, cf);
     }
 
     public ExpExperimentTable createAnalysesTable(String name, ContainerFilter cf)
@@ -2043,6 +1985,11 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         MaterializedQueryHelper helper = fastflowCache.get(attr);
         if (null == helper)
         {
+            // If there is no data in this container, we can avoid caching and creating empty temp tables.  This check is fast.
+            SQLFragment existsSql = new SQLFragment("SELECT 1 FROM flow.object where container=").appendValue(c).append(" AND typeid=").appendValue(typeid);
+            if (!(new SqlSelector(FlowManager.get().getSchema(), existsSql).exists()))
+                return  new SQLFragment("(").append(generateFastFlowSqlFragment(c, typeid)).append(" AND 0=1) __empty_flow_table ");
+
             helper = createFastFlowObjectHelper(c, typeid);
             fastflowCache.put(attr, helper);
         }
@@ -2056,30 +2003,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     {
         DbSchema flow = FlowManager.get().getSchema();
 
-        SQLFragment select = new SQLFragment(
-                "SELECT \n" +
-                "    exp.data.RowId,\n" +
-                "    exp.data.LSID,\n" +
-                "    exp.data.Name,\n" +
-                "    exp.data.CpasType,\n" +
-                "    exp.data.SourceApplicationId,\n" +
-                "    exp.data.DataFileUrl,\n" +
-                "    exp.data.RunId,\n" +
-                "    exp.data.Created,\n" +
-                "    exp.data.CreatedBy,\n" +
-                "    exp.data.Container,\n" +
-                "    flow.object.RowId AS objectid,\n" +
-                "    flow.object.TypeId,\n" +
-                "    flow.object.compid,\n" +
-                "    flow.object.fcsid,\n" +
-                "    flow.object.scriptid,\n" +
-                "    flow.object.uri,\n" +
-// see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleType sampleType)
-                "    (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId\n" +
-                "     WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId\n" +
-                "FROM exp.data\n" +
-                "    INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId\n");
-        select.append(" WHERE flow.Object.container = ").appendValue(c).append(" AND TypeId = ").append(String.valueOf(typeid));
+        SQLFragment select = generateFastFlowSqlFragment(c, typeid);
         List<String> indexes = Arrays.asList(
                 "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId);\n",
                 "CREATE INDEX ix_objid_${NAME} ON temp.${NAME} (ObjectId);"
@@ -2091,6 +2015,36 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 uptodate,
                 indexes,
                 30 * CacheManager.MINUTE);
+    }
+
+    @NotNull
+    private SQLFragment generateFastFlowSqlFragment(Container c, int typeid)
+    {
+        // see ExpDataTableImpl.addMaterialInputColumn(String alias, SamplesSchema schema, String pdRole, final ExpSampleType sampleType)
+        return new SQLFragment("""
+                    SELECT\s
+                        exp.data.RowId,
+                        exp.data.LSID,
+                        exp.data.Name,
+                        exp.data.CpasType,
+                        exp.data.SourceApplicationId,
+                        exp.data.DataFileUrl,
+                        exp.data.RunId,
+                        exp.data.Created,
+                        exp.data.CreatedBy,
+                        exp.data.Container,
+                        flow.object.RowId AS objectid,
+                        flow.object.TypeId,
+                        flow.object.compid,
+                        flow.object.fcsid,
+                        flow.object.scriptid,
+                        flow.object.uri,
+                        (SELECT MIN(InputMaterial.RowId) FROM exp.materialInput INNER JOIN exp.material AS InputMaterial ON exp.materialInput.materialId = InputMaterial.RowId
+                         WHERE exp.data.SourceApplicationId = exp.materialInput.TargetApplicationId) AS MaterialInputRowId
+                    FROM exp.data
+                        INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId
+                    """)
+                .append(" WHERE flow.Object.container = ").appendValue(c).append(" AND TypeId = ").appendValue(typeid);
     }
 
 
@@ -2134,8 +2088,8 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         for (FilterInfo f : ics.getBackgroundFilter())
         {
             Object value = f.getValue();
-            if (value instanceof String && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
-                value = Double.parseDouble((String)value);
+            if (value instanceof String strValue && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
+                value = Double.parseDouble(strValue);
             filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
         }
         SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
@@ -2185,7 +2139,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         DbSchema flow = FlowManager.get().getSchema();
 
         ICSMetadata ics = _protocol.getICSMetadata();
-        if (!ics.hasCompleteBackground())
+        if (null == ics || !ics.hasCompleteBackground())
             return null;
 
         List<String> indexes = Arrays.asList(
