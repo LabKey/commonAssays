@@ -2143,8 +2143,8 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             return null;
 
         List<String> indexes = Arrays.asList(
-                "CREATE INDEX ix_fg_${NAME} ON temp.${NAME} (fg);\n",
-                "CREATE INDEX ix_bg_${NAME} ON temp.${NAME} (bg);\n"
+                "CREATE INDEX ix_fg_${NAME} ON temp.${NAME} (fg)",
+                "CREATE INDEX ix_bg_${NAME} ON temp.${NAME} (bg)"
         );
 
         Supplier<String> uptodate = () -> String.valueOf(FlowManager.get().flowObjectModificationCount.get());
