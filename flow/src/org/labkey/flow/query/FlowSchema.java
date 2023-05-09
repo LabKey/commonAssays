@@ -2005,8 +2005,8 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
         SQLFragment select = generateFastFlowSqlFragment(c, typeid);
         List<String> indexes = Arrays.asList(
-                "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId);\n",
-                "CREATE INDEX ix_objid_${NAME} ON temp.${NAME} (ObjectId);"
+                "CREATE INDEX ix_rowid_${NAME} ON temp.${NAME} (RowId)",
+                "CREATE INDEX ix_objid_${NAME} ON temp.${NAME} (ObjectId)"
         );
 
         Supplier<String> uptodate = () -> String.valueOf(FlowManager.get().flowObjectModificationCount.get());
