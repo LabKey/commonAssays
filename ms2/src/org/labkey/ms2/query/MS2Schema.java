@@ -1209,6 +1209,11 @@ public class MS2Schema extends UserSchema
                 // groups that share proteins (including transitively) are lumped into the same normalized group
                 while (rowsUpdated > 0);
 
+                // We don't have a good way of knowing when the temp table can be cleaned up. Since users
+                // may sort/filter/export the report that's backed by the temp table and we don't know when they're
+                // finished. Our normal pattern is to wait for a tracker object to be garbage collected and then
+                // delete it, but we also clean them up at startup. That's good enough here, because there won't
+                // be thousands of different reports using a table like this.
                 NORMALIZED_PROTEIN_GROUP_CACHE.put(runListId, tracker);
 
                 return tempTableName;
