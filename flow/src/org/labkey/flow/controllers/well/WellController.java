@@ -273,7 +273,7 @@ public class WellController extends BaseFlowController
 
             _isUpdate = Boolean.parseBoolean(getRequest().getParameter("isUpdate"));
 
-            if(!_isUpdate)
+            if (!_isUpdate)
             {
                 if (_wells == null)
                 {
@@ -296,6 +296,10 @@ public class WellController extends BaseFlowController
                     form.ff_keywordName = getKeywordIntersection(_wells, true);
                 }
             }
+
+            if (form.getWells().isEmpty())
+                throw new NotFoundException();
+
             return FormPage.getView("/org/labkey/flow/controllers/well/editWell.jsp", form, errors);
         }
 
