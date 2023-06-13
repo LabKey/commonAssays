@@ -525,7 +525,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected void replaceFileInAssayRun(File original, File newFile)
     {
         //Add spot for new file
-        click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
+        waitAndClick(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
         //remove old file
         click(Locator.xpath("//tr[td/span/text() = '" + original.getName() + "']" +
                 "/td/a[contains(@class, 'labkey-file-remove-icon-enabled')]"));
