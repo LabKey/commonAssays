@@ -33,6 +33,9 @@ import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -70,6 +73,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -429,5 +433,25 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public Collection<StatsService.CurveFitType> getCurveFits()
     {
         return List.of(StatsService.CurveFitType.FOUR_PARAMETER_SIMPLEX, StatsService.CurveFitType.LINEAR);
+    }
+
+    @Override
+    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
+    {
+        super.moveAssayResults(runs, protocol, sourceContainer, targetContainer, user, assayMoveData); // assay results
+
+        TableInfo curveFitTable = ElisaProtocolSchema.getTableInfoCurveFit();
+
+        SQLFragment updateSql = new SQLFragment("UPDATE ").append(curveFitTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(", modified = ").appendValue(new Date())
+                .append(", modifiedby = ").appendValue(user.getUserId())
+                .append(" WHERE runid ");
+        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+        curveFitTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
+        int updateCurveFit = new SqlExecutor(curveFitTable.getSchema()).execute(updateSql);
+
+        Map<String, Integer> updateCounts = assayMoveData.counts();
+        updateCounts.put("curvefit", updateCounts.getOrDefault("curvefit", 0) + updateCurveFit);
     }
 }
