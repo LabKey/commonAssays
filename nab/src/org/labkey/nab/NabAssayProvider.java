@@ -77,6 +77,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -450,8 +451,26 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         dilutionDataTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
         int updateDilutionDataCount = new SqlExecutor(dilutionDataTable.getSchema()).execute(updateSql);
 
+        // move specimen
+        SQLFragment specimenLsidSelect = new SQLFragment("SELECT specimenlsid FROM ")
+                .append(wellDataTable)
+                .append(" WHERE runid ");
+        wellDataTable.getSchema().getSqlDialect().appendInClauseSql(specimenLsidSelect, runRowIds);
+        specimenLsidSelect.append(")");
+        TableInfo expMaterialTable = ExperimentService.get().getTinfoMaterial();
+        SQLFragment updateSpecimenSql = new SQLFragment("UPDATE ").append(expMaterialTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(", modified = ").appendValue(new Date())
+                .append(", modifiedby = ").appendValue(user.getUserId())
+                .append(" WHERE lsid IN (")
+                .append(specimenLsidSelect)
+                .append(")");
+        int updateSpecimenCount = new SqlExecutor(expMaterialTable.getSchema()).execute(updateSpecimenSql);
+
         Map<String, Integer> updateCounts = assayMoveData.counts();
         updateCounts.put("wellData", updateCounts.getOrDefault("wellData", 0) + updateWellDataCount);
         updateCounts.put("dilutionData", updateCounts.getOrDefault("dilutionData", 0) + updateDilutionDataCount);
+        updateCounts.put("specimen", updateCounts.getOrDefault("specimen", 0) + updateSpecimenCount);
+
     }
 }
