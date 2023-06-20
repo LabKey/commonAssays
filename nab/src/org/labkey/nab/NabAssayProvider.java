@@ -456,7 +456,6 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
                 .append(wellDataTable)
                 .append(" WHERE runid ");
         wellDataTable.getSchema().getSqlDialect().appendInClauseSql(specimenLsidSelect, runRowIds);
-        specimenLsidSelect.append(")");
         TableInfo expMaterialTable = ExperimentService.get().getTinfoMaterial();
         SQLFragment updateSpecimenSql = new SQLFragment("UPDATE ").append(expMaterialTable)
                 .append(" SET container = ").appendValue(targetContainer.getEntityId())
