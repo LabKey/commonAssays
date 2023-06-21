@@ -33,6 +33,9 @@ import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -48,6 +51,7 @@ import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -70,6 +74,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -429,5 +434,55 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     public Collection<StatsService.CurveFitType> getCurveFits()
     {
         return List.of(StatsService.CurveFitType.FOUR_PARAMETER_SIMPLEX, StatsService.CurveFitType.LINEAR);
+    }
+
+    @Override
+    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
+    {
+        super.moveAssayResults(runs, protocol, sourceContainer, targetContainer, user, assayMoveData); // assay results
+        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+
+        // move specimen
+        String tableName = AssayProtocolSchema.DATA_TABLE_NAME;
+        AssaySchema schema = createProtocolSchema(user, targetContainer, protocol, null);
+        FilteredTable assayResultTable = (FilteredTable) schema.getTable(tableName);
+        if (assayResultTable != null)
+        {
+            TableInfo expMaterialTable = ExperimentService.get().getTinfoMaterial();
+            TableInfo expDataTable = ExperimentService.get().getTinfoData();
+
+            SQLFragment specimenLsidSelect = new SQLFragment("SELECT specimenlsid FROM ")
+                    .append(assayResultTable.getRealTable())
+                    .append(" WHERE dataid IN (SELECT rowid FROM ")
+                    .append(expDataTable)
+                    .append(" WHERE runid ");
+            assayResultTable.getSchema().getSqlDialect().appendInClauseSql(specimenLsidSelect, runRowIds);
+            specimenLsidSelect.append(")");
+
+            SQLFragment updateSpecimenSql = new SQLFragment("UPDATE ").append(expMaterialTable)
+                    .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                    .append(", modified = ").appendValue(new Date())
+                    .append(", modifiedby = ").appendValue(user.getUserId())
+                    .append(" WHERE lsid IN (")
+                    .append(specimenLsidSelect)
+                    .append(")");
+
+            int updateSpecimenCount = new SqlExecutor(expMaterialTable.getSchema()).execute(updateSpecimenSql);
+            Map<String, Integer> updateCounts = assayMoveData.counts();
+            updateCounts.put("specimen", updateCounts.getOrDefault("specimen", 0) + updateSpecimenCount);
+        }
+
+        TableInfo curveFitTable = ElisaProtocolSchema.getTableInfoCurveFit();
+
+        SQLFragment updateSql = new SQLFragment("UPDATE ").append(curveFitTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(", modified = ").appendValue(new Date())
+                .append(", modifiedby = ").appendValue(user.getUserId())
+                .append(" WHERE runid ");
+        curveFitTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
+        int updateCurveFit = new SqlExecutor(curveFitTable.getSchema()).execute(updateSql);
+
+        Map<String, Integer> updateCounts = assayMoveData.counts();
+        updateCounts.put("curvefit", updateCounts.getOrDefault("curvefit", 0) + updateCurveFit);
     }
 }

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayPipelineProvider;
+import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayProviderSchema;
 import org.labkey.api.assay.AssayRunCreator;
@@ -36,7 +37,10 @@ import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.Lsid;
@@ -73,6 +77,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -424,5 +429,47 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
                 StatsService.CurveFitType.FIVE_PARAMETER,
                 StatsService.CurveFitType.FOUR_PARAMETER,
                 StatsService.CurveFitType.POLYNOMIAL);
+    }
+
+    @Override
+    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
+    {
+        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+
+        TableInfo wellDataTable = NabManager.getTableInfoWellData();
+        SQLFragment updateSql = new SQLFragment("UPDATE ").append(wellDataTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(" WHERE runid ");
+        wellDataTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
+        int updateWellDataCount = new SqlExecutor(wellDataTable.getSchema()).execute(updateSql);
+
+        TableInfo dilutionDataTable = NabManager.getTableInfoDilutionData();
+        updateSql = new SQLFragment("UPDATE ").append(dilutionDataTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(" WHERE runid ");
+
+        dilutionDataTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
+        int updateDilutionDataCount = new SqlExecutor(dilutionDataTable.getSchema()).execute(updateSql);
+
+        // move specimen
+        SQLFragment specimenLsidSelect = new SQLFragment("SELECT specimenlsid FROM ")
+                .append(wellDataTable)
+                .append(" WHERE runid ");
+        wellDataTable.getSchema().getSqlDialect().appendInClauseSql(specimenLsidSelect, runRowIds);
+        TableInfo expMaterialTable = ExperimentService.get().getTinfoMaterial();
+        SQLFragment updateSpecimenSql = new SQLFragment("UPDATE ").append(expMaterialTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(", modified = ").appendValue(new Date())
+                .append(", modifiedby = ").appendValue(user.getUserId())
+                .append(" WHERE lsid IN (")
+                .append(specimenLsidSelect)
+                .append(")");
+        int updateSpecimenCount = new SqlExecutor(expMaterialTable.getSchema()).execute(updateSpecimenSql);
+
+        Map<String, Integer> updateCounts = assayMoveData.counts();
+        updateCounts.put("wellData", updateCounts.getOrDefault("wellData", 0) + updateWellDataCount);
+        updateCounts.put("dilutionData", updateCounts.getOrDefault("dilutionData", 0) + updateDilutionDataCount);
+        updateCounts.put("specimen", updateCounts.getOrDefault("specimen", 0) + updateSpecimenCount);
+
     }
 }

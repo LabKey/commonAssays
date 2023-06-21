@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ChangePropertyDescriptorException;
 import org.labkey.api.exp.ExperimentException;
@@ -487,5 +488,24 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public static Domain getExcelRunDomain(ExpProtocol protocol)
     {
         return AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+    }
+
+    @Override
+    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
+    {
+        TableInfo dataRowTable = LuminexProtocolSchema.getTableInfoDataRow();
+        SQLFragment updateSql = new SQLFragment("UPDATE ").append(dataRowTable)
+                .append(" SET container = ").appendValue(targetContainer.getEntityId())
+                .append(" WHERE dataid IN ( SELECT rowId FROM ")
+                .append(ExperimentService.get().getTinfoData())
+                .append(" WHERE runid ");
+        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+        dataRowTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
+        updateSql.append(")");
+
+        int updateDataRow = new SqlExecutor(dataRowTable.getSchema()).execute(updateSql);
+
+        Map<String, Integer> updateCounts = assayMoveData.counts();
+        updateCounts.put("dataRow", updateCounts.getOrDefault("dataRow", 0) + updateDataRow);
     }
 }
