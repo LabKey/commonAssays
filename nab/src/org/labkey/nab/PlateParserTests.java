@@ -95,7 +95,7 @@ public class PlateParserTests
         }
     }
 
-    private static List<Pair<String, String>> singlePlateTests = Arrays.asList(
+    private static final List<Pair<String, String>> singlePlateTests = Arrays.asList(
             // The ".expected.tsv" files is a simple grid of numbers and are used to check the plate reader formats
             // We also check that the .expected.tsv validates against itself.
             Pair.of("Nab/m0902051;3997.expected.tsv", "Nab/m0902051;3997.expected.tsv"),
@@ -132,7 +132,7 @@ public class PlateParserTests
             Pair.of("Nab/seaman/RC121306.xls", "Nab/seaman/RC121306.expected.tsv")
     );
 
-    @Test
+    // @Test
     public void parseMultiPlate()
     {
         // TODO:

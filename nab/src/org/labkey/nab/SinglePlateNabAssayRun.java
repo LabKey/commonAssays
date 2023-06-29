@@ -53,13 +53,13 @@ import java.util.Set;
 public class SinglePlateNabAssayRun extends NabAssayRun
 {
     protected Plate _plate;
-    private DilutionSummary[] _dilutionSummaries;
+    private final DilutionSummary[] _dilutionSummaries;
     public static final String SAMPLE_WELL_GROUP_NAME = "SampleWellGroupName";
 
-    private Map<Position, WellGroup> _positionToVirusMap = new HashMap<>();
-    private Map<String, Map<WellGroup, WellGroup>> _virusGroupToControlMap = new HashMap<>();
+    private final Map<Position, WellGroup> _positionToVirusMap = new HashMap<>();
+    private final Map<String, Map<WellGroup, WellGroup>> _virusGroupToControlMap = new HashMap<>();
 
-    public SinglePlateNabAssayRun(DilutionAssayProvider provider, ExpRun run, Plate plate,
+    public SinglePlateNabAssayRun(DilutionAssayProvider<?> provider, ExpRun run, Plate plate,
                                   User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
@@ -154,21 +154,6 @@ public class SinglePlateNabAssayRun extends NabAssayRun
         return key;
     }
 
-/*
-    @Override
-    protected String getSampleKey(ExpMaterial material)
-    {
-        String virusName = "";
-        String wellgroup = getWellGroupName(material);
-        for (Map.Entry<PropertyDescriptor, Object> entry : material.getPropertyValues().entrySet())
-        {
-            if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
-                virusName = entry.getValue().toString();
-        }
-        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellgroup);
-    }
-*/
-
     @Nullable
     @Override
     public WellGroup getCellControlWells(Plate plate, @Nullable List<Position> dataPositions)
@@ -205,9 +190,6 @@ public class SinglePlateNabAssayRun extends NabAssayRun
 
     /**
      * Returns the virus well group that contains the specified positions.
-     * @param plate
-     * @param positions
-     * @return
      */
     @Nullable
     private WellGroup getVirusGroupForPositions(Plate plate, List<Position> positions)
@@ -356,8 +338,8 @@ public class SinglePlateNabAssayRun extends NabAssayRun
             return plate.getWellGroup(WellGroup.Type.CONTROL, controlGroupName);
     }
 
-    private CaseInsensitiveHashMap<WellGroup> _cellControls = new CaseInsensitiveHashMap<>();
-    private CaseInsensitiveHashMap<WellGroup> _virusControls = new CaseInsensitiveHashMap<>();
+    private final CaseInsensitiveHashMap<WellGroup> _cellControls = new CaseInsensitiveHashMap<>();
+    private final CaseInsensitiveHashMap<WellGroup> _virusControls = new CaseInsensitiveHashMap<>();
 
     private boolean ensureCellControl(Plate plate, String virusWellGroupName)
     {

@@ -41,9 +41,9 @@ import java.util.Map;
 public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 {
     protected List<Plate> _plates;
-    private DilutionSummary[] _dilutionSummaries;
+    private final DilutionSummary[] _dilutionSummaries;
 
-    public SinglePlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
+    public SinglePlateDilutionNabAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates,
                                   User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
@@ -56,12 +56,7 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
             {
                 String virusName = plate.getProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME).toString();
                 String key = SinglePlateDilutionSamplePropertyHelper.getKey(virusName, sample.getName());
-                List<WellGroup> groups = sampleGroups.get(key);
-                if (groups == null)
-                {
-                    groups = new ArrayList<>();
-                    sampleGroups.put(key, groups);
-                }
+                List<WellGroup> groups = sampleGroups.computeIfAbsent(key, k -> new ArrayList<>());
                 groups.add(sample);
             }
         }
@@ -87,26 +82,22 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 
     /**
      * Generate a key for the sample level property map
-     * @param material
-     * @return
      */
     @Override
     protected String getSampleKey(ExpMaterial material)
     {
         String virusName = "";
-        String wellgroup = getWellGroupName(material);
+        String wellGroup = getWellGroupName(material);
         for (Map.Entry<PropertyDescriptor, Object> entry : material.getPropertyValues().entrySet())
         {
             if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
                 virusName = entry.getValue().toString();
         }
-        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellgroup);
+        return SinglePlateDilutionSamplePropertyHelper.getKey(virusName, wellGroup);
     }
 
     /**
      * Generate a key for the sample level property map
-     * @param summary
-     * @return
      */
     @Override
     protected String getSampleKey(DilutionSummary summary)

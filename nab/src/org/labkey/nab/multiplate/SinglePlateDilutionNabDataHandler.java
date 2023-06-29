@@ -168,7 +168,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider<?> provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
         for (Map.Entry<ExpMaterial,String> e : sampleInputs.entrySet())
@@ -190,12 +190,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                     throw new ExperimentException("Unable to find sample metadata for sample well group \"" + name +
                             "\": your sample metadata file may contain incorrect well group names, or it may not list all required samples.");
                 }
-                List<WellGroup> materialWellGroups = mapping.get(material);
-                if (materialWellGroups == null)
-                {
-                    materialWellGroups = new ArrayList<>();
-                    mapping.put(material, materialWellGroups);
-                }
+                List<WellGroup> materialWellGroups = mapping.computeIfAbsent(material, k -> new ArrayList<>());
                 materialWellGroups.add(specimenGroup);
             }
         }
@@ -203,7 +198,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }

@@ -95,7 +95,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user,
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user,
                                                       List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
@@ -364,11 +364,11 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     AssayProvider provider = AssayService.get().getProvider(protocol);
                     AssayProtocolSchema protocolSchema = provider.createProtocolSchema(null, protocol.getContainer(), protocol, null);
                     TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
-                    if (virusTable instanceof FilteredTable)
+                    if (virusTable instanceof FilteredTable<?> filteredTable)
                     {
-                        if (virusTable.getColumn(FieldKey.fromParts(NabVirusDomainKind.DATLSID_COLUMN_NAME)) != null)
+                        if (filteredTable.getColumn(FieldKey.fromParts(NabVirusDomainKind.DATLSID_COLUMN_NAME)) != null)
                         {
-                            TableInfo table = ((FilteredTable) virusTable).getRealTable();
+                            TableInfo table = filteredTable.getRealTable();
                             SimpleFilter dataLsidFilter = new SimpleFilter(FieldKey.fromString(NabVirusDomainKind.DATLSID_COLUMN_NAME), data.getLSID());
 
                             // delete the rows in the virus table associated with this run
@@ -378,7 +378,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 }
             }
         }
-        catch(SQLException e)
+        catch (SQLException e)
         {
             throw new ExperimentException(e);
         }

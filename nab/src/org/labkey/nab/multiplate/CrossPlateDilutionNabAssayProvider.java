@@ -17,19 +17,11 @@ package org.labkey.nab.multiplate;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.query.ResultsQueryView;
-import org.labkey.api.assay.query.RunListQueryView;
-import org.labkey.api.assay.dilution.DilutionDataHandler;
-import org.labkey.api.view.ViewContext;
 import org.labkey.nab.query.NabProtocolSchema;
-import org.springframework.validation.BindException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * User: klum

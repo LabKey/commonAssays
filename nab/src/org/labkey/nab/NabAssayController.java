@@ -205,12 +205,12 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    protected DilutionAssayProvider getProvider(ExpRun run)
+    protected DilutionAssayProvider<?> getProvider(ExpRun run)
     {
         AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-        if (!(provider instanceof DilutionAssayProvider))
-            throw new NotFoundException("Run " + run.getRowId() + " is not a NAb run.");
-        return (DilutionAssayProvider) provider;
+        if (provider instanceof DilutionAssayProvider<?> dilutionAssayProvider)
+            return dilutionAssayProvider;
+        throw new NotFoundException("Run " + run.getRowId() + " is not a NAb run.");
     }
 
     protected DilutionDataHandler getDataHandler(ExpRun run)

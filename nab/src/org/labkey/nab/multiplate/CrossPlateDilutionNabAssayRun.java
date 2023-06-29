@@ -37,9 +37,9 @@ import java.util.Map;
 public class CrossPlateDilutionNabAssayRun extends NabAssayRun
 {
     protected List<Plate> _plates;
-    private DilutionSummary[] _dilutionSummaries;
+    private final DilutionSummary[] _dilutionSummaries;
 
-    public CrossPlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
+    public CrossPlateDilutionNabAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates,
                                          User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
@@ -52,12 +52,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
         {
             for (WellGroup sample : plate.getWellGroups(WellGroup.Type.SPECIMEN))
             {
-                List<WellGroup> groups = sampleGroups.get(sample.getName());
-                if (groups == null)
-                {
-                    groups = new ArrayList<>();
-                    sampleGroups.put(sample.getName(), groups);
-                }
+                List<WellGroup> groups = sampleGroups.computeIfAbsent(sample.getName(), k -> new ArrayList<>());
                 groups.add(sample);
             }
         }
