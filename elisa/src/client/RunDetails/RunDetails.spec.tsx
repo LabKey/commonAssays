@@ -1,6 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import { Alert } from "@labkey/components";
+import { Alert, waitForLifecycle } from "@labkey/components";
 
 import { RunDetailsImpl } from "./RunDetails";
 import { TEST_PLOT_DATA } from "./utils.spec";
@@ -12,7 +12,7 @@ import { CurveFitPanel } from "./components/CurveFitPanel";
 import { REQUIRED_COLUMN_NAMES } from "./constants";
 
 describe('<RunDetailsImpl/>', () => {
-    test('check initial state from props', () => {
+    test('check initial state from props', async () => {
         const wrapper = mount(
             <RunDetailsImpl
                 protocolId={1}
@@ -23,6 +23,7 @@ describe('<RunDetailsImpl/>', () => {
                 measures={[]}
             />
         );
+        await waitForLifecycle(wrapper);
         const defaultPlotOptions = getDefaultPlotOptions(['p1','p2'], [1,2]);
 
         expect(wrapper.state('filteredData')).toHaveLength(2);
@@ -36,7 +37,7 @@ describe('<RunDetailsImpl/>', () => {
         wrapper.unmount();
     });
 
-    test('check initial display', () => {
+    test('check initial display', async () => {
         const wrapper = mount(
             <RunDetailsImpl
                 protocolId={1}
@@ -47,6 +48,7 @@ describe('<RunDetailsImpl/>', () => {
                 measures={[]}
             />
         );
+        await waitForLifecycle(wrapper);
 
         expect(wrapper.find('.run-details-left')).toHaveLength(1);
         expect(wrapper.find(DataSelectionsPanel)).toHaveLength(1);
@@ -59,7 +61,7 @@ describe('<RunDetailsImpl/>', () => {
         wrapper.unmount();
     });
 
-    test('missing field keys', () => {
+    test('missing field keys', async () => {
         const wrapper = mount(
             <RunDetailsImpl
                 protocolId={1}
@@ -70,6 +72,7 @@ describe('<RunDetailsImpl/>', () => {
                 measures={[]}
             />
         );
+        await waitForLifecycle(wrapper);
 
         const alerts = wrapper.find(Alert);
         expect(alerts).toHaveLength(1);

@@ -196,7 +196,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
                 console.error(reason);
                 this.setState(() => ({ curveFitData: {
                     points: [],
-                    error: reason.exception
+                    error: reason?.exception
                 } as CurveFitData }));
             });
     }
