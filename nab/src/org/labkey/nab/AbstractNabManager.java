@@ -32,7 +32,7 @@ public class AbstractNabManager extends DilutionManager
 {
     public static final String DEFAULT_TEMPLATE_NAME = "NAb: 5 specimens in duplicate";
 
-    public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws SQLException
+    public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws Exception
     {
         NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
         PlateTemplate template;
