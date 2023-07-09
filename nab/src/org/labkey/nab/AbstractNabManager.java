@@ -39,7 +39,7 @@ public class AbstractNabManager extends DilutionManager
         List<? extends PlateTemplate> templates = PlateService.get().getPlateTemplates(container);
         if (templates.isEmpty())
         {
-            template = nabHandler.createPlate(NabPlateTypeHandler.SINGLE_PLATE_TYPE, container, 8, 12);
+            template = nabHandler.createTemplate(NabPlateTypeHandler.SINGLE_PLATE_TYPE, container, 8, 12);
             template.setName(DEFAULT_TEMPLATE_NAME);
             PlateService.get().save(container, user, template);
         }

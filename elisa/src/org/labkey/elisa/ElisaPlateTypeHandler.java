@@ -16,6 +16,7 @@
 
 package org.labkey.elisa;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
 import org.labkey.api.assay.plate.PlateService;
@@ -57,7 +58,7 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
+    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 

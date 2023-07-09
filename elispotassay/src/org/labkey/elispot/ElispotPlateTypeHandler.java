@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
@@ -74,7 +75,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
+    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
@@ -123,7 +124,7 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public void validate(Container container, User user, PlateTemplate template) throws ValidationException
+    public void validateTemplate(Container container, User user, PlateTemplate template) throws ValidationException
     {
         boolean hasBackgroundWell = false;
 
