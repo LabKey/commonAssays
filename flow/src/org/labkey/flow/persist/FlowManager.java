@@ -1704,24 +1704,25 @@ public class FlowManager
 
     public int getRunCount(Container container, ObjectType type)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?)";
-        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), type.getTypeId()).getObject(Integer.class);
+        String sqlFCSRunCount = """
+                SELECT COUNT (DISTINCT d.runid) FROM exp.data d INNER JOIN flow.object o ON
+                o.dataid = d.rowid
+                AND d.container = ?
+                AND d.container = o.container
+                AND o.typeid = ?""";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), type.getTypeId()).getObject(Integer.class);
     }
 
     public int getFCSRunCount(Container container)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
-        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), ObjectType.fcsKeywords.getTypeId()).getObject(Integer.class);
+        String sqlFCSRunCount = """
+                SELECT COUNT (r.RowId) FROM exp.experimentrun r
+                WHERE r.RowId IN (SELECT d.runid FROM exp.data d INNER JOIN flow.object o ON
+                o.dataid = d.rowid
+                AND d.container = ?
+                AND d.container = o.container
+                AND o.typeid = ?) AND r.FilePathRoot IS NOT NULL""";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), ObjectType.fcsKeywords.getTypeId()).getObject(Integer.class);
     }
 
     public void deleteContainer(Container container)
