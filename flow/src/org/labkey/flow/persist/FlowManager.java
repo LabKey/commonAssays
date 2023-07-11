@@ -1585,7 +1585,7 @@ public class FlowManager
     {
         String sqlFCSRunCount = """
                 SELECT COUNT (r.RowId) FROM exp.experimentrun r
-                WHERE exp.ExperimentRun.RowId IN (SELECT d.runid FROM exp.data d INNER JOIN flow.object o ON
+                WHERE r.RowId IN (SELECT d.runid FROM exp.data d INNER JOIN flow.object o ON
                 o.dataid = d.rowid
                 AND d.container = ?
                 AND d.container = o.container
