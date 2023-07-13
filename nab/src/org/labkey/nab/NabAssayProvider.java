@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayPipelineProvider;
-import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayProviderSchema;
 import org.labkey.api.assay.AssayRunCreator;
@@ -36,7 +35,6 @@ import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
@@ -62,9 +60,9 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.ThawListResolverType;
-import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
@@ -73,7 +71,6 @@ import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabProviderSchema;
 import org.labkey.nab.query.NabRunCreator;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -280,9 +277,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         {
             NabManager.get().ensurePlateTemplate(targetContainer, user);
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
-            throw new RuntimeSQLException(e);
+            throw UnexpectedException.wrap(e);
         }
         return super.getAssayTemplate(user, targetContainer, toCopy);
     }
@@ -296,9 +293,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         {
             NabManager.get().ensurePlateTemplate(targetContainer, user);
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
-            throw new RuntimeSQLException(e);
+            throw UnexpectedException.wrap(e);
         }
         return super.getAssayTemplate(user, targetContainer);
     }
