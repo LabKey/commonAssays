@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.data.Container;
 import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
@@ -85,7 +86,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createPlate(String templateTypeName, Container container, int rowCount, int colCount)
+    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
         PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
