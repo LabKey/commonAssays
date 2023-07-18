@@ -19,13 +19,13 @@ import org.json.JSONObject;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.exp.api.ExpMaterial;
 
 import java.util.ArrayList;

@@ -2,12 +2,11 @@ package org.labkey.elisa;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayUploadXarContext;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -45,8 +44,8 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
         if (_specimenGroupMap == null)
         {
             _specimenGroupMap = new HashMap<>();
-            PlateTemplate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
-            for (WellGroupTemplate sample : template.getWellGroups(WellGroup.Type.SPECIMEN))
+            Plate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+            for (WellGroup sample : template.getWellGroups(WellGroup.Type.SPECIMEN))
             {
                 for (Position pos : sample.getPositions())
                     _specimenGroupMap.put(pos, sample.getName());

@@ -65,12 +65,10 @@ import org.labkey.api.assay.nab.view.RunDetailsAction;
 import org.labkey.api.assay.nab.view.RunDetailsHeaderView;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -524,11 +522,11 @@ public class NabAssayController extends SpringActionController
     {
         private final Container _container;
         private final Domain _sampleDomain;
-        private final List<WellGroupTemplate> _sampleGroups;
+        private final List<WellGroup> _sampleGroups;
         private final Domain _virusDomain;
-        private final List<WellGroupTemplate> _virusGroups;
+        private final List<WellGroup> _virusGroups;
 
-        public SampleTemplateWriter(Container container, Domain sampleDomain, List<WellGroupTemplate> sampleGroups, Domain virusDomain, List<WellGroupTemplate> virusGroups)
+        public SampleTemplateWriter(Container container, Domain sampleDomain, List<WellGroup> sampleGroups, Domain virusDomain, List<WellGroup> virusGroups)
         {
             _sampleDomain = sampleDomain;
             _sampleGroups = sampleGroups;
@@ -581,11 +579,11 @@ public class NabAssayController extends SpringActionController
 
             // Render the rows (i.e. well group names, virus group names, and default property values):
             int rowNum = 1;
-            for (WellGroupTemplate sampleGroup : _sampleGroups)
+            for (WellGroup sampleGroup : _sampleGroups)
             {
                 if (_virusGroups.size() > 0)
                 {
-                    for (WellGroupTemplate virusGroup : _virusGroups)
+                    for (WellGroup virusGroup : _virusGroups)
                         renderRow(sheet, headers, columnToDefaultValue, rowNum++, sampleGroup, virusGroup);
                 }
                 else
@@ -593,7 +591,7 @@ public class NabAssayController extends SpringActionController
             }
         }
 
-        private void renderRow(Sheet sheet, List<String> headers, Map<String, Object> columnToDefaultValue, int rowNum, WellGroupTemplate sample, @Nullable WellGroupTemplate virus)
+        private void renderRow(Sheet sheet, List<String> headers, Map<String, Object> columnToDefaultValue, int rowNum, WellGroup sample, @Nullable WellGroup virus)
         {
             Row row = sheet.createRow(rowNum);
             for (int column = 0; column < headers.size(); column++)
@@ -649,15 +647,15 @@ public class NabAssayController extends SpringActionController
             NabAssayProvider nabProvider = ((NabAssayProvider) provider);
             Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
             Domain virusDomain = nabProvider.getVirusWellGroupDomain(protocol);
-            PlateTemplate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
+            Plate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
             if (template == null)
             {
                 throw new NotFoundException("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");
             }
 
-            List<WellGroupTemplate> sampleGroups = new ArrayList<>();
-            List<WellGroupTemplate> virusGroups = new ArrayList<>();
-            for (WellGroupTemplate group : template.getWellGroups())
+            List<WellGroup> sampleGroups = new ArrayList<>();
+            List<WellGroup> virusGroups = new ArrayList<>();
+            for (WellGroup group : template.getWellGroups())
             {
                 if (group.getType() == WellGroup.Type.SPECIMEN)
                     sampleGroups.add(group);

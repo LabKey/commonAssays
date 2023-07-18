@@ -16,12 +16,11 @@
 package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -32,11 +31,11 @@ public class AbstractNabManager extends DilutionManager
 {
     public static final String DEFAULT_TEMPLATE_NAME = "NAb: 5 specimens in duplicate";
 
-    public synchronized PlateTemplate ensurePlateTemplate(Container container, User user) throws Exception
+    public synchronized Plate ensurePlateTemplate(Container container, User user) throws Exception
     {
         NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
-        PlateTemplate template;
-        List<? extends PlateTemplate> templates = PlateService.get().getPlateTemplates(container);
+        Plate template;
+        List<Plate> templates = PlateService.get().getPlateTemplates(container);
         if (templates.isEmpty())
         {
             template = nabHandler.createTemplate(NabPlateTypeHandler.SINGLE_PLATE_TYPE, container, 8, 12);

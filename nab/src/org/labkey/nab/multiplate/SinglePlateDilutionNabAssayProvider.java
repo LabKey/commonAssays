@@ -18,27 +18,21 @@ package org.labkey.nab.multiplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
-import org.labkey.api.assay.query.ResultsQueryView;
-import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.ViewContext;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabRunUploadForm;
 import org.labkey.nab.query.NabProtocolSchema;
-import org.springframework.validation.BindException;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +102,7 @@ public class SinglePlateDilutionNabAssayProvider extends HighThroughputNabAssayP
     }
 
     @Override
-    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, Plate template, SampleMetadataInputFormat inputFormat)
     {
         if (inputFormat == SampleMetadataInputFormat.MANUAL)
             return new PlateSamplePropertyHelper(sampleProperties, template);

@@ -15,7 +15,7 @@
  */
 package org.labkey.elispot.plate;
 
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.assay.plate.TextPlateReader;
 import org.labkey.api.exp.ExperimentException;
@@ -55,7 +55,7 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    public double[][] loadFile(PlateTemplate template, File dataFile) throws ExperimentException
+    public double[][] loadFile(Plate template, File dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
@@ -77,7 +77,7 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    public Map<String, double[][]> loadMultiGridFile(PlateTemplate template, File dataFile) throws ExperimentException
+    public Map<String, double[][]> loadMultiGridFile(Plate template, File dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))

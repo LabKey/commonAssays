@@ -21,6 +21,7 @@ import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.DilutionSummary;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SimpleFilter;
@@ -36,7 +37,6 @@ import org.labkey.api.security.User;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.AssayProtocolSchema;
 
 import java.util.ArrayList;

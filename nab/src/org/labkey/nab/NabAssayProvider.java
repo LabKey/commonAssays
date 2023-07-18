@@ -31,8 +31,8 @@ import org.labkey.api.assay.actions.PlateUploadForm;
 import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.nab.NabSpecimen;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
@@ -356,7 +356,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
 
     public PlateSamplePropertyHelper getVirusPropertyHelper(PlateUploadForm context, boolean insertView)
     {
-        PlateTemplate template = getPlateTemplate(context.getContainer(), context.getProtocol());
+        Plate template = getPlateTemplate(context.getContainer(), context.getProtocol());
         try
         {
             AssayProvider provider = context.getProvider();

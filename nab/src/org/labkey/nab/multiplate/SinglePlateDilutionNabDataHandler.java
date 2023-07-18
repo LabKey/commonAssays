@@ -22,7 +22,6 @@ import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
@@ -67,7 +66,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
+    protected List<Plate> createPlates(File dataFile, Plate template) throws ExperimentException
     {
         DataLoader loader = null;
         try

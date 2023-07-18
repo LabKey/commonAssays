@@ -17,6 +17,7 @@ package org.labkey.elispot.pipeline;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
@@ -29,9 +30,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProvider;
@@ -181,7 +180,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
     private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, PlateReader reader) throws ExperimentException
     {
-        PlateTemplate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
+        Plate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
 
         if (reader != null)

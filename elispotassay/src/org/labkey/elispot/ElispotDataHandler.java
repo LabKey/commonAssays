@@ -19,7 +19,7 @@ package org.labkey.elispot;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.statistics.MathStat;
@@ -39,10 +39,8 @@ import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayDataType;
@@ -108,7 +106,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = _data.getContainer();
             ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
-            PlateTemplate template = provider.getPlateTemplate(container, protocol);
+            Plate template = provider.getPlateTemplate(container, protocol);
 
             Map<String, DomainProperty> runProperties = new HashMap<>();
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())
@@ -229,7 +227,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return datas;
     }
 
-    public static Map<PlateInfo, Plate> initializePlates(ExpProtocol protocol, File dataFile, PlateTemplate template, PlateReader reader) throws ExperimentException
+    public static Map<PlateInfo, Plate> initializePlates(ExpProtocol protocol, File dataFile, Plate template, PlateReader reader) throws ExperimentException
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
         Map<PlateInfo, Plate> plateMap = new HashMap<>();

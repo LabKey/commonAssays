@@ -18,7 +18,7 @@ package org.labkey.elispot;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -50,7 +50,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
         {
             File file = dataFiles.get(AssayDataCollector.PRIMARY_FILE);
             PlateReader reader;
-            PlateTemplate template = form.getProvider().getPlateTemplate(form.getContainer(), form.getProtocol());
+            Plate template = form.getProvider().getPlateTemplate(form.getContainer(), form.getProtocol());
 
             // populate property name to value map
             Map<String, String> runPropMap = new HashMap<>();

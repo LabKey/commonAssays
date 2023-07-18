@@ -28,10 +28,10 @@ import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedDataExchangeHandler;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
@@ -331,7 +331,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    protected PlateSamplePropertyHelper createSampleFilePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, Plate template, SampleMetadataInputFormat inputFormat)
     {
         // some of the sample properties are calculated versus collected
         List<DomainProperty> properties = sampleProperties.stream()

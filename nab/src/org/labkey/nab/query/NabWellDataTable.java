@@ -29,9 +29,8 @@ import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.query.QueryForeignKey;
@@ -90,7 +89,7 @@ public class NabWellDataTable extends NabBaseTable
         if (provider instanceof NabAssayProvider)
         {
             NabAssayProvider nabAssayProvider = (NabAssayProvider)provider;
-            PlateTemplate template = nabAssayProvider.getPlateTemplate(getContainer(), _protocol);
+            Plate template = nabAssayProvider.getPlateTemplate(getContainer(), _protocol);
             if (null != template)
             {
                 addWellNameColumn(template.getRows());
@@ -127,35 +126,35 @@ public class NabWellDataTable extends NabBaseTable
         addColumn(new ExprColumn(this, "WellName", sql, JdbcType.VARCHAR, row, column));
     }
 
-    private void addWellgroupPropertyColumns(PlateTemplate plateTemplate)
+    private void addWellgroupPropertyColumns(Plate plateTemplate)
     {
-        Map<WellGroup.Type, Map<String, WellGroupTemplate>> wellGroupTemplateMap = plateTemplate.getWellGroupTemplateMap();
-        Map<String, WellGroupTemplate> controlTemplates = wellGroupTemplateMap.get(WellGroup.Type.CONTROL);
+        Map<WellGroup.Type, Map<String, WellGroup>> wellGroupTemplateMap = plateTemplate.getWellGroupTemplateMap();
+        Map<String, WellGroup> controlTemplates = wellGroupTemplateMap.get(WellGroup.Type.CONTROL);
         if (null != controlTemplates && !controlTemplates.isEmpty())
         {
             addWellgroupPropertyColumns(controlTemplates, CONTROL_WELLGROUP_NAME);
         }
-        Map<String, WellGroupTemplate> virusTemplates = wellGroupTemplateMap.get(WellGroup.Type.VIRUS);
+        Map<String, WellGroup> virusTemplates = wellGroupTemplateMap.get(WellGroup.Type.VIRUS);
         if (null != virusTemplates && !virusTemplates.isEmpty())
         {
             addWellgroupPropertyColumns(virusTemplates, VIRUS_WELLGROUP_NAME);
         }
-        Map<String, WellGroupTemplate> specimenTemplates = wellGroupTemplateMap.get(WellGroup.Type.SPECIMEN);
+        Map<String, WellGroup> specimenTemplates = wellGroupTemplateMap.get(WellGroup.Type.SPECIMEN);
         if (null != specimenTemplates && !specimenTemplates.isEmpty())
         {
             addWellgroupPropertyColumns(specimenTemplates, SPECIMEN_WELLGROUP_NAME);
         }
-        Map<String, WellGroupTemplate> replicateTemplates = wellGroupTemplateMap.get(WellGroup.Type.REPLICATE);
+        Map<String, WellGroup> replicateTemplates = wellGroupTemplateMap.get(WellGroup.Type.REPLICATE);
         if (null != replicateTemplates && !replicateTemplates.isEmpty())
         {
             addWellgroupPropertyColumns(replicateTemplates, REPLICATE_WELLGROUP_NAME);
         }
     }
 
-    private void addWellgroupPropertyColumns(Map<String, WellGroupTemplate> wellgroupTemplates, String wellgroupNameColumnName)
+    private void addWellgroupPropertyColumns(Map<String, WellGroup> wellgroupTemplates, String wellgroupNameColumnName)
     {
         Map<String, Map<String, Object>> propertyMap = new CaseInsensitiveHashMap<>();        // Map propertyName -> (Map wellGroupName -> propertyValue)
-        for (WellGroupTemplate template : wellgroupTemplates.values())
+        for (WellGroup template : wellgroupTemplates.values())
         {
             for (String propertyName : template.getPropertyNames())
             {

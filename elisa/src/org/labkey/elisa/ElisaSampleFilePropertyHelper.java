@@ -2,10 +2,9 @@ package org.labkey.elisa;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -31,7 +30,7 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
     public static final String WELL_LOCATION_COLUMN_NAME = "Well";
     public static final String SPOT_COLUMN_NAME = "Spot";
 
-    public ElisaSampleFilePropertyHelper(Container container, ExpProtocol protocol, List<? extends DomainProperty> domainProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    public ElisaSampleFilePropertyHelper(Container container, ExpProtocol protocol, List<? extends DomainProperty> domainProperties, Plate template, SampleMetadataInputFormat inputFormat)
     {
         super(container, protocol, domainProperties, template, inputFormat);
     }
@@ -103,7 +102,7 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
             // need to adjust the column value to be 0 based to match the template locations
             position.setColumn(position.getColumn()-1);
 
-            for (WellGroupTemplate wellGroup : _template.getWellGroups(position))
+            for (WellGroup wellGroup : _template.getWellGroups(position))
             {
                 if (wellGroup.getType() == WellGroup.Type.SPECIMEN)
                     return HighThroughputImportHelper.getSpecimenGroupKey(plateName, analyteNum, wellGroup.getName());

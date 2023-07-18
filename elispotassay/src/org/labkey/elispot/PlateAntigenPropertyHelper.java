@@ -18,9 +18,8 @@ package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
@@ -37,9 +36,9 @@ import java.util.Set;
 public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
 {
     private List<String> _antigenNames;
-    private final PlateTemplate _template;
+    private final Plate _template;
 
-    public PlateAntigenPropertyHelper(List<? extends DomainProperty> antigenDomainProperties, PlateTemplate template)
+    public PlateAntigenPropertyHelper(List<? extends DomainProperty> antigenDomainProperties, Plate template)
     {
         super(antigenDomainProperties);
         _template = template;
@@ -47,7 +46,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
 
         if (template != null)
         {
-            for (WellGroupTemplate wellgroup : template.getWellGroups())
+            for (WellGroup wellgroup : template.getWellGroups())
             {
                 if (wellgroup.getType() == WellGroup.Type.ANTIGEN)
                 {
@@ -61,7 +60,7 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
     protected String getObject(int index, @NotNull Map<DomainProperty, String> sampleProperties, @NotNull Set<ExpMaterial> parentMaterials)
     {
         int i = 0;
-        for (WellGroupTemplate wellgroup : _template.getWellGroups())
+        for (WellGroup wellgroup : _template.getWellGroups())
         {
             if (wellgroup.getType() == WellGroup.Type.ANTIGEN)
             {
