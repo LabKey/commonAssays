@@ -47,7 +47,7 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.actions.AssayHeaderView;
 import org.labkey.api.assay.AssayProtocolSchema;
@@ -208,7 +208,7 @@ public class ElispotController extends SpringActionController
     }
 
     private List<WellInfo> createWellInfoList(ExpRun run, ExpProtocol protocol, AbstractPlateBasedAssayProvider provider,
-                                              PlateTemplate template, PlateReader reader)
+                                              Plate template, PlateReader reader)
     {
         List<WellInfo> wellInfos = new ArrayList<>();
 
@@ -311,7 +311,7 @@ public class ElispotController extends SpringActionController
             ExpProtocol protocol = run.getProtocol();
 
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(protocol);
-            PlateTemplate template = provider.getPlateTemplate(getContainer(), protocol);
+            Plate template = provider.getPlate(getContainer(), protocol);
 
             String plateReaderName = null;
             for (ObjectProperty prop : run.getObjectProperties().values())

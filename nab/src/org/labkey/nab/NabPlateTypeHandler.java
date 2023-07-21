@@ -18,13 +18,12 @@ package org.labkey.nab;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.SampleProperty;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.data.Container;
 import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.multiplate.HighThroughputNabDataHandler;
 
@@ -86,9 +85,9 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
+    public Plate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE))
             return createHighThroughputSingleDilutionTemplate(template, container, rowCount, colCount);
@@ -115,7 +114,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
             {
                 int firstCol = (sample * 2) + 2;
                 // create the overall specimen group, consisting of two adjacent columns:
-                WellGroupTemplate sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
+                WellGroup sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(container, 0, firstCol),
                         PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
 //                sampleGroup.setProperty(prop.name(), "");
@@ -153,7 +152,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    private PlateTemplate createHighThroughputSingleDilutionTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
+    private Plate createHighThroughputSingleDilutionTemplate(Plate template, Container c, int rowCount, int colCount)
     {
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(c, 0, 0),
@@ -207,7 +206,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
                     positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2), col));
                     positions.add(PlateService.get().createPosition(c, row + (rowGroup % 2) + 2, col));
 
-                    WellGroupTemplate wg = template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE, positions);
+                    WellGroup wg = template.addWellGroup("Specimen " + sampleIndex + "-" + replicateIndex++, WellGroup.Type.REPLICATE, positions);
 
                     // add an explicit order property to override the natural ordering
                     wg.setProperty(HighThroughputNabDataHandler.REPLICATE_GROUP_ORDER_PROPERTY, String.valueOf(replicateGroupIndex++));
@@ -218,7 +217,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    private PlateTemplate createMultiVirusTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
+    private Plate createMultiVirusTemplate(Plate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();
@@ -282,7 +281,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
                 WellGroup.Type.REPLICATE, WellGroup.Type.OTHER);
     }
 
-    private PlateTemplate create20Sample4VirusScreeningTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
+    private Plate create20Sample4VirusScreeningTemplate(Plate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();
@@ -370,7 +369,7 @@ public class NabPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    private PlateTemplate create240Sample1VirusScreeningTemplate(PlateTemplate template, Container c, int rowCount, int colCount)
+    private Plate create240Sample1VirusScreeningTemplate(Plate template, Container c, int rowCount, int colCount)
     {
         assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();

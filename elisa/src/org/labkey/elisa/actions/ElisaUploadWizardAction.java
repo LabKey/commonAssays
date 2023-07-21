@@ -22,7 +22,7 @@ import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.assay.actions.PlateBasedUploadWizardAction;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -184,7 +184,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
 
     protected PlateConcentrationPropertyHelper createConcentrationPropertyHelper(Container container, ExpProtocol protocol, ElisaAssayProvider provider)
     {
-        PlateTemplate template = provider.getPlateTemplate(container, protocol);
+        Plate template = provider.getPlate(container, protocol);
         return new PlateConcentrationPropertyHelper(provider.getConcentrationWellGroupDomain(protocol).getProperties(), template);
     }
 

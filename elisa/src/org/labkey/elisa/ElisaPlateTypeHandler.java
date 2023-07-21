@@ -17,16 +17,15 @@
 package org.labkey.elisa;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.util.Pair;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.labkey.elisa.ElisaModule.EXPERIMENTAL_MULTI_PLATE_SUPPORT;
@@ -58,9 +57,9 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
+    public Plate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
         template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
@@ -125,9 +124,9 @@ public class ElisaPlateTypeHandler extends AbstractPlateTypeHandler
         return template;
     }
 
-    private PlateTemplate createHighThroughputPlate(Container container, int rowCount, int colCount)
+    private Plate createHighThroughputPlate(Container container, int rowCount, int colCount)
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
         // control well groups
         template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,

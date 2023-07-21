@@ -25,11 +25,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.assay.plate.AbstractPlateTypeHandler;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.util.Pair;
 
@@ -75,9 +73,9 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public PlateTemplate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
+    public Plate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
     {
-        PlateTemplate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
 
         // for the default elispot plate, we pre-populate it with specimen and antigen groups
         if (templateTypeName != null && templateTypeName.equals(DEFAULT_PLATE))
@@ -124,11 +122,11 @@ public class ElispotPlateTypeHandler extends AbstractPlateTypeHandler
     }
 
     @Override
-    public void validateTemplate(Container container, User user, PlateTemplate template) throws ValidationException
+    public void validateTemplate(Container container, User user, Plate template) throws ValidationException
     {
         boolean hasBackgroundWell = false;
 
-        for (WellGroupTemplate group : template.getWellGroups())
+        for (WellGroup group : template.getWellGroups())
         {
             if (group.getType() == WellGroup.Type.CONTROL)
             {

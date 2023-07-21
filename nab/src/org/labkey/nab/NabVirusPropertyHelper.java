@@ -16,13 +16,13 @@
 package org.labkey.nab;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
@@ -42,7 +42,7 @@ public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
 {
     private SampleMetadataInputFormat _metadataInputFormat;
 
-    public NabVirusPropertyHelper(List<? extends DomainProperty> virusDomainProperties, PlateTemplate template, SampleMetadataInputFormat metadataInputFormat)
+    public NabVirusPropertyHelper(List<? extends DomainProperty> virusDomainProperties, Plate template, SampleMetadataInputFormat metadataInputFormat)
     {
         super(virusDomainProperties, template, WellGroup.Type.VIRUS);
         _metadataInputFormat = metadataInputFormat;
