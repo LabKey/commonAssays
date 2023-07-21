@@ -44,7 +44,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
     private void ensureData() throws ExperimentException
     {
-        _plateTemplate = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+        _plateTemplate = _provider.getPlate(_protocol.getContainer(), _protocol);
         DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
         try (DataLoader loader = factory.createLoader(_dataFile, true))
         {

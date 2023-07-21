@@ -44,7 +44,7 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
         if (_specimenGroupMap == null)
         {
             _specimenGroupMap = new HashMap<>();
-            Plate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+            Plate template = _provider.getPlate(_protocol.getContainer(), _protocol);
             for (WellGroup sample : template.getWellGroups(WellGroup.Type.SPECIMEN))
             {
                 for (Position pos : sample.getPositions())

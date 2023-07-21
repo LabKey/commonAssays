@@ -106,7 +106,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
             Container container = _data.getContainer();
             ElispotAssayProvider provider = (ElispotAssayProvider)AssayService.get().getProvider(protocol);
-            Plate template = provider.getPlateTemplate(container, protocol);
+            Plate template = provider.getPlate(container, protocol);
 
             Map<String, DomainProperty> runProperties = new HashMap<>();
             for (DomainProperty column : provider.getRunDomain(protocol).getProperties())

@@ -184,7 +184,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
 
     protected PlateConcentrationPropertyHelper createConcentrationPropertyHelper(Container container, ExpProtocol protocol, ElisaAssayProvider provider)
     {
-        Plate template = provider.getPlateTemplate(container, protocol);
+        Plate template = provider.getPlate(container, protocol);
         return new PlateConcentrationPropertyHelper(provider.getConcentrationWellGroupDomain(protocol).getProperties(), template);
     }
 

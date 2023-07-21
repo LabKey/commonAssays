@@ -50,7 +50,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
         {
             File file = dataFiles.get(AssayDataCollector.PRIMARY_FILE);
             PlateReader reader;
-            Plate template = form.getProvider().getPlateTemplate(form.getContainer(), form.getProtocol());
+            Plate template = form.getProvider().getPlate(form.getContainer(), form.getProtocol());
 
             // populate property name to value map
             Map<String, String> runPropMap = new HashMap<>();

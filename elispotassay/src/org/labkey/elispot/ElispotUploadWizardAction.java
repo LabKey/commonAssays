@@ -148,7 +148,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
 
     public PlateAntigenPropertyHelper createAntigenPropertyHelper(Container container, ExpProtocol protocol, ElispotAssayProvider provider)
     {
-        Plate template = provider.getPlateTemplate(container, protocol);
+        Plate template = provider.getPlate(container, protocol);
         Set<DomainProperty> domainProperties = new LinkedHashSet<>();
         Domain domain = provider.getAntigenWellGroupDomain(protocol);
         domainProperties.add(domain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME));
@@ -300,7 +300,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     form.getUploadedData();
                     ElispotAssayProvider provider = form.getProvider();
 
-                    Plate template = provider.getPlateTemplate(getContainer(), form.getProtocol());
+                    Plate template = provider.getPlate(getContainer(), form.getProtocol());
                     if (template == null)
                     {
                         errors.reject(SpringActionController.ERROR_MSG, "The template for this assay is either missing or invalid.");
@@ -503,7 +503,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (data.size() != 1)
                     throw new ExperimentException("Elispot should only upload a single file per run.");
 
-                Plate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
+                Plate template = provider.getPlate(form.getContainer(), form.getProtocol());
                 Map<PlateInfo, Plate> plates = Collections.EMPTY_MAP;
                 PlateReader reader = null;
 

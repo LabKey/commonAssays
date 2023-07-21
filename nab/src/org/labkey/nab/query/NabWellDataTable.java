@@ -89,7 +89,7 @@ public class NabWellDataTable extends NabBaseTable
         if (provider instanceof NabAssayProvider)
         {
             NabAssayProvider nabAssayProvider = (NabAssayProvider)provider;
-            Plate template = nabAssayProvider.getPlateTemplate(getContainer(), _protocol);
+            Plate template = nabAssayProvider.getPlate(getContainer(), _protocol);
             if (null != template)
             {
                 addWellNameColumn(template.getRows());

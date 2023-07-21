@@ -180,7 +180,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
     private Plate initializePlate(PlateBasedAssayProvider provider, ExpRun run, PlateReader reader) throws ExperimentException
     {
-        Plate template = provider.getPlateTemplate(run.getContainer(), run.getProtocol());
+        Plate template = provider.getPlate(run.getContainer(), run.getProtocol());
         List<? extends ExpData> data = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
 
         if (reader != null)

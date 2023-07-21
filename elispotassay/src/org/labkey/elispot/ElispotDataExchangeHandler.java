@@ -49,7 +49,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         ElispotRunUploadForm form = (ElispotRunUploadForm)context;
 
         ElispotAssayProvider provider = form.getProvider();
-        Plate template = provider.getPlateTemplate(form.getContainer(), form.getProtocol());
+        Plate template = provider.getPlate(form.getContainer(), form.getProtocol());
 
         // add in the specimen information, the data will be serialized to a tsv and the file
         // location will be added to the run properties file.
@@ -67,7 +67,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         if (provider instanceof ElispotAssayProvider)
         {
             ElispotAssayProvider plateProvider = (ElispotAssayProvider)provider;
-            Plate template = plateProvider.getPlateTemplate(viewContext.getContainer(), protocol);
+            Plate template = plateProvider.getPlate(viewContext.getContainer(), protocol);
             if (template != null)
             {
                 List<? extends DomainProperty> props = plateProvider.getSampleWellGroupDomain(protocol).getProperties();

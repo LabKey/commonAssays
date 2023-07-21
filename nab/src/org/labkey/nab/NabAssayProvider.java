@@ -356,7 +356,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
 
     public PlateSamplePropertyHelper getVirusPropertyHelper(PlateUploadForm context, boolean insertView)
     {
-        Plate template = getPlateTemplate(context.getContainer(), context.getProtocol());
+        Plate template = getPlate(context.getContainer(), context.getProtocol());
         try
         {
             AssayProvider provider = context.getProvider();

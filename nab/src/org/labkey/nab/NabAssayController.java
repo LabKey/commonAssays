@@ -647,7 +647,7 @@ public class NabAssayController extends SpringActionController
             NabAssayProvider nabProvider = ((NabAssayProvider) provider);
             Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
             Domain virusDomain = nabProvider.getVirusWellGroupDomain(protocol);
-            Plate template = nabProvider.getPlateTemplate(context.getContainer(), protocol);
+            Plate template = nabProvider.getPlate(context.getContainer(), protocol);
             if (template == null)
             {
                 throw new NotFoundException("The plate template for this assay design could not be found.  It may have been deleted by an administrator.");

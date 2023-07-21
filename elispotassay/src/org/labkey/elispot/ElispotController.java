@@ -311,7 +311,7 @@ public class ElispotController extends SpringActionController
             ExpProtocol protocol = run.getProtocol();
 
             ElispotAssayProvider provider = (ElispotAssayProvider) AssayService.get().getProvider(protocol);
-            Plate template = provider.getPlateTemplate(getContainer(), protocol);
+            Plate template = provider.getPlate(getContainer(), protocol);
 
             String plateReaderName = null;
             for (ObjectProperty prop : run.getObjectProperties().values())
