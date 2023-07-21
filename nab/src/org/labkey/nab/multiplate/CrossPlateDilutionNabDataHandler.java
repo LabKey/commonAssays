@@ -17,6 +17,7 @@ package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.DataType;
@@ -24,7 +25,6 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.util.FileType;
 

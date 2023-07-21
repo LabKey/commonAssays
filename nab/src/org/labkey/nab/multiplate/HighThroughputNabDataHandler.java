@@ -23,10 +23,8 @@ import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
@@ -70,7 +68,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     protected static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
     @Override
-    protected List<Plate> createPlates(File dataFile, PlateTemplate template) throws ExperimentException
+    protected List<Plate> createPlates(File dataFile, Plate template) throws ExperimentException
     {
         DataLoader loader = null;
         try
@@ -111,7 +109,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    protected List<Plate> createPlates(ExpRun run, PlateTemplate template, boolean recalcStats) throws ExperimentException
+    protected List<Plate> createPlates(ExpRun run, Plate template, boolean recalcStats) throws ExperimentException
     {
         List<WellDataRow> wellDataRows = DilutionManager.getWellDataRows(run);
         if (wellDataRows.isEmpty())
@@ -148,7 +146,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate)
+    protected double[][] getCellValues(final File dataFile, Plate nabTemplate)
     {
         throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
     }
@@ -200,7 +198,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
                 {
                     // it's possible to override the natural ordering of the replicate well groups by adding a replicate
                     // well group property : 'Group Order' with a numeric value in the plate template
-                    String order = (String)((WellGroupTemplate)well).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                    String order = (String)((WellGroup)well).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
                     if (!NumberUtils.isDigits(order))
                     {
                         hasExplicitOrder = false;
@@ -218,10 +216,10 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             {
                 wellData.sort((Comparator<WellData>) (w1, w2) ->
                 {
-                    if ((w1 instanceof WellGroupTemplate) && (w2 instanceof WellGroupTemplate))
+                    if ((w1 instanceof WellGroup) && (w2 instanceof WellGroup))
                     {
-                        String order1 = (String) ((WellGroupTemplate) w1).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
-                        String order2 = (String) ((WellGroupTemplate) w2).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                        String order1 = (String) ((WellGroup) w1).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
+                        String order2 = (String) ((WellGroup) w2).getProperty(REPLICATE_GROUP_ORDER_PROPERTY);
 
                         return NumberUtils.toInt(order1, 0) - NumberUtils.toInt(order2, 0);
                     }

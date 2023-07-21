@@ -19,7 +19,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.assay.plate.PlateTemplate;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
@@ -42,13 +42,13 @@ public class PlateParserTests
         _context = new Mockery();
     }
 
-    public double[][] parse(File file, PlateTemplate template) throws ExperimentException
+    public double[][] parse(File file, Plate template) throws ExperimentException
     {
         SinglePlateNabDataHandler handler = new SinglePlateNabDataHandler();
         return handler.getCellValues(file, template);
     }
 
-    public void assertCells(String nabFile, double[][] expected, File file, PlateTemplate template) throws ExperimentException
+    public void assertCells(String nabFile, double[][] expected, File file, Plate template) throws ExperimentException
     {
         double[][] actual = parse(file, template);
         if (actual == null)
@@ -79,11 +79,11 @@ public class PlateParserTests
     }
 
     // Create a plate template that has enough information to parse the data file
-    public PlateTemplate template(String name, final int rows, final int columns)
+    public Plate template(String name, final int rows, final int columns)
     {
         synchronized (_context)
         {
-            final PlateTemplate template = _context.mock(PlateTemplate.class, name);
+            final Plate template = _context.mock(Plate.class, name);
             _context.checking(new Expectations()
             {{
                 allowing(template).getRows();
@@ -123,7 +123,7 @@ public class PlateParserTests
             File expectedFile = JunitUtil.getSampleData(null, test.second);
 
             final double[][] expected = parseExpected(expectedFile);
-            PlateTemplate template = template(nabFile.getName(), expected.length, expected[0].length);
+            Plate template = template(nabFile.getName(), expected.length, expected[0].length);
             assertCells(test.first, expected, nabFile, template);
         }
     }

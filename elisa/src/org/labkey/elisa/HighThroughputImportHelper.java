@@ -6,12 +6,10 @@ import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
-import org.labkey.api.assay.plate.WellGroupTemplate;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -36,7 +34,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     private static final Logger LOG = LogManager.getLogger(HighThroughputImportHelper.class);
 
     private Map<String, AnalytePlate> _plateMap = new HashMap<>();
-    private PlateTemplate _plateTemplate;
+    private Plate _plateTemplate;
 
     public HighThroughputImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile) throws ExperimentException
     {
@@ -46,7 +44,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
     private void ensureData() throws ExperimentException
     {
-        _plateTemplate = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+        _plateTemplate = _provider.getPlate(_protocol.getContainer(), _protocol);
         DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
         try (DataLoader loader = factory.createLoader(_dataFile, true))
         {
@@ -176,12 +174,12 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
         private Map<Integer, Map<String, Double>> _stdConcentrations = new HashMap<>();
         private Map<Integer, double[][]> _dataMap = new HashMap<>();
         private String _plateName;
-        private PlateTemplate _plateTemplate;
+        private Plate _plateTemplate;
         // contains the mapping of (well/analyte) to extra row data to merge during data import
         private Map<String, Map<String, Object>> _extraWellData = new HashMap<>();
         public static final String CONTROL_ID_COLUMN = "Sample";
 
-        public AnalytePlate(String plateName, PlateTemplate plateTemplate)
+        public AnalytePlate(String plateName, Plate plateTemplate)
         {
             _plateName = plateName;
             _plateTemplate = plateTemplate;
@@ -207,7 +205,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
         public void setStdConcentration(Position position, Integer spot, Double concentration)
         {
-            for (WellGroupTemplate wellGroup : _plateTemplate.getWellGroups(position))
+            for (WellGroup wellGroup : _plateTemplate.getWellGroups(position))
             {
                 if (wellGroup.getType() == WellGroup.Type.REPLICATE)
                 {
@@ -241,7 +239,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
             // need to adjust the column value to be 0 based to match the template locations
             position.setColumn(position.getColumn()-1);
 
-            for (WellGroupTemplate wellGroup : _plateTemplate.getWellGroups(position))
+            for (WellGroup wellGroup : _plateTemplate.getWellGroups(position))
             {
                 if (wellGroup.getType() == WellGroup.Type.CONTROL)
                 {

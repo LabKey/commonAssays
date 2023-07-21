@@ -16,8 +16,8 @@
 package org.labkey.nab.multiplate;
 
 import org.labkey.api.assay.plate.PlateSampleFilePropertyHelper;
-import org.labkey.api.assay.plate.PlateTemplate;
-import org.labkey.api.assay.plate.WellGroupTemplate;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFilePropertyHelper
 {
-    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, PlateTemplate template, SampleMetadataInputFormat inputFormat)
+    public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, Plate template, SampleMetadataInputFormat inputFormat)
     {
         super(c, protocol, sampleProperties, template, inputFormat);
     }
@@ -62,7 +62,7 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
         try (ExcelLoader loader = new ExcelLoader(metadataFile, true))
         {
-            Map<String, WellGroupTemplate> sampleGroupNames = getSampleWellGroupNameMap();
+            Map<String, WellGroup> sampleGroupNames = getSampleWellGroupNameMap();
 
             // issue #19539 -- now addressed by larger default value for _scanAheadLineCount
 
@@ -93,7 +93,7 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
                 {
                     wellGroupName = String.valueOf(row.get(wellGroupColumnName));
                 }
-                WellGroupTemplate wellgroup = wellGroupName != null ? sampleGroupNames.get(wellGroupName) : null;
+                WellGroup wellgroup = wellGroupName != null ? sampleGroupNames.get(wellGroupName) : null;
 
                 if (wellgroup != null)
                 {

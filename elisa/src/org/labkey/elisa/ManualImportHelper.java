@@ -7,7 +7,6 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateBasedAssayProvider;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.PlateService;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
@@ -50,7 +49,7 @@ public class ManualImportHelper extends AbstractElisaImportHelper
         PlateReader reader = _provider.getPlateReader(BioTekPlateReader.LABEL);
         if (reader != null)
         {
-            PlateTemplate template = _provider.getPlateTemplate(_protocol.getContainer(), _protocol);
+            Plate template = _provider.getPlate(_protocol.getContainer(), _protocol);
             double[][] cellValues = reader.loadFile(template, _dataFile);
             if (cellValues == null)
             {

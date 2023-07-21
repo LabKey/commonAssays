@@ -29,7 +29,6 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
 import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateTemplate;
 import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.WellData;
@@ -102,7 +101,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected double[][] getCellValues(final File dataFile, PlateTemplate nabTemplate) throws ExperimentException
+    protected double[][] getCellValues(final File dataFile, Plate nabTemplate) throws ExperimentException
     {
         final int expectedRows = nabTemplate.getRows();
         final int expectedCols = nabTemplate.getColumns();
