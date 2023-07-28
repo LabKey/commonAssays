@@ -76,7 +76,7 @@ public class LuminexEC50Test extends LuminexTest
         _customizeViewsHelper.applyCustomView();
 
         DataRegionTable table = new DataRegionTable("query", getDriver());
-        table.setFilter("TitrationId/Name", "Equals One Of (example usage: a;b;c)", "Standard1;Standard2");
+        table.setFilter("TitrationId/Name", "Equals One Of", "Standard1;Standard2");
 
         List<String> analyte = table.getColumnDataAsText("Analyte");
         List<String> formula = table.getColumnDataAsText("Curve Type");
