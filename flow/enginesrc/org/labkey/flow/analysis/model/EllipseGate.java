@@ -28,10 +28,11 @@ public class EllipseGate extends RegionGate
 {
     String xAxis;
     String yAxis;
-    static public class Point implements Serializable
+
+    public static class Point implements Serializable
     {
-        final public double x;
-        final public double y;
+        public final double x;
+        public final double y;
         public Point(double x, double y)
         {
             this.x = x;
@@ -148,7 +149,7 @@ public class EllipseGate extends RegionGate
         double c = length(foci)/2;
         double a = Math.max(distance/2,c);      // width
         double b = Math.sqrt((a*a)-(c*c));      // height
-        double v[] = new double[] { c==0?1:(foci[0].x-center[0])/c, c==0?0:(foci[0].y-center[1])/c};
+        double[] v = new double[] { c==0?1:(foci[0].x-center[0])/c, c==0?0:(foci[0].y-center[1])/c};
         double[] xrotate = new double[] {a*v[0],a*v[1],0};
         double[] yrotate = new double[] {-1*b*v[1], b*v[0], 0};
         double[][] m = new double[][] {xrotate, yrotate, center};
@@ -160,7 +161,7 @@ public class EllipseGate extends RegionGate
             list.add(ellipse.invert());
     }
 
-    static private double length(Point[] points)
+    private static double length(Point[] points)
     {
         assert points.length == 2;
         double dx = points[0].x - points[1].x;
@@ -168,19 +169,7 @@ public class EllipseGate extends RegionGate
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    static private double distance(Point point, Point[] foci)
-    {
-        double ret = 0;
-        for (Point focus : foci)
-        {
-            double dx = point.x - focus.x;
-            double dy = point.y - focus.y;
-            ret += Math.sqrt(dx * dx + dy * dy);
-        }
-        return ret;
-    }
-
-    static public EllipseGate fromVertices(String xAxis, String yAxis, Point[] vertices)
+    public static EllipseGate fromVertices(String xAxis, String yAxis, Point[] vertices)
     {
         Point[] axis1 = new Point[] { vertices[0], vertices[1] };
         Point[] axis2 = new Point[] { vertices[2], vertices[3] };
@@ -213,16 +202,15 @@ public class EllipseGate extends RegionGate
                     majorAxis[i].y * focalRatio + center.y * (1-focalRatio)
             );
         }
-        EllipseGate ret = new EllipseGate(xAxis, yAxis, majorAxisLength, foci[0], foci[1]);
-        return ret;
+        return new EllipseGate(xAxis, yAxis, majorAxisLength, foci[0], foci[1]);
     }
 
-    static private Point toPoint(Element elPoint)
+    private static Point toPoint(Element elPoint)
     {
         return new Point(Double.parseDouble(elPoint.getAttribute("x")), Double.parseDouble(elPoint.getAttribute("y")));
     }
 
-    static public EllipseGate readEllipse(Element el)
+    public static EllipseGate readEllipse(Element el)
     {
         NodeList nlFoci = el.getElementsByTagName("focus");
 
@@ -237,6 +225,7 @@ public class EllipseGate extends RegionGate
     }
 
 
+    @Override
     public boolean equals(Object o)
     {
         if (this == o) return true;
@@ -253,6 +242,7 @@ public class EllipseGate extends RegionGate
         return true;
     }
 
+    @Override
     public int hashCode()
     {
         int result = super.hashCode();
@@ -261,35 +251,5 @@ public class EllipseGate extends RegionGate
         result = 31 * result + Arrays.hashCode(foci);
         result = 31 * result + Double.valueOf(distance).hashCode();
         return result;
-    }
-
-
-    public static void main(String[] args)
-    {
-        EllipseGate g = new EllipseGate("x", "y", 14, new Point(10,10), new Point(20,15));
-        Polygon p;
-
-        System.out.println("10\t10");
-        System.out.println("20\t15");
-        List<Polygon> l = new ArrayList<>();
-
-        l.clear();
-        g.getPolygons(l, "x", "y");
-        p = l.get(0);
-        for (int i=0 ; i<p.len ;i++)
-        {
-            System.out.println(p.X[i] + "\t" + p.Y[i]);
-        }
-
-        System.out.println();
-        System.out.println();
-
-        l.clear();
-        g.getPolygons(l, "y", "x");
-        p = l.get(0);
-        for (int i=0 ; i<p.len ;i++)
-        {
-            System.out.println(p.X[i] + "\t" + p.Y[i]);
-        }
     }
 }
