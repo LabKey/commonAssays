@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by susanh on 10/25/15.
@@ -202,7 +203,7 @@ public abstract class PeptideImporter extends MS2Importer
 
         stmt.setInt(n++, _fractionId);
         stmt.setInt(n++, peptide.getScan());
-        if (peptide.getScan() == peptide.getEndScan())
+        if (Objects.equals(peptide.getScan(), peptide.getEndScan()))
             stmt.setNull(n++, Types.INTEGER);
         else
             stmt.setInt(n++, peptide.getEndScan());

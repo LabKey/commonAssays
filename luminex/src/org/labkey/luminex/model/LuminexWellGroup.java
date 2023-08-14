@@ -49,7 +49,7 @@ public class LuminexWellGroup implements WellGroup
         {
             if (well.getDataRow().isSummary())
                 setContainsSummaryData(true);
-            else if (!well.getDataRow().isSummary())
+            else
                 setContainsRawData(true);
         }
     }
