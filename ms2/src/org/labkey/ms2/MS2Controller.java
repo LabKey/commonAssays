@@ -294,7 +294,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleRedirectAction
+    public static class BeginAction extends SimpleRedirectAction<Object>
     {
         @Override
         public ActionURL getRedirectURL(Object o)
@@ -775,7 +775,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public class RenameBean
+    public static class RenameBean
     {
         public MS2Run run;
         public String description;
@@ -994,7 +994,7 @@ public class MS2Controller extends SpringActionController
             return getGoStatusURL(_message);
         }
 
-        private class GoView extends TabStripView
+        private static class GoView extends TabStripView
         {
             @Override
             public List<NavTree> getTabList()
@@ -1024,7 +1024,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class GoStatusAction extends SimpleViewAction<GoForm>
+    public static class GoStatusAction extends SimpleViewAction<GoForm>
     {
         @Override
         public ModelAndView getView(GoForm form, BindException errors)
@@ -1567,7 +1567,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ProteinDisambiguationRedirectAction extends SimpleViewAction<ProteinDisambiguationForm>
+    public static class ProteinDisambiguationRedirectAction extends SimpleViewAction<ProteinDisambiguationForm>
     {
         @Override
         public ModelAndView getView(ProteinDisambiguationForm form, BindException errors)
@@ -2228,7 +2228,7 @@ public class MS2Controller extends SpringActionController
     // success, the post handler redirect back to the action with the run list ID as a parameter. This is a GET, so getView()
     // is then invoked to verify the cached run list and display the action-specific setup view.
     @RequiresPermission(ReadPermission.class)
-    public abstract class AbstractRunListSetupAction<FormType extends RunListForm> extends FormViewAction<FormType>
+    public abstract static class AbstractRunListSetupAction<FormType extends RunListForm> extends FormViewAction<FormType>
     {
         private ActionURL _successUrl;
 
@@ -2364,7 +2364,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public abstract class RunListHandlerAction<FormType extends RunListForm, ViewType extends QueryView> extends QueryViewAction<FormType, ViewType>
+    public abstract static class RunListHandlerAction<FormType extends RunListForm, ViewType extends QueryView> extends QueryViewAction<FormType, ViewType>
     {
         protected List<MS2Run> _runs;
 
@@ -2552,7 +2552,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class CompareServiceAction extends GWTServiceAction
+    public static class CompareServiceAction extends GWTServiceAction
     {
         @Override
         protected BaseRemoteService createService()
@@ -2591,7 +2591,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class DeleteDataBasesAction extends FormHandlerAction
+    public static class DeleteDataBasesAction extends FormHandlerAction
     {
         private String _message;
 
@@ -2871,7 +2871,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
+    public static class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
     {
         @Override
         public void validateCommand(SetBestNameForm form, Errors errors)
@@ -2964,7 +2964,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
+    public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
     {
         private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
         private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
@@ -3395,7 +3395,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptideProphetDistributionPlotAction extends ExportAction<PeptideProphetForm>
+    public static class ShowPeptideProphetDistributionPlotAction extends ExportAction<PeptideProphetForm>
     {
         @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -3414,7 +3414,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptideProphetObservedVsModelPlotAction extends ExportAction<PeptideProphetForm>
+    public static class ShowPeptideProphetObservedVsModelPlotAction extends ExportAction<PeptideProphetForm>
     {
         @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -3432,7 +3432,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptideProphetObservedVsPPScorePlotAction extends ExportAction<PeptideProphetForm>
+    public static class ShowPeptideProphetObservedVsPPScorePlotAction extends ExportAction<PeptideProphetForm>
     {
         @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -3445,7 +3445,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptideProphetSensitivityPlotAction extends ExportAction<PeptideProphetForm>
+    public static class ShowPeptideProphetSensitivityPlotAction extends ExportAction<PeptideProphetForm>
     {
         @Override
         public void export(PeptideProphetForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -3531,7 +3531,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
+    public static class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
     {
         @Override
         public void export(RunForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -3689,7 +3689,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowAllRunsAction extends SimpleViewAction
+    public static class ShowAllRunsAction extends SimpleViewAction
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -3978,7 +3978,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(AdminOperationsPermission.class)
-    public class MascotConfigAction extends FormViewAction<MascotSettingsForm>
+    public static class MascotConfigAction extends FormViewAction<MascotSettingsForm>
     {
         @Override
         public void validateCommand(MascotSettingsForm target, Errors errors)
@@ -4038,7 +4038,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowProteinAction extends SimpleViewAction<DetailsForm>
+    public static class ShowProteinAction extends SimpleViewAction<DetailsForm>
     {
         private MS2Run _run;
         private Protein _protein;
@@ -4121,7 +4121,7 @@ public class MS2Controller extends SpringActionController
      * fasta for the current run that have the given peptide sequence. No peptides grid shown.
      */
     @RequiresPermission(ReadPermission.class)
-    public class ShowAllProteinsAction extends SimpleViewAction<DetailsForm>
+    public static class ShowAllProteinsAction extends SimpleViewAction<DetailsForm>
     {
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
@@ -4158,7 +4158,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
+    public static class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
     {
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
@@ -4404,7 +4404,7 @@ public class MS2Controller extends SpringActionController
      * of the protein coverage map.  Can't use CSS tags.
      */
     @RequiresPermission(ReadPermission.class)
-    public class ExportProteinCoverageMapAction extends SimpleViewAction<DetailsForm>
+    public static class ExportProteinCoverageMapAction extends SimpleViewAction<DetailsForm>
     {
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
@@ -4453,7 +4453,7 @@ public class MS2Controller extends SpringActionController
      * based on the criteria provided from the Compare Peptides Options page.
      */
     @RequiresPermission(ReadPermission.class)
-    public class ExportComparisonProteinCoverageMapAction extends SimpleViewAction<PeptideFilteringComparisonForm>
+    public static class ExportComparisonProteinCoverageMapAction extends SimpleViewAction<PeptideFilteringComparisonForm>
     {
         @Override
         public ModelAndView getView(PeptideFilteringComparisonForm form, BindException errors) throws Exception
@@ -4633,7 +4633,7 @@ public class MS2Controller extends SpringActionController
      * in a protein coverage map
      */
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptidePopupAction extends SimpleViewAction<DetailsForm>
+    public static class ShowPeptidePopupAction extends SimpleViewAction<DetailsForm>
     {
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
@@ -4682,7 +4682,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class PieSliceSectionAction extends SimpleViewAction<PieSliceSectionForm>
+    public static class PieSliceSectionAction extends SimpleViewAction<PieSliceSectionForm>
     {
         private PieSliceSectionForm _form;
 
@@ -4837,7 +4837,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(AdminOperationsPermission.class)
-    public class MascotTestAction extends SimpleViewAction<TestMascotForm>
+    public static class MascotTestAction extends SimpleViewAction<TestMascotForm>
     {
         @Override
         public ModelAndView getView(TestMascotForm form, BindException errors)
@@ -4966,7 +4966,7 @@ public class MS2Controller extends SpringActionController
 
     @SuppressWarnings({"UnusedDeclaration"})
     @RequiresPermission(ReadPermission.class)
-    public class MS2SearchOptionsAction extends MutatingApiAction<MS2SearchOptions>
+    public static class MS2SearchOptionsAction extends MutatingApiAction<MS2SearchOptions>
     {
         private static final String CATEGORY = "MS2SearchOptions";
 
@@ -5071,7 +5071,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class ReloadSPOMAction extends FormHandlerAction
+    public static class ReloadSPOMAction extends FormHandlerAction<Object>
     {
         @Override
         public void validateCommand(Object target, Errors errors)
@@ -5097,7 +5097,7 @@ public class MS2Controller extends SpringActionController
     private static final Cache<String, PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
 
     @RequiresPermission(ReadPermission.class)
-    public class DoOnePeptideChartAction extends ExportAction
+    public static class DoOnePeptideChartAction extends ExportAction
     {
         @Override
         public void export(Object o, HttpServletResponse response, BindException errors) throws Exception
@@ -5132,22 +5132,18 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    // TODO: Use form
     @RequiresPermission(ReadPermission.class)
-    public class AddExtraFilterAction extends SimpleRedirectAction
+    public class AddExtraFilterAction extends SimpleRedirectAction<RunForm>
     {
         @Override
-        public ActionURL getRedirectURL(Object o)
+        public ActionURL getRedirectURL(RunForm form)
         {
             ViewContext ctx = getViewContext();
             HttpServletRequest request = ctx.getRequest();
             ActionURL url = ctx.cloneActionURL();
             url.setAction(ShowRunAction.class);
 
-            MS2Run run = MS2Manager.getRun(request.getParameter("run"));
-
-            if (null == run)
-                throw new NotFoundException("Run not found: " + request.getParameter("run"));
+            MS2Run run = form.validateRun();
 
             String paramName = run.getChargeFilterParamName();
 
@@ -5657,7 +5653,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public class DeleteAnnotInsertEntriesAction extends FormHandlerAction
+    public static class DeleteAnnotInsertEntriesAction extends FormHandlerAction
     {
         @Override
         public void validateCommand(Object target, Errors errors)
@@ -5721,7 +5717,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowParamsFileAction extends ExportAction<DetailsForm>
+    public static class ShowParamsFileAction extends ExportAction<DetailsForm>
     {
         @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -5796,7 +5792,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowGZFileAction extends ExportAction<DetailsForm>
+    public static class ShowGZFileAction extends ExportAction<DetailsForm>
     {
         @Override
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -6213,7 +6209,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class PepSearchAction extends QueryViewAction<PeptideFilterSearchForm, QueryView>
+    public static class PepSearchAction extends QueryViewAction<PeptideFilterSearchForm, QueryView>
     {
         public PepSearchAction()
         {
@@ -6550,27 +6546,27 @@ public class MS2Controller extends SpringActionController
 
             // @RequiresPermission(AdminPermission.class)
             assertForAdminPermission(user,
-                controller.new SetBestNameAction()
+                    new SetBestNameAction()
             );
 
             // @RequiresPermission(AdminOperationsPermission.class)
             assertForAdminOperationsPermission(user,
-                controller.new MascotConfigAction(),
-                controller.new MascotTestAction()
+                    new MascotConfigAction(),
+                    new MascotTestAction()
             );
 
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
                 controller.new LoadGoAction(),
-                controller.new GoStatusAction(),
+                    new GoStatusAction(),
                 controller.new ReloadFastaAction(),
-                controller.new DeleteDataBasesAction(),
+                    new DeleteDataBasesAction(),
                 controller.new TestFastaParsingAction(),
                 controller.new PurgeRunsAction(),
                 controller.new ShowMS2AdminAction(),
-                controller.new ReloadSPOMAction(),
+                    new ReloadSPOMAction(),
                 controller.new InsertAnnotsAction(),
-                controller.new DeleteAnnotInsertEntriesAction(),
+                    new DeleteAnnotInsertEntriesAction(),
                 controller.new ShowAnnotInsertDetailsAction(),
                 controller.new AttachFilesUpgradeAction(),
                 controller.new ImportMSScanCountsUpgradeAction()

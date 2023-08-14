@@ -100,7 +100,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
                 col.setFieldKey(new FieldKey(null,domainProperty.getName()));
                 PropertyDescriptor pd = domainProperty.getPropertyDescriptor();
                 FieldKey pkFieldKey = new FieldKey(null, NabAssayProvider.VIRUS_LSID_COLUMN_NAME);
-                PropertyColumn.copyAttributes(_userSchema.getUser(), col, pd, schema.getContainer(), _userSchema.getSchemaPath(), getPublicName(), pkFieldKey);
+                PropertyColumn.copyAttributes(_userSchema.getUser(), col, pd, schema.getContainer(), _userSchema.getSchemaPath(), getPublicName(), pkFieldKey, null, null);
             }
             addColumn(col);
 

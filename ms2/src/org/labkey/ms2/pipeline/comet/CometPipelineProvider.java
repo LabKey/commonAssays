@@ -87,7 +87,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         return new SetupWebPart();
     }
 
-    class SetupWebPart extends WebPartView
+    static class SetupWebPart extends WebPartView
     {
         public SetupWebPart()
         {

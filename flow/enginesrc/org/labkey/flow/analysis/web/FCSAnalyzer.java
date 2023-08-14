@@ -148,7 +148,7 @@ public class FCSAnalyzer
             plot = hPlot;
         }
         JFreeChart chart = new JFreeChart(title, plot);
-        BufferedImage img = chart.createBufferedImage(GRAPH_HEIGHT, GRAPH_WIDTH);
+        BufferedImage img = chart.createBufferedImage(GRAPH_WIDTH, GRAPH_HEIGHT);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "png", baos);
         return baos.toByteArray();
