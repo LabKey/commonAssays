@@ -22,6 +22,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -55,11 +56,13 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
     {
         if (!_renderedCSS)
         {
-            out.write("<script type=\"text/javascript\">\n" +
-            "LABKEY.requiresCss(\"MS2/ProteinCoverageMap.css\");\n" +
-            "LABKEY.requiresScript(\"MS2/ProteinCoverageMap.js\");\n" +
-            "LABKEY.requiresScript(\"util.js\");\n" +
-            "</script>");
+            out.write("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">");
+            out.write("""
+                            LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
+                            LABKEY.requiresScript("MS2/ProteinCoverageMap.js");
+                            LABKEY.requiresScript("util.js");
+                            """);
+            out.write("</script>");
             _renderedCSS = true;
         }
         super.renderGridCellContents(ctx, out);
