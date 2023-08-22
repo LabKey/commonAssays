@@ -141,16 +141,16 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                         int analyte = (int)ctx.get("analyte");
                         int titration = (int)ctx.get("titration");
 
-                        String jsFuncCall = "javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration')";
+                        String jsFuncCall = "LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration'); return false;";
 
                         NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
                         ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
                         if (curveTypes.contains(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
-                            ljPlotsNav.addChild("EC50 - 4PL", String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL"));
+                            ljPlotsNav.addChild(new NavTree("EC50 - 4PL").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL")));
                         if (curveTypes.contains(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
-                            ljPlotsNav.addChild("EC50 - 5PL Rumi", String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL"));
-                        ljPlotsNav.addChild("AUC", String.format(jsFuncCall, protocolId, analyte, titration, "AUC"));
-                        ljPlotsNav.addChild("High MFI", String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI"));
+                            ljPlotsNav.addChild(new NavTree("EC50 - 5PL Rumi").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL")));
+                        ljPlotsNav.addChild(new NavTree("AUC").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "AUC")));
+                        ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
 
                         PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
                         ljPlotsMenu.renderMenuButton(ctx, out, false, null);

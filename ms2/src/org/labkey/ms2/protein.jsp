@@ -52,7 +52,8 @@
                     <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
                         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
                     <% } %>
-                    <select name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" onchange="this.form.submit();">
+                    <% addHandler(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "change", "this.form.submit();"); %>
+                    <select id="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>">
                         <option value="false">Show only peptides assigned by search engine</option>
                         <option value="true" <%=selected(ProteinManager.showAllPeptides(getActionURL(), getUser()))%>>Show all peptides with sequence matches</option>
                     </select>
