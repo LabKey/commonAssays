@@ -251,7 +251,7 @@ public class FlowController extends BaseFlowController
                 return false;
             }
 
-            destContainer = ContainerManager.createContainer(parent, folderName);
+            destContainer = ContainerManager.createContainer(parent, folderName, getUser());
             destContainer.setActiveModules(getContainer().getActiveModules(), getUser());
             destContainer.setFolderType(getContainer().getFolderType(), getUser(), errors);
             destContainer.setDefaultModule(flowModule);
