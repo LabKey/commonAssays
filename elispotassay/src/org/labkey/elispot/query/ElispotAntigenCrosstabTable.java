@@ -113,7 +113,7 @@ public class ElispotAntigenCrosstabTable extends CrosstabTable
         getMutableColumn("InstanceCount").setHidden(true);
         getMutableColumn("Run").setHidden(true);
         getMutableColumn("SpecimenLsid").setHidden(true);
-        setTitle("AntigenStats");
+        setName("AntigenStats");
     }
 
     @NotNull

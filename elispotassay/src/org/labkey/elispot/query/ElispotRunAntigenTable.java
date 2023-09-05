@@ -46,7 +46,7 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
     {
         super(schema, StorageProvisioner.createTableInfo(domain), cf, protocol);
         setDescription("Contains one row per well for the \"" + protocol.getName() + "\" ELISpot assay design.");
-        setTitle("Antigen");
+        setName("Antigen");
         this.setPublic(false);
 
         // Add column for AntigenStats heading

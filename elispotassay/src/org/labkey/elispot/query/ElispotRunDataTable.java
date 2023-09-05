@@ -37,10 +37,12 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.util.HtmlString;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
+import org.labkey.elispot.ElispotProtocolSchema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
     {
         super(schema, table, cf, protocol);
 
+        setName("Data");
         setDescription("Contains one row per sample for the \"" + protocol.getName() + "\" ELISpot assay design.");
 
         // display column for spot counts
@@ -117,18 +120,9 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
             }
         }
 
-        var antigenLsidColumn = getMutableColumn("AntigenLsid");
+        var antigenLsidColumn = getMutableColumn(FieldKey.fromParts("AntigenLsid"));
         antigenLsidColumn.setLabel("Antigen");
-        antigenLsidColumn.setFk(new LookupForeignKey( (String)null, "AntigenName")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                // TODO ContainerFilter
-                return ElispotManager.getTableInfoElispotAntigen(_protocol);
-            }
-        });
-
+        antigenLsidColumn.setFk(QueryForeignKey.from(getUserSchema(), getContainerFilter()).to(ElispotProtocolSchema.ANTIGEN_TABLE_NAME, "AntigenLsid", null));
     }
 
     @Override
