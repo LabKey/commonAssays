@@ -46,7 +46,7 @@ public class ElisaUpgradeCode implements UpgradeCode
                     protocols.addAll(AssayService.get().getAssayProtocols(container));
             }
 
-            User upgradeUser = new LimitedUser(UserManager.getGuestUser(), new int[0], Collections.singleton(RoleManager.getRole(SiteAdminRole.class)), false);
+            User upgradeUser = new LimitedUser(UserManager.getGuestUser(), Collections.singleton(RoleManager.getRole(SiteAdminRole.class)));
             for (ExpProtocol protocol : protocols)
             {
                 AssayProvider provider = AssayService.get().getProvider(protocol);
