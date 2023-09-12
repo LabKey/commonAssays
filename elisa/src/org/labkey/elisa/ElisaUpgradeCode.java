@@ -19,12 +19,10 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.security.LimitedUser;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserManager;
-import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.security.roles.SiteAdminRole;
 import org.labkey.elisa.query.CurveFitDb;
 import org.labkey.elisa.query.ElisaManager;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +44,7 @@ public class ElisaUpgradeCode implements UpgradeCode
                     protocols.addAll(AssayService.get().getAssayProtocols(container));
             }
 
-            User upgradeUser = new LimitedUser(UserManager.getGuestUser(), Collections.singleton(RoleManager.getRole(SiteAdminRole.class)));
+            User upgradeUser = new LimitedUser(UserManager.getGuestUser(), SiteAdminRole.class);
             for (ExpProtocol protocol : protocols)
             {
                 AssayProvider provider = AssayService.get().getProvider(protocol);
