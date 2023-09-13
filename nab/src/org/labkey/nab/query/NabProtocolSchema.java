@@ -28,14 +28,9 @@ import org.labkey.api.assay.query.ResultsQueryView;
 import org.labkey.api.assay.query.RunListDetailsQueryView;
 import org.labkey.api.assay.query.RunListQueryView;
 import org.labkey.api.cache.BlockingCache;
-import org.labkey.api.cache.Cache;
-import org.labkey.api.cache.CacheLoader;
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DatabaseCache;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
@@ -56,13 +51,12 @@ import org.springframework.validation.BindException;
 import java.util.Collections;
 import java.util.Set;
 
-/**
- * User: kevink
- * Date: 10/13/12
- */
 public class NabProtocolSchema extends AssayProtocolSchema
 {
-    private static final Cache<String, Set<Double>> CUTOFF_CACHE = new BlockingCache<>(new DatabaseCache<>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"));
+    private static final BlockingCache<Integer, Set<Double>> CUTOFF_CACHE = new BlockingCache<>(new DatabaseCache<>(NabManager.getSchema().getScope(), 100, "NAbCutoffValues"), (key, argument) -> {
+        ExpProtocol protocol = (ExpProtocol)argument;
+        return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
+    });
     /*package*/ static final String DATA_ROW_TABLE_NAME = "Data";
     public static final String NAB_DBSCHEMA_NAME = "nab";
     public static final String NAB_VIRUS_SCHEMA_NAME = "nabvirus";
@@ -95,14 +89,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         var nameColumn = runTable.getMutableColumn(ExpRunTable.Column.Name);
         // NAb has two detail type views of a run - the filtered results/data grid, and the run details page that
         // shows the graph. Set the run's name to be a link to the grid instead of the default details page.
-        nameColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter());
-            }
-        });
+        nameColumn.setDisplayColumnFactory(colInfo -> new AssayDataLinkDisplayColumn(colInfo, runTable.getContainerFilter()));
 
         // Add hidden aliased column from Run/RowId to expose the cell control aggregates for this run
         AliasedColumn cellControlAggCol = new AliasedColumn(CELL_CONTROL_AGGREGATES_TABLE_NAME, runTable.getColumn("RowId"));
@@ -138,19 +125,12 @@ public class NabProtocolSchema extends AssayProtocolSchema
     /** For databases with a lot of NAb runs, it can be expensive to get the set of unique cutoff values. */
     private static Set<Double> getCutoffValues(final ExpProtocol protocol)
     {
-        return CUTOFF_CACHE.get(Integer.toString(protocol.getRowId()), null, new CacheLoader<String, Set<Double>>()
-        {
-            @Override
-            public Set<Double> load(@NotNull String key, @Nullable Object argument)
-            {
-                return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
-            }
-        });
+        return CUTOFF_CACHE.get(protocol.getRowId(), protocol);
     }
 
     public static void clearProtocolFromCutoffCache(int protocolId)
     {
-        CUTOFF_CACHE.remove(Integer.toString(protocolId));
+        CUTOFF_CACHE.remove(protocolId);
     }
 
     public static class NabResultsQueryView extends DilutionResultsQueryView
