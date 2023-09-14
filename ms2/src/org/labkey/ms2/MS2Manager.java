@@ -27,7 +27,6 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DatabaseCache;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
@@ -105,17 +104,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: arauch
- * Date: Mar 23, 2005
- * Time: 9:58:17 PM
- */
 public class MS2Manager
 {
-    private static Logger _log = LogManager.getLogger(MS2Manager.class);
-
-    private static PeptideIndexCache _peptideIndexCache = new PeptideIndexCache();
-
+    private static final Logger LOG = LogManager.getLogger(MS2Manager.class);
+    private static final int CACHE_SIZE = 10;
+    private static final Cache<String, long[]> PEPTIDE_INDEX_CACHE = CacheManager.getCache(CACHE_SIZE, CacheManager.HOUR, "Peptide index");
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
     private static final Cache<String, MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
     private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
@@ -441,14 +434,14 @@ public class MS2Manager
             expRun.setFilePathRoot(pepXMLFile.getParentFile());
             ViewBackgroundInfo info = new ViewBackgroundInfo(container, user, null);
             expRun = ExperimentService.get().saveSimpleExperimentRun(expRun, Collections.emptyMap(), inputDatas, Collections.emptyMap(),
-                    outputDatas, Collections.emptyMap(), info, _log, false);
+                    outputDatas, Collections.emptyMap(), info, LOG, false);
 
             // Set the MS2 run to point at this experiment run
             run.setExperimentRunLSID(expRun.getLSID());
             MS2Manager.updateRun(run, user);
 
             // Ensure that any custom data handlers have a chance to do their magic
-            pepXMLData.findDataHandler().importFile(pepXMLData, pepXMLFile, info, _log, source.getXarContext());
+            pepXMLData.findDataHandler().importFile(pepXMLData, pepXMLFile, info, LOG, source.getXarContext());
 
             transaction.commit();
             return expRun;
@@ -536,14 +529,14 @@ public class MS2Manager
                 }
                 else
                 {
-                    _log.debug("MS2RunType \"" + type + "\" not found");
+                    LOG.debug("MS2RunType \"" + type + "\" not found");
                     return null;
                 }
             }
         }
         catch (SQLException e)
         {
-            _log.error("getRuns", e);
+            LOG.error("getRuns", e);
             throw new RuntimeSQLException(e);
         }
 
@@ -1048,7 +1041,7 @@ public class MS2Manager
         String url = ctx.getActionURL().getLocalURIString();
         String referrer = StringUtils.trimToEmpty(ctx.getRequest().getHeader("referer"));
         String userAgent = StringUtils.trimToEmpty(ctx.getRequest().getHeader("User-Agent"));
-        _log.warn(error + "(url=" + url + ", referrer=" + referrer + ", browser=" + userAgent + ")");
+        LOG.warn(error + "(url=" + url + ", referrer=" + referrer + ", browser=" + userAgent + ")");
     }
 
 
@@ -1130,7 +1123,7 @@ public class MS2Manager
     {
         File f = new File(getRun(fraction.getRun()).getPath(), fraction.getFileName());
         NetworkDrive.ensureDrive(f.getPath());
-        try (MascotDatLoader loader = new MascotDatLoader(f, _log))
+        try (MascotDatLoader loader = new MascotDatLoader(f, LOG))
         {
             return loader.loadSpectrum(scan);
         }
@@ -1283,26 +1276,14 @@ public class MS2Manager
 
     public static void cachePeptideIndex(String key, long[] index)
     {
-        _peptideIndexCache.put(key, index);
+        PEPTIDE_INDEX_CACHE.put(key, index);
     }
 
 
     public static long[] getPeptideIndex(String key)
     {
-        return _peptideIndexCache.get(key);
+        return PEPTIDE_INDEX_CACHE.get(key);
     }
-
-
-    private static class PeptideIndexCache extends DatabaseCache<String, long[]>
-    {
-        private static final int CACHE_SIZE = 10;
-
-        public PeptideIndexCache()
-        {
-            super(getSchema().getScope(), CACHE_SIZE, CacheManager.HOUR, "Peptide index");
-        }
-    }
-
 
     public static long getRunCount(Container c)
     {
