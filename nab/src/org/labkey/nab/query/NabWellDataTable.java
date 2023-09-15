@@ -128,7 +128,7 @@ public class NabWellDataTable extends NabBaseTable
 
     private void addWellgroupPropertyColumns(Plate plateTemplate)
     {
-        Map<WellGroup.Type, Map<String, WellGroup>> wellGroupTemplateMap = plateTemplate.getWellGroupTemplateMap();
+        Map<WellGroup.Type, Map<String, WellGroup>> wellGroupTemplateMap = plateTemplate.getWellGroupMap();
         Map<String, WellGroup> controlTemplates = wellGroupTemplateMap.get(WellGroup.Type.CONTROL);
         if (null != controlTemplates && !controlTemplates.isEmpty())
         {
