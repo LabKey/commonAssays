@@ -25,10 +25,8 @@ import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
-import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -167,7 +165,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider<?> provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
         for (Map.Entry<ExpMaterial,String> e : sampleInputs.entrySet())
@@ -189,12 +187,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                     throw new ExperimentException("Unable to find sample metadata for sample well group \"" + name +
                             "\": your sample metadata file may contain incorrect well group names, or it may not list all required samples.");
                 }
-                List<WellGroup> materialWellGroups = mapping.get(material);
-                if (materialWellGroups == null)
-                {
-                    materialWellGroups = new ArrayList<>();
-                    mapping.put(material, materialWellGroups);
-                }
+                List<WellGroup> materialWellGroups = mapping.computeIfAbsent(material, k -> new ArrayList<>());
                 materialWellGroups.add(specimenGroup);
             }
         }
@@ -202,23 +195,9 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
-    }
-
-    public Lsid getDataRowLSID(ExpData data, String wellGroupName, Map<PropertyDescriptor, Object> sampleProperties)
-    {
-        String virusName = "";
-        for (Map.Entry<PropertyDescriptor, Object> entry : sampleProperties.entrySet())
-        {
-            if (entry.getKey().getName().equals(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME))
-                virusName = entry.getValue().toString();
-        }
-        Lsid.LsidBuilder dataRowLsid = new Lsid.LsidBuilder(data.getLSID());
-        dataRowLsid.setNamespacePrefix(NAB_DATA_ROW_LSID_PREFIX);
-        dataRowLsid.setObjectId(dataRowLsid.getObjectId() + "-" + virusName + "-" + wellGroupName);
-        return dataRowLsid.build();
     }
 
     @Override

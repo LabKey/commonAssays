@@ -49,7 +49,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider<?> provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
         for (Map.Entry<ExpMaterial,String> e : sampleInputs.entrySet())
@@ -81,7 +81,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user, List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new CrossPlateDilutionNabAssayRun(provider, run, plates, user, sortedCutoffs, fit);
     }

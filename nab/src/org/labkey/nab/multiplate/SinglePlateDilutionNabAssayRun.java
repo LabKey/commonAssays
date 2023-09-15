@@ -19,6 +19,7 @@ import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -40,10 +41,10 @@ import java.util.Map;
  */
 public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 {
-    protected List<Plate> _plates;
-    private DilutionSummary[] _dilutionSummaries;
+    protected final List<Plate> _plates;
+    private final DilutionSummary[] _dilutionSummaries;
 
-    public SinglePlateDilutionNabAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates,
+    public SinglePlateDilutionNabAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates,
                                   User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
@@ -56,21 +57,16 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
             {
                 String virusName = plate.getProperty(NabAssayProvider.VIRUS_NAME_PROPERTY_NAME).toString();
                 String key = SinglePlateDilutionSamplePropertyHelper.getKey(virusName, sample.getName());
-                List<WellGroup> groups = sampleGroups.get(key);
-                if (groups == null)
-                {
-                    groups = new ArrayList<>();
-                    sampleGroups.put(key, groups);
-                }
+                List<WellGroup> groups = sampleGroups.computeIfAbsent(key, k -> new ArrayList<>());
                 groups.add(sample);
             }
         }
         List<DilutionSummary> dilutionSummaries = new ArrayList<>();
 
         for (Map.Entry<String, List<WellGroup>> sample : sampleGroups.entrySet())
-            dilutionSummaries.add(new MultiVirusDilutionSummary(this, sample.getValue(), null, _renderedCurveFitType));
+            dilutionSummaries.add(new MultiVirusDilutionSummary(this, sample.getValue(), null, _renderedCurveFitType, _run.getContainer()));
 
-        _dilutionSummaries = dilutionSummaries.toArray(new DilutionSummary[dilutionSummaries.size()]);
+        _dilutionSummaries = dilutionSummaries.toArray(new DilutionSummary[0]);
     }
 
     @Override
@@ -87,8 +83,6 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 
     /**
      * Generate a key for the sample level property map
-     * @param material
-     * @return
      */
     @Override
     protected String getSampleKey(ExpMaterial material)
@@ -105,8 +99,6 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 
     /**
      * Generate a key for the sample level property map
-     * @param summary
-     * @return
      */
     @Override
     protected String getSampleKey(DilutionSummary summary)
@@ -119,9 +111,9 @@ public class SinglePlateDilutionNabAssayRun extends NabAssayRun
 
     private static class MultiVirusDilutionSummary extends DilutionSummary
     {
-        public MultiVirusDilutionSummary(Luc5Assay assay, List<WellGroup> sampleGroups, String lsid, StatsService.CurveFitType curveFitType)
+        public MultiVirusDilutionSummary(Luc5Assay assay, List<WellGroup> sampleGroups, String lsid, StatsService.CurveFitType curveFitType, Container container)
         {
-            super(assay, sampleGroups, lsid, curveFitType);
+            super(assay, sampleGroups, lsid, curveFitType, container);
         }
     }
 }
