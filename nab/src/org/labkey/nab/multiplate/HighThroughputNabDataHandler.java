@@ -85,7 +85,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             final int expectedCols = template.getColumns();
 
             List<double[][]> matrices = parse(dataFile, loader.getColumns(), loader.load(), expectedRows, expectedCols);
-            if (matrices == null || matrices.size() == 0)
+            if (matrices == null || matrices.isEmpty())
                 throw createParseError(dataFile, "No plate data found");
 
             int plateNumber = 1;
@@ -184,11 +184,13 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         List<WellData> wells = new ArrayList<>();
         // All well groups use the same plate template, so it's okay to just check the dilution direction of the first group:
         boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(SampleProperty.ReverseDilutionDirection.name()));
+
+        Map<PropertyDescriptor,Object> sampleProperties = sampleInput.getPropertyValues();
+
         for (WellGroup group : groups)
         {
-            Map<PropertyDescriptor,Object> map = sampleInput.getPropertyValues();
             for (DomainProperty property : properties.values())
-                group.setProperty(property.getName(), map.get(property.getPropertyDescriptor()));
+                group.setProperty(property.getName(), sampleProperties.get(property.getPropertyDescriptor()));
 
             boolean hasExplicitOrder = true;
             List<? extends WellData> wellData = group.getWellData(true);
@@ -230,7 +232,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
             wells.addAll(wellData);
         }
 
-        applyDilution(wells, sampleInput, properties, reverseDirection);
+        applyDilution(wells, sampleInput, properties, reverseDirection, sampleProperties);
     }
 
     @Override

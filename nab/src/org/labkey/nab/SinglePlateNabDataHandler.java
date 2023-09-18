@@ -94,7 +94,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider provider, ExpRun run, List<Plate> plates, User user,
+    protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user,
                                                       List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
         return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
@@ -190,7 +190,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
     // Excel can only handle single sheets so this helper class abstracts away creating the loader for a specific sheet.
     // In addition we need to configure the loaders differently for parsing a list of data versus a grid of data without headers.
-    protected abstract class Load
+    protected abstract static class Load
     {
         abstract DataLoader createList() throws IOException, ExperimentException;
         abstract DataLoader createGrid() throws IOException, ExperimentException;
@@ -339,11 +339,11 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                             virusData.add(well);
                     }
                 }
-                applyDilution(virusData, sampleInput, properties, reverseDirection);
+                applyDilution(virusData, sampleInput, properties, reverseDirection, sampleProperties);
             }
         }
         else
-            applyDilution(wells, sampleInput, properties, reverseDirection);
+            applyDilution(wells, sampleInput, properties, reverseDirection, sampleProperties);
     }
 
     @Override
@@ -389,11 +389,11 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     AssayProvider provider = AssayService.get().getProvider(protocol);
                     AssayProtocolSchema protocolSchema = provider.createProtocolSchema(null, protocol.getContainer(), protocol, null);
                     TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
-                    if (virusTable instanceof FilteredTable)
+                    if (virusTable instanceof FilteredTable ft)
                     {
                         if (virusTable.getColumn(FieldKey.fromParts(NabVirusDomainKind.DATLSID_COLUMN_NAME)) != null)
                         {
-                            TableInfo table = ((FilteredTable) virusTable).getRealTable();
+                            TableInfo table = ft.getRealTable();
                             SimpleFilter dataLsidFilter = new SimpleFilter(FieldKey.fromString(NabVirusDomainKind.DATLSID_COLUMN_NAME), data.getLSID());
 
                             // delete the rows in the virus table associated with this run

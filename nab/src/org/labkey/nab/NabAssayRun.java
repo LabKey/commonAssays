@@ -50,7 +50,7 @@ import java.util.Set;
 
 public abstract class NabAssayRun extends DilutionAssayRun
 {
-    public NabAssayRun(DilutionAssayProvider provider, ExpRun run,
+    public NabAssayRun(DilutionAssayProvider<?> provider, ExpRun run,
                        User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
