@@ -24,6 +24,7 @@ import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -52,20 +53,20 @@ import java.util.Set;
  */
 public class SinglePlateNabAssayRun extends NabAssayRun
 {
-    protected Plate _plate;
-    private DilutionSummary[] _dilutionSummaries;
+    protected final Plate _plate;
+    private final DilutionSummary[] _dilutionSummaries;
     public static final String SAMPLE_WELL_GROUP_NAME = "SampleWellGroupName";
 
-    private Map<Position, WellGroup> _positionToVirusMap = new HashMap<>();
-    private Map<String, Map<WellGroup, WellGroup>> _virusGroupToControlMap = new HashMap<>();
+    private final Map<Position, WellGroup> _positionToVirusMap = new HashMap<>();
+    private final Map<String, Map<WellGroup, WellGroup>> _virusGroupToControlMap = new HashMap<>();
 
-    public SinglePlateNabAssayRun(DilutionAssayProvider provider, ExpRun run, Plate plate,
+    public SinglePlateNabAssayRun(DilutionAssayProvider<?> provider, ExpRun run, Plate plate,
                                   User user, List<Integer> cutoffs, StatsService.CurveFitType renderCurveFitType)
     {
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plate = plate;
         List<? extends WellGroup> specimenGroups = _plate.getWellGroups(WellGroup.Type.SPECIMEN);
-        _dilutionSummaries = getDilutionSumariesForWellGroups(specimenGroups);
+        _dilutionSummaries = getDilutionSummariesForWellGroups(specimenGroups, run.getContainer());
     }
 
     @Override
@@ -81,7 +82,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
     }
 
     @Override
-    protected DilutionSummary[] getDilutionSumariesForWellGroups(List<? extends WellGroup> specimenGroups)
+    protected DilutionSummary[] getDilutionSummariesForWellGroups(List<? extends WellGroup> specimenGroups, Container container)
     {
         List<WellGroup> specimenVirusGroups = new ArrayList<>();
         for (WellGroup specimenGroup : specimenGroups)
@@ -116,7 +117,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
                 specimenVirusGroups.add(specimenGroup);
         }
 
-        return super.getDilutionSumariesForWellGroups(specimenVirusGroups);
+        return super.getDilutionSummariesForWellGroups(specimenVirusGroups, container);
     }
 
 
@@ -205,9 +206,6 @@ public class SinglePlateNabAssayRun extends NabAssayRun
 
     /**
      * Returns the virus well group that contains the specified positions.
-     * @param plate
-     * @param positions
-     * @return
      */
     @Nullable
     private WellGroup getVirusGroupForPositions(Plate plate, List<Position> positions)
@@ -267,7 +265,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
                     if (virus.contains(pos))
                     {
                         if (!virusToControlPositions.containsKey(virus))
-                            virusToControlPositions.put(virus, new ArrayList<Position>());
+                            virusToControlPositions.put(virus, new ArrayList<>());
 
                         virusToControlPositions.get(virus).add(pos);
                         break;
@@ -322,7 +320,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
     protected String getVirusName(String virusWellGroupName)
     {
         List<? extends ExpData> outputDatas = _run.getOutputDatas(null);
-        if (outputDatas.size() > 0)
+        if (!outputDatas.isEmpty())
         {
             Lsid virusLsid = DilutionDataHandler.createVirusWellGroupLsid(outputDatas.get(0), virusWellGroupName);
             AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
@@ -356,8 +354,8 @@ public class SinglePlateNabAssayRun extends NabAssayRun
             return plate.getWellGroup(WellGroup.Type.CONTROL, controlGroupName);
     }
 
-    private CaseInsensitiveHashMap<WellGroup> _cellControls = new CaseInsensitiveHashMap<>();
-    private CaseInsensitiveHashMap<WellGroup> _virusControls = new CaseInsensitiveHashMap<>();
+    private final CaseInsensitiveHashMap<WellGroup> _cellControls = new CaseInsensitiveHashMap<>();
+    private final CaseInsensitiveHashMap<WellGroup> _virusControls = new CaseInsensitiveHashMap<>();
 
     private boolean ensureCellControl(Plate plate, String virusWellGroupName)
     {
