@@ -111,37 +111,46 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
             if (ExcelLoader.isExcel(dataFile))
             {
-                final ExcelFactory.WorkbookMetadata md = ExcelFactory.getMetadata(dataFile);
-                for (int i = 0, len = md.getSheetNames().size(); i < len; i++)
+                try (ExcelFactory.WorkbookMetadata md = ExcelFactory.getMetadata(dataFile))
                 {
-                    final int sheetNum = i;
-                    Load load = new Load()
+                    for (int i = 0, len = md.getSheetNames().size(); i < len; i++)
                     {
-                        @Override
-                        DataLoader createList()
+                        final int sheetNum = i;
+                        Load load = new Load()
                         {
-                            return createLoader(true);
-                        }
+                            @Override
+                            DataLoader createList()
+                            {
+                                return createLoader(true);
+                            }
 
-                        @Override
-                        DataLoader createGrid()
-                        {
-                            return createLoader(false);
-                        }
+                            @Override
+                            DataLoader createGrid()
+                            {
+                                return createLoader(false);
+                            }
 
-                        DataLoader createLoader(boolean hasColumnHeaders)
-                        {
-                            ExcelLoader loader = new ExcelLoader(dataFile, md, hasColumnHeaders, null);
-                            loader.setInferTypes(false);
-                            loader.setIncludeBlankLines(true);
-                            loader.setSheetIndex(sheetNum);
-                            return loader;
-                        }
-                    };
+                            DataLoader createLoader(boolean hasColumnHeaders)
+                            {
+                                ExcelLoader loader = new ExcelLoader(dataFile, md, hasColumnHeaders, null);
+                                loader.setInferTypes(false);
+                                loader.setIncludeBlankLines(true);
+                                loader.setSheetIndex(sheetNum);
+                                return loader;
+                            }
 
-                    double[][] values = parse(dataFile, load, expectedRows, expectedCols);
-                    if (values != null)
-                        return values;
+                            @Override
+                            void close(DataLoader loader)
+                            {
+                                // Issue : 48650
+                                // noop, the workbook is cached in the metadata object, let WorkbookMetadata clean up
+                            }
+                        };
+
+                        double[][] values = parse(dataFile, load, expectedRows, expectedCols);
+                        if (values != null)
+                            return values;
+                    }
                 }
             }
             else
@@ -158,6 +167,12 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     DataLoader createGrid() throws IOException, ExperimentException
                     {
                         return createLoader(dataFile, false);
+                    }
+
+                    @Override
+                    void close(DataLoader loader)
+                    {
+                        loader.close();
                     }
                 };
                 double[][] values = parse(dataFile, load, expectedRows, expectedCols);
@@ -179,12 +194,14 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     {
         abstract DataLoader createList() throws IOException, ExperimentException;
         abstract DataLoader createGrid() throws IOException, ExperimentException;
+        abstract void close(DataLoader loader);
     }
 
     protected double[][] parse(File dataFile, Load load, int expectedRows, int expectedCols) throws ExperimentException, IOException
     {
         // First, attempt to parse list-style data using column headers.
-        try (DataLoader loader = load.createList())
+        DataLoader loader = load.createList();
+        try
         {
             ColumnDescriptor[] columns = loader.getColumns();
             List<Map<String, Object>> rows = loader.load();
@@ -208,14 +225,23 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 }
             }
         }
+        finally
+        {
+            load.close(loader);
+        }
 
         // Next, attempt to parse grid-style data without column headers.
-        try (DataLoader loader = load.createGrid())
+        loader = load.createGrid();
+        try
         {
             List<Map<String, Object>> rows = loader.load();
             double[][] matrix = PlateUtils.parseGrid(dataFile, rows, expectedRows, expectedCols, null);
             if (matrix != null)
                 return matrix;
+        }
+        finally
+        {
+            load.close(loader);
         }
 
         return null;
