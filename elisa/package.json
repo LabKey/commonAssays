@@ -45,16 +45,16 @@
   "devDependencies": {
     "@labkey/build": "6.14.0-fb-package-updates-0923.6",
     "@labkey/eslint-config-react": "0.0.12-fb-package-updates-0923.0",
-    "@types/enzyme": "3.10.12",
-    "@types/jest": "29.2.0",
-    "@types/react": "16.14.34",
+    "@types/enzyme": "3.10.13",
+    "@types/jest": "29.5.5",
+    "@types/react": "16.14.46",
     "enzyme": "3.11.0",
-    "enzyme-adapter-react-16": "1.15.6",
+    "enzyme-adapter-react-16": "1.15.7",
     "enzyme-to-json": "3.6.2",
-    "jest": "29.2.2",
-    "jest-environment-jsdom": "29.2.2",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "29.7.0",
     "jest-teamcity-reporter": "0.9.0",
     "react-test-renderer": "16.14.0",
-    "ts-jest": "29.0.3"
+    "ts-jest": "29.1.1"
   }
 }
