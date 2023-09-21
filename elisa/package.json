@@ -40,11 +40,11 @@
     }
   },
   "dependencies": {
-    "@labkey/components": "2.368.2-fb-package-updates-0923.2"
+    "@labkey/components": "2.370.0"
   },
   "devDependencies": {
-    "@labkey/build": "6.14.0-fb-package-updates-0923.6",
-    "@labkey/eslint-config-react": "0.0.12-fb-package-updates-0923.0",
+    "@labkey/build": "6.15.0",
+    "@labkey/eslint-config-react": "0.0.13",
     "@types/enzyme": "3.10.13",
     "@types/jest": "29.5.5",
     "@types/react": "16.14.46",
