@@ -54,6 +54,12 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
 
     @Override
+    public TableInfo createTable(String name, ContainerFilter cf, boolean includeExtraMetadata)
+    {
+        return createTable(name, cf);
+    }
+
+    @Override
     public TableInfo createTable(String name, ContainerFilter cf)
     {
         return super.createTable(name, cf, FEATURE_ID, SAMPLE_ID, VALUE_MEASURE_ID, TITLE); //TODO: Looks a bit funny, modify?
