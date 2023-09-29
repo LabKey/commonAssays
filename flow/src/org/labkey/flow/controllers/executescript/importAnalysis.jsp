@@ -25,6 +25,7 @@
 <%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.ImportAnalysisStep.CONFIRM" %>
+<%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.BACK_BUTTON_ACTION" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -106,11 +107,12 @@
         }
     %>
 
+<input type="hidden" name="goBack" id="goBack" value="false">
 <% if (form.getWizardStep().getNumber() < CONFIRM.getNumber()) { %>
 <p>
     <%= button("Cancel").href(cancelUrl) %>
     &nbsp;&nbsp;
-    <%=generateBackButton()%>
+    <%= button("Back").submit(true).primary(false).onClick(BACK_BUTTON_ACTION) %>
     <%= button("Next").submit(true) %>
 </p>
 
@@ -122,7 +124,7 @@
 <p>
     <%= button("Cancel").href(cancelUrl) %>
     &nbsp;&nbsp;
-    <%=generateBackButton()%>
+    <%= button("Back").submit(true).primary(false).onClick(BACK_BUTTON_ACTION) %>
     <%= button("Next").submit(true) %>
 </p>
     
