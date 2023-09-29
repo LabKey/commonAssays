@@ -472,6 +472,9 @@ public class AnalysisScriptController extends BaseFlowController
         return targetStudy;
     }
 
+    // static js steps to take for the Back buttons in the wizard
+    public final static String BACK_BUTTON_ACTION = "document.forms['importAnalysis'].elements['goBack'].value = true; return true;";
+
     public enum ImportAnalysisStep
     {
         SELECT_ANALYSIS("Select Workspace", "/org/labkey/flow/controllers/executescript/importAnalysisSelectAnalysis.jsp"),
@@ -557,6 +560,9 @@ public class AnalysisScriptController extends BaseFlowController
         public void validateCommand(ImportAnalysisForm form, Errors errors)
         {
             getWorkspace(form, errors);
+            if (form.isGoBack() && form.getStep() == ImportAnalysisStep.SELECT_ANALYSIS.getNumber())
+                errors.reject(ERROR_MSG, "If you wish to cancel the import wizard, please use the Cancel button");
+
             if (errors.hasErrors())
                 form.setWizardStep(ImportAnalysisStep.SELECT_ANALYSIS);
         }
@@ -584,33 +590,75 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 // wizard step is the last step shown to the user.
                 // Handle the post and setup the form for the next wizard step.
-                switch (form.getWizardStep())
-                {
-                    case SELECT_ANALYSIS:
-                        stepSelectAnalysis(form, errors);
-                        break;
-
-                    case SELECT_FCSFILES:
-                        stepSelectFCSFiles(form, errors);
-                        break;
-
-                    case REVIEW_SAMPLES:
-                        stepReviewSamples(form, errors);
-                        break;
-
-                    case CHOOSE_ANALYSIS:
-                        stepChooseAnalysis(form, errors);
-                        break;
-
-                    case CONFIRM:
-                        stepConfirm(form, errors);
-                        break;
-                }
+                if (form.isGoBack())
+                    handleBack(form, errors);
+                else
+                    handleNext(form, errors);
             }
 
             title = form.getWizardStep().getTitle();
 
             return false;
+        }
+
+        private void handleNext(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            // wizard step is the last step shown to the user.
+            // Handle the post and setup the form for the next wizard step.
+            switch (form.getWizardStep())
+            {
+                case SELECT_ANALYSIS:
+                    stepSelectAnalysis(form, errors);
+                    break;
+
+                case SELECT_FCSFILES:
+                    stepSelectFCSFiles(form, errors);
+                    break;
+
+                case REVIEW_SAMPLES:
+                    stepReviewSamples(form, errors);
+                    break;
+
+                case CHOOSE_ANALYSIS:
+                    stepChooseAnalysis(form, errors);
+                    break;
+
+                case CONFIRM:
+                    stepConfirm(form, errors);
+                    break;
+            }
+        }
+
+        private void handleBack(ImportAnalysisForm form, BindException errors) throws Exception
+        {
+            // wizard step is the last step shown to the user.
+            // Handle the post and setup the form for the previous wizard step.
+            switch (form.getWizardStep())
+            {
+                case SELECT_ANALYSIS:
+                    stepSelectAnalysis(form, errors);
+                    break;
+
+                case SELECT_FCSFILES:
+                    form.setWizardStep(ImportAnalysisStep.SELECT_ANALYSIS);
+                    break;
+
+                case REVIEW_SAMPLES:
+                    // Retain the previous radio button selection
+                    SelectFCSFileOption selected = form.getSelectFCSFilesOption();
+                    form.setSelectFCSFilesOption(null);
+                    stepSelectAnalysis(form, errors);
+                    form.setSelectFCSFilesOption(selected);
+                    break;
+
+                case CHOOSE_ANALYSIS:
+                    stepSelectFCSFiles(form, errors);
+                    break;
+
+                case CONFIRM:
+                    stepReviewSamples(form, errors);
+                    break;
+            }
         }
 
         private PipeRoot getPipeRoot()

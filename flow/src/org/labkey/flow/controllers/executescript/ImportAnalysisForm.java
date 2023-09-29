@@ -37,6 +37,7 @@ public class ImportAnalysisForm implements HasAllowBindParameter
     
     // unicode small comma (probably not in the gate name so is safer than comma as a separator char in LovCombo)
     public static final String PARAMETER_SEPARATOR = "\ufe50";
+    private boolean goBack = false;
 
     public enum SelectFCSFileOption implements SafeToRenderEnum
     {
@@ -205,6 +206,16 @@ public class ImportAnalysisForm implements HasAllowBindParameter
     public void setConfirm(boolean confirm)
     {
         this.confirm = confirm;
+    }
+
+    public boolean isGoBack()
+    {
+        return goBack;
+    }
+
+    public void setGoBack(boolean goBack)
+    {
+        this.goBack = goBack;
     }
 
 
