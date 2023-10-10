@@ -171,6 +171,7 @@ public final class LuminexPositivityTest extends LuminexTest
         runs.clickHeaderButton("Re-import run");
         clickButton("Next"); // batch
         clickButton("Next"); // run
+        waitForElement(Locator.name("ReRunReuseFilePaths").withAttributeContaining("value", "assaydata/"));
         for (String analyteName : _analyteNames)
             verifyAnalytePosThresholdValue(analyteName, expectedThresholdValue);
         clickButton("Cancel");
