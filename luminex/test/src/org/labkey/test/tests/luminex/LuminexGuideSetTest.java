@@ -23,6 +23,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
@@ -421,6 +422,7 @@ public final class LuminexGuideSetTest extends LuminexTest
             table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
+        Window.Window(getDriver()).withTitle("Curve Comparison").waitFor();
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
         assertTextPresent("Export to PDF");
