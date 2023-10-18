@@ -17,9 +17,10 @@
 package org.labkey.flow.controllers.executescript;
 
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleRedirectAction;
@@ -44,6 +45,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
 import org.labkey.api.util.URLHelper;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.BadRequestException;
 import org.labkey.api.view.HttpPostRedirectView;
@@ -85,22 +87,29 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.labkey.api.assay.AssayFileWriter.DIR_NAME;
 
 public class AnalysisScriptController extends BaseFlowController
 {
-    private static final Logger _log = LogManager.getLogger(AnalysisScriptController.class);
+    private static final Logger _log = LogHelper.getLogger(AnalysisScriptController.class, "Flow analysis API controller");
 
     public enum Action
     {
@@ -117,7 +126,7 @@ public class AnalysisScriptController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public class BeginAction extends SimpleViewAction<Object>
     {
         FlowScript script;
 
@@ -162,8 +171,7 @@ public class AnalysisScriptController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp", form, errors);
         }
 
-        protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, BindException errors,
-                                         int[] runIds, String experimentLSID)
+        protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, int[] runIds, String experimentLSID)
                 throws Exception
         {
             nav = new Pair<>(null, Action.analyzeSelectedRuns);
@@ -223,7 +231,7 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 return chooseAnalysisName(form, errors);
             }
-            return analyzeRuns(form, errors, runIds, experimentLSID);
+            return analyzeRuns(form, runIds, experimentLSID);
         }
     }
 
@@ -319,7 +327,7 @@ public class AnalysisScriptController extends BaseFlowController
                         relativeFile = relativeURI.getPath();
                         if (relativeFile.endsWith("/"))
                             relativeFile = relativeFile.substring(0, relativeFile.length()-1);
-                        if (relativeFile.length() == 0 || relativeFile.contains("..") || relativeFile.contains("/") || relativeFile.contains("\\"))
+                        if (relativeFile.isEmpty() || relativeFile.contains("..") || relativeFile.contains("/") || relativeFile.contains("\\"))
                         {
                             errors.reject(ERROR_MSG, relativeFile + " is not under '" + displayPath + "'");
                             continue;
@@ -347,7 +355,7 @@ public class AnalysisScriptController extends BaseFlowController
     {
         protected void validatePipeline()
         {
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            PipeRoot root = Objects.requireNonNull(PipelineService.get().findPipelineRoot(getContainer()));
             root.requiresPermission(getContainer(), getUser(), InsertPermission.class);
         }
 
@@ -415,7 +423,7 @@ public class AnalysisScriptController extends BaseFlowController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class ShowUploadRunsAction extends SimpleRedirectAction
+    public static class ShowUploadRunsAction extends SimpleRedirectAction<Object>
     {
         @Override
         public URLHelper getRedirectURL(Object o)
@@ -440,7 +448,7 @@ public class AnalysisScriptController extends BaseFlowController
     private Container getTargetStudy(String targetStudyId, Errors errors)
     {
         Container targetStudy = null;
-        if (targetStudyId != null && targetStudyId.length() > 0)
+        if (targetStudyId != null && !targetStudyId.isEmpty())
         {
             targetStudy = ContainerManager.getForId(targetStudyId);
             if (targetStudy == null)
@@ -456,7 +464,7 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             Set<Study> studies = StudyService.get().findStudy(targetStudy, getUser());
-            if (studies == null || studies.isEmpty())
+            if (studies.isEmpty())
             {
                 errors.reject(ERROR_MSG, "No study found in TargetStudy container '" + targetStudy.getPath() + "'.");
                 return null;
@@ -529,8 +537,8 @@ public class AnalysisScriptController extends BaseFlowController
         @Override
         public ModelAndView getView(PipelinePathForm form, BindException errors)
         {
-            File f = form.getValidatedSingleFile(getContainer());
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            Path f = form.getValidatedSinglePath(getContainer());
+            PipeRoot root = Objects.requireNonNull(PipelineService.get().findPipelineRoot(getContainer()));
             String workspacePath = "/" + root.relativePath(f).replace('\\', '/');
 
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
@@ -589,7 +597,7 @@ public class AnalysisScriptController extends BaseFlowController
             else
             {
                 // wizard step is the last step shown to the user.
-                // Handle the post and setup the form for the next wizard step.
+                // Handle the post and set up the form for the next wizard step.
                 if (form.isGoBack())
                     handleBack(form, errors);
                 else
@@ -604,7 +612,7 @@ public class AnalysisScriptController extends BaseFlowController
         private void handleNext(ImportAnalysisForm form, BindException errors) throws Exception
         {
             // wizard step is the last step shown to the user.
-            // Handle the post and setup the form for the next wizard step.
+            // Handle the post and set up the form for the next wizard step.
             switch (form.getWizardStep())
             {
                 case SELECT_ANALYSIS:
@@ -629,10 +637,10 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        private void handleBack(ImportAnalysisForm form, BindException errors) throws Exception
+        private void handleBack(@NotNull ImportAnalysisForm form, BindException errors)
         {
             // wizard step is the last step shown to the user.
-            // Handle the post and setup the form for the previous wizard step.
+            // Handle the post and set up the form for the previous wizard step.
             switch (form.getWizardStep())
             {
                 case SELECT_ANALYSIS:
@@ -690,9 +698,8 @@ public class AnalysisScriptController extends BaseFlowController
                 try
                 {
                     // save the uploaded workspace
-                    AssayFileWriter writer = new AssayFileWriter();
-                    File dir = writer.ensureUploadDirectory(getContainer());
-                    File uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    Path dir = AssayFileWriter.ensureUploadDirectoryPath(getContainer(), DIR_NAME);
+                    Path uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
                     file.transferTo(uploadedFile);
 
                     String uploadedPath = root.relativePath(uploadedFile);
@@ -738,7 +745,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
 
         // Get the directory to use as the file path root of the flow analysis run.
-        private File getRunPathRoot(List<File> keywordDirs, SampleIdMap<FlowFCSFile> resolvedFCSFiles, File workspacePath, Errors errors)
+        private File getRunPathRoot(List<File> keywordDirs, SampleIdMap<FlowFCSFile> resolvedFCSFiles)
         {
             if (keywordDirs != null && !keywordDirs.isEmpty())
             {
@@ -762,9 +769,6 @@ public class AnalysisScriptController extends BaseFlowController
                     }
                 }
             }
-
-//            if (workspacePath != null) // XXX: not the same as previous behavior
-//                return workspacePath.getParentFile();
 
             return null;
         }
@@ -799,7 +803,7 @@ public class AnalysisScriptController extends BaseFlowController
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
             Map<String, SelectedSamples.ResolvedSample> rows = form.getSelectedSamples().getRows();
-            if (rows.size() == 0)
+            if (rows.isEmpty())
                 return null;
 
             if (form.isResolving() && form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StringUtils.isNotEmpty(form.getKeywordDir()[0]))
@@ -850,7 +854,7 @@ public class AnalysisScriptController extends BaseFlowController
             return fcsFiles;
         }
 
-        private AnalysisEngine getAnalysisEngine(ImportAnalysisForm form, Errors errors)
+        private AnalysisEngine getAnalysisEngine(@NotNull ImportAnalysisForm form)
         {
             // UNDONE: validate pipeline root is available for rEngine
             if (form.getSelectAnalysisEngine() != null)
@@ -858,12 +862,42 @@ public class AnalysisScriptController extends BaseFlowController
             return AnalysisEngine.FlowJoWorkspace;
         }
 
+        private boolean hasLocalRuns(File workspaceFile)
+        {
+            PipeRoot root = getPipeRoot();
+            String workspaceDir = root.relativePath(workspaceFile.getParentFile());
+
+            // First, try to find an existing run in the same container as the workspace.
+            // Default to selecting a previous run if there are any keyword runs.
+            List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            for (FlowRun keywordRun : allKeywordRuns)
+            {
+                if (keywordRun.getPath() == null)
+                    continue;
+
+                FlowExperiment experiment = keywordRun.getExperiment();
+                if (experiment != null && (experiment.isWorkspace() || experiment.isAnalysis()))
+                    continue;
+
+                File keywordRunFile = new File(keywordRun.getPath());
+                if (keywordRunFile.exists())
+                {
+                    String keywordRunPath = root.relativePath(keywordRunFile);
+                    if (workspaceDir.equals(keywordRunPath) && keywordRun.hasRealWells())
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+
         private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
             IWorkspace workspace = workspaceData.getWorkspaceObject();
             List<? extends ISampleInfo> samples = workspace.getSamples();
-            if (samples.size() == 0)
+            if (samples.isEmpty())
             {
                 errors.reject(ERROR_MSG, String.format("%s doesn't contain samples", workspace.getKindName()));
                 return;
@@ -880,29 +914,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             if (workspaceFile != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
             {
-                // First, try to find an existing run in the same directory as the workspace.
-                // Default to selecting a previous run if there are any keyword runs.
-                List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-                Map<FlowRun, String> keywordRuns = new LinkedHashMap<>(allKeywordRuns.size());
-                for (FlowRun keywordRun : allKeywordRuns)
-                {
-                    if (keywordRun.getPath() == null)
-                        continue;
-
-                    FlowExperiment experiment = keywordRun.getExperiment();
-                    if (experiment != null && (experiment.isWorkspace() || experiment.isAnalysis()))
-                        continue;
-
-                    File keywordRunFile = new File(keywordRun.getPath());
-                    if (keywordRunFile.exists())
-                    {
-                        String keywordRunPath = root.relativePath(keywordRunFile);
-                        if (keywordRunPath != null && keywordRun.hasRealWells())
-                            keywordRuns.put(keywordRun, keywordRunPath);
-                    }
-                }
-
-                if (!keywordRuns.isEmpty())
+                if (hasLocalRuns(workspaceFile))
                 {
                     form.setKeywordRunsExist(true);
                     form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
@@ -939,7 +951,86 @@ public class AnalysisScriptController extends BaseFlowController
             if (form.getSelectFCSFilesOption() == null)
                 form.setSelectFCSFilesOption(SelectFCSFileOption.None);
 
-            form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
+            // If import folder has a 1:1 fcs file for each sample, then skip ahead to the analysis
+            if (!errors.hasErrors() && canAccelerate(form) && !form.isGoBack())
+                accelerateWizard(form, errors);
+            else
+                form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
+        }
+
+        private void accelerateWizard(ImportAnalysisForm form, BindException errors)
+        {
+            // Set the data folder if we aren't using an existing run
+            if (SelectFCSFileOption.None == form.getSelectFCSFilesOption())
+                form.setKeywordDir(new String[] {getWorkspaceFolder(form).toString()});
+
+            // Select FCS file (by default we already select all fcs files in working folder)
+            stepSelectFCSFiles(form, errors);
+            // Map samples to data files (by default we map by names)
+            stepReviewSamples(form, errors);
+            // advance wizard to choosing the Analysis/Study folders
+            form.setWizardStep(ImportAnalysisStep.CHOOSE_ANALYSIS);
+        }
+
+        @NotNull
+        private Path getWorkspaceFolder(ImportAnalysisForm form)
+        {
+            return Objects.requireNonNull(getPipeRoot().resolveToNioPath(form.getWorkspace().getPath())).getParent();
+        }
+
+        /**
+         * For now we will only accelerate the wizard iff there is a 1:1 mapping of workspace samples and data files
+         * @param form wizard form
+         * @return true iff there is a 1:1 mapping of workspace samples and data files
+         */
+        private boolean canAccelerate(ImportAnalysisForm form)
+        {
+            List<String> sampleNames = form.getWorkspace().getWorkspaceObject().getSamples().stream().map(ISampleInfo::getSampleName).toList();
+            Set<String> fileNames;
+
+            Path dataFolder = getWorkspaceFolder(form);
+
+            try (Stream<Path> files = Files.list(dataFolder))
+            {
+                fileNames = files
+                        .map(Path::toFile)
+                        .filter(((IOFileFilter)FCS.FCSFILTER)::accept)
+                        .map(File::getName)
+                        .collect(Collectors.toSet());
+            }
+            catch (IOException e)
+            {
+                _log.debug("Failed to accelerate import wizard, unable to resolve fcs files from workspace");
+                return false;
+            }
+
+            if (sampleNames.size() > fileNames.size())
+            {
+                _log.debug("Failed to accelerate import wizard, more samples than data files supplied");
+                return false;
+            }
+
+            if (sampleNames.size() < fileNames.size())
+            {
+                _log.debug("Failed to accelerate import wizard, more data files than samples supplied");
+                return false;
+            }
+
+            // Confirm 1:1 mapping of Samples to data files
+            for (String s:sampleNames)
+                if (!fileNames.remove(s))
+                {
+                    _log.debug(String.format("Failed to accelerate import wizard, sample [%1$s] does not have a corresponding data file.", s));
+                    return false;
+                }
+
+            if (!fileNames.isEmpty())
+            {
+                _log.debug(String.format("Failed to accelerate import wizard, additional data files supplied: %1$s", String.join(", ", fileNames)));
+                return false;
+            }
+
+            return true;
         }
 
         private void stepSelectFCSFiles(ImportAnalysisForm form, BindException errors)
@@ -949,7 +1040,7 @@ public class AnalysisScriptController extends BaseFlowController
             // Disallow other select options if there are FCS files included in the archive.
             if (fcsFilesOption != SelectFCSFileOption.Included && form.getWorkspace().isIncludesFCSFiles())
             {
-                errors.reject(ERROR_MSG, "Can't select option other than Inclded if FCS files are already included");
+                errors.reject(ERROR_MSG, "Can't select option other than Included if FCS files are already included");
                 return;
             }
 
@@ -1004,11 +1095,11 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 WorkspaceData workspaceData = form.getWorkspace();
                 List<File> keywordDirs = getKeywordDirs(form, errors);
-                if (keywordDirs == null || keywordDirs.size() == 0)
+                if (keywordDirs == null || keywordDirs.isEmpty())
                     errors.reject(ERROR_MSG, "No directory selected");
 
                 if (keywordDirs != null && keywordDirs.size() > 1)
-                    errors.reject(ERROR_MSG, "Only a single keyword directoy can currently be imported.");
+                    errors.reject(ERROR_MSG, "Only a single keyword directory can currently be imported.");
 
                 if (errors.hasErrors())
                     return;
@@ -1018,7 +1109,7 @@ public class AnalysisScriptController extends BaseFlowController
                 // Translate selected keyword directory into a existing keyword run if possible.
                 FlowRun existingKeywordRun = null;
                 List<FlowRun> keywordRuns = FlowRun.getRunsForPath(getContainer(), FlowProtocolStep.keywords, keywordDir);
-                if (keywordRuns.size() > 0)
+                if (!keywordRuns.isEmpty())
                 {
                     for (FlowRun keywordRun : keywordRuns)
                     {
@@ -1116,7 +1207,7 @@ public class AnalysisScriptController extends BaseFlowController
                         int perfectMatchId = perfectMatch != null ? perfectMatch.getRowId() : 0;
                         List<FlowFCSFile> candidates = matches.second;
 
-                        if (perfectMatchId != 0 || (candidates != null && candidates.size() > 0))
+                        if (perfectMatchId != 0 || (candidates != null && !candidates.isEmpty()))
                         {
                             resolvedSample = new SelectedSamples.ResolvedSample(perfectMatchId > 0, perfectMatchId, candidates);
                         }
@@ -1259,7 +1350,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
-            if (targetStudy != null && (keywordDirs == null || keywordDirs.size() == 0))
+            if (targetStudy != null && (keywordDirs == null || keywordDirs.isEmpty()))
             {
                 errors.reject(ERROR_MSG, "Target study can only be selected when also importing a directory of FCS files");
                 return;
@@ -1307,7 +1398,7 @@ public class AnalysisScriptController extends BaseFlowController
             ViewBackgroundInfo info = getViewBackgroundInfo();
             if (getPipeRoot() == null)
             {
-                // root-less pipeline job for workapce uploaded via the browser
+                // root-less pipeline job for workspace uploaded via the browser
                 info.setURL(null);
             }
             else
@@ -1317,9 +1408,9 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             // Choose a run path root for the imported analysis based upon the input FCS files.
-            File runFilePathRoot = getRunPathRoot(keywordDirs, selectedFCSFiles, pipelineFile, errors);
+            File runFilePathRoot = getRunPathRoot(keywordDirs, selectedFCSFiles);
 
-            AnalysisEngine analysisEngine = getAnalysisEngine(form, errors);
+            AnalysisEngine analysisEngine = getAnalysisEngine(form);
             if (errors.hasErrors())
                 return;
 
@@ -1327,7 +1418,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (errors.hasErrors())
                 return;
 
-            if (targetStudy != null && (keywordDirs == null || keywordDirs.size() == 0))
+            if (targetStudy != null && (keywordDirs == null || keywordDirs.isEmpty()))
             {
                 errors.reject(ERROR_MSG, "Target study can only be selected when also importing a directory of FCS files");
                 return;
@@ -1386,92 +1477,4 @@ public class AnalysisScriptController extends BaseFlowController
             root.addChild(display);
         }
     }
-
-
-    /*
-    // Called from pipeline import panel
-    @RequiresPermission(UpdatePermission.class)
-    public class ImportAnalysisResultsAction extends SimpleViewAction<PipelinePathForm>
-    {
-        @Override
-        public ModelAndView getView(PipelinePathForm form, BindException errors) throws Exception
-        {
-            File pipelineFile = form.getValidatedSingleFile(getContainer());
-
-            PipeRoot root = form.getPipeRoot(getContainer());
-            File statisticsFile = findStatisticsFile(errors, pipelineFile, FlowSettings.getWorkingDirectory());
-            if (statisticsFile == null && !errors.hasErrors())
-                errors.reject(ERROR_MSG, "No statistics file found.");
-
-            if (errors.hasErrors())
-                return new SimpleErrorView(errors);
-
-            // UNDONE: set runFilePathRoot to path containing FCS files
-            File runFilePathRoot = statisticsFile.getParentFile();
-            File analysisPathRoot = statisticsFile.getParentFile();
-
-            // Get an experiment based on the parent folder name
-            int suffix = 0;
-            String runName;
-            if (pipelineFile.getName().equalsIgnoreCase(AnalysisSerializer.STATISTICS_FILENAME))
-                runName = FileUtil.getBaseName(runFilePathRoot);
-            else
-                runName = FileUtil.getBaseName(pipelineFile);
-            while (true)
-            {
-                String experimentName = runName + (suffix == 0 ? "" : suffix);
-                FlowExperiment experiment = FlowExperiment.getForName(getUser(), getContainer(), experimentName);
-                if (experiment == null)
-                    break;
-
-                if (!experiment.hasRun(runFilePathRoot, FlowProtocolStep.analysis))
-                    break;
-
-                suffix++;
-            }
-
-            FlowExperiment experiment = FlowExperiment.createForName(getUser(), getContainer(), runName + (suffix == 0 ? "" : suffix));
-
-            // UNDONE: resolve FCS files from archive
-            Map<String, FlowFCSFile> resolvedFCSFiles = null;
-
-            ViewBackgroundInfo info = getViewBackgroundInfo();
-            if (root == null)
-            {
-                // root-less pipeline job for analysis results uploaded via the browser
-                info.setURL(null);
-            }
-
-            List<File> keywordDirs = null;
-            boolean failOnError = true;
-
-            ImportResultsJob job = new ImportResultsJob(
-                    info, root, experiment, AnalysisEngine.Archive,
-                    analysisPathRoot, pipelineFile, runFilePathRoot,
-                    keywordDirs, resolvedFCSFiles, runName, failOnError);
-            throw new RedirectException(executeScript(job));
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            return root.addChild("Import Analysis");
-        }
-    }
-
-    public File findStatisticsFile(BindException errors, File pipelineFile, File tempDir) throws Exception
-    {
-        File statisticsFile = null;
-
-        if (pipelineFile.getName().equalsIgnoreCase(AnalysisSerializer.STATISTICS_FILENAME))
-        {
-            statisticsFile = pipelineFile;
-        }
-        else if (pipelineFile.getName().endsWith(".zip"))
-        {
-        }
-
-        return statisticsFile;
-    }
-    */
 }
