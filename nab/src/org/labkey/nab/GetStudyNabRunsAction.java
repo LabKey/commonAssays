@@ -26,6 +26,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 
@@ -36,12 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-/*
- * User: brittp
- * Date: March 4, 2010
- * Time: 5:13:30 PM
- */
 
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(10.1)
@@ -86,6 +81,7 @@ public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsActi
             return null;
         else
         {
+            JsonUtil.sanitizeMap(properties);
             return new ApiSimpleResponse(properties);
         }
     }
