@@ -37,6 +37,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
@@ -208,6 +209,8 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
 
         }
+        // Recursively replace all +Infinity, -Infinity, and NaN values with JSON-legal values
+        JsonUtil.sanitizeMap(response);
         return new ApiSimpleResponse(response);
     }
 }
