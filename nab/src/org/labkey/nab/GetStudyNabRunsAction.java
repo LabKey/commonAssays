@@ -81,7 +81,6 @@ public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsActi
             return null;
         else
         {
-            JsonUtil.sanitizeMap(properties);
             return new ApiSimpleResponse(properties);
         }
     }

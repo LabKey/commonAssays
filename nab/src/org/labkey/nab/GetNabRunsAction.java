@@ -204,7 +204,6 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
 
         }
         // Recursively replace all +Infinity, -Infinity, and NaN values with JSON-legal values
-        JsonUtil.sanitizeMap(response);
         return new ApiSimpleResponse(response);
     }
 }
