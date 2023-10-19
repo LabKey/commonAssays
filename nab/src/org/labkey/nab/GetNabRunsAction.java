@@ -37,7 +37,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.util.JsonUtil;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
