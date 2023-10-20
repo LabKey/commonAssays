@@ -35,10 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: brittp
- * Date: Mar 12, 2010 9:43:44 AM
- */
 public class NabRunPropertyMap extends HashMap<String, Object>
 {
     private static class PropertyNameMap extends HashMap<String, Object>
