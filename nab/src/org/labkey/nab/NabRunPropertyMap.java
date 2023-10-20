@@ -19,14 +19,15 @@ import org.json.JSONObject;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.statistics.FitFailedException;
-import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.statistics.FitFailedException;
+import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.exp.api.ExpMaterial;
+import org.labkey.api.util.JsonUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,8 +103,8 @@ public class NabRunPropertyMap extends HashMap<String, Object>
                     sample.put("fitError", dilutionSummary.getFitError());
                     for (int cutoff : assay.getCutoffs())
                     {
-                        sample.put("curveIC" + cutoff, dilutionSummary.getCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType()));
-                        sample.put("pointIC" + cutoff, dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType()));
+                        sample.put("curveIC" + cutoff, JsonUtil.translateNumber(dilutionSummary.getCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType())));
+                        sample.put("pointIC" + cutoff, JsonUtil.translateNumber(dilutionSummary.getInterpolatedCutoffDilution(cutoff/100.0, assay.getRenderedCurveFitType())));
                     }
                 }
                 if (includeFitParameters && null != specimenRow)
