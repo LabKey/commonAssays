@@ -1994,7 +1994,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             fastflowCache.put(attr, helper);
         }
 
-        return helper.getFromSql(tableAlias, null);
+        return helper.getFromSql(tableAlias);
     }
 
 
@@ -2060,7 +2060,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
         if (null == helper)
             return null;
-        return helper.getFromSql(generateBackgroundJuctionSql(), tableAlias, null);
+        return helper.getFromSql(generateBackgroundJuctionSql(), tableAlias);
     }
 
 
