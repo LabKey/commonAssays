@@ -19,13 +19,13 @@ import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ApiVersion;
 import org.labkey.api.action.ReadOnlyApiAction;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.Pair;
 import org.springframework.validation.BindException;
 
@@ -36,12 +36,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-/*
- * User: brittp
- * Date: March 4, 2010
- * Time: 5:13:30 PM
- */
 
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(10.1)
