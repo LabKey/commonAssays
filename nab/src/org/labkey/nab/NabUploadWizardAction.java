@@ -17,7 +17,9 @@
 package org.labkey.nab;
 
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.dilution.DilutionAssayProvider;
+import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
@@ -27,11 +29,8 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.roles.EditorRole;
-import org.labkey.api.security.roles.Role;
-import org.labkey.api.security.roles.RoleManager;
-import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
+import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
 import org.springframework.validation.BindException;
@@ -40,15 +39,8 @@ import org.springframework.validation.ObjectError;
 
 import javax.servlet.ServletException;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-/**
- * User: brittp
- * Date: Sep 27, 2007
- * Time: 3:48:53 PM
- */
 @RequiresPermission(InsertPermission.class)
 public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, NabAssayProvider>
 {
@@ -164,10 +156,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                 User elevatedUser = getUser();
                 if (_run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
                 {
-                    User currentUser = getUser();
-                    Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
-                    contextualRoles.add(RoleManager.getRole(EditorRole.class));
-                    elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
+                    elevatedUser = LimitedUser.getElevatedUser(getContainer(), getUser(), Pair.of(DeletePermission.class, EditorRole.class));
                 }
 
                 if (form.getReRun() != null)

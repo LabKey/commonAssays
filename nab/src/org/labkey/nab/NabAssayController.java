@@ -104,12 +104,11 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
-import org.labkey.api.security.roles.Role;
-import org.labkey.api.security.roles.RoleManager;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JsonUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Pair;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -479,15 +478,7 @@ public class NabAssayController extends SpringActionController
         protected User getGraphUser()
         {
             // See comment in DetailsAction about the elevatedUser
-            User elevatedUser = getUser();
-            if (!getContainer().hasPermission(getUser(), ReadPermission.class))
-            {
-                User currentUser = getUser();
-                Set<Role> contextualRoles = new HashSet<>(currentUser.getStandardContextualRoles());
-                contextualRoles.add(RoleManager.getRole(ReaderRole.class));
-                elevatedUser = new LimitedUser(currentUser, currentUser.getGroups(), contextualRoles, false);
-            }
-            return elevatedUser;
+            return LimitedUser.getElevatedUser(getContainer(), getUser(), Pair.of(ReadPermission.class, ReaderRole.class));
         }
 
         @Override
