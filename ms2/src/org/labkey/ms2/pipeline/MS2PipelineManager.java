@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
@@ -182,7 +183,14 @@ public class MS2PipelineManager
                 if (!NetworkDrive.exists(file) && NetworkDrive.exists(file.getParentFile()))
                 {
                     // Try to create it if it doesn't exist
-                    file.mkdir();
+                    try
+                    {
+                        FileUtil.mkdir(file);
+                    }
+                    catch (IOException e)
+                    {
+                        throw new NotFoundException("Could not create database sequence root for " + container.getPath());
+                    }
                 }
                 if (NetworkDrive.exists(file))
                 {

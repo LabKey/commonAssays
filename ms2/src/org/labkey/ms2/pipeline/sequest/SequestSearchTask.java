@@ -163,8 +163,15 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         {
             indexDir = new File(new File(_factory.getIndexRootDir()), relativeDirPath);
         }
-        indexDir.mkdirs();
-        if (!indexDir.isDirectory())
+        try
+        {
+            FileUtil.mkdirs(indexDir);
+            if (!indexDir.isDirectory())
+            {
+                throw new IOException();
+            }
+        }
+        catch (IOException e)
         {
             throw new PipelineJobException("Failed to create index directory " + indexDir);
         }
@@ -467,7 +474,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private void convertToDTA(Map<String, String> params, File dirOutputDta, File fileMzXML, String tppVersion, List<RecordedAction> actions)
             throws IOException, PipelineJobException
     {
-        if (!dirOutputDta.mkdir())
+        if (!FileUtil.mkdir(dirOutputDta))
             throw new IOException("Failed to create output directory for DTA files '" + dirOutputDta + "'.");
         ArrayList<String> mzXML2SearchArgs = new ArrayList<>();
         mzXML2SearchArgs.add(PipelineJobService.get().getExecutablePath("MzXML2Search", null, "tpp", tppVersion, getJob().getLogger()));

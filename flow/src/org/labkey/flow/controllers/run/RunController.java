@@ -628,7 +628,7 @@ public class RunController extends BaseFlowController
                 {
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     File exportDir = new File(root.resolvePath(PipelineService.EXPORT_DIR), name);
-                    exportDir.mkdirs();
+                    FileUtil.mkdirs(exportDir);
                     return new FileSystemFile(exportDir);
                 }
 
@@ -636,7 +636,7 @@ public class RunController extends BaseFlowController
                 {
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     File exportDir = root.resolvePath(PipelineService.EXPORT_DIR);
-                    exportDir.mkdir();
+                    FileUtil.mkdir(exportDir);
                     return new ZipFile(exportDir, FileUtil.makeFileNameWithTimestamp(name, "zip"));
                 }
 
@@ -656,7 +656,7 @@ public class RunController extends BaseFlowController
                     else
                     {
                         File child = new File(dir, FileUtil.makeLegalName(name + "_" + getTimestamp()));
-                        child.mkdirs();
+                        FileUtil.mkdirs(child);
                         return new FileSystemFile(child);
                     }
                 }
