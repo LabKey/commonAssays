@@ -165,10 +165,10 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider<?> provider, List<Plate> plates, Map<ExpMaterial,String> sampleInputs) throws ExperimentException
+    protected Map<ExpMaterial, List<WellGroup>> getMaterialWellGroupMapping(DilutionAssayProvider<?> provider, List<Plate> plates, Map<? extends ExpMaterial,String> sampleInputs) throws ExperimentException
     {
         Map<String, ExpMaterial> nameToMaterial = new HashMap<>();
-        for (Map.Entry<ExpMaterial,String> e : sampleInputs.entrySet())
+        for (Map.Entry<? extends ExpMaterial,String> e : sampleInputs.entrySet())
             nameToMaterial.put(e.getValue(), e.getKey());
 
         Map<ExpMaterial, List<WellGroup>> mapping = new HashMap<>();

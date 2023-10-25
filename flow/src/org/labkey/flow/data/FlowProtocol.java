@@ -1089,7 +1089,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             }
 
             // verify - Samples aren't added as inputs to the FCSFile's run, just the individual Keywords protocol applications
-            Map<ExpMaterial, String> materialInputs = afterSampleImportRun.getExperimentRun().getMaterialInputs();
+            Map<? extends ExpMaterial, String> materialInputs = afterSampleImportRun.getExperimentRun().getMaterialInputs();
             assertEquals(0, materialInputs.size());
             assertEquals(2, sumInteralMaterialInputs(afterSampleImportRun));
 
