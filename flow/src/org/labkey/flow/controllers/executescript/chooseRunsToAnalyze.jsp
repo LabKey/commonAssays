@@ -58,20 +58,20 @@
     }
 </style>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
+<labkey:form name="analyzeRuns" method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
     <table class="lk-fields-table">
         <tr><td>Analysis script to use:</td>
-            <td><select name="scriptId" onchange="this.form.submit()">
+            <td><select id="scriptId" name="scriptId">
                 <labkey:options value="<%=form.getProtocol().getScriptId()%>"
                               map="<%=FlowObject.idLabelsFor(form.getAvailableGateDefinitionSets())%>"/>
             </select></td></tr>
         <tr><td>Analysis step to perform:</td>
-            <td><select name="actionSequence" onchange="this.form.submit()">
+            <td><select id="actionSequence" name="actionSequence">
                 <labkey:options value="<%=form.getProtocolStep().getDefaultActionSequence()%>"
                               map="<%=form.getAvailableSteps(form.getProtocol())%>"/>
             </select></td></tr>
         <tr><td>Analysis folder to put results in:</td>
-            <td><select name="ff_targetExperimentId" onchange="this.form.submit()">
+            <td><select id="ff_targetExperimentId" name="ff_targetExperimentId">
                 <labkey:options value="<%=form.ff_targetExperimentId == null ? null : Integer.valueOf(form.ff_targetExperimentId)%>"
                               map="<%=FlowObject.idLabelsFor(targetExperiments, \"<create new>\")%>"/>
             </select></td>
@@ -79,7 +79,7 @@
         <% if (analysis.requiresCompensationMatrix())
         { %>
         <tr><td>Compensation matrix to use:</td>
-            <td><select name="ff_compensationMatrixOption" onchange="this.form.submit()">
+            <td><select id="ff_compensationMatrixOption" name="ff_compensationMatrixOption">
                 <labkey:options value="<%=form.ff_compensationMatrixOption%>" map="<%=form.getCompensationMatrixOptions()%>" />
             </select></td>
         </tr>
@@ -88,3 +88,15 @@
     <br/>
     <%include(view, out);%>
 </labkey:form>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
+    (function (){
+        function select_onChange(event) {
+            event.target.form.submit();
+        }
+
+        document.getElementById('scriptId').addEventListener("change", select_onChange);
+        document.getElementById('actionSequence').addEventListener("change", select_onChange);
+        document.getElementById('ff_targetExperimentId').addEventListener("change", select_onChange);
+        document.getElementById('ff_compensationMatrixOption').addEventListener("change", select_onChange);
+    })();
+</script>

@@ -129,34 +129,38 @@ if (groups.size() > 1)
 {
     %>
     <p>
-    <script type="application/javascript" nonce="<%=getScriptNonce()%>">
-        function onGroupChanged(selectedGroup) {
-            importedGroup = selectedGroup || "All Samples";
+        Select a group to import from the <%=h(workspace.getKindName())%>.
+        <select id="importGroupNames" name="importGroupNames"  >
+            <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
+        </select>
+        <script type="application/javascript" nonce="<%=getScriptNonce()%>">
+            document.getElementById("importGroupNames").addEventListener("click", onGroupChanged);
 
-            var dr = LABKEY.DataRegions[<%= q(SamplesConfirmGridView.DATAREGION_NAME) %>];
-            if (dr) {
-                var group = groups[importedGroup];
-                if (group) {
-                    for (var i = 0; i < samples.length; i++) {
-                        var sampleId = samples[i].sampleId;
-                        // escape quotes
-                        sampleId = sampleId.replace(/('|"|\\)/g, "\\$1");
+            function onGroupChanged(e) {
+                let selectedGroup = e.target.value;
+                console.log(selectedGroup);
+                importedGroup = selectedGroup || "All Samples";
 
-                        var selected = samples[i].groups.indexOf(importedGroup) > -1;
-                        var elts = document.getElementsByName("selectedSamples.rows[" + sampleId + "].selected");
-                        if (elts.length > 0) {
-                            var inputEl = elts[0];
-                            inputEl.checked = selected;
+                var dr = LABKEY.DataRegions[<%= q(SamplesConfirmGridView.DATAREGION_NAME) %>];
+                if (dr) {
+                    var group = groups[importedGroup];
+                    if (group) {
+                        for (var i = 0; i < samples.length; i++) {
+                            var sampleId = samples[i].sampleId;
+                            // escape quotes
+                            sampleId = sampleId.replace(/('|"|\\)/g, "\\$1");
+
+                            var selected = samples[i].groups.indexOf(importedGroup) > -1;
+                            var elts = document.getElementsByName("selectedSamples.rows[" + sampleId + "].selected");
+                            if (elts.length > 0) {
+                                var inputEl = elts[0];
+                                inputEl.checked = selected;
+                            }
                         }
                     }
                 }
             }
-        }
-    </script>
-    Select a group to import from the <%=h(workspace.getKindName())%>.
-    <select id="importGroupNames" name="importGroupNames" onchange="onGroupChanged(this.value);">
-        <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
-    </select>
+        </script>
     <%
 }
 %>

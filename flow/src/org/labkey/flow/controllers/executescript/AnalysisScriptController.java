@@ -862,7 +862,13 @@ public class AnalysisScriptController extends BaseFlowController
             return AnalysisEngine.FlowJoWorkspace;
         }
 
-        private boolean hasLocalRuns(File workspaceFile)
+        private enum RunType {
+            Local,
+            Existing,
+            None
+        };
+
+        private RunType hasExistingRuns(File workspaceFile)
         {
             PipeRoot root = getPipeRoot();
             String workspaceDir = root.relativePath(workspaceFile.getParentFile());
@@ -870,6 +876,7 @@ public class AnalysisScriptController extends BaseFlowController
             // First, try to find an existing run in the same container as the workspace.
             // Default to selecting a previous run if there are any keyword runs.
             List<FlowRun> allKeywordRuns = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
+            RunType rt = RunType.None;
             for (FlowRun keywordRun : allKeywordRuns)
             {
                 if (keywordRun.getPath() == null)
@@ -883,12 +890,17 @@ public class AnalysisScriptController extends BaseFlowController
                 if (keywordRunFile.exists())
                 {
                     String keywordRunPath = root.relativePath(keywordRunFile);
-                    if (workspaceDir.equals(keywordRunPath) && keywordRun.hasRealWells())
-                        return true;
+                    if (keywordRunPath != null && keywordRun.hasRealWells())
+                    {
+                        rt = RunType.Existing;  // Order of selection preference Local > Existing > None
+                        if (workspaceDir.equals(keywordRunPath) && keywordRun.hasRealWells())
+                            // If we already have a run for local fcs files return;
+                            return RunType.Local;
+                    }
                 }
             }
 
-            return false;
+            return rt;
         }
 
 
@@ -912,16 +924,19 @@ public class AnalysisScriptController extends BaseFlowController
                 workspaceFile = root.resolvePath(path);
             }
 
+            RunType rt = RunType.None;
             if (workspaceFile != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
             {
-                if (hasLocalRuns(workspaceFile))
+                rt = hasExistingRuns(workspaceFile);
+                if (rt != RunType.None)
                 {
+                    // If there are existing and or existing Local runs
                     form.setKeywordRunsExist(true);
                     form.setSelectFCSFilesOption(SelectFCSFileOption.Previous);
                 }
                 else
                 {
-                    // Next, guess the FCS files are in the same directory as the workspace.
+                    // Next, guess the FCS files are in the same directory as the workspace, but not analyzed yet.
                     File keywordDir = null;
                     for (ISampleInfo sampleInfo : samples)
                     {
@@ -941,28 +956,32 @@ public class AnalysisScriptController extends BaseFlowController
                             String[] parts = StringUtils.split(relPath, File.separatorChar);
                             String keywordPath = StringUtils.join(parts, "/");
                             form.setKeywordDir(new String[] { keywordPath });
-                            //form.setRunFilePathRoot(keywordPath);
                         }
                         form.setSelectFCSFilesOption(SelectFCSFileOption.Browse);
                     }
                 }
             }
 
+            // If there are no existing FCS files present
             if (form.getSelectFCSFilesOption() == null)
                 form.setSelectFCSFilesOption(SelectFCSFileOption.None);
 
             // If import folder has a 1:1 fcs file for each sample, then skip ahead to the analysis
             if (!errors.hasErrors() && canAccelerate(form) && !form.isGoBack())
-                accelerateWizard(form, errors);
+                accelerateWizard(form, errors, rt);
             else
                 form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
         }
 
-        private void accelerateWizard(ImportAnalysisForm form, BindException errors)
+        private void accelerateWizard(ImportAnalysisForm form, BindException errors, RunType rt)
         {
+            // If there are already existing runs, but not one for the local files prefer the local files
+            if (rt == RunType.Existing)
+                form.setSelectFCSFilesOption(SelectFCSFileOption.None); //Setting to None will allow the selection of local files in next step
+
             // Set the data folder if we aren't using an existing run
             if (SelectFCSFileOption.None == form.getSelectFCSFilesOption())
-                form.setKeywordDir(new String[] {getWorkspaceFolder(form).toString()});
+                form.setKeywordDir(new String[]{getWorkspaceFolder(form).toString()});
 
             // Select FCS file (by default we already select all fcs files in working folder)
             stepSelectFCSFiles(form, errors);
