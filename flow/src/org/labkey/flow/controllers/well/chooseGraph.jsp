@@ -35,6 +35,7 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.util.element.Option" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -117,39 +118,52 @@
         <% if (hasScripts)
         {
         %>
-        <tr><td>Analysis Script:</td><td><select id="select-<%=FlowParam.scriptId%>" name="<%=FlowParam.scriptId%>">
-            <labkey:options value="<%=form.getScriptId()%>" map="<%=scriptOptions%>"/>
-        </select></td></tr>
+        <tr>
+            <td>Analysis Script:</td>
+            <td>
+                <%=select().name(FlowParam.scriptId.name())
+                        .className(null)
+                        .addOptions(scriptOptions)
+                        .selected(form.getScriptId())
+                        .onChange("this.form.submit()")
+                %>
+            </td>
+        </tr>
         <%
             }
         %>
         <% if (steps.size() > 1)
-        { %>
-        <tr><td>Analysis Step:</td><td><select id="select-<%=FlowParam.actionSequence%>" name="<%=FlowParam.actionSequence%>">
-            <% for (FlowProtocolStep s : steps)
-            { %>
-            <option value="<%=s.getDefaultActionSequence()%>"<%=selected(s == step)%>><%=h(s.getLabel())%></option>
-            <% } %>
-        </select></td></tr>
+        {
+            FlowProtocolStep finalStep = step;
+        %>
+        <tr>
+            <td>Analysis Step:</td>
+            <td>
+                <%=select().name(FlowParam.actionSequence.name())
+                        .className(null)
+                        .addOptions(steps.stream().map(s->new Option.OptionBuilder(s.getLabel(), s.getDefaultActionSequence()).selected(s == finalStep)))
+                        .onChange("this.form.submit();")
+                %>
+            </td>
+        </tr>
         <% } %>
         <% if (hasComps)
         {
         %>
-        <tr><td>Compensation Matrix:</td><td><select id="select-compId" name="compId">
-            <labkey:options value="<%=form.getCompId()%>" map="<%=compOptions%>"/>
-        </select></td></tr>
+        <tr>
+            <td>Compensation Matrix:</td>
+            <td>
+                <%=select().name("compId")
+                        .className(null)
+                        .addOptions(compOptions)
+                        .selected(form.getCompId())
+                        .onChange("this.form.submit();")
+                %>
+            </td>
+        </tr>
         <% } %>
     </table>
 </form>
-<script type="text/javascript" nonce="<%=getScriptNonce()%>">
-    function select_onChange(event) {
-        event.target.form.submit();
-    }
-
-    document.getElementById("select-<%=FlowParam.actionSequence%>")?.addEventListener("change", select_onChange);
-    document.getElementById("select-<%=FlowParam.scriptId%>")?.addEventListener("change", select_onChange);
-    document.getElementById("select-compId")?.addEventListener("change", select_onChange);
-</script>
 <%
     Collection<SubsetSpec> subsets = Collections.emptyList();
     if (script != null)
