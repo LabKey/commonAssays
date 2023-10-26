@@ -129,15 +129,8 @@ if (groups.size() > 1)
 {
     %>
     <p>
-        Select a group to import from the <%=h(workspace.getKindName())%>.
-        <select id="importGroupNames" name="importGroupNames"  >
-            <labkey:options value="<%=form.getImportGroupNameList()%>" map="<%=groupOptions%>" />
-        </select>
         <script type="application/javascript" nonce="<%=getScriptNonce()%>">
-            document.getElementById("importGroupNames").addEventListener("click", onGroupChanged);
-
-            function onGroupChanged(e) {
-                let selectedGroup = e.target.value;
+            function onGroupChanged(selectedGroup) {
                 console.log(selectedGroup);
                 importedGroup = selectedGroup || "All Samples";
 
@@ -161,6 +154,12 @@ if (groups.size() > 1)
                 }
             }
         </script>
+        Select a group to import from the <%=h(workspace.getKindName())%>.
+        <%=select().name("importGroupNames")
+            .className(null)
+            .addOptions(groupOptions)
+            .selected(form.getImportGroupNameList())
+            .onChange("onGroupChanged(this.value);")%>
     <%
 }
 %>
