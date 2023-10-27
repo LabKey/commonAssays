@@ -156,6 +156,7 @@ if (groups.size() > 1)
         </script>
         Select a group to import from the <%=h(workspace.getKindName())%>.
         <%=select().name("importGroupNames")
+            .id("importGroupNames")
             .className(null)
             .addOptions(groupOptions)
             .selected(form.getImportGroupNameList())
