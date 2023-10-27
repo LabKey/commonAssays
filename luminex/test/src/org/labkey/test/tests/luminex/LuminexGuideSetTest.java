@@ -422,7 +422,7 @@ public final class LuminexGuideSetTest extends LuminexTest
             table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
-        Window.Window(getDriver()).withTitle("Curve Comparison").waitFor();
+        Window<?> curveComparisonWindow = new Window.WindowFinder(getDriver()).withTitle("Curve Comparison").waitFor();
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
         assertTextPresent("Export to PDF");
@@ -432,7 +432,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Assay Type");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Experiment Performer");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
-        clickButton("Close", 0);
+        curveComparisonWindow.clickButton("Close", true);
     }
 
     private void selectCurveComparisonPlotOption(String comboName, String value)
