@@ -24,6 +24,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -219,7 +220,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description, ExpProtocol.Status status)
+    public ExpProtocol createAssayDefinition(User user, Container container, String name, String description, ExpProtocol.Status status, @NotNull XarContext context)
     {
         // UNDONE: could just call FlowProtocol.ensureForContainer() ?
         throw new UnsupportedOperationException();

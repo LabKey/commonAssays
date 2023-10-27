@@ -49,12 +49,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-/*
- * User: brittp
- * Date: Dec 9, 2008
- * Time: 5:13:30 PM
- */
-
 @RequiresPermission(ReadPermission.class)
 @ApiVersion(9.1)
 public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabRunsForm>
@@ -208,6 +202,7 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
 
         }
+        // Recursively replace all +Infinity, -Infinity, and NaN values with JSON-legal values
         return new ApiSimpleResponse(response);
     }
 }
