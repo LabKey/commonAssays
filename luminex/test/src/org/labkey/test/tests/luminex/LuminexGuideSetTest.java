@@ -23,7 +23,6 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
-import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
@@ -32,6 +31,7 @@ import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.WikiHelper;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
+import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Calendar;
@@ -422,7 +422,7 @@ public final class LuminexGuideSetTest extends LuminexTest
             table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
-        Window<?> curveComparisonWindow = new Window.WindowFinder(getDriver()).withTitle("Curve Comparison").waitFor();
+        WebElement curveComparisonWindow = ExtHelper.Locators.window("Curve Comparison").waitForElement(getDriver(), 5_000);
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
         assertTextPresent("Export to PDF");
@@ -432,7 +432,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Assay Type");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Experiment Performer");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
-        curveComparisonWindow.clickButton("Close", true);
+        Locator.extButton("Close").findElement(curveComparisonWindow);
+        _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
     }
 
     private void selectCurveComparisonPlotOption(String comboName, String value)
