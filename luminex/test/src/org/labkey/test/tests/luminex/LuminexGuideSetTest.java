@@ -432,7 +432,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Assay Type");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Experiment Performer");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
-        Locator.extButton("Close").findElement(curveComparisonWindow);
+        Locator.extButton("Close").findElement(curveComparisonWindow).click();
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
     }
 
