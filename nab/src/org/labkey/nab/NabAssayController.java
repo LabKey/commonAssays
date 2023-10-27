@@ -137,6 +137,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -1272,11 +1273,22 @@ public class NabAssayController extends SpringActionController
                 }
 
                 DbSchema schema = DilutionManager.getSchema();
-                for (WellDataRow well : DilutionManager.getExcludedWellDataRows(run))
+
+                List<WellDataRow> wells = DilutionManager.getExcludedWellDataRows(run);
+                Set<String> specimenLsids = new HashSet<>();
+                for (WellDataRow well : wells)
+                {
+                    specimenLsids.add(well.getSpecimenLsid());
+                }
+
+                Map<String, ExpMaterial> specimenMaterials = ExperimentService.get().getExpMaterialsByLsid(specimenLsids)
+                        .stream().collect(Collectors.toMap(ExpMaterial::getLSID, material -> material));
+
+                for (WellDataRow well : wells)
                 {
                     // need the specimen name
                     String specimenName = null;
-                    ExpMaterial material = ExperimentService.get().getExpMaterial(well.getSpecimenLsid());
+                    ExpMaterial material = specimenMaterials.get(well.getSpecimenLsid());
                     if (material != null)
                     {
                         // try to find the specimen id entered for this run
