@@ -438,8 +438,10 @@ public final class LuminexGuideSetTest extends LuminexTest
 
     private void selectCurveComparisonPlotOption(String comboName, String value)
     {
-        _extHelper.selectComboBoxItem(Locator.input(comboName).parent(), value);
-        waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
+        doAndWaitForElementToRefresh(
+                () -> _extHelper.selectComboBoxItem(Locator.input(comboName).parent(), value),
+                Locator.name("resultImage"), shortWait());
+        _extHelper.waitForLoadingMaskToDisappear(WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
     }
 
