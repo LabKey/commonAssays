@@ -97,7 +97,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
-import org.labkey.api.security.LimitedUser;
+import org.labkey.api.security.ElevatedUser;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -479,7 +479,7 @@ public class NabAssayController extends SpringActionController
         protected User getGraphUser()
         {
             // See comment in DetailsAction about the elevatedUser
-            return LimitedUser.getElevatedUser(getContainer(), getUser(), Pair.of(ReadPermission.class, ReaderRole.class));
+            return ElevatedUser.ensureContextualRoles(getContainer(), getUser(), Pair.of(ReadPermission.class, ReaderRole.class));
         }
 
         @Override

@@ -15,20 +15,18 @@
  * limitations under the License.
  */
 %>
+<%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.pipeline.PipeRoot" %>
 <%@ page import="org.labkey.api.pipeline.PipelineService" %>
 <%@ page import="org.labkey.api.pipeline.PipelineUrls" %>
 <%@ page import="org.labkey.api.security.permissions.AdminOperationsPermission" %>
 <%@ page import="org.labkey.api.settings.AppProps" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.flow.FlowModule" %>
 <%@ page import="org.labkey.flow.analysis.model.ExternalAnalysis" %>
 <%@ page import="org.labkey.flow.analysis.model.IWorkspace" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.Objects" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -84,10 +82,10 @@
 </p>
 <hr/>
 
-<input type="radio" name="selectFCSFilesOption"
-       id="<%=ImportAnalysisForm.SelectFCSFileOption.None%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
-       <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.None))%>
-       onclick="clearSelections(this.value);" />
+<labkey:input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.None.name()%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.None%>"
+       checked="<%=(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.None))%>"
+       onClick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.None%>">Don't associate FCS files with the <%=h(workspace.getKindName())%>.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (workspace.hasAnalysis()) { %>
@@ -102,20 +100,20 @@
     if (form.getWorkspace().isIncludesFCSFiles())
     {
 %>
-<input type="radio" name="selectFCSFilesOption"
-       id="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
-       <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Included))%>
-       onclick="clearSelections(this.value);" />
+<labkey:input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Included.name()%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>"
+       checked="<%=(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Included))%>"
+       onClick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Included%>">Import FCS files included in the analysis archive.</label>
 <%
     }
 
 %>
-<input type="radio" name="selectFCSFilesOption"
-       id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
-        <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Previous))%>
-        <%=disabled(!keywordRunsExist)%>
-       onclick="clearSelections(this.value);" />
+<labkey:input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Previous.name()%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>"
+       checked="<%=(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Previous))%>"
+       isDisabled="<%=(!keywordRunsExist)%>"
+       onClick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
     <div style="display:inline-block; <%=text(!keywordRunsExist ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 </label>
@@ -123,10 +121,10 @@
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
 
-<input type="radio" name="selectFCSFilesOption"
-       id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
-        <%=checked(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Browse))%>
-       onclick="clearSelections(this.value); renderFileBrowser();" />
+<labkey:input type="radio" name="selectFCSFilesOption"
+       id="<%=ImportAnalysisForm.SelectFCSFileOption.Browse.name()%>" value="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"
+       checked="<%=(Objects.equals(form.getSelectFCSFilesOption(), ImportAnalysisForm.SelectFCSFileOption.Browse))%>"
+       onClick="clearSelections(this.value); renderFileBrowser();" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Browse%>"> Browse the pipeline for a directory of FCS files.</label>
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot)

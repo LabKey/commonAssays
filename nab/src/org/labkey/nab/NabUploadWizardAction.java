@@ -23,7 +23,7 @@ import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.security.LimitedUser;
+import org.labkey.api.security.ElevatedUser;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -156,7 +156,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
                 User elevatedUser = getUser();
                 if (_run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
                 {
-                    elevatedUser = LimitedUser.getElevatedUser(getContainer(), getUser(), Pair.of(DeletePermission.class, EditorRole.class));
+                    elevatedUser = ElevatedUser.ensureContextualRoles(getContainer(), getUser(), Pair.of(DeletePermission.class, EditorRole.class));
                 }
 
                 if (form.getReRun() != null)

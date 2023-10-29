@@ -114,7 +114,6 @@ var report =
     %>]
 };
 
-
 function Form_onSave()
 {
     Ext.getBody().mask("Saving...");
@@ -131,12 +130,10 @@ function Form_onSave()
     });
 }
 
-
 function Form_onCancel()
 {
     window.location = <%=q(canURL)%>;
 }
-
 
 function Form_onDelete()
 {
@@ -158,6 +155,16 @@ function Form_onDelete()
    }
    %>
    window.location = <%=q(url)%>;
+}
+
+// help solve link conflicts with strict CSP
+function linkHelper(text, onClick) {
+    const id = Ext.id();
+    const html = '<a id="' + id +'" href="#" class="labkey-text-link" >' + text + '</a>';
+    const callback = () => {
+        LABKEY.Utils.attachEventHandler(id, "click", onClick);
+    };
+    return {"html": html, "callback": callback }
 }
 
 Ext.onReady(function() {
@@ -229,8 +236,14 @@ Ext.onReady(function() {
         filterItems.push(filterItem);
     }
 
+    const keywordLink = linkHelper('Add Keyword Filter', addKeywordFilter);
+
     filterItems.push({
-        xtype: 'displayfield', id: 'add-keyword-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Keyword Filter', onClick: 'addKeywordFilter(this);'})
+        xtype: 'displayfield',
+        id: 'add-keyword-button',
+        fieldLabel: '',
+        hideLabel: false,
+        html: keywordLink.html
     });
 
     filterItems.push(spacer);
@@ -240,6 +253,7 @@ Ext.onReady(function() {
     // sample filters
     //
 
+    let sampleLink;
     if (hasSampleFilters || SampleType.properties.length > 0)
     {
         for (i = 0; i < sample.length; i++)
@@ -248,8 +262,14 @@ Ext.onReady(function() {
             filterItems.push(filterItem);
         }
 
+        sampleLink = linkHelper('Add Sample Filter', addSampleFilter);
+
         filterItems.push({
-            xtype: 'displayfield', id: 'add-sample-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Sample Filter', onClick: 'addSampleFilter(this);'})
+            xtype: 'displayfield',
+            id: 'add-sample-button',
+            fieldLabel: '',
+            hideLabel: false,
+            html: sampleLink.html
         });
 
         filterItems.push(spacer);
@@ -266,8 +286,14 @@ Ext.onReady(function() {
         filterItems.push(filterItem);
     }
 
+    const statisticLink = linkHelper('Add Statistic Filter', addStatisticFilter);
+
     filterItems.push({
-        xtype: 'displayfield', id: 'add-statistic-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Statistic Filter', onClick: 'addStatisticFilter(this);'})
+        xtype: 'displayfield',
+        id: 'add-statistic-button',
+        fieldLabel: '',
+        hideLabel: false,
+        html: statisticLink.html
     });
 
     filterItems.push(spacer);
@@ -283,8 +309,14 @@ Ext.onReady(function() {
         filterItems.push(filterItem);
     }
 
+    const filterLink = linkHelper('Add Field Filter', addFieldKeyFilter);
+
     filterItems.push({
-        xtype: 'displayfield', id: 'add-fieldkey-button', fieldLabel: '', hideLabel: false, html: LABKEY.Utils.textLink({text: 'Add Field Filter', onClick: 'addFieldKeyFilter(this);'})
+        xtype: 'displayfield',
+        id: 'add-fieldkey-button',
+        fieldLabel: '',
+        hideLabel: false,
+        html: filterLink.html
     });
 
     filterItems.push(spacer);
@@ -375,11 +407,17 @@ Ext.onReady(function() {
         buttonAlign:'left'
     });
     form.render('form');
+
+    keywordLink.callback();
+    sampleLink?.callback();
+    statisticLink.callback();
+    filterLink.callback();
 });
+
+
 </script>
 
 <%
     JspView<Object> statPicker = new StatPickerView();
     statPicker.include(statPicker, out);
 %>
-
