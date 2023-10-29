@@ -268,7 +268,7 @@ public class AnalysisSerializer
         }
         else if (file.getName().endsWith(".zip"))
         {
-            tempDir.mkdir();
+            FileUtil.mkdir(tempDir);
 
             ZipFile zipFile = new ZipFile(file);
 

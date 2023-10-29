@@ -68,7 +68,7 @@ public class PlotTests extends Assert
     {
         if (outDir.exists())
             FileUtil.deleteDir(outDir);
-        if (!outDir.mkdirs())
+        if (!FileUtil.mkdirs(outDir))
             throw new Exception("Failed to create output dir: " + outDir);
         System.out.println("Generating graphs for '" + fcsFile.getName() + "'...");
 

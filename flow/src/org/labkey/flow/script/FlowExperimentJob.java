@@ -142,7 +142,7 @@ public abstract class FlowExperimentJob extends FlowJob
         File dirFolder = new File(dirRoot, "Folder" + container.getRowId());
         if (!dirFolder.exists())
         {
-            if (!dirFolder.mkdirs())
+            if (!FileUtil.mkdirs(dirFolder))
                 throw new IOException("Failed to create flow wokring directory: " + dirFolder.getAbsolutePath());
         }
         return dirFolder;
@@ -159,7 +159,7 @@ public abstract class FlowExperimentJob extends FlowJob
         File dirRun = new File(dirFolder, dirName);
         if (!dirRun.exists())
         {
-            if (!dirRun.mkdirs())
+            if (!FileUtil.mkdirs(dirRun))
                 throw new IOException("Could not create analysis directory: " + dirRun.getAbsolutePath());
         }
         for (int i = 1; ; i ++)
@@ -167,7 +167,7 @@ public abstract class FlowExperimentJob extends FlowJob
             File dirData = new File(dirRun, step.getLabel() + i);
             if (!dirData.exists())
             {
-                if (!dirData.mkdirs())
+                if (!FileUtil.mkdirs(dirData))
                     throw new IOException("Could not create analysis directory: " + dirData.getAbsolutePath());
                 return dirData;
             }

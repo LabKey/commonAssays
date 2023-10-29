@@ -59,7 +59,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
             throw new IOException("No pipeline root configured for the /Shared project");
         }
         File logDir = pipelineRoot.resolvePath("proteinAnnotationImport");
-        logDir.mkdir();
+        FileUtil.mkdir(logDir);
         if (!logDir.isDirectory())
         {
             throw new IOException("Could not create directory for log file: " + logDir);
