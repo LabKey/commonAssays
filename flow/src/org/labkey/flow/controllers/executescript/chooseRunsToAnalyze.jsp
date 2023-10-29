@@ -58,30 +58,45 @@
     }
 </style>
 <labkey:errors/>
-<labkey:form method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
+<labkey:form name="analyzeRuns" method="POST" action="<%=new ActionURL(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, getContainer())%>">
     <table class="lk-fields-table">
         <tr><td>Analysis script to use:</td>
-            <td><select name="scriptId" onchange="this.form.submit()">
-                <labkey:options value="<%=form.getProtocol().getScriptId()%>"
-                              map="<%=FlowObject.idLabelsFor(form.getAvailableGateDefinitionSets())%>"/>
-            </select></td></tr>
+            <td>
+                <%=select().name("scriptId")
+                        .className(null)
+                        .addOptions(FlowObject.idLabelsFor(form.getAvailableGateDefinitionSets()))
+                        .selected(form.getProtocol().getScriptId())
+                        .onChange("this.form.submit();")%>
+            </td>
+        </tr>
         <tr><td>Analysis step to perform:</td>
-            <td><select name="actionSequence" onchange="this.form.submit()">
-                <labkey:options value="<%=form.getProtocolStep().getDefaultActionSequence()%>"
-                              map="<%=form.getAvailableSteps(form.getProtocol())%>"/>
-            </select></td></tr>
+            <td>
+                <%=select().name("actionSequence")
+                        .className(null)
+                        .addOptions(form.getAvailableSteps(form.getProtocol()))
+                        .selected(form.getProtocolStep().getDefaultActionSequence())
+                        .onChange("this.form.submit();")%>
+            </td>
+        </tr>
         <tr><td>Analysis folder to put results in:</td>
-            <td><select name="ff_targetExperimentId" onchange="this.form.submit()">
-                <labkey:options value="<%=form.ff_targetExperimentId == null ? null : Integer.valueOf(form.ff_targetExperimentId)%>"
-                              map="<%=FlowObject.idLabelsFor(targetExperiments, \"<create new>\")%>"/>
-            </select></td>
+            <td>
+                <%=select().name("ff_targetExperimentId")
+                        .className(null)
+                        .addOptions(FlowObject.idLabelsFor(targetExperiments, "<create new>"))
+                        .selected(form.ff_targetExperimentId == null ? "" : Integer.valueOf(form.ff_targetExperimentId))
+                        .onChange("this.form.submit();")%>
+            </td>
         </tr>
         <% if (analysis.requiresCompensationMatrix())
         { %>
         <tr><td>Compensation matrix to use:</td>
-            <td><select name="ff_compensationMatrixOption" onchange="this.form.submit()">
-                <labkey:options value="<%=form.ff_compensationMatrixOption%>" map="<%=form.getCompensationMatrixOptions()%>" />
-            </select></td>
+            <td>
+                <%=select().name("ff_compensationMatrixOption")
+                        .className(null)
+                        .addOptions(form.getCompensationMatrixOptions())
+                        .selected(form.ff_compensationMatrixOption)
+                        .onChange("this.form.submit();")%>
+            </td>
         </tr>
         <% } %>
     </table>

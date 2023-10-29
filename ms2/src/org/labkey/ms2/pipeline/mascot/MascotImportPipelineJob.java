@@ -67,7 +67,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         boolean completeStatus = false;
         try
         {
-            if (!dirWork.exists() && !dirWork.mkdir())
+            if (!dirWork.exists() && !FileUtil.mkdir(dirWork))
             {
                 getLogger().error("Failed create working folder "+dirWork.getAbsolutePath()+".");
                 return;

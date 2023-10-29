@@ -488,18 +488,6 @@ public class FlowRun extends FlowObject<ExpRun>
 
     public FlowTableType getDefaultQuery()
     {
-//        FlowWell well = getFirstWell();
-//        if (well != null)
-//        {
-//            if (well.getDataType() == FlowDataType.FCSAnalysis)
-//            {
-//                return FlowTableType.FCSAnalyses;
-//            }
-//            if (well.getDataType() == FlowDataType.CompensationControl)
-//            {
-//                return FlowTableType.CompensationControls;
-//            }
-//        }
         FlowWell[] wells = getWells();
         for (FlowWell well : wells)
         {

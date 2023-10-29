@@ -81,7 +81,7 @@ public class MicroarrayController extends SpringActionController
             {
                 analysisDir = new File(root, simpleDirName + "-" + (suffix++));
             }
-            analysisDir.mkdir();
+            FileUtil.mkdir(analysisDir);
 
             // Copy over all of the files
             List<File> files = form.getValidatedFiles(getContainer());

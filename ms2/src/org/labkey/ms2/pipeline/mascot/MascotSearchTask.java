@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.ms2.MS2RunType;
@@ -279,7 +280,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             File localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
             File localDBHash = MS2PipelineManager.getLocalMascotFileHash(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
             File localDBParent = localDB.getParentFile();
-            localDBParent.mkdirs();
+            FileUtil.mkdirs(localDBParent);
             long filesize=0;
             long timestamp=0;
             String hash="";

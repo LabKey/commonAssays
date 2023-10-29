@@ -45,9 +45,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * User: klum
@@ -212,6 +215,19 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
         for (int nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
+
+        Set<String> specimenLsids = new HashSet<>();
+        for (NabSpecimen nabSpecimen : nabSpecimens)
+        {
+            String wellgroupName = nabSpecimen.getWellgroupName();
+            String specimenLsid = nabSpecimen.getSpecimenLsid();
+
+            if (wellgroupName != null || specimenLsid != null)
+                specimenLsids.add(specimenLsid);
+        }
+
+        Map<String, ExpMaterial> specimenMaterials = ExperimentService.get().getExpMaterialsByLsid(specimenLsids)
+                .stream().collect(Collectors.toMap(ExpMaterial::getLSID, material -> material));
         for (NabSpecimen nabSpecimen : nabSpecimens)
         {
             String wellgroupName = nabSpecimen.getWellgroupName();
@@ -222,7 +238,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 continue;
 
             // get the virus name from the material input
-            ExpMaterial inputMaterial = ExperimentService.get().getExpMaterial(specimenLsid);
+            ExpMaterial inputMaterial = specimenMaterials.get(specimenLsid);
             if (inputMaterial != null)
             {
                 for (Map.Entry<PropertyDescriptor, Object> entry : inputMaterial.getPropertyValues().entrySet())

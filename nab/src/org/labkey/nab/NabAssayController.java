@@ -97,7 +97,7 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.ContextualRoles;
-import org.labkey.api.security.LimitedUser;
+import org.labkey.api.security.ElevatedUser;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AdminPermission;
@@ -137,6 +137,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * User: jeckels
@@ -478,7 +479,7 @@ public class NabAssayController extends SpringActionController
         protected User getGraphUser()
         {
             // See comment in DetailsAction about the elevatedUser
-            return LimitedUser.getElevatedUser(getContainer(), getUser(), Pair.of(ReadPermission.class, ReaderRole.class));
+            return ElevatedUser.ensureContextualRoles(getContainer(), getUser(), Pair.of(ReadPermission.class, ReaderRole.class));
         }
 
         @Override
@@ -1272,11 +1273,22 @@ public class NabAssayController extends SpringActionController
                 }
 
                 DbSchema schema = DilutionManager.getSchema();
-                for (WellDataRow well : DilutionManager.getExcludedWellDataRows(run))
+
+                List<WellDataRow> wells = DilutionManager.getExcludedWellDataRows(run);
+                Set<String> specimenLsids = new HashSet<>();
+                for (WellDataRow well : wells)
+                {
+                    specimenLsids.add(well.getSpecimenLsid());
+                }
+
+                Map<String, ExpMaterial> specimenMaterials = ExperimentService.get().getExpMaterialsByLsid(specimenLsids)
+                        .stream().collect(Collectors.toMap(ExpMaterial::getLSID, material -> material));
+
+                for (WellDataRow well : wells)
                 {
                     // need the specimen name
                     String specimenName = null;
-                    ExpMaterial material = ExperimentService.get().getExpMaterial(well.getSpecimenLsid());
+                    ExpMaterial material = specimenMaterials.get(well.getSpecimenLsid());
                     if (material != null)
                     {
                         // try to find the specimen id entered for this run

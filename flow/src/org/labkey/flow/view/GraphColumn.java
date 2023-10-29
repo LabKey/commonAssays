@@ -29,6 +29,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
@@ -118,7 +119,7 @@ public class GraphColumn extends DataColumn
     {
         if (!ctx.containsKey(INCLUDE_UTIL_SCRIPT))
         {
-            out.write("<script type='text/javascript' src='" + AppProps.getInstance().getContextPath() + "/Flow/util.js'></script>");
+            out.write(String.format("<script type='text/javascript' src='%1$s/Flow/util.js' nonce='%2$s' ></script>", AppProps.getInstance().getContextPath(), PageConfig.getScriptNonceHeader(ctx.getRequest())));
             ctx.put(INCLUDE_UTIL_SCRIPT, true);
         }
 

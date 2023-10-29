@@ -123,7 +123,7 @@
             }
         %>
         <tr><td colspan="2">
-            <a class="add-new-keyword" onclick="return false;"><i class="fa fa-plus-circle"></i> Create a new keyword</a>
+            <%=link(unsafe("<i class=\"fa fa-plus-circle\"></i> Create a new keyword")).addClass("add-new-keyword").onClick("return false;")%>
         </td></tr>
         <% } %>
     </table>

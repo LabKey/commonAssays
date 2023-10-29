@@ -41,19 +41,19 @@ public class FlowSettings
         try
         {
             file = FileUtil.createTempFile("FlowAnalysis", "tmp");
+            File ret = new File(file.getParentFile(), "FlowAnalysis");
+            if (!ret.exists())
+            {
+                FileUtil.mkdir(ret);
+            }
+            file.delete();
+            _tempAnalysisDirectory = ret;
+            return ret;
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
-        File ret = new File(file.getParentFile(), "FlowAnalysis");
-        if (!ret.exists())
-        {
-            ret.mkdir();
-        }
-        file.delete();
-        _tempAnalysisDirectory = ret;
-        return ret;
     }
 
     static public File getWorkingDirectory()
