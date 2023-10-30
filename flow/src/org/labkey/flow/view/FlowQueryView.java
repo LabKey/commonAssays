@@ -205,6 +205,12 @@ public class FlowQueryView extends QueryView
     }
 
     @Override
+    public boolean showDeleteButton()
+    {
+        return getSettings().isAllowDelete();
+    }
+
+    @Override
     protected URLHelper urlChangeView()
     {
         URLHelper ret = super.urlChangeView();

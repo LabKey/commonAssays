@@ -27,6 +27,7 @@ public class FlowQuerySettings extends QuerySettings
 
     private ShowGraphs _showGraphs;
     private boolean _subtractBackground;
+    private boolean _allowDelete = true;
 
     protected FlowQuerySettings(String dataRegionName)
     {
@@ -83,5 +84,15 @@ public class FlowQuerySettings extends QuerySettings
     public void setSubtractBackground(boolean subtractBackground)
     {
         _subtractBackground = subtractBackground;
+    }
+
+    public void setAllowDelete(boolean allowDelete)
+    {
+        _allowDelete = allowDelete;
+    }
+
+    public boolean isAllowDelete()
+    {
+        return _allowDelete;
     }
 }
