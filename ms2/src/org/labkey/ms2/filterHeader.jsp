@@ -55,8 +55,8 @@
                     <table class="labkey-data-region-legacy">
                         <tr>
                             <td style="vertical-align: middle;" nowrap>
-                                <select id="viewTypeGrouping" name="grouping" onchange="document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];"><%
-
+                                <% addHandler("viewTypeGrouping", "change", "document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];"); %>
+                                <select id="viewTypeGrouping" name="grouping"><%
                                 for(MS2RunViewType viewType : bean.viewTypes)
                                 { %>
                                     <option value="<%=h(viewType.getURLName())%>"<%=selected(viewType.equals(bean.currentViewType))%>><%=h(viewType.getName())%></option><%

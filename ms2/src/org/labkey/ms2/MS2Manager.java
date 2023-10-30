@@ -16,12 +16,14 @@
 
 package org.labkey.ms2;
 
+import com.google.common.primitives.ImmutableLongArray;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.BeanObjectFactory;
@@ -108,7 +110,7 @@ public class MS2Manager
 {
     private static final Logger LOG = LogManager.getLogger(MS2Manager.class);
     private static final int CACHE_SIZE = 10;
-    private static final Cache<String, long[]> PEPTIDE_INDEX_CACHE = CacheManager.getCache(CACHE_SIZE, CacheManager.HOUR, "Peptide index");
+    private static final Cache<String, ImmutableLongArray> PEPTIDE_INDEX_CACHE = CacheManager.getBlockingCache(CACHE_SIZE, CacheManager.HOUR, "Peptide index", null);
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
     private static final Cache<String, MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
     private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
@@ -1017,21 +1019,21 @@ public class MS2Manager
         return new TableSelector(getTableInfoITraqProteinQuantitation()).getObject(groupId, ITraqProteinQuantitation.class);
     }
 
-    public static int verifyRowIndex(long[] index, int rowIndex, long peptideId)
+    public static int verifyRowIndex(ImmutableLongArray index, int rowIndex, long peptideId)
     {
-        if (rowIndex < 0 || rowIndex >= index.length)
+        if (rowIndex < 0 || rowIndex >= index.length())
             logRowIndexError("RowIndex out of bounds " + rowIndex);
-        else if (index[rowIndex] != peptideId)
+        else if (index.get(rowIndex) != peptideId)
             logRowIndexError("Wrong peptideId found at rowIndex " + rowIndex + " in cached peptide index");
         else
             return rowIndex;
 
-        for (int i=0; i<index.length; i++)
-            if (index[i] == peptideId)
-                return i;
+        int idx = index.indexOf(peptideId);
 
-        logRowIndexError("Can't find peptideId " + peptideId + " in peptide index");
-        return -1;
+        if (-1 == idx)
+            logRowIndexError("Can't find peptideId " + peptideId + " in peptide index");
+
+        return idx;
     }
 
 
@@ -1273,16 +1275,9 @@ public class MS2Manager
         Table.update(user, getTableInfoRuns(), run, run.getRun());
     }
 
-
-    public static void cachePeptideIndex(String key, long[] index)
+    public static ImmutableLongArray getPeptideIndex(String key, CacheLoader<String, ImmutableLongArray> cacheLoader)
     {
-        PEPTIDE_INDEX_CACHE.put(key, index);
-    }
-
-
-    public static long[] getPeptideIndex(String key)
-    {
-        return PEPTIDE_INDEX_CACHE.get(key);
+        return PEPTIDE_INDEX_CACHE.get(key, null, cacheLoader);
     }
 
     public static long getRunCount(Container c)

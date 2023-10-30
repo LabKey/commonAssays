@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2;
 
+import com.google.common.primitives.ImmutableLongArray;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -202,11 +203,6 @@ import static org.labkey.api.util.DOM.TD;
 import static org.labkey.api.util.DOM.TR;
 import static org.labkey.api.util.DOM.at;
 
-/**
- * User: adam
- * Date: Dec 10, 2007
- * Time: 3:57:13 PM
- */
 public class MS2Controller extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(MS2Controller.class);
@@ -802,7 +798,7 @@ public class MS2Controller extends SpringActionController
             int sqlRowIndex = form.getRowIndex();
             int rowIndex = sqlRowIndex - 1;  // Switch 1-based, JDBC row index to 0-based row index for array lookup
 
-            long[] peptideIndex = null;
+            ImmutableLongArray peptideIndex = null;
 
             //if no row index was passed, don't try to look it up, as it always results
             //in an error being written to the log. There are now other instances where
@@ -824,21 +820,17 @@ public class MS2Controller extends SpringActionController
             // Display next and previous only if we have a cached index and a valid pointer
             if (null != peptideIndex && -1 != rowIndex)
             {
-                if (0 == rowIndex)
-                    previousURL = null;
-                else
+                if (0 != rowIndex)
                 {
                     previousURL = getViewContext().cloneActionURL();
-                    previousURL.replaceParameter("peptideId", peptideIndex[rowIndex - 1]);
+                    previousURL.replaceParameter("peptideId", peptideIndex.get(rowIndex - 1));
                     previousURL.replaceParameter("rowIndex", sqlRowIndex - 1);
                 }
 
-                if (rowIndex == (peptideIndex.length - 1))
-                    nextURL = null;
-                else
+                if (rowIndex != (peptideIndex.length() - 1))
                 {
                     nextURL = getViewContext().cloneActionURL();
-                    nextURL.replaceParameter("peptideId", peptideIndex[rowIndex + 1]);
+                    nextURL.replaceParameter("peptideId", peptideIndex.get(rowIndex + 1));
                     nextURL.replaceParameter("rowIndex", sqlRowIndex + 1);
                 }
 
@@ -859,7 +851,7 @@ public class MS2Controller extends SpringActionController
             if (null != nextURL) {
                  nextPrevStr += PageFlowUtil.link("Next").href(nextURL);
             }
-            if (nextPrevStr.length() > 0) {
+            if (!nextPrevStr.isEmpty()) {
                 result.addView(new HtmlView(nextPrevStr));
             }
 
@@ -911,7 +903,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private long[] getPeptideIndex(ActionURL currentURL, MS2Run run)
+    private ImmutableLongArray getPeptideIndex(ActionURL currentURL, MS2Run run)
     {
         try
         {

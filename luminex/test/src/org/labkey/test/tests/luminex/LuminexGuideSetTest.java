@@ -31,6 +31,7 @@ import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.WikiHelper;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
+import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Calendar;
@@ -421,6 +422,7 @@ public final class LuminexGuideSetTest extends LuminexTest
             table.checkCheckbox(table.getRowIndex("Titration/Run/Batch/Network", "NETWORK" + i));
         }
         clickButton("View 4PL Curves", 0);
+        WebElement curveComparisonWindow = ExtHelper.Locators.window("Curve Comparison").waitForElement(getDriver(), 5_000);
         waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
         assertTextPresent("Export to PDF");
@@ -430,13 +432,16 @@ public final class LuminexGuideSetTest extends LuminexTest
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Assay Type");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Experiment Performer");
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
-        clickButton("Close", 0);
+        Locator.extButton("Close").findElement(curveComparisonWindow).click();
+        _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
     }
 
     private void selectCurveComparisonPlotOption(String comboName, String value)
     {
-        _extHelper.selectComboBoxItem(Locator.input(comboName).parent(), value);
-        waitForTextToDisappear("loading curves...", WAIT_FOR_JAVASCRIPT);
+        doAndWaitForElementToRefresh(
+                () -> _extHelper.selectComboBoxItem(Locator.input(comboName).parent(), value),
+                Locator.name("resultImage"), shortWait());
+        _extHelper.waitForLoadingMaskToDisappear(WAIT_FOR_JAVASCRIPT);
         assertTextNotPresent("Error executing command");
     }
 
