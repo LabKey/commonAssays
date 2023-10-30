@@ -207,7 +207,8 @@ public class FlowQueryView extends QueryView
     @Override
     public boolean showDeleteButton()
     {
-        return getSettings().isAllowDelete();
+        // Don't allow delete for individual FCS files or for wsp samples (which we represent as FCSFiles--kinda)
+        return !(getSettings().getQueryName().equalsIgnoreCase("FCSFiles") || getSettings().getQueryName().equalsIgnoreCase("FCSAnalyses"));
     }
 
     @Override

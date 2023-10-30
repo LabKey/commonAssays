@@ -63,7 +63,6 @@ public class RunForm extends FlowQueryForm
         {
             String queryName = getRun().getDefaultQuery().toString();
             ret.setQueryName(queryName);
-            ((FlowQuerySettings)ret).setAllowDelete(false);  //Don't allow deleting of individual FCS files
         }
         return ret;
     }
