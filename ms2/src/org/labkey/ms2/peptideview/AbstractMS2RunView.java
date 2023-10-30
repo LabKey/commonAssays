@@ -16,8 +16,9 @@
 
 package org.labkey.ms2.peptideview;
 
-import org.apache.logging.log4j.Logger;
+import com.google.common.primitives.ImmutableLongArray;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnHeaderType;
@@ -76,13 +77,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: jeckels
- * Date: Feb 22, 2006
- */
 public abstract class AbstractMS2RunView
 {
-    private static Logger _log = LogManager.getLogger(AbstractMS2RunView.class);
+    private static final Logger _log = LogManager.getLogger(AbstractMS2RunView.class);
 
     private final Container _container;
     private final User _user;
@@ -286,46 +283,28 @@ public abstract class AbstractMS2RunView
         }
     }
 
-    public long[] getPeptideIndex(ActionURL url)
+    public ImmutableLongArray getPeptideIndex(ActionURL url)
     {
-        String lookup = getIndexLookup(url);
-        long[] index = MS2Manager.getPeptideIndex(lookup);
-
-        if (null == index)
-        {
-            Long[] rowIdsLong = generatePeptideIndex(url);
-
-            index = new long[rowIdsLong.length];
-            for (int i=0; i<rowIdsLong.length; i++)
-                index[i] = rowIdsLong[i];
-
-            MS2Manager.cachePeptideIndex(lookup, index);
-        }
-
-        return index;
+        return MS2Manager.getPeptideIndex(getIndexCacheKey(url), (key, argument) -> generatePeptideIndex(url));
     }
 
-
     // Generate signature used to cache & retrieve the peptide index 
-    protected String getIndexLookup(ActionURL url)
+    protected String getIndexCacheKey(ActionURL url)
     {
         return "Filter:" + getPeptideFilter(url).toSQLString(MS2Manager.getSqlDialect()) + "|Sort:" + getPeptideSort().getSortText();
     }
-
 
     private Sort getPeptideSort()
     {
         return new Sort(_url, MS2Manager.getDataRegionNamePeptides());
     }
 
-
     private SimpleFilter getPeptideFilter(ActionURL url)
     {
         return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, getUser(), _runs[0]);
     }
 
-
-    protected Long[] generatePeptideIndex(ActionURL url)
+    protected ImmutableLongArray generatePeptideIndex(ActionURL url)
     {
         Sort sort = ProteinManager.getPeptideBaseSort();
         sort.insertSort(getPeptideSort());
@@ -334,7 +313,7 @@ public abstract class AbstractMS2RunView
         SimpleFilter filter = getPeptideFilter(url);
         filter = ProteinManager.reduceToValidColumns(filter, MS2Manager.getTableInfoPeptides());
 
-        return new TableSelector(MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort).getArray(Long.class);
+        return ImmutableLongArray.copyOf(new TableSelector(MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort).getCollection(Long.class));
     }
 
     protected MS2Run getSingleRun()
