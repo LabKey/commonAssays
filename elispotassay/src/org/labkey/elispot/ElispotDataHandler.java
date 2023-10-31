@@ -122,7 +122,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     Map<PlateInfo, Plate> plates = initializePlates(protocol, _dataFile, template, reader);
 
                     Map<String, ExpMaterial> materialMap = new HashMap<>();
-                    for (Map.Entry<ExpMaterial,String> e : run.getMaterialInputs().entrySet())
+                    for (Map.Entry<? extends ExpMaterial,String> e : run.getMaterialInputs().entrySet())
                         materialMap.put(e.getValue(), e.getKey());
 
                     // create a map of analyte to cytokine names (third step of the upload wizard)
@@ -342,7 +342,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             // calculate antigen statistics on a per sample basis
             Map<String, ExpMaterial> materialMap = new HashMap<>();
 
-            for (Map.Entry<ExpMaterial,String> e : run.getMaterialInputs().entrySet())
+            for (Map.Entry<? extends ExpMaterial,String> e : run.getMaterialInputs().entrySet())
                 materialMap.put(e.getValue(), e.getKey());
 
             DomainProperty antigenNameProp = antigenDomain.getPropertyByName(ElispotAssayProvider.ANTIGENNAME_PROPERTY_NAME);

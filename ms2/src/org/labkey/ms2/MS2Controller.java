@@ -140,7 +140,6 @@ import org.labkey.ms2.peptideview.PeptidesView;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
-import org.labkey.ms2.pipeline.MSPictureUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
@@ -5724,7 +5723,7 @@ public class MS2Controller extends SpringActionController
                 ExpRun expRun = ExperimentService.get().getExpRun(lsid);
                 if (expRun != null)
                 {
-                    for (Map.Entry<ExpData, String> entry : expRun.getDataInputs().entrySet())
+                    for (Map.Entry<? extends ExpData, String> entry : expRun.getDataInputs().entrySet())
                     {
                         if (AbstractMS2SearchTask.JOB_ANALYSIS_PARAMETERS_ROLE_NAME.equalsIgnoreCase(entry.getValue()))
                         {
@@ -6325,49 +6324,6 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresSiteAdmin
-    public class AttachFilesUpgradeAction extends FormViewAction
-    {
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public ModelAndView getView(Object o, boolean reshow, BindException errors)
-        {
-            return new JspView("/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp");
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            if (root == null || !root.isValid())
-            {
-                throw new NotFoundException("No pipeline root found for " + getContainer());
-            }
-
-            ViewBackgroundInfo info = getViewBackgroundInfo();
-            PipelineJob job = new MSPictureUpgradeJob(info, root);
-            PipelineService.get().queueJob(job);
-
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(Object o)
-        {
-            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Attach mspicture Files to Existing MS2 Runs");
-        }
-    }
-
-    @RequiresSiteAdmin
     public class ImportMSScanCountsUpgradeAction extends FormViewAction
     {
         @Override
@@ -6560,7 +6516,6 @@ public class MS2Controller extends SpringActionController
                 controller.new InsertAnnotsAction(),
                     new DeleteAnnotInsertEntriesAction(),
                 controller.new ShowAnnotInsertDetailsAction(),
-                controller.new AttachFilesUpgradeAction(),
                 controller.new ImportMSScanCountsUpgradeAction()
             );
 

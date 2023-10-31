@@ -216,7 +216,7 @@ public class ElispotController extends SpringActionController
         assert(data.size() == 1);
 
         Map<String, ExpMaterial> inputs = new HashMap<>();
-        for (Map.Entry<ExpMaterial,String> e : run.getMaterialInputs().entrySet())
+        for (Map.Entry<? extends ExpMaterial,String> e : run.getMaterialInputs().entrySet())
             inputs.put(e.getValue(), e.getKey());
 
         for (int row=0; row < template.getRows(); row++)
