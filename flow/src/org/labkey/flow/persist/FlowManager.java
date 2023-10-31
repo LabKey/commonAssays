@@ -30,6 +30,7 @@ import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -45,7 +46,6 @@ import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.property.ExperimentProperty;
 import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
@@ -109,7 +109,7 @@ public class FlowManager
 
     public DbSchema getSchema()
     {
-        return DbSchema.get(SCHEMA_NAME);
+        return DbSchema.get(SCHEMA_NAME, DbSchemaType.Module);
     }
 
     public TableInfo getTinfoStatisticAttr()
@@ -175,47 +175,6 @@ public class FlowManager
     }
 
     /**
-     * Get the row id of an attribute name.
-     * DOES NOT CACHE.
-     *
-     * @param container The container.
-     * @param type The attribute type.
-     * @param attr The attribute name.
-     * @return The row id of the attribute or 0 if not found.
-     */
-    private int getAttributeRowId(Container container, AttributeType type, String attr)
-    {
-        return getAttributeRowId(container.getId(), type, attr);
-    }
-
-    private int getAttributeRowId(String containerId, AttributeType type, String attr)
-    {
-        FlowEntry entry = getAttributeEntry(containerId, type, attr);
-        if (entry != null)
-            return entry._rowId;
-
-        return 0;
-    }
-
-    /**
-     * Get the canonical id of an attribute name.
-     * DOES NOT CACHE.
-     *
-     * @param container The container.
-     * @param type The attribute type.
-     * @param attr The attribute name.
-     * @return The row id of the attribute or 0 if not found.
-    private int getAttributeId(Container container, AttributeType type, String attr)
-    {
-        FlowEntry entry = getAttributeEntry(container.getId(), type, attr);
-        if (entry != null)
-            return entry._aliasId;
-
-        return 0;
-    }
-     */
-
-    /**
      * Get the FlowEntry for the attribute name, matching exact casing.
      * DOES NOT CACHE.
      *
@@ -253,8 +212,7 @@ public class FlowManager
             String name = rs.getString("Name");
             Integer rowId = rs.getInt("RowId");
             Integer aliasId = rs.getInt("Id");
-            FlowEntry a = new FlowEntry(type, rowId, containerId, name, aliasId);
-            return a;
+            return new FlowEntry(type, rowId, containerId, name, aliasId);
         }
         catch (SQLException e)
         {
@@ -275,8 +233,7 @@ public class FlowManager
             String name = (String)map.get("Name");
             Integer rowId = (Integer)map.get("RowId");
             Integer aliasId = (Integer)map.get("Id");
-            FlowEntry a = new FlowEntry(type, rowId, containerId, name, aliasId);
-            return a;
+            return new FlowEntry(type, rowId, containerId, name, aliasId);
         }).sorted().collect(Collectors.toList());
     }
 
@@ -299,21 +256,6 @@ public class FlowManager
         Integer aliasId = (Integer)row.get("Id");
         return new FlowEntry(type, rowId, containerId, name, aliasId);
     }
-
-    /**
-     * Get an ordered list of all names in the container.
-     * DOES NOT CACHE
-    @NotNull
-    public List<String> getAttributeNames(@NotNull String containerId, @NotNull AttributeType type)
-    {
-        TableInfo table = attributeTable(type);
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromParts("Container"), containerId);
-        Sort sort = new Sort("Name");
-        TableSelector selector = new TableSelector(table, Collections.singleton("Name"), filter, sort);
-        return selector.getArrayList(String.class);
-    }
-     */
 
     /** Get all attributes in the container. */
     public Collection<FlowEntry> getAttributeEntries(@NotNull String containerId, @NotNull final AttributeType type)
@@ -407,7 +349,7 @@ public class FlowManager
     {
         // Get case-sensitivity rule
         final FlowProtocol protocol = FlowProtocol.getForContainer(container);
-        boolean caseSensitive = protocol != null ? type.isCaseSensitive(protocol) : true;
+        boolean caseSensitive = protocol == null || type.isCaseSensitive(protocol);
 
         final String containerId = container.getId();
 
@@ -445,7 +387,7 @@ public class FlowManager
                 if (others.size() > 1)
                 {
                     int preferredId = others.get(0)._aliasId;
-                    if (others.size() > 1 && others.stream().anyMatch(item -> item._aliasId != preferredId))
+                    if (others.stream().anyMatch(item -> item._aliasId != preferredId))
                         throw new FlowCasingMismatchException("Can't create " + type + " with same casing as other " + type + "s when there is more than one preferred attribute.", sampleLabel, type, others, attr);
                 }
 
@@ -496,43 +438,31 @@ public class FlowManager
     }
 
 
-    public int ensureStatisticName(Container c, String sampleLabel, String name, boolean uncache)
-    {
-        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.statistic, name, Collections.emptyList(), uncache);
-    }
-
-
     public int ensureKeywordName(Container c, String sampleLabel, String name, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, Collections.emptyList(), uncache);
     }
 
 
-    public int ensureGraphName(Container c, String sampleLabel, String name, boolean uncache)
-    {
-        return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.graph, name, Collections.emptyList(), uncache);
-    }
-
-
-    public int ensureStatisticNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
+    public int ensureStatisticNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.statistic, name, aliases, uncache);
     }
 
 
-    public int ensureKeywordNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
+    public int ensureKeywordNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, aliases, uncache);
     }
 
 
-    public int ensureGraphNameAndAliases(Container c, String sampleLabel, String name, Collection<? extends Object> aliases, boolean uncache)
+    public int ensureGraphNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.graph, name, aliases, uncache);
     }
 
 
-    private int ensureAttributeNameAndAliases(Container c, String sampleLabel, AttributeType type, String name, Collection<? extends Object> aliases, boolean uncache)
+    private int ensureAttributeNameAndAliases(Container c, String sampleLabel, AttributeType type, String name, Collection<?> aliases, boolean uncache)
     {
         //_log.info("ensureAlias(" + c + ", " + type + ", " + name + ", aliases)");
         try
@@ -697,7 +627,6 @@ public class FlowManager
         TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
-        String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         // Check that the existing entry and the entry being aliased aren't both present on a single object
         // to avoid violating the primary key constraint. For flow.keyword the pk_keyword covers (objectid, keywordid)
@@ -734,7 +663,7 @@ public class FlowManager
         if (!c.getId().equals(entry._containerId))
             throw new IllegalArgumentException("container");
 
-        Collection aliases = getAliases(entry);
+        Collection<FlowEntry> aliases = getAliases(entry);
         if (!aliases.isEmpty())
             throw new IllegalArgumentException(type + " '" + entry._name + "' has " + aliases.size() + " aliases and can't be deleted");
 
@@ -753,32 +682,6 @@ public class FlowManager
         }
     }
 
-
-    /**
-     * Checks for existence of a alias by type and rowId.
-     * DOES NOT USE CACHE
-     */
-    public boolean isAlias(AttributeType type, int rowId)
-    {
-        FlowEntry entry = getAttributeEntry(type, rowId);
-        if (entry == null)
-            return false;
-
-        return entry.isAlias();
-    }
-
-    /**
-     * Return the preferred name for the rowId or null if rowId is not an alias id.
-     * DOES NOT USE CACHE
-     */
-    public FlowEntry getAliased(AttributeType type, int rowId)
-    {
-        FlowEntry entry = getAttributeEntry(type, rowId);
-        if (entry == null || !entry.isAlias())
-            return null;
-
-        return getAttributeEntry(type, entry._aliasId);
-    }
 
     /**
      * Return the preferred/primary name for the rowId or null if rowId is not an alias id.
@@ -869,9 +772,7 @@ public class FlowManager
             else
                 preferredEntry = entry;
 
-            Collection<FlowEntry> aliases = aliasMap.get(preferredEntry);
-            if (aliases == null)
-                aliasMap.put(preferredEntry, aliases = new ArrayList<>());
+            Collection<FlowEntry> aliases = aliasMap.computeIfAbsent(preferredEntry, k -> new ArrayList<>());
 
             if (entry.isAlias())
                 aliases.add(entry);
@@ -894,7 +795,7 @@ public class FlowManager
                 .append("-- Outermost query: get all rowids not in use\n")
                 .append("SELECT attr3.rowid, attr3.container, attr3.name, attr3.id\n")
                 .append("FROM ").append(attrTable, "attr3").append("\n")
-                .append("WHERE attr3.container = ?\n")
+                .append("WHERE attr3.container = ?\n").add(c)
                 .append("AND attr3.rowid NOT IN (\n")
                 .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
                 .append("    SELECT attr2.rowid\n")
@@ -903,14 +804,10 @@ public class FlowManager
                 .append("        -- First query: all ids in use\n")
                 .append("        SELECT attr.id\n")
                 .append("        FROM ").append(attrTable, "attr").append("\n")
-                .append("        WHERE attr.container = ?\n")
+                .append("        WHERE attr.container = ?\n").add(c)
                 .append("        AND attr.rowid IN (SELECT val.").append(valueTableAttrIdColumn).append(" FROM ").append(valueTable, "val").append(")\n")
                 .append("  )\n")
                 .append(")\n");
-
-        sql.add(c.getId());
-        sql.add(c.getId());
-
         SqlSelector selector = new SqlSelector(getSchema(), sql);
 
         final List<FlowEntry> unused = new ArrayList<>();
@@ -951,7 +848,7 @@ public class FlowManager
                 .append("-- Outermost query: get all rowids not in use\n")
                 .append("DELETE\n")
                 .append("FROM ").append(attrTable).append("\n")
-                .append("WHERE container = ?\n")
+                .append("WHERE container = ?\n").add(c)
                 .append("AND rowid NOT IN (\n")
                 .append("    -- Second query: all rowids in use; maps used ids back to alias or primary rowid\n")
                 .append("    SELECT attr2.rowid\n")
@@ -960,13 +857,10 @@ public class FlowManager
                 .append("        -- First query: all ids in use\n")
                 .append("        SELECT attr.id\n")
                 .append("        FROM ").append(attrTable, "attr").append("\n")
-                .append("        WHERE attr.container = ?\n")
+                .append("        WHERE attr.container = ?\n").add(c)
                 .append("        AND attr.rowid IN (SELECT val.").append(valueTableAttrIdColumn).append(" FROM ").append(valueTable, "val").append(")\n")
                 .append("  )\n")
                 .append(")\n");
-
-        sql.add(c.getId());
-        sql.add(c.getId());
 
         SqlExecutor executor = new SqlExecutor(getSchema());
         return executor.execute(sql);
@@ -1072,9 +966,7 @@ public class FlowManager
             Integer attributeRowId = (Integer)row.get("OriginalAttrId");
             Integer dataId = (Integer)row.get("DataId");
 
-            Collection<FlowDataObject> datas = usages.get(attributeRowId);
-            if (datas == null)
-                usages.put(attributeRowId, datas = new ArrayList<>());
+            Collection<FlowDataObject> datas = usages.computeIfAbsent(attributeRowId, k -> new ArrayList<>());
 
             FlowDataObject fdo = FlowDataObject.fromRowId(dataId);
             datas.add(fdo);
@@ -1160,7 +1052,7 @@ public class FlowManager
 
     private String join(Integer[] oids, int from, int to)
     {
-        Iterator i = new ArrayIterator(oids, from, to);
+        Iterator<Integer> i = new ArrayIterator<>(oids, from, to);
         return StringUtils.join(i, ',');
     }
 
@@ -1270,10 +1162,11 @@ public class FlowManager
         deleteObjectIds(objectIds, containers);
     }
 
-    static private String sqlSelectKeyword = "SELECT flow.keyword.value FROM flow.object" +
-                                            "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
-                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name = ?";
+    static private final String sqlSelectKeyword = """
+            SELECT flow.keyword.value FROM flow.object
+            INNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid
+            INNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid
+            WHERE flow.object.dataid = ? AND flow.KeywordAttr.name = ?""";
     public String getKeyword(ExpData data, String keyword)
     {
         SqlSelector selector = new SqlSelector(getSchema(), sqlSelectKeyword, data.getRowId(), keyword);
@@ -1281,10 +1174,11 @@ public class FlowManager
     }
 
     // Select a set of keywords and values.  The keyword name IN clause will be appended.
-    static private String sqlSelectKeywords = "SELECT flow.keywordAttr.name, flow.keyword.value FROM flow.object" +
-                                            "\nINNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid" +
-                                            "\nINNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.KeywordAttr.name ";
+    static private final String sqlSelectKeywords = """
+            SELECT flow.keywordAttr.name, flow.keyword.value FROM flow.object
+            INNER JOIN flow.keyword on flow.object.rowid = flow.keyword.objectid
+            INNER JOIN flow.KeywordAttr ON flow.KeywordAttr.id = flow.keyword.keywordid
+            WHERE flow.object.dataid = ? AND flow.KeywordAttr.name\s""";
     public Map<String, String> getKeywords(ExpData data, String... keywords)
     {
         SQLFragment sql = new SQLFragment(sqlSelectKeywords, data.getRowId());
@@ -1294,8 +1188,8 @@ public class FlowManager
         return selector.fillValueMap(new TreeMap<String, String>());
     }
 
-    static private String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
-    static private String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, OriginalKeywordId, Value) VALUES (?, ?, ?, ?)";
+    static private final String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";
+    static private final String sqlInsertKeyword = "INSERT INTO flow.keyword (ObjectId, KeywordId, OriginalKeywordId, Value) VALUES (?, ?, ?, ?)";
 
     public void setKeyword(Container c, User user, ExpData data, String keyword, String value)
     {
@@ -1345,27 +1239,30 @@ public class FlowManager
         AuditLogService.get().addEvent(user, event);
     }
 
-    static private String sqlSelectStat = "SELECT flow.statistic.value FROM flow.object" +
-                                            "\nINNER JOIN flow.statistic on flow.object.rowid = flow.statistic.objectid" +
-                                            "\nINNER JOIN flow.StatisticAttr ON flow.StatisticAttr.id = flow.statistic.statisticid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.StatisticAttr.name = ?";
+    static private final String sqlSelectStat = """
+            SELECT flow.statistic.value FROM flow.object
+            INNER JOIN flow.statistic on flow.object.rowid = flow.statistic.objectid
+            INNER JOIN flow.StatisticAttr ON flow.StatisticAttr.id = flow.statistic.statisticid
+            WHERE flow.object.dataid = ? AND flow.StatisticAttr.name = ?""";
     public Double getStatistic(ExpData data, StatisticSpec stat)
     {
         return new SqlSelector(getSchema(), sqlSelectStat, data.getRowId(), stat.toString()).getObject(Double.class);
     }
 
-    static private String sqlSelectGraph = "SELECT flow.graph.data FROM flow.object" +
-                                            "\nINNER JOIN flow.graph on flow.object.rowid = flow.graph.objectid" +
-                                            "\nINNER JOIN flow.GraphAttr ON flow.GraphAttr.id = flow.graph.graphid" +
-                                            "\nWHERE flow.object.dataid = ? AND flow.GraphAttr.name = ?";
+    static private final String sqlSelectGraph = """
+            SELECT flow.graph.data FROM flow.object
+            INNER JOIN flow.graph on flow.object.rowid = flow.graph.objectid
+            INNER JOIN flow.GraphAttr ON flow.GraphAttr.id = flow.graph.graphid
+            WHERE flow.object.dataid = ? AND flow.GraphAttr.name = ?""";
     public byte[] getGraphBytes(ExpData data, GraphSpec graph)
     {
         return new SqlSelector(getSchema(), sqlSelectGraph, data.getRowId(), graph.toString()).getObject(byte[].class);
     }
 
-    static private String sqlSelectScript = "SELECT flow.script.text from flow.object" +
-                                            "\nINNER JOIN flow.script ON flow.object.rowid = flow.script.objectid" +
-                                            "\nWHERE flow.object.dataid = ?";
+    static private final String sqlSelectScript = """
+            SELECT flow.script.text from flow.object
+            INNER JOIN flow.script ON flow.object.rowid = flow.script.objectid
+            WHERE flow.object.dataid = ?""";
     public String getScript(ExpData data)
     {
         return new SqlSelector(getSchema(), sqlSelectScript, data.getRowId()).getObject(String.class);
@@ -1386,12 +1283,12 @@ public class FlowManager
             script = new Script();
             script.setObjectId(obj.getRowId());
             script.setText(scriptText);
-            script = Table.insert(user, getTinfoScript(), script);
+            Table.insert(user, getTinfoScript(), script);
         }
         else
         {
             script.setText(scriptText);
-            script = Table.update(user, getTinfoScript(), script, script.getRowId());
+            Table.update(user, getTinfoScript(), script, script.getRowId());
         }
     }
 
@@ -1552,13 +1449,14 @@ public class FlowManager
     public Map<String, Object> getAttributeMetrics(AttributeType attributeType)
     {
         TableInfo table = attributeType.getAttributeTable();
-        return removeRowNum(new SqlSelector(DbScope.getLabKeyScope(), new SQLFragment(
-                "SELECT " +
-                        "COUNT(*) AS Count, " +
-                        "SUM(CASE WHEN a.id != a.rowid THEN 1 ELSE 0 END) AS AliasCount, " +
-                        "COUNT(DISTINCT(a.name)) AS DistinctCount, " +
-                        "COUNT(DISTINCT(LOWER(a.name))) AS DistinctLowerCount " +
-                        "FROM "
+        return removeRowNum(new SqlSelector(DbScope.getLabKeyScope(), new SQLFragment("""
+                        SELECT
+                          COUNT(*) AS Count,
+                          SUM(CASE WHEN a.id != a.rowid THEN 1 ELSE 0 END) AS AliasCount,
+                          COUNT(DISTINCT(a.name)) AS DistinctCount,
+                          COUNT(DISTINCT(LOWER(a.name))) AS DistinctLowerCount
+                        FROM
+                        """
         ).append(table, "a")).getMap());
     }
 
@@ -1567,17 +1465,6 @@ public class FlowManager
         String sqlFCSFileCount = "SELECT COUNT(flow.object.rowid) FROM flow.object\n" +
                 "WHERE flow.object.container = ? AND flow.object.typeid = ?";
         return new SqlSelector(getSchema(), sqlFCSFileCount, container.getId(), type.getTypeId()).getObject(Integer.class);
-    }
-
-    // CONSIDER: move to experiment module
-    public int getFlaggedCount(Container container)
-    {
-        String sql = "SELECT COUNT(OP.objectid) FROM exp.object OB, exp.objectproperty OP, exp.propertydescriptor PD\n" +
-                "WHERE OB.container = ? AND\n" +
-                "OB.objectid = OP.objectid AND\n" +
-                "OP.propertyid = PD.propertyid AND\n" +
-                "PD.propertyuri = '" + ExperimentProperty.COMMENT.getPropertyDescriptor().getPropertyURI() + "'";
-        return new SqlSelector(getSchema(), sql, container.getId()).getObject(Integer.class);
     }
 
     // counts FCSFiles in Keyword runs
@@ -1594,25 +1481,6 @@ public class FlowManager
         // ignoring 'fake' FCSFiles created while importing a FlowJo workspace.
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("Original"), true, CompareType.EQUAL);
-
-        Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
-        //TODO: multiple aggregates
-        Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-        if (result != null && result.getValue() instanceof Number)
-            return ((Number)result.getValue()).intValue();
-
-        return 0;
-    }
-
-    // count FCSFiles with or without samples
-    public int getFCSFileSamplesCount(User user, Container container, boolean hasSamples)
-    {
-        FlowSchema schema = new FlowSchema(user, container);
-
-        TableInfo table = schema.getTable(FlowTableType.FCSFiles, null);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
-        List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
-        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Sample", "Name"), null, hasSamples ? CompareType.NONBLANK : CompareType.ISBLANK);
 
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
@@ -1650,29 +1518,29 @@ public class FlowManager
     // count of runs created from an Analysis Script
     public Map<String, Object> getAnalysisScriptRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema,
-                "SELECT\n" +
-                "  COUNT(*) AS RunCount,\n" +
-                "  MAX(Created) AS CreatedMax,\n" +
-                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
-                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
-                "  SUM(FCSFileCount) AS FCSFileCount\n" +
-                "FROM flow.Runs\n" +
-                "WHERE AnalysisScript IS NOT NULL").getMap());
+        return removeRowNum(QueryService.get().selector(schema, """
+                        SELECT
+                          COUNT(*) AS RunCount,
+                          MAX(Created) AS CreatedMax,
+                          SUM(FCSAnalysisCount) AS FCSAnalysisCount,
+                          SUM(CompensationControlCount) AS CompControlCount,
+                          SUM(FCSFileCount) AS FCSFileCount
+                        FROM flow.Runs
+                        WHERE AnalysisScript IS NOT NULL""").getMap());
     }
 
     // count of runs created from a FlowJo Workspace
     public Map<String, Object> getWorkspaceRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema,
-                "SELECT\n" +
-                "  COUNT(*) AS RunCount,\n" +
-                "  MAX(Created) AS CreatedMax,\n" +
-                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
-                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
-                "  SUM(FCSFileCount) AS FCSFileCount\n" +
-                "FROM flow.Runs\n" +
-                "WHERE Workspace IS NOT NULL").getMap());
+        return removeRowNum(QueryService.get().selector(schema, """
+                        SELECT
+                          COUNT(*) AS RunCount,
+                          MAX(Created) AS CreatedMax,
+                          SUM(FCSAnalysisCount) AS FCSAnalysisCount,
+                          SUM(CompensationControlCount) AS CompControlCount,
+                          SUM(FCSFileCount) AS FCSFileCount
+                        FROM flow.Runs
+                        WHERE Workspace IS NOT NULL""").getMap());
     }
 
     // count of runs created from an analysis archive import
@@ -1691,37 +1559,38 @@ public class FlowManager
 
     public Map<String, Object> getFCSFileOnlyRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema,
-                "SELECT\n" +
-                "  COUNT(*) AS RunCount,\n" +
-                "  MAX(Created) AS CreatedMax,\n" +
-                "  SUM(FCSAnalysisCount) AS FCSAnalysisCount,\n" +
-                "  SUM(CompensationControlCount) AS CompControlCount,\n" +
-                "  SUM(FCSFileCount) AS FCSFileCount\n" +
-                "FROM flow.Runs\n" +
-                "WHERE ProtocolStep = 'Keywords'").getMap());
+        return removeRowNum(QueryService.get().selector(schema, """
+                        SELECT
+                          COUNT(*) AS RunCount,
+                          MAX(Created) AS CreatedMax,
+                          SUM(FCSAnalysisCount) AS FCSAnalysisCount,
+                          SUM(CompensationControlCount) AS CompControlCount,
+                          SUM(FCSFileCount) AS FCSFileCount
+                        FROM flow.Runs
+                        WHERE ProtocolStep = 'Keywords'""").getMap());
     }
 
     public int getRunCount(Container container, ObjectType type)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?)";
-        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), type.getTypeId()).getObject(Integer.class);
+        String sqlFCSRunCount = """
+                SELECT COUNT (DISTINCT d.runid) FROM exp.data d INNER JOIN flow.object o ON
+                o.dataid = d.rowid
+                AND d.container = ?
+                AND d.container = o.container
+                AND o.typeid = ?""";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), type.getTypeId()).getObject(Integer.class);
     }
 
     public int getFCSRunCount(Container container)
     {
-        String sqlFCSRunCount = "SELECT COUNT (exp.ExperimentRun.RowId) FROM exp.experimentrun\n" +
-                "WHERE exp.ExperimentRun.RowId IN (" +
-                "SELECT exp.data.runid FROM exp.data INNER JOIN flow.object ON flow.object.dataid = exp.data.rowid\n" +
-                "AND exp.data.container = ?\n" +
-                "AND flow.object.container = ?\n" +
-                "AND flow.object.typeid = ?) AND exp.ExperimentRun.FilePathRoot IS NOT NULL";
-        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), container.getId(), ObjectType.fcsKeywords.getTypeId()).getObject(Integer.class);
+        String sqlFCSRunCount = """
+                SELECT COUNT (r.RowId) FROM exp.experimentrun r
+                WHERE r.RowId IN (SELECT d.runid FROM exp.data d INNER JOIN flow.object o ON
+                o.dataid = d.rowid
+                AND d.container = ?
+                AND d.container = o.container
+                AND o.typeid = ?) AND r.FilePathRoot IS NOT NULL""";
+        return new SqlSelector(getSchema(), sqlFCSRunCount, container.getId(), ObjectType.fcsKeywords.getTypeId()).getObject(Integer.class);
     }
 
     public void deleteContainer(Container container)
@@ -1764,10 +1633,10 @@ public class FlowManager
             }
 
             @Override
-            public void afterBatchInsert(int currentRow) throws SQLException { }
+            public void afterBatchInsert(int currentRow) { }
 
             @Override
-            public void updateStatistics(int currentRow) throws SQLException { }
+            public void updateStatistics(int currentRow) { }
         };
 
         String sqlSelectDateTime = "" +
@@ -1870,7 +1739,7 @@ public class FlowManager
         }
         catch (ValidationException | SQLException ex)
         {
-            throw new UnexpectedException(ex);
+            throw UnexpectedException.wrap(ex);
         }
     }
 
