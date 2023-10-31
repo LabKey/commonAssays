@@ -18,7 +18,6 @@ package org.labkey.flow.controllers.run;
 
 import org.labkey.flow.data.*;
 import org.labkey.flow.query.FlowQueryForm;
-import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.UserSchema;
