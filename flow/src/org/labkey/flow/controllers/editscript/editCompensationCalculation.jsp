@@ -31,7 +31,7 @@
 %>
 <labkey:errors/>
 <%=getScriptTag("/Flow/editCompensationCalculation.js")%>
-<script type="text/javascript">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
 var parameters = <%=text(javascriptArray(form.parameters))%>
 var AutoComp = {};
