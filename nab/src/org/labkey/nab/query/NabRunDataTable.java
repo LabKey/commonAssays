@@ -75,7 +75,7 @@ public class NabRunDataTable extends NabBaseTable
 
     public NabRunDataTable(final NabProtocolSchema schema, ContainerFilter cf, final ExpProtocol protocol)
     {
-        super(schema, new NAbSpecimenTable(schema, cf), cf, protocol);
+        super(schema, new NAbSpecimenTable(schema, cf, protocol), cf, protocol);
         _nabSpecimenTable = (NAbSpecimenTable) getRealTable();
 
         final AssayProvider provider = AssayService.get().getProvider(protocol);

@@ -200,7 +200,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
 
             if (DilutionManager.NAB_SPECIMEN_TABLE_NAME.equalsIgnoreCase(tableType))
             {
-                return new NAbSpecimenTable(this, cf);
+                return new NAbSpecimenTable(this, cf, getProtocol());
             }
 
             if (DilutionManager.WELL_DATA_TABLE_NAME.equalsIgnoreCase(tableType))
