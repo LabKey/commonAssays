@@ -26,8 +26,11 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.PanelButton;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.api.ExperimentUrls;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.query.QueryAction;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.InsertPermission;
@@ -223,6 +226,19 @@ public class FlowQueryView extends QueryView
     public FlowSchema getSchema()
     {
         return (FlowSchema) super.getSchema();
+    }
+
+    @Override
+    public boolean showDeleteButtonConfirmationText()
+    {
+        return !getSettings().getQueryName().equalsIgnoreCase(FlowTableType.Runs.name());
+    }
+
+    @Override
+    public ActionButton createDeleteButton(boolean showConfirmation)
+    {
+        setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnURL()).toContainerRelativeURL());
+        return super.createDeleteButton(showConfirmation);
     }
 
     @Override
