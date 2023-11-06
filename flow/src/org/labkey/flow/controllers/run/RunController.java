@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormViewAction;
@@ -59,6 +58,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -118,7 +118,7 @@ import static org.labkey.flow.controllers.run.StatusJsonHelper.getStatusUrl;
 
 public class RunController extends BaseFlowController
 {
-    private static final Logger _log = LogManager.getLogger(RunController.class);
+    private static final Logger _log = LogHelper.getLogger(RunController.class, "Flow run and analysis logger");
 
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(RunController.class);
 
@@ -195,9 +195,6 @@ public class RunController extends BaseFlowController
             else
                 root.addChild(experiment.getLabel(), experiment.urlShow());
 
-//            if (script != null)
-//                root.addChild(script.getLabel(), script.urlShow());
-
             root.addChild("Runs");
         }
     }
@@ -207,8 +204,8 @@ public class RunController extends BaseFlowController
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
         private FlowRun _run;
-        private Map<String, File> _files = new TreeMap<>();
-        private List<File> _missing = new LinkedList<>();
+        private final Map<String, File> _files = new TreeMap<>();
+        private final List<File> _missing = new LinkedList<>();
 
         @Override
         public void validate(DownloadRunForm form, BindException errors)
@@ -237,7 +234,7 @@ public class RunController extends BaseFlowController
                     _missing.add(file);
             }
 
-            if (_missing.size() > 0 && !form.isSkipMissing())
+            if (!_missing.isEmpty() && !form.isSkipMissing())
             {
                 errors.reject(ERROR_MSG, "files missing from run: " + _run.getName());
             }
@@ -414,7 +411,7 @@ public class RunController extends BaseFlowController
                     {
                         _exportToScriptTimeout = Integer.parseInt(exportToScriptTimeout);
                     }
-                    catch (NumberFormatException ex) { }
+                    catch (NumberFormatException ignore) { }
                 }
 
                 String exportToScriptDeleteOnComplete = module.getExportToScriptDeleteOnComplete(getContainer());
@@ -502,7 +499,7 @@ public class RunController extends BaseFlowController
             if (fcsDirName != null)
                 fcsDirName = FileUtil.makeLegalName(fcsDirName);
 
-            if (_runs != null && _runs.size() > 0)
+            if (_runs != null && !_runs.isEmpty())
             {
                 String zipName = "ExportedRuns";
                 if (_runs.size() == 1)
@@ -561,7 +558,7 @@ public class RunController extends BaseFlowController
                     _successURL = onExportComplete(form, vf, files);
                 }
             }
-            else if (_wells != null && _wells.size() > 0)
+            else if (_wells != null && !_wells.isEmpty())
             {
                 String zipName = "data";
 
@@ -806,7 +803,7 @@ public class RunController extends BaseFlowController
             for (String part : parts)
             {
                 part = part.trim();
-                if (part.length() == 0)
+                if (part.isEmpty())
                     continue;
 
                 String arg = part;
@@ -875,9 +872,8 @@ public class RunController extends BaseFlowController
             String id = String.valueOf(well.getRowId());
             String name = well.getName();
 
-            if (well instanceof FlowFCSAnalysis && (includeStatistics || includeGraphBytes))
+            if (well instanceof FlowFCSAnalysis analysis && (includeStatistics || includeGraphBytes))
             {
-                FlowFCSAnalysis analysis = (FlowFCSAnalysis) well;
                 AttributeSet attrs = analysis.getAttributeSet(includeGraphBytes);
                 analysisAttrs.put(id, name, attrs);
             }
@@ -919,7 +915,7 @@ public class RunController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class DownloadAttachmentAction extends BaseDownloadAction<AttachmentForm>
+    public static class DownloadAttachmentAction extends BaseDownloadAction<AttachmentForm>
     {
         @Override
         public @Nullable Pair<AttachmentParent, String> getAttachment(AttachmentForm form)
