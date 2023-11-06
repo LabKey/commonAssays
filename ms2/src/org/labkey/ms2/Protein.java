@@ -39,11 +39,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.labkey.api.util.PageFlowUtil.helpPopup;
-
 public class Protein
 {
-    private static Logger _log = LogManager.getLogger(Protein.class);
+    private static final Logger _log = LogManager.getLogger(Protein.class);
 
     private double _mass;
     private String _sequence;
@@ -556,7 +554,7 @@ public class Protein
                             }
 
                         }
-                        label = helpPopup("Peptide Details", details.toString(), true, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
+                        label = PageFlowUtil.helpPopup("Peptide Details", details.toString(), true, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
 
                     }
                     label = continuationLeft + label + continuationRight;

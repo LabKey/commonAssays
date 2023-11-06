@@ -22,6 +22,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.luminex.LuminexDataHandler;
 
@@ -31,10 +32,10 @@ import java.util.Set;
 
 public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
 {
-    private String _analyteName;
-    private String _inputName;
-    private String _displayName;
-    private Set<String> _initNegativeControlAnalytes;
+    private final String _analyteName;
+    private final String _inputName;
+    private final String _displayName;
+    private final Set<String> _initNegativeControlAnalytes;
 
     public NegativeBeadDisplayColumnFactory(String analyteName, String inputName, Set<String> initNegativeControlAnalytes)
     {
@@ -77,7 +78,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                 sb.append("The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are " +
                         "those selected as Negative Control analytes.\n\n");
                 sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
-                out.write(PageFlowUtil.helpPopup(_displayName, sb.toString()));
+                PageFlowUtil.popupHelp(HtmlString.of(sb), _displayName).appendTo(out);
 
                 out.write("</td>");
             }

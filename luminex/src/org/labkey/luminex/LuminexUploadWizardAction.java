@@ -49,6 +49,7 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
@@ -569,7 +570,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
                 renderTitle(ctx, out);
                 String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
-                out.write(PageFlowUtil.helpPopup(displayName, sb));
+                PageFlowUtil.popupHelp(HtmlString.of(sb), displayName).appendTo(out);
 
                 out.write("</td>");
             }
