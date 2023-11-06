@@ -202,7 +202,7 @@ public class RunController extends BaseFlowController
         }
     }
 
-        @RequiresLogin
+    @RequiresLogin
     @RequiresPermission(ReadPermission.class)
     public class DownloadAction extends SimpleViewAction<DownloadRunForm>
     {
