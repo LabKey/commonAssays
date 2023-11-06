@@ -49,7 +49,6 @@ import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.FileNameUniquifier;
@@ -83,7 +82,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
-import org.labkey.flow.query.FlowQueryForm;
 import org.labkey.flow.view.ExportAnalysisForm;
 import org.labkey.flow.view.ExportAnalysisManifest;
 import org.springframework.validation.BindException;
@@ -203,42 +201,6 @@ public class RunController extends BaseFlowController
             root.addChild("Runs");
         }
     }
-
-//    @RequiresLogin
-//    @RequiresPermission(ReadPermission.class)
-//    public class DeleteAction extends FormViewAction<RunsForm>
-//    {
-//
-//        @Override
-//        public void validateCommand(RunsForm target, Errors errors)
-//        {
-//
-//        }
-//
-//        @Override
-//        public ModelAndView getView(RunsForm runsForm, boolean reshow, BindException errors) throws Exception
-//        {
-//            return new ConfirmDeleteView;
-//        }
-//
-//        @Override
-//        public boolean handlePost(RunsForm runsForm, BindException errors) throws Exception
-//        {
-//            return false;
-//        }
-//
-//        @Override
-//        public URLHelper getSuccessURL(RunsForm runsForm)
-//        {
-//            return null;
-//        }
-//
-//        @Override
-//        public void addNavTrail(NavTree root)
-//        {
-//
-//        }
-//    }
 
         @RequiresLogin
     @RequiresPermission(ReadPermission.class)
