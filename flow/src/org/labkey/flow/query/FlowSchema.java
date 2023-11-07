@@ -1986,7 +1986,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         if (null == helper)
         {
             // If there is no data in this container, we can avoid caching and creating empty temp tables.  This check is fast.
-            SQLFragment existsSql = new SQLFragment("SELECT 1 FROM flow.object where container=").appendValue(c).append(" AND typeid=").appendValue(typeid);
+            SQLFragment existsSql = new SQLFragment("SELECT 1 FROM flow.object where container=?").add(c).append(" AND typeid=?").add(typeid);
             if (!(new SqlSelector(FlowManager.get().getSchema(), existsSql).exists()))
                 return  new SQLFragment("(").append(generateFastFlowSqlFragment(c, typeid)).append(" AND 0=1) __empty_flow_table ");
 
@@ -2044,7 +2044,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                     FROM exp.data
                         INNER JOIN flow.object ON exp.Data.RowId=flow.object.DataId
                     """)
-                .append(" WHERE flow.Object.container = ").appendValue(c).append(" AND TypeId = ").appendValue(typeid);
+                .append(" WHERE flow.Object.container = ?").add(c).append(" AND TypeId = ?").add(typeid);
     }
 
 
