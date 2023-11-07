@@ -33,6 +33,7 @@ import org.labkey.api.attachments.BaseDownloadAction;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.collections.RowMapFactory;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.TSVMapWriter;
 import org.labkey.api.data.TSVWriter;
@@ -82,6 +83,7 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.view.ExportAnalysisForm;
 import org.labkey.flow.view.ExportAnalysisManifest;
 import org.springframework.validation.BindException;
@@ -196,6 +198,20 @@ public class RunController extends BaseFlowController
                 root.addChild(experiment.getLabel(), experiment.urlShow());
 
             root.addChild("Runs");
+        }
+
+        public static ActionURL getFcsFileRunsURL(Container c)
+        {
+            return new ActionURL(RunController.ShowRunsAction.class, c)
+                    .addParameter("query.FCSFileCount~neq", 0)
+                    .addParameter("query.ProtocolStep~eq", "Keywords")
+                    .addParameter("runTableType", FlowTableType.FCSFiles.name());
+        }
+        public static ActionURL getFCSAnalysisRunsURL(Container c)
+        {
+            return new ActionURL(RunController.ShowRunsAction.class, c)
+                .addParameter("query.FCSAnalysisCount~neq", 0)
+                .addParameter("runTableType", FlowTableType.FCSAnalyses.name());
         }
     }
 
