@@ -554,8 +554,11 @@ public class Protein
                             }
 
                         }
-                        label = PageFlowUtil.helpPopup("Peptide Details", details.toString(), true, "<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>", 250, onClickScript );
-
+                        label = PageFlowUtil.popupHelp(HtmlString.unsafe(details.toString()), "Peptide Details")
+                            .link(HtmlString.unsafe("<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>"))
+                            .script(onClickScript)
+                            .width(250)
+                            .toString();
                     }
                     label = continuationLeft + label + continuationRight;
                 }
