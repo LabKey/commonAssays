@@ -16,8 +16,8 @@
 
 package org.labkey.flow.view;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -26,6 +26,8 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.DOM;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -37,6 +39,19 @@ import org.labkey.flow.query.FlowQuerySettings;
 
 import java.io.IOException;
 import java.io.Writer;
+
+import static org.labkey.api.util.DOM.Attribute.alt;
+import static org.labkey.api.util.DOM.Attribute.height;
+import static org.labkey.api.util.DOM.Attribute.onerror;
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.Attribute.title;
+import static org.labkey.api.util.DOM.Attribute.width;
+import static org.labkey.api.util.DOM.BR;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.SPAN;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
 
 public class GraphColumn extends DataColumn
 {
@@ -65,7 +80,7 @@ public class GraphColumn extends DataColumn
         if (parts.length != 2)
             throw new IllegalArgumentException("error parsing graph spec: expected pair of values: " + objectIdGraph);
 
-        if (parts[0].length() > 0)
+        if (!parts[0].isEmpty())
         {
             try
             {
@@ -78,7 +93,7 @@ public class GraphColumn extends DataColumn
         }
 
         graphSpec = parts[1];
-        if (graphSpec.length() == 0)
+        if (graphSpec.isEmpty())
         {
             throw new IllegalArgumentException("error parsing graph spec: expected second part to be non-empty string: " + objectIdGraph);
         }
@@ -123,53 +138,45 @@ public class GraphColumn extends DataColumn
             ctx.put(INCLUDE_UTIL_SCRIPT, true);
         }
 
-        Integer objectId = null;
-        String graphSpec = null;
-        String graphTitle;
         Object boundValue = getColumnInfo().getValue(ctx);
-        if ((boundValue instanceof String))
-        {
-            try
-            {
-                Pair<Integer, String> pair = parseObjectIdGraph((String) boundValue);
-                objectId = pair.first;
-                graphSpec = pair.second;
-            }
-            catch (IllegalArgumentException ex)
-            {
-                LOG.debug(ex.getMessage());
-                out.write("&nbsp;");
-                return;
-            }
-
-            graphTitle = PageFlowUtil.filter(graphSpec);
-        }
-        else
+        if ((!(boundValue instanceof String)))
         {
             LOG.debug("error parsing graph spec: expected pair of values, but got '" + boundValue + "'");
             out.write("&nbsp;");
             return;
         }
 
+        Integer objectId;
+        String graphSpec;
+
+        try
+        {
+            Pair<Integer, String> pair = parseObjectIdGraph((String) boundValue);
+            objectId = pair.first;
+            graphSpec = pair.second;
+        }
+        catch (IllegalArgumentException ex)
+        {
+            LOG.debug(ex.getMessage());
+            out.write("&nbsp;");
+            return;
+        }
 
         String graphSize = FlowPreference.graphSize.getValue(ctx.getRequest()) + "px";
 
         if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Inline)
         {
-            out.write("<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + ";\">");
-            if (objectId == null)
-            {
-                out.write("<span class=\"labkey-disabled labkey-flow-graph\">No graph for:<br>" + graphTitle + "</span>");
-            }
-            else
-            {
-                String urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
-                out.write("<img alt=\"Graph of: " + graphTitle + "\" title=\"" + graphTitle + "\"");
-                out.write(" style=\"height: " + graphSize + "; width: " + graphSize + ";\" class=\"labkey-flow-graph\" src=\"");
-                out.write(PageFlowUtil.filter(urlGraph));
-                out.write("\" onerror=\"flowImgError(this);\">");
-            }
-            out.write("</span><wbr>");
+            SPAN(
+                at(style, "display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize),
+                objectId == null ?
+                    SPAN(cl("labkey-disabled labkey-flow-graph"), "No graph for:", BR(), graphSpec) :
+                    IMG(
+                        at(alt, "Graph of: " + graphSpec).at(title, graphSpec).at(style, "height: " + graphSize + "; width: " + graphSize)
+                            .at(src, urlGraph(objectId, graphSpec, ctx.getContainer()))
+                            .at(onerror, "flowImgError(this);").cl("labkey-flow-graph")
+                    )
+            ).appendTo(out);
+            out.write("<wbr>");
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
         {
@@ -179,29 +186,20 @@ public class GraphColumn extends DataColumn
             }
             else
             {
-                String urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
-
-                StringBuilder iconHtml = new StringBuilder();
-                iconHtml.append("<img width=32 height=32");
-                iconHtml.append(" title=\"").append(graphTitle).append("\"");
-                iconHtml.append(" src=\"").append(PageFlowUtil.filter(urlGraph)).append("\"");
-                iconHtml.append(" />");
-
-                StringBuilder imageHtml = new StringBuilder();
-                imageHtml.append("<img src=\"").append(PageFlowUtil.filter(urlGraph)).append("\" />");
-
-                out.write(PageFlowUtil.helpPopup(graphSpec, imageHtml.toString(), true, iconHtml.toString(), 310));
+                ActionURL urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
+                HtmlString iconHtml = DOM.createHtmlFragment(IMG(at(width, 32).at(height, 32).at(title, graphSpec).at(src, urlGraph)));
+                HtmlString imageHtml = DOM.createHtmlFragment(IMG(at(src, urlGraph)));
+                PageFlowUtil.popupHelp(imageHtml, graphSpec).link(iconHtml).width(310).appendTo(out);
             }
         }
     }
 
     // NOTE: We generate the URL for the current container, but the ShowGraphAction
     // will redirect to the objectId's container if the user has read permission there.
-    private String urlGraph(Integer objectId, String graphSpec, Container container)
+    private ActionURL urlGraph(Integer objectId, String graphSpec, Container container)
     {
         return new ActionURL(WellController.ShowGraphAction.class, container)
-                .addParameter(FlowParam.objectId, objectId)
-                .addParameter(FlowParam.graph, graphSpec)
-                .toString();
+            .addParameter(FlowParam.objectId, objectId)
+            .addParameter(FlowParam.graph, graphSpec);
     }
 }

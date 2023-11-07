@@ -58,6 +58,8 @@ import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -470,13 +472,15 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                         HashSet<String> s = new LinkedHashSet<>(Arrays.asList(ids));
                         s.removeAll(Arrays.asList(matches));
 
-                        popupText += "<p>" + PageFlowUtil.filter(StringUtils.join(s, ", ")) + "</p>";
+                        HtmlString popupHtml = HtmlStringBuilder.of(popupText)
+                            .append(HtmlString.unsafe("<p>"))
+                            .append(StringUtils.join(s, ", "))
+                            .append(HtmlString.unsafe("</p>")).getHtmlString();
 
-                        String imgHtml = "<img align=\"top\" src=\"" +
-                                HttpView.currentContext().getContextPath() +
-                                "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">";
+                        HtmlString imgHtml = HtmlString.unsafe("<img align=\"top\" src=\"" + HttpView.currentContext().getContextPath() +
+                            "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">");
 
-                        out.write(PageFlowUtil.helpPopup("Unmatched Specimen IDs", popupText, true, imgHtml, 0));
+                        PageFlowUtil.popupHelp(popupHtml, "Unmatched Specimen IDs").link(imgHtml).width(0).appendTo(out);
                     }
                 }
 

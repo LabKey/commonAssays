@@ -41,6 +41,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
@@ -67,10 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * User: kevink
- * Date: 10/20/12
- */
 public class SamplesConfirmGridView extends GridView
 {
     public static final Logger LOG = LogManager.getLogger(SamplesConfirmGridView.class);
@@ -378,12 +375,12 @@ public class SamplesConfirmGridView extends GridView
                 {
                     out.write("/_images/check.png\" />");
                     String fileName = ctx.get(SAMPLE_NAME_FIELD_KEY, String.class);
-                    out.write(PageFlowUtil.helpPopup("Matched", "Matched the previously imported FCS file '" + fileName + "'", true));
+                    PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched").appendTo(out);
                 }
                 else
                 {
                     out.write("/_images/cancel.png\" />");
-                    out.write(PageFlowUtil.helpPopup("Not matched", "Failed to match a previously imported FCS file.  Please manually select a matching FCS file or skip importing this row.", true));
+                    PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched").appendTo(out);
                 }
             }
         }
