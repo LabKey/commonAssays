@@ -237,7 +237,14 @@ public class FlowQueryView extends QueryView
     @Override
     public ActionButton createDeleteButton(boolean showConfirmation)
     {
-        setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnURL()).toContainerRelativeURL());
+        return createDeleteButton(showConfirmation, true);
+    }
+
+    protected ActionButton createDeleteButton(boolean showConfirmation, boolean useExpRunsURL)
+    {
+        // The Analysis "folder" table needs to use the getDeleteProtocolURL, the FCSRuns and FCSAnalysis 'views' need the getDeleteSelectedExpRunsURL
+        if (useExpRunsURL)
+            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnURL()).toContainerRelativeURL());
         return super.createDeleteButton(showConfirmation);
     }
 
