@@ -202,11 +202,6 @@ public class FlowQueryView extends QueryView
         }
     }
 
-    protected boolean subtractBackground()
-    {
-        return getSettings().getSubtractBackground();
-    }
-
     @Override
     public boolean showDeleteButton()
     {
