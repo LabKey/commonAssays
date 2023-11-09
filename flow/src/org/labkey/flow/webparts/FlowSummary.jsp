@@ -86,11 +86,8 @@
     FlowExperiment[] _experiments = FlowExperiment.getAnalysesAndWorkspace(c);
     Arrays.sort(_experiments);
 
-    ActionURL fcsFileRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
-            .addParameter("query.FCSFileCount~neq", 0)
-            .addParameter("query.ProtocolStep~eq", "Keywords");
-    ActionURL fcsAnalysisRunsURL = new ActionURL(RunController.ShowRunsAction.class, c)
-            .addParameter("query.FCSAnalysisCount~neq", 0);
+    ActionURL fcsFileRunsURL = RunController.ShowRunsAction.getFcsFileRunsURL(c);
+    ActionURL fcsAnalysisRunsURL = RunController.ShowRunsAction.getFCSAnalysisRunsURL(c);
     ActionURL compMatricesURL = FlowTableType.CompensationMatrices.urlFor(user, c, QueryAction.executeQuery);
 
     final int DISPLAY_MAX_ROWS = 15;

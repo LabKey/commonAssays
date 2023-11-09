@@ -85,4 +85,9 @@ public class AnalysesWebPart extends FlowQueryView
         }
     }
 
+    @Override
+    public ActionButton createDeleteButton(boolean showConfirmation)
+    {
+        return super.createDeleteButton(showConfirmation, false);
+    }
 }

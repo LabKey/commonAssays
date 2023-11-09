@@ -26,7 +26,6 @@ public class FlowQuerySettings extends QuerySettings
     }
 
     private ShowGraphs _showGraphs;
-    private boolean _subtractBackground;
 
     protected FlowQuerySettings(String dataRegionName)
     {
@@ -63,7 +62,6 @@ public class FlowQuerySettings extends QuerySettings
                 }
             }
         }
-        _subtractBackground = _getParameter(param("subtractBackground")) != null;
     }
 
     public ShowGraphs getShowGraphs()
@@ -73,15 +71,5 @@ public class FlowQuerySettings extends QuerySettings
     public void setShowGraphs(ShowGraphs showGraphs)
     {
         _showGraphs = showGraphs;
-    }
-
-    public boolean getSubtractBackground()
-    {
-        return _subtractBackground;
-    }
-
-    public void setSubtractBackground(boolean subtractBackground)
-    {
-        _subtractBackground = subtractBackground;
     }
 }
