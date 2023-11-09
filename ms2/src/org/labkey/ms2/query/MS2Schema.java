@@ -18,6 +18,7 @@ package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.BaseViewAction;
+import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.*;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExperimentService;
@@ -1160,7 +1161,7 @@ public class MS2Schema extends UserSchema
 
             DbScope scope = MS2Manager.getSchema().getScope();
 
-            try (Connection connection = scope.getConnection())
+            try (Connection connection = scope.getConnection(); var ignore = SpringActionController.ignoreSqlUpdates())
             {
                 String shortName = "RunList" + runListId;
                 String tempTableName = getDbSchema().getSqlDialect().getGlobalTempTablePrefix() + shortName;
@@ -1185,8 +1186,8 @@ public class MS2Schema extends UserSchema
                 executor.execute(insertSQL);
 
                 // Create indices on the two columns
-                executor.execute("CREATE INDEX IDX_" + shortName + "_NormalizedId ON " + tempTableName + "(NormalizedId);");
-                executor.execute("CREATE INDEX IDX_" + shortName + "_ProteinGroupId ON " + tempTableName + "(ProteinGroupId);");
+                executor.execute("CREATE INDEX IDX_" + shortName + "_NormalizedId ON " + tempTableName + "(NormalizedId)");
+                executor.execute("CREATE INDEX IDX_" + shortName + "_ProteinGroupId ON " + tempTableName + "(ProteinGroupId)");
 
                 // Figure out the minimum group id that contains a protein (SeqId) that's also in this group
                 String updateSubQuery = "SELECT MIN(MinNormalizedId) AS NewNormalizedId, GroupId FROM \n" +
