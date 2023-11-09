@@ -36,6 +36,7 @@ public class RunsForm extends FlowQueryForm
     private int _experimentId;
     private int _scriptId;
 
+    private FlowTableType _runTableType;
     public int getExperimentId()
     {
         return _experimentId;
@@ -54,6 +55,16 @@ public class RunsForm extends FlowQueryForm
     public void setScriptId(int scriptId)
     {
         _scriptId = scriptId;
+    }
+
+    public FlowTableType getRunTableType()
+    {
+        return _runTableType;
+    }
+
+    public void setRunTableType(FlowTableType runTableType)
+    {
+        _runTableType = runTableType;
     }
 
     @Override
@@ -83,6 +94,15 @@ public class RunsForm extends FlowQueryForm
     public QuerySettings createQuerySettings(UserSchema schema)
     {
         QuerySettings ret = super.createQuerySettings(schema);
+        if (getRunTableType() == FlowTableType.FCSAnalyses)
+        {
+            ret.setSelectionKey(FlowTableType.FCSAnalyses.name());
+        }
+        else if (getRunTableType() == FlowTableType.FCSFiles)
+        {
+            ret.setSelectionKey(FlowTableType.FCSFiles.name());
+        }
+
         if (ret.getQueryName() == null)
         {
             ret.setQueryName(FlowTableType.Runs.toString());
