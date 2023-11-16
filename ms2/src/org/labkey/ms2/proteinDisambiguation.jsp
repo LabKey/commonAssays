@@ -30,14 +30,14 @@
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
-    LABKEY.requiresCss("MS2/ProteinCoverageMap.js");
+    LABKEY.requiresScript("MS2/ProteinCoverageMap.js");
     LABKEY.requiresScript("util.js");
 
     function checkAll() {
         var checked = document.getElementById('checkallproteins').checked;
         var cbs = document.getElementsByName('targetSeqIds');
         for(var i=0; i < cbs.length; i++) {
-            if(cbs[i].type == 'checkbox') {
+            if(cbs[i].type === 'checkbox') {
                 cbs[i].checked = checked;
             }
         }
@@ -46,11 +46,11 @@
     function validate() {
         var cbs = document.getElementsByName('targetSeqIds'), checkedCount = 0;
         for(var i=0; i < cbs.length; i++) {
-            if(cbs[i].type == 'checkbox' && cbs[i].checked) {
+            if(cbs[i].type === 'checkbox' && cbs[i].checked) {
                 checkedCount++;
             }
         }
-        if (checkedCount == 0)
+        if (checkedCount === 0)
         {
             alert("Please choose at least one applicable protein!");
             return false;
@@ -87,12 +87,14 @@
     else { %>
         Multiple proteins match your search. Please choose the applicable proteins below.<br>
 
-<form action="<%=h(formUrl)%>" method="GET" onsubmit="return validate();">
+<labkey:form action="<%=formUrl%>" method="GET" onsubmit="return validate();">
     <% for (Pair<String, String> param : baseUrl.getParameters()) { %>
         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
     <% } %>
-    <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;" onclick="checkAll();">All</div>
+    <div style="margin-top: 10px;"><input type=checkbox name=checkall checked id=checkallproteins style="margin-right: 12px;">All</div>
     <%
+        addHandler("checkallproteins", "click", "checkAll()");
+
         for (Protein protein : proteins) {
             String divId = GUID.makeGUID();
             JSONObject props = new JSONObject().put("width", 450).put("title", "Protein Details");
@@ -127,7 +129,7 @@
 %>
 <br>
 <%= button("Continue").submit(true) %>&nbsp;<%=generateBackButton("Cancel")%>
-</form>
+</labkey:form>
 <%
     }
 %>

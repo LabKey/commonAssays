@@ -16,10 +16,13 @@
  */
 %>
 <%@ page import="org.labkey.api.security.User" %>
+<%@ page import="org.labkey.api.util.DOM" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.style" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -32,6 +35,17 @@
         isStandardView = true;  // no parameter = standard
     else
         isStandardView = grouping.equals("query");
+
+    HtmlString helpHtml = DOM.createHtmlFragment(DOM.TABLE(
+        DOM.TR(
+            DOM.TD(DOM.at(style, "vertical-align: top; white-space:nowrap;"), DOM.B("Standard")),
+            DOM.TD(HtmlString.NBSP, "Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Grid Views->Customize Grid to change the column list.")
+        ),
+        DOM.TR(
+            DOM.TD(DOM.at(style, "vertical-align: top; white-space:nowrap;"), DOM.B("Protein Groups")),
+            DOM.TD(HtmlString.NBSP, "Shows proteins, grouped under the ProteinProphet assigned groups. Use Grid Views->Customize Grid to change the column list.")
+        )
+    ));
 %>
 <labkey:form method="post" action="<%=bean.applyViewURL%>">
     <table id="ms2RunViewConfig" class="lk-fields-table">
@@ -51,19 +65,19 @@
         <tr>
             <td style="height: 100%; padding-right: 1em" id="ms2RunGrouping">
                 <fieldset>
-                    <legend>Grouping</legend>
+                    <legend style="margin-bottom: 2px;">Grouping</legend>
                     <table class="labkey-data-region-legacy">
                         <tr>
                             <td style="vertical-align: middle;" nowrap>
                                 <% addHandler("viewTypeGrouping", "change", "document.getElementById('viewTypeExpanded').disabled = !viewTypeInfo[document.getElementById('viewTypeGrouping').selectedIndex];"); %>
                                 <select id="viewTypeGrouping" name="grouping"><%
-                                for(MS2RunViewType viewType : bean.viewTypes)
+                                for (MS2RunViewType viewType : bean.viewTypes)
                                 { %>
                                     <option value="<%=h(viewType.getURLName())%>"<%=selected(viewType.equals(bean.currentViewType))%>><%=h(viewType.getName())%></option><%
                                 } %>
-                                </select><%=helpPopup("Grouping", "<table><tr><td style=\"vertical-align: top;\" nowrap><b>Standard</b></td><td>Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein Groups</b></td><td>Shows proteins, grouped under the ProteinProphet assigned groups. Use Grid Views->Customize Grid to change the column list.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Peptides (Legacy)</b></td><td>Shows peptides without nesting them.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>Protein (Legacy)</b></td><td>Shows peptides, grouped by their search engine assigned protein.</td></tr><tr><td style=\"vertical-align: top;\" nowrap><b>ProteinProphet (Legacy)</b></td><td>Shows peptides, grouped by their ProteinProphet protein groups.</td></tr></table>", true, 500)%>
+                                </select><%=helpPopup("Grouping", helpHtml, 500)%>&nbsp;
                             </td>
-                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%></td>
+                            <td style="vertical-align: middle;" nowrap><input id="viewTypeExpanded" type="checkbox" name="expanded" value="1"<%=checked(bean.expanded)%><%=disabled(!bean.currentViewType.supportsExpansion())%>>Expanded<%=helpPopup("Expanded", "If selected, the groups will all be expanded. If not, the groups will be collapsed but can be expanded individually")%>&nbsp;</td>
                             <td style="vertical-align: middle;" nowrap>
                                 <%= button("Go").id("viewTypeSubmitButton").submit(true) %></td>
                         </tr>
@@ -128,8 +142,8 @@
     </table>
 </labkey:form>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-    var viewTypeInfo = {};
-    var count = 0;<%
+    const viewTypeInfo = {};
+    let count = 0;<%
 
     for (MS2RunViewType viewType : bean.viewTypes)
     { %>

@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.executescript.AnalysisScriptController" %>
 <%@ page import="org.labkey.flow.controllers.executescript.ImportAnalysisForm" %>
-<%@ page import="java.util.Iterator" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.ImportAnalysisStep.CONFIRM" %>
 <%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.BACK_BUTTON_ACTION" %>
@@ -87,20 +86,16 @@
 <labkey:form name="<%=ImportAnalysisForm.NAME%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
-        Iterator i = form.getWorkspace().getHiddenFields(getViewContext()).entrySet().iterator();
-        while (i.hasNext())
+        for (Map.Entry<String, String> entry : form.getWorkspace().getHiddenFields(getViewContext()).entrySet())
         {
-            Map.Entry entry = (Map.Entry)i.next();
             String key = "workspace." + entry.getKey();
             %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
         }
 
         if (form.getStep() > AnalysisScriptController.ImportAnalysisStep.REVIEW_SAMPLES.getNumber())
         {
-            i = form.getSelectedSamples().getHiddenFields().entrySet().iterator();
-            while (i.hasNext())
+            for (Map.Entry<String, String> entry : form.getSelectedSamples().getHiddenFields().entrySet())
             {
-                Map.Entry entry = (Map.Entry)i.next();
                 String key = "selectedSamples." + entry.getKey();
             %><input type="hidden" id="<%=h(key)%>" name="<%=h(key)%>" value="<%=h(entry.getValue())%>"><%
             }

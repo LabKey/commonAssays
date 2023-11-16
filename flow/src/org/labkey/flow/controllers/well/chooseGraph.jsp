@@ -107,7 +107,7 @@
             steps.add(FlowProtocolStep.analysis);
         }
     }
-    if (steps.size() > 0 && !steps.contains(step))
+    if (!steps.isEmpty() && !steps.contains(step))
     {
         step = steps.get(0);
     }
