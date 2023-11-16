@@ -715,7 +715,6 @@ ms2/src/org/labkey/ms2/pipeline/MS2PipelineManager.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchForm.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2SearchJobSupport.java -text
-ms2/src/org/labkey/ms2/pipeline/MSPictureUpgradeJob.java -text
 ms2/src/org/labkey/ms2/pipeline/PipelineController.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/ProteinProphetPipelineProvider.java -text
@@ -725,7 +724,6 @@ ms2/src/org/labkey/ms2/pipeline/SearchServiceImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/Sqt2PinTask.java -text
 ms2/src/org/labkey/ms2/pipeline/TPPTask.java -text
 ms2/src/org/labkey/ms2/pipeline/UnknownMS2Run.java -text
-ms2/src/org/labkey/ms2/pipeline/attachMSPictureFiles.jsp -text
 ms2/src/org/labkey/ms2/pipeline/comet/Comet2014ParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/Comet2015ParamsBuilder.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometDefaults.xml -text
