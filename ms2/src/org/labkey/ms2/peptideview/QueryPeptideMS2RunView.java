@@ -119,20 +119,18 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
         ColumnInfo desiredCol = pair.first;
         SQLFragment sql = pair.second;
 
+        SQLFragment result;
         if (queryView.getSelectedNestingOption() != null)
         {
-            SQLFragment result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
-            result.append(sql);
-            result.append(") x");
-            return result;
+            result = new SQLFragment("SELECT SeqId FROM " + MS2Manager.getTableInfoProteinGroupMemberships() + " WHERE ProteinGroupId IN (");
         }
         else
         {
-            SQLFragment result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
-            result.append(sql);
-            result.append(") x");
-            return result;
+            result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
         }
+        result.append(sql);
+        result.append(") x");
+        return result;
     }
 
     @Override
@@ -166,13 +164,13 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
 
     public class PeptideQueryView extends AbstractMS2QueryView
     {
-        private List<DisplayColumn> _additionalDisplayColumns = new ArrayList<>();
+        private final List<DisplayColumn> _additionalDisplayColumns = new ArrayList<>();
 
         public PeptideQueryView(MS2Schema schema, QuerySettings settings, boolean expanded, boolean forExport)
         {
             super(schema, settings, expanded, forExport,
-                    new QueryNestingOption(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId"), FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), getAJAXNestedGridURL()),
-                    new QueryNestingOption(FieldKey.fromParts("SeqId"), FieldKey.fromParts("SeqId", "SeqId"), getAJAXNestedGridURL()));
+                new QueryNestingOption(FieldKey.fromParts("ProteinProphetData", "ProteinGroupId"), FieldKey.fromParts("ProteinProphetData", "ProteinGroupId", "RowId"), getAJAXNestedGridURL()),
+                new QueryNestingOption(FieldKey.fromParts("SeqId"), FieldKey.fromParts("SeqId", "SeqId"), getAJAXNestedGridURL()));
             setShowDetailsColumn(false);
         }
 
@@ -236,11 +234,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
             {
                 runTypes.add(run.getRunType());
             }
-            boolean highestScoreFlag = false;
-            if(_url.getParameter("highestScore") != null)
-            {
-                highestScoreFlag = true;
-            }
+            boolean highestScoreFlag = _url.getParameter("highestScore") != null;
             _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), ContainerFilter.current(schema.getContainer()), runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
             // Manually apply the metadata
             _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<>());
@@ -275,11 +269,10 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
 
         PeptideQueryView view = new PeptideQueryView(schema, settings, true, false);
         DataRegion region = view.createDataRegion();
-        if (!(region instanceof NestableDataRegion))
+        if (!(region instanceof NestableDataRegion rgn))
         {
             throw new NotFoundException("No nesting possible");
         }
-        NestableDataRegion rgn = (NestableDataRegion) region;
 
         DataRegion nestedRegion = rgn.getNestedRegion();
         GridView result = new GridView(nestedRegion, (BindException)null);
