@@ -65,7 +65,7 @@
         <tr>
             <td style="height: 100%; padding-right: 1em" id="ms2RunGrouping">
                 <fieldset>
-                    <legend style="margin-bottom: 2px;">Grouping</legend>
+                    <legend>Grouping</legend>
                     <table class="labkey-data-region-legacy">
                         <tr>
                             <td style="vertical-align: middle;" nowrap>

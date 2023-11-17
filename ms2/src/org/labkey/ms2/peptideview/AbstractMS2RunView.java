@@ -114,13 +114,13 @@ public abstract class AbstractMS2RunView
         return _container;
     }
 
-    protected String getAJAXNestedGridURL()
+    protected ActionURL getAJAXNestedGridURL()
     {
         ActionURL groupURL = _url.clone();
         groupURL.setAction(MS2Controller.GetProteinGroupingPeptidesAction.class);
         groupURL.deleteParameter("proteinGroupingId");
 
-        return groupURL.addParameter("proteinGroupingId", null).toString();
+        return groupURL.addParameter("proteinGroupingId", null);
     }
     
     protected ButtonBar createButtonBar(String whatWeAreSelecting, DataRegion dataRegion)
