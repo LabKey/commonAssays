@@ -56,34 +56,6 @@
             <td class="lk-default-val-header">Negative Bead</td>
         </tr>
 
-        <%  if (!analytes.isEmpty())
-            {
-                int i; for (i = 0; i < analytes.size(); i++)
-                {
-        %>
-            <tr id="<%=h(analytes.get(i))%>">
-                <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
-                <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
-                <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a id="deleteRow<%=i%>"><i class="fa fa-close"></i></a></td>
-            </tr>
-        <%
-                    addHandler("deleteRow" + i, "click", "deleteRow(" + q(analytes.get(i)) + ")");
-                }
-            }
-            else
-            {
-        %>
-            <tr id="InsertRow0">
-                <td><input name="analytes" value="" size=30></td>
-                <td><input name="positivityThresholds" value="" size=20></td>
-                <td><input name="negativeBeads" value="" size=30></td>
-                <td><a id="deleteRow0"><i class="fa fa-close"></i></a></td>
-            </tr>
-        <%
-                addHandler("deleteRow0", "click", "deleteRow('InsertRow0')");
-            }
-        %>
         <tr>
             <td colspan="2">
                 <%= button("Add Row").onClick("addRow();")%>
@@ -101,28 +73,45 @@
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     const rowCount = 1;
-    const table = document.getElementById("defaultValues");
+    let table;
 
-    function addRow() {
+    LABKEY.Utils.onReady(function() {
+        table = document.getElementById("defaultValues");
+        <%  if (!analytes.isEmpty())
+            {
+                int i; for (i = 0; i < analytes.size(); i++)
+                {
+        %>
+        addRow(<%=q(analytes.get(i))%>, <%=q(positivityThresholds.get(i))%>, <%=q(negativeBeads.get(i))%>);
+        <%
+                }
+            }
+            else
+            {
+        %>
+        addRow();
+        <%
+            }
+        %>
+    });
+
+    function addRow(analyte, threshold, bead) {
         const row = table.insertRow(table.rows.length - 1);
-        const rowId = "InsertRow"+rowCount;
-        row.id = rowId;
 
         const analyteCell = row.insertCell(-1);
-        analyteCell.innerHTML = "<input name=\"analytes\" value=\"\" size=30>";
+        analyteCell.innerHTML = "<input name=\"analytes\" value=\"" + (analyte || "") + "\" size=30>";
         const positivityCell = row.insertCell(-1);
-        positivityCell.innerHTML = "<input name=\"positivityThresholds\" value=\"\" size=20>";
+        positivityCell.innerHTML = "<input name=\"positivityThresholds\" value=\"" + (threshold || "") + "\" size=20>";
         const negativeBeads = row.insertCell(-1);
-        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"\" size=30>";
+        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"" + (bead || "") + "\" size=30>";
         const deleteRowButton = row.insertCell(-1);
-        deleteRowButton.innerHTML = "<a onclick=deleteRow('" + rowId + "')><i class=\"fa fa-close\"></i></a>";
+        deleteRowButton.innerHTML = "<a><i class=\"fa fa-close\"></i></a>";
+        deleteRowButton['onclick'] = function(event){ deleteRow(event.target.parentElement.parentElement.parentElement); };
     }
 
-    function deleteRow(rowId) {
+    function deleteRow(row) {
         if (table.rows.length > 2)
         {
-            // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
-            const row = document.getElementById(rowId);
             row.parentNode.removeChild(row);
         }
     }
