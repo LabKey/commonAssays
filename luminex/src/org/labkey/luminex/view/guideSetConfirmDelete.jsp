@@ -17,12 +17,16 @@
 %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
+<%@ page import="org.labkey.api.util.Link" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.luminex.LuminexController" %>
+<%@ page import="org.labkey.luminex.LuminexController.GuideSetsDeleteBean.GuideSet" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.tabindex" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -37,10 +41,9 @@
 <%
     JspView<LuminexController.GuideSetsDeleteBean> me = (JspView<LuminexController.GuideSetsDeleteBean>) HttpView.currentView();
     LuminexController.GuideSetsDeleteBean bean = me.getModelBean();
-    List<LuminexController.GuideSetsDeleteBean.GuideSet> guideSets = bean.getGuideSets();
+    List<GuideSet> guideSets = bean.getGuideSets();
 
-    ActionURL successUrl = bean.getSuccessActionURL(
-            new ActionURL(LuminexController.ManageGuideSetAction.class, getContainer()));
+    ActionURL successUrl = bean.getSuccessActionURL(new ActionURL(LuminexController.ManageGuideSetAction.class, getContainer()));
     ActionURL cancelUrl = bean.getCancelActionURL(successUrl);
 %>
 
@@ -55,14 +58,23 @@
     <p>Are you sure you want to delete the following guide set<%=h(guideSets.size()!=1 ? "s" : "")%>?</p>
 
     <ul>
-        <% for (LuminexController.GuideSetsDeleteBean.GuideSet gs : guideSets) { %>
-            <li><a href="#" tabindex="-1" onclick="createGuideSetWindow('<%=bean.getProtocol().getRowId()%>','<%=gs.getGuideSetId()%>', false)">Guide Set <%=gs.getGuideSetId()%>: <%= h(gs.getComment()) %></a></li>
+        <% for (GuideSet gs : guideSets) { %>
+            <li>
+            <%
+                new Link.LinkBuilder("Guide Set " + gs.getGuideSetId() + ": " + gs.getComment())
+                    .href("#")
+                    .attributes(Map.of(tabindex.name(), "-1"))
+                    .onClick("createGuideSetWindow(" + bean.getProtocol().getRowId() + ", " + gs.getGuideSetId() + ", false)")
+                    .appendTo(out);
+            %>
+            </li>
             <br>
             Type: <% if (gs.isValueBased()) {%>Value-based<%} else {%>Run-based<%}%>
             <br><br>
             Current Guide Set: <%=h(gs.getCurrent())%>
             <br>
-            <% if (gs.getMemberRuns().size() > 0 ) { %>
+            <%
+                if (!gs.getMemberRuns().isEmpty()) { %>
                 <br>
                 Member Runs:
                 <ul>
@@ -70,8 +82,12 @@
                         <li><%=h(run)%></li>
                     <% } %>
                 </ul>
-            <% } %>
-            <% if (gs.getUserRuns().size() > 0 ) { %>
+            <%
+                }
+
+                if (!gs.getUserRuns().isEmpty())
+                {
+            %>
                 <br>
                 User Runs:
                 <ul>
@@ -88,7 +104,9 @@
                         {
                     %>
                             <li>... [Showing first <%=len%> runs, <%=gs.getUserRuns().size()%> total]</li>
-                    <%  } %>
+            <%
+                }
+            %>
                 </ul>
             <% } %>
             <br>
