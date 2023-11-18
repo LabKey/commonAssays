@@ -51,13 +51,13 @@ import static org.junit.Assert.assertEquals;
 @BaseWebDriverTest.ClassTimeout(minutes = 20) // Positivity uploads can take a while
 public final class LuminexPositivityTest extends LuminexTest
 {
-    private static List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
+    private static final List<String> _analyteNames = Arrays.asList("MyAnalyte", "Blank");
     private int _expectedThresholdValue = 100;
     private int _newThresholdValue = 100;
     private Boolean _expectedNegativeControlValue = false;
     private Boolean _newNegativeControlValue = false;
-    private static String _negControlAnalyte = _analyteNames.get(1);
-    protected static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/description_parsing_example.pl");
+    private static final String _negControlAnalyte = _analyteNames.get(1);
+    private static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/description_parsing_example.pl");
     private static final String RUN_ID_BASE = "Positivity";
 
     @BeforeClass

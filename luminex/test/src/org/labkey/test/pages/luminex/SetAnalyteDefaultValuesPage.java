@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.Locators;
-import org.labkey.test.WebDriverWrapper;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
@@ -28,7 +27,7 @@ import java.util.List;
 
 public class SetAnalyteDefaultValuesPage
 {
-    private BaseWebDriverTest _test;
+    private final BaseWebDriverTest _test;
 
     public SetAnalyteDefaultValuesPage(BaseWebDriverTest test)
     {
@@ -72,7 +71,10 @@ public class SetAnalyteDefaultValuesPage
 
     public List<AnalyteDefault> getAnalyteDefaults()
     {
-        List<WebElement> defaultValueRows = Locator.id("defaultValues").append(Locator.tag("tr").withAttribute("id")).findElements(_test.getDriver());
+        // Find all the rows with "analytes" inputs
+        List<WebElement> defaultValueRows = Locator.id("defaultValues")
+            .append(Locator.tag("tr").withChild(Locator.tag("td").withChild(Locator.tagWithName("input", "analytes"))))
+            .findElements(_test.getDriver());
         List<AnalyteDefault> defaultValues = new ArrayList<>();
 
         for (WebElement row : defaultValueRows)
@@ -102,9 +104,9 @@ public class SetAnalyteDefaultValuesPage
     {
         public static final Integer DEFAULT_POSITIVITY_THRESHOLD = 100;
 
-        private String _analyteName;
-        private Integer _positivityThreshold;
-        private String _negativeBead;
+        private final String _analyteName;
+        private final Integer _positivityThreshold;
+        private final String _negativeBead;
 
         public AnalyteDefault(String analyteName)
         {
