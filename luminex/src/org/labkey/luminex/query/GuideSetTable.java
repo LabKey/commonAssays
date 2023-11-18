@@ -114,8 +114,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         detailsCol.setDisplayColumnFactory(colInfo ->
         {
             Collection<String> dependencies = Arrays.asList("Ext4", "luminex/GuideSetWindow.js");
-            String javaScriptEvent = "onclick=\"createGuideSetWindow(${ProtocolId:jsString}, ${RowId:jsString}, true);\"";
-            return new JavaScriptDisplayColumn(colInfo, dependencies, javaScriptEvent, "labkey-text-link")
+            String onClickJavaScript = "createGuideSetWindow(${ProtocolId:jsString}, ${RowId:jsString}, true);";
+            return new JavaScriptDisplayColumn(colInfo, dependencies, onClickJavaScript, "labkey-text-link")
             {
                 @NotNull
                 @Override

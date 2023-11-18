@@ -47,16 +47,15 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.PopupMenu;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
-import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.LuminexDataHandler;
-import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.model.GuideSet;
+import org.labkey.luminex.model.Titration;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -121,54 +120,44 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 
         var ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("TitrationId")));
         ljPlots.setTextAlign("left");
-        ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+        ljPlots.setDisplayColumnFactory(colInfo -> {
+            // using JavaScriptDisplayColumn for dependencies
+            return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
-                List<String> dependencyList = new ArrayList<>();
-                dependencyList.add("clientapi/ext3");
-                dependencyList.add("vis/vis");
-                dependencyList.add("luminex/LeveyJenningsPlotHelpers.js");
-                dependencyList.add("luminex/LeveyJenningsReport.css");
-
-                // using JavaScriptDisplayColumn for dependencies
-                return new JavaScriptDisplayColumn(colInfo, Collections.unmodifiableList(dependencyList), "")
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
                 {
-                    @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                    {
-                        int protocolId = schema.getProtocol().getRowId();
-                        int analyte = (int)ctx.get("analyte");
-                        int titration = (int)ctx.get("titration");
+                    int protocolId = schema.getProtocol().getRowId();
+                    int analyte = (int)ctx.get("analyte");
+                    int titration = (int)ctx.get("titration");
 
-                        String jsFuncCall = "LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration'); return false;";
+                    String jsFuncCall = "LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','Titration'); return false;";
 
-                        NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
-                        ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
-                        if (curveTypes.contains(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
-                            ljPlotsNav.addChild(new NavTree("EC50 - 4PL").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL")));
-                        if (curveTypes.contains(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
-                            ljPlotsNav.addChild(new NavTree("EC50 - 5PL Rumi").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL")));
-                        ljPlotsNav.addChild(new NavTree("AUC").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "AUC")));
-                        ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
+                    NavTree ljPlotsNav = new NavTree("Levey-Jennings Plot Menu");
+                    ljPlotsNav.setImage(AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png", 27, 20);
+                    if (curveTypes.contains(StatsService.CurveFitType.FOUR_PARAMETER.getLabel()))
+                        ljPlotsNav.addChild(new NavTree("EC50 - 4PL").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC504PL")));
+                    if (curveTypes.contains(StatsService.CurveFitType.FIVE_PARAMETER.getLabel()))
+                        ljPlotsNav.addChild(new NavTree("EC50 - 5PL Rumi").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "EC505PL")));
+                    ljPlotsNav.addChild(new NavTree("AUC").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "AUC")));
+                    ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
 
-                        PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                        ljPlotsMenu.renderMenuButton(ctx, out, false, null);
-                    }
+                    PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
+                    ljPlotsMenu.renderMenuButton(ctx, out, false, null);
+                }
 
-                    @Override
-                    public boolean isSortable()
-                    {
-                        return false;
-                    }
+                @Override
+                public boolean isSortable()
+                {
+                    return false;
+                }
 
-                    @Override
-                    public boolean isFilterable()
-                    {
-                        return false;
-                    }
-                };
-            }
+                @Override
+                public boolean isFilterable()
+                {
+                    return false;
+                }
+            };
         });
 
         // set the default columns for this table to be those used for the QC Report
