@@ -56,23 +56,34 @@
             <td class="lk-default-val-header">Negative Bead</td>
         </tr>
 
-        <% if (!analytes.isEmpty()) { %>
-            <% int i; for (i = 0; i < analytes.size(); i++) { %>
+        <%  if (!analytes.isEmpty())
+            {
+                int i; for (i = 0; i < analytes.size(); i++)
+                {
+        %>
             <tr id="<%=h(analytes.get(i))%>">
                 <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
                 <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
                 <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a onclick="deleteRow('<%=h(analytes.get(i))%>')"><i class="fa fa-close"></i></a></td>
+                <td><a id="deleteRow<%=i%>"><i class="fa fa-close"></i></a></td>
             </tr>
-            <% } %>
-        <% } else { %>
+        <%
+                    addHandler("deleteRow" + i, "click", "deleteRow(" + q(analytes.get(i)) + ")");
+                }
+            }
+            else
+            {
+        %>
             <tr id="InsertRow0">
                 <td><input name="analytes" value="" size=30></td>
                 <td><input name="positivityThresholds" value="" size=20></td>
                 <td><input name="negativeBeads" value="" size=30></td>
-                <td><a onclick="deleteRow('InsertRow0')"><i class="fa fa-close"></i></a></td>
+                <td><a id="deleteRow0"><i class="fa fa-close"></i></a></td>
             </tr>
-        <% } %>
+        <%
+                addHandler("deleteRow0", "click", "deleteRow('InsertRow0')");
+            }
+        %>
         <tr>
             <td colspan="2">
                 <%= button("Add Row").onClick("addRow();")%>
