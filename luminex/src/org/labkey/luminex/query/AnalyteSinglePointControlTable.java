@@ -42,27 +42,22 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Pair;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
-import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.LuminexDataHandler;
-import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Analyte;
+import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.GuideSet;
+import org.labkey.luminex.model.SinglePointControl;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * User: gktaylor
- * Date: Aug 9, 2013
- */
 public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 {
     public AnalyteSinglePointControlTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filterTable)
@@ -120,46 +115,36 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
         // add LJ plot column
         var ljPlots = addWrapColumn("L-J Plots", getRealTable().getColumn(FieldKey.fromParts("SinglePointControlId")));
-        ljPlots.setDisplayColumnFactory(new DisplayColumnFactory(){
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+        ljPlots.setDisplayColumnFactory(colInfo -> {
+            // using JavaScriptDisplayColumn for dependencies
+            return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
-                List<String> dependencyList = new ArrayList<>();
-                dependencyList.add("clientapi/ext3");
-                dependencyList.add("vis/vis");
-                dependencyList.add("luminex/LeveyJenningsPlotHelpers.js");
-                dependencyList.add("luminex/LeveyJenningsReport.css");
-
-                // using JavaScriptDisplayColumn for dependencies
-                return new JavaScriptDisplayColumn(colInfo, Collections.unmodifiableList(dependencyList), "")
+                @Override
+                public void renderGridCellContents(RenderContext ctx, Writer out)
                 {
-                    @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                    {
-                        int protocolId = schema.getProtocol().getRowId();
-                        int analyte = (int)ctx.get("analyte");
-                        int singlePointControl = (int)ctx.get("singlePointControl");
+                    int protocolId = schema.getProtocol().getRowId();
+                    int analyte = (int)ctx.get("analyte");
+                    int singlePointControl = (int)ctx.get("singlePointControl");
+                    String onClickPattern = "LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePoint');";
+                    String onClick = String.format(onClickPattern, protocolId, analyte, singlePointControl, "MFI");
 
-                        String linkTag = "<a href=\"javascript:LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePoint')\">";
+                    HtmlString html = HtmlString.unsafe(String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png"));
 
-                        out.write( String.format(linkTag, protocolId, analyte, singlePointControl, "MFI") );
-                        out.write( String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png") );
-                        out.write( "</a>" );
-                    }
+                    renderLink(out, html, onClick, null);
+                }
 
-                    @Override
-                    public boolean isSortable()
-                    {
-                        return false;
-                    }
+                @Override
+                public boolean isSortable()
+                {
+                    return false;
+                }
 
-                    @Override
-                    public boolean isFilterable()
-                    {
-                        return false;
-                    }
-                };
-            }
+                @Override
+                public boolean isFilterable()
+                {
+                    return false;
+                }
+            };
         });
 
         // set the default columns for this table to be those used for the QC Report

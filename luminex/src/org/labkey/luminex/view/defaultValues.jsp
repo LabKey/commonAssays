@@ -30,12 +30,11 @@
     List<String> positivityThresholds = bean.getPositivityThresholds();
     List<String> negativeBeads = bean.getNegativeBeads();
 %>
-
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.requiresCss("fileAddRemoveIcon.css");
 </script>
 
-<style type="text/css">
+<style>
     table.lk-default-val td {
         padding: 0 3px 3px 0;
     }
@@ -57,30 +56,6 @@
             <td class="lk-default-val-header">Negative Bead</td>
         </tr>
 
-        <% if (analytes.size() > 0) { %>
-            <% int i; for (i=0; i<analytes.size()-1; i++ ) { %>
-            <tr id="<%=h(analytes.get(i))%>">
-                <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
-                <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
-                <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a onclick="deleteRow('<%=h(analytes.get(i))%>')"><i class="fa fa-close"></i></a></td>
-            </tr>
-            <% } %>
-            <%-- Treat last row as special case  (and yes I hate the copy pasta here too) --%>
-            <tr id="<%=h(analytes.get(i))%>">
-                <td><input name="analytes" value="<%=h(analytes.get(i))%>" size=30></td>
-                <td><input name="positivityThresholds" value="<%=h(positivityThresholds.get(i))%>" size=20></td>
-                <td><input name="negativeBeads" value="<%=h(negativeBeads.get(i))%>" size=30></td>
-                <td><a onclick="deleteRow('<%=h(analytes.get(i))%>')"><i class="fa fa-close"></i></a></td>
-            </tr>
-        <% } else { %>
-            <tr id="InsertRow0">
-                <td><input name="analytes" value="" size=30></td>
-                <td><input name="positivityThresholds" value="" size=20></td>
-                <td><input name="negativeBeads" value="" size=30></td>
-                <td><a onclick="deleteRow('InsertRow0')"><i class="fa fa-close"></i></a></td>
-            </tr>
-        <% } %>
         <tr>
             <td colspan="2">
                 <%= button("Add Row").onClick("addRow();")%>
@@ -97,40 +72,46 @@
 </labkey:form>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-    var rowCount = 1;
-    var table = document.getElementById("defaultValues");
+    let table;
 
-    function addRow() {
-        var row = table.insertRow(table.rows.length - 1);
-        var rowId = "InsertRow"+rowCount;
-        row.id = rowId;
+    LABKEY.Utils.onReady(function() {
+        table = document.getElementById("defaultValues");
+        <%  if (!analytes.isEmpty())
+            {
+                int i; for (i = 0; i < analytes.size(); i++)
+                {
+        %>
+        addRow(<%=q(analytes.get(i))%>, <%=q(positivityThresholds.get(i))%>, <%=q(negativeBeads.get(i))%>);
+        <%
+                }
+            }
+            else
+            {
+        %>
+        addRow();
+        <%
+            }
+        %>
+    });
 
-        var analyteCell = row.insertCell(-1);
-        analyteCell.innerHTML = "<input name=\"analytes\" value=\"\" size=30>";
-        var positivityCell = row.insertCell(-1);
-        positivityCell.innerHTML = "<input name=\"positivityThresholds\" value=\"\" size=20>";
-        var negativeBeads = row.insertCell(-1);
-        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"\" size=30>";
-        var deleteRowButton = row.insertCell(-1);
-        deleteRowButton.innerHTML = "<a onclick=deleteRow('" + rowId + "')><i class=\"fa fa-close\"></i></a>";
+    function addRow(analyte, threshold, bead) {
+        const row = table.insertRow(table.rows.length - 1);
+
+        const analyteCell = row.insertCell(-1);
+        analyteCell.innerHTML = "<input name=\"analytes\" value=\"" + (analyte || "") + "\" size=30>";
+        const positivityCell = row.insertCell(-1);
+        positivityCell.innerHTML = "<input name=\"positivityThresholds\" value=\"" + (threshold || "") + "\" size=20>";
+        const negativeBeads = row.insertCell(-1);
+        negativeBeads.innerHTML = "<input name=\"negativeBeads\" value=\"" + (bead || "") + "\" size=30>";
+        const deleteRowButton = row.insertCell(-1);
+        deleteRowButton.innerHTML = "<a><i class=\"fa fa-close\"></i></a>";
+        deleteRowButton['onclick'] = function(event){ deleteRow(event.target.parentElement.parentElement.parentElement); };
     }
 
-    function deleteRow(rowId) {
+    function deleteRow(row) {
         if (table.rows.length > 2)
         {
-            // http://stackoverflow.com/questions/4967223/javascript-delete-a-row-from-a-table-by-id
-            var row = document.getElementById(rowId);
             row.parentNode.removeChild(row);
         }
-    }
-
-    function getLastRow()
-    {
-        return table.rows[ table.rows.length - 1 ];
-    }
-
-    function getLastCell(row)
-    {
-        return row.cells[ row.cells.length - 1];
     }
 </script>

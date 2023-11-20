@@ -23,16 +23,25 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
+import org.labkey.api.util.DOM;
+import org.labkey.api.util.DOM.Attribute;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.Link;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
 
-/**
- * User: jeckels
- * Date: 6/29/11
- */
+import static org.labkey.api.util.DOM.Attribute.alt;
+import static org.labkey.api.util.DOM.Attribute.height;
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.Attribute.title;
+import static org.labkey.api.util.DOM.Attribute.width;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.PageFlowUtil.jsString;
+
 public class ExclusionUIDisplayColumn extends DataColumn
 {
     private final FieldKey _typeFieldKey;
@@ -90,37 +99,36 @@ public class ExclusionUIDisplayColumn extends DataColumn
 
         String id = "__changeExclusions__" + wellID;
 
-        // add onclick handler to call the well exclusion window creation function
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
+        Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
+
+        HtmlString img = excluded.booleanValue() ?
+            getImgTag("excluded.png", exclusionComment, id, canEdit) :
+            getImgTag("included.png", "Click to add a well or replicate group exclusion", id, canEdit);
+
         if (canEdit)
         {
-            out.write("<a onclick=\"openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", '" + wellID + "', "
-                + (description == null ? null : "'" + description + "'") + ", '" + type + "');\">");
-        }
-
-        Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
-        if (excluded.booleanValue())
-        {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/exclusion/excluded.png\" height=\"16\" width=\"16\" id=\""+id+"\"");
-            if (canEdit)
-            {
-                String tooltip = PageFlowUtil.filter(exclusionComment);
-                out.write("title=\"" + tooltip + "\" alt=\"" + tooltip + "\" ");
-            }
-            out.write(" />");
+            // add onclick handler to call the well exclusion window creation function
+            String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
+                jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
+            new Link.LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(out);
         }
         else
         {
-            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/luminex/exclusion/included.png\" height=\"16\" width=\"16\"  id=\""+id+"\"");
-            if (canEdit)
-            {
-                out.write("title=\"Click to add a well or replicate group exclusion\" alt=\"Click to add a well or replicate group exclusion\" ");
-            }
-            out.write(" />");
+            out.write(img.toString());
         }
+    }
+
+    private HtmlString getImgTag(String png, String titleAlt, String id, boolean canEdit)
+    {
+        DOM._Attributes att = at(src, AppProps.getInstance().getContextPath() + "/luminex/exclusion/" + png)
+            .at(height, 16)
+            .at(width, 16)
+            .at(Attribute.id, id);
+
         if (canEdit)
-        {
-            out.write("</a>");
-        }
+            att.at(title, titleAlt).at(alt, titleAlt);
+
+        return DOM.createHtmlFragment(IMG(att));
     }
 }
