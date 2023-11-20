@@ -40,11 +40,8 @@ import static org.labkey.api.util.DOM.Attribute.title;
 import static org.labkey.api.util.DOM.Attribute.width;
 import static org.labkey.api.util.DOM.IMG;
 import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.PageFlowUtil.jsString;
 
-/**
- * User: jeckels
- * Date: 6/29/11
- */
 public class ExclusionUIDisplayColumn extends DataColumn
 {
     private final FieldKey _typeFieldKey;
@@ -112,8 +109,8 @@ public class ExclusionUIDisplayColumn extends DataColumn
         if (canEdit)
         {
             // add onclick handler to call the well exclusion window creation function
-            String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", '" + wellID +
-                "', " + (description == null ? null : "'" + description + "'") + ", '" + type + "');";
+            String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
+                jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
             new Link.LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(out);
         }
         else
