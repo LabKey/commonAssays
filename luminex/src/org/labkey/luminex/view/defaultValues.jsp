@@ -34,7 +34,7 @@
     LABKEY.requiresCss("fileAddRemoveIcon.css");
 </script>
 
-<style type="text/css">
+<style>
     table.lk-default-val td {
         padding: 0 3px 3px 0;
     }
@@ -72,7 +72,6 @@
 </labkey:form>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-    const rowCount = 1;
     let table;
 
     LABKEY.Utils.onReady(function() {
@@ -114,15 +113,5 @@
         {
             row.parentNode.removeChild(row);
         }
-    }
-
-    function getLastRow()
-    {
-        return table.rows[ table.rows.length - 1 ];
-    }
-
-    function getLastCell(row)
-    {
-        return row.cells[ row.cells.length - 1];
     }
 </script>
