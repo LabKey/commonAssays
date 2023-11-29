@@ -111,6 +111,8 @@ public class AnalysisScriptController extends BaseFlowController
 {
     private static final Logger _log = LogHelper.getLogger(AnalysisScriptController.class, "Flow analysis API controller");
 
+    private static final String ACCELERATION_ISSUE_MSG = "Couldn't accelerate the import process, the co-located .fcs files don't match the samples in the selected .wsp file.";
+
     public enum Action
     {
         chooseRunsToAnalyze,
@@ -967,7 +969,7 @@ public class AnalysisScriptController extends BaseFlowController
                 form.setSelectFCSFilesOption(SelectFCSFileOption.None);
 
             // If import folder has a 1:1 fcs file for each sample, then skip ahead to the analysis
-            if (!errors.hasErrors() && canAccelerate(form) && !form.isGoBack())
+            if (!errors.hasErrors() && canAccelerate(form, errors) && !form.isGoBack())
                 accelerateWizard(form, errors, rt);
             else
                 form.setWizardStep(ImportAnalysisStep.SELECT_FCSFILES);
@@ -999,10 +1001,11 @@ public class AnalysisScriptController extends BaseFlowController
 
         /**
          * For now we will only accelerate the wizard iff there is a 1:1 mapping of workspace samples and data files
-         * @param form wizard form
+         * @param form   wizard form
+         * @param errors error collection
          * @return true iff there is a 1:1 mapping of workspace samples and data files
          */
-        private boolean canAccelerate(ImportAnalysisForm form)
+        private boolean canAccelerate(ImportAnalysisForm form, BindException errors)
         {
             List<String> sampleNames = form.getWorkspace().getWorkspaceObject().getSamples().stream().map(ISampleInfo::getSampleName).toList();
             Set<String> fileNames;
@@ -1019,37 +1022,25 @@ public class AnalysisScriptController extends BaseFlowController
             }
             catch (IOException e)
             {
-                _log.debug("Failed to accelerate import wizard, unable to resolve fcs files from workspace");
+                String msg = "Could not accelerate flow import, unable to resolve fcs files.";
+                errors.reject(ERROR_MSG, msg);
+                _log.debug(msg + ". DataFolder: " + dataFolder);
                 return false;
             }
 
-            if (sampleNames.size() > fileNames.size())
+            String unmatchedSamples = sampleNames.stream().filter(s -> !fileNames.remove(s)).collect(Collectors.joining(", "));
+            String unmatchedFiles = String.join(", ", fileNames);
+            if (!PageFlowUtil.empty(unmatchedSamples) || !PageFlowUtil.empty(unmatchedFiles))
             {
-                _log.debug("Failed to accelerate import wizard, more samples than data files supplied");
-                return false;
+                String msg = ACCELERATION_ISSUE_MSG;
+                msg += !PageFlowUtil.empty(unmatchedFiles) ? String.format("\nUnmatched wsp samples: %1$s.", unmatchedSamples) : "";
+                msg += !PageFlowUtil.empty(unmatchedFiles) ? String.format("\nAdditional fcs file(s) supplied: %1$s.", unmatchedFiles) : "";
+
+                errors.reject(ERROR_MSG, msg);
+                _log.debug(msg);
             }
 
-            if (sampleNames.size() < fileNames.size())
-            {
-                _log.debug("Failed to accelerate import wizard, more data files than samples supplied");
-                return false;
-            }
-
-            // Confirm 1:1 mapping of Samples to data files
-            for (String s:sampleNames)
-                if (!fileNames.remove(s))
-                {
-                    _log.debug(String.format("Failed to accelerate import wizard, sample [%1$s] does not have a corresponding data file.", s));
-                    return false;
-                }
-
-            if (!fileNames.isEmpty())
-            {
-                _log.debug(String.format("Failed to accelerate import wizard, additional data files supplied: %1$s", String.join(", ", fileNames)));
-                return false;
-            }
-
-            return true;
+            return !errors.hasErrors();
         }
 
         private void stepSelectFCSFiles(ImportAnalysisForm form, BindException errors)
