@@ -882,13 +882,6 @@ public class MS2Test extends AbstractMS2ImportTest
         searchRunsTable.clickHeaderMenu("Compare", "ProteinProphet");
         clickButton("Compare");
 
-        click(Locator.linkWithText("Comparison Overview"));
-        waitForText(1000, RUN_GROUP1_NAME2);
-        assertTextPresent(RUN_GROUP1_NAME2,
-                RUN_GROUP2_NAME,
-                DEFAULT_EXPERIMENT);
-        selectOptionByValue(Locator.xpath("//div[text() = 'A']/../../../td/select"), "group1");
-
         log("Test Customize View");
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("SeqId/Mass", "Protein Mass");

@@ -22,15 +22,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.exp.api.ExpExperiment;
-import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.exp.api.ExperimentUrls;
-import org.labkey.api.gwt.client.model.GWTComparisonGroup;
-import org.labkey.api.gwt.client.model.GWTComparisonMember;
-import org.labkey.api.gwt.client.model.GWTComparisonResult;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -48,14 +40,9 @@ import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.compare.CompareDataRegion;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  * User: jeckels
@@ -65,10 +52,8 @@ public abstract class AbstractRunCompareView extends QueryView
 {
     protected List<MS2Run> _runs;
     protected boolean _forExport;
-    private SimpleFilter _runFilter = new SimpleFilter();
+    private final SimpleFilter _runFilter = new SimpleFilter();
     private List<FieldKey> _columns;
-
-    private Collection<String> _runErrors = new ArrayList<>();
 
     public AbstractRunCompareView(ViewContext context, int runListIndex, boolean forExport, String tableName)
     {
@@ -84,7 +69,6 @@ public abstract class AbstractRunCompareView extends QueryView
         catch (RunListException e)
         {
             _runs = null;
-            _runErrors = e.getMessages();
         }
 
         if (_runs != null)
@@ -124,79 +108,6 @@ public abstract class AbstractRunCompareView extends QueryView
         return (MS2Schema)super.getSchema();
     }
 
-    protected abstract String getGroupingColumnName();
-
-    public GWTComparisonResult createCompareResult()
-            throws IOException
-    {
-        List<FieldKey> cols = new ArrayList<>();
-        cols.add(FieldKey.fromParts(getGroupingColumnName()));
-        cols.add(FieldKey.fromParts("Run", "RowId"));
-        setColumns(cols);
-
-        StringBuilder sb = new StringBuilder();
-
-        try (TSVGridWriter tsvWriter = getTsvWriter())
-        {
-            tsvWriter.setHeaderRowVisible(false);
-            tsvWriter.write(sb);
-
-            StringTokenizer lines = new StringTokenizer(sb.toString(), "\n");
-            int proteinCount = lines.countTokens();
-            GWTComparisonMember[] gwtRuns = new GWTComparisonMember[_runs.size()];
-            Map<Integer, GWTComparisonGroup> runGroups = new HashMap<>();
-            boolean[][] hits = new boolean[_runs.size()][];
-            for (int i = 0; i < _runs.size(); i++)
-            {
-                hits[i] = new boolean[proteinCount];
-            }
-
-            int index = 0;
-            while (lines.hasMoreTokens())
-            {
-                String line = lines.nextToken();
-                String[] values = line.split("\\t");
-                for (int i = 0; i < _runs.size() && i + 1 < values.length; i++)
-                {
-                    hits[i][index] = !"".equals(values[i + 1].trim());
-                }
-                index++;
-            }
-
-            for (int runIndex = 0; runIndex < _runs.size(); runIndex++)
-            {
-                MS2Run run = _runs.get(runIndex);
-                ActionURL runURL = MS2Controller.getShowRunURL(getUser(), run.getContainer(), run.getRun());
-                String lsid = run.getExperimentRunLSID();
-                ExpRun expRun = null;
-                if (lsid != null)
-                {
-                    expRun = ExperimentService.get().getExpRun(lsid);
-                }
-                GWTComparisonMember gwtRun = new GWTComparisonMember(run.getDescription(), hits[runIndex]);
-                gwtRun.setUrl(runURL.toString());
-                if (expRun != null)
-                {
-                    for (ExpExperiment experiment : expRun.getExperiments())
-                    {
-                        GWTComparisonGroup comparisonGroup = runGroups.get(experiment.getRowId());
-                        if (comparisonGroup == null)
-                        {
-                            comparisonGroup = new GWTComparisonGroup();
-                            comparisonGroup.setURL(PageFlowUtil.urlProvider(ExperimentUrls.class).getExperimentDetailsURL(experiment.getContainer(), experiment).toString());
-                            comparisonGroup.setName(experiment.getName());
-                            runGroups.put(experiment.getRowId(), comparisonGroup);
-                        }
-                        comparisonGroup.addMember(gwtRun);
-                    }
-                }
-                gwtRuns[runIndex] = gwtRun;
-            }
-
-            return new GWTComparisonResult(gwtRuns, runGroups.values().toArray(new GWTComparisonGroup[runGroups.size()]), proteinCount, "Runs");
-        }
-    }
-    
     @Override
     public DataView createDataView()
     {
@@ -348,6 +259,4 @@ public abstract class AbstractRunCompareView extends QueryView
 
         return ret;
     }
-
-    public abstract String getComparisonName();
 }

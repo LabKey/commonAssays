@@ -16,15 +16,11 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.data.CrosstabTable;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
-
-import java.sql.SQLException;
 
 /**
  * User: jeckels
@@ -41,12 +37,6 @@ public class NormalizedProteinProphetCrosstabView extends AbstractQueryCrosstabV
     protected TableInfo createTable()
     {
         return _schema.createNormalizedProteinProphetComparisonTable(_form, getViewContext());
-    }
-
-    @Override
-    protected FieldKey getComparisonColumn()
-    {
-        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_ProteinGroupId");
     }
 
     @Override

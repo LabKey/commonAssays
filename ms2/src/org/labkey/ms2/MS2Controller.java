@@ -1925,20 +1925,10 @@ public class MS2Controller extends SpringActionController
             prefs.put(PeptideFilteringFormElements.proteinProphetProbability.name(), form.getProteinProphetProbability() == null ? null : form.getProteinProphetProbability().toString());
             savePreferences(prefs);
 
-            Map<String, String> props = new HashMap<>();
-            props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
-            props.put(PROTEIN_GROUPS_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PROTEIN_GROUPS_FILTER_VIEW_NAME));
-            props.put("comparisonName", "ProteinProphetCrosstab");
-            GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
-            gwtView.setTitle("Comparison Overview");
-            gwtView.setFrame(WebPartView.FrameType.PORTAL);
-            gwtView.enableExpandCollapse("ProteinProphetQueryCompare", true);
-
             gridView.setTitle("Comparison Details");
             gridView.setFrame(WebPartView.FrameType.PORTAL);
 
-            return new VBox(gwtView, gridView);
+            return gridView;
         }
 
         @Override
@@ -2006,25 +1996,10 @@ public class MS2Controller extends SpringActionController
 
             savePreferences(prefs);
 
-            Map<String, String> props = new HashMap<>();
-            VBox result = new VBox();
-            props.put("originalURL", getViewContext().getActionURL().toString());
-            props.put(PEPTIDES_FILTER_VIEW_NAME, getViewContext().getActionURL().getParameter(PEPTIDES_FILTER_VIEW_NAME));
-            props.put("comparisonName", "PeptideCrosstab");
-            ActionURL url = getViewContext().getActionURL();
-            if (null == url.getParameter("targetProtein") || url.getParameter("targetProtein").length()==0)
-            {
-                GWTView gwtView = new GWTView(org.labkey.ms2.client.MS2VennDiagramView.class, props);
-                gwtView.setTitle("Comparison Overview");
-                gwtView.setFrame(WebPartView.FrameType.PORTAL);
-                gwtView.enableExpandCollapse("PeptideQueryCompare", true);
-                result.addView(gwtView);
-            }
             view.setTitle("Comparison Details");
             view.setFrame(WebPartView.FrameType.PORTAL);
 
-            result.addView(view);
-            return result;
+            return view;
         }
 
         @Override
@@ -2540,18 +2515,6 @@ public class MS2Controller extends SpringActionController
 
         return null;
     }
-
-
-    @RequiresPermission(ReadPermission.class)
-    public static class CompareServiceAction extends GWTServiceAction
-    {
-        @Override
-        protected BaseRemoteService createService()
-        {
-            return new CompareServiceImpl(getViewContext());
-        }
-    }
-
 
     @RequiresSiteAdmin
     public class ReloadFastaAction extends FormHandlerAction

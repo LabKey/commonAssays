@@ -19,10 +19,8 @@ package org.labkey.ms2.query;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.CrosstabTable;
-import org.labkey.api.query.FieldKey;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.Sort;
-import org.labkey.api.data.AggregateColumnInfo;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -60,12 +58,6 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
     protected Sort getBaseSort()
     {
         return new Sort(CrosstabTable.getDefaultSortString() + ",Peptide");
-    }
-
-    @Override
-    protected FieldKey getComparisonColumn()
-    {
-        return FieldKey.fromParts(AggregateColumnInfo.NAME_PREFIX + "COUNT_RowId");
     }
 
     @Override

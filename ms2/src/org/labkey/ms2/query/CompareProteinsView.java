@@ -34,21 +34,9 @@ public class CompareProteinsView extends AbstractRunCompareView
     }
 
     @Override
-    protected String getGroupingColumnName()
-    {
-        return "SeqId";
-    }
-
-    @Override
     protected String getGroupHeader()
     {
         return "Protein Information";
-    }
-
-    @Override
-    public String getComparisonName()
-    {
-        return "Proteins";
     }
 
     @Override
