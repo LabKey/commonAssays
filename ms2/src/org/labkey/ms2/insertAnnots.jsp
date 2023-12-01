@@ -40,10 +40,12 @@
     <tr>
       <td class="labkey-form-label">Type</td>
       <td>
-       <select name='fileType' onchange="document.getElementById('fastaGuess').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('fastaOrganism').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('uniprotOnly').style.display = 'uniprot' == this.value ? 'table-row' : 'none';">
-          <option value='uniprot' <% if ("uniprot".equals(bean.getFileType())) { %>selected<% } %>>uniprot</option>
-          <option value='fasta' <% if ("fasta".equals(bean.getFileType())) { %>selected<% } %>>fasta</option>
-       </select>
+      <%=
+        select().name("fileType").selected(bean.getFileType()).onChange("document.getElementById('fastaGuess').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('fastaOrganism').style.display = ('fasta' == this.value ? 'table-row' : 'none'); document.getElementById('uniprotOnly').style.display = 'uniprot' == this.value ? 'table-row' : 'none';")
+                .addOption("uniprot", "uniprot")
+                .addOption("fasta", "fasta")
+                .build()
+      %>
       </td>
     </tr>
     <tr id="fastaOrganism" style="display: <%=h("fasta".equals(bean.getFileType()) ? "table-row" : "none")%>;">
