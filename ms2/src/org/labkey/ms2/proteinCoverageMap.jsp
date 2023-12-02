@@ -339,9 +339,7 @@
         </div>
 <% } %>
 
-
-
-<script type="application/javascript" nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.ms2.ProteinCoverageMap.registerSelectAll();
 
     <% if (displayLegend)

@@ -37,7 +37,7 @@
 
 <div id="<%=h(appId)%>"></div>
 
-<script type="application/javascript" nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     (function() {
         LABKEY.App.loadApp('elisaRunDetails', <%=q(appId)%>, {
             protocolId: <%=form.getProtocolId()%>,

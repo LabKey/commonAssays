@@ -453,9 +453,11 @@ if (getGraphs().length > 0)
     include(new SetGraphSizeView(), out);
     for (GraphSpec graph : getGraphs())
     {
+        String id = makeId("img_");
+        addHandler(id, "error", "flowImgError(this);");
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
-        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>" onerror="flowImgError(this);">
+        <img id="<%=h(id)%>" style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>">
         </span><wbr>
         <%
     }
@@ -463,7 +465,7 @@ if (getGraphs().length > 0)
 
 
 List<FlowFCSFile> relatedFiles = well.getFCSFileOutputs();
-if (relatedFiles.size() > 0)
+if (!relatedFiles.isEmpty())
 {
     %>
     <br/><br/>

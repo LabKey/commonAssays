@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.util.element.Option" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
@@ -35,7 +36,6 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.util.element.Option" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -240,9 +240,10 @@
             step.addParams(urlGenerateGraph);
         }
         urlGenerateGraph.addParameter("graph", graphspec.toString());
-
+        String id = makeId("img_");
+        addHandler(id, "error", "flowImgError(this);");
 %>
 <%=getScriptTag("Flow/util.js")%>
 <br/>
-<p><img src="<%=h(urlGenerateGraph)%>" onerror="flowImgError(this);"></p>
+<p><img id="<%=h(id)%>" src="<%=h(urlGenerateGraph)%>"></p>
 <% } %>

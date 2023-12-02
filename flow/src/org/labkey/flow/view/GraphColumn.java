@@ -31,6 +31,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.controllers.FlowParam;
@@ -42,7 +43,6 @@ import java.io.Writer;
 
 import static org.labkey.api.util.DOM.Attribute.alt;
 import static org.labkey.api.util.DOM.Attribute.height;
-import static org.labkey.api.util.DOM.Attribute.onerror;
 import static org.labkey.api.util.DOM.Attribute.src;
 import static org.labkey.api.util.DOM.Attribute.style;
 import static org.labkey.api.util.DOM.Attribute.title;
@@ -166,6 +166,9 @@ public class GraphColumn extends DataColumn
 
         if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Inline)
         {
+            PageConfig pageConfig = HttpView.currentPageConfig();
+            String id = pageConfig.makeId("img_");
+
             SPAN(
                 at(style, "display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize),
                 objectId == null ?
@@ -173,9 +176,10 @@ public class GraphColumn extends DataColumn
                     IMG(
                         at(alt, "Graph of: " + graphSpec).at(title, graphSpec).at(style, "height: " + graphSize + "; width: " + graphSize)
                             .at(src, urlGraph(objectId, graphSpec, ctx.getContainer()))
-                            .at(onerror, "flowImgError(this);").cl("labkey-flow-graph")
+                            .id(id).cl("labkey-flow-graph")
                     )
             ).appendTo(out);
+            pageConfig.addHandler(id, "error", "flowImgError(this);");
             out.write("<wbr>");
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
