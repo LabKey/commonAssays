@@ -451,13 +451,12 @@ if (getGraphs().length > 0)
     final String graphSize = FlowPreference.graphSize.getValue(request);
     %><br/><%
     include(new SetGraphSizeView(), out);
+    getPageConfig().addHandlerForQuerySelector("IMG.labkey-flow-graph", "error", "flowImgError(this);");
     for (GraphSpec graph : getGraphs())
     {
-        String id = makeId("img_");
-        addHandler(id, "error", "flowImgError(this);");
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
-        <img id="<%=h(id)%>" style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>">
+        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>">
         </span><wbr>
         <%
     }

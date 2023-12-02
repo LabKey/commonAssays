@@ -166,9 +166,6 @@ public class GraphColumn extends DataColumn
 
         if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Inline)
         {
-            PageConfig pageConfig = HttpView.currentPageConfig();
-            String id = pageConfig.makeId("img_");
-
             SPAN(
                 at(style, "display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize),
                 objectId == null ?
@@ -176,10 +173,10 @@ public class GraphColumn extends DataColumn
                     IMG(
                         at(alt, "Graph of: " + graphSpec).at(title, graphSpec).at(style, "height: " + graphSize + "; width: " + graphSize)
                             .at(src, urlGraph(objectId, graphSpec, ctx.getContainer()))
-                            .id(id).cl("labkey-flow-graph")
+                            .cl("labkey-flow-graph")
                     )
             ).appendTo(out);
-            pageConfig.addHandler(id, "error", "flowImgError(this);");
+            ensureErrorHandler();
             out.write("<wbr>");
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
@@ -195,6 +192,19 @@ public class GraphColumn extends DataColumn
                 HtmlString imageHtml = DOM.createHtmlFragment(IMG(at(src, urlGraph)));
                 PageFlowUtil.popupHelp(imageHtml, graphSpec).link(iconHtml).width(310).appendTo(out);
             }
+        }
+    }
+
+    private boolean _errorHandlerRegistered = false;
+
+    private void ensureErrorHandler()
+    {
+        if (!_errorHandlerRegistered)
+        {
+            // This handler gets registered once per graph column, but PageConfig collapses multiple identical handlers
+            PageConfig pageConfig = HttpView.currentPageConfig();
+            pageConfig.addHandlerForQuerySelector("IMG.labkey-flow-graph", "error", "flowImgError(this);");
+            _errorHandlerRegistered = true;
         }
     }
 
