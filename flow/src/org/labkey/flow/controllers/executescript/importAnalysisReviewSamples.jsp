@@ -129,8 +129,8 @@ if (groups.size() > 1)
 {
     %>
     <p>
-        <script type="application/javascript" nonce="<%=getScriptNonce()%>">
-            function onGroupChanged(selectedGroup) {
+        <<script type="text/javascript" nonce="<%=getScriptNonce()%>">
+        function onGroupChanged(selectedGroup) {
                 console.log(selectedGroup);
                 importedGroup = selectedGroup || "All Samples";
 

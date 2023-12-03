@@ -47,9 +47,11 @@
             return "N/A";
         ActionURL urlGraph = well.urlFor(WellController.ShowGraphAction.class);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
+        String id = makeId("img_");
+        addHandler(id, "error", "flowImgError(this);");
         return "<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + "\">\n" +
-               "<img style=\"width:" + graphSize + ";height:" + graphSize + ";\" class='labkey-flow-graph' src=\"" + h(urlGraph) + "\" onerror=\"flowImgError(this);\">\n" +
-               "</span><wbr>";
+                "<img id=\"" + id + "\" style=\"width:" + graphSize + ";height:" + graphSize + ";\" class='labkey-flow-graph' src=\"" + h(urlGraph) + "\">\n" +
+                "</span><wbr>";
     }
 %>
 <%=getScriptTag("Flow/util.js")%>
@@ -128,7 +130,7 @@
 
     abstract class Callback
     {
-        String title;
+        final String title;
 
         public Callback(String title)
         {

@@ -451,11 +451,12 @@ if (getGraphs().length > 0)
     final String graphSize = FlowPreference.graphSize.getValue(request);
     %><br/><%
     include(new SetGraphSizeView(), out);
+    getPageConfig().addHandlerForQuerySelector("IMG.labkey-flow-graph", "error", "flowImgError(this);");
     for (GraphSpec graph : getGraphs())
     {
         %>
         <span style="display:inline-block; vertical-align:top; height:<%=h(graphSize)%>px; width:<%=h(graphSize)%>px;">
-        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>" onerror="flowImgError(this);">
+        <img style="width:<%=h(graphSize)%>px; height:<%=h(graphSize)%>px;" class='labkey-flow-graph' src="<%=h(getWell().urlFor(WellController.ShowGraphAction.class).addParameter("graph", graph.toString()))%>">
         </span><wbr>
         <%
     }
@@ -463,7 +464,7 @@ if (getGraphs().length > 0)
 
 
 List<FlowFCSFile> relatedFiles = well.getFCSFileOutputs();
-if (relatedFiles.size() > 0)
+if (!relatedFiles.isEmpty())
 {
     %>
     <br/><br/>

@@ -31,6 +31,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.controllers.FlowParam;
@@ -42,7 +43,6 @@ import java.io.Writer;
 
 import static org.labkey.api.util.DOM.Attribute.alt;
 import static org.labkey.api.util.DOM.Attribute.height;
-import static org.labkey.api.util.DOM.Attribute.onerror;
 import static org.labkey.api.util.DOM.Attribute.src;
 import static org.labkey.api.util.DOM.Attribute.style;
 import static org.labkey.api.util.DOM.Attribute.title;
@@ -173,9 +173,10 @@ public class GraphColumn extends DataColumn
                     IMG(
                         at(alt, "Graph of: " + graphSpec).at(title, graphSpec).at(style, "height: " + graphSize + "; width: " + graphSize)
                             .at(src, urlGraph(objectId, graphSpec, ctx.getContainer()))
-                            .at(onerror, "flowImgError(this);").cl("labkey-flow-graph")
+                            .cl("labkey-flow-graph")
                     )
             ).appendTo(out);
+            ensureErrorHandler();
             out.write("<wbr>");
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
@@ -191,6 +192,19 @@ public class GraphColumn extends DataColumn
                 HtmlString imageHtml = DOM.createHtmlFragment(IMG(at(src, urlGraph)));
                 PageFlowUtil.popupHelp(imageHtml, graphSpec).link(iconHtml).width(310).appendTo(out);
             }
+        }
+    }
+
+    private boolean _errorHandlerRegistered = false;
+
+    private void ensureErrorHandler()
+    {
+        if (!_errorHandlerRegistered)
+        {
+            // This handler gets registered once per graph column, but PageConfig collapses multiple identical handlers
+            PageConfig pageConfig = HttpView.currentPageConfig();
+            pageConfig.addHandlerForQuerySelector("IMG.labkey-flow-graph", "error", "flowImgError(this);");
+            _errorHandlerRegistered = true;
         }
     }
 
