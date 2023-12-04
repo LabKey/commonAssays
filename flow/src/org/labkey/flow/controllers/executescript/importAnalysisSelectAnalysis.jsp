@@ -45,7 +45,6 @@ Upload file from your computer
     <% addHandler("workspace_file", "change", "selectUploadWorkspace();"); %>
     <input type="file" id="workspace_file" name="workspace_file" style="border: none; background-color: transparent;">
     <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-        //
         function selectUploadWorkspace()
         {
             document.getElementById("uploadWorkspace").checked = true;
