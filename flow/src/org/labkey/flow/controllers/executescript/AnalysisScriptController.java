@@ -529,7 +529,7 @@ public class AnalysisScriptController extends BaseFlowController
 
     /**
      * This action acts as a bridge between FlowPipelineProvider and ImportAnalysisAction
-     * by setting the 'workspace_path' parameter and POSTs to the first wizard step.
+     * by setting the 'workspace.path' parameter and POSTs to the first wizard step.
      */
     @RequiresPermission(UpdatePermission.class)
     public class ImportAnalysisFromPipelineAction extends SimpleViewAction<PipelinePathForm>
@@ -544,7 +544,7 @@ public class AnalysisScriptController extends BaseFlowController
             ActionURL url = new ActionURL(ImportAnalysisAction.class, getContainer());
 
             List<Pair<String, String>> inputs = new ArrayList<>();
-            inputs.add(Pair.of("workspace_path", workspacePath));
+            inputs.add(Pair.of("workspace.path", workspacePath));
             inputs.add(Pair.of("step", String.valueOf(ImportAnalysisStep.SELECT_ANALYSIS.getNumber())));
 
             getPageConfig().setTemplate(PageConfig.Template.None);
@@ -678,13 +678,13 @@ public class AnalysisScriptController extends BaseFlowController
             return root;
         }
 
-        // Saves uploaded "workspace_file" to pipeline root
-        // or reads "workspace_path" from pipeline.
+        // Saves uploaded "workspace.file" to pipeline root
+        // or reads "workspace.path" from pipeline.
         private void getWorkspace(ImportAnalysisForm form, Errors errors)
         {
             WorkspaceData workspace = form.getWorkspace();
             Map<String, MultipartFile> files = getFileMap();
-            MultipartFile file = files.get("workspace_file");
+            MultipartFile file = files.get("workspace.file");
             if (file != null && StringUtils.isNotEmpty(file.getOriginalFilename()))
             {
                 // ensure the pipeline root exists

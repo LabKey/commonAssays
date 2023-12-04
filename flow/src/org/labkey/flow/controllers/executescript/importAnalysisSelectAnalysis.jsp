@@ -42,21 +42,19 @@
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />
 Upload file from your computer
 <div style="padding: 5px 0 10px 2em;">
-    <% addHandler("workspace_file", "change", "selectUploadWorkspace();"); %>
-    <input type="file" id="workspace_file" name="workspace_file" style="border: none; background-color: transparent;">
+    <input type="file" id="workspace.file" name="workspace.file" style="border: none; background-color: transparent;">
     <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-        function selectUploadWorkspace()
+        document.getElementById("workspace.file")['onchange'] = function()
         {
             document.getElementById("uploadWorkspace").checked = true;
         }
-        document.getElementById("workspace_file")
     </script>
 </div>
 <input type="radio" name="selectWorkspace" id="browseWorkspace" value="browseWorkspace" />
 Browse the pipeline
 <div style="padding-left: 2em; padding-bottom: 1em;">
     <% if (hasPipelineRoot) {
-        String inputId = "workspace_path";
+        String inputId = "workspace.path";
         String href = new HelpTopic("flowAnalysisArchiveFormat").getHelpTopicHref();
     %>
     Select either a FlowJo workspace (.wsp and .xml) or an <a href="<%=h(href)%>">analysis archive</a>.<br/><br/>
@@ -74,7 +72,7 @@ Browse the pipeline
             if (path)
             {
                 document.getElementById("browseWorkspace").checked = true;
-                document.getElementById("workspace_file").value = null;
+                document.getElementById("workspace.file").value = null;
             }
             // setTitle...
         }
