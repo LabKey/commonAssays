@@ -104,12 +104,15 @@ var keywordValueSubsetListMap = KV;
 
 <labkey:form method="POST" action="<%=formAction(EditCompensationCalculationAction.class)%>">
 
-<% if (hasAutoCompScripts) { %>
+<% if (hasAutoCompScripts)
+    {
+        addHandler("selectAutoCompScript", "change", "populateAutoComp(this);");
+        %>
         <labkey:panel title="Choose AutoCompensation script">
             <p>Your FlowJo workspace contains AutoCompensation scripts; you can optionally
             select a script from the drop down below to quickly populate the compensation
             calculation form fields.</p>
-            <select name="selectAutoCompScript" onchange="populateAutoComp(this);">
+            <select id="selectAutoCompScript" name="selectAutoCompScript">
             <%
                 %><option value=""></option><%
                 for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
