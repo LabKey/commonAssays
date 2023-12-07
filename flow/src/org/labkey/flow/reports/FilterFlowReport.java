@@ -406,7 +406,7 @@ public abstract class FilterFlowReport extends FlowReport
         HttpView plot = r.renderReport(context);
         return new VBox(
                 plot,
-                new HtmlView("<textarea style='display:none;' cols=120 rows=30>" + PageFlowUtil.filter(_query) + "</textarea>")
+                HtmlView.unsafe("<textarea style='display:none;' cols=120 rows=30>" + PageFlowUtil.filter(_query) + "</textarea>")
         );
     }
 

@@ -62,7 +62,7 @@ public class ViabilityController extends SpringActionController
         @Override
         public ModelAndView getConfirmView(ProtocolIdForm protocolIdForm, BindException errors)
         {
-            return new HtmlView("Recalculate all specimen aggregates for this assay?");
+            return HtmlView.of("Recalculate all specimen aggregates for this assay?");
         }
 
         @Override
