@@ -45,7 +45,8 @@
     ReportIdentifier id = ((ReportsController.IdForm) HttpView.currentModel()).getReportId();
 
     Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
-    %><p><select onchange="Select_onChange(this.value)"><%
+    addHandler("selectReport", "change", "Select_onChange(this.value)");
+    %><p><select id="selectReport"><%
     for (FlowReport r : reports)
     {
         ReportDescriptor d = r.getDescriptor();

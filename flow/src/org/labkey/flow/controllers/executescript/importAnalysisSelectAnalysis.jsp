@@ -42,9 +42,9 @@
 <input type="radio" name="selectWorkspace" id="uploadWorkspace" value="uploadWorkspace" />
 Upload file from your computer
 <div style="padding: 5px 0 10px 2em;">
-    <input type="file" id="workspace.file" name="workspace.file" onchange="selectUploadWorkspace();" style="border: none; background-color: transparent;">
+    <input type="file" id="workspace.file" name="workspace.file" style="border: none; background-color: transparent;">
     <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-        function selectUploadWorkspace()
+        document.getElementById("workspace.file")['onchange'] = function()
         {
             document.getElementById("uploadWorkspace").checked = true;
         }
