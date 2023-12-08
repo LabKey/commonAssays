@@ -28,6 +28,8 @@ import org.springframework.validation.BindException;
 
 import java.util.Collections;
 
+import static org.labkey.api.util.PageFlowUtil.filter;
+
 /**
  * User: jeckels
  * Date: Dec 3, 2008
@@ -71,7 +73,7 @@ public class CustomProteinListView extends VBox
         if (!context.getContainer().isProject())
         {
             ActionURL link = ProteinController.getBeginURL(context.getContainer().getProject());
-            HtmlView noteView = new HtmlView("This list only shows protein lists that have been loaded into this folder. When constructing queries, <a href=\"" + link + "\">annotations in the project</a> are visible from all the folders in that project.");
+            HtmlView noteView = HtmlView.unsafe("This list only shows protein lists that have been loaded into this folder. When constructing queries, <a href=\"" + filter(link) + "\">annotations in the project</a> are visible from all the folders in that project.");
             addView(noteView);
         }
         addView(gridView);

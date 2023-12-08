@@ -852,7 +852,7 @@ public class MS2Controller extends SpringActionController
                  nextPrevStr += PageFlowUtil.link("Next").href(nextURL);
             }
             if (!nextPrevStr.isEmpty()) {
-                result.addView(new HtmlView(nextPrevStr));
+                result.addView(HtmlView.unsafe(nextPrevStr));
             }
 
             ShowPeptideContext ctx = new ShowPeptideContext(form, run, peptide, currentURL, previousURL, nextURL, showGzURL, modificationHref(run), getContainer(), getUser());
@@ -4233,7 +4233,7 @@ public class MS2Controller extends SpringActionController
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
-                addView(new HtmlView("<a name=\"Protein" + i + "\"></a>"));
+                addView(HtmlView.unsafe("<a name=\"Protein" + i + "\"></a>"));
                 protein.setPeptides(peptides);
                 if (peptides != null)
                 {
@@ -4289,7 +4289,7 @@ public class MS2Controller extends SpringActionController
                 CurrentFilterView peptideCountsView = new CurrentFilterView(null, sqlSummaries);
                 peptideCountsView.setFrame(FrameType.NONE);
                 gridView.setFrame(FrameType.NONE);
-                VBox vBox = new VBox(peptideCountsView, new HtmlView("<a name=\"Peptides\"></a>"), gridView);
+                VBox vBox = new VBox(peptideCountsView, HtmlView.unsafe("<a name=\"Peptides\"></a>"), gridView);
                 vBox.setFrame(FrameType.PORTAL);
                 vBox.setTitle("Peptides");
                 vBox.enableExpandCollapse("Peptides", false);

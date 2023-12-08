@@ -426,7 +426,7 @@ public class AttributeController extends BaseFlowController
 
             if (bean.unusedKeywords.isEmpty() && bean.unusedStats.isEmpty() && bean.unusedGraphs.isEmpty())
             {
-                return new HtmlView("There are no unused attributes in this folder.");
+                return HtmlView.of("There are no unused attributes in this folder.");
             }
             else
             {

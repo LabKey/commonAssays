@@ -388,11 +388,11 @@ public class WellController extends BaseFlowController
 
             URI fileURI = _well.getFCSURI();
             if (fileURI == null)
-                return new HtmlView("<span class='labkey-error'>There is no file on disk for this well.</span>");
+                return HtmlView.err("There is no file on disk for this well.");
 
             PipeRoot r = PipelineService.get().findPipelineRoot(_well.getContainer());
             if (r == null)
-                return new HtmlView("<span class='labkey-error'>Pipeline not configured</span>");
+                return HtmlView.err("Pipeline not configured");
 
             // NOTE: see 30001, we are not checking the pipeline permissions which control access via webdav
             // I don't think it necessary or what is intended by those permissions
@@ -405,7 +405,7 @@ public class WellController extends BaseFlowController
                 canRead = f != null && f.canRead();
             }
             if (!canRead)
-                return new HtmlView("<span class='labkey-error'>The original FCS file is no longer available or is not readable" + (rel == null ? "." : ": " + PageFlowUtil.filter(rel.getPath())) + "</span>");
+                return HtmlView.err("The original FCS file is no longer available or is not readable" + (rel == null ? "." : ": " + rel.getPath()));
 
             return new JspView<>("/org/labkey/flow/controllers/well/chooseGraph.jsp", form);
         }

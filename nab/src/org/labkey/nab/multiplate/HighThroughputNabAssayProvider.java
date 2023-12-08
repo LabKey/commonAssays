@@ -63,7 +63,7 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");
+        return HtmlView.of("The high-throughput NAb data file is a specially formatted file with a .csv or .xls extension.");
     }
 
     @Override

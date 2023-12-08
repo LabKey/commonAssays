@@ -240,7 +240,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The data file is the output file from the plate reader that has been selected.");
+        return HtmlView.of("The data file is the output file from the plate reader that has been selected.");
     }
 
     @Override
