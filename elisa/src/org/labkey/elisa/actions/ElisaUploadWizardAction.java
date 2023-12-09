@@ -128,7 +128,8 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                 else if (form.getSampleMetadataInputFormat() == SampleMetadataInputFormat.MANUAL)
                     return getConcentrationsView(form, false, errors);
                 else
-                    return null;            }
+                    return null;
+            }
         };
     }
 

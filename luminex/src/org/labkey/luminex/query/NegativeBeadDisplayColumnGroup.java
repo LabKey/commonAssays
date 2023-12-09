@@ -19,18 +19,16 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.view.HttpView;
 import org.labkey.luminex.LuminexDataHandler;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-/**
- * Created by cnathe on 8/7/14.
- */
 public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
 {
-    private String _inputName;
+    private final String _inputName;
 
     public NegativeBeadDisplayColumnGroup(List<DisplayColumn> columns, String inputName)
     {
@@ -45,18 +43,26 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
         if (isCopyable())
         {
             String inputName = ColumnInfo.propNameFromName(_inputName);
-            out.write("<input type=checkbox name='" + inputName + "CheckBox' id='" + inputName + "CheckBox' onchange=\"");
-            out.write("b = this.checked;\n" );
+            String id = inputName + "CheckBox";
+            out.write("<input type=checkbox name='" + id + "' id='" + id + "' />");
+            StringBuilder onChange = new StringBuilder("b = this.checked;\n");
             for (int i = 1; i < getColumns().size(); i++)
             {
                 DisplayColumn col = getColumns().get(i);
                 if (col.getColumnInfo() != null)
                 {
-                    out.write("s = document.getElementsByName('" + col.getFormFieldName(ctx) + "')[0].options.length;\n");
-                    out.write("document.getElementsByName('" + col.getFormFieldName(ctx) + "')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
+                    onChange.append("s = document.getElementsByName('")
+                        .append(col.getFormFieldName(ctx))
+                        .append("')[0].options.length;\n")
+                        .append("document.getElementsByName('")
+                        .append(col.getFormFieldName(ctx))
+                        .append("')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
                 }
             }
-            out.write(" if (b) { " + inputName + "Updated(); }\">");
+            onChange.append(" if (b) { ")
+                .append(inputName)
+                .append("Updated(); }\">");
+            HttpView.currentPageConfig().addHandler(id, "change", onChange.toString());
         }
         out.write("</td>");
     }
