@@ -61,7 +61,7 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
             }
             onChange.append(" if (b) { ")
                 .append(inputName)
-                .append("Updated(); }\">");
+                .append("Updated(); }");
             HttpView.currentPageConfig().addHandler(id, "change", onChange.toString());
         }
         out.write("</td>");
