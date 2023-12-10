@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
@@ -85,20 +84,23 @@
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
+            String standardId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+            addHandler(standardId, "click", "titrationRoleChecked(this);showHideAnalytePropertyColumn();");
+            String qcId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+            addHandler(qcId, "click", "titrationRoleChecked(this);");
+            String otherId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+            addHandler(otherId, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
                         <td style="padding-right: 10px;"><%= h(titrationEntry.getValue().getName()) %></td>
                         <td align="center">
-                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>'
-                                   value='1' onClick='titrationRoleChecked(this);showHideAnalytePropertyColumn();' />
+                            <input type='checkbox' name='<%=h(standardId)%>' id='<%=h(standardId)%>' value='1' />
                         </td>
                         <td align="center">
-                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue())) %>'
-                                   value='1' onClick='titrationRoleChecked(this);' />
+                            <input type='checkbox' name='<%=h(qcId)%>' id='<%=h(qcId)%>' value='1' />
                         </td>
                         <td align="center">
-                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue())) %>'
-                                   value='1' onClick='titrationRoleChecked(this);' />
+                            <input type='checkbox' name='<%=h(otherId)%>' id='<%=h(otherId)%>' value='1' />
                         </td>
                     </tr>
 <%
@@ -120,12 +122,13 @@
 <%
         for (Map.Entry<String, Titration> titrationEntry : unknownTitrations.entrySet())
         {
+            String id = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+            addHandler(id, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
                         <td style="padding-right: 10px;"><%= h(titrationEntry.getValue().getName()) %></td>
                         <td>
-                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue())) %>'
-                                   value='1' onClick='titrationRoleChecked(this);' />
+                            <input type='checkbox' name='<%=h(id)%>' id='<%=h(id)%>' value='1' />
                         </td>
                     </tr>
 <%
@@ -137,7 +140,7 @@
 <%
     }
 
-    // show section for the user to select trackec single point controls
+    // show section for the user to select tracked single point controls
     if (!trackedSinglePointControls.isEmpty())
     {
 %>
@@ -147,12 +150,13 @@
 <%
                     for (String trackedSinglePointControl : trackedSinglePointControls)
                     {
+                        String id = LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl);
+                        addHandler(id, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
                         <td style="padding-right: 10px;"><%= h(trackedSinglePointControl) %></td>
                         <td>
-                            <input type='checkbox' name='<%= h(LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl)) %>'
-                                   value='1' onClick='titrationRoleChecked(this);' />
+                            <input type='checkbox' name='<%=h(id)%>' id ='<%=h(id)%>' value='1' />
                         </td>
                     </tr>
 <%
@@ -222,7 +226,7 @@
         var els = document.getElementsByName(elName);
         for (var i = 0; i < els.length; i++)
         {
-            if (els[i].type == "hidden")
+            if (els[i].type === "hidden")
             {
                 return els[i];
             }
@@ -232,10 +236,10 @@
 
     function getInputFormElement(elName)
     {
-        var els = document.getElementsByName(elName);
-        for (var i = 0; i < els.length; i++)
+        const els = document.getElementsByName(elName);
+        for (let i = 0; i < els.length; i++)
         {
-            if (els[i].type == "checkbox")
+            if (els[i].type === "checkbox")
             {
                 return els[i];
             }
@@ -243,7 +247,7 @@
         return null;
     }
 
-    Ext4.onReady(setInitialWellRoles);
+    LABKEY.Utils.onReady(setInitialWellRoles);
 
     function setInitialWellRoles()
     {
@@ -258,7 +262,7 @@
                 var inputEl = getInputFormElement(propertyName);
                 if (hiddenEl && inputEl)
                 {
-                    inputEl.checked = hiddenEl.value == "true";
+                    inputEl.checked = hiddenEl.value === "true";
                 }
 <%
             }
@@ -271,7 +275,7 @@
             var inputEl = getInputFormElement(propertyName);
             if (hiddenEl && inputEl)
             {
-                inputEl.checked = hiddenEl.value == "true";
+                inputEl.checked = hiddenEl.value === "true";
             }
 <%
         }
