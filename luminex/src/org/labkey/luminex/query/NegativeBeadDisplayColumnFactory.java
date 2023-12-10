@@ -24,6 +24,7 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.HttpView;
 import org.labkey.luminex.LuminexDataHandler;
 
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             @Override
             public void renderTitle(RenderContext ctx, Writer out) throws IOException
             {
-                out.write("<script type=\"text/javascript\">\n" +
+                out.write("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n" +
                         "LABKEY.requiresExt4Sandbox(function() {\n" +
                             "LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');\n" +
                         "});\n" +

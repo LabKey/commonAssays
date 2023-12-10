@@ -46,6 +46,7 @@ import org.labkey.api.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.VBox;
 import org.labkey.viability.data.MultiValueInputColumn;
@@ -106,13 +107,13 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
             }
 
             @Override
-            public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors)
             {
                 return false;
             }
 
             @Override
-            public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
             {
                 if (errors.hasErrors())
                     return getRunPropertiesView(form, true, false, errors);
@@ -130,7 +131,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
 
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        sb.append("<script type=\"text/javascript\">\n");
+        sb.append("<script type=\"text/javascript\" nonce=\"").append(HttpView.currentPageConfig().getScriptNonce()).append("\">");
         sb.append("LABKEY.requiresScript(['internal/jQuery', 'viability/CheckRunUploadForm.js'],function(){\n");
         sb.append(formRef).append(".onsubmit = function(){return checkRunUploadForm(").append(formRef).append(", jQuery);};\n");
         sb.append("});\n");

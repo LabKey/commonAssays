@@ -20,6 +20,10 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.PreviouslyUploadedDataCollector;
+import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.BaseColumnInfo;
@@ -44,11 +48,7 @@ import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.assay.actions.UploadWizardAction;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
-import org.labkey.api.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.InsertView;
@@ -122,7 +122,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         if (reRun != null)
         {
-            JspView exclusionWarning = addExclusionWarning(form, analyteNames);
+            JspView<LuminexRunUploadForm> exclusionWarning = addExclusionWarning(form, analyteNames);
 
             //Only add if present
             if(exclusionWarning != null)
@@ -131,7 +131,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
         // if there are titrations or single point controls in the uploaded data, show the well role definition section
         LuminexExcelParser parser = form.getParser();
-        if (parser.getTitrations().size() > 0 || parser.getSinglePointControls().size() > 0)
+        if (!parser.getTitrations().isEmpty() || !parser.getSinglePointControls().isEmpty())
         {
             JspView<LuminexRunUploadForm> top = new JspView<>("/org/labkey/luminex/view/titrationWellRoles.jsp", form);
             top.setTitle("Define Well Roles");
@@ -510,7 +510,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     }
 
     @Nullable
-    private JspView addExclusionWarning(LuminexRunUploadForm form, String[] analyteNames) throws ExperimentException
+    private JspView<LuminexRunUploadForm> addExclusionWarning(LuminexRunUploadForm form, String[] analyteNames) throws ExperimentException
     {
         long exclusionCount = LuminexManager.get().getExclusionCount(form.getReRunId());
 
