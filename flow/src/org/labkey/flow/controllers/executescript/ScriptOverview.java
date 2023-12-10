@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.executescript;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
@@ -61,11 +62,11 @@ public class ScriptOverview extends Overview
 
         if (runCount == 0)
         {
-            setStatusHTML("This script has not yet been used to analyze data.");
+            setStatusHTML(HtmlString.of("This script has not yet been used to analyze data."));
         }
         else
         {
-            setStatusHTML("This script has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>.  For this reason, it cannot be edited.");
+            setStatusHTML(HtmlString.unsafe("This script has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>.  For this reason, it cannot be edited."));
         }
 
         addStep(getCompensationCalculationStep());
@@ -77,7 +78,7 @@ public class ScriptOverview extends Overview
             Action action = new Action("Make a copy of this analysis script", _script.urlFor(ScriptController.CopyAction.class));
             if (runCount != 0)
             {
-                action.setDescriptionHTML("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>.");
+                action.setDescriptionHTML(HtmlString.unsafe("This script cannot be edited anymore because it has been used <a href=\"" + PageFlowUtil.filter(runsUrl) + "\">" + runCount + " times</a>."));
             }
             addAction(action);
         }
@@ -89,11 +90,11 @@ public class ScriptOverview extends Overview
         }
 
         Action actionSettings = new Action("Edit Settings", _script.urlFor(ScriptController.EditSettingsAction.class));
-        actionSettings.setExplanatoryHTML("The script has settings that affect the way that graphs are drawn and statistics are calculated.");
+        actionSettings.setExplanatoryHTML(HtmlString.of("The script has settings that affect the way that graphs are drawn and statistics are calculated."));
         addAction(actionSettings);
 
         Action actionSource = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
-        actionSource.setExplanatoryHTML("Advanced: Analysis scripts are XML documents that can be edited by hand");
+        actionSource.setExplanatoryHTML(HtmlString.of("Advanced: Analysis scripts are XML documents that can be edited by hand"));
         addAction(actionSource);
 
         Action actionDownload = new Action("Download", _script.urlDownload());
@@ -132,33 +133,33 @@ public class ScriptOverview extends Overview
             }
         }
         Step ret = new Step("Define Compensation Calculation", stepStatus);
-        ret.setExplanatoryHTML("The compensation calculation specifies the keywords that are used to identify the compensation wells, and specifies the gates that are to be applied.");
+        ret.setExplanatoryHTML(HtmlString.of("The compensation calculation specifies the keywords that are used to identify the compensation wells, and specifies the gates that are to be applied."));
         if (hasStep)
         {
             try
             {
                 Action action = new Action("Show compensation calculation", _script.urlFor(ScriptController.EditCompensationCalculationAction.class));
                 CompensationCalculation calc = (CompensationCalculation) _script.getCompensationCalcOrAnalysis(FlowProtocolStep.calculateCompensation);
-                action.setDescriptionHTML("The compensation calculation involves " + calc.getChannelCount() + " channels and " + countChildPopulations(calc) + " gates.");
+                action.setDescriptionHTML(HtmlString.of("The compensation calculation involves " + calc.getChannelCount() + " channels and " + countChildPopulations(calc) + " gates."));
                 ret.addAction(action);
             }
             catch (Exception e)
             {
                 Action action = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
-                action.setDescriptionHTML("An exception occurred: " + e);
+                action.setDescriptionHTML(HtmlString.of("An exception occurred: " + e));
                 ret.addAction(action);
             }
         }
         else
         {
-            ret.setStatusHTML("This script does not have a compensation calculation section.");
+            ret.setStatusHTML(HtmlString.of("This script does not have a compensation calculation section."));
             if (_canEdit)
             {
                 Action actionUpload = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.UploadCompensationCalculationAction.class));
-                actionUpload.setExplanatoryHTML("You can upload a FlowJo workspace to define the compensation calculation.");
+                actionUpload.setExplanatoryHTML(HtmlString.of("You can upload a FlowJo workspace to define the compensation calculation."));
                 ret.addAction(actionUpload);
                 Action actionFromScratch = new Action("Define compensation calculation from scratch", _script.urlFor(ScriptController.ChooseCompensationRunAction.class));
-                actionFromScratch.setExplanatoryHTML("You can also embark on the long process of using the online gate editor to define the compensation calculation");
+                actionFromScratch.setExplanatoryHTML(HtmlString.of("You can also embark on the long process of using the online gate editor to define the compensation calculation"));
                 ret.addAction(actionFromScratch);
             }
         }
@@ -193,19 +194,19 @@ public class ScriptOverview extends Overview
             }
         }
         Step ret = new Step("Define Analysis", stepStatus);
-        ret.setExplanatoryHTML("The analysis definition specifies which gates to apply, statistics to calculate, and graphs to draw.");
+        ret.setExplanatoryHTML(HtmlString.of("The analysis definition specifies which gates to apply, statistics to calculate, and graphs to draw."));
         if (hasStep)
         {
             try
             {
                 Analysis analysis = (Analysis) _script.getCompensationCalcOrAnalysis(FlowProtocolStep.analysis);
-                ret.setStatusHTML("This analysis has " + countChildPopulations(analysis) + " gates, " + analysis.getStatistics().size() + " statistics, and " +
-                    analysis.getGraphs().size() + " graphs.");
+                ret.setStatusHTML(HtmlString.of("This analysis has " + countChildPopulations(analysis) + " gates, " + analysis.getStatistics().size() + " statistics, and " +
+                    analysis.getGraphs().size() + " graphs."));
             }
             catch (Exception e)
             {
                 Action action = new Action("View Source", _script.urlFor(ScriptController.EditScriptAction.class));
-                action.setDescriptionHTML("An exception occurred: " + e);
+                action.setDescriptionHTML(HtmlString.of("An exception occurred: " + e));
                 ret.addAction(action);
             }
         }
@@ -215,11 +216,11 @@ public class ScriptOverview extends Overview
             Action action = new Action("Upload a FlowJo workspace", _script.urlFor(ScriptController.UploadAnalysisAction.class));
             if (hasStep)
             {
-                action.setExplanatoryHTML("You can modify the gate definitions by uploading a FlowJo workspace");
+                action.setExplanatoryHTML(HtmlString.of("You can modify the gate definitions by uploading a FlowJo workspace"));
             }
             else
             {
-                action.setExplanatoryHTML("You can specify the gate definitions by uploading a FlowJo workspace");
+                action.setExplanatoryHTML(HtmlString.of("You can specify the gate definitions by uploading a FlowJo workspace"));
             }
             ret.addAction(action);
         }
@@ -258,12 +259,12 @@ public class ScriptOverview extends Overview
         if (hasAnalysis && !hasComp && _script.requiresCompensationMatrix(FlowProtocolStep.analysis))
         {
             List<FlowCompensationMatrix> comps = FlowCompensationMatrix.getCompensationMatrices(getContainer());
-            if (comps.size() == 0)
-                ret.setStatusHTML("<b>Important: This analysis script requires a compensation matrix, but there are no compensation matrices in this folder.</b>");
+            if (comps.isEmpty())
+                ret.setStatusHTML(HtmlString.unsafe("<b>Important: This analysis script requires a compensation matrix, but there are no compensation matrices in this folder.</b>"));
         }
         if (_script.getRun() != null)
         {
-            ret.setExplanatoryHTML("This script is part of the run '" + _script.getRun().getName() + "'.  It cannot be used to analyze another run, but you can make a copy of it.");
+            ret.setExplanatoryHTML(HtmlString.of("This script is part of the run '" + _script.getRun().getName() + "'.  It cannot be used to analyze another run, but you can make a copy of it."));
         }
         else if (hasAnalysis || hasComp)
         {
@@ -272,7 +273,7 @@ public class ScriptOverview extends Overview
         }
         else
         {
-            ret.setExplanatoryHTML("This script must have either a compensation calculation or an analysis before it can be executed.");
+            ret.setExplanatoryHTML(HtmlString.of("This script must have either a compensation calculation or an analysis before it can be executed."));
         }
         return ret;
     }
