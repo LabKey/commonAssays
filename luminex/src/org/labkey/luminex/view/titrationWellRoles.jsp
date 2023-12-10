@@ -111,7 +111,7 @@
     }
 
     // show section for the user to select which titrations are Titrated Unknowns
-    if (unknownTitrations.size() > 0)
+    if (!unknownTitrations.isEmpty())
     {
 %>
         <td>
@@ -138,7 +138,7 @@
     }
 
     // show section for the user to select trackec single point controls
-    if (trackedSinglePointControls.size() >0)
+    if (!trackedSinglePointControls.isEmpty())
     {
 %>
         <td>
@@ -189,7 +189,7 @@
 
             // set the hidden helper showcol field value
             var showcols = document.getElementsByName(titrationRoleName + "_showcol");
-            if (showcols.length == 1)
+            if (showcols.length === 1)
                 showcols[0].value = (isChecked ? "true" : "");
 
             // show/hide the column associated with this titration
@@ -206,7 +206,7 @@
 
                     // also need to make sure all input checkboxes are unchecked if hiding column cell (except for the "Same" checkbox)
                     var cellInputs = elements[i].getElementsByTagName("input");
-                    if (cellInputs.length == 1 && cellInputs[0].id.indexOf("CheckBox") == -1)
+                    if (cellInputs.length === 1 && cellInputs[0].id.indexOf("CheckBox") === -1)
                     {
                         cellInputs[0].checked = false;
                     }
@@ -244,6 +244,7 @@
     }
 
     Ext4.onReady(setInitialWellRoles);
+
     function setInitialWellRoles()
     {
 <%
