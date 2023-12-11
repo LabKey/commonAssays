@@ -162,7 +162,7 @@ public class FlowOverview extends Overview
             HtmlStringBuilder status = HtmlStringBuilder.of();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
                     .addParameter("query.Original~eq", "true");
-            status.unsafeAppend("<a href=\"").append(urlShowFCSFiles.toString()).unsafeAppend("\">").append(_fcsFileCount).append(" FCS files</a> have been imported.");
+            status.unsafeAppend("<a href=\"").append(urlShowFCSFiles.toString()).unsafeAppend("\">").append(_fcsFileCount).unsafeAppend(" FCS files</a> have been imported.");
             ActionURL urlShowRuns = RunController.ShowRunsAction.getFcsFileRunsURL(getContainer());
             if (_fcsRunCount == 1)
             {
