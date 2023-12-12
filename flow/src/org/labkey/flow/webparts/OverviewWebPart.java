@@ -20,8 +20,6 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 
-import java.io.PrintWriter;
-
 public class OverviewWebPart extends HtmlView
 {
     static public final BaseWebPartFactory FACTORY = new SimpleWebPartFactory("Flow Experiment Management", OverviewWebPart.class);
