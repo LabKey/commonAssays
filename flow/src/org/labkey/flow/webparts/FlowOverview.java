@@ -28,13 +28,11 @@ import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.Overview;
-import org.labkey.flow.FlowModule;
-import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.compensation.CompensationController;
-import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.run.RunController;
@@ -134,7 +132,7 @@ public class FlowOverview extends Overview
             {
                 ActionURL runningJobsURL = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlBegin(getContainer(), true);
                 Action action = new Action("Show jobs", runningJobsURL);
-                action.setDescriptionHTML("There are " + jobCount + " jobs running in this folder.");
+                action.setDescriptionHTML(HtmlString.of("There are " + jobCount + " jobs running in this folder."));
                 addAction(action);
             }
         }
@@ -152,7 +150,7 @@ public class FlowOverview extends Overview
         if (!_canInsert) return null;
         ActionURL urlImportAnalysis = new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, getContainer());
         Action ret = new Action("Import FlowJo Workspace Analysis", urlImportAnalysis);
-        ret.setExplanatoryHTML("You can also import statistics that have been calculated by FlowJo");
+        ret.setExplanatoryHTML(HtmlString.of("You can also import statistics that have been calculated by FlowJo"));
         return ret;
     }
 
@@ -161,24 +159,24 @@ public class FlowOverview extends Overview
         Step ret = new Step("Import FCS Files", _fcsFileCount == 0 ? Step.Status.required : Step.Status.normal);
         if (_fcsFileCount != 0)
         {
-            StringBuilder status = new StringBuilder();
+            HtmlStringBuilder status = HtmlStringBuilder.of();
             ActionURL urlShowFCSFiles = FlowTableType.FCSFiles.urlFor(getUser(), getContainer(), QueryAction.executeQuery)
                     .addParameter("query.Original~eq", "true");
-            status.append("<a href=\"").append(h(urlShowFCSFiles)).append("\">").append(_fcsFileCount).append(" FCS files</a> have been imported.");
+            status.unsafeAppend("<a href=\"").append(urlShowFCSFiles.toString()).unsafeAppend("\">").append(_fcsFileCount).unsafeAppend(" FCS files</a> have been imported.");
             ActionURL urlShowRuns = RunController.ShowRunsAction.getFcsFileRunsURL(getContainer());
             if (_fcsRunCount == 1)
             {
-                status.append(" These are in <a href=\"").append(h(urlShowRuns)).append("\">1 run</a>.");
+                status.unsafeAppend(" These are in <a href=\"").append(urlShowRuns.toString()).unsafeAppend("\">1 run</a>.");
             }
             else
             {
-                status.append(" These are in <a href=\"").append(h(urlShowRuns)).append("\">").append(_fcsRunCount).append(" runs</a>.");
+                status.unsafeAppend(" These are in <a href=\"").append(urlShowRuns.toString()).unsafeAppend("\">").append(_fcsRunCount).unsafeAppend(" runs</a>.");
             }
-            ret.setStatusHTML(status.toString());
+            ret.setStatusHTML(status.getHtmlString());
         }
         else
         {
-            ret.setStatusHTML(" No FCS files have been imported yet.");
+            ret.setStatusHTML(HtmlString.of(" No FCS files have been imported yet."));
         }
         ret.addAction(getBrowseForFCSFilesAction());
         ret.addAction(getImportFlowJoAnalysisAction());
@@ -195,26 +193,26 @@ public class FlowOverview extends Overview
             ExpSampleType st = protocol.getSampleType(getUser());
             if (st != null)
             {
-                StringBuilder sb = new StringBuilder();
-                sb.append("There are <a href=\"").append(h(protocol.urlShowSamples())).append("\">").append(protocol.getSamples(st, getUser()).size()).append(" sample descriptions</a> in this folder.");
+                HtmlStringBuilder sb = HtmlStringBuilder.of();
+                sb.unsafeAppend("There are <a href=\"").append(protocol.urlShowSamples().toString()).unsafeAppend("\">").append(protocol.getSamples(st, getUser()).size()).unsafeAppend(" sample descriptions</a> in this folder.");
 
-                ret.setStatusHTML(sb.toString());
+                ret.setStatusHTML(sb.getHtmlString());
 
                 if (_canUpdate)
                 {
                     Action uploadAction = new Action("Upload More Samples", protocol.urlUploadSamples());
                     ret.addAction(uploadAction);
                     
-                    if (protocol.getSampleTypeJoinFields().size() != 0)
+                    if (!protocol.getSampleTypeJoinFields().isEmpty())
                     {
                         Action action = new Action("Modify sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
-                        action.setDescriptionHTML("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>");
+                        action.setDescriptionHTML(HtmlString.unsafe("<i>The sample descriptions are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.</i>"));
                         ret.addAction(action);
                     }
                     else
                     {
                         Action action = new Action("Define sample description join fields", protocol.urlFor(ProtocolController.JoinSampleTypeAction.class));
-                        action.setDescriptionHTML("You can specify how these sample descriptions should be linked to FCS files.");
+                        action.setDescriptionHTML(HtmlString.of("You can specify how these sample descriptions should be linked to FCS files."));
                         ret.addAction(action);
                     }
                 }
@@ -222,7 +220,7 @@ public class FlowOverview extends Overview
             else if (_canUpdate)
             {
                 Action action = new Action("Upload Sample Descriptions", protocol.urlCreateSampleType());
-                action.setDescriptionHTML("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>");
+                action.setDescriptionHTML(HtmlString.unsafe("<i>Additional information about groups of FCS files can be uploaded in spreadsheet, and associated with the FCS files using keywords.</i>"));
                 ret.addAction(action);
             }
 

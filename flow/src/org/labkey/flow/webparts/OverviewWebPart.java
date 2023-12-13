@@ -16,6 +16,7 @@
 
 package org.labkey.flow.webparts;
 
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
 
@@ -29,7 +30,7 @@ public class OverviewWebPart extends HtmlView
 
     public OverviewWebPart(ViewContext portalCtx) throws Exception
     {
-        super(new FlowOverview(portalCtx.getUser(), portalCtx.getContainer()).toString());
+        super(HtmlString.unsafe(new FlowOverview(portalCtx.getUser(), portalCtx.getContainer()).toString()));
         setTitle("Flow Experiment Management");
 
         // slight hackery see initFlow()
