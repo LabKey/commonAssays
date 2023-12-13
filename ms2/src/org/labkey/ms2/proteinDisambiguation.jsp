@@ -119,7 +119,7 @@
     </div>
 
     <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-        Ext.onReady(function () {
+        LABKEY.Utils.onReady(function () {
             new LABKEY.ext.CalloutTip( <%= props %> );
         });
     </script>

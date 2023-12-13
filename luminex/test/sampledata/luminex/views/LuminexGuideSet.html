@@ -1,235 +1,241 @@
 <!-- Moved from 'server/test/data/api' -->
-<input type="button" value="Load QWPs" onClick="loadQWP(0);" id="button_loadqwps"/>
-<input type="button" value="Test Insert,Update,Delete" onClick="getValidDataAndRunId();" id="button_testiud"/>
-<input type="button" value="Attempt update CurveFit"  onClick="updateCurveFit('CurveFit', 'RowId');" id="button_updateCurveFit"/>
-<input type="button" value="Attempt update GuideSetCurveFit"  onClick="updateCurveFit('GuideSetCurveFit', 'GuideSetId');" id="button_updateGuideSetCurveFit"/>
+<input type="button" value="Load QWPs" id="button_loadqwps"/>
+<input type="button" value="Test Insert,Update,Delete" id="button_testiud"/>
+<input type="button" value="Attempt update CurveFit" id="button_updateCurveFit"/>
+<input type="button" value="Attempt update GuideSetCurveFit" id="button_updateGuideSetCurveFit"/>
 <div id="qwp-div">Query Web Part DIV</div>
 <div id="log-info">Logging Info DIV</div>
 
+<!-- Used as HTML wiki source, so nonce is NOT required -->
 <script type="text/javascript">
-        var tablePrefix = "&TestAssayLuminex></% 1";
-        var loadedQWPsOnce = false;
-        var currentStep = 0;
-        var logHtml = "";
-        var validDataId = null;
-        var validRunId = null;
+    var tablePrefix = "&TestAssayLuminex></% 1";
+    var loadedQWPsOnce = false;
+    var logHtml = "";
+    var validDataId = null;
+    var validRunId = null;
 
-        var qwpArray = [
-            {table: "Analyte", cols: ["RowId", "Name"], sort: "RowId"},
-            {table: "AnalyteTitration", cols: ["Analyte", "Titration"], sort: "Analyte, Titration"},
-            {table: "CurveFit", cols: ["RowId", "EC50", "AUC"], sort: "RowId"},
-            {table: "GuideSet", cols: ["RowId", "AnalyteName", "Conjugate", "Isotype", "Comment"], sort: "RowId"},
-            {table: "GuideSetCurveFit", cols: ["GuideSetId", "AUCAverage", "EC50Average"], sort: "GuideSetId"},
-            {table: "QCFlags", cols: ["RowId", "FlagType", "Description", "Enabled"], sort: "RowId"},
-            {table: "Titration", cols: ["RowId", "Name"], sort: "RowId"},
-            {table: "RunExclusion", cols: ["RunId", "Comment"], sort: "RunId"},
-            {table: "WellExclusion", cols: ["RowId", "Description", "Comment"], sort: "RowId"}
-        ];
+    var qwpArray = [
+        {table: "Analyte", cols: ["RowId", "Name"], sort: "RowId"},
+        {table: "AnalyteTitration", cols: ["Analyte", "Titration"], sort: "Analyte, Titration"},
+        {table: "CurveFit", cols: ["RowId", "EC50", "AUC"], sort: "RowId"},
+        {table: "GuideSet", cols: ["RowId", "AnalyteName", "Conjugate", "Isotype", "Comment"], sort: "RowId"},
+        {table: "GuideSetCurveFit", cols: ["GuideSetId", "AUCAverage", "EC50Average"], sort: "GuideSetId"},
+        {table: "QCFlags", cols: ["RowId", "FlagType", "Description", "Enabled"], sort: "RowId"},
+        {table: "Titration", cols: ["RowId", "Name"], sort: "RowId"},
+        {table: "RunExclusion", cols: ["RunId", "Comment"], sort: "RunId"},
+        {table: "WellExclusion", cols: ["RowId", "Description", "Comment"], sort: "RowId"}
+    ];
 
-        function loadQWP(index)
+    LABKEY.Utils.onReady(function() {
+        document.getElementById("button_loadqwps")['onclick'] = function() { loadQWP(0); };
+        document.getElementById("button_testiud")['onclick'] = function() { getValidDataAndRunId(); };
+        document.getElementById("button_updateCurveFit")['onclick'] = function() { updateCurveFit('CurveFit', 'RowId'); };
+        document.getElementById("button_updateGuideSetCurveFit")['onclick'] = function() { updateCurveFit('GuideSetCurveFit', 'GuideSetId'); };
+    });
+
+    function loadQWP(index)
+    {
+        var record = qwpArray[index];
+        var sql = 'SELECT ';
+        for (var i = 0; i < record.cols.length; i++)
         {
-            var record = qwpArray[index];
-            var sql = 'SELECT ';
-            for (var i = 0; i < record.cols.length; i++)
-            {
-                sql += (i > 0 ? ',' : '') + ' x.' + record.cols[i];
-            }
-            sql += ' FROM "' + tablePrefix + ' ' + record.table + '"' + ' AS x';
+            sql += (i > 0 ? ',' : '') + ' x.' + record.cols[i];
+        }
+        sql += ' FROM "' + tablePrefix + ' ' + record.table + '"' + ' AS x';
 
-            new LABKEY.QueryWebPart({
-               title: tablePrefix + ' ' + record.table,
-               schemaName: 'assay',
-               sql: sql,
-               sort: record.sort,
-               renderTo: 'qwp-div',
-               success: function(dataRegion) {
-                   updateLog("Success: loaded " + record.table + " QWP with " + dataRegion.rowCount + ".", true);
-                   if (record.expectedRows != undefined && record.expectedRows != dataRegion.rowCount)
-                   {
-                       updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpcted number of records in " + record.table + " QWP (expected " + record.expectedRows + ")</span>", true);
-                   }
-
-                   // store the rowCount for checking if the loadQWP is called again
-                   qwpArray[index].expectedRows = dataRegion.rowCount;
-
-                   if (qwpArray.length > index+1)
-                   {
-                       loadQWP(index+1);
-                   }
-                   else
-                   {
-                       updateLog("Done" + " loading QWPs" + (loadedQWPsOnce ? " again" : ""), true);
-                       updateLog("", true); // add a blank line
-                       Ext.get('qwp-div').update(""); // clear the QWP div
-                       loadedQWPsOnce = true;
-                   }
+        new LABKEY.QueryWebPart({
+           title: tablePrefix + ' ' + record.table,
+           schemaName: 'assay',
+           sql: sql,
+           sort: record.sort,
+           renderTo: 'qwp-div',
+           success: function(dataRegion) {
+               updateLog("Success: loaded " + record.table + " QWP with " + dataRegion.rowCount + ".", true);
+               if (record.expectedRows !== undefined && record.expectedRows !== dataRegion.rowCount)
+               {
+                   updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpcted number of records in " + record.table + " QWP (expected " + record.expectedRows + ")</span>", true);
                }
-            });
-        }
 
-        var insertArray = [
-            {table: "Analyte", insertRow: {}, insertFailureExpected: true},
-            {table: "AnalyteTitration", insertRow: {}, insertFailureExpected: true},
-            {table: "CurveFit", insertRow: {}, insertFailureExpected: true},
-            {table: "GuideSet", keyVar: "rowId", updateVar: "comment", insertRow: {analyteName: "Test Analyte", titrationName: "Test Titration", currentGuideSet: false}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: true},
-            {table: "GuideSetCurveFit", insertRow: {}, insertFailureExpected: true},
-            {table: "QCFlags", keyVar: "rowId", updateVar: "comment", insertRow: {runId: 1, flagType: "TEST", description: "Test Description", enabled: true}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
-            {table: "Titration", insertRow: {}, insertFailureExpected: true},
-            {table: "RunExclusion", keyVar: "runId", updateVar: "comment", insertRow: {runId: 1}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
-            {table: "WellExclusion", keyVar: "rowId", updateVar: "comment", insertRow: {dataId: 1, type: "T1", description: "TEST"}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false}
-        ];
+               // store the rowCount for checking if the loadQWP is called again
+               qwpArray[index].expectedRows = dataRegion.rowCount;
 
-        function getValidDataAndRunId()
-        {
-            // before we can call the insert, update, and delete testing function, we will need a valid dataId and runId
-            // we can use the ones that are used by the existing WellExclusion
-            LABKEY.Query.selectRows({
-                schemaName: "assay",
-                queryName: tablePrefix + " WellExclusion",
-                columns: "DataId, DataId/Run/RowId",
-                success: function(data){
-                    if (data.rows.length > 0)
-                    {
-                        validDataId = data.rows[0]["DataId"];
-                        validRunId = data.rows[0]["DataId/Run/RowId"];
-                    }
+               if (qwpArray.length > index+1)
+               {
+                   loadQWP(index+1);
+               }
+               else
+               {
+                   updateLog("Done" + " loading QWPs" + (loadedQWPsOnce ? " again" : ""), true);
+                   updateLog("", true); // add a blank line
+                   Ext.get('qwp-div').update(""); // clear the QWP div
+                   loadedQWPsOnce = true;
+               }
+           }
+        });
+    }
 
-                    testInsertUpdateDelete(0);
+    var insertArray = [
+        {table: "Analyte", insertRow: {}, insertFailureExpected: true},
+        {table: "AnalyteTitration", insertRow: {}, insertFailureExpected: true},
+        {table: "CurveFit", insertRow: {}, insertFailureExpected: true},
+        {table: "GuideSet", keyVar: "rowId", updateVar: "comment", insertRow: {analyteName: "Test Analyte", titrationName: "Test Titration", currentGuideSet: false}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: true},
+        {table: "GuideSetCurveFit", insertRow: {}, insertFailureExpected: true},
+        {table: "QCFlags", keyVar: "rowId", updateVar: "comment", insertRow: {runId: 1, flagType: "TEST", description: "Test Description", enabled: true}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
+        {table: "Titration", insertRow: {}, insertFailureExpected: true},
+        {table: "RunExclusion", keyVar: "runId", updateVar: "comment", insertRow: {runId: 1}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false},
+        {table: "WellExclusion", keyVar: "rowId", updateVar: "comment", insertRow: {dataId: 1, type: "T1", description: "TEST"}, insertFailureExpected: false, updateFailureExpected: false, deleteFailureExpected: false}
+    ];
+
+    function getValidDataAndRunId()
+    {
+        // before we can call the insert, update, and delete testing function, we will need a valid dataId and runId
+        // we can use the ones that are used by the existing WellExclusion
+        LABKEY.Query.selectRows({
+            schemaName: "assay",
+            queryName: tablePrefix + " WellExclusion",
+            columns: "DataId, DataId/Run/RowId",
+            success: function(data){
+                if (data.rows.length > 0)
+                {
+                    validDataId = data.rows[0]["DataId"];
+                    validRunId = data.rows[0]["DataId/Run/RowId"];
                 }
-            });
-        }
 
-        function testInsertUpdateDelete(index)
-        {
-            var record = insertArray[index];
+                testInsertUpdateDelete(0);
+            }
+        });
+    }
 
-            // replace the temp runId and dataId values with valid ones
-            if (record.insertRow.runId)
-                record.insertRow.runId = parseInt(validRunId) - 1;
-            if (record.insertRow.dataId)
-                record.insertRow.dataId = validDataId;            
+    function testInsertUpdateDelete(index)
+    {
+        var record = insertArray[index];
 
-            LABKEY.Query.insertRows({
+        // replace the temp runId and dataId values with valid ones
+        if (record.insertRow.runId)
+            record.insertRow.runId = parseInt(validRunId) - 1;
+        if (record.insertRow.dataId)
+            record.insertRow.dataId = validDataId;
+
+        LABKEY.Query.insertRows({
+            schemaName: 'assay',
+            queryName: tablePrefix + ' ' + record.table,
+            rows: [record.insertRow],
+            success: insertSuccess(record, index),
+            failure: insertFailure("insert", record, index, record.insertFailureExpected)
+        });
+    }
+
+    function insertSuccess(record, index)
+    {
+        return function(data) {
+            updateLog("Success: inserted record into " + record.table, true);
+            if (data.rowsAffected !== 1)
+                updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpected number of rows affected by insert into " + record.table + "(" + data.rowsAffected + " rows affected)</span>", true);
+
+            var keyVal = (data.rows[0][record.keyVar] ? data.rows[0][record.keyVar] : data.rows[0][record.keyVar.toLowerCase()]);
+            var updateRow = record.insertRow;
+            updateRow[record.keyVar] = keyVal;
+            updateRow[record.updateVar] = "updated via javascript";
+
+            LABKEY.Query.updateRows({
                 schemaName: 'assay',
                 queryName: tablePrefix + ' ' + record.table,
-                rows: [record.insertRow],
-                success: insertSuccess(record, index),
-                failure: insertFailure("insert", record, index, record.insertFailureExpected)
+                rows: [updateRow],
+                success: updateSuccess(record, index),
+                failure: insertFailure("update", record, index, record.updateFailureExpected)
             });
         }
+    }
 
-        function insertSuccess(record, index)
-        {
-            return function(data) {
-                updateLog("Success: inserted record into " + record.table, true);
-                if (data.rowsAffected != 1)
-                    updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpected number of rows affected by insert into " + record.table + "(" + data.rowsAffected + " rows affected)</span>", true);
+    function updateSuccess(record, index)
+    {
+        return function(data) {
+            updateLog("Success: updated record in " + record.table, true);
+            if (data.rowsAffected !== 1)
+                updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpected number of rows affected by update in " + record.table + "(" + data.rowsAffected + " rows affected)</span>", true);
 
-                var keyVal = (data.rows[0][record.keyVar] ? data.rows[0][record.keyVar] : data.rows[0][record.keyVar.toLowerCase()]);
-                var updateRow = record.insertRow;
-                updateRow[record.keyVar] = keyVal;
-                updateRow[record.updateVar] = "updated via javascript";
+            var deleteRow = {};
+            deleteRow[record.keyVar] = (data.rows[0][record.keyVar] ? data.rows[0][record.keyVar] : data.rows[0][record.keyVar.toLowerCase()]);
 
-                LABKEY.Query.updateRows({
-                    schemaName: 'assay',
-                    queryName: tablePrefix + ' ' + record.table,
-                    rows: [updateRow],
-                    success: updateSuccess(record, index),
-                    failure: insertFailure("update", record, index, record.updateFailureExpected)
-                });
-            }
-        }
-
-        function updateSuccess(record, index)
-        {
-            return function(data) {
-                updateLog("Success: updated record in " + record.table, true);
-                if (data.rowsAffected != 1)
-                    updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: unexpected number of rows affected by update in " + record.table + "(" + data.rowsAffected + " rows affected)</span>", true);
-
-                var deleteRow = {};
-                deleteRow[record.keyVar] = (data.rows[0][record.keyVar] ? data.rows[0][record.keyVar] : data.rows[0][record.keyVar.toLowerCase()]);
-
-                if (record.deleteFailureExpected)
-                {
-                    if (qwpArray[index].expectedRows != undefined)
-                        qwpArray[index].expectedRows++;
-                    
-                    checkForNextInsert(index);
-                }
-                else
-                {
-                    LABKEY.Query.deleteRows({
-                        schemaName: 'assay',
-                        queryName: tablePrefix + ' ' + record.table,
-                        rows: [deleteRow],
-                        success: function(){
-                            updateLog("Success: deleted record from " + record.table, true);
-                            checkForNextInsert(index);
-                        },
-                        failure: insertFailure("delete", record, index, record.deleteFailureExpected)
-                    });
-                }
-            }
-        }
-
-        function insertFailure(type, record, index, failureExpected)
-        {
-            return function(response){
-                if (failureExpected)
-                    updateLog("Expected " + type + " failure for " + record.table + ": " + response.exception, true);
-                else
-                    updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: " + type + " failed for " + record.table + ": " + response.exception + "</span>", true);
+            if (record.deleteFailureExpected)
+            {
+                if (qwpArray[index].expectedRows !== undefined)
+                    qwpArray[index].expectedRows++;
 
                 checkForNextInsert(index);
             }
-        }
-
-        function checkForNextInsert(index)
-        {
-            if (insertArray.length > index+1)
-            {
-               testInsertUpdateDelete(index+1);
-            }
             else
             {
-               updateLog("Done " + "testing inserts, updates, and deletes", true);
-               updateLog("", true); // add a blank line
+                LABKEY.Query.deleteRows({
+                    schemaName: 'assay',
+                    queryName: tablePrefix + ' ' + record.table,
+                    rows: [deleteRow],
+                    success: function(){
+                        updateLog("Success: deleted record from " + record.table, true);
+                        checkForNextInsert(index);
+                    },
+                    failure: insertFailure("delete", record, index, record.deleteFailureExpected)
+                });
             }
         }
+    }
 
+    function insertFailure(type, record, index, failureExpected)
+    {
+        return function(response){
+            if (failureExpected)
+                updateLog("Expected " + type + " failure for " + record.table + ": " + response.exception, true);
+            else
+                updateLog("<span class='labkey-error'>" + "Unexpected " + "Error: " + type + " failed for " + record.table + ": " + response.exception + "</span>", true);
 
-        function updateCurveFit(table, keyVar)
+            checkForNextInsert(index);
+        }
+    }
+
+    function checkForNextInsert(index)
+    {
+        if (insertArray.length > index+1)
         {
-            LABKEY.Query.selectRows({
-                schemaName: 'assay',
-                queryName: tablePrefix + ' ' + table,
-                success: function(data) {
-                    var updateRow = {};
-                    updateRow[keyVar] = data.rows[0][keyVar];
-
-                    // expect the update for teh CurveFit table to fail
-                    LABKEY.Query.updateRows({
-                        schemaName: 'assay',
-                        queryName: tablePrefix + ' ' + table,
-                        rows: [updateRow],
-                        success: function(){
-                            updateLog("Unexpected " + "Error: unexpected successful update of " + table, true);
-                            updateLog("Done with " + table + " update", true);
-                            updateLog("", true);
-                        },
-                        failure: function(response){
-                            updateLog("Expected update failure for " + table + ": " + response.exception, true);
-                            updateLog("Done with " + table + " update", true);
-                            updateLog("", true);                            
-                        }
-                     });
-                }
-             });
+           testInsertUpdateDelete(index+1);
         }
-
-        function updateLog(newHtml, newLine){
-            logHtml += (newLine ? "<br/>" : "") + newHtml;
-            Ext.get('log-info').update(logHtml);
+        else
+        {
+           updateLog("Done " + "testing inserts, updates, and deletes", true);
+           updateLog("", true); // add a blank line
         }
+    }
+
+    function updateCurveFit(table, keyVar)
+    {
+        LABKEY.Query.selectRows({
+            schemaName: 'assay',
+            queryName: tablePrefix + ' ' + table,
+            success: function(data) {
+                var updateRow = {};
+                updateRow[keyVar] = data.rows[0][keyVar];
+
+                // expect the update for teh CurveFit table to fail
+                LABKEY.Query.updateRows({
+                    schemaName: 'assay',
+                    queryName: tablePrefix + ' ' + table,
+                    rows: [updateRow],
+                    success: function(){
+                        updateLog("Unexpected " + "Error: unexpected successful update of " + table, true);
+                        updateLog("Done with " + table + " update", true);
+                        updateLog("", true);
+                    },
+                    failure: function(response){
+                        updateLog("Expected update failure for " + table + ": " + response.exception, true);
+                        updateLog("Done with " + table + " update", true);
+                        updateLog("", true);
+                    }
+                 });
+            }
+         });
+    }
+
+    function updateLog(newHtml, newLine){
+        logHtml += (newLine ? "<br/>" : "") + newHtml;
+        Ext.get('log-info').update(logHtml);
+    }
 </script>

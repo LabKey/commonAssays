@@ -301,5 +301,5 @@
             }
         }
 
-        Ext.onReady(init);
+        LABKEY.Utils.onReady(init);
 </script>

@@ -167,7 +167,7 @@ function linkHelper(text, onClick) {
     return {"html": html, "callback": callback }
 }
 
-Ext.onReady(function() {
+LABKEY.Utils.onReady(function() {
 
     var i;
     var keyword = [];
