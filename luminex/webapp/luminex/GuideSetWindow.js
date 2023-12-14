@@ -203,7 +203,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
         });
     },
 
-    // NOTE: consider putting store/model into seperate file...
+    // NOTE: consider putting store/model into separate file...
     getGuideSetStore: function() {
         if(!this.guideSetStore)
         {
@@ -302,7 +302,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     {
                         // NOTE: using this for dirty bit logic.
                         form.elements['MFICheckBox'].initial = record.get("MaxFIEnabled");
-                        if(record.get("ControlType") == "Titration")
+                        if(record.get("ControlType") === "Titration")
                         {
                             if (gsWindow.has4PLCurveFit) form.elements['EC504PLCheckBox'].initial = record.get("EC504PLEnabled");
                             if (gsWindow.has5PLCurveFit) form.elements['EC505PLCheckBox'].initial = record.get("EC505PLEnabled");
@@ -318,32 +318,14 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
     }
 });
 
-// helper used in display column
-function createGuideSetWindow(protocolId, currentGuideSetId, allowEdit) {
-    LABKEY.Assay.getById({
-        id: protocolId,
-        success: function(assay){
-            if (Ext4.isArray(assay) && assay.length == 1)
-            {
-                // could use either full name or base name here...
-                Ext4.create('LABKEY.luminex.GuideSetWindow', {
-                    assayName: assay[0].name,
-                    currentGuideSetId: currentGuideSetId,
-                    canEdit: allowEdit && LABKEY.user.canUpdate
-                });
-            }
-        }
-    });
-}
-
-function checkGuideSetWindowDirty(name) {
+function checkGuideSetWindowDirty() {
     var fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
     var form = document.forms['GuideSetForm'];
     var guideSetWindowDirtyBit = false;
     // Uncaught TypeError: Cannot read property 'checked' of undefined (when unchecking all the boxes... who knows why)
     try {
-        for (var name in fields) {
-            if (form.elements[name].checked != form.elements[name].initial)
+        for (let name in fields) {
+            if (form.elements[name].checked !== form.elements[name].initial)
             {
                 guideSetWindowDirtyBit = true;
                 break;
