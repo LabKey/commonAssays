@@ -318,7 +318,26 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
     }
 });
 
-function checkGuideSetWindowDirty() {
+// helper used in display column... see GuideSetTable and guidSetConfirmDelete.jsp
+// noinspection JSUnusedGlobalSymbols
+function createGuideSetWindow(protocolId, currentGuideSetId, allowEdit) {
+    LABKEY.Assay.getById({
+        id: protocolId,
+        success: function(assay){
+            if (Ext4.isArray(assay) && assay.length === 1)
+            {
+                // could use either full name or base name here...
+                Ext4.create('LABKEY.luminex.GuideSetWindow', {
+                    assayName: assay[0].name,
+                    currentGuideSetId: currentGuideSetId,
+                    canEdit: allowEdit && LABKEY.user.canUpdate
+                });
+            }
+        }
+    });
+}
+
+function checkGuideSetWindowDirty(name) {
     var fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
     var form = document.forms['GuideSetForm'];
     var guideSetWindowDirtyBit = false;
