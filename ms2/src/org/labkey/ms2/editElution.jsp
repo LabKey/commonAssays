@@ -106,14 +106,10 @@
         {
             if (ctx.getLightValue(i) != null)
             {
-                if (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan())
-                {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-                }
-                else
-                {
-                    %><img class="labkey-bordered" onclick="setRange('light', <%= i %>)" name="lightImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-                }
+                String color = (i >= quant.getLightFirstScan() && i <= quant.getLightLastScan()) ? "red" : "gray";
+                String id = "lightImgScan" + i;
+                addHandler(id, "click", "setRange('light', " + i + ")");
+                %><img class="labkey-bordered" id="<%=h(id)%> name="<%=h(id)%>" src="<%=getWebappURL("/_images/" + color + ".gif")%> height="<%= (int)(ctx.getLightValue(i).floatValue() / ctx.getMaxLightIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
             }
             else
             {
@@ -164,14 +160,10 @@
         {
             if (ctx.getHeavyValue(i) != null)
             {
-                if (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan())
-                {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/red.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-                }
-                else
-                {
-                    %><img class="labkey-bordered" onclick="setRange('heavy', <%= i %>)" name="heavyImgScan<%= i %>" src="<%=getWebappURL("/_images/gray.gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
-                }
+                String color = (i >= quant.getHeavyFirstScan() && i <= quant.getHeavyLastScan()) ? "red" : "gray";
+                String id = "heavyImgScan" + i;
+                addHandler(id, "click", "setRange('heavy', " + i + ")");
+                %><img class="labkey-bordered" id="<%=h(id)%>" name="<%=h(id)%>>" src="<%=getWebappURL("/_images/" + color + ".gif")%> height="<%= (int)(ctx.getHeavyValue(i).floatValue() / ctx.getMaxHeavyIntensity() * 250)%>" width="5" alt="Scan <%= i %>"/><%
             }
             else
             {
@@ -189,11 +181,11 @@
 </labkey:form>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-var areas = new Object();
+var areas = {};
 areas.light = <%= quant.getLightArea() %>;
 areas.heavy = <%= quant.getHeavyArea() %>;
-var intensities = new Object();
-intensities.light = new Object();
+var intensities = {};
+intensities.light = {};
 <%
     for (PeptideQuantitation.ScanInfo scanInfo : ctx.getLightElutionProfile())
     {
@@ -202,7 +194,7 @@ intensities.light = new Object();
     <%
     }
 %>
-intensities.heavy = new Object();
+intensities.heavy = {};
 <%
     for (PeptideQuantitation.ScanInfo scanInfo : ctx.getHeavyElutionProfile())
     {

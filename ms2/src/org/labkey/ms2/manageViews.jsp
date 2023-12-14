@@ -27,10 +27,15 @@
 <labkey:form method="post" name="manageViewsForm" action="">
     <p>
         <input type=hidden value="<%=h(bean.getReturnURL())%>">
-        <% for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
-        { %>
-            <input onchange="updateForm();" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
-        <% } %>
+        <%
+            getPageConfig().addHandlerForQuerySelector("INPUT.labkey-defaultViewType", "change", "updateForm();");
+            for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
+            {
+        %>
+            <input class="labkey-defaultViewType" type="radio" <% if (bean.getDefaultViewType() == defaultViewType) { %>checked<% } %> name="defaultViewType" value="<%=h(defaultViewType.toString()) %>" id="defaultViewType<%=h(defaultViewType.toString()) %>"/> <%=h(defaultViewType.getDescription()) %><br/>
+        <%
+            }
+        %>
     </p>
     <table class="labkey-data-region-legacy labkey-show-borders">
         <tr>
