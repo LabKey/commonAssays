@@ -140,7 +140,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         VBox vbox = new VBox();
         vbox.addView(HtmlView.unsafe("<style type='text/css'>input { font-family: monospace; }</style>"));
         vbox.addView(view);
-        vbox.addView(new HtmlView(sb.toString()));
+        vbox.addView(HtmlView.unsafe(sb.toString()));
         return vbox;
     }
 

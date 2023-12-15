@@ -60,6 +60,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.ThawListResolverType;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
@@ -251,7 +252,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     public HttpView getDataDescriptionView(AssayRunUploadForm form)
     {
-        return new HtmlView("The NAb data file is a specially formatted TSV, CSV or Excel file.");
+        return HtmlView.of("The NAb data file is a specially formatted TSV, CSV or Excel file.");
     }
 
     @Override
