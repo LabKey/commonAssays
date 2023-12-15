@@ -146,7 +146,7 @@ public class LibraTest extends MS2TestBase
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptide"));
         _customizeViewsHelper.saveCustomView("HyperFilter");
         click(Locator.radioButtonById("SpectraCountPeptideCharge"));
-        selectOptionByText(Locator.id("PeptidesFilter_viewName"), "HyperFilter");
+        selectOptionByText(Locator.id("PeptidesFilter.viewName"), "HyperFilter");
         setFormElement(Locator.name("targetProtein"), "");
         clickButton("Compare");
         assertElementPresent(Locator.linkWithText("itraq/iTRAQ (Libra)"), 12);
@@ -162,7 +162,7 @@ public class LibraTest extends MS2TestBase
         // Validate that it remembers our options
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptideCharge"));
-        assertEquals("HyperFilter", getFormElement(Locator.id("PeptidesFilter_viewName")));
+        assertEquals("HyperFilter", getFormElement(Locator.id("PeptidesFilter.viewName")));
     }
 
     private void specificProteinTest()

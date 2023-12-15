@@ -71,9 +71,7 @@ public class FilterView extends QueryView
         if (options.size() <= 1)
             return null;
 
-        // Note: dots in ids don't seem to be compatible with document.querySelectorAll(), so replace them
-        // TODO: I think Utils.attachEventHandler() needs to escape dots in the ID; maybe other characters. Issue 49287
-        String id = param(QueryParam.viewName).replace('.', '_'); // Workaround until fix is in place
+        String id = param(QueryParam.viewName);
 
         new SelectBuilder()
             .id(id)
