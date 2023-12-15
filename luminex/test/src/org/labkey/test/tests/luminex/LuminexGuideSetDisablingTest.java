@@ -52,7 +52,7 @@ import static org.junit.Assert.assertNotEquals;
 @BaseWebDriverTest.ClassTimeout(minutes = 13)
 public final class LuminexGuideSetDisablingTest extends LuminexTest
 {
-    private LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
+    private final LuminexGuideSetHelper _guideSetHelper = new LuminexGuideSetHelper(this);
     private static final File[] GUIDE_SET_FILES = {
             TestFileUtils.getSampleData("luminex/01-11A12-IgA-Biotin.xls"),
             TestFileUtils.getSampleData("luminex/02-14A22-IgA-Biotin.xls"),

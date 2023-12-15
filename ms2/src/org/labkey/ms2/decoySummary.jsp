@@ -40,17 +40,15 @@
     String targetCount = nf.format(bean.getTargetCount());
     String decoyCount = nf.format(bean.getDecoyCount());
     Float desiredFdr = bean.getDesiredFdr();
-    Boolean isIonCutoff;  // we don't ever need to retrieve value from bean on page
+    boolean isIonCutoff;  // we don't ever need to retrieve value from bean on page
 
     ActionURL newURL = getViewContext().cloneActionURL();
     String ionCutoff = newURL.getParameter("MS2Peptides.Ion~gte");
     if (null != ionCutoff)
     {
         float ionCutoffFloat = Float.parseFloat(ionCutoff);
-        if(ionCutoffFloat == bean.getScoreThreshold())  // filter is same as threshold, so check checkbox
-            isIonCutoff = true;
-        else
-            isIonCutoff = false;
+        // filter is same as threshold, so check checkbox
+        isIonCutoff = ionCutoffFloat == bean.getScoreThreshold();
     }
     else
     {
@@ -64,10 +62,9 @@
     }
     else
     {
-        if(grouping.equals("query"))  // standard view
-            isStandardView = true;
-        else  // not standard, so disable checkbox (which would not work anyway)
-            isStandardView = false;
+        // standard view
+        // not standard, so disable checkbox (which would not work anyway)
+        isStandardView = grouping.equals("query");
     }
 
     newURL.deleteParameter("MS2Peptides.Ion~gte");
@@ -109,28 +106,44 @@
             <td></td>
             <td class="labkey-form-label">Adjust FDR To</td>
             <td style="text-align:right">
-                <select name="desiredFdr" id="desiredFdr" onchange="setFilterParameter(this.value); this.form.submit();">
+                <select name="desiredFdr" id="desiredFdr">
                     <%
                         List<Float> fdrOptions = bean.getFdrOptions();
                         defaultFormat.setMinimumIntegerDigits(1);
                         defaultFormat.setMinimumFractionDigits(1);
                         for(Float fdrOption : fdrOptions)
-                        { %>
+                        {
+                    %>
                     <option value="<%= h(fdrOption)%>"
                             <%=selected(Float.compare(fdrOption, (null == desiredFdr ? bean.getFdrAtDefaultPvalue() : desiredFdr)) == 0)%>><%=h(defaultFormat.format(fdrOption))%></option><%
-                    } %>
+                        }
+                    %>
                 </select>
             </td>
         </tr>
         <tr>
             <td colspan="4">
-                <label <% if (!isStandardView) { %> style="display:none"<% } %>><input type="checkbox" onclick="if(this.checked) {setFilterParameter(document.getElementById('desiredFdr').value)} this.form.submit();"
-                       name="isIonCutoff" id="isIonCutoff"<%=checked(isIonCutoff)%> value="true"></input>Only show Ion &gt= this threshold</label>
+                <label <% if (!isStandardView) { %> style="display:none"<% } %>><input type="checkbox" name="isIonCutoff"
+                    id="isIonCutoff"<%=checked(isIonCutoff)%> value="true">Only show Ion &gt= this threshold</label>
             </td>
         </tr>
     </table>
 </labkey:form>
 <script nonce="<%=getScriptNonce()%>">
+    LABKEY.Utils.onReady(function() {
+        document.getElementById("desiredFdr")['onchange'] = function() {
+            setFilterParameter(this.value);
+            this.form.submit();
+        };
+        document.getElementById("isIonCutoff")['onclick'] = function() {
+            if (this.checked)
+            {
+                setFilterParameter(document.getElementById('desiredFdr').value);
+            }
+            this.form.submit();
+        };
+    });
+
     function setFilterParameter(desiredFdr) {
         <%
             JSONObject jsonObj = new JSONObject();

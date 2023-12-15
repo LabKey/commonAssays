@@ -20,6 +20,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.HttpView;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -46,14 +47,14 @@ public class MultiValueInputColumn extends DataColumn
         String id = getInputPrefix() + formFieldName;
 
         out.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
-        out.write("<script text=\"text/javascript\">\n");
+        out.write("<script text=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n");
         out.write("LABKEY.requiresScript('viability/MultiValueInput', function(){\n");
         out.write("new MultiValueInput('");
         out.write(PageFlowUtil.filter(id));
         out.write("'");
 
         // XXX: hack. ignore the value in the render context. take the value as passed in during view creation.
-        if (_values != null && _values.size() > 0)
+        if (_values != null && !_values.isEmpty())
         {
             out.write(", [");
             for (int i = 0; i < _values.size(); i++)

@@ -196,7 +196,7 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    private class GraphLinkQueryView extends QueryView
+    private static class GraphLinkQueryView extends QueryView
     {
         private final String _tableName;
         private final String _controlType;

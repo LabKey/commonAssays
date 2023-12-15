@@ -81,30 +81,40 @@
     <h5><b>View Settings </b></h5>
 
     <label for="peptide-setting-select">By:</label>
-    <select name="peptideSettings" id="peptide-setting-select" onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('viewBy', 'peptide-setting-select')">
-        <option value="intensity" <%=isIntensityView ? h("selected") : h("")%> >Intensity</option>
-        <option value="confidenceScore" <%=isConfidenceView ? h("selected") : h("")%> >Confidence Score</option>
-    </select>
+    <%=select()
+        .name("peptideSettings")
+        .id("peptide-setting-select")
+        .addOptions(Map.of(
+            "intensity", "Intensity",
+            "confidenceScore", "Confidence Score"
+        ))
+        .selected(isIntensityView ? "intensity" : "confidenceScore")
+        .onChange("LABKEY.ms2.PeptideCharacteristicLegend.changeView('viewBy', 'peptide-setting-select')")
+    %>
 
     <label for="peptide-replicate-select">Replicate:</label>
-    <select name="replicateSettings" id="peptide-replicate-select"  onchange="LABKEY.ms2.PeptideCharacteristicLegend.changeView('replicateId', 'peptide-replicate-select')">
-        <labkey:options map="<%=replicates%>" value="<%=selectedReplicate%>"/>
-    </select>
-
+    <%=select()
+        .name("replicateSettings")
+        .id("peptide-replicate-select")
+        .addOptions(replicates)
+        .selected(selectedReplicate)
+        .onChange("LABKEY.ms2.PeptideCharacteristicLegend.changeView('replicateId', 'peptide-replicate-select');")
+    %>
 
     <label>Modified forms:</label>
     <span class="peptideForms">
-        <input type="radio" name="combinedOrStacked" id="combined" value="combined" <%=checked(isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')"/>
+        <input type="radio" name="combinedOrStacked" id="combined" value="combined"<%=checked(isCombined)%>/>
         <label for="combined">Combined</label>
 
         <span class="stackedForm" >
-            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked" <%=checked(!isCombined)%> onclick="LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')"/>
+            <input type="radio" name="combinedOrStacked" id="stacked" value="stacked"<%=checked(!isCombined)%>/>
             <label for="stacked" >Stacked</label>
         </span>
     </span>
-
 </div>
 <%
+        addHandler("combined", "click", "LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'combined')");
+        addHandler("stacked", "click", "LABKEY.ms2.PeptideCharacteristicLegend.changeView('peptideForm', 'stacked')");
     }
     // helper list of intensity or confidence score values of peptides used for calculations
     List<Double> iValues = new ArrayList<>();
@@ -285,7 +295,8 @@
             legendLabel = "Intensity";
             legendScale = "(Log 10 base)";
         }
-        else {
+        else
+        {
             legendLabel = "Confidence Score";
             legendScale = "-(Log 10 base)";
         }
@@ -327,10 +338,10 @@
             {
                 String id = "feature-" + StringUtils.replace(uniqueFeature, " ", "");
                 String color = colors.length > colorIndex ? colors[colorIndex++] : "#808080";
+                addHandler(id, "change", "LABKEY.ms2.ProteinCoverageMap.toggleStyleColor(" + q(id) + ", " + q(color) + ")");
             %>
             <div>
-                <input type="checkbox" onchange="LABKEY.ms2.ProteinCoverageMap.toggleStyleColor(<%= hq(id) %>, <%= hq(color) %>)"
-                       id="<%= h(id) %>" value="<%= h(id) %>" class="featureCheckboxItem" />
+                <input type="checkbox" id="<%= h(id) %>" value="<%= h(id) %>" class="featureCheckboxItem" />
                 <label style="padding-left: 5px; border-left: 5px solid <%= h(color)%>" for="<%= h(id) %>">
                     <%= h(StringUtils.capitalize(uniqueFeature)) %>
                 </label>

@@ -25,11 +25,8 @@ import org.xml.sax.SAXParseException;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-/**
- */
 public class ScriptParser
 {
     List<Error> _errors;
@@ -83,7 +80,7 @@ public class ScriptParser
         try
         {
             XmlOptions options = new XmlOptions();
-            List<XmlError> errors = new ArrayList();
+            List<XmlError> errors = new ArrayList<>();
             options.setDocumentType(ScriptDocument.type);
             script = StringUtils.replace(script, "<script>", "<script xmlns=\"" + ScriptDocument.type.getContentModel().getName().getNamespaceURI() + "\">");
             ScriptDocument doc = ScriptDocument.Factory.parse(new StringReader(script), options);
@@ -105,13 +102,13 @@ public class ScriptParser
         }
         catch (XmlException xmlException)
         {
-            if (xmlException.getErrors().size() == 0)
+            if (xmlException.getErrors().isEmpty())
             {
                 addError(new Error(xmlException.toString()));
             }
             else
             {
-                for (XmlError xmlError : (Collection<XmlError>) xmlException.getErrors())
+                for (XmlError xmlError : xmlException.getErrors())
                 {
                     addError(new Error(xmlError.getMessage(), xmlError.getLine(), xmlError.getColumn() > 0 ? xmlError.getColumn() : 1));
                 }
@@ -126,13 +123,13 @@ public class ScriptParser
     void addError(Error error)
     {
         if (_errors == null)
-            _errors = new ArrayList();
+            _errors = new ArrayList<>();
         _errors.add(error);
     }
 
     public Error[] getErrors()
     {
-        if (_errors == null || _errors.size() == 0)
+        if (_errors == null || _errors.isEmpty())
             return null;
         return _errors.toArray(new Error[0]);
     }

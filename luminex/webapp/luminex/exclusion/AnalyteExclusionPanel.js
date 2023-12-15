@@ -14,7 +14,7 @@ function openExclusionsAnalyteWindow(assayId, runId)
         id: assayId,
         success: function(assay)
         {
-            if (Ext.isArray(assay) && assay.length == 1)
+            if (Ext.isArray(assay) && assay.length === 1)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Analytes from Analysis',
@@ -71,7 +71,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             title += "<BR/><span style='color:red;'>To remove an exclusion, uncheck the analyte(s).</span>";
         }
 
-        // grid of avaialble/excluded analytes
+        // grid of available/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
             style: 'padding-top: 10px;',
@@ -155,8 +155,8 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             runId: this.runId,
             commands: [{
                 key: this.runId,
-                analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
-                analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only
+                analyteRowIds: (analyteRowIds !== "" ? analyteRowIds : null),
+                analyteNames: (analyteNames !== "" ? analyteNames : null), // for logging purposes only
                 comment: this.findById('comment').getValue()
             }]
         };

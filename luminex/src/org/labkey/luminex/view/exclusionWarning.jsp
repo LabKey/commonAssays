@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.data.ContainerFilter" %>
+<%@ page import="org.labkey.api.util.StringUtilsLabKey" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
-<%@ page import="org.labkey.api.util.StringUtilsLabKey" %>
 <%@ page import="org.labkey.luminex.LuminexAssayProvider" %>
-<%@ page import="org.labkey.api.data.ContainerFilter" %>
-<%@ page import="java.util.Collections" %>
+<%@ page import="org.labkey.luminex.LuminexRunUploadForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%

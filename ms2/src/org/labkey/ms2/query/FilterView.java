@@ -20,21 +20,16 @@ import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 
-/**
- * User: jeckels
- * Date: Mar 3, 2008
- */
 public class FilterView extends QueryView
 {
     public static final String PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON = "customViewRadioButton";
@@ -57,7 +52,7 @@ public class FilterView extends QueryView
                 peptides ? MS2Schema.HiddenTableType.PeptidesFilter.toString() : MS2Schema.HiddenTableType.ProteinGroupsFilter.toString());
     }
 
-    public String renderViewList(HttpServletRequest request, Writer out, String viewName) throws IOException
+    public String renderViewList(HttpServletRequest request, Writer out, String viewName)
     {
         Map<String, CustomView> customViews = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         Map<String, CustomView> savedViews = getQueryDef().getCustomViews(getUser(), request, false, false);
@@ -75,24 +70,18 @@ public class FilterView extends QueryView
 
         if (options.size() <= 1)
             return null;
-        String id = h(param(QueryParam.viewName));
-        out.write("<select id=\"" + id + "\" name=\"" + id + "\"");
-        out.write("onchange=\"document.getElementById('" + _radioButtonID + "').checked=true;\"");
-        out.write(">");
-        for (Map.Entry<?, String> entry : options.entrySet())
-        {
-            out.write("\n<option");
-            if (Objects.equals(entry.getKey(), viewName))
-            {
-                out.write(" selected");
-            }
-            out.write(" value=\"");
-            out.write(h(entry.getKey()));
-            out.write("\">");
-            out.write(h(entry.getValue()));
-            out.write("</option>");
-        }
-        out.write("</select>");
+
+        String id = param(QueryParam.viewName);
+
+        new SelectBuilder()
+            .id(id)
+            .name(id)
+            .onChange("document.getElementById('" + _radioButtonID + "').checked=true;")
+            .addOptions(options)
+            .selected(viewName)
+            .className(null)
+            .appendTo(out);
+
         return id;
     }
 }
