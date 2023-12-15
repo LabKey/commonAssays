@@ -71,7 +71,7 @@ LABKEY.Exclusions.AnalytePanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             title += "<BR/><span style='color:red;'>To remove an exclusion, uncheck the analyte(s).</span>";
         }
 
-        // grid of avaialble/excluded analytes
+        // grid of available/excluded analytes
         var availableAnalytesGrid = new Ext.grid.GridPanel({
             id: 'availableanalytes',
             style: 'padding-top: 10px;',
