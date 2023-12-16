@@ -57,8 +57,13 @@ you can monitor the progress by refreshing the status information on the next pa
 
 Click "Cancel" to return to the Protein Databases Admin page.<br><br>
 <labkey:form action="<%=loadGo%>" enctype="multipart/form-data" method="post">
-    <input type="file" name="gofile" size="60" onChange="showPathname(this, 'filename')">&nbsp;<label id="filename"></label><br><br>
+    <input type="file" name="gofile" id="gofile" size="60">&nbsp;<label id="filename"></label><br><br>
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2Controller.MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
 </labkey:form>
 </td></tr></table>
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
+    LABKEY.Utils.onReady(function() {
+        document.getElementById("gofile")['change'] = function() { showPathname(this, 'filename'); };
+    })
+</script>

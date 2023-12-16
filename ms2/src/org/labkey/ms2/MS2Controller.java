@@ -629,7 +629,8 @@ public class MS2Controller extends SpringActionController
         SelectBuilder select = new SelectBuilder()
             .id("views")
             .name("viewParams")
-            .addStyle("width:200");
+            .addStyle("width:200")
+            .className(null);
 
         // The defaultView parameter isn't used directly - it's just something on the URL so that it's clear
         // that the user has explicitly requested the standard view and therefore prevent us from

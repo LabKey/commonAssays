@@ -15,7 +15,7 @@
 #  - 3.0.20120323 : Changes for LabKey server 12.1
 #  - 3.1.20120629 : Issue 15279: Luminex Positivity Calculation incorrect for titrated unknowns incorrect
 #  - 4.0.20120509 : Changes for LabKey server 12.2
-#  - 4.1.20120806 : Issue 15709: Luminex tranform : QC Control plots not displayed when EC50 value out of acceptable range
+#  - 4.1.20120806 : Issue 15709: Luminex transform : QC Control plots not displayed when EC50 value out of acceptable range
 #  - 4.2.20121121 : Changes for LabKey server 12.3, Issue 15042: Transform script (and AUC calculation error) when luminex file uploaded that has an ExpConc value of zero for a standard well
 #  - 5.0.20121210 : Change for LabKey server 13.1
 #  - 5.1.20130424 : Move fix for Issue 15042 up to earliest curve fit calculation

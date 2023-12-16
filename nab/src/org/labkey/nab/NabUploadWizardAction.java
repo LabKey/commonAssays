@@ -18,7 +18,6 @@ package org.labkey.nab;
 
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.actions.UploadWizardAction;
-import org.labkey.api.assay.dilution.DilutionAssayProvider;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpRun;
@@ -119,36 +118,8 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         @Override
         public boolean executeStep(NabRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
-            if (_postedVirusProperties != null)
-            {
-                form.setSampleProperties(_postedVirusProperties);
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedVirusProperties.entrySet())
-                {
-                    try
-                    {
-                        form.saveDefaultValues(entry.getValue(), entry.getKey());
-                    }
-                    catch (org.labkey.api.exp.ExperimentException e)
-                    {
-                        errors.addError(new ObjectError("main", null, null, e.toString()));
-                    }
-                }
-            }
-            if (_postedSampleProperties != null)
-            {
-                form.setSampleProperties(_postedSampleProperties);
-                for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
-                {
-                    try
-                    {
-                        form.saveDefaultValues(entry.getValue(), entry.getKey());
-                    }
-                    catch (org.labkey.api.exp.ExperimentException e)
-                    {
-                        errors.addError(new ObjectError("main", null, null, e.toString()));
-                    }
-                }
-            }
+            execute(form, errors, _postedVirusProperties);
+            execute(form, errors, _postedSampleProperties);
             boolean success = !errors.hasErrors() && super.executeStep(form, errors);
 
             if (success && _run != null)
@@ -164,12 +135,31 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             }
             return success;
         }
+
+        private void execute(NabRunUploadForm form, BindException errors, Map<String, Map<DomainProperty, String>> postedVirusProperties)
+        {
+            if (postedVirusProperties != null)
+            {
+                form.setSampleProperties(postedVirusProperties);
+                for (Map.Entry<String, Map<DomainProperty, String>> entry : postedVirusProperties.entrySet())
+                {
+                    try
+                    {
+                        form.saveDefaultValues(entry.getValue(), entry.getKey());
+                    }
+                    catch (ExperimentException e)
+                    {
+                        errors.addError(new ObjectError("main", null, null, e.toString()));
+                    }
+                }
+            }
+        }
     }
 
     @Override
     protected ActionURL getUploadWizardCompleteURL(NabRunUploadForm form, ExpRun run)
     {
-        DilutionAssayProvider provider = form.getProvider();
+        NabAssayProvider provider = form.getProvider();
         return provider.getUploadWizardCompleteURL(form, run);
     }
 

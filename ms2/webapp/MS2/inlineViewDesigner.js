@@ -26,7 +26,7 @@
 
         LABKEY.DataRegion.loadViewDesigner(function() {
 
-            var viewName = viewSelectId == null || viewSelectId == '' ? null : document.getElementById(viewSelectId).value;
+            var viewName = viewSelectId == null || viewSelectId === '' ? null : document.getElementById(viewSelectId).value;
             LABKEY.Query.getQueryDetails({
                 schemaName: 'ms2',
                 queryName: queryName,

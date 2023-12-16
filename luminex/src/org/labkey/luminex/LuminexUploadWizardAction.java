@@ -222,7 +222,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 }
             }
 
-            if (cols.size() > 0)
+            if (!cols.isEmpty())
             {
                 // don't allow the "Same" checkbox options for the NegativeControl analyte property
                 boolean isCopyable = !LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME.equals(analyteDP.getName());
@@ -482,7 +482,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         for (File file : form.getUploadedData().values())
             fileNameToHeaderKeyMap.put(file.getName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file));
 
-        Set retainedExclusions = new HashSet();
+        Set<MultiKey<String>> retainedExclusions = new HashSet<>();
 
         parser.getSheets().forEach((analyte, datRowList) ->
             datRowList.forEach(row ->
@@ -498,7 +498,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     if (ex.wouldExclude(dataFileHeaderKey, analyteName, description, type, dilution))
                     {
                         //Aggregate retained exclusions by analyte
-                        retainedExclusions.add(new MultiKey(ex.getDataFileHeaderKey(), ex.getDescription(), ex.getType(), ex.getDilution()));
+                        retainedExclusions.add(new MultiKey<>(ex.getDataFileHeaderKey(), ex.getDescription(), ex.getType(), ex.getDilution()));
                         notRetained.remove(ex);
                         return;
                     }

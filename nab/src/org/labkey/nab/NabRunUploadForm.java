@@ -17,10 +17,6 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionRunUploadForm;
 
-/**
- * User: klum
- * Date: 5/16/13
- */
 public class NabRunUploadForm extends DilutionRunUploadForm<NabAssayProvider>
 {
 }
