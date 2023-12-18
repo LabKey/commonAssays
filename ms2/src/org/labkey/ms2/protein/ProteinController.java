@@ -28,6 +28,7 @@ import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.*;
 import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.*;
 import org.labkey.api.reader.TabLoader;
@@ -127,18 +128,18 @@ public class ProteinController extends SpringActionController
 
             ActionURL url;
 
-            String header;
+            HtmlStringBuilder header = HtmlStringBuilder.of();
             if (_showSequences)
             {
                 url = new ActionURL(ShowAnnotationSetAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. " + PageFlowUtil.link("show without proteins").href(url);
+                header.append("This view shows your protein list with all the proteins that match. If more than one sequence matches you will get multiple rows. ").append(PageFlowUtil.link("show without proteins").href(url));
             }
             else
             {
                 url = new ActionURL(ShowAnnotationSetWithSequencesAction.class, getContainer());
                 url.addParameter("CustomAnnotation.queryName", settings.getQueryName());
-                header = "This view shows just the data uploaded as part of the list. " + PageFlowUtil.link("show with matching proteins loaded into this server").href(url);
+                header.append("This view shows just the data uploaded as part of the list. ").append(PageFlowUtil.link("show with matching proteins loaded into this server").href(url));
             }
 
             HtmlView linkView = new HtmlView(header);

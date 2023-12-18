@@ -64,6 +64,7 @@ import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.ReturnURLString;
 import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
@@ -998,9 +999,9 @@ public class MS2Controller extends SpringActionController
             public HttpView getTabView(String tabId)
             {
                 if ("manual".equals(tabId))
-                    return new JspView("/org/labkey/ms2/loadGoManual.jsp");
+                    return new JspView<>("/org/labkey/ms2/loadGoManual.jsp");
                 else
-                    return new JspView("/org/labkey/ms2/loadGoAutomatic.jsp");
+                    return new JspView<>("/org/labkey/ms2/loadGoAutomatic.jsp");
             }
         }
     }
@@ -2683,7 +2684,7 @@ public class MS2Controller extends SpringActionController
             VBox result = new VBox(blastView, grid, annots, jobsView);
             if (form.getMessage() != null)
             {
-                HtmlView messageView = new HtmlView("Admin Message", "<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>");
+                HtmlView messageView = new HtmlView("Admin Message", HtmlString.unsafe("<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>"));
                 result.addView(messageView, 0);
             }
             return result;
@@ -4096,13 +4097,16 @@ public class MS2Controller extends SpringActionController
             ActionURL currentURL = getViewContext().cloneActionURL();
 
             ProteinsView view = new ProteinsView(currentURL, run, form, proteins, new String[]{peptide.getTrimmedPeptide()}, null);
-            List<String> fastaNames = new ArrayList<>();
+            HtmlStringBuilder summary = HtmlStringBuilder.of();
+            summary.unsafeAppend("<p><span class=\"navPageHeader\">All protein sequences in FASTA file" + (run.getFastaIds().length > 1 ? "s" : "") + " ");
+            String delimiter = "";
             for (int i : run.getFastaIds())
             {
-                fastaNames.add(ProteinManager.getFastaFile(i).getFilename());
+                summary.append(delimiter).append(ProteinManager.getFastaFile(i).getFilename());
+                delimiter = ", ";
             }
-            HttpView summary = new HtmlView("<p><span class=\"navPageHeader\">All protein sequences in FASTA file" + (run.getFastaIds().length > 1 ? "s" : "") + " " + StringUtils.join(fastaNames, ", ") + " that contain the peptide " + peptide + "</span></p>");
-            return new VBox(summary, view);
+            summary.append(" that contain the peptide " + peptide).unsafeAppend("</span></p>");
+            return new VBox(new HtmlView(summary), view);
         }
 
         @Override
@@ -4202,7 +4206,7 @@ public class MS2Controller extends SpringActionController
             int proteinCount = Math.min(100, proteins.size());
             // string search:  searching for a peptide string in the proteins of a given run
             boolean stringSearch = (null != peptides);
-            // don't show the peptides grid or the coveage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)
+            // don't show the peptides grid or the coverage map for the Proteins matching a peptide or the no run case (e.g click on a protein Name in Matching Proteins grid of search results)
             boolean showPeptides = !stringSearch && run != null;
             SimpleFilter allPeptidesQueryFilter = null;
             NestableQueryView gridView = null;
@@ -4657,7 +4661,7 @@ public class MS2Controller extends SpringActionController
             if (StringUtils.isBlank(sliceDefinition))
                 sliceDefinition = "Miscellaneous or Defunct Category";
             String html = "<font size=\"+1\">" + PageFlowUtil.filter(sliceDefinition) + "</font>";
-            HttpView definitionView = new HtmlView("Definition", html);
+            HttpView definitionView = new HtmlView("Definition", HtmlString.unsafe(html));
             vbox.addView(definitionView);
 
             String sqids = form.getSqids();

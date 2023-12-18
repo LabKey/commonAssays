@@ -29,10 +29,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.util.CheckedInputStream;
-import org.labkey.api.util.ExceptionUtil;
-import org.labkey.api.util.JobRunner;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.*;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protein.ProteinManager;
@@ -69,24 +66,25 @@ public abstract class GoLoader
     private static Boolean _goLoaded = null;
     private static GoLoader _currentLoader = null;
 
-    private final StringBuffer _status = new StringBuffer();  // Can't use StringBuilder -- needs to be synchronized
+    private final HtmlStringBuilder _status = HtmlStringBuilder.of();  // Can't use StringBuilder -- needs to be synchronized
     private boolean _complete = false;
 
     public static WebPartView getCurrentStatus(String message)
     {
-        StringBuilder html = new StringBuilder(null == message ? "" : PageFlowUtil.filter(message) + "<br><br>");
+        HtmlStringBuilder html = HtmlStringBuilder.of();
+        html.append(null == message ? "" : message).unsafeAppend("<br><br>");
 
         if (null == _currentLoader)
             html.append("No GO annotation loads have been attempted during this server session");
         else
         {
-            StringBuffer status = _currentLoader.getStatus();
-            if (-1 == status.indexOf("failed"))
-                html.append("Refresh this page to update status<br><br>\n");
+            HtmlString status = _currentLoader.getStatus();
+            if (!status.toString().contains("failed"))
+                html.unsafeAppend("Refresh this page to update status<br><br>\n");
             html.append(status);
         }
 
-        return new HtmlView("GO Annotation Load Status", html.toString());
+        return new HtmlView("GO Annotation Load Status", html);
     }
 
 
@@ -294,9 +292,9 @@ public abstract class GoLoader
 
     private void logException(Exception e)
     {
-        _status.insert(0, "See below for complete log<br><br>");
+        _status.insert(0, HtmlString.unsafe("See below for complete log<br><br>"));
         _status.insert(0, ExceptionUtil.renderException(e));
-        _status.insert(0, "Loading GO annotations failed with the following exception:<br>");
+        _status.insert(0, HtmlString.unsafe("Loading GO annotations failed with the following exception:<br>"));
 
         logStatus("Loading GO annotations failed with the following exception:");
         logStatus(ExceptionUtil.renderException(e).toString());
@@ -304,9 +302,9 @@ public abstract class GoLoader
     }
 
 
-    private StringBuffer getStatus()
+    private HtmlString getStatus()
     {
-        return _status;
+        return _status.getHtmlString();
     }
 
 

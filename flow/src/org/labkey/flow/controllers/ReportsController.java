@@ -43,6 +43,7 @@ import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
@@ -330,13 +331,13 @@ public class ReportsController extends BaseFlowController
         {
             r = getReport(getViewContext(), form);
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("Delete report: ").append(PageFlowUtil.filter(r.getDescriptor().getReportName())).append("?");
+            HtmlStringBuilder sb = HtmlStringBuilder.of();
+            sb.append("Delete report: ").append(r.getDescriptor().getReportName()).append("?");
 
             if (r.saveToDomain())
                 sb.append(" All saved report results will also be deleted.");
 
-            return new HtmlView(sb.toString());
+            return new HtmlView(sb);
         }
 
         @Override
