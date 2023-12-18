@@ -67,7 +67,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         '<td align="right">{[this.formatNumber(values.EC504PLStdDev)]}</td>',
                         '<tpl if="ValueBased &lt; 1">',
                         '<td align="right">{EC504PLRunCount}</td>',
-                        '<td align="center"><input type="checkbox" name="EC504PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
+                        '<td align="center"><input type="checkbox" name="EC504PLCheckBox" class="lk-check-dirty" {[this.initCheckbox(values.EC504PLEnabled, values.UserCanEdit)]}></td>',
                         '</tpl>',
                     '</tr>',
                 '</tpl>',
@@ -78,7 +78,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                         '<td align="right">{[this.formatNumber(values.EC505PLStdDev)]}</td>',
                         '<tpl if="ValueBased &lt; 1">',
                         '<td align="right">{EC505PLRunCount}</td>',
-                        '<td align="center"><input type="checkbox" name="EC505PLCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
+                        '<td align="center"><input type="checkbox" name="EC505PLCheckBox" class="lk-check-dirty" {[this.initCheckbox(values.EC505PLEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
                     '</tr>',
                 '</tpl>',
@@ -89,7 +89,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                 '<td align="right">{[this.formatNumber(values.MaxFIStdDev)]}</td>',
                 '<tpl if="ValueBased &lt; 1">',
                 '<td align="right">{MaxFIRunCount}</td>',
-                '<td align="center"><input type="checkbox" name="MFICheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.MaxFIEnabled, values.UserCanEdit)]}></td>',
+                '<td align="center"><input type="checkbox" name="MFICheckBox" class="lk-check-dirty" {[this.initCheckbox(values.MaxFIEnabled, values.UserCanEdit)]}></td>',
                 '</tpl>',
             '</tr>',
             '<tpl if="ControlType ==\'Titration\'">',
@@ -99,7 +99,7 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
                     '<td align="right">{[this.formatNumber(values.AUCStdDev)]}</td>',
                     '<tpl if="ValueBased &lt; 1">',
                     '<td align="right">{AUCRunCount}</td>',
-                    '<td align="center"><input type="checkbox" name="AUCCheckBox" onchange="checkGuideSetWindowDirty();" {[this.initCheckbox(values.AUCEnabled, values.UserCanEdit)]}></td>',
+                    '<td align="center"><input type="checkbox" name="AUCCheckBox" class="lk-check-dirty" {[this.initCheckbox(values.AUCEnabled, values.UserCanEdit)]}></td>',
                     '</tpl>',
                 '</tr>',
             '</tpl>',
@@ -135,7 +135,17 @@ Ext4.define('LABKEY.luminex.GuideSetWindow', {
             xtype: 'dataview',
             tpl: LABKEY.luminex.GuideSetWindow.viewTpl,
             padding: 10,
-            store: this.getGuideSetStore()
+            store: this.getGuideSetStore(),
+            listeners: {
+                // "viewready" event fired too early; inputs were not found in the DOM at that point. So use "refresh".
+                // This event is invoked multiple times, but it's fine if handlers get attached more than once.
+                refresh: function() {
+                    LABKEY.Utils.attachEventHandlerForQuerySelector("INPUT.lk-check-dirty", "change", function()
+                    {
+                        checkGuideSetWindowDirty();
+                    });
+                }
+            }
         }];
 
         this.buttons = [{
@@ -338,19 +348,15 @@ function createGuideSetWindow(protocolId, currentGuideSetId, allowEdit) {
 }
 
 function checkGuideSetWindowDirty(name) {
-    var fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
-    var form = document.forms['GuideSetForm'];
-    var guideSetWindowDirtyBit = false;
-    // Uncaught TypeError: Cannot read property 'checked' of undefined (when unchecking all the boxes... who knows why)
-    try {
-        for (let name in fields) {
-            if (form.elements[name].checked !== form.elements[name].initial)
-            {
-                guideSetWindowDirtyBit = true;
-                break;
-            }
+    const fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
+    const form = document.forms['GuideSetForm'];
+    let guideSetWindowDirtyBit = false;
+    fields.forEach(function(name) {
+        const element = form.elements[name];
+        if (element && (element.checked !== element.initial))
+        {
+            guideSetWindowDirtyBit = true;
         }
-    }
-    catch (err) {}
+    });
     Ext4.getCmp('GuideSetSaveButton').setDisabled(!guideSetWindowDirtyBit);
 }
