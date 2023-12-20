@@ -703,7 +703,7 @@ public class MS2Schema extends UserSchema
                 SQLFragment sql = new SQLFragment("Run IN (SELECT r.Run FROM ");
                 sql.append(MS2Manager.getTableInfoRuns(), "r");
                 sql.append(" WHERE ");
-                sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container"), MS2Schema.this.getContainer()));
+                sql.append(filter.getSQLFragment(getSchema(), new SQLFragment("r.Container")));
                 sql.append(")");
                 addCondition(sql, containerFieldKey);
             }

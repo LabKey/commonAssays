@@ -422,7 +422,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         sql.append(" WHERE Run IN (SELECT Run FROM ");
         sql.append(MS2Manager.getTableInfoRuns(), "r");
         sql.append(" WHERE ");
-        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), getContainer()));
+        sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container")));
         sql.append(" AND Deleted = ?");
         sql.add(Boolean.FALSE);
         if (runs != null)
