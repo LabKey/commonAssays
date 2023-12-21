@@ -545,7 +545,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                         "WHERE result.ProtocolID = ? AND ");
             filter.add(getProtocol().getRowId());
 
-            filter.append(containerFilter.getSQLFragment(getSchema(), new SQLFragment("result.Container"), getContainer()));
+            filter.append(containerFilter.getSQLFragment(getSchema(), new SQLFragment("result.Container")));
 
             filter.append(")");
             filter.appendComment("</ResultSpecimens.applyContainerFilter>", getSqlDialect());

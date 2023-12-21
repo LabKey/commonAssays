@@ -87,9 +87,6 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
         });
         addColumn(runColumn);
 
-//        ColumnInfo objectUriColumn = getColumn("ObjectUri");
-//        Domain antigenDomain = ((ElispotAssayProvider)provider).getAntigenWellGroupDomain(protocol);
-//        PropertyDescriptor materialProperty = antigenDomain.getPropertyByName("SpecimenLsid").getPropertyDescriptor();
         final boolean hasMaterialSpecimenPropertyColumnDecorator = hasMaterialSpecimenPropertyColumnDecorator();
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(protocol, AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
@@ -151,11 +148,8 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
     protected void applyContainerFilter(ContainerFilter filter)
     {
         // There isn't a container column directly on this table so do a special filter
-        if (getContainer() != null)
-        {
-            FieldKey containerColumn = FieldKey.fromParts("Run", "Folder");
-            clearConditions(containerColumn);
-            addCondition(filter.getSQLFragment(getSchema(), new SQLFragment("(SELECT d.Container FROM exp.ExperimentRun d WHERE d.RowId = RunId)"), getContainer()), containerColumn);
-        }
+        FieldKey containerColumn = FieldKey.fromParts("Run", "Folder");
+        clearConditions(containerColumn);
+        addCondition(filter.getSQLFragment(getSchema(), new SQLFragment("(SELECT d.Container FROM exp.ExperimentRun d WHERE d.RowId = RunId)")), containerColumn);
     }
 }
