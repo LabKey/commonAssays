@@ -42,7 +42,7 @@
 
     <div style="margin-left: 25px;">
         <%--default to checked--%>
-        <input type="checkbox" name="retainExclusions" <%=checked(bean.getRetainExclusions())%> onchange="retainExclusionsChanged(this)" />
+        <input type="checkbox" id="retainExclusions" name="retainExclusions"<%=checked(bean.getRetainExclusions())%>/>
         <%=h("Retain matched exclusion" + (exclusionCount == 1 ? "" :"s"))%>
         <br/>
     </div>
@@ -52,9 +52,11 @@
 </span>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
+    LABKEY.Utils.onReady(function() {
+        document.getElementById("retainExclusions")['onchange'] = function() { retainExclusionsChanged(this) };
+    });
 
-    function retainExclusionsChanged(el)
-    {
+    function retainExclusionsChanged(el) {
         var hiddenEl = getHiddenFormElement(el.name);
         if (hiddenEl != null)
             hiddenEl.value = el.checked;
