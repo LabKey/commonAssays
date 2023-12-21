@@ -34,10 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: klum
- * Date: 2/24/13
- */
 public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFilePropertyHelper
 {
     public SinglePlateDilutionSamplePropertyHelper(Container c, ExpProtocol protocol, List<? extends DomainProperty> sampleProperties, Plate template, SampleMetadataInputFormat inputFormat)
