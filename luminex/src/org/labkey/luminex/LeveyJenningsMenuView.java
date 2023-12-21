@@ -65,7 +65,7 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
     {
         super("/org/labkey/luminex/view/leveyJenningsMenu.jsp");
         ContainerFilter.AllFolders containerFilter = new ContainerFilter.AllFolders(getViewContext().getUser());
-        SQLFragment containerSQL = containerFilter.getSQLFragment(LuminexProtocolSchema.getSchema(), new SQLFragment("r.Container"), getViewContext().getContainer());
+        SQLFragment containerSQL = containerFilter.getSQLFragment(LuminexProtocolSchema.getSchema(), new SQLFragment("r.Container"));
 
         SQLFragment titrationSQL = new SQLFragment("SELECT DISTINCT t.Name FROM ");
         titrationSQL.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
