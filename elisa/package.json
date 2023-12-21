@@ -40,7 +40,7 @@
     }
   },
   "dependencies": {
-    "@labkey/components": "3.0.0"
+    "@labkey/components": "3.0.2-fb-bump-components.0"
   },
   "devDependencies": {
     "@labkey/build": "7.0.0",
