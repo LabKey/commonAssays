@@ -40,10 +40,10 @@
     }
   },
   "dependencies": {
-    "@labkey/components": "2.370.0"
+    "@labkey/components": "3.1.1"
   },
   "devDependencies": {
-    "@labkey/build": "6.15.0",
+    "@labkey/build": "7.0.0",
     "@labkey/eslint-config-react": "0.0.13",
     "@types/enzyme": "3.10.13",
     "@types/jest": "29.5.5",
