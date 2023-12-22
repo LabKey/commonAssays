@@ -30,7 +30,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.MicroarrayModule;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Collections;

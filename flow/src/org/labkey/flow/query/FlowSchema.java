@@ -99,7 +99,7 @@ import org.labkey.flow.reports.FlowReportManager;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.io.Writer;
@@ -116,10 +116,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Supplier;
-
-import static java.lang.Boolean.TRUE;
-import static java.util.Objects.requireNonNull;
-
 
 public class FlowSchema extends UserSchema implements UserSchema.HasContextualRoles
 {

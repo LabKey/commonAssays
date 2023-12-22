@@ -27,7 +27,7 @@ import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.nab.NabAssayProvider;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;

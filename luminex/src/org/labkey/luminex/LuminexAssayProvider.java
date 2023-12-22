@@ -71,7 +71,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,8 +82,6 @@ import java.util.Set;
 
 /**
  * Defines the Luminex assay type, creates default batch/run/analyte domains, sets up header links.
- * User: jeckels
- * Date: Jul 13, 2007
  */
 public class LuminexAssayProvider extends AbstractAssayProvider
 {

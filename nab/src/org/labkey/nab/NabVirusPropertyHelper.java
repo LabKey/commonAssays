@@ -29,7 +29,7 @@ import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.view.InsertView;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;

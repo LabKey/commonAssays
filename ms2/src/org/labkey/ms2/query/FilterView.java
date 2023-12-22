@@ -24,7 +24,7 @@ import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;

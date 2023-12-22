@@ -18,7 +18,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.util.DateUtil;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -26,9 +26,6 @@ import java.util.Date;
 
 /**
  * A renderer of spectrum information that ends up as some type of text file
- * User: adam
- * Date: May 8, 2006
- * Time: 5:23:26 PM
  */
 public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
 {
