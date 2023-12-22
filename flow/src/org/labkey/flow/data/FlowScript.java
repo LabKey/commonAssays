@@ -45,7 +45,7 @@ import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;

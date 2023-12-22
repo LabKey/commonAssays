@@ -39,7 +39,7 @@ import org.labkey.api.view.RedirectException;
 import org.labkey.flow.controllers.FlowParam;
 import org.springframework.web.servlet.mvc.Controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.Collection;

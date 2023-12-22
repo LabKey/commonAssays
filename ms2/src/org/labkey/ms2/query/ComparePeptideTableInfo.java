@@ -28,7 +28,7 @@ import org.labkey.api.query.LookupForeignKey;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -57,7 +57,7 @@ import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.protein.ProteinManager;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
