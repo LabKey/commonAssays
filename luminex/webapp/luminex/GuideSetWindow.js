@@ -347,7 +347,7 @@ function createGuideSetWindow(protocolId, currentGuideSetId, allowEdit) {
     });
 }
 
-function checkGuideSetWindowDirty(name) {
+function checkGuideSetWindowDirty() {
     const fields = ['EC504PLCheckBox', 'EC505PLCheckBox', 'MFICheckBox', 'AUCCheckBox']
     const form = document.forms['GuideSetForm'];
     let guideSetWindowDirtyBit = false;

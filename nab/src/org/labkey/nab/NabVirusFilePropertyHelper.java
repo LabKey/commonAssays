@@ -28,9 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by cnathe on 8/18/14.
- */
 public class NabVirusFilePropertyHelper extends PlateSampleFilePropertyHelper
 {
     public static final String VIRUS_WELLGROUP_COLUMN = "VirusWellGroup";
