@@ -38,7 +38,7 @@ import java.util.Set;
  */
 public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
 {
-    private List<String> _analyteNames;
+    private final List<String> _analyteNames;
 
     public PlateAnalytePropertyHelper(ElispotRunUploadForm form, List<? extends DomainProperty> antigenDomainProperties) throws ExperimentException
     {

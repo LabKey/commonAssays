@@ -34,13 +34,13 @@ import java.util.Set;
 
 public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 {
-    private LuminexRunUploadForm _form;
-    private Titration _titration;
-    private String _analyteName;
-    private String _protocolName;
-    private boolean _errorReshow;
-    private boolean _hideCell;
-    private Set<Titration> _standardTitrations;
+    private final LuminexRunUploadForm _form;
+    private final Titration _titration;
+    private final String _analyteName;
+    private final String _protocolName;
+    private final boolean _errorReshow;
+    private final boolean _hideCell;
+    private final Set<Titration> _standardTitrations;
 
     public AnalytePropStandardsDisplayColumn(LuminexRunUploadForm form, Titration titration, String analyteName, String protocolName,
                                              boolean errorReshow, boolean hideCell, Set<Titration> standardTitrations)
@@ -67,7 +67,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 
         String defVal = defaultTitrationValues.get(propertyName);
         // If we're replacing this run, and the previous version of the run had the analyte/titration
-        // combination, see if it they were used together
+        // combination, see if they were used together
         if (_form.getReRun() != null && existingTitrations.containsKey(titrationName) && existingAnalytes.containsKey(_analyteName))
         {
             SQLFragment selectedSQL = new SQLFragment("SELECT at.* FROM ");
@@ -100,7 +100,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
                 // if there is only one standard, then preselect the checkbox
                 checked = "CHECKED";
             }
-            else if (_standardTitrations.size() > 1 && (defVal == null || defVal.toLowerCase().equals("true")))
+            else if (defVal == null || defVal.equalsIgnoreCase("true"))
             {
                 // if > 1 standard and default value exists, set checkbox based on default value
                 // else if no default value and titration is standard, then preselect the checkbox
@@ -122,16 +122,10 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputWrapperEnd(Writer out) throws IOException
-    {
-        out.write("</td>");
-    }
-
-    @Override
     public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
     {
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td name=\"" + titrationCellName + "\"" + "class=\"" + PageFlowUtil.filter(cls)+ "\""
+        out.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
                 + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
         renderTitle(ctx, out);
         out.write("</td>");

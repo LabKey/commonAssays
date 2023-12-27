@@ -69,7 +69,7 @@
     <table class="lk-luminex-well-role-table">
         <tr>
 <%
-    if (nonUnknownTitrations.size() > 0)
+    if (!nonUnknownTitrations.isEmpty())
     {
 %>
         <td>

@@ -51,6 +51,7 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.VBox;
@@ -423,15 +424,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
                     String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
+                    String id = groupName + "CheckBox";
                     out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
-                    out.write("<input type=checkbox name='" + groupName + "CheckBox' id='" + groupName + "CheckBox' onchange=\"");
-                    out.write(" b = this.checked;");
-                    for (int i = 1; i < getColumns().size(); i++)
+                    out.write("<input type=checkbox name='" + id + "' id='" + id + "'>");
+                    StringBuilder onchange = new StringBuilder("b = this.checked;");
+                    for (DisplayColumn col : getColumns())
                     {
-                        DisplayColumn col = getColumns().get(i);
-                        out.write("document.getElementsByName('" + col.getFormFieldName(ctx) + "')[0].style.display = b ? 'none' : 'block';\n");
+                        onchange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.display = b ? 'none' : 'block';\n");
                     }
-                    out.write(" if (b) { " + groupName + "Updated(); }\">");
+                    onchange.append("if (b) { ").append(groupName).append("Updated(); }");
+                    HttpView.currentPageConfig().addHandler(id, "change", onchange.toString());
                     out.write("</td>");
                 }
 

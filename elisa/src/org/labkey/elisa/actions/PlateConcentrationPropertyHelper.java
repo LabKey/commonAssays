@@ -32,13 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * User: klum
- * Date: 10/14/12
- */
 public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellGroup>
 {
-    private Set<String> _controlNames;
+    private final Set<String> _controlNames;
     private final Plate _template;
 
     public PlateConcentrationPropertyHelper(List<? extends DomainProperty> domainProperties, Plate template)

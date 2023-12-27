@@ -35,12 +35,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by klum on 7/6/2014.
- */
 public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
 {
-    private SampleMetadataInputFormat _metadataInputFormat;
+    private final SampleMetadataInputFormat _metadataInputFormat;
 
     public NabVirusPropertyHelper(List<? extends DomainProperty> virusDomainProperties, Plate template, SampleMetadataInputFormat metadataInputFormat)
     {

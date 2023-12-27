@@ -17,10 +17,8 @@
 package org.labkey.test.ms2;
 
 import org.labkey.test.BaseWebDriverTest;
-import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
-import org.labkey.test.WebTestHelper;
 
 import java.io.File;
 import java.util.Arrays;

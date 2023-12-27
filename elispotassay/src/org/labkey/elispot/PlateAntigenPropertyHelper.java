@@ -29,13 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: Karl Lum
- * Date: Jan 14, 2008
- */
 public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
 {
-    private List<String> _antigenNames;
+    private final List<String> _antigenNames;
     private final Plate _template;
 
     public PlateAntigenPropertyHelper(List<? extends DomainProperty> antigenDomainProperties, Plate template)
@@ -80,11 +76,9 @@ public class PlateAntigenPropertyHelper extends SamplePropertyHelper<String>
         return !AbstractAssayProvider.SPECIMENID_PROPERTY_NAME.equals(pd.getName()) && !AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME.equals(pd.getName());
     }
 
-
     @Override
     public List<String> getSampleNames()
     {
         return _antigenNames;
     }
-
 }

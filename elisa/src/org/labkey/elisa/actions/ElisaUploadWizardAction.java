@@ -53,10 +53,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- * User: klum
- * Date: 10/9/12
- */
 @RequiresPermission(InsertPermission.class)
 public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaRunUploadForm, ElisaAssayProvider>
 {

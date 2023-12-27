@@ -85,10 +85,10 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
         List<String> cols = Arrays.asList(PLATE_COLUMN_NAME, SAMPLE_COLUMN_NAME, WELL_LOCATION_COLUMN_NAME, SPOT_COLUMN_NAME);
         for (String column : cols)
         {
-            if (!Arrays.stream(columns).anyMatch(c -> c.getColumnName().equalsIgnoreCase(column)))
+            if (Arrays.stream(columns).noneMatch(c -> c.getColumnName().equalsIgnoreCase(column)))
             {
                 throw new ExperimentException("Unable to process the data file, the uploaded file must contain these columns: " +
-                        cols.toString() + ".");
+                        cols + ".");
             }
         }
     }
