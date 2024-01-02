@@ -101,8 +101,6 @@ import java.util.Set;
 /**
  * Module that supports mass-spectrometry based protein database searches. Can convert raw intrument files to mzXML
  * and then analyze using a variety of search engines like XTandem or Comet, load the results, and show reports.
- * User: migra
- * Date: Jul 18, 2005
  */
 public class MS2Module extends SpringModule implements ProteomicsModule
 {
@@ -120,7 +118,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 23.001;
+        return 24.000;
     }
 
     @Override
