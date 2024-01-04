@@ -40,3 +40,5 @@ CREATE TABLE elisa.CurveFit
 
 CREATE INDEX IX_CurveFit_ProtocolId ON elisa.CurveFit(ProtocolId);
 CREATE INDEX IX_CurveFit_RunId ON elisa.CurveFit(RunId);
+
+SELECT core.executeJavaUpgradeCode('moveCurveFitData');

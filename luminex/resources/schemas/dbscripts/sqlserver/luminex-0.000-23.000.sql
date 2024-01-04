@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* luminex-0.00-10.10.sql */
-
 CREATE SCHEMA luminex;
 GO
 
@@ -88,8 +86,6 @@ CREATE INDEX IX_LuminexDataRow_DataId ON luminex.DataRow (DataId);
 CREATE INDEX IX_LuminexDataRow_AnalyteId ON luminex.DataRow (AnalyteId);
 CREATE INDEX IDX_DataRow_Container_ProtocolID ON luminex.datarow(Container, ProtocolID);
 
-/* luminex-10.30-11.10.sql */
-
 ALTER TABLE luminex.DataRow
 ALTER COLUMN fistring NVARCHAR(64);
 
@@ -104,8 +100,6 @@ ALTER COLUMN obsconcstring NVARCHAR(64);
 
 ALTER TABLE luminex.DataRow
 ALTER COLUMN concinrangestring NVARCHAR(64);
-
-/* luminex-11.10-11.20.sql */
 
 ALTER TABLE luminex.datarow ADD LSID LSIDtype;
 GO
@@ -274,8 +268,6 @@ ALTER TABLE luminex.RunExclusionAnalyte ALTER COLUMN AnalyteId INT NOT NULL;
 ALTER TABLE luminex.RunExclusionAnalyte ADD CONSTRAINT PK_LuminexRunExclusionAnalyte PRIMARY KEY (AnalyteId, RunId);
 CREATE INDEX IDX_LuminexRunExclusionAnalyte_RunID ON luminex.RunExclusionAnalyte(RunId);
 
-/* luminex-11.20-11.30.sql */
-
 CREATE TABLE luminex.CurveFit
 (
     RowId INT IDENTITY(1,1) NOT NULL,
@@ -435,8 +427,6 @@ ALTER TABLE luminex.WellExclusion DROP COLUMN Dilution;
 DROP INDEX luminex.analyte.ix_luminexdatarow_lsid;
 CREATE UNIQUE INDEX UQ_Analyte_LSID ON luminex.Analyte(LSID);
 
-/* luminex-11.30-12.10.sql */
-
 /* NOTE: this change was added on the 11.3 branch after installers for 11.3 were posted;
    this script is for servers that haven't upgraded to 11.31 yet.  */
 CREATE INDEX IX_LuminexDataRow_LSID ON luminex.DataRow (LSID);
@@ -444,8 +434,6 @@ CREATE INDEX IX_LuminexDataRow_LSID ON luminex.DataRow (LSID);
 ALTER TABLE luminex.Analyte ADD PositivityThreshold INT;
 
 ALTER TABLE luminex.CurveFit ADD FailureFlag BIT;
-
-/* luminex-13.20-13.30.sql */
 
 CREATE TABLE luminex.SinglePointControl
 (
@@ -505,8 +493,6 @@ CREATE TABLE luminex.AnalyteSinglePointControl
 CREATE INDEX IDX_AnalyteSinglePointControl_GuideSetId ON luminex.AnalyteSinglePointControl(GuideSetId);
 CREATE INDEX IDX_AnalyteSinglePointControl_SinglePointControlId ON luminex.AnalyteSinglePointControl(SinglePointControlId);
 
-/* luminex-14.10-14.20.sql */
-
 ALTER TABLE luminex.GuideSet ADD ValueBased BIT;
 GO
 UPDATE luminex.GuideSet SET ValueBased = 0;
@@ -547,8 +533,6 @@ WHERE
         StringValue = '' AND
     MVIndicator IS NULL;
 
-/* luminex-14.20-14.30.sql */
-
 ALTER TABLE luminex.Titration ADD OtherControl BIT;
 GO
 UPDATE luminex.Titration SET OtherControl=0;
@@ -574,8 +558,6 @@ UPDATE luminex.datarow SET SinglePointControlId =
                                (SELECT s.rowid FROM luminex.singlepointcontrol s, exp.data d, exp.protocolapplication pa
                                 WHERE pa.runid = s.runid AND d.sourceapplicationid = pa.rowid AND dataid = d.rowid AND description = s.name)
 WHERE SinglePointControlId IS NULL;
-
-/* luminex-14.30-15.10.sql */
 
 ALTER TABLE luminex.GuideSet ADD EC504PLEnabled BIT;
 ALTER TABLE luminex.GuideSet ADD EC505PLEnabled BIT;
@@ -606,8 +588,6 @@ UPDATE luminex.GuideSet SET IsTitration =
                                     )
 ;
 ALTER TABLE luminex.GuideSet ALTER COLUMN IsTitration BIT NOT NULL;
-
-/* luminex-16.20-16.30.sql */
 
 ALTER TABLE luminex.Analyte ADD BeadNumber NVARCHAR(50);
 GO
@@ -642,13 +622,24 @@ UPDATE luminex.Analyte SET Name = RTRIM(LTRIM(Name)),
 -- trim the analyte name from the guide set table
 UPDATE luminex.GuideSet SET AnalyteName = RTRIM(LTRIM(AnalyteName));
 
-/* luminex-16.30-17.10.sql */
-
 ALTER TABLE luminex.WellExclusion ADD Dilution REAL;
 
 DROP INDEX UQ_WellExclusion ON luminex.WellExclusion;
 CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Dilution, Type, DataId);
 
-/* luminex-17.30-18.10.sql */
-
 ALTER TABLE luminex.WellExclusion ADD Well NVARCHAR(50);
+
+/* 22.xxx SQL scripts */
+
+-- add missing FK constraint and indices for luminex.AnalyteTitration
+ALTER TABLE luminex.AnalyteTitration ADD CONSTRAINT FK_AnalyteTitration_AnalyteId FOREIGN KEY (AnalyteId) REFERENCES luminex.Analyte(RowId);
+CREATE INDEX IDX_LuminexAnalyteTitration_AnalyteId ON luminex.AnalyteTitration(AnalyteId);
+ALTER TABLE luminex.AnalyteTitration ADD CONSTRAINT FK_AnalyteTitration_TitrationId FOREIGN KEY (TitrationId) REFERENCES luminex.Titration(RowId);
+CREATE INDEX IDX_LuminexAnalyteTitration_TitrationId ON luminex.AnalyteTitration(TitrationId);
+
+-- add missing indices for FK constraints on existing table columns
+CREATE INDEX IDX_LuminexCurveFit_AnalyteIdTitrationId ON luminex.CurveFit(AnalyteId, TitrationId);
+CREATE INDEX IDX_LuminexRunExclusion_RunId ON luminex.RunExclusion(RunId);
+CREATE INDEX IDX_LuminexRunExclusionAnalyte_AnalyteId ON luminex.RunExclusionAnalyte(AnalyteId);
+CREATE INDEX IDX_LuminexWellExclusion_DataId ON luminex.WellExclusion(DataId);
+CREATE INDEX IDX_LuminexWellExclusionAnalyte_AnalyteId ON luminex.WellExclusionAnalyte(AnalyteId);
