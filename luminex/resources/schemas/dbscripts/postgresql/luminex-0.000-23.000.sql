@@ -203,8 +203,6 @@ CREATE TABLE luminex.WellExclusion
     CONSTRAINT FK_LuminexWellExclusion_DataId FOREIGN KEY (DataId) REFERENCES exp.Data(RowId)
 );
 
-CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Dilution, DataId);
-
 CREATE TABLE luminex.WellExclusionAnalyte
 (
     AnalyteId INT,
@@ -213,8 +211,6 @@ CREATE TABLE luminex.WellExclusionAnalyte
     CONSTRAINT FK_LuminexWellExclusionAnalyte_AnalyteId FOREIGN KEY (AnalyteId) REFERENCES luminex.Analyte(RowId),
     CONSTRAINT FK_LuminexWellExclusionAnalyte_WellExclusionId FOREIGN KEY (WellExclusionId) REFERENCES luminex.WellExclusion(RowId)
 );
-
-CREATE UNIQUE INDEX UQ_WellExclusionAnalyte ON luminex.WellExclusionAnalyte(AnalyteId, WellExclusionId);
 
 CREATE TABLE luminex.RunExclusion
 (
@@ -238,21 +234,15 @@ CREATE TABLE luminex.RunExclusionAnalyte
     CONSTRAINT FK_LuminexRunExclusionAnalyte_RunId FOREIGN KEY (RunId) REFERENCES luminex.RunExclusion(RunId)
 );
 
-CREATE UNIQUE INDEX UQ_RunExclusionAnalyte ON luminex.RunExclusionAnalyte(AnalyteId, RunId);
-
 -- Don't allow AnalyteId to be NULL in the exclusion tables
 
 ALTER TABLE luminex.WellExclusionAnalyte ALTER COLUMN AnalyteId SET NOT NULL;
-
-DROP INDEX luminex.UQ_WellExclusionAnalyte;
 
 ALTER TABLE luminex.WellExclusionAnalyte ADD CONSTRAINT PK_LuminexWellExclusionAnalyte PRIMARY KEY (AnalyteId, WellExclusionId);
 
 CREATE INDEX IDX_LuminexWellExclusionAnalyte_WellExclusionID ON luminex.WellExclusionAnalyte(WellExclusionId);
 
 ALTER TABLE luminex.RunExclusionAnalyte ALTER COLUMN AnalyteId SET NOT NULL;
-
-DROP INDEX luminex.UQ_RunExclusionAnalyte;
 
 ALTER TABLE luminex.RunExclusionAnalyte ADD CONSTRAINT PK_LuminexRunExclusionAnalyte PRIMARY KEY (AnalyteId, RunId);
 
@@ -401,19 +391,9 @@ UPDATE luminex.wellexclusion we SET "type" =
 		AND ((we.description IS NULL AND types.description IS NULL) OR we.description = types.description))
 	WHERE "type" IS NULL;
 
-DROP INDEX luminex.UQ_WellExclusion;
-
-CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Type, DataId);	
-
 ALTER TABLE luminex.wellexclusion DROP COLUMN dilution;
 
-DROP INDEX luminex.ix_luminexdatarow_lsid;
-
 CREATE UNIQUE INDEX UQ_Analyte_LSID ON luminex.Analyte(LSID);
-
-/* NOTE: this change was added on the 11.3 branch after installers for 11.3 were posted;
-   this script is for servers that haven't upgraded to 11.31 yet.  */
-CREATE INDEX IX_LuminexDataRow_LSID ON luminex.DataRow (LSID);
 
 ALTER TABLE luminex.Analyte ADD COLUMN PositivityThreshold INT;
 
@@ -579,7 +559,6 @@ UPDATE luminex.GuideSet SET AnalyteName = TRIM(both FROM AnalyteName);
 
 ALTER TABLE luminex.WellExclusion ADD COLUMN Dilution REAL;
 
-DROP INDEX luminex.UQ_WellExclusion;
 CREATE UNIQUE INDEX UQ_WellExclusion ON luminex.WellExclusion(Description, Dilution, Type, DataId);
 
 ALTER TABLE luminex.WellExclusion ADD COLUMN Well VARCHAR(50);
