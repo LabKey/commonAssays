@@ -53,7 +53,6 @@ import org.labkey.api.qc.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
-import org.labkey.api.settings.ExperimentalFeatureService;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
@@ -83,7 +82,6 @@ import java.util.stream.Collectors;
 
 import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_DATA;
 import static org.labkey.api.exp.api.ExpProtocol.ASSAY_DOMAIN_RUN;
-import static org.labkey.elisa.ElisaModule.EXPERIMENTAL_MULTI_PLATE_SUPPORT;
 
 /**
  * User: klum
@@ -224,14 +222,11 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         addProperty(domain, CONCENTRATION_UNITS_PROPERTY, "Concentration Units", PropertyType.STRING, "Units eg. (ug/ml)");
 
-        if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
-        {
-            Container lookupContainer = c.getProject();
-            DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
-            method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
-            method.setRequired(true);
-            method.setShownInUpdateView(false);
-        }
+        Container lookupContainer = c.getProject();
+        DomainProperty method = addProperty(domain, CURVE_FIT_METHOD_PROPERTY, "Curve Fit Method", PropertyType.STRING);
+        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), ElisaProviderSchema.CURVE_FIT_METHOD_TABLE_NAME));
+        method.setRequired(true);
+        method.setShownInUpdateView(false);
 
         return result;
     }
@@ -324,10 +319,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     @Override
     public SampleMetadataInputFormat[] getSupportedMetadataInputFormats()
     {
-        if (ExperimentalFeatureService.get().isFeatureEnabled(EXPERIMENTAL_MULTI_PLATE_SUPPORT))
-            return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
-        else
-            return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL};
+        return new SampleMetadataInputFormat[]{SampleMetadataInputFormat.MANUAL, SampleMetadataInputFormat.COMBINED};
     }
 
     @Override

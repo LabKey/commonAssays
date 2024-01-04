@@ -26,7 +26,6 @@ import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
-import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.WebPartFactory;
 
@@ -47,7 +46,7 @@ public class ElisaModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 23.000;
+        return 24.000;
     }
 
     @Override
@@ -85,11 +84,6 @@ public class ElisaModule extends DefaultModule
         AbstractPlateBasedAssayProvider provider = new ElisaAssayProvider();
 
         AssayService.get().registerAssayProvider(provider);
-
-        AdminConsole.addExperimentalFeatureFlag(EXPERIMENTAL_MULTI_PLATE_SUPPORT,
-                "ELISA Multi-plate, multi well data support",
-                "Allows ELISA assay import of high-throughput data file formats which contain multiple plates and multiple analyte values per well.",
-                false);
     }
 
     @NotNull
