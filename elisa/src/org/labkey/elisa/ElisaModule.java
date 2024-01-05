@@ -92,10 +92,4 @@ public class ElisaModule extends DefaultModule
     {
         return Collections.emptyList();
     }
-
-    @Override
-    public @Nullable UpgradeCode getUpgradeCode()
-    {
-        return new ElisaUpgradeCode();
-    }
 }
