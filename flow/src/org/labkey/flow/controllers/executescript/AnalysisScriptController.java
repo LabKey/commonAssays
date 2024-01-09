@@ -41,6 +41,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
+import org.labkey.api.usageMetrics.SimpleMetricsService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
@@ -55,6 +56,7 @@ import org.labkey.api.view.NavTree;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.flow.FlowModule;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.model.FCS;
@@ -1357,6 +1359,12 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
+            if (form.getStudyChanged())
+            {
+                // Estabilish & increment a metric to measure usage of the Study Linkage feature of the Flow data import process
+                SimpleMetricsService.get().increment(FlowModule.NAME, "SampleImport", "StudyLinkChanged");
+            }
+
             if (errors.hasErrors())
                 return;
 
