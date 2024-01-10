@@ -240,7 +240,7 @@
                             String iconCls = StringUtils.isNotEmpty(sample.getComment()) ? FlagColumnRenderer.flagEnabledCls() : "";
                       %>
                           "<tr>" +
-                          "<td><a<%=comment%> href='<%=h(url)%>'><i class=<%=q(iconCls)%>/></a>" +
+                          "<td><a<%=comment%> href='<%=h(url)%>'><i class='<%=h(iconCls)%>'/></a>" +
                           "<td nowrap><a<%=comment%> href='<%=h(url)%>'><%=h(name)%></a>" +
                           "</tr>" +
                       <%
