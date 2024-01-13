@@ -349,7 +349,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             Map<String, Map<String, Double>> backgroundValueMap = Collections.emptyMap();
 
             if (subtractBackground)
-                backgroundValueMap = ElispotPlateTypeHandler.getBackgroundValues(container, plate, reader);
+                backgroundValueMap = ElispotPlateLayoutHandler.getBackgroundValues(container, plate, reader);
 
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.SPECIMEN))
             {
@@ -370,11 +370,11 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     {
                         Map<String, Double> values = backgroundValueMap.get(group.getName());
 
-                        if (values.containsKey(ElispotPlateTypeHandler.MEAN_STAT))
-                            bkMeanValue = values.get(ElispotPlateTypeHandler.MEAN_STAT);
+                        if (values.containsKey(ElispotPlateLayoutHandler.MEAN_STAT))
+                            bkMeanValue = values.get(ElispotPlateLayoutHandler.MEAN_STAT);
 
-                        if (values.containsKey(ElispotPlateTypeHandler.MEDIAN_STAT))
-                            bkMedianValue = values.get(ElispotPlateTypeHandler.MEDIAN_STAT);
+                        if (values.containsKey(ElispotPlateLayoutHandler.MEDIAN_STAT))
+                            bkMedianValue = values.get(ElispotPlateLayoutHandler.MEDIAN_STAT);
                     }
 
                     Set<String> analyteNames = new HashSet<>();

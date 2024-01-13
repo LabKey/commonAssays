@@ -87,7 +87,7 @@ public class ElispotModule extends DefaultModule
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
-        PlateService.get().registerPlateTypeHandler(new ElispotPlateTypeHandler());
+        PlateService.get().registerPlateLayoutHandler(new ElispotPlateLayoutHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElispotDataHandler());
 
         PlateBasedAssayProvider provider = new ElispotAssayProvider();

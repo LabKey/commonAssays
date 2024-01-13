@@ -33,12 +33,12 @@ public class AbstractNabManager extends DilutionManager
 
     public synchronized Plate ensurePlateTemplate(Container container, User user) throws Exception
     {
-        NabPlateTypeHandler nabHandler = new NabPlateTypeHandler();
+        NabPlateLayoutHandler nabHandler = new NabPlateLayoutHandler();
         Plate template;
         List<Plate> templates = PlateService.get().getPlateTemplates(container);
         if (templates.isEmpty())
         {
-            template = nabHandler.createTemplate(NabPlateTypeHandler.SINGLE_PLATE_TYPE, container, 8, 12);
+            template = nabHandler.createTemplate(NabPlateLayoutHandler.SINGLE_PLATE_TYPE, container, 8, 12);
             template.setName(DEFAULT_TEMPLATE_NAME);
             PlateService.get().save(container, user, template);
         }
