@@ -17,6 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateType;
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.plate.PlateService;
@@ -38,9 +39,15 @@ public class AbstractNabManager extends DilutionManager
         List<Plate> templates = PlateService.get().getPlateTemplates(container);
         if (templates.isEmpty())
         {
-            template = nabHandler.createTemplate(NabPlateLayoutHandler.SINGLE_PLATE_TYPE, container, 8, 12);
-            template.setName(DEFAULT_TEMPLATE_NAME);
-            PlateService.get().save(container, user, template);
+            PlateType plateType = PlateService.get().getPlateType(8, 12);
+            if (plateType != null)
+            {
+                template = nabHandler.createTemplate(NabPlateLayoutHandler.SINGLE_PLATE_TYPE, container, plateType);
+                template.setName(DEFAULT_TEMPLATE_NAME);
+                PlateService.get().save(container, user, template);
+            }
+            else
+                throw new IllegalStateException("The plate type : 96 wells (8 x 12) does not exist");
         }
         else
             template = templates.get(0);

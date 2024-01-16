@@ -76,9 +76,10 @@ public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public Plate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
+    public Plate createTemplate(@Nullable String templateTypeName, Container container, @NotNull PlateType plateType)
     {
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        validatePlateType(plateType);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
 
         // for the default elispot plate, we pre-populate it with specimen and antigen groups
         if (templateTypeName != null && templateTypeName.equals(DEFAULT_PLATE))

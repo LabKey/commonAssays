@@ -19,13 +19,13 @@ package org.labkey.nab;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.dilution.SampleProperty;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.PlateType;
-import org.labkey.api.data.Container;
 import org.labkey.api.assay.plate.AbstractPlateLayoutHandler;
+import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
+import org.labkey.api.assay.plate.PlateType;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.data.Container;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.multiplate.HighThroughputNabDataHandler;
 
@@ -85,21 +85,22 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public Plate createTemplate(@Nullable String templateTypeName, Container container, int rowCount, int colCount)
+    public Plate createTemplate(@Nullable String templateTypeName, Container container, @NotNull PlateType plateType)
     {
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), rowCount, colCount);
+        validatePlateType(plateType);
+        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE))
-            return createHighThroughputSingleDilutionTemplate(template, container, rowCount, colCount);
+            return createHighThroughputSingleDilutionTemplate(template, container, plateType);
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase(MULTI_VIRUS_384WELL_PLATE_TYPE))
-            return createMultiVirusTemplate(template, container, rowCount, colCount);
+            return createMultiVirusTemplate(template, container, plateType);
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SCREENING_20SAMPLE_4VIRUS_PLATE_TYPE))
-            return create20Sample4VirusScreeningTemplate(template, container, rowCount, colCount);
+            return create20Sample4VirusScreeningTemplate(template, container, plateType);
 
         if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SCREENING_240SAMPLE_1VIRUS_PLATE_TYPE))
-            return create240Sample1VirusScreeningTemplate(template, container, rowCount, colCount);
+            return create240Sample1VirusScreeningTemplate(template, container, plateType);
 
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
@@ -152,15 +153,15 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         return template;
     }
 
-    private Plate createHighThroughputSingleDilutionTemplate(Plate template, Container c, int rowCount, int colCount)
+    private Plate createHighThroughputSingleDilutionTemplate(Plate template, Container c, PlateType plateType)
     {
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(c, 0, 0),
-                PlateService.get().createPosition(c, rowCount-1, 1));
+                PlateService.get().createPosition(c, plateType.getRows() - 1, 1));
 
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
-                PlateService.get().createPosition(c, 0, colCount-2),
-                PlateService.get().createPosition(c, rowCount-1, colCount-1));
+                PlateService.get().createPosition(c, 0, plateType.getColumns() - 2),
+                PlateService.get().createPosition(c, plateType.getRows() - 1, plateType.getColumns() - 1));
 
         int colsPerSample = 8;
         int sampleIndex = 1;
@@ -168,7 +169,7 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         for (int colGroup = 0; colGroup < 2; colGroup++)
         {
             int startCol = colGroup * colsPerSample + 2;
-            for (int row = 0; row < (rowCount - 1); row += 2)
+            for (int row = 0; row < (plateType.getRows() - 1); row += 2)
             {
                 template.addWellGroup("" + sampleIndex, WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(c, row, startCol),
@@ -189,7 +190,7 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         int startCol = 2 * colsPerSample + 2;
         colsPerSample = 4;
 
-        for (int row = 0; row < (rowCount - 1); row += 4)
+        for (int row = 0; row < (plateType.getRows() - 1); row += 4)
         {
             int replicateGroupIndex = 1;
             template.addWellGroup("" + sampleIndex, WellGroup.Type.SPECIMEN,
@@ -217,9 +218,9 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         return template;
     }
 
-    private Plate createMultiVirusTemplate(Plate template, Container c, int rowCount, int colCount)
+    private Plate createMultiVirusTemplate(Plate template, Container c, PlateType plateType)
     {
-        assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
+        assert 16 == plateType.getRows() && 24 == plateType.getColumns(): "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();
 
         List<Position> cellControlPositions = new ArrayList<>();
@@ -227,36 +228,36 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         List<Position> virus2Positions = new ArrayList<>();
         List<Position> virus1Positions = new ArrayList<>();
 
-        for (int row = 2; row < rowCount-2; row += 1)
+        for (int row = 2; row < plateType.getRows() - 2; row += 1)
         {
             cellControlPositions.add(plateService.createPosition(c, row, 0));
             virus2Positions.add(plateService.createPosition(c, row, 0));
-            cellControlPositions.add(plateService.createPosition(c, row, colCount-1));
-            virus1Positions.add(plateService.createPosition(c, row, colCount-1));
+            cellControlPositions.add(plateService.createPosition(c, row, plateType.getColumns() - 1));
+            virus1Positions.add(plateService.createPosition(c, row, plateType.getColumns() - 1));
 
             virusControlPositions.add(plateService.createPosition(c, row, 1));
             virus1Positions.add(plateService.createPosition(c, row, 1));
-            virusControlPositions.add(plateService.createPosition(c, row, colCount-2));
-            virus2Positions.add(plateService.createPosition(c, row, colCount-2));
+            virusControlPositions.add(plateService.createPosition(c, row, plateType.getColumns() - 2));
+            virus2Positions.add(plateService.createPosition(c, row, plateType.getColumns() - 2));
         }
 
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL, cellControlPositions);
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL, virusControlPositions);
 
-        for (int col = 2; col < colCount-2; col += 2)
+        for (int col = 2; col < plateType.getColumns() - 2; col += 2)
         {
             int specimen = (col/2);
             template.addWellGroup(String.format("Specimen %02d", specimen), WellGroup.Type.SPECIMEN,
                     plateService.createPosition(c, 1, col),
-                    plateService.createPosition(c, rowCount-2, col+1));
+                    plateService.createPosition(c, plateType.getRows() - 2, col+1));
 
-            for (int row = 1; row < rowCount-1; row += 1)
+            for (int row = 1; row < plateType.getRows() - 1; row += 1)
             {
                 virus2Positions.add(plateService.createPosition(c, row, col));
                 virus1Positions.add(plateService.createPosition(c, row, col + 1));
             }
 
-            for (int row = 1; row < rowCount-2; row += 2)
+            for (int row = 1; row < plateType.getRows() - 2; row += 2)
             {
                 int repl = (row/2) + 1;
                 template.addWellGroup("Virus 2, Specimen " + specimen + ", Replicate " + repl, WellGroup.Type.REPLICATE,
@@ -281,28 +282,28 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
                 WellGroup.Type.REPLICATE, WellGroup.Type.OTHER);
     }
 
-    private Plate create20Sample4VirusScreeningTemplate(Plate template, Container c, int rowCount, int colCount)
+    private Plate create20Sample4VirusScreeningTemplate(Plate template, Container c, PlateType plateType)
     {
-        assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
+        assert 16 == plateType.getRows() && 24 == plateType.getColumns(): "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();
 
         List<Position> cellControlPositions = new ArrayList<>();
         List<Position> virusControlPositions = new ArrayList<>();
 
-        for (int row = 0; row < rowCount; row++)
+        for (int row = 0; row < plateType.getRows(); row++)
         {
             cellControlPositions.add(plateService.createPosition(c, row, 0));
             virusControlPositions.add(plateService.createPosition(c, row, 1));
-            virusControlPositions.add(plateService.createPosition(c, row, colCount-2));
-            cellControlPositions.add(plateService.createPosition(c, row, colCount-1));
+            virusControlPositions.add(plateService.createPosition(c, row, plateType.getColumns() - 2));
+            cellControlPositions.add(plateService.createPosition(c, row, plateType.getColumns() - 1));
         }
 
-        for (int col = 1; col < colCount-1; col++)
+        for (int col = 1; col < plateType.getColumns() - 1; col++)
         {
             virusControlPositions.add(plateService.createPosition(c, 0, col));
             virusControlPositions.add(plateService.createPosition(c, 1, col));
-            virusControlPositions.add(plateService.createPosition(c, rowCount-2, col));
-            virusControlPositions.add(plateService.createPosition(c, rowCount-1, col));
+            virusControlPositions.add(plateService.createPosition(c, plateType.getRows() - 2, col));
+            virusControlPositions.add(plateService.createPosition(c, plateType.getRows() - 1, col));
         }
         template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL, cellControlPositions);
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL, virusControlPositions);
@@ -312,9 +313,9 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         List<Position> virus3Positions = new ArrayList<>();
         List<Position> virus4Positions = new ArrayList<>();
 
-        for (int row = 0; row < rowCount; row += 2)
+        for (int row = 0; row < plateType.getRows(); row += 2)
         {
-            for (int col=1; col < colCount-1; col += 2)
+            for (int col=1; col < plateType.getColumns() - 1; col += 2)
             {
                 virus2Positions.add(plateService.createPosition(c, row, col));
                 virus4Positions.add(plateService.createPosition(c, row + 1, col));
@@ -333,9 +334,9 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         List<Position> replicate3Pos = new ArrayList<>();
         List<Position> replicate4Pos = new ArrayList<>();
 
-        for (int col=2; col < colCount-5; col += 4)
+        for (int col=2; col < plateType.getColumns() - 5; col += 4)
         {
-            for (int row = 2; row < rowCount-2; row += 2)
+            for (int row = 2; row < plateType.getRows() - 2; row += 2)
             {
                 template.addWellGroup(String.format("Specimen %02d", specimenCount), WellGroup.Type.SPECIMEN,
                         plateService.createPosition(c, row, col),
@@ -369,9 +370,9 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
         return template;
     }
 
-    private Plate create240Sample1VirusScreeningTemplate(Plate template, Container c, int rowCount, int colCount)
+    private Plate create240Sample1VirusScreeningTemplate(Plate template, Container c, PlateType plateType)
     {
-        assert 16 == rowCount && 24 == colCount: "Only 16x24 multi-virus supported";
+        assert 16 == plateType.getRows() && 24 == plateType.getColumns(): "Only 16x24 multi-virus supported";
         PlateService plateService = PlateService.get();
 
         template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
@@ -382,9 +383,9 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
                 plateService.createPosition(c, 13, 22));
 
         int specimenCount = 1;
-        for (int row = 2; row < rowCount-2; row ++)
+        for (int row = 2; row < plateType.getRows() - 2; row ++)
         {
-            for (int col=2; col < colCount-2; col++)
+            for (int col=2; col < plateType.getColumns() - 2; col++)
             {
                 template.addWellGroup(String.format("Specimen %03d", specimenCount), WellGroup.Type.SPECIMEN,
                         plateService.createPosition(c, row, col),
