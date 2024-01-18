@@ -30,7 +30,7 @@
     boolean targetedMSModuleActive = getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("TargetedMS"));
     String renderId = "tabbed-search-form-" + getRequestScopedUID();
 %>
-<div id=<%=q(renderId)%>></div>
+<div id="<%=h(renderId)%>"></div>
 
 <style type="text/css">
 
