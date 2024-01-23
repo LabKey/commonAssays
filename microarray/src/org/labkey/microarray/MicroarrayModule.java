@@ -24,18 +24,15 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
-import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
-import org.labkey.microarray.controllers.MicroarrayController;
 import org.labkey.microarray.matrix.ExpressionMatrixAssayProvider;
 import org.labkey.microarray.matrix.ExpressionMatrixDataHandler;
 import org.labkey.microarray.matrix.ExpressionMatrixExperimentListener;
-import org.labkey.microarray.pipeline.GeneDataPipelineProvider;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.util.Arrays;
@@ -48,7 +45,6 @@ public class MicroarrayModule extends SpringModule
 {
     private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
 
-    private static final String CONTROLLER_NAME = "microarray";
     private static final String FEATURE_ANNOTATION_SET_CONTROLLER_NAME = "feature-annotationset";
 
     public static final String DB_SCHEMA_NAME = "microarray";
@@ -68,7 +64,6 @@ public class MicroarrayModule extends SpringModule
     @Override
     protected void init()
     {
-        addController(CONTROLLER_NAME, MicroarrayController.class);
         addController(FEATURE_ANNOTATION_SET_CONTROLLER_NAME, FeatureAnnotationSetController.class);
         MicroarrayUserSchema.register(this);
     }
@@ -112,9 +107,8 @@ public class MicroarrayModule extends SpringModule
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
         AssayService.get().registerAssayProvider(new ExpressionMatrixAssayProvider());
-        PipelineService.get().registerPipelineProvider(new GeneDataPipelineProvider(this));
 
-        // add a container listener so we'll know when our container is deleted:
+        // add a container listener so that we'll know when our container is deleted:
         ContainerManager.addContainerListener(new MicroarrayContainerListener());
 
         ExperimentService.get().addExperimentListener(new ExpressionMatrixExperimentListener());
