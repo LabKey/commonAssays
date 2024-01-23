@@ -52,6 +52,7 @@
 <input type="hidden" name="selectAnalysisEngine" id="selectAnalysisEngine" value="<%=form.getSelectAnalysisEngine()%>">
 
 <input type="hidden" name="importGroupNames" value="<%=h(form.getImportGroupNames())%>"/>
+<input type="hidden" name="studyChanged" id="studyChanged" value="<%=h(form.getStudyChanged())%>" />
 
 <p>
 <hr/>
@@ -232,7 +233,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPubl
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <br>
             Choose a target study folder:<br>
-            <%=select().name("targetStudy").className(null).addOptions(targetStudies).selected(text(form.getTargetStudy()))
+            <%=select().name("targetStudy").className(null).addOptions(targetStudies).selected(text(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
             %>
 <%--            <select id="targetStudy" name="targetStudy">--%>
 <%--                <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>--%>

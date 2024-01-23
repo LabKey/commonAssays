@@ -62,6 +62,18 @@ public class ImportAnalysisForm implements HasAllowBindParameter
     private String[] keywordDir;
     private boolean confirm;
 
+    private boolean studyChanged = false;
+
+    public void setStudyChanged(boolean studyChanged)
+    {
+        this.studyChanged = studyChanged;
+    }
+
+    public boolean getStudyChanged()
+    {
+        return this.studyChanged;
+    }
+
     public int getStep()
     {
         return step;
