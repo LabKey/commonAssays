@@ -22,7 +22,6 @@ import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -78,7 +77,7 @@ public class ElisaModule extends DefaultModule
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
-        PlateService.get().registerPlateTypeHandler(new ElisaPlateTypeHandler());
+        PlateService.get().registerPlateLayoutHandler(new ElisaPlateLayoutHandler());
         ExperimentService.get().registerExperimentDataHandler(new ElisaDataHandler());
 
         AbstractPlateBasedAssayProvider provider = new ElisaAssayProvider();

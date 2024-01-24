@@ -97,7 +97,7 @@ public class NabModule extends DefaultModule
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
-        PlateService.get().registerPlateTypeHandler(new NabPlateTypeHandler());
+        PlateService.get().registerPlateLayoutHandler(new NabPlateLayoutHandler());
         AssayService.get().registerAssayProvider(new NabAssayProvider());
         ExperimentService.get().registerExperimentDataHandler(new SinglePlateNabDataHandler());
         AssayService.get().registerAssayProvider(new CrossPlateDilutionNabAssayProvider());
