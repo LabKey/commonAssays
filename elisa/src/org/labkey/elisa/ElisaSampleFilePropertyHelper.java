@@ -15,7 +15,7 @@ import org.labkey.api.reader.DataLoaderFactory;
 import org.labkey.api.reader.DataLoaderService;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;

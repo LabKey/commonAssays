@@ -41,7 +41,7 @@ import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.persist.FlowManager;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;

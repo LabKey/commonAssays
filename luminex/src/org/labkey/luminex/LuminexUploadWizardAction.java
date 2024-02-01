@@ -68,7 +68,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -87,8 +87,6 @@ import java.util.TreeSet;
 /**
  * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
  * last entered default values for analyte domain and standard properties
- * User: jeckels
- * Date: Aug 8, 2007
 */
 @RequiresPermission(InsertPermission.class)
 public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUploadForm, LuminexAssayProvider>

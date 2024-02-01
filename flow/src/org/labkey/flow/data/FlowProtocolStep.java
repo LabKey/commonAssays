@@ -26,7 +26,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowParam;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

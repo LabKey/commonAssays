@@ -37,7 +37,7 @@ import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;

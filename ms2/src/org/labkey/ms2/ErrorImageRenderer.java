@@ -16,8 +16,9 @@
 
 package org.labkey.ms2;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

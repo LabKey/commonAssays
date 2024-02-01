@@ -34,7 +34,7 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protein.ProteinManager;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

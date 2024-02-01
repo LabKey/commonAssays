@@ -20,8 +20,8 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.controllers.FlowController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public enum FlowPreference
 {
@@ -37,7 +37,7 @@ public enum FlowPreference
     {
         _defValue = defValue;
     }
-    String _defValue;
+    final String _defValue;
 
     public String getValue(HttpServletRequest request)
     {
