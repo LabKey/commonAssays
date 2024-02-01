@@ -25,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.util.JsonUtil;
 import org.labkey.flow.analysis.model.SampleIdMap;
 
 import java.io.IOException;
@@ -136,7 +137,7 @@ public class ExportAnalysisManifest
         {
             StringWriter sw = new StringWriter();
             JsonGenerator jsonGen = new JsonFactory().createGenerator(sw);
-            ObjectMapper oc = new ObjectMapper();
+            ObjectMapper oc = JsonUtil.createDefaultMapper();
             String dateFormat = "yyyy-MM-dd HH:mm:ss";
             DateFormat df = new SimpleDateFormat(dateFormat);
             oc.setDateFormat(df);

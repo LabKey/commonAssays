@@ -58,6 +58,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
+<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -346,10 +347,10 @@ Ext.onReady(function()
     }
 });
 
-var statistics = <%=unsafe(jsonStats.toString())%>;
+var statistics = <%=JavaScriptFragment.unsafe(jsonStats.toString())%>;
 var treeData;
 var stats;
-var keywords = <%=unsafe(jsonKeywords.toString())%>;
+var keywords = <%=JavaScriptFragment.unsafe(jsonKeywords.toString())%>;
 </script>
 <table class="lk-fields-table"><%
 

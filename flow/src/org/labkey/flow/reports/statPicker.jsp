@@ -30,6 +30,7 @@
 <%@ page import="java.util.Collection" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.stream.Stream" %>
+<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -379,7 +380,7 @@ function createStatStore(stats)
 
 let FlowPropertySet = {};
 FlowPropertySet.keywords = <%=toJsonArray(fps.getVisibleKeywords())%>;
-FlowPropertySet.statistics = <%=unsafe(jsonStats.toString())%>;
+FlowPropertySet.statistics = <%=JavaScriptFragment.unsafe(jsonStats.toString())%>;
 
 let SampleType = {};
 SampleType.properties = <%=toJsonArray(sampleTypeProperties)%>;
