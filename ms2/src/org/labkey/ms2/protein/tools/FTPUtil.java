@@ -22,7 +22,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.util.FileUtil;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -67,7 +67,7 @@ import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;

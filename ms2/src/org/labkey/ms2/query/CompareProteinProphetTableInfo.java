@@ -27,7 +27,7 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2Manager;
 import org.jetbrains.annotations.NotNull;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;

@@ -30,7 +30,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.ResultSet;

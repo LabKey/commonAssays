@@ -33,7 +33,7 @@ import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -44,12 +44,10 @@ import java.util.Set;
 /**
  * Info source for running transform/validation script over a run that's already been imported into the database
  * (including with exclusions of well groups, analytes, etc.)
- * User: jeckels
- * Date: Oct 7, 2011
  */
 public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAssayProvider> implements LuminexRunContext
 {
-    private Map<String, Analyte> _analytes = new LinkedHashMap<>();
+    private final Map<String, Analyte> _analytes = new LinkedHashMap<>();
     private LuminexExcelParser _parser;
 
     public LuminexRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
