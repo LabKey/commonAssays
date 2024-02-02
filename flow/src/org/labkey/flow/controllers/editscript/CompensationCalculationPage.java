@@ -18,7 +18,9 @@ package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fhcrc.cpas.flow.script.xml.*;
+import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.JavaScriptFragment;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.Population;
@@ -217,11 +219,9 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return "['" + StringUtils.join(strings, "',\n'") + "']";
     }
 
-    public String javascriptArray(String... strings)
+    public JSONArray javascriptArray(String... strings)
     {
-        if (strings.length == 0)
-            return "[]";
-        return "['" + StringUtils.join(strings, "',\n'") + "']";
+        return new JSONArray(strings);
     }
 
     public String option(String value, String display, String currentValue)

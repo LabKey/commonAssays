@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.util.JsonUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class StatusJsonHelper
          }
          if(stringBuilder.length() > 0)
          {
-             ObjectMapper mapper = new ObjectMapper();
+             ObjectMapper mapper = JsonUtil.createDefaultMapper();
              mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
              try
              {

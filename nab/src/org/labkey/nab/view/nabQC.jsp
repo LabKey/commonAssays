@@ -31,6 +31,8 @@
 <%@ page import="static org.labkey.api.util.DOM.cl" %>
 <%@ page import="static org.labkey.api.util.DOM.DIV" %>
 <%@ page import="static org.labkey.api.util.DOM.createHtml" %>
+<%@ page import="org.labkey.api.util.JsonUtil" %>
+<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -43,7 +45,6 @@
     JspView<NabAssayController.NabQCForm> me = (JspView<NabAssayController.NabQCForm>) HttpView.currentView();
     NabAssayController.NabQCForm bean = me.getModelBean();
     DilutionAssayRun assay = bean.getAssay();
-    ObjectMapper jsonMapper = new ObjectMapper();
     HtmlString errorMsg = HtmlString.EMPTY_STRING;
 
     // run properties array
@@ -95,8 +96,8 @@
                 runId       : <%=bean.getRunId()%>,
                 returnUrl   : <%=q(bean.getReturnUrl(getContainer()))%>,
                 runName     : <%=q(assay.getRunName())%>,
-                runProperties : <%=unsafe(jsonMapper.writeValueAsString(runProperties))%>,
-                controlProperties : <%=unsafe(jsonMapper.writeValueAsString(controlProperties))%>
+                runProperties : <%=JavaScriptFragment.asJson(runProperties)%>,
+                controlProperties : <%=JavaScriptFragment.asJson(controlProperties)%>
             });
         });
 </script><%

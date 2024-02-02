@@ -33,7 +33,7 @@
 <%=getScriptTag("/Flow/editCompensationCalculation.js")%>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
 function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[arguments[i]] = arguments[i + 1]; return o; }
-var parameters = <%=text(javascriptArray(form.parameters))%>
+var parameters = <%= javascriptArray(form.parameters) %>
 var AutoComp = {};
 <%
     boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
@@ -45,7 +45,7 @@ var AutoComp = {};
         AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
         if (criteria != null)
         {
-        %>'criteria' : <%=text(javascriptArray(criteria.getPrimaryKeyword(), criteria.getSecondaryKeyword(), criteria.getSecondaryValue()))%>,
+        %>'criteria' : <%=javascriptArray(criteria.getPrimaryKeyword(), criteria.getSecondaryKeyword(), criteria.getSecondaryValue())%>,
         <%
         }
 
@@ -54,8 +54,8 @@ var AutoComp = {};
         String and = "\n";
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=text(and)%><%=q(param.getParameterName())%> : <%=text(javascriptArray(
-                param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate()))%><%
+            %><%=text(and)%><%=q(param.getParameterName())%> : <%=javascriptArray(
+                param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate())%><%
             and = ",\n";
         }
         %>}
