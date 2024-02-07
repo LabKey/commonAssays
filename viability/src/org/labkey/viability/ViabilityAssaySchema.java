@@ -37,7 +37,6 @@ import org.labkey.api.data.MutableColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.UrlColumn;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -54,7 +53,6 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.QueryForeignKey;
-import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.SpecimenForeignKey;
@@ -118,7 +116,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
+    public FilteredTable<ViabilityAssaySchema> createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         // UNDONE: add link to study columns when link to study is implemented
         //addLinkedToStudyColumns(table, protocol, schema.getUser(), "rowId", true);
@@ -369,77 +367,9 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             col.setShownInUpdateView(false);
             return col;
         }
-
-        public class SpecimenAggregateColumn extends ExprColumn
-        {
-            public SpecimenAggregateColumn(TableInfo parent, String name, SQLFragment frag, JdbcType type, ColumnInfo... dependentColumns)
-            {
-                super(parent, name, frag, type, dependentColumns);
-            }
-
-            public SpecimenAggregateColumn(TableInfo parent, String name, JdbcType type, ColumnInfo... dependentColumns)
-            {
-                super(parent, name, new SQLFragment(ExprColumn.STR_TABLE_ALIAS + "$z." + name), type, dependentColumns);
-            }
-
-            @Override
-            public void declareJoins(String parentAlias, Map<String, SQLFragment> map)
-            {
-                ResultSpecimensTable rs = new ResultSpecimensTable(getContainerFilter());
-                // 9024: propagate container filter
-                rs.setContainerFilter(getContainerFilter());
-                List<FieldKey> fields = new ArrayList<>();
-                FieldKey resultId = FieldKey.fromParts("ResultID");
-                FieldKey volume = FieldKey.fromParts("SpecimenID", "Volume");
-                FieldKey globalUniqueId = FieldKey.fromParts("SpecimenID", "GlobalUniqueId");
-                fields.add(resultId);
-                fields.add(FieldKey.fromParts("SpecimenID"));
-                fields.add(volume);
-                fields.add(globalUniqueId);
-
-                // TargetStudy could be on the Results, Run, or Batch table.
-                fields.add(FieldKey.fromParts("ResultID", "TargetStudy"));
-                fields.add(FieldKey.fromParts("ResultID", "Run", "TargetStudy"));
-                fields.add(FieldKey.fromParts("ResultID", "Run", "Batch", "TargetStudy"));
-
-                Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(rs, fields);
-
-                SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), null, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
-                SQLFragment groupFrag = new SQLFragment();
-                groupFrag.append("SELECT\n");
-                groupFrag.append("  " + columnMap.get(resultId).getAlias() + " as VolumeResultID,\n");
-                groupFrag.append("  SUM(" + columnMap.get(volume).getAlias() + ") as OriginalCells,\n");
-                groupFrag.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") as SpecimenMatchCount,\n");
-
-                if (getDbSchema().getSqlDialect().supportsGroupConcat())
-                {
-                    SQLFragment guid = new SQLFragment(columnMap.get(globalUniqueId).getAlias());
-                    SQLFragment specimenMatches = getDbSchema().getSqlDialect().getGroupConcat(guid, true, true);
-                    groupFrag.append("  ").append(specimenMatches).append(" as SpecimenMatches\n");
-                }
-                else
-                {
-                    groupFrag.append(" NULL as SpecimenMatches\n");
-                }
-
-                groupFrag.append("FROM (\n");
-                groupFrag.append(sub);
-                groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
-
-                SQLFragment frag = new SQLFragment();
-                frag.appendComment("<SpecimenAggregateColumn.declareJoin()", getSqlDialect());
-                frag.append("\nLEFT OUTER JOIN (\n");
-                frag.append(groupFrag);
-                String name = parentAlias + "$z";
-                frag.append(") AS ").append(name).append(" ON ").append(parentAlias).append(".RowId = ").append(name).append(".VolumeResultID");
-                frag.appendComment("</SpecimenAggregateColumn.declareJoin()", getSqlDialect());
-
-                map.put(name, frag);
-            }
-        }
     }
 
-    public class MissingSpecimenPopupFactory implements DisplayColumnFactory
+    public static class MissingSpecimenPopupFactory implements DisplayColumnFactory
     {
         @Override
         public DisplayColumn createRenderer(ColumnInfo colInfo)
@@ -473,9 +403,10 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                         s.removeAll(Arrays.asList(matches));
 
                         HtmlString popupHtml = HtmlStringBuilder.of(popupText)
-                            .append(HtmlString.unsafe("<p>"))
+                            .unsafeAppend("<p>")
                             .append(StringUtils.join(s, ", "))
-                            .append(HtmlString.unsafe("</p>")).getHtmlString();
+                            .unsafeAppend("</p>")
+                            .getHtmlString();
 
                         HtmlString imgHtml = HtmlString.unsafe("<img align=\"top\" src=\"" + HttpView.currentContext().getContextPath() +
                             "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">");
