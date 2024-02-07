@@ -43,7 +43,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
     <p>Peptides to include in the comparison:</p>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>"<%=checked(form.isNoPeptideFilter())%> /> All peptides</div>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="peptideProphetRadioButton" value="<%= probability %>"<%=checked(form.isPeptideProphetFilter())%>/> Peptides with PeptideProphet probability &ge; <input type="text" size="2" id="<%= peptideProphetProbability %>" name="<%= peptideProphetProbability %>" value="<%=h(form.getPeptideProphetProbability())%>" /></div>
-    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="<%= text(FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
+    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="<%= unsafe(FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
         Peptides that meet the filter criteria in a custom grid:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
         <%=link("Create or Edit").onClick("showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;") %>

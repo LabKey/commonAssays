@@ -59,7 +59,7 @@ Browse the pipeline
     %>
     Select either a FlowJo workspace (.wsp and .xml) or an <a href="<%=h(href)%>">analysis archive</a>.<br/><br/>
     <%  if (!form.getWorkspace().getHiddenFields(getViewContext()).containsKey("path")) { %>
-    <input type="hidden" id="<%=text(inputId)%>" name="<%=text(inputId)%>" value=""/>
+    <input type="hidden" id="<%=unsafe(inputId)%>" name="<%=unsafe(inputId)%>" value=""/>
     <%  }  %>
     <div id="treeDiv"></div>
     <script type="text/javascript" nonce="<%=getScriptNonce()%>">

@@ -170,7 +170,7 @@
         });
         </script>
         <div id="fcsFileRuns-div">
-            <a href="<%=h(fcsFileRunsURL)%>">FCS Files (<%=_fcsRunCount%> <%=text(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsFileRunsURL)%>">FCS Files (<%=_fcsRunCount%> <%=unsafe(_fcsRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsRunCount > 0) --%>
 
@@ -194,7 +194,7 @@
         });
         </script>
         <div id="fcsAnalysisRuns-div">
-            <a href="<%=h(fcsAnalysisRunsURL)%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=text(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
+            <a href="<%=h(fcsAnalysisRunsURL)%>">FCS Analyses (<%=_fcsAnalysisRunCount%> <%=unsafe(_fcsAnalysisRunCount == 1 ? "run" : "runs")%>)</a>
         </div>
     <% } %><%-- end if (_fcsAnalysisRunCount > 0) --%>
 
@@ -217,7 +217,7 @@
         });
         </script>
         <div id="compensationMatrices-div">
-            <a href="<%=h(compMatricesURL)%>">Compensation (<%=_compensationMatrixCount%> <%=text(_compensationMatrixCount == 1 ? "matrix" : "matrices")%>)</a>
+            <a href="<%=h(compMatricesURL)%>">Compensation (<%=_compensationMatrixCount%> <%=unsafe(_compensationMatrixCount == 1 ? "matrix" : "matrices")%>)</a>
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
@@ -317,7 +317,7 @@
                                     '<div><a href="<%=h(script.urlFor(ScriptController.UploadCompensationCalculationAction.class))%>">Upload FlowJo Compensation</a></div>',
                                 <% } %>
                                 <% if (script.hasStep(FlowProtocolStep.analysis)) { %>
-                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditAnalysisAction.class))%>"><%=text(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
+                                    '<div><a href="<%=h(script.urlFor(ScriptController.EditAnalysisAction.class))%>"><%=unsafe(canEditScript ? "Edit" : "View")%> Statistics and Graphs</a></div>',
                                     <% if (canEditScript) { %>
                                         '<div><a href="<%=h(script.urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.analysis))%>">Rename Populations</a></div>',
                                     <% } %>
@@ -352,7 +352,7 @@
             });
             </script>
             <div id="script-<%=script.getScriptId()%>-div" style="white-space:nowrap;">
-                <a href="<%=h(script.urlShow())%>"><%=h(script.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
+                <a href="<%=h(script.urlShow())%>"><%=h(script.getName())%> (<%=runCount%> <%=unsafe(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }
@@ -392,7 +392,7 @@
             }
             %>
             <div id="script-<%=experiment.getExperimentId()%>-div">
-                <a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getName())%> (<%=runCount%> <%=text(runCount == 1 ? "run" : "runs")%>)</a>
+                <a href="<%=h(experiment.urlShow())%>"><%=h(experiment.getName())%> (<%=runCount%> <%=unsafe(runCount == 1 ? "run" : "runs")%>)</a>
             </div>
             <%
         }

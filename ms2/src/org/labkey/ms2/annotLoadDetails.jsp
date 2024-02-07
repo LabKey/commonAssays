@@ -23,7 +23,7 @@
     AnnotationInsertion insertion = ((JspView<AnnotationInsertion>) HttpView.currentView()).getModelBean();
 %>
 <p><%=h(insertion.getComment())%></p>
-<p>Upload started at <%=formatDateTime(insertion.getInsertDate())%>, <%=insertion.getMouthsful()%> batch<%=text(insertion.getMouthsful() != 1 ? "es" : "")%> processed</p>
+<p>Upload started at <%=formatDateTime(insertion.getInsertDate())%>, <%=insertion.getMouthsful()%> batch<%=unsafe(insertion.getMouthsful() != 1 ? "es" : "")%> processed</p>
 <table>
 <tr>
    <td>&nbsp;</td><td align="right" class="labkey-form-label"><strong>Total</strong></td><td align='right' class="labkey-form-label"><strong>Most Recent Batch</strong></td>

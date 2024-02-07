@@ -68,14 +68,14 @@
             if (step.getNumber() > 1) {
                 %>
                 <td valign="middle">
-                    <img src="<%=getWebappURL("_.gif")%>" style="background:<%=text(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
+                    <img src="<%=getWebappURL("_.gif")%>" style="background:<%=unsafe(futureStep ? "silver" : "black")%>; width:30px; height:1px"/>
                 </td>
                 <%
             }
             %>
-            <td width="70" style="text-align:center; opacity:<%=text(futureStep ? "0.6" : "1")%>" valign="top">
-                <span style="font-size:1.1em;font-weight:<%=text(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
-                <span style="font-weight:<%=text(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
+            <td width="70" style="text-align:center; opacity:<%=unsafe(futureStep ? "0.6" : "1")%>" valign="top">
+                <span style="font-size:1.1em;font-weight:<%=unsafe(currentStep ? "bold":"normal")%>;"><%=step.getNumber()%></span><br/>
+                <span style="font-weight:<%=unsafe(currentStep ? "bold":"normal")%>"><%=h(step.getTitle())%></span>
             </td>
             <%
         }

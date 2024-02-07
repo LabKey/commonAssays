@@ -54,7 +54,7 @@ var AutoComp = {};
         String and = "\n";
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=text(and)%><%=q(param.getParameterName())%> : <%=javascriptArray(
+            %><%=unsafe(and)%><%=q(param.getParameterName())%> : <%=javascriptArray(
                 param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate())%><%
             and = ",\n";
         }
@@ -156,7 +156,7 @@ var keywordValueSubsetListMap = KV;
 
                     %>
                     <tr>
-                        <td><%= text(i == 0 ? "" : "and") %></td>
+                        <td><%= unsafe(i == 0 ? "" : "and") %></td>
                     <% if (canEdit) { %>
                         <td><select name="ff_filter_field"><labkey:options value="<%=field%>" map="<%=fieldOptions%>" /></select></td>
                         <td><select name="ff_filter_op"><labkey:options value="<%=op%>" map="<%=opOptions%>" /></select></td>
@@ -193,13 +193,13 @@ var keywordValueSubsetListMap = KV;
                 %>
                 <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i)%>">
                     <td><%=h(parameter)%></td>
-                    <td><%=text(selectKeywordNames(Sign.positive, i))%></td>
-                    <td><%=text(selectKeywordValues(Sign.positive, i))%></td>
-                    <td><%=text(selectSubsets(Sign.positive, i))%></td>
-                    <td><%=text(selectKeywordNames(Sign.negative, i))%></td>
-                    <td><%=text(selectKeywordValues(Sign.negative, i))%></td>
+                    <td><%=unsafe(selectKeywordNames(Sign.positive, i))%></td>
+                    <td><%=unsafe(selectKeywordValues(Sign.positive, i))%></td>
+                    <td><%=unsafe(selectSubsets(Sign.positive, i))%></td>
+                    <td><%=unsafe(selectKeywordNames(Sign.negative, i))%></td>
+                    <td><%=unsafe(selectKeywordValues(Sign.negative, i))%></td>
                     <td>
-                        <%=text(selectSubsets(Sign.negative, i))%>
+                        <%=unsafe(selectSubsets(Sign.negative, i))%>
                         <% if (i == 0) { %>
                             <input class="labkey-button" type="button" value="Universal" onclick="universalNegative()">
                         <% } %>

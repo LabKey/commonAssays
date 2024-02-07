@@ -56,7 +56,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     <p>Protein groups to use in the comparison:</p>
     <div class="labkey-indented"><input type="radio" name="<%= proteinGroupFilterType %>" value="<%= none %>"<%=checked(form.isNoProteinGroupFilter())%>/> All protein groups</div>
     <div class="labkey-indented"><input type="radio" name="<%= proteinGroupFilterType %>" id="proteinProphetRadioButton" value="<%= probability %>"<%=checked(form.isProteinProphetFilter())%>/> Protein groups with ProteinProphet probability &ge; <input type="text" size="2" id="<%= proteinProphetProbability %>" name="<%= proteinProphetProbability %>" value="<%=h(form.getProteinProphetProbability())%>" /></div>
-    <div class="labkey-indented"><input type="radio" name="<%= proteinGroupFilterType %>" id="<%= text(FilterView.PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewProteinGroupFilter())%>/>
+    <div class="labkey-indented"><input type="radio" name="<%= proteinGroupFilterType %>" id="<%= unsafe(FilterView.PROTEIN_GROUPS_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewProteinGroupFilter())%>/>
         Protein groups that meet the filter criteria in a custom view:
         <% String proteinGroupViewSelectId = bean.getProteinGroupView().renderViewList(request, out, proteinGroupViewName); %>
         <%=link("Create or Edit View").onClick("showViewDesigner('" + ProteinGroupsFilter + "', 'proteinGroupsCustomizeView', " + PageFlowUtil.jsString(proteinGroupViewSelectId) + "); return false;").id("editProteinGroupsViewLink") %>
@@ -69,7 +69,7 @@ String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext(
     <p>Peptide requirements for the protein groups:</p>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" value="<%= none %>"<%=checked(form.isNoPeptideFilter())%>/> All peptides</div>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="peptideProphetRadioButton" value="<%= probability %>"<%=checked(form.isPeptideProphetFilter())%>/> Peptides with PeptideProphet probability &ge; <input type="text" size="2" id="<%= peptideProphetProbability %>" name="<%= peptideProphetProbability %>" value="<%=h(form.getPeptideProphetProbability())%>" /></div>
-    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="<%= text(FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
+    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="<%= unsafe(FilterView.PEPTIDES_CUSTOM_VIEW_RADIO_BUTTON) %>" value="<%= customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
         Peptides that meet the filter criteria in a custom view:
         <% String peptideViewSelectId = bean.getPeptideView().renderViewList(request, out, peptideViewName); %>
         <%=link("Create or Edit View").onClick("showViewDesigner('" + PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;") %>
