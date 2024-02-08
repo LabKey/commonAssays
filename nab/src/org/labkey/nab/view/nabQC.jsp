@@ -78,7 +78,7 @@
 %>
 
 <%
-    if (errorMsg.length() > 0)
+    if (!errorMsg.isEmpty())
     {
 %>
     <%=errorMsg%>
