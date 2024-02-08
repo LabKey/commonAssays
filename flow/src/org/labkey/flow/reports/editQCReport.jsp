@@ -72,7 +72,7 @@ var report =
         FilterFlowReport.Filter f = new FilterFlowReport.Filter(d,i);
         if (f.type == null)
             break;
-        %><%=text(comma)%>{
+        %><%=unsafe(comma)%>{
             property:<%=q(f.property)%>,
             value:<%=q(f.value)%>,
             type:<%=q(f.type)%>,

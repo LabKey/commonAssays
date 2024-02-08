@@ -38,7 +38,7 @@
 <labkey:errors />
 <labkey:form method="post" action="<%=urlFor(PipelineController.SetCometDefaultsAction.class)%>">
     <div>
-        <textarea style="width: 100%" id="configureXml" name="configureXml" cols="90" rows="20"><%=text(form.getConfigureXml())%></textarea>
+        <textarea style="width: 100%" id="configureXml" name="configureXml" cols="90" rows="20"><%=unsafe(form.getConfigureXml())%></textarea>
     </div>
     <div>
         For detailed explanations of all available input parameters, see the

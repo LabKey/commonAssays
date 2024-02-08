@@ -165,7 +165,7 @@ those results must be put into different analysis folders.
                     %>
                     <option value="<%=analysis.getExperimentId()%>"
                             <%=selected(disabledReason == null && analysis.getExperimentId() == selectedId)%>
-                            <%=text(disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":"")%>>
+                            <%=unsafe(disabledReason != null ? "disabled=\"disabled\" title=\"" + h(disabledReason) + "\"":"")%>>
                         <%=h(analysis.getName())%>
                     </option>
                     <%
@@ -233,7 +233,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPubl
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <br>
             Choose a target study folder:<br>
-            <%=select().name("targetStudy").className(null).addOptions(targetStudies).selected(text(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
+            <%=select().name("targetStudy").className(null).addOptions(targetStudies).selected(unsafe(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
             %>
 <%--            <select id="targetStudy" name="targetStudy">--%>
 <%--                <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>--%>

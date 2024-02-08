@@ -25,7 +25,7 @@
     ActionURL loadGo = urlFor(MS2Controller.LoadGoAction.class).addParameter("manual", 1);
 %>
 <table><tr><td>
-You are about to <%=text(loaded ? "reload" : "load")%> Gene Ontology (GO) annotation files from your computer into your
+You are about to <%=unsafe(loaded ? "reload" : "load")%> Gene Ontology (GO) annotation files from your computer into your
 LabKey database. Use this method if the automatic FTP method doesn't work for you (e.g., your LabKey server can't
 connect to ftp.geneontology.org) or you need to upload a specific version of the GO annotations.<br><br>
 
@@ -49,7 +49,7 @@ After choosing a file, click "Continue" and your LabKey Server will:
     }
 
     %>
-    <li><%=text(loaded ? "Reload" : "Load")%> the database tables with information from the specified GO file</li>
+    <li><%=unsafe(loaded ? "Reload" : "Load")%> the database tables with information from the specified GO file</li>
 </ul>
 
 Loading will take place in the background and you can continue to use your LabKey Server normally. If you want,

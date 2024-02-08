@@ -63,7 +63,7 @@ The analysis section describes which gates in the analysis, as well as the stati
 <%
     ScriptOverview overview = new ScriptOverview(getUser(), getContainer(), script);
 %>
-<%=text(overview.toString())%>
+<%=unsafe(overview.toString())%>
 
 <div>
 <% if (script.getRunCount() > 0) {

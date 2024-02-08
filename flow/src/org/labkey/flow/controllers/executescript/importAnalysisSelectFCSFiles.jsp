@@ -50,7 +50,7 @@
         <textarea rows="10" cols="140" readonly><%
         for (String warning : warnings)
         {
-            %><%=h(warning)%><%=text("\n")%><%
+            %><%=h(warning)%><%=unsafe("\n")%><%
         }
         %></textarea></p><%
     }
@@ -115,9 +115,9 @@
        isDisabled="<%=(!keywordRunsExist)%>"
        onClick="clearSelections(this.value);" />
 <label for="<%=ImportAnalysisForm.SelectFCSFileOption.Previous%>">
-    <div style="display:inline-block; <%=text(!keywordRunsExist ? "color:silver;" : "")%>">Previously imported FCS files.</div>
+    <div style="display:inline-block; <%=unsafe(!keywordRunsExist ? "color:silver;" : "")%>">Previously imported FCS files.</div>
 </label>
-<div style="padding-left: 2em; padding-bottom: 1em; <%=text(!keywordRunsExist ? "color:silver;" : "")%>">
+<div style="padding-left: 2em; padding-bottom: 1em; <%=unsafe(!keywordRunsExist ? "color:silver;" : "")%>">
     <%=h(FlowModule.getLongProductName())%> will attempt to match the samples in the <%=h(workspace.getKindName())%> with previously imported FCS files.
 </div>
 

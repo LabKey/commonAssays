@@ -106,7 +106,7 @@
         <td class="labkey-column-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
-        %><td class="<%=className%>" style="text-align:right;"><%=text(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
+        %><td class="<%=className%>" style="text-align:right;"><%=unsafe(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
         }%>
     </tr>
     <%}%>
@@ -185,7 +185,7 @@
         <% } %>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <td><%=text(callback.render(iChannel, iChannelValue))%></td>
+        <td><%=unsafe(callback.render(iChannel, iChannelValue))%></td>
         <%}%>
     </tr>
     <%}%>

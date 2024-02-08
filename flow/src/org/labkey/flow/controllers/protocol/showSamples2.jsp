@@ -190,7 +190,7 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
             <b>Unlinked Samples</b>
             <small>
                 &mdash;
-                <a id="unlinked-samples" href="<%=h(urlUnlinkedSamples)%>"><%=unlinkedSampleIds.size()%> samples</a> <%=text(unlinkedSampleIds.size() == 1 ? "is" : "are")%> not joined to any FCS Files<br>
+                <a id="unlinked-samples" href="<%=h(urlUnlinkedSamples)%>"><%=unlinkedSampleIds.size()%> samples</a> <%=unsafe(unlinkedSampleIds.size() == 1 ? "is" : "are")%> not joined to any FCS Files<br>
             </small>
         </td>
     </tr>
