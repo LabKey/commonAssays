@@ -27,8 +27,8 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.flow.persist.FlowManager;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -49,11 +49,10 @@ public class FlowServiceImpl implements FlowService
 
     /** Flow data files are usually imported via temp files so ExperimentService.get().getExpDataByURL() doesn't work */
     @Override
-    public List<ExpData> getExpDataByPath(Path path, @Nullable Container container)
+    public List<? extends ExpData> getExpDataByPath(Path path, @Nullable Container container)
     {
         if (container == null || container.getActiveModules().contains(_module))
         {
-            List<ExpData> ret = new LinkedList<>();
             SQLFragment sql = new SQLFragment("SELECT dataid FROM ").append(FlowManager.get().getTinfoObject().getFromSQL("O")).append(" WHERE uri=?");
             sql.add(FileUtil.pathToString(path));
 
@@ -67,14 +66,7 @@ public class FlowServiceImpl implements FlowService
 
             Integer[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
 
-            for (Integer dataid : dataids)
-            {
-                ExpData data = ExperimentService.get().getExpData(dataid);
-                if (null != data)
-                    ret.add(data);
-            }
-
-            return ret;
+            return ExperimentService.get().getExpDatas(Arrays.asList(dataids));
         }
 
         return Collections.emptyList();
