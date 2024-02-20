@@ -100,7 +100,7 @@ public abstract class GoLoader implements Closeable
     }
 
 
-    public static GoLoader getFtpLoader()
+    public static GoLoader getHttpLoader()
     {
         return ensureOneLoader(new HttpGoLoader());
     }
