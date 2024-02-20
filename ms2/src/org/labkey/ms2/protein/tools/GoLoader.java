@@ -16,10 +16,11 @@
 
 package org.labkey.ms2.protein.tools;
 
+import jakarta.servlet.ServletException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
@@ -29,17 +30,28 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.util.*;
+import org.labkey.api.util.CheckedInputStream;
+import org.labkey.api.util.ExceptionUtil;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
+import org.labkey.api.util.JobRunner;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.protein.ProteinManager;
 
-import jakarta.servlet.ServletException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -53,9 +65,9 @@ import java.util.zip.GZIPInputStream;
  * Date: May 28, 2007
  * Time: 2:56:10 PM
  */
-public abstract class GoLoader
+public abstract class GoLoader implements Closeable
 {
-    private static final Logger _log = LogManager.getLogger(GoLoader.class);
+    private static final Logger _log = LogHelper.getLogger(GoLoader.class, "Imports Gene Ontology archives");
 
     private static final String GOTERM_FILE = "term.txt";
     private static final String GOTERM2TERM_FILE = "term2term.txt";
@@ -69,7 +81,7 @@ public abstract class GoLoader
     private final HtmlStringBuilder _status = HtmlStringBuilder.of();  // Can't use StringBuilder -- needs to be synchronized
     private boolean _complete = false;
 
-    public static WebPartView getCurrentStatus(String message)
+    public static WebPartView<?> getCurrentStatus(String message)
     {
         HtmlStringBuilder html = HtmlStringBuilder.of();
         html.append(null == message ? "" : message).unsafeAppend("<br><br>");
@@ -90,7 +102,7 @@ public abstract class GoLoader
 
     public static GoLoader getFtpLoader()
     {
-        return ensureOneLoader(new FtpGoLoader());
+        return ensureOneLoader(new HttpGoLoader());
     }
 
 
@@ -145,9 +157,10 @@ public abstract class GoLoader
         logStatus("Starting to load GO annotation files");
         logStatus("");
 
-        try (TarArchiveInputStream tais = new TarArchiveInputStream(new GZIPInputStream(new CheckedInputStream(getInputStream()))))
+        try (InputStream in = getInputStream();
+            TarArchiveInputStream tais = new TarArchiveInputStream(new GZIPInputStream(new CheckedInputStream(in))))
         {
-            TarArchiveEntry te = tais.getNextTarEntry();
+            TarArchiveEntry te = tais.getNextEntry();
 
             while (te != null)
             {
@@ -160,7 +173,7 @@ public abstract class GoLoader
                 if (null != bean)
                     loadSingleGoFile(bean, shortFilename, tais);
 
-                te = tais.getNextTarEntry();
+                te = tais.getNextEntry();
             }
         }
 
@@ -184,22 +197,22 @@ public abstract class GoLoader
         logStatus("Starting to load " + filename);
         BufferedReader isr = Readers.getReader(is);
         TabLoader t = new TabLoader(isr, false);
-        StringBuilder SQLCommand = new StringBuilder("INSERT INTO " + ti + "(");
-        StringBuilder QMarkPart = new StringBuilder("VALUES (");
+        StringBuilder sql = new StringBuilder("INSERT INTO " + ti + "(");
+        StringBuilder valuesSql = new StringBuilder("VALUES (");
 
         for (int i = 0; i < cols.length; i++)
         {
-            SQLCommand.append(cols[i]);
-            QMarkPart.append("?");
+            sql.append(cols[i]);
+            valuesSql.append("?");
             if (i < (cols.length - 1))
             {
-                SQLCommand.append(",");
-                QMarkPart.append(",");
+                sql.append(",");
+                valuesSql.append(",");
             }
             else
             {
-                SQLCommand.append(") ");
-                QMarkPart.append(") ");
+                sql.append(") ");
+                valuesSql.append(") ");
             }
         }
 
@@ -213,7 +226,8 @@ public abstract class GoLoader
         {
             conn = scope.getConnection();
             conn.setAutoCommit(false);
-            ps = conn.prepareStatement(SQLCommand + QMarkPart.toString());
+            sql.append(valuesSql);
+            ps = conn.prepareStatement(sql.toString());
 
             for (Map<String, Object> curRec : t)
             {
@@ -231,9 +245,8 @@ public abstract class GoLoader
 
                     ColumnInfo column = columns.get(kindex);
                     Object val = curRec.get(key);
-                    if (val instanceof String)
+                    if (val instanceof String s)
                     {
-                        String s = (String)val;
                         if (s.equals("\\N"))
                             continue;
 
@@ -316,10 +329,10 @@ public abstract class GoLoader
 
     protected void logStatus(String message)
     {
-        if (message.length() > 0)
+        if (!message.isEmpty())
             _log.debug(message);
 
-        message += "<br>\n";
+        _status.unsafeAppend("<br>\n");
 
         _status.append(message);
     }
@@ -377,30 +390,48 @@ public abstract class GoLoader
     }
 
 
-    private static class FtpGoLoader extends GoLoader
+    private static class HttpGoLoader extends GoLoader
     {
-        private final static String SERVER = "ftp.geneontology.org";
-        private final static String PATH = "godatabase/archive/latest-full";
+        private final static String SERVER = "release.geneontology.org";
+        private final static String PATH = "/2017-01-01/mysql_dumps/";
         private final static String FILENAME = "go_monthly-termdb-tables.tar.gz";
 
+        private File _file;
+
         @Override
-        protected InputStream getInputStream() throws IOException, ServletException
+        protected InputStream getInputStream() throws IOException
         {
             logStatus("Searching for the latest GO annotation files at " + SERVER);
-            logStatus("Starting to download " + FILENAME + " from " + SERVER);
-            File file = FTPUtil.downloadFile("anonymous", "anonymous", SERVER, PATH, FILENAME);
-            file.deleteOnExit();
+            logStatus("Starting to download " + PATH + FILENAME + " from " + SERVER);
+            _file = FileUtil.createTempFile(FILENAME, null);
+            try (InputStream in = new BufferedInputStream(new URL("http://" + SERVER + PATH + FILENAME).openStream());
+                 OutputStream out = new BufferedOutputStream(new FileOutputStream(_file)))
+            {
+                IOUtils.copy(in, out);
+            }
+
+            _file.deleteOnExit();
             logStatus("Finished downloading " + FILENAME);
             logStatus("");
 
-            return new FileInputStream(file);
+            return new FileInputStream(_file);
+        }
+
+        @Override
+        public void close() throws IOException
+        {
+            if (_file != null)
+            {
+                _file.delete();
+                _file = null;
+            }
         }
     }
 
 
     private static class StreamGoLoader extends GoLoader
     {
-        private InputStream _is;
+        private final InputStream _is;
 
         private StreamGoLoader(InputStream is)
         {
@@ -411,6 +442,12 @@ public abstract class GoLoader
         protected InputStream getInputStream()
         {
             return _is;
+        }
+
+        @Override
+        public void close()
+        {
+
         }
     }
 }
