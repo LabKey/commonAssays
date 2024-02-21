@@ -25,11 +25,13 @@
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
 %>
 <table><tr><td>
-You are about to <%=h(loaded ? "reload" : "load")%> the latest Gene Ontology (GO) annotation files into your
+    This is a deprecated feature. It will be completely removed in a future version.<br><br>
+
+You are about to <%=h(loaded ? "reload" : "load")%> the January 2017 Gene Ontology (GO) annotation files into your
 LabKey database. If you click "Continue", this server will automatically:
 
 <ul>
-    <li>Download the latest GO annotation files from ftp.geneontology.org</li><%
+    <li>Download the GO annotation files from geneontology.org</li><%
 
     if (loaded)
     {
@@ -43,17 +45,9 @@ LabKey database. If you click "Continue", this server will automatically:
     <li><%=h(loaded ? "Reload" : "Load")%> the database tables with information from the downloaded GO files</li>
 </ul>
 
-Your LabKey Server must be able to connect via the Internet to ftp.geneontology.org. Assuming a reasonably fast
-Internet connection, this process should take less than five minutes to complete. The loading will take place
-in the background and you can continue to use your LabKey Server normally. If you want, you can monitor the
-process by refreshing the status information on the next page.<br><br>
-
-<%if (SystemUtils.IS_OS_WINDOWS) { %>
-<span class="labkey-error">Warning: Since this server is running Windows it may encounter firewall issues with FTP downloads.
-If the server's firewall has not been properly configured then the automatic GO download may fail, in which case you should
-switch to the "Manual" tab and follow the instructions there.</span> For more information,
-<%=helpLink("annotations#go", "visit the documentation")%>.<br><br>
-<% } %>
+Your LabKey Server must be able to connect via the Internet to geneontology.org. This process should take less than
+    five minutes to complete. The loading will take place in the background and you can continue to use your server
+    normally. You can monitor the process by refreshing the status information on the next page.<br><br>
 
 If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
 <labkey:form action="<%=urlFor(LoadGoAction.class)%>" method="post">

@@ -30,7 +30,6 @@ import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.ExportException;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.HasViewContext;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.MutatingApiAction;
@@ -50,7 +49,6 @@ import org.labkey.api.data.*;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.ms.Replicate;
 import org.labkey.api.ms2.MS2Service;
@@ -113,7 +111,6 @@ import org.labkey.api.util.element.Option.OptionBuilder;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
-import org.labkey.api.view.GWTView;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.HBox;
 import org.labkey.api.view.HtmlView;
@@ -965,7 +962,7 @@ public class MS2Controller extends SpringActionController
             }
             else
             {
-                loader = GoLoader.getFtpLoader();
+                loader = GoLoader.getHttpLoader();
             }
 
             if (null != loader)

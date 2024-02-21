@@ -25,14 +25,15 @@
     ActionURL loadGo = urlFor(MS2Controller.LoadGoAction.class).addParameter("manual", 1);
 %>
 <table><tr><td>
-You are about to <%=unsafe(loaded ? "reload" : "load")%> Gene Ontology (GO) annotation files from your computer into your
-LabKey database. Use this method if the automatic FTP method doesn't work for you (e.g., your LabKey server can't
-connect to ftp.geneontology.org) or you need to upload a specific version of the GO annotations.<br><br>
+    This is a deprecated feature. It will be completely removed in a future version.<br><br>
+
+    You are about to <%=unsafe(loaded ? "reload" : "load")%> Gene Ontology (GO) annotation files from your computer into your
+LabKey database. Use this method if the automatic download method doesn't work for you or you need to upload a specific version of the GO annotations.<br><br>
 
 Click the "Browse..." or "Choose File..." button below to choose a file to upload. The file must be a GZIP compressed
 archive that includes all five GO annotation files (graph_path.txt, term.txt, term_definition.txt, term_synonym.txt,
-and term2term.txt) in the proper format. See <a href="ftp://ftp.geneontology.org/godatabase/archive/latest-full" target="go">
-ftp://ftp.geneontology.org/godatabase/archive/latest-full</a> for examples of these files. The GO archive to use is an
+and term2term.txt) in the proper format. See <a href="http://release.geneontology.org/2017-01-01/mysql_dumps/index.html" target="go">
+    http://release.geneontology.org/2017-01-01/mysql_dumps/index.html</a> for examples of these files. The GO archive to use is an
 approximately 12MB file named go_monthly-termdb-tables.tar.gz.<br><br>
 
 After choosing a file, click "Continue" and your LabKey Server will:

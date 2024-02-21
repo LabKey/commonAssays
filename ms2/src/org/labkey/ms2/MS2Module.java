@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExperimentService;
@@ -37,6 +38,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
+import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
@@ -93,9 +95,11 @@ import org.labkey.ms2.search.ProteinSearchWebPart;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -288,6 +292,12 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
         FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
         FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+
+        UsageMetricsService.get().registerUsageMetrics(getName(), () -> {
+                Map<String, Object> results = new HashMap<>();
+                results.put("hasGeneOntologyData", new TableSelector(ProteinManager.getTableInfoGoTerm()).exists());
+                return results;
+        });
     }
 
     @NotNull
