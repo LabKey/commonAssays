@@ -945,8 +945,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            setTitle((GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations");
-            setHelpTopic("annotations");
+            addProteinAdminNavTrail(root, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations", getPageConfig(), "annotations");
         }
 
         @Override
@@ -1014,7 +1013,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public static class GoStatusAction extends SimpleViewAction<GoForm>
+    public class GoStatusAction extends SimpleViewAction<GoForm>
     {
         @Override
         public ModelAndView getView(GoForm form, BindException errors)
@@ -1025,13 +1024,11 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            setTitle("GO Load Status");
-            setHelpTopic("annotations");
+            addProteinAdminNavTrail(root, "GO Load Status", getPageConfig(), "annotations");
         }
     }
 
-
-    private static class GoForm
+    public static class GoForm
     {
         String _message = null;
 
@@ -2516,7 +2513,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresSiteAdmin
-    public class ReloadFastaAction extends FormHandlerAction
+    public class ReloadFastaAction extends FormHandlerAction<Object>
     {
         @Override
         public void validateCommand(Object target, Errors errors)
@@ -2544,7 +2541,7 @@ public class MS2Controller extends SpringActionController
 
 
     @RequiresSiteAdmin
-    public static class DeleteDataBasesAction extends FormHandlerAction
+    public static class DeleteDataBasesAction extends FormHandlerAction<Object>
     {
         private String _message;
 
@@ -2603,7 +2600,7 @@ public class MS2Controller extends SpringActionController
 
         public String getHeader()
         {
-            if (_header != null && _header.length() > 0 && _header.startsWith(">"))
+            if (_header != null && !_header.isEmpty() && _header.startsWith(">"))
             {
                 return _header.substring(1);
             }
@@ -6471,7 +6468,7 @@ public class MS2Controller extends SpringActionController
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
                 controller.new LoadGoAction(),
-                    new GoStatusAction(),
+                controller.new GoStatusAction(),
                 controller.new ReloadFastaAction(),
                     new DeleteDataBasesAction(),
                 controller.new TestFastaParsingAction(),
