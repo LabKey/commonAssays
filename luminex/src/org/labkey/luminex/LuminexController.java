@@ -496,7 +496,7 @@ public class LuminexController extends SpringActionController
         }
 
         @Override
-        protected int importData(DataLoader dl, FileStream file, String originalName, BatchValidationException errors, @Nullable AuditBehaviorType auditBehaviorType, @Nullable TransactionAuditProvider.TransactionAuditEvent auditEvent) throws IOException
+        protected int importData(DataLoader dl, FileStream file, String originalName, BatchValidationException errors, @Nullable AuditBehaviorType auditBehaviorType, @Nullable TransactionAuditProvider.TransactionAuditEvent auditEvent, @Nullable String auditUserComment) throws IOException
         {
             // NOTE: consider being smarter here and intersecting the list of desired columns with dl.getColumns()
             // NOTE: consider making case-insentive
