@@ -31,8 +31,10 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.CheckedInputStream;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.JobRunner;
@@ -60,11 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-/**
- * User: adam
- * Date: May 28, 2007
- * Time: 2:56:10 PM
- */
 public abstract class GoLoader implements Closeable
 {
     private static final Logger _log = LogHelper.getLogger(GoLoader.class, "Imports Gene Ontology archives");
@@ -78,39 +75,41 @@ public abstract class GoLoader implements Closeable
     private static Boolean _goLoaded = null;
     private static GoLoader _currentLoader = null;
 
-    private final HtmlStringBuilder _status = HtmlStringBuilder.of();  // Can't use StringBuilder -- needs to be synchronized
+    private static final Object LOCK = new Object(); // Used to synchronize access to _status
+    private final HtmlStringBuilder _status = HtmlStringBuilder.of();
     private boolean _complete = false;
 
     public static WebPartView<?> getCurrentStatus(String message)
     {
         HtmlStringBuilder html = HtmlStringBuilder.of();
-        html.append(null == message ? "" : message).unsafeAppend("<br><br>");
+
+        if (null != message)
+            html.append(message).append(HtmlString.BR);
 
         if (null == _currentLoader)
+        {
             html.append("No GO annotation loads have been attempted during this server session");
+        }
         else
         {
             HtmlString status = _currentLoader.getStatus();
             if (!status.toString().contains("failed"))
-                html.unsafeAppend("Refresh this page to update status<br><br>\n");
+                html.unsafeAppend("Refresh this page to update status<br>\n");
             html.append(status);
         }
 
         return new HtmlView("GO Annotation Load Status", html);
     }
 
-
     public static GoLoader getHttpLoader()
     {
         return ensureOneLoader(new HttpGoLoader());
     }
 
-
     public static GoLoader getStreamLoader(InputStream is)
     {
         return ensureOneLoader(new StreamGoLoader(is));
     }
-
 
     private static synchronized GoLoader ensureOneLoader(GoLoader newLoader)
     {
@@ -119,7 +118,6 @@ public abstract class GoLoader implements Closeable
         else
             return null;
     }
-
 
     protected abstract InputStream getInputStream() throws IOException, ServletException;
 
@@ -145,11 +143,11 @@ public abstract class GoLoader implements Closeable
         });
     }
 
-
     private void loadGoFromGz() throws SQLException, IOException, ServletException
     {
         DbSchema schema = ProteinManager.getSchema();
         Map<String, GoLoadBean> map = getGoLoadMap();
+        long start = System.currentTimeMillis();
 
         clearGoLoaded();
         new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
@@ -178,10 +176,10 @@ public abstract class GoLoader implements Closeable
         }
 
         new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+        long elapsed = System.currentTimeMillis() - start;
 
-        logStatus("Successfully loaded all GO annotation files");
+        logStatus("Successfully loaded all GO annotation files (" + DateUtil.formatDuration(elapsed) + ")");
     }
-
 
     private static final int GO_BATCH_SIZE = 5000;
 
@@ -276,7 +274,7 @@ public abstract class GoLoader implements Closeable
                 orgLineCount++;
                 if (orgLineCount % GO_BATCH_SIZE == 0)
                 {
-                    logStatus(orgLineCount + " rows loaded");
+                    logStatus(Formats.commaf0.format(orgLineCount) + " rows loaded");
                     ps.executeBatch();
                     conn.commit();
                     ps.clearBatch();
@@ -302,41 +300,48 @@ public abstract class GoLoader implements Closeable
         logStatus("");
     }
 
-
     private void logException(Exception e)
     {
-        _status.insert(0, HtmlString.unsafe("See below for complete log<br><br>"));
-        _status.insert(0, ExceptionUtil.renderException(e));
-        _status.insert(0, HtmlString.unsafe("Loading GO annotations failed with the following exception:<br>"));
+        synchronized (LOCK)
+        {
+            _status.insert(0, HtmlString.unsafe("See below for complete log<br>"));
+            _status.insert(0, ExceptionUtil.renderException(e));
+            _status.insert(0, HtmlString.unsafe("Loading GO annotations failed with the following exception:<br>"));
+        }
 
-        logStatus("Loading GO annotations failed with the following exception:");
-        logStatus(ExceptionUtil.renderException(e).toString());
+        logStatus(HtmlString.unsafe("<br>Loading GO annotations failed with the following exception:"));
+        logStatus(ExceptionUtil.renderException(e));
         ExceptionUtil.logExceptionToMothership(null, e);
     }
 
-
     private HtmlString getStatus()
     {
-        return _status.getHtmlString();
+        synchronized (LOCK)
+        {
+            return _status.getHtmlString();
+        }
     }
-
 
     private boolean isComplete()
     {
         return _complete;
     }
 
-
     protected void logStatus(String message)
     {
-        if (!message.isEmpty())
-            _log.debug(message);
-
-        _status.unsafeAppend("<br>\n");
-
-        _status.append(message);
+        logStatus(HtmlString.of(message));
     }
 
+    protected void logStatus(HtmlString message)
+    {
+        if (!message.isEmpty())
+            _log.debug(message.toString());
+
+        synchronized (LOCK)
+        {
+            _status.append(HtmlString.BR).append("\n").append(message);
+        }
+    }
 
     private static class GoLoadBean
     {
@@ -349,7 +354,6 @@ public abstract class GoLoader implements Closeable
             this.cols = cols;
         }
     }
-
 
     private static Map<String, GoLoadBean> getGoLoadMap()
     {
@@ -364,12 +368,10 @@ public abstract class GoLoader implements Closeable
         return map;
     }
 
-
     public static void clearGoLoaded()
     {
         _goLoaded = null;
     }
-
 
     public static Boolean isGoLoaded()
     {
@@ -388,7 +390,6 @@ public abstract class GoLoader implements Closeable
 
         return _goLoaded;
     }
-
 
     private static class HttpGoLoader extends GoLoader
     {
@@ -418,7 +419,7 @@ public abstract class GoLoader implements Closeable
         }
 
         @Override
-        public void close() throws IOException
+        public void close()
         {
             if (_file != null)
             {
@@ -427,7 +428,6 @@ public abstract class GoLoader implements Closeable
             }
         }
     }
-
 
     private static class StreamGoLoader extends GoLoader
     {
@@ -447,7 +447,6 @@ public abstract class GoLoader implements Closeable
         @Override
         public void close()
         {
-
         }
     }
 }
