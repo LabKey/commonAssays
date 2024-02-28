@@ -31,8 +31,10 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.CheckedInputStream;
+import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.JobRunner;
@@ -60,11 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-/**
- * User: adam
- * Date: May 28, 2007
- * Time: 2:56:10 PM
- */
 public abstract class GoLoader implements Closeable
 {
     private static final Logger _log = LogHelper.getLogger(GoLoader.class, "Imports Gene Ontology archives");
@@ -84,7 +81,10 @@ public abstract class GoLoader implements Closeable
     public static WebPartView<?> getCurrentStatus(String message)
     {
         HtmlStringBuilder html = HtmlStringBuilder.of();
-        html.append(null == message ? "" : message).unsafeAppend("<br><br>");
+        html.append(null == message ? "" : message);
+
+        if (null != message)
+            html.unsafeAppend("<br>");
 
         if (null == _currentLoader)
             html.append("No GO annotation loads have been attempted during this server session");
@@ -92,7 +92,7 @@ public abstract class GoLoader implements Closeable
         {
             HtmlString status = _currentLoader.getStatus();
             if (!status.toString().contains("failed"))
-                html.unsafeAppend("Refresh this page to update status<br><br>\n");
+                html.unsafeAppend("Refresh this page to update status<br>\n");
             html.append(status);
         }
 
@@ -150,6 +150,7 @@ public abstract class GoLoader implements Closeable
     {
         DbSchema schema = ProteinManager.getSchema();
         Map<String, GoLoadBean> map = getGoLoadMap();
+        long start = System.currentTimeMillis();
 
         clearGoLoaded();
         new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
@@ -178,8 +179,9 @@ public abstract class GoLoader implements Closeable
         }
 
         new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+        long elapsed = System.currentTimeMillis() - start;
 
-        logStatus("Successfully loaded all GO annotation files");
+        logStatus("Successfully loaded all GO annotation files (" + DateUtil.formatDuration(elapsed) + ")");
     }
 
 
@@ -276,7 +278,7 @@ public abstract class GoLoader implements Closeable
                 orgLineCount++;
                 if (orgLineCount % GO_BATCH_SIZE == 0)
                 {
-                    logStatus(orgLineCount + " rows loaded");
+                    logStatus(Formats.commaf0.format(orgLineCount) + " rows loaded");
                     ps.executeBatch();
                     conn.commit();
                     ps.clearBatch();
@@ -418,7 +420,7 @@ public abstract class GoLoader implements Closeable
         }
 
         @Override
-        public void close() throws IOException
+        public void close()
         {
             if (_file != null)
             {
@@ -447,7 +449,6 @@ public abstract class GoLoader implements Closeable
         @Override
         public void close()
         {
-
         }
     }
 }

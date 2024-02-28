@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.apache.commons.lang3.SystemUtils" %>
 <%@ page import="org.labkey.ms2.MS2Controller.LoadGoAction" %>
 <%@ page import="org.labkey.ms2.MS2Controller.MS2UrlsImpl" %>
 <%@ page import="org.labkey.ms2.protein.tools.GoLoader" %>
@@ -46,10 +45,10 @@ LabKey database. If you click "Continue", this server will automatically:
 </ul>
 
 Your LabKey Server must be able to connect via the Internet to geneontology.org. This process should take less than
-    five minutes to complete. The loading will take place in the background and you can continue to use your server
+    a minute to complete. The loading will take place in the background and you can continue to use your server
     normally. You can monitor the process by refreshing the status information on the next page.<br><br>
 
-If you wish to proceed, click the "Continue" button. Otherwise click "Cancel".<br><br>
+If you wish to proceed, click the "Continue" button. Otherwise, click "Cancel".<br><br>
 <labkey:form action="<%=urlFor(LoadGoAction.class)%>" method="post">
     <%= button("Continue").submit(true) %>
     <%= button("Cancel").href(MS2UrlsImpl.get().getShowProteinAdminUrl()) %>
