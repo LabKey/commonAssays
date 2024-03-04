@@ -456,12 +456,6 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Class<? extends Controller> getDataImportAction()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public PipelineProvider getPipelineProvider()
     {
         return PipelineService.get().getPipelineProvider(FlowPipelineProvider.NAME);
