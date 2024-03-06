@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.controllers.attribute.AttributeController" %>
 <%@ page import="org.labkey.flow.controllers.protocol.ProtocolController" %>
@@ -57,7 +56,7 @@ Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
     <labkey:input type="hidden" id="allowCaseChangeAlias" name="allowCaseChangeAlias" value="false"/>
 </labkey:form>
 
-<script nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var errorEl = document.getElementById('form-errors');
     function showError(msg) {
         errorEl.innerHTML = '<div class="labkey-error">' + LABKEY.Utils.encodeHtml(msg) + '</div>';

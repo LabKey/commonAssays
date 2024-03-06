@@ -36,12 +36,12 @@ function o() { var o = {}; for (var i = 0; i < arguments.length; i += 2) o[argum
 var parameters = <%= javascriptArray(form.parameters) %>
 var AutoComp = {};
 <%
-    boolean hasAutoCompScripts = form.workspace.getAutoCompensationScripts().size() > 0;
+    boolean hasAutoCompScripts = !form.workspace.getAutoCompensationScripts().isEmpty();
     for (AutoCompensationScript autoComp : form.workspace.getAutoCompensationScripts())
     {
         %>AutoComp[<%=q(autoComp.getName())%>]={<%
 
-        // 'criteria' : [ primarykKeyword, secondaryKeyword, secondaryValue ]
+        // 'criteria' : [ primaryKeyword, secondaryKeyword, secondaryValue ]
         AutoCompensationScript.MatchingCriteria criteria = autoComp.getCriteria();
         if (criteria != null)
         {
@@ -110,7 +110,7 @@ var keywordValueSubsetListMap = KV;
         %>
         <labkey:panel title="Choose AutoCompensation script">
             <p>Your FlowJo workspace contains AutoCompensation scripts; you can optionally
-            select a script from the drop down below to quickly populate the compensation
+            select a script from the drop-down list below to quickly populate the compensation
             calculation form fields.</p>
             <select id="selectAutoCompScript" name="selectAutoCompScript">
             <%
@@ -126,7 +126,7 @@ var keywordValueSubsetListMap = KV;
 <% } %>
 
         <labkey:panel title="Analyze FCS Files where">
-            <p>Filters may optionally be applied to this analysis script.  The set of keyword and
+            <p>Filters may optionally be applied to this analysis script. The set of keyword and
             value pairs <i>must all</i> match in the FCS header to be included in the analysis.
             You can change the filter later by editing the script settings from the
             analysis script start page.</p>
@@ -178,9 +178,9 @@ var keywordValueSubsetListMap = KV;
             which are to be used to identify the compensation control in experiment runs.</p>
             <p><b>If you do not see the keyword you are looking for:</b><br>
             This page only allows you to choose keyword/value pairs that uniquely identify a
-            sample in the workspace.  If you do not see the keyword that you would like to use,
+            sample in the workspace. If you do not see the keyword that you would like to use,
             this might be because the workspace that you uploaded contained more than one sample
-            with that keyword value.  Use FlowJo to save a workspace template with AutoCompensation scripts or
+            with that keyword value. Use FlowJo to save a workspace template with AutoCompensation scripts or
             a workspace containing only one set of compensation controls, and upload that new workspace.
             </p>
             <table class="labkey-data-region-legacy labkey-show-borders">
@@ -200,8 +200,10 @@ var keywordValueSubsetListMap = KV;
                     <td><%=unsafe(selectKeywordValues(Sign.negative, i))%></td>
                     <td>
                         <%=unsafe(selectSubsets(Sign.negative, i))%>
-                        <% if (i == 0) { %>
-                            <input class="labkey-button" type="button" value="Universal" onclick="universalNegative()">
+                        <% if (i == 0) {
+                            addHandler("universalNegative", "click", "universalNegative()");
+                        %>
+                            <input class="labkey-button" id="universalNegative" type="button" value="Universal">
                         <% } %>
                     </td>
                 </tr>
@@ -219,9 +221,9 @@ if (analysisNames.length > 0)
             <p>You can choose to use the gating from either the sample identified
             by the unique keyword/value pair from the compensation
             calculation above <i>or</i> from one of the named groups in the workspace.</p>
-            <p>By default, the sample's gating will be used.  However, if this is a
+            <p>By default, the sample's gating will be used. However, if this is a
             <b>workspace template</b>, you will most likely need to select a group name
-            from the drop down that has gating for the given subsets.</p>
+            from the drop-down list that has gating for the given subsets.</p>
             <select name="selectGroupName" title="Use gating either from the sample or from a group">
                 <option value="" title="Use gating from the sample identified by the Keyword/Value pair">Sample</option>
                 <% for (String group : analysisNames)
