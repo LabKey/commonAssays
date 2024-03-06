@@ -29,7 +29,7 @@
 <% if (error != null) { %>
 <p class="labkey-error"><%=unsafe(PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>"))%></p>
 <% if (error.getLine() != 0) { %>
-<script nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function findOffset(text, line, column)
     {
         var offset = 0;
