@@ -58,7 +58,7 @@
                 if (sampleInfo != null)
                     groupSamples.put(sampleInfo.getLabel(), new String[] { sampleInfo.getSampleId(), sampleInfo.getLabel() });
             }
-            if (group.isAllSamples() || groupSamples.size() > 0)
+            if (group.isAllSamples() || !groupSamples.isEmpty())
             {
                 String groupName = group.getGroupName().toString();
                 groups.put(groupName, groupSamples.values());
@@ -100,10 +100,10 @@
 </p>
 <% } %>
 <hr/>
-<script nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
-    var importedGroup = <%=q(form.getImportGroupNames().length() > 0 ? form.getImportGroupNameList().get(0) : "All Samples")%>;
+    var importedGroup = <%=q(!form.getImportGroupNames().isEmpty() ? form.getImportGroupNameList().get(0) : "All Samples")%>;
 </script>
 
 <%

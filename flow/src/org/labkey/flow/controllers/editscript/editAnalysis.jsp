@@ -29,16 +29,21 @@
     Collection<SubsetSpec> subsets = form.getFlowScript().getSubsets();
 %>
 <labkey:errors/>
-<script nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var STATS = [];
-    <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
+
+    LABKEY.Utils.onReady(function(){
+        document.getElementById('addStat')['onclick'] = addStat;
+        document.getElementById('addGraph')['onclick'] = addGraph;
+        <% for (StatisticSpec.STAT stat : StatisticSpec.STAT.values()) { %>
         STATS.push({
             name: <%=h(stat.name())%>,
             shortName: <%=h(stat.getShortName())%>,
             longName: <%=h(stat.getLongName())%>,
             parameterRequired: <%= stat.isParameterRequired() %>
         });
-    <% } %>
+        <% } %>
+    });
 
     function addStat()
     {
@@ -190,7 +195,7 @@
                 <td>
                     <input id="stat_parameter2">
                 </td>
-                <td><input type="button" onclick="addStat()" value="Add Statistic"></td>
+                <td><input id="addStat" type="button" value="Add Statistic"></td>
             </tr>
         </table>
 
@@ -224,13 +229,13 @@
                         <% } %>
                     </select>
                 </td>
-                <td><input type="button" onclick="addGraph()" value="Add Graph"></td>
+                <td><input id="addGraph" type="button" value="Add Graph"></td>
             </tr>
         </table>
     </p>
     <p>
         <b>Additional Subsets</b><br>
-        Use this textbox to specify boolean expressions involving subsets that you want to calculate statistics for.
+        Use this text box to specify boolean expressions involving subsets that you want to calculate statistics for.
         A boolean subset expression has parentheses around it, and uses the operators '&' (and), '|' (or), and '!' (not).
         Example:<br>
         Lymph/CD4/CD8/(IFNg+&!IL2+)<br>

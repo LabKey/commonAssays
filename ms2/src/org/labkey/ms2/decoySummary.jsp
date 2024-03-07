@@ -129,7 +129,7 @@
         </tr>
     </table>
 </labkey:form>
-<script nonce="<%=getScriptNonce()%>">
+<script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.Utils.onReady(function() {
         document.getElementById("desiredFdr")['onchange'] = function() {
             setFilterParameter(this.value);
