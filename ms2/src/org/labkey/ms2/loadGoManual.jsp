@@ -65,6 +65,6 @@ Click "Cancel" to return to the Protein Databases Admin page.<br><br>
 </td></tr></table>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     LABKEY.Utils.onReady(function() {
-        document.getElementById("gofile")['change'] = function() { showPathname(this, 'filename'); };
+        document.getElementById("gofile")['onchange'] = function() { showPathname(this, 'filename'); };
     })
 </script>
