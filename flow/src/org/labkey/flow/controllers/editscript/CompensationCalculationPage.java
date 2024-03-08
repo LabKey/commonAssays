@@ -24,6 +24,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
@@ -84,14 +85,11 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         ChannelDef channelDef = channelDef(doc, channel);
         if (channelDef == null)
             return null;
-        switch (sign)
+        return switch (sign)
         {
-            case positive:
-                return channelDef.getPositive();
-            case negative:
-                return channelDef.getNegative();
-        }
-        return null;
+            case positive -> channelDef.getPositive();
+            case negative -> channelDef.getNegative();
+        };
     }
 
     public Map<String,Map<String, List<String>>> keywordValueSampleMap;
@@ -117,7 +115,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
     public List<String> getSubsetNames(Analysis analysis)
     {
-        List<String> ret = new ArrayList();
+        List<String> ret = new ArrayList<>();
         for (Population pop : analysis.getPopulations())
         {
             addSubsetNames(pop, null, ret);
@@ -129,11 +127,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     {
         if ("$BEGINDATA".equals(keyword) || "$ENDDATA".equals(keyword) || "$TOT".equals(keyword))
             return false;
-        if (keyword.startsWith("$P") && keyword.endsWith("V"))
-        {
-            return false;
-        }
-        return true;
+        return !keyword.startsWith("$P") || !keyword.endsWith("V");
     }
 
     /**
@@ -144,8 +138,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
      */
     public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(Workspace workspace)
     {
-        Set<String> keywordsSet = new TreeSet();
-        Map<Workspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap();
+        Set<String> keywordsSet = new TreeSet<>();
+        Map<Workspace.SampleInfo, List<String>> sampleSubsetMap = new HashMap<>();
         for (Workspace.SampleInfo sample : workspace.getSamplesComplete()) {
             Analysis analysis = workspace.getSampleAnalysis(sample);
             if (analysis == null)
@@ -153,27 +147,22 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             sampleSubsetMap.put(sample, getSubsetNames(analysis));
             keywordsSet.addAll(sample.getKeywords().keySet());
         }
-        Map<String, Map<String, List<String>>> keywordValueSubsetListMap = new LinkedHashMap();
+        Map<String, Map<String, List<String>>> keywordValueSubsetListMap = new LinkedHashMap<>();
         for (String keyword : keywordsSet)
         {
             if (!isValidCompKeyword(keyword))
                 continue;
-            Map<String, List<Workspace.SampleInfo>> sampleMap = new LinkedHashMap();
+            Map<String, List<Workspace.SampleInfo>> sampleMap = new LinkedHashMap<>();
             for (Workspace.SampleInfo sample : sampleSubsetMap.keySet())
             {
                 String value = sample.getKeywords().get(keyword);
                 if (value != null)
                 {
-                    List<Workspace.SampleInfo> list = sampleMap.get(value);
-                    if (list == null)
-                    {
-                        list = new ArrayList();
-                        sampleMap.put(value, list);
-                    }
+                    List<Workspace.SampleInfo> list = sampleMap.computeIfAbsent(value, k -> new ArrayList<>());
                     list.add(sample);
                 }
             }
-            Map<String, List<String>> valueSampleMap = new TreeMap();
+            Map<String, List<String>> valueSampleMap = new TreeMap<>();
             for (Map.Entry<String, List<Workspace.SampleInfo>> entry : sampleMap.entrySet())
             {
                 if (entry.getValue().size() != 1)
@@ -181,7 +170,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
                 List<String> subsets = sampleSubsetMap.get(entry.getValue().get(0));
                 valueSampleMap.put(entry.getKey(), subsets);
             }
-            if (valueSampleMap.size() > 0)
+            if (!valueSampleMap.isEmpty())
             {
                 keywordValueSubsetListMap.put(keyword, valueSampleMap);
             }
@@ -194,19 +183,9 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
             {
                 Map<String, List<String>> valueSampleMap =
-                    keywordValueSubsetListMap.get(param.getSearchKeyword());
-                if (valueSampleMap == null)
-                {
-                    valueSampleMap = new TreeMap();
-                    keywordValueSubsetListMap.put(param.getSearchKeyword(), valueSampleMap);
-                }
+                        keywordValueSubsetListMap.computeIfAbsent(param.getSearchKeyword(), k -> new TreeMap<>());
 
-                List<String> subsets = valueSampleMap.get(param.getSearchValue());
-                if (subsets == null)
-                {
-                    subsets = new ArrayList<>();
-                    valueSampleMap.put(param.getSearchValue(), subsets);
-                }
+                List<String> subsets = valueSampleMap.computeIfAbsent(param.getSearchValue(), k -> new ArrayList<>());
 
                 // XXX: insert the subset into the proper position
                 if (StringUtils.isNotEmpty(param.getPositiveGate()) && !subsets.contains(param.getPositiveGate()))
@@ -226,7 +205,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
     public String javascriptArray(List<String> strings)
     {
-        if (strings == null || strings.size() == 0)
+        if (strings == null || strings.isEmpty())
             return "[]";
         return "['" + StringUtils.join(strings, "',\n'") + "']";
     }
@@ -242,7 +221,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         StringBuilder ret = new StringBuilder("<option value=\"" + h(value) + "\"");
         if (selected)
             ret.append(" selected");
-        ret.append(">" + h(display) + "</option>\n");
+        ret.append(">").append(h(display)).append("</option>\n");
         return ret.toString();
     }
 
@@ -265,7 +244,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             .name(sign + "KeywordName[" + index + "]")
             .addOption("", "")
             .addOptions(keywordValueSampleMap.keySet())
-            .onChange("populateKeywordValues('" + sign + "'," + index + ")")
+            .onChange("populateKeywordValues(" + PageFlowUtil.jsString(sign.toString()) + ", " + index + ")")
             .selected(getKeywordName(sign, index))
             .className(null);
     }
@@ -280,7 +259,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             .addOption("", "")
             .addOptions(options)
             .selected(getKeywordValue(sign, index))
-            .onChange("populateSubsets('" + sign + "'," + index + ")")
+            .onChange("populateSubsets(" + PageFlowUtil.jsString(sign.toString()) + ", " + index + ")")
             .className(null);
     }
 
@@ -328,10 +307,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         String keywordName = getKeywordName(sign, index);
         Map<String, List<String>> valueSubsetMap = keywordName == null ? null : keywordValueSampleMap.get(keywordName);
         List<String> subsets = Collections.emptyList();
-        if (valueSubsetMap == null)
-        {
-        }
-        else
+        if (valueSubsetMap != null)
         {
             List<String> valueSubsets = valueSubsetMap.get(getKeywordValue(sign, index));
             if (valueSubsets != null)
@@ -342,18 +318,18 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
         SubsetSpec current = SubsetSpec.fromEscapedString(getSubset(sign, index));
 
-        ret.append("<select name=\"" + sign + "Subset[" + index + "]\">");
+        ret.append("<select name=\"").append(sign).append("Subset[").append(index).append("]\">");
         ret.append(option("", "Ungated", ""));
         for (String subset : subsets)
         {
             SubsetSpec workspaceSubset = SubsetSpec.fromEscapedString(subset);
             boolean selected = subsetMatches(current, workspaceSubset, sign, index);
-            ret.append("\n<option value=\"" + h(workspaceSubset.toString()) + "\"");
+            ret.append("\n<option value=\"").append(h(workspaceSubset.toString())).append("\"");
             if (selected)
             {
                 ret.append(" selected");
             }
-            ret.append(">" + h(subset) + "</option>");
+            ret.append(">").append(h(subset)).append("</option>");
         }
         ret.append("</select>");
         return ret.toString();
