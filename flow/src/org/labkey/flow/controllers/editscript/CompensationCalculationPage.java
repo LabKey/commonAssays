@@ -17,10 +17,14 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fhcrc.cpas.flow.script.xml.*;
+import org.fhcrc.cpas.flow.script.xml.ChannelDef;
+import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
+import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDef;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.JavaScriptFragment;
+import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.Population;
@@ -29,7 +33,15 @@ import org.labkey.flow.analysis.model.SubsetPart;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.analysis.web.SubsetSpec;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 abstract public class CompensationCalculationPage extends ScriptController.Page<EditCompensationCalculationForm>
 {
@@ -247,45 +259,29 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return sign == Sign.positive ? form.positiveSubset[index] : form.negativeSubset[index];
     }
 
-    public String selectKeywordNames(Sign sign, int index)
+    public SelectBuilder selectKeywordNames(Sign sign, int index)
     {
-        StringBuilder ret = new StringBuilder();
-        String current = getKeywordName(sign, index);
-        ret.append("<select name=\"" + sign + "KeywordName[" + index + "]\"");
-        ret.append(" onChange=\"populateKeywordValues('" + sign + "'," + index + ")\">");
-        ret.append(option("", "", current));
-        for (String keyword : keywordValueSampleMap.keySet())
-        {
-            ret.append(option(keyword, keyword, current));
-        }
-        ret.append("\n</select>");
-        return ret.toString();
+        return new SelectBuilder()
+            .name(sign + "KeywordName[" + index + "]")
+            .addOption("", "")
+            .addOptions(keywordValueSampleMap.keySet())
+            .onChange("populateKeywordValues('" + sign + "'," + index + ")")
+            .selected(getKeywordName(sign, index))
+            .className(null);
     }
 
-
-    public String selectKeywordValues(Sign sign, int index)
+    public SelectBuilder selectKeywordValues(Sign sign, int index)
     {
-        StringBuilder ret = new StringBuilder();
         Map<String, List<String>> valueSubsetMap = this.keywordValueSampleMap.get(getKeywordName(sign, index));
-        String current = getKeywordValue(sign, index);
-        String[] options;
-        if (valueSubsetMap == null)
-        {
-            options = new String[0];
-        }
-        else
-        {
-            options = valueSubsetMap.keySet().toArray(new String[0]);
-        }
-        ret.append("<select name=\"" + sign + "KeywordValue[" + index + "]\"");
-        ret.append("onChange=\"populateSubsets('" + sign + "'," + index + ")\">");
-        ret.append(option("", "", current));
-        for (String option : options)
-        {
-            ret.append(option(option, option, current));
-        }
-        ret.append("</select>");
-        return ret.toString();
+        Set<String> options = (valueSubsetMap == null ? Set.of() : valueSubsetMap.keySet());
+
+        return new SelectBuilder()
+            .name(sign + "KeywordValue[" + index + "]")
+            .addOption("", "")
+            .addOptions(options)
+            .selected(getKeywordValue(sign, index))
+            .onChange("populateSubsets('" + sign + "'," + index + ")")
+            .className(null);
     }
 
     private boolean subsetNameMatches(String subsetUser, String subsetWorkspace, Sign sign, String channel)
@@ -367,10 +363,10 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     {
         if (form.workspace == null)
             return new String[0];
-        List<String> ret = new ArrayList();
+        List<String> ret = new ArrayList<>();
         for (Analysis analysis : form.workspace.getGroupAnalyses().values())
         {
-            if (analysis.getPopulations().size() > 0)
+            if (!analysis.getPopulations().isEmpty())
             {
                 PopulationName name = analysis.getName();
                 if (name != null)
