@@ -451,8 +451,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     out.write("  }\n");
                     out.write("}\n");
                     out.write("var e = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0];\n");
-                    out.write("e.onchange=" + groupName + "Updated;\n");
-                    out.write("e.onkeyup=" + groupName + "Updated;\n");
+                    out.write("e['onchange']=" + groupName + "Updated;\n");
+                    out.write("e['onkeyup']=" + groupName + "Updated;\n");
                     out.write("\n");
                 }
             });

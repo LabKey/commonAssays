@@ -82,8 +82,10 @@
                     <tr>
                         <td>Scans:</td>
                         <td>
-                            <input type="text" onkeyup="updateRange('light');" name="lightFirstScan" value="<%= quant.getLightFirstScan() %>" size="4"/> -
-                            <input type="text" onkeyup="updateRange('light');" name="lightLastScan" value="<%= quant.getLightLastScan() %>" size="4"/>
+                            <input type="text" name="lightFirstScan" value="<%= quant.getLightFirstScan() %>" size="4"/> -
+                            <% addHandler("lightFirstScan", "keyup", "updateRange('light');"); %>
+                            <input type="text" name="lightLastScan" value="<%= quant.getLightLastScan() %>" size="4"/>
+                            <% addHandler("lightLastScan", "keyup", "updateRange('light');"); %>
                         </td>
                     </tr>
                     <tr>
@@ -136,8 +138,10 @@
                     <tr>
                         <td>Scans:</td>
                         <td>
-                            <input type="text" onkeyup="updateRange('heavy');" name="heavyFirstScan" value="<%= quant.getHeavyFirstScan() %>" size="4"/> -
-                            <input type="text" onkeyup="updateRange('heavy');" name="heavyLastScan" value="<%= quant.getHeavyLastScan() %>" size="4"/>
+                            <% addHandler("heavyFirstScan", "keyup", "updateRange('heavy');"); %>
+                            <input type="text" name="heavyFirstScan" id="heavyFirstScan" value="<%= quant.getHeavyFirstScan() %>" size="4"/> -
+                            <% addHandler("heavyLastScan", "keyup", "updateRange('heavy');"); %>
+                            <input type="text" name="heavyLastScan" id="heavyLastScan" value="<%= quant.getHeavyLastScan() %>" size="4"/>
                         </td>
                     </tr>
                     <tr>
