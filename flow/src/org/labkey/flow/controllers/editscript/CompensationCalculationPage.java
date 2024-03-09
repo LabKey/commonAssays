@@ -24,7 +24,6 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
@@ -244,7 +243,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             .name(sign + "KeywordName[" + index + "]")
             .addOption("", "")
             .addOptions(keywordValueSampleMap.keySet())
-            .onChange("populateKeywordValues(" + PageFlowUtil.jsString(sign.toString()) + ", " + index + ")")
+            .onChange("populateKeywordValues(" + q(sign.toString()) + ", " + index + ")")
             .selected(getKeywordName(sign, index))
             .className(null);
     }
@@ -259,7 +258,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             .addOption("", "")
             .addOptions(options)
             .selected(getKeywordValue(sign, index))
-            .onChange("populateSubsets(" + PageFlowUtil.jsString(sign.toString()) + ", " + index + ")")
+            .onChange("populateSubsets(" + q(sign.toString()) + ", " + index + ")")
             .className(null);
     }
 
