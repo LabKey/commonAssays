@@ -193,11 +193,11 @@ var keywordValueSubsetListMap = KV;
                 %>
                 <tr id="<%=h(parameter)%>" class="<%=getShadeRowClass(i)%>">
                     <td><%=h(parameter)%></td>
-                    <td><%=unsafe(selectKeywordNames(Sign.positive, i))%></td>
-                    <td><%=unsafe(selectKeywordValues(Sign.positive, i))%></td>
+                    <td><%=selectKeywordNames(Sign.positive, i)%></td>
+                    <td><%=selectKeywordValues(Sign.positive, i)%></td>
                     <td><%=unsafe(selectSubsets(Sign.positive, i))%></td>
-                    <td><%=unsafe(selectKeywordNames(Sign.negative, i))%></td>
-                    <td><%=unsafe(selectKeywordValues(Sign.negative, i))%></td>
+                    <td><%=selectKeywordNames(Sign.negative, i)%></td>
+                    <td><%=selectKeywordValues(Sign.negative, i)%></td>
                     <td>
                         <%=unsafe(selectSubsets(Sign.negative, i))%>
                         <% if (i == 0) {
