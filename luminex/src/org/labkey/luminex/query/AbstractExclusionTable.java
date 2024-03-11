@@ -18,6 +18,7 @@ package org.labkey.luminex.query;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ForeignKey;
@@ -173,7 +174,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         }
 
         @Override
-        protected Map<String, Object> updateRow(User user, Container container, Map<String, Object> row, @NotNull Map<String, Object> oldRow) throws InvalidKeyException, ValidationException, QueryUpdateServiceException, SQLException
+        protected Map<String, Object> updateRow(User user, Container container, Map<String, Object> row, @NotNull Map<String, Object> oldRow, @Nullable Map<Enum, Object> configParameters) throws InvalidKeyException, ValidationException, QueryUpdateServiceException, SQLException
         {
             checkPermissions(user, oldRow, UpdatePermission.class);
             checkPermissions(user, row, UpdatePermission.class);
@@ -187,7 +188,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
                 deleteAnalytes(oldRow);
             }
 
-            Map<String, Object> result = super.updateRow(user, container, row, oldRow);
+            Map<String, Object> result = super.updateRow(user, container, row, oldRow, configParameters);
 
             if (analytesSpecified)
             {
