@@ -19,7 +19,27 @@ package org.labkey.luminex.query;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.*;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.ExperimentUrls;
@@ -39,11 +59,10 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.query.ResultsQueryView;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.publish.StudyPublishService;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -577,81 +596,76 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         visibleColumns.add(Math.min(visibleColumns.size(), 3), curvesColumn.getFieldKey());
         result.setDefaultVisibleColumns(visibleColumns);
 
-        DisplayColumnFactory factory = new DisplayColumnFactory()
+        DisplayColumnFactory factory = colInfo -> new DataColumn(colInfo)
         {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
+            /** RowId -> Name */
+            private final Map<FieldKey, FieldKey> _pdfColumns = new HashMap<>();
+
             {
-                return new DataColumn(colInfo)
+                TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
+                // Check for data outputs that are PDFs
+                for (ColumnInfo columnInfo : outputTable.getColumns())
                 {
-                    /** RowId -> Name */
-                    private final Map<FieldKey, FieldKey> _pdfColumns = new HashMap<>();
-
+                    if (columnInfo.getName().toLowerCase().endsWith("pdf"))
                     {
-                        TableInfo outputTable = result.getColumn(ExpRunTable.Column.Output).getFk().getLookupTableInfo();
-                        // Check for data outputs that are PDFs
-                        for (ColumnInfo columnInfo : outputTable.getColumns())
-                        {
-                            if (columnInfo.getName().toLowerCase().endsWith("pdf"))
-                            {
-                                _pdfColumns.put(
-                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
-                                    FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
-                            }
-                        }
+                        _pdfColumns.put(
+                            FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.RowId.toString()),
+                            FieldKey.fromParts(ExpRunTable.Column.Output.toString(), columnInfo.getName(), ExpDataTable.Column.Name.toString()));
+                    }
+                }
+            }
+
+            @Override
+            public void addQueryFieldKeys(Set<FieldKey> keys)
+            {
+                keys.addAll(_pdfColumns.keySet());
+                keys.addAll(_pdfColumns.values());
+            }
+
+            @Override
+            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+            {
+                Map<Integer, String> pdfs = new HashMap<>();
+                for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
+                {
+                    Number rowId = (Number)ctx.get(entry.getKey());
+                    if (rowId != null)
+                    {
+                        pdfs.put(rowId.intValue(), (String)ctx.get(entry.getValue()));
+                    }
+                }
+
+                if (pdfs.size() == 1)
+                {
+                    for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                    {
+                        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                        url.addParameter("rowId", entry.getKey().toString());
+                        out.write("<a href=\"" + url + "\">");
+                        out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                        out.write("</a>");
+                    }
+                }
+                else if (pdfs.size() > 1)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (Map.Entry<Integer, String> entry : pdfs.entrySet())
+                    {
+                        ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
+                        url.addParameter("rowId", entry.getKey().toString());
+                        sb.append("<a href=\"");
+                        sb.append(url);
+                        sb.append("\">");
+                        sb.append(PageFlowUtil.filter(entry.getValue()));
+                        sb.append("</a><br/>");
                     }
 
-                    @Override
-                    public void addQueryFieldKeys(Set<FieldKey> keys)
-                    {
-                        keys.addAll(_pdfColumns.keySet());
-                        keys.addAll(_pdfColumns.values());
-                    }
-
-                    @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
-                    {
-                        Map<Integer, String> pdfs = new HashMap<>();
-                        for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
-                        {
-                            Number rowId = (Number)ctx.get(entry.getKey());
-                            if (rowId != null)
-                            {
-                                pdfs.put(rowId.intValue(), (String)ctx.get(entry.getValue()));
-                            }
-                        }
-
-                        if (pdfs.size() == 1)
-                        {
-                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
-                            {
-                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-                                url.addParameter("rowId", entry.getKey().toString());
-                                out.write("<a href=\"" + url + "\">");
-                                out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                                out.write("</a>");
-                            }
-                        }
-                        else if (pdfs.size() > 1)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            for (Map.Entry<Integer, String> entry : pdfs.entrySet())
-                            {
-                                ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
-                                url.addParameter("rowId", entry.getKey().toString());
-                                sb.append("<a href=\"");
-                                sb.append(url);
-                                sb.append("\">");
-                                sb.append(PageFlowUtil.filter(entry.getValue()));
-                                sb.append("</a><br/>");
-                            }
-
-                            out.write("<a onmouseover=\"return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");\">");
-                            out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                            out.write("</a>");
-                        }
-                    }
-                };
+                    HtmlString image = HtmlString.unsafe("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                    new LinkBuilder(image)
+                        .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
+                        .clearClasses()
+                        .appendTo(out);
+                }
             }
         };
         curvesColumn.setDisplayColumnFactory(factory);
