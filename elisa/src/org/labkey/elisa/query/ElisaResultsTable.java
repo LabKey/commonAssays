@@ -37,10 +37,6 @@ import org.labkey.elisa.ElisaDataHandler;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * User: klum
- * Date: 10/14/12
- */
 public class ElisaResultsTable extends AssayResultTable
 {
     public ElisaResultsTable(final AssayProtocolSchema schema, ContainerFilter cf, boolean includeLinkedToStudyColumns)
@@ -50,7 +46,6 @@ public class ElisaResultsTable extends AssayResultTable
         String sampleDomainURI = AbstractAssayProvider.getDomainURIForPrefix(schema.getProtocol(), AbstractPlateBasedAssayProvider.ASSAY_DOMAIN_SAMPLE_WELLGROUP);
         final ExpSampleType sampleType = SampleTypeService.get().getSampleType(sampleDomainURI);
         Set<FieldKey> visibleColumns = new LinkedHashSet<>();
-
 
         // add material lookup columns to the view first, so they appear at the left:
         if (sampleType != null)
@@ -75,11 +70,7 @@ public class ElisaResultsTable extends AssayResultTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                    if (sampleType != null)
-                    {
-                        materials.setSampleType(sampleType, true);
-                    }
+                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter(), sampleType);
                     var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                     if (propertyCol.getFk() instanceof PropertyForeignKey)
                     {

@@ -72,11 +72,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema, getLookupContainerFilter());
-                if (sampleType != null)
-                {
-                    materials.setSampleType(sampleType, true);
-                }
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema, getLookupContainerFilter(), sampleType);
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)
                 {

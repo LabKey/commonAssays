@@ -270,12 +270,7 @@ public class NabRunDataTable extends NabBaseTable
                         @Override
                         public TableInfo getLookupTableInfo()
                         {
-                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                            // Make sure we are filtering to the same set of containers
-                            if (sampleType != null)
-                            {
-                                materials.setSampleType(sampleType, true);
-                            }
+                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter(), sampleType);
                             var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                             if (propertyCol.getFk() instanceof PropertyForeignKey)
                             {
