@@ -26,8 +26,6 @@ import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.query.ExpMaterialTable;
-import org.labkey.api.exp.query.ExpRunTable;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
@@ -40,11 +38,6 @@ import org.labkey.api.study.assay.SpecimenPropertyColumnDecorator;
 import org.labkey.api.util.StringExpression;
 import org.labkey.nab.SinglePlateNabDataHandler;
 
-/**
- * User: davebradlee
- * Date: 2/20/13
- * Time: 6:36 PM
- */
 public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
 {
     protected final NabProtocolSchema _schema;
@@ -72,7 +65,7 @@ public abstract class NabBaseTable extends FilteredTable<AssayProtocolSchema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), _schema, getLookupContainerFilter(), sampleType);
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(_schema, getLookupContainerFilter(), sampleType);
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (propertyCol.getFk() instanceof PropertyForeignKey)
                 {

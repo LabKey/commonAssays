@@ -70,7 +70,7 @@ public class ElisaResultsTable extends AssayResultTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter(), sampleType);
+                    ExpMaterialTable materials = ExperimentService.get().createMaterialTable(schema, getLookupContainerFilter(), sampleType);
                     var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                     if (propertyCol.getFk() instanceof PropertyForeignKey)
                     {
