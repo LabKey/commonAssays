@@ -115,6 +115,8 @@ abstract public class FlowReport extends AbstractReport
     @Override
     public ActionURL getRunReportURL(ViewContext context)
     {
+        if (null == getReportId())
+            return null;
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.ExecuteAction.class, c);
         url.addParameter("reportId", getReportId().toString());
@@ -129,6 +131,8 @@ abstract public class FlowReport extends AbstractReport
     @Override
     public ActionURL getEditReportURL(ViewContext context)
     {
+        if (null == getReportId())
+            return null;
         Container c = ContainerManager.getForId(getDescriptor().getContainerId());
         ActionURL url = new ActionURL(ReportsController.UpdateAction.class, c);
         url.addParameter("reportId", getReportId().toString());
