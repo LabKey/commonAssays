@@ -38,7 +38,6 @@ import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
-import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.AliasedColumn;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -64,11 +63,6 @@ import java.util.Set;
 
 import static org.labkey.api.assay.dilution.DilutionDataHandler.FIT_PARAMETERS_PROPERTY_NAME;
 
-/**
- * User: brittp
- * Date: Jul 6, 2007
- * Time: 5:35:15 PM
- */
 public class NabRunDataTable extends NabBaseTable
 {
     protected final NAbSpecimenTable _nabSpecimenTable;
@@ -270,12 +264,7 @@ public class NabRunDataTable extends NabBaseTable
                         @Override
                         public TableInfo getLookupTableInfo()
                         {
-                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                            // Make sure we are filtering to the same set of containers
-                            if (sampleType != null)
-                            {
-                                materials.setSampleType(sampleType, true);
-                            }
+                            ExpMaterialTable materials = ExperimentService.get().createMaterialTable(schema, getLookupContainerFilter(), sampleType);
                             var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                             if (propertyCol.getFk() instanceof PropertyForeignKey)
                             {

@@ -98,11 +98,7 @@ public abstract class PlateBasedAssayRunDataTable extends FilteredTable<AssaySch
             @Override
             public TableInfo getLookupTableInfo()
             {
-                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(ExpSchema.TableType.Materials.toString(), schema, getLookupContainerFilter());
-                if (sampleType != null)
-                {
-                    materials.setSampleType(sampleType, true);
-                }
+                ExpMaterialTable materials = ExperimentService.get().createMaterialTable(schema, getLookupContainerFilter(), sampleType);
                 var propertyCol = materials.addColumn(ExpMaterialTable.Column.Property);
                 if (hasMaterialSpecimenPropertyColumnDecorator && propertyCol.getFk() instanceof PropertyForeignKey)
                 {
