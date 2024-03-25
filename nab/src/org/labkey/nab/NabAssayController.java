@@ -70,6 +70,8 @@ import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.cache.Cache;
+import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -137,6 +139,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -273,9 +276,11 @@ public class NabAssayController extends SpringActionController
         return d1.compareTo(d2) > 0 ? d1 : d2;
     }
 
+    static Cache<String,NAbRunWrapper> ASSAY_CACHE = CacheManager.getCache(10, TimeUnit.MINUTES.toMillis(5), "NabAssayCache");
+
     private DilutionAssayRun getCachedRun(ExpRun run)
     {
-        NAbRunWrapper cache = (NAbRunWrapper) getViewContext().getSession().getAttribute(LAST_NAB_RUN_KEY);
+        NAbRunWrapper cache = ASSAY_CACHE.get(getViewContext().getSession().getId());
         if (cache == null || cache.getRun() == null)
             return null;
         DilutionAssayRun assay = cache.getRun();
@@ -291,6 +296,18 @@ public class NabAssayController extends SpringActionController
         return null;
     }
 
+    private void putCachedRun(DilutionAssayRun assay)
+    {
+        if (PageFlowUtil.isRobotUserAgent(getViewContext().getRequest().getHeader("User-Agent")))
+            return;
+        ASSAY_CACHE.put(getViewContext().getSession().getId(), new NAbRunWrapper(assay, new Date()));
+    }
+
+    private void clearCachedRun()
+    {
+        ASSAY_CACHE.remove(getViewContext().getSession().getId());
+    }
+
     private DilutionAssayRun _getNabAssayRun(ExpRun run, StatsService.CurveFitType fit, User elevatedUser) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
@@ -304,7 +321,7 @@ public class NabAssayController extends SpringActionController
             {
                 assay = getDataHandler(run).getAssayResults(run, elevatedUser, fit);
                 if (assay != null && fit == null)
-                    getViewContext().getSession().setAttribute(LAST_NAB_RUN_KEY, new NAbRunWrapper(assay, new Date()));
+                    putCachedRun(assay);
             }
             catch (DilutionDataHandler.MissingDataFileException e)
             {
@@ -1165,7 +1182,7 @@ public class NabAssayController extends SpringActionController
                             }
                             transaction.commit();
                             // clear the nab run cache
-                            getViewContext().getSession().removeAttribute(LAST_NAB_RUN_KEY);
+                            clearCachedRun();
                             NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
                             response.put("success", true);
                         }
