@@ -20,6 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.elispot.ElispotDataHandler;
 
+import java.util.List;
+
 /**
  * Created by klum on 3/23/2015.
  */
@@ -53,9 +55,9 @@ public class FluorescentPlateInfo implements PlateInfo
      * @return
      */
     @Nullable
-    public static FluorescentPlateInfo create(String annotation)
+    public static FluorescentPlateInfo create(List<String> annotations)
     {
-        if (annotation != null)
+        for (String annotation : annotations)
         {
             String analyte = null;
             String measurement = null;

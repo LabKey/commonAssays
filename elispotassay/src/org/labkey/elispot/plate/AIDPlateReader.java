@@ -25,7 +25,7 @@ import org.labkey.api.reader.DataLoaderFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by klum on 12/14/14.
@@ -77,7 +77,7 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    public Map<String, double[][]> loadMultiGridFile(Plate template, File dataFile) throws ExperimentException
+    public List<PlateUtils.GridInfo> loadMultiGridFile(Plate template, File dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))

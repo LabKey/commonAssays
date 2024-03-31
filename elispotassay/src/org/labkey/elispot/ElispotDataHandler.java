@@ -19,6 +19,7 @@ package org.labkey.elispot;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.Logger;
+import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
@@ -243,13 +244,13 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             }
             else if (method == ElispotAssayProvider.DetectionMethodType.FLUORESCENT)
             {
-                for (Map.Entry<String, double[][]> entry : reader.loadMultiGridFile(template, dataFile).entrySet())
+                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, dataFile))
                 {
                     // attempt to parse the plate grid annotation into a PlateInfo object
-                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(entry.getKey());
+                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(grid.getAnnotations());
                     if (plateInfo != null)
                     {
-                        plateMap.put(plateInfo, PlateService.get().createPlate(template, entry.getValue(), null));
+                        plateMap.put(plateInfo, PlateService.get().createPlate(template, grid.getData(), null));
                     }
                 }
             }

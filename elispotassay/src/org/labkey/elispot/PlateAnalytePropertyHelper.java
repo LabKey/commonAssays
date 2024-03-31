@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -60,10 +61,10 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
             if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
                 reader = form.getProvider().getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                for (Map.Entry<String, double[][]> entry : reader.loadMultiGridFile(template, file).entrySet())
+                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, file))
                 {
                     // attempt to parse the plate grid annotation into a PlateInfo object
-                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(entry.getKey());
+                    FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(grid.getAnnotations());
                     if (plateInfo != null)
                     {
                         if (plateInfo.getMeasurement().equals(ElispotDataHandler.SFU_PROPERTY_NAME))
