@@ -302,7 +302,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
         }
 
         if (newVal && newVal.measurement){
-            this.applyStyleToClass(newVal.measurement, {display: ''});
+            this.applyStyleToClass(newVal.measurement, {display: '', cursor: 'pointer'});
         }
     },
 
@@ -350,10 +350,10 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
             '<tr><td><div class="plate-rowlabel"><br>{label}</div></td>' +
             '<tpl for="cols">',
             '<td><div class="plate-well-td-div {aCls} {sCls}" dataIndex="{dataIndex}">',
-            '<a class="labkey-cls-spotcount" style="display:" href="javascript:void(0);">{spotCount}</a>',
-            '<a class="labkey-cls-spotsize" style="display: none" href="javascript:void(0);">{spotSize}</a>',
-            '<a class="labkey-cls-activity" style="display: none" href="javascript:void(0);">{activity}</a>',
-            '<a class="labkey-cls-intensity" style="display: none" href="javascript:void(0);">{intensity}</a>',
+            '<a class="labkey-cls-spotcount" style="cursor: pointer">{spotCount}</a>',
+            '<a class="labkey-cls-spotsize" style="display: none">{spotSize}</a>',
+            '<a class="labkey-cls-activity" style="display: none">{activity}</a>',
+            '<a class="labkey-cls-intensity" style="display: none">{intensity}</a>',
             '</div>',
             '</td>',
             '</tpl>',
