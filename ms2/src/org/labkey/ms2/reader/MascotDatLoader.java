@@ -17,10 +17,10 @@ package org.labkey.ms2.reader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.MS2Modification;
@@ -864,7 +864,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
             return null;
         }
 
-        File f = new File(parent, name);
+        File f = FileUtil.appendName(parent, name);
         if (f.isFile())
         {
             return f;

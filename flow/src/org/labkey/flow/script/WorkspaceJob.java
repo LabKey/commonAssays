@@ -306,7 +306,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             }
             else if (runFilePathRoot != null)
             {
-                file = new File(runFilePathRoot, sample.getLabel());
+                file = FileUtil.appendName(runFilePathRoot, sample.getLabel());
                 uri = file.toURI();
             }
             // Don't set FCSFile uri unless the file actually exists on disk.

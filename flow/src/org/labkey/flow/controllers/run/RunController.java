@@ -639,7 +639,7 @@ public class RunController extends BaseFlowController
                 case PipelineFiles:
                 {
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-                    File exportDir = new File(root.resolvePath(PipelineService.EXPORT_DIR), name);
+                    File exportDir = FileUtil.appendName(root.resolvePath(PipelineService.EXPORT_DIR), name);
                     FileUtil.mkdirs(exportDir);
                     return new FileSystemFile(exportDir);
                 }

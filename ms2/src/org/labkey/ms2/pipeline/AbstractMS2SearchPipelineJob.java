@@ -134,13 +134,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         }
 
         // Check if there's an analysis-specific copy of the file
-        File analysisFile = new File(getAnalysisDirectory(), name);
+        File analysisFile = FileUtil.appendName(getAnalysisDirectory(), name);
         if (NetworkDrive.exists(analysisFile))
         {
             return analysisFile;
         }
         // If not, check if there's a shared copy of the file in the data directory
-        File dataFile = new File(getDataDirectory(), name);
+        File dataFile = FileUtil.appendName(getDataDirectory(), name);
         if (NetworkDrive.exists(dataFile))
         {
             return dataFile;
@@ -166,13 +166,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                     // mzXML should be in the same directory as the mzXML and RAW files.
                     if (fileType.isType(name))
                     {
-                        return new File(getDataDirectory(), name);
+                        return FileUtil.appendName(getDataDirectory(), name);
                     }
                 }
             }
         }
         
-        return new File(getAnalysisDirectory(), name);
+        return FileUtil.appendName(getAnalysisDirectory(), name);
     }
 
     /**
