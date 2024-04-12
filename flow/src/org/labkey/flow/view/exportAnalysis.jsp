@@ -63,6 +63,7 @@
 
 <% if (renderForm) { %>
     <form action='<%=h(exportURL)%>' method='POST'>
+        <labkey:csrf />
 <% } %>
 
 <table class="lk-fields-table">
