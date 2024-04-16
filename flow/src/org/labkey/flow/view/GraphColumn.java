@@ -26,8 +26,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
-import org.labkey.api.util.DOM;
-import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.DOM.Renderable;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -188,8 +187,8 @@ public class GraphColumn extends DataColumn
             else
             {
                 ActionURL urlGraph = urlGraph(objectId, graphSpec, ctx.getContainer());
-                HtmlString iconHtml = DOM.createHtmlFragment(IMG(at(width, 32).at(height, 32).at(title, graphSpec).at(src, urlGraph)));
-                HtmlString imageHtml = DOM.createHtmlFragment(IMG(at(src, urlGraph)));
+                Renderable iconHtml = IMG(at(width, 32).at(height, 32).at(title, graphSpec).at(src, urlGraph));
+                Renderable imageHtml = IMG(at(src, urlGraph));
                 PageFlowUtil.popupHelp(imageHtml, graphSpec).link(iconHtml).width(310).appendTo(out);
             }
         }
