@@ -40,7 +40,7 @@
         {
             var preferenceForm = document.forms['preferences'];
             var mascotForm = document.forms['mascottest'];
-            if (preferenceForm.mascotServer.value.length == 0)
+            if (preferenceForm.mascotServer.value.length === 0)
             {
                 alert("Please specify your Mascot server before testing.");
                 try {preferenceForm.mascotServer.focus();} catch(x){}
@@ -55,6 +55,10 @@
             mascotForm.submit();
         };
     })();
+
+    LABKEY.Utils.onReady(function(){
+        document.getElementById('testMascot')['onclick'] = testMascot;
+    });
 </script>
 
 <labkey:form name="preferences" enctype="multipart/form-data" method="post">
@@ -90,7 +94,7 @@
         </tr>
         <tr>
             <td></td>
-            <td><%=link("Test Mascot settings").href("javascript:testMascot()")%>
+            <td><%=link("Test Mascot settings").id("testMascot")%>
             </td>
         </tr>
 

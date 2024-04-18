@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -30,7 +30,7 @@
 %>
 <%
     String graphSize = FlowPreference.graphSize.getValue(request);
-    Map<String, String> sizes = new LinkedHashMap();
+    Map<String, String> sizes = new LinkedHashMap<>();
     sizes.put("300", "Large Graphs");
     sizes.put("200", "Medium Graphs");
     sizes.put("150", "Small Graphs");
@@ -142,7 +142,7 @@
 <%
 for (Map.Entry<String, String> entry : sizes.entrySet()) { %>
     <div class="labkey-graph-size">
-        <%=link(h(entry.getValue())).addClass(entry.getKey().equals(graphSize) ? "labkey-selected-link" : "").onClick("setGraphSize(" + h(entry.getKey()) + ")")%>
+        <%=link(entry.getValue()).addClass(entry.getKey().equals(graphSize) ? "labkey-selected-link" : "").onClick("setGraphSize(" + entry.getKey() + ")")%>
     </div>
 <% } %>
 <img id="updateGraphSize" height="1" width="1" src="<%=getWebappURL("_.gif")%>">
