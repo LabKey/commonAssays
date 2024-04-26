@@ -139,7 +139,7 @@ public class LuminexImportWizard extends LabKeyPage<LuminexImportWizard.Elements
         clickButton("Save and Finish", longWaitForPage);
     }
 
-    public class Elements extends LabKeyPage.ElementCache
+    public class Elements extends LabKeyPage<?>.ElementCache
     {
         //Page 1 WebParts
         final BatchPropertiesWebPart batchproperties = BatchPropertiesWebPart(getDriver()).findWhenNeeded();
@@ -152,7 +152,4 @@ public class LuminexImportWizard extends LabKeyPage<LuminexImportWizard.Elements
         final AnalytePropertiesWebPart analyteProperties = AnalytePropertiesWebPart(getDriver()).findWhenNeeded();
     }
 
-    public static class Locators extends org.labkey.test.Locators
-    {
-    }
 }

@@ -20,11 +20,10 @@ import org.labkey.test.components.WebPartPanel;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-public class BatchPropertiesWebPart extends WebPartPanel
+public class BatchPropertiesWebPart extends WebPartPanel<BatchPropertiesWebPart.Elements>
 {
     private static final String TITLE = "Batch Properties";
 
-    private Elements _elements;
     protected BatchPropertiesWebPart(WebElement componentElement, WebDriver driver)
     {
         super(componentElement, driver);
@@ -37,7 +36,7 @@ public class BatchPropertiesWebPart extends WebPartPanel
 
     public void checkSampleInfo()
     {
-        elements().sampleInfoRadioButton.click();
+        elementCache().sampleInfoRadioButton.click();
     }
 
     public static class BatchPropertiesWebPartFinder extends WebPartFinder<BatchPropertiesWebPart, BatchPropertiesWebPartFinder>
@@ -54,20 +53,19 @@ public class BatchPropertiesWebPart extends WebPartPanel
         }
     }
 
-    public Elements elements()
+    @Override
+    protected Elements newElementCache()
     {
-        if (_elements == null)
-            _elements = new Elements();
-        return _elements;
+        return new Elements();
     }
 
-    public class Elements extends WebPartPanel.ElementCache
+    public class Elements extends WebPartPanel<?>.ElementCache
     {
         protected final WebElement sampleInfoRadioButton = Locators.sampleInfoRadio.findWhenNeeded(this);
 
     }
 
-    public static class Locators extends org.labkey.test.Locators
+    public static class Locators
     {
         protected static final Locator sampleInfoRadio = Locator.radioButtonByNameAndValue("participantVisitResolver", "SampleInfo");
     }

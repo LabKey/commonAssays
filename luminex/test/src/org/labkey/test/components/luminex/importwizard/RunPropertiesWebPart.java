@@ -27,7 +27,6 @@ public class RunPropertiesWebPart extends WebPartPanel
     private static final String TITLE = "Run Properties";
     public static final String ASSAY_ID_FIELD  = "name";
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
-    private Elements _elements;
 
     protected RunPropertiesWebPart(WebElement componentElement, WebDriver driver)
     {
@@ -85,19 +84,7 @@ public class RunPropertiesWebPart extends WebPartPanel
         }
     }
 
-    public Elements elements()
-    {
-        if (_elements == null)
-            _elements = new Elements();
-        return _elements;
-    }
-
-    public class Elements extends WebPartPanel.ElementCache
-    {
-
-    }
-
-    public static class Locators extends org.labkey.test.Locators
+    public static class Locators
     {
         protected static final Locator plusButton = Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]");
         protected static Locator minusButton(String fileName)

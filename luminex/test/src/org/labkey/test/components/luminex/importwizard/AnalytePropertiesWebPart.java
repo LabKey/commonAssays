@@ -23,7 +23,6 @@ public class AnalytePropertiesWebPart extends WebPartPanel
 {
     private static final String TITLE = "Analyte Properties";
 
-    private Elements _elements;
     protected AnalytePropertiesWebPart(WebElement componentElement, WebDriver driver)
     {
         super(componentElement, driver);
@@ -48,19 +47,4 @@ public class AnalytePropertiesWebPart extends WebPartPanel
         }
     }
 
-    public Elements elements()
-    {
-        if (_elements == null)
-            _elements = new Elements();
-        return _elements;
-    }
-
-    public class Elements extends WebPartPanel.ElementCache
-    {
-
-    }
-
-    public static class Locators extends org.labkey.test.Locators
-    {
-    }
 }
