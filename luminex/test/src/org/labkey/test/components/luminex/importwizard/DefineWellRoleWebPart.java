@@ -86,9 +86,9 @@ public class DefineWellRoleWebPart extends WebPartPanel
 
     }
 
-    public static class Locators extends org.labkey.test.Locators
+    public static class Locators
     {
-        protected static final Locator titrationRole(String controlType, String name)
+        protected static Locator titrationRole(String controlType, String name)
         {
             return Locator.tagWithName("input", "_titrationRole_" + controlType + "_" + name);
         }

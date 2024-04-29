@@ -16,12 +16,9 @@
 package org.labkey.test.components.luminex.dialogs;
 
 import org.labkey.test.Locator;
-import org.labkey.test.pages.LabKeyPage;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.ExtHelper;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 /**
  * Created by iansigmon on 12/29/16.
@@ -31,7 +28,6 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
     protected static final String MENU_BUTTON_ITEM = "Exclude Singlepoint Unknowns";
     private static final String TITLE = "Exclude Singlepoint Unknowns from Analysis";
 
-    Elements _elements;
     protected SinglepointExclusionDialog(WebDriver driver)
     {
         super(driver);
@@ -85,18 +81,4 @@ public class SinglepointExclusionDialog extends BaseExclusionDialog
         sleep(500);
     }
 
-    protected Elements elements()
-    {
-        if (_elements == null)
-            _elements = new Elements();
-        return _elements;
-    }
-
-    public class Elements extends LabKeyPage.ElementCache
-    {
-    }
-
-    public static class Locators extends org.labkey.test.Locators
-    {
-    }
 }
