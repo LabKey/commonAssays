@@ -40,10 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: Karl Lum
- * Date: Jan 14, 2008
- */
 public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
 {
     public static final String BLANK_PLATE = "blank";
@@ -54,7 +50,7 @@ public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
     public static final String MEDIAN_STAT = "median";
 
     @Override
-    public String getAssayType()
+    public @NotNull String getAssayType()
     {
         return "ELISpot";
     }
@@ -76,21 +72,21 @@ public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public Plate createTemplate(@Nullable String templateTypeName, Container container, @NotNull PlateType plateType)
+    public Plate createPlate(@Nullable String plateName, Container container, @NotNull PlateType plateType)
     {
         validatePlateType(plateType);
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
+        Plate plate = PlateService.get().createPlate(container, getAssayType(), plateType);
 
         // for the default elispot plate, we pre-populate it with specimen and antigen groups
-        if (templateTypeName != null && templateTypeName.equals(DEFAULT_PLATE))
+        if (plateName != null && plateName.equals(DEFAULT_PLATE))
         {
             for (int sample = 0; sample < 4; sample++)
             {
                 int row = sample * 2;
                 // create the overall specimen group, consisting of two adjacent rows:
-                template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
+                plate.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(container, row, 0),
-                        PlateService.get().createPosition(container, row+1, template.getColumns() - 1));
+                        PlateService.get().createPosition(container, row+1, plate.getColumns() - 1));
             }
 
             // populate the antigen groups
@@ -104,19 +100,19 @@ public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
                     int row = sample * 2;
                     int col = antigen * 3;
 
-                    position1.add(template.getPosition(row, col));
-                    position1.add(template.getPosition(row, col + 1));
-                    position1.add(template.getPosition(row, col + 2));
+                    position1.add(plate.getPosition(row, col));
+                    position1.add(plate.getPosition(row, col + 1));
+                    position1.add(plate.getPosition(row, col + 2));
 
-                    position2.add(template.getPosition(row + 1, col));
-                    position2.add(template.getPosition(row + 1, col + 1));
-                    position2.add(template.getPosition(row + 1, col + 2));
+                    position2.add(plate.getPosition(row + 1, col));
+                    position2.add(plate.getPosition(row + 1, col + 1));
+                    position2.add(plate.getPosition(row + 1, col + 2));
                 }
-                template.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
-                template.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
+                plate.addWellGroup("Antigen " + (antigen*2 + 1), WellGroup.Type.ANTIGEN, position1);
+                plate.addWellGroup("Antigen " + (antigen*2 + 2), WellGroup.Type.ANTIGEN, position2);
             }
         }
-        return template;
+        return plate;
     }
 
     @Override
@@ -126,11 +122,11 @@ public class ElispotPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public void validateTemplate(Container container, User user, Plate template) throws ValidationException
+    public void validatePlate(Container container, User user, Plate plate) throws ValidationException
     {
         boolean hasBackgroundWell = false;
 
-        for (WellGroup group : template.getWellGroups())
+        for (WellGroup group : plate.getWellGroups())
         {
             if (group.getType() == WellGroup.Type.CONTROL)
             {

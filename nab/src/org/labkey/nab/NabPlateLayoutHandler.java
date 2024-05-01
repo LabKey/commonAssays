@@ -33,11 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/**
- * User: jeckels
- * Date: Apr 23, 2007
- */
 public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
 {
     public static final String SINGLE_PLATE_TYPE = "single-plate";
@@ -49,7 +44,7 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
     public static final String SCREENING_240SAMPLE_1VIRUS_PLATE_TYPE = "screening : 240 samples, 1 virus plate";
 
     @Override
-    public String getAssayType()
+    public @NotNull String getAssayType()
     {
         return "NAb";
     }
@@ -85,72 +80,71 @@ public class NabPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public Plate createTemplate(@Nullable String templateTypeName, Container container, @NotNull PlateType plateType)
+    public Plate createPlate(@Nullable String plateName, Container container, @NotNull PlateType plateType)
     {
         validatePlateType(plateType);
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
+        Plate plate = PlateService.get().createPlate(container, getAssayType(), plateType);
 
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE))
-            return createHighThroughputSingleDilutionTemplate(template, container, plateType);
+        if (plateName != null && plateName.equalsIgnoreCase(HIGH_THROUGHPUT_SINGLEDILUTION_PLATE_TYPE))
+            return createHighThroughputSingleDilutionTemplate(plate, container, plateType);
 
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(MULTI_VIRUS_384WELL_PLATE_TYPE))
-            return createMultiVirusTemplate(template, container, plateType);
+        if (plateName != null && plateName.equalsIgnoreCase(MULTI_VIRUS_384WELL_PLATE_TYPE))
+            return createMultiVirusTemplate(plate, container, plateType);
 
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SCREENING_20SAMPLE_4VIRUS_PLATE_TYPE))
-            return create20Sample4VirusScreeningTemplate(template, container, plateType);
+        if (plateName != null && plateName.equalsIgnoreCase(SCREENING_20SAMPLE_4VIRUS_PLATE_TYPE))
+            return create20Sample4VirusScreeningTemplate(plate, container, plateType);
 
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SCREENING_240SAMPLE_1VIRUS_PLATE_TYPE))
-            return create240Sample1VirusScreeningTemplate(template, container, plateType);
+        if (plateName != null && plateName.equalsIgnoreCase(SCREENING_240SAMPLE_1VIRUS_PLATE_TYPE))
+            return create240Sample1VirusScreeningTemplate(plate, container, plateType);
 
-        template.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+        plate.addWellGroup(NabManager.CELL_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
-                PlateService.get().createPosition(container, template.getRows() - 1, 0));
-        template.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+                PlateService.get().createPosition(container, plate.getRows() - 1, 0));
+        plate.addWellGroup(NabManager.VIRUS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 1),
-                PlateService.get().createPosition(container, template.getRows() - 1, 1));
+                PlateService.get().createPosition(container, plate.getRows() - 1, 1));
         
-        if (templateTypeName != null && templateTypeName.equalsIgnoreCase(SINGLE_PLATE_TYPE))
+        if (plateName != null && plateName.equalsIgnoreCase(SINGLE_PLATE_TYPE))
         {
-            for (int sample = 0; sample < (template.getColumns() - 2)/2; sample++)
+            for (int sample = 0; sample < (plate.getColumns() - 2)/2; sample++)
             {
                 int firstCol = (sample * 2) + 2;
                 // create the overall specimen group, consisting of two adjacent columns:
-                WellGroup sampleGroup = template.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
+                WellGroup sampleGroup = plate.addWellGroup("Specimen " + (sample + 1), WellGroup.Type.SPECIMEN,
                         PlateService.get().createPosition(container, 0, firstCol),
-                        PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
-//                sampleGroup.setProperty(prop.name(), "");
+                        PlateService.get().createPosition(container, plate.getRows() - 1, firstCol + 1));
                 for (SampleProperty prop : SampleProperty.values())
                 {
                     if (prop.isTemplateProperty())
                         sampleGroup.setProperty(prop.name(), "");
                 }
 
-                for (int replicate = 0; replicate < template.getRows(); replicate++)
+                for (int replicate = 0; replicate < plate.getRows(); replicate++)
                 {   
-                    template.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
+                    plate.addWellGroup("Specimen " + (sample + 1) + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
                             PlateService.get().createPosition(container, replicate, firstCol),
                             PlateService.get().createPosition(container, replicate, firstCol + 1));
                 }
             }
         }
-        else if (templateTypeName != null && templateTypeName.equalsIgnoreCase(HIGH_THROUGHPUT_PLATE_TYPE))
+        else if (plateName != null && plateName.equalsIgnoreCase(HIGH_THROUGHPUT_PLATE_TYPE))
         {
             int sample = 1;
-            for (int col = 2; col < (template.getColumns() - 1); col += 2)
+            for (int col = 2; col < (plate.getColumns() - 1); col += 2)
             {
-                for (int row = 0; row < template.getRows(); row++)
+                for (int row = 0; row < plate.getRows(); row++)
                 {
                     int currentSampleIndex = sample++;
-                    template.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.SPECIMEN,
+                    plate.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.SPECIMEN,
                             PlateService.get().createPosition(container, row, col),
                             PlateService.get().createPosition(container, row, col+1));
-                    template.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.REPLICATE,
+                    plate.addWellGroup("Specimen " + currentSampleIndex, WellGroup.Type.REPLICATE,
                         PlateService.get().createPosition(container, row, col),
                         PlateService.get().createPosition(container, row, col+1));
                 }
             }
         }
-        return template;
+        return plate;
     }
 
     private Plate createHighThroughputSingleDilutionTemplate(Plate template, Container c, PlateType plateType)
