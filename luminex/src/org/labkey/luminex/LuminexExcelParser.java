@@ -36,6 +36,7 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.reader.ExcelFactory;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
@@ -846,7 +847,7 @@ public class LuminexExcelParser
             assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
 
             Domain dummyDomain = PropertyService.get().createDomain(ContainerManager.getRoot(), "fakeURI", "dummyDomain");
-            return new LuminexExcelParser(dummyDomain, Arrays.asList(new File(luminexDir, fileName)));
+            return new LuminexExcelParser(dummyDomain, Arrays.asList(FileUtil.appendName(luminexDir, fileName)));
         }
     }
 }
