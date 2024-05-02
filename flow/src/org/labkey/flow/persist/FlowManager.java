@@ -1453,8 +1453,8 @@ public class FlowManager
                         SELECT
                           COUNT(*) AS Count,
                           SUM(CASE WHEN a.id != a.rowid THEN 1 ELSE 0 END) AS AliasCount,
-                          COUNT(DISTINCT(a.name)) AS DistinctCount,
-                          COUNT(DISTINCT(LOWER(a.name))) AS DistinctLowerCount
+                          COUNT(DISTINCT a.name) AS DistinctCount,
+                          COUNT(DISTINCT LOWER(a.name)) AS DistinctLowerCount
                         FROM
                         """
         ).append(table, "a")).getMap());

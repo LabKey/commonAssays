@@ -60,7 +60,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         if (runs != null)
         {
             SQLFragment seqIdCondition = new SQLFragment();
-            seqIdCondition.append("SeqId IN (SELECT DISTINCT(SeqId) FROM ");
+            seqIdCondition.append("SeqId IN (SELECT DISTINCT SeqId FROM ");
             seqIdCondition.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
             seqIdCondition.append(", ");
             seqIdCondition.append(MS2Manager.getTableInfoProteinGroups(), "pg");
