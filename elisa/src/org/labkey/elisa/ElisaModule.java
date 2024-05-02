@@ -34,8 +34,6 @@ import java.util.Set;
 
 public class ElisaModule extends DefaultModule
 {
-    public static final String EXPERIMENTAL_MULTI_PLATE_SUPPORT = "elisaMultiPlateSupport";
-
     @Override
     public String getName()
     {

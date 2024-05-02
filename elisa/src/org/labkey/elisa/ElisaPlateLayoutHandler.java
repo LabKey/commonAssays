@@ -29,10 +29,6 @@ import org.labkey.api.util.Pair;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * User: klum
- * Date: 10/7/12
- */
 public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
 {
     public static final String DEFAULT_PLATE = "default";
@@ -41,7 +37,7 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
     public static final String STANDARDS_CONTROL_SAMPLE = "Standards";
 
     @Override
-    public String getAssayType()
+    public @NotNull String getAssayType()
     {
         return ElisaAssayProvider.NAME;
     }
@@ -57,47 +53,47 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
     }
 
     @Override
-    public Plate createTemplate(@Nullable String templateTypeName, Container container, @NotNull PlateType plateType)
+    public Plate createPlate(@Nullable String plateName, Container container, @NotNull PlateType plateType)
     {
         validatePlateType(plateType);
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
+        Plate plate = PlateService.get().createPlate(container, getAssayType(), plateType);
 
-        template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+        plate.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
-                PlateService.get().createPosition(container, template.getRows() - 3, 1));
+                PlateService.get().createPosition(container, plate.getRows() - 3, 1));
 
-        if (DEFAULT_PLATE.equals(templateTypeName))
+        if (DEFAULT_PLATE.equals(plateName))
         {
-            for (int sample = 0; sample < (template.getColumns())/2; sample++)
+            for (int sample = 0; sample < (plate.getColumns())/2; sample++)
             {
                 int firstCol = (sample * 2);
 
                 if (firstCol > 0)
                 {
                     // create the overall specimen group, consisting of two adjacent columns:
-                    template.addWellGroup("Specimen " + sample, WellGroup.Type.SPECIMEN,
+                    plate.addWellGroup("Specimen " + sample, WellGroup.Type.SPECIMEN,
                             PlateService.get().createPosition(container, 0, firstCol),
-                            PlateService.get().createPosition(container, template.getRows() - 1, firstCol + 1));
+                            PlateService.get().createPosition(container, plate.getRows() - 1, firstCol + 1));
                 }
 
-                for (int replicate = 0; replicate < template.getRows(); replicate++)
+                for (int replicate = 0; replicate < plate.getRows(); replicate++)
                 {
                     String specimenName = firstCol == 0 ? "Standard" : ("Specimen " + sample + 1);
 
-                    template.addWellGroup(specimenName + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
+                    plate.addWellGroup(specimenName + ", Replicate " + (replicate + 1), WellGroup.Type.REPLICATE,
                             PlateService.get().createPosition(container, replicate, firstCol),
                             PlateService.get().createPosition(container, replicate, firstCol + 1));
                 }
             }
         }
-        else if (UNDILUTED_PLATE.equals(templateTypeName))
+        else if (UNDILUTED_PLATE.equals(plateName))
         {
             int specimen = 1;
-            for (int column = 0; column < (template.getColumns())/2; column++)
+            for (int column = 0; column < (plate.getColumns())/2; column++)
             {
                 int firstCol = (column * 2);
 
-                for (int row = 0; row < template.getRows(); row++)
+                for (int row = 0; row < plate.getRows(); row++)
                 {
                     // column group 1 through rows 6 are the control well groups
                     String wellName;
@@ -106,38 +102,38 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
                         wellName = "Standard, Replicate " + (row + 1);
                     else
                     {
-                        template.addWellGroup("Specimen " + specimen, WellGroup.Type.SPECIMEN,
+                        plate.addWellGroup("Specimen " + specimen, WellGroup.Type.SPECIMEN,
                                 PlateService.get().createPosition(container, row, firstCol),
                                 PlateService.get().createPosition(container, row, firstCol + 1));
 
                         wellName = "Specimen " + (specimen++) + ", Replicate 1";
                     }
-                    template.addWellGroup(wellName, WellGroup.Type.REPLICATE,
+                    plate.addWellGroup(wellName, WellGroup.Type.REPLICATE,
                             PlateService.get().createPosition(container, row, firstCol),
                             PlateService.get().createPosition(container, row, firstCol + 1));
                 }
             }
         }
-        else if (HIGH_THROUGHPUT_PLATE.equals(templateTypeName))
+        else if (HIGH_THROUGHPUT_PLATE.equals(plateName))
         {
-            template = createHighThroughputPlate(container, plateType);
+            plate = createHighThroughputPlate(container, plateType);
         }
-        return template;
+        return plate;
     }
 
     private Plate createHighThroughputPlate(Container container, PlateType plateType)
     {
-        Plate template = PlateService.get().createPlateTemplate(container, getAssayType(), plateType);
+        Plate plate = PlateService.get().createPlate(container, getAssayType(), plateType);
 
         // control well groups
-        template.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
+        plate.addWellGroup(STANDARDS_CONTROL_SAMPLE, WellGroup.Type.CONTROL,
                 PlateService.get().createPosition(container, 0, 0),
                 PlateService.get().createPosition(container, 7, 2));
 
         for (int row = 8; row < plateType.getRows(); row++)
         {
             String wellGroupName = "Control " + (row-7);
-            template.addWellGroup(wellGroupName, WellGroup.Type.CONTROL,
+            plate.addWellGroup(wellGroupName, WellGroup.Type.CONTROL,
                     PlateService.get().createPosition(container, row, 0),
                     PlateService.get().createPosition(container, row, 2));
         }
@@ -149,7 +145,7 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
                     ? "Standard, Replicate " + (row + 1)
                     : "Control, Replicate " + (row - 7);
 
-            template.addWellGroup(wellGroupName, WellGroup.Type.REPLICATE,
+            plate.addWellGroup(wellGroupName, WellGroup.Type.REPLICATE,
                     PlateService.get().createPosition(container, row, 0),
                     PlateService.get().createPosition(container, row, 2));
         }
@@ -158,7 +154,7 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
         for (int col = 3; col < plateType.getColumns(); col++)
         {
             String wellGroupName = "Sample " + (col-2);
-            template.addWellGroup(wellGroupName, WellGroup.Type.SPECIMEN,
+            plate.addWellGroup(wellGroupName, WellGroup.Type.SPECIMEN,
                     PlateService.get().createPosition(container, 0, col),
                     PlateService.get().createPosition(container, plateType.getRows() - 1, col));
 
@@ -166,14 +162,14 @@ public class ElisaPlateLayoutHandler extends AbstractPlateLayoutHandler
             for (int row = 0; row < plateType.getRows(); row += 2)
             {
                 String replicateGroupName = wellGroupName + ", Replicate " + ((row/2) + 1);
-                template.addWellGroup(replicateGroupName, WellGroup.Type.REPLICATE,
+                plate.addWellGroup(replicateGroupName, WellGroup.Type.REPLICATE,
                         PlateService.get().createPosition(container, row, col),
                         PlateService.get().createPosition(container, row+1, col));
             }
         }
 
         // replicate well groups
-        return template;
+        return plate;
     }
 
     @Override

@@ -24,10 +24,6 @@ import org.labkey.api.assay.plate.PlateService;
 
 import java.util.List;
 
-/**
- * User: brittp
- * Date: Sep 2, 2010 11:10:01 AM
- */
 public class AbstractNabManager extends DilutionManager
 {
     public static final String DEFAULT_TEMPLATE_NAME = "NAb: 5 specimens in duplicate";
@@ -35,22 +31,20 @@ public class AbstractNabManager extends DilutionManager
     public synchronized Plate ensurePlateTemplate(Container container, User user) throws Exception
     {
         NabPlateLayoutHandler nabHandler = new NabPlateLayoutHandler();
-        Plate template;
-        List<Plate> templates = PlateService.get().getPlateTemplates(container);
-        if (templates.isEmpty())
+        Plate plate;
+        List<Plate> plates = PlateService.get().getPlates(container);
+        if (plates.isEmpty())
         {
             PlateType plateType = PlateService.get().getPlateType(8, 12);
-            if (plateType != null)
-            {
-                template = nabHandler.createTemplate(NabPlateLayoutHandler.SINGLE_PLATE_TYPE, container, plateType);
-                template.setName(DEFAULT_TEMPLATE_NAME);
-                PlateService.get().save(container, user, template);
-            }
-            else
+            if (plateType == null)
                 throw new IllegalStateException("The plate type : 96 wells (8 x 12) does not exist");
+
+            plate = nabHandler.createPlate(NabPlateLayoutHandler.SINGLE_PLATE_TYPE, container, plateType);
+            plate.setName(DEFAULT_TEMPLATE_NAME);
+            PlateService.get().save(container, user, plate);
         }
         else
-            template = templates.get(0);
-        return template;
+            plate = plates.get(0);
+        return plate;
     }
 }

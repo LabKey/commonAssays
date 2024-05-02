@@ -60,7 +60,6 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.api.study.assay.ThawListResolverType;
-import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.UnexpectedException;
@@ -81,16 +80,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: brittp
- * Date: Sep 21, 2007
- * Time: 2:33:52 PM
- */
 public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUploadForm>
 {
     public static final String RESOURCE_NAME = "NAb";
     public static final String NAME = "TZM-bl Neutralization (NAb)";
-
     public static final String CUSTOM_DETAILS_VIEW_NAME = "CustomDetailsView";
     private static final String NAB_RUN_LSID_PREFIX = "NabAssayRun";
     private static final String NAB_ASSAY_PROTOCOL = "NabAssayProtocol";
@@ -153,12 +146,6 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
             {
                 // defer permission checking until user attempts to view the details page
                 return true;
-
-//                ExpRun run = getObject(lsid);
-//                if (run == null)
-//                    return false;
-//                Container c = run.getContainer();
-//                return c.hasPermission(user, perm, RunDatasetContextualRoles.getContextualRolesForRun(c, user, run));
             }
         });
     }
@@ -404,8 +391,6 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     {
         ActionURL url = new ActionURL(NabAssayController.QCDataAction.class, context.getContainer());
         url.addParameters(context.getActionURL().getParameters());
-        //url.addParameter("rowId", run.getRowId());
-
         return url;
     }
 
@@ -468,6 +453,5 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         updateCounts.put("wellData", updateCounts.getOrDefault("wellData", 0) + updateWellDataCount);
         updateCounts.put("dilutionData", updateCounts.getOrDefault("dilutionData", 0) + updateDilutionDataCount);
         updateCounts.put("specimen", updateCounts.getOrDefault("specimen", 0) + updateSpecimenCount);
-
     }
 }
