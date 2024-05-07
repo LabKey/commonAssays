@@ -42,6 +42,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
 import org.labkey.api.usageMetrics.SimpleMetricsService;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
@@ -944,7 +945,7 @@ public class AnalysisScriptController extends BaseFlowController
                     File keywordDir = null;
                     for (ISampleInfo sampleInfo : samples)
                     {
-                        File sampleFile = new File(workspaceFile.getParent(), sampleInfo.getLabel());
+                        File sampleFile = FileUtil.appendName(new File(workspaceFile.getParent()),sampleInfo.getLabel());
                         if (sampleFile.exists())
                         {
                             keywordDir = workspaceFile.getParentFile();

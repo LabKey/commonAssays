@@ -16,7 +16,6 @@
 package org.labkey.flow.script;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
@@ -156,7 +155,7 @@ public abstract class FlowExperimentJob extends FlowJob
     public File createAnalysisDirectory(String dirName, FlowProtocolStep step) throws Exception
     {
         File dirFolder = getWorkingFolder(getContainer());
-        File dirRun = new File(dirFolder, dirName);
+        File dirRun = FileUtil.appendName(dirFolder, dirName);
         if (!dirRun.exists())
         {
             if (!FileUtil.mkdirs(dirRun))
@@ -197,12 +196,12 @@ public abstract class FlowExperimentJob extends FlowJob
 
     synchronized public File decideFileName(File directory, String name, String extension)
     {
-        File fileTry = new File(directory, name + "." + extension);
+        File fileTry = FileUtil.appendName(directory, name + "." + extension);
         if (!fileTry.exists())
             return fileTry;
         for (int i = 1; ; i++)
         {
-            fileTry = new File(directory, name + i + "." + extension);
+            fileTry = FileUtil.appendName(directory, name + i + "." + extension);
             if (!fileTry.exists())
                 return fileTry;
         }

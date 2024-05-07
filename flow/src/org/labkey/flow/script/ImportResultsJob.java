@@ -33,6 +33,7 @@ import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
@@ -180,7 +181,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             }
             else if (getRunFilePathRoot() != null)
             {
-                file = new File(getRunFilePathRoot(), sampleLabel);
+                file = FileUtil.appendName(getRunFilePathRoot(), sampleLabel);
                 uri = file.toURI();
             }
 

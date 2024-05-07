@@ -118,7 +118,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     @Override
     public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
     {
-        File dbFile = new File(sequenceRoot, db);
+        File dbFile = FileUtil.appendName(sequenceRoot, db);
         return NetworkDrive.exists(dbFile);
     }
 
