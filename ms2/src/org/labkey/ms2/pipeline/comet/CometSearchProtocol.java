@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
@@ -61,7 +62,7 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
         if(dbNames == null || dbNames.length == 0)
             throw new IllegalArgumentException("A sequence database must be selected.");
 
-        File fileSequenceDB = new File(getDirSeqRoot(), dbNames[0]);
+        File fileSequenceDB = FileUtil.appendName(getDirSeqRoot(), dbNames[0]);
         if (!fileSequenceDB.exists())
             throw new IllegalArgumentException("Sequence database '" + dbNames[0] + "' is not found in local FASTA root.");
 
