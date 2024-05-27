@@ -318,9 +318,9 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
     @Override
     @NotNull
-    public Set<String> getSchemaNames()
+    public List<String> getSchemaNames()
     {
-        return PageFlowUtil.set(MS2Schema.SCHEMA_NAME, ProteinManager.getSchemaName());
+        return List.of(ProteinManager.getSchemaName(), MS2Schema.SCHEMA_NAME);
     }
 
     @Override
