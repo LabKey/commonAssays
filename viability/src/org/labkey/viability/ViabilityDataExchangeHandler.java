@@ -20,6 +20,7 @@ import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.qc.TsvDataSerializer;
 import org.labkey.api.assay.AssayProvider;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -47,20 +49,20 @@ public class ViabilityDataExchangeHandler extends TsvDataExchangeHandler
     private static class ViabilityDataSerializer extends TsvDataSerializer
     {
         @Override
-        public List<Map<String, Object>> importRunData(ExpProtocol protocol, File runData) throws Exception
+        public Supplier<ValidatingDataRowIterator> importRunData(ExpProtocol protocol, File runData) throws Exception
         {
             AssayProvider provider = AssayService.get().getProvider(protocol);
             ExpData data = ExperimentService.get().createData(protocol.getContainer(), ViabilityTsvDataHandler.DATA_TYPE);
             ExperimentDataHandler handler = data.findDataHandler();
 
-            if (handler instanceof ViabilityAssayDataHandler)
+            if (handler instanceof ViabilityAssayDataHandler viabilityHandler)
             {
-                ViabilityAssayDataHandler.Parser parser = ((ViabilityAssayDataHandler)handler).getParser(provider.getRunDomain(protocol),
+                ViabilityAssayDataHandler.Parser parser = viabilityHandler.getParser(provider.getRunDomain(protocol),
                         provider.getResultsDomain(protocol), runData);
-
-                return parser.getResultData();
+                List<Map<String, Object>> rows = parser.getResultData();
+                return () -> ValidatingDataRowIterator.of(rows);
             }
-            return Collections.emptyList();
+            return () -> ValidatingDataRowIterator.of(Collections.emptyList());
         }
     }
 }

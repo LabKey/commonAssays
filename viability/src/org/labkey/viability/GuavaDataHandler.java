@@ -32,6 +32,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -48,6 +49,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * User: kevink
@@ -384,23 +386,22 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
     }
 
     @Override
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        Map<DataType, List<Map<String, Object>>> result = new HashMap<>();
-        if (context instanceof AssayUploadXarContext)
+        Map<DataType, Supplier<ValidatingDataRowIterator>> result = new HashMap<>();
+        if (context instanceof AssayUploadXarContext xarContext)
         {
             List<Map<String, Object>> rows;
-            AssayRunUploadContext<ViabilityAssayProvider> uploadContext = ((AssayUploadXarContext) context).getContext();
-            if (uploadContext instanceof ViabilityAssayRunUploadForm)
+            AssayRunUploadContext<?> uploadContext = xarContext.getContext();
+            if (uploadContext instanceof ViabilityAssayRunUploadForm form)
             {
                 // Importing via standard assay import wizard
-                ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm) ((AssayUploadXarContext) context).getContext();
                 rows = form.getResultProperties(null);
             }
             else
             {
                 // Importing via ImportRunApiAction
-                ViabilityAssayProvider provider = uploadContext.getProvider();
+                ViabilityAssayProvider provider = (ViabilityAssayProvider) uploadContext.getProvider();
                 ExpProtocol protocol = uploadContext.getProtocol();
                 Domain runDomain = provider.getRunDomain(protocol);
                 Domain resultsDomain = provider.getResultsDomain(protocol);
@@ -412,7 +413,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             }
 
             // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transormation
-            result.put(ViabilityTsvDataHandler.DATA_TYPE, rows);
+            result.put(ViabilityTsvDataHandler.DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
         }
         else
         {
@@ -420,6 +421,4 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         }
         return result;
     }
-
-
 }

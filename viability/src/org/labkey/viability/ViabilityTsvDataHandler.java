@@ -25,6 +25,7 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -34,11 +35,11 @@ import org.labkey.api.assay.AssayService;
 import org.apache.commons.beanutils.converters.StringArrayConverter;
 import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * User: kevink
@@ -88,59 +89,59 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         @Override
         protected void _parse() throws IOException
         {
-            TabLoader tl = new TabLoader(_dataFile, true);
-            tl.setParseQuotes(true);
-
-            ColumnDescriptor[] columns = tl.getColumns();
-            for (ColumnDescriptor cd : columns)
+            try (TabLoader tl = new TabLoader(_dataFile, true))
             {
-                if (cd.name.equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
+                tl.setParseQuotes(true);
+
+                ColumnDescriptor[] columns = tl.getColumns();
+                for (ColumnDescriptor cd : columns)
                 {
-                    // parses a comma separated list as List<String>
-                    cd.converter = new Converter()
+                    if (cd.name.equals(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME))
                     {
-                        @Override
-                        public Object convert(Class type, Object value)
+                        // parses a comma separated list as List<String>
+                        cd.converter = new Converter()
                         {
-                            Converter c = new StringArrayConverter();
-                            Object o = c.convert(type, value);
-                            if (o != null && o instanceof String[])
-                                return Arrays.asList((String[])o);
-                            return null;
-                        }
-                    };
-                    break;
-                }
-            }
-
-            if (_runDomain != null)
-            {
-                Map<String, String> comments = tl.getComments();
-                Map<DomainProperty, Object> runData = new HashMap<>(comments.size());
-                for (Map.Entry<String, String> comment : comments.entrySet())
-                {
-                    DomainProperty property = _runDomain.getPropertyByName(comment.getKey());
-                    if (property != null)
-                    {
-                        runData.put(property, comment.getValue());
+                            @Override
+                            public Object convert(Class type, Object value)
+                            {
+                                Converter c = new StringArrayConverter();
+                                Object o = c.convert(type, value);
+                                if (o != null && o instanceof String[])
+                                    return Arrays.asList((String[]) o);
+                                return null;
+                            }
+                        };
+                        break;
                     }
                 }
-                _runData = runData;
+
+                if (_runDomain != null)
+                {
+                    Map<String, String> comments = tl.getComments();
+                    Map<DomainProperty, Object> runData = new HashMap<>(comments.size());
+                    for (Map.Entry<String, String> comment : comments.entrySet())
+                    {
+                        DomainProperty property = _runDomain.getPropertyByName(comment.getKey());
+                        if (property != null)
+                        {
+                            runData.put(property, comment.getValue());
+                        }
+                    }
+                    _runData = runData;
+                }
+                _resultData = tl.load();
             }
-            _resultData = tl.load();
         }
-
-
     }
 
     @Override
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         assert dataFile.getName().endsWith(".tsv") || dataFile.getName().endsWith(".TSV");
         
         // Uck.  The TsvDataExchangeHandler writes out GuavaDataHandler.getValidationDataMap() bfore running the transform script.
         // After the transform has run, this method is called to read that output back in.
-        Map<DataType, List<Map<String, Object>>> result = new HashMap<>();
+        Map<DataType, Supplier<ValidatingDataRowIterator>> result = new HashMap<>();
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
         AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -149,7 +150,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 
         Parser parser = getParser(runDomain, resultsDomain, dataFile);
         List<Map<String, Object>> dataMap = parser.getResultData();
-        result.put(ViabilityTsvDataHandler.DATA_TYPE, dataMap);
+        result.put(ViabilityTsvDataHandler.DATA_TYPE, () -> ValidatingDataRowIterator.of(dataMap));
 
         return result;
     }

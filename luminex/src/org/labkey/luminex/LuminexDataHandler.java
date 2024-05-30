@@ -55,6 +55,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpQCFlagTable;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
@@ -109,6 +110,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -566,8 +568,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexImportHelper helper = new LuminexImportHelper();
-        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, insertRows, LogManager.getLogger(LuminexDataHandler.class));
-        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, updateRows, LogManager.getLogger(LuminexDataHandler.class));
+        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, ValidatingDataRowIterator.of(insertRows.iterator()), LogManager.getLogger(LuminexDataHandler.class));
+        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, ValidatingDataRowIterator.of(updateRows.iterator()), LogManager.getLogger(LuminexDataHandler.class));
     }
 
     /** Inserts or updates an analyte row in the hard table */
@@ -1661,7 +1663,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             public void updateStatistics(int currentRow)
             {
             }
-        }, domain, excelRunPropsList, true);
+        }, domain, ValidatingDataRowIterator.of(excelRunPropsList.iterator()), true, null);
     }
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
@@ -1886,7 +1888,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                                 separator = ", ";
                                 sb.append(parts[i].trim());
                             }
-                            if (sb.length() > 0)
+                            if (!sb.isEmpty())
                             {
                                 extraSpecimenInfo = sb.toString();
                             }
@@ -2064,7 +2066,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
@@ -2072,10 +2074,10 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile);
 
         // create a temporary resolver to use for parsing the description value prior to creating the data file for the transform script
-        // i.e. we don't care about about resolving the study or lookup information at this time (that will happen after the transform is run)
+        // i.e. we don't care about resolving the study or lookup information at this time (that will happen after the transform is run)
         ParticipantVisitResolver resolver = new StudyParticipantVisitResolverType().createResolver(run, null, info.getUser());
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
+        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
         List<Map<String, Object>> dataRows = new ArrayList<>();
 
         Set<String> titrations = parser.getTitrations();
@@ -2103,12 +2105,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataRows.add(dataMap);
             }
         }
-        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, dataRows);
+        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(dataRows));
         return datas;
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMaps) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMaps) throws ExperimentException
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == analyteFactory)
@@ -2120,28 +2122,37 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<>();
         Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
-        for (Map<String, Object> dataMap : dataMaps)
+        try (ValidatingDataRowIterator iter = dataMaps.get())
         {
-            // CONSIDER: subclass the rowFactory to ignore "titration"
-            // titration==true/false so leaving it causes ConversionException(NumberFormatException)
-            CaseInsensitiveHashMap<Object> row = new CaseInsensitiveHashMap<>(dataMap);
-            row.remove("titration");
-            Analyte analyte = analyteFactory.fromMap(row);
-            LuminexDataRow dataRow = rowFactory.fromMap(row);
-            dataRow._setExtraProperties(row);
-
-            // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
-            if (dataRow.getLsid() == null)
+            while (iter.hasNext())
             {
-                dataRow.setLsid(builder.setObjectId(GUID.makeGUID()).toString());
-            }
+                Map<String, Object> dataMap = iter.next();
 
-            Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte, sheets);
-            entry.getValue().add(dataRow);
+                // CONSIDER: subclass the rowFactory to ignore "titration"
+                // titration==true/false so leaving it causes ConversionException(NumberFormatException)
+                CaseInsensitiveHashMap<Object> row = new CaseInsensitiveHashMap<>(dataMap);
+                row.remove("titration");
+                Analyte analyte = analyteFactory.fromMap(row);
+                LuminexDataRow dataRow = rowFactory.fromMap(row);
+                dataRow._setExtraProperties(row);
+
+                // since a transform script can generate new records for analytes with > 1 standard selected, set lsids for new records
+                if (dataRow.getLsid() == null)
+                {
+                    dataRow.setLsid(builder.setObjectId(GUID.makeGUID()).toString());
+                }
+
+                Map.Entry<Analyte, List<LuminexDataRow>> entry = LuminexExcelParser.ensureAnalyte(analyte, sheets);
+                entry.getValue().add(dataRow);
+            }
+        }
+        catch (ValidationException e)
+        {
+            throw new ExperimentException(e);
         }
 
         LuminexRunContext form = (LuminexRunContext)context;
-        importData(data, run, context.getUser(), LogManager.getLogger(LuminexDataHandler.class), sheets, form.getParser(), form, false);
+        importData(data, run, context.getUser(), LOGGER, sheets, form.getParser(), form, false);
     }
 
     @Override

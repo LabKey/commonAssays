@@ -19,10 +19,13 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.CloseableIterator;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.query.ValidationException;
@@ -234,7 +237,7 @@ public class FlowReportJob extends RReportJob
         _report.deleteSavedResults(getContainer());
     }
 
-    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws ValidationException, SQLException
+    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws ValidationException, SQLException, ExperimentException, IOException
     {
         OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
         {
@@ -258,16 +261,21 @@ public class FlowReportJob extends RReportJob
 
             @Override
             public void afterBatchInsert(int currentRow)
-            { }
+            {
+            }
 
             @Override
             public void updateStatistics(int currentRow)
-            { }
+            {
+            }
         };
 
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 
-        OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, loader.load(), true);
+        try (CloseableIterator<Map<String, Object>> iter = loader.iterator())
+        {
+            OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, ValidatingDataRowIterator.of(iter), true, null);
+        }
     }
 
     @Override

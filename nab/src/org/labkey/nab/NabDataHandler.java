@@ -36,6 +36,8 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.query.NabProtocolSchema;
@@ -48,6 +50,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -109,7 +112,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData, User user) throws ExperimentException
+    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData, User user) throws ExperimentException
     {
         Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
         Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
@@ -121,7 +124,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     /**
      * Populates cutoff and AUC information from the passed in raw data
      */
-    public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
+    public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData,
                                       Map<String, Pair<Integer, String>> wellgroupNameToNabSpecimen) throws ExperimentException
     {
         _populateDilutionStats(data, run, protocol, rawData, wellgroupNameToNabSpecimen, true, Collections.emptyList(), Collections.emptyList());
@@ -133,7 +136,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     public void recalculateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
                                          List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
-        _populateDilutionStats(data, run, protocol, rawData, Collections.emptyMap(), false, specimenRows, cutoffRows);
+        _populateDilutionStats(data, run, protocol, () -> ValidatingDataRowIterator.of(rawData), Collections.emptyMap(), false, specimenRows, cutoffRows);
     }
 
     /**
@@ -141,11 +144,10 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * specific tables.
      *
      * @param commitData true to persist dilution and well level data
-     * @param wellGroupNameToNabSpecimen
      * @param specimenRows if commitData is false, then specimen data will be returned in this collection
      * @param cutoffRows if commitData is false, then cutoff data will be returned in this collection
      */
-    private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
+    private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData,
                                         Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen, boolean commitData,
                                         List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
@@ -157,93 +159,102 @@ public abstract class NabDataHandler extends DilutionDataHandler
         for (ExpMaterial material : run.getMaterialInputs().keySet())
             inputMaterialMap.put(material.getLSID(), material);
 
-        for (Map<String, Object> group : rawData)
+        try (ValidatingDataRowIterator iter = rawData.get())
         {
-            if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
-                throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
-
-            if (group.get(WELLGROUP_NAME_PROPERTY) == null)
-                throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
-
-            if (group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY) == null)
-                throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
-
-            String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
-            String specimenLsid = group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY).toString();
-
-            ExpMaterial material = inputMaterialMap.get(specimenLsid);
-
-            if (material == null)
-                throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
-
-            String dataRowLsid = getDataRowLSID(data, groupName).toString();
-
-            OntologyManager.ensureObject(container, dataRowLsid,  data.getLSID());
-            int objectId = 0;
-
-            // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
-            Map<String, Object> nabSpecimenEntries = new HashMap<>();
-            nabSpecimenEntries.put(WELLGROUP_NAME_PROPERTY, groupName);
-            nabSpecimenEntries.put("ObjectId", objectId);                       // TODO: this will go away  when nab table transfer is complete
-            nabSpecimenEntries.put("ObjectUri", dataRowLsid);
-            nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
-            nabSpecimenEntries.put("DataId", data.getRowId());
-            nabSpecimenEntries.put("RunId", run.getRowId());
-            nabSpecimenEntries.put("SpecimenLsid", specimenLsid);
-            nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
-            nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + POLY_SUFFIX));
-            nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + POLY_SUFFIX));
-            nabSpecimenEntries.put("Auc_4pl", group.get(AUC_PREFIX + PL4_SUFFIX));
-            nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + PL4_SUFFIX));
-            nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + PL5_SUFFIX));
-            nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
-            String virusWellGroupName = (String)group.get(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME);
-            nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
-            nabSpecimenEntries.put(FIT_PARAMETERS_PROPERTY_NAME, group.get(FIT_PARAMETERS_PROPERTY_NAME));
-
-            int nabRowid = 0;
-            if (commitData)
+            while (iter.hasNext())
             {
-                nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
-                wellGroupNameToNabSpecimen.put(groupName, new Pair<>(nabRowid, specimenLsid));
-            }
-            else
-                specimenRows.add(new CaseInsensitiveHashMap<>(nabSpecimenEntries));
+                Map<String, Object> group = iter.next();
+                if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
+                    throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
-            for (Integer cutoffValue : cutoffFormats.keySet())
-            {
-                Map<String, Object> cutoffEntries = new HashMap<>();
+                if (group.get(WELLGROUP_NAME_PROPERTY) == null)
+                    throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
+
+                if (group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY) == null)
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
+
+                String groupName = group.get(WELLGROUP_NAME_PROPERTY).toString();
+                String specimenLsid = group.get(DILUTION_INPUT_MATERIAL_DATA_PROPERTY).toString();
+
+                ExpMaterial material = inputMaterialMap.get(specimenLsid);
+
+                if (material == null)
+                    throw new ExperimentException("The row must contain a value for the specimen lsid : " + DILUTION_INPUT_MATERIAL_DATA_PROPERTY);
+
+                String dataRowLsid = getDataRowLSID(data, groupName).toString();
+
+                OntologyManager.ensureObject(container, dataRowLsid, data.getLSID());
+                int objectId = 0;
+
+                // New code to insert into NAbSpecimen and CutoffValue tables instead of Ontology properties
+                Map<String, Object> nabSpecimenEntries = new HashMap<>();
+                nabSpecimenEntries.put(WELLGROUP_NAME_PROPERTY, groupName);
+                nabSpecimenEntries.put("ObjectId", objectId);                       // TODO: this will go away  when nab table transfer is complete
+                nabSpecimenEntries.put("ObjectUri", dataRowLsid);
+                nabSpecimenEntries.put("ProtocolId", protocol.getRowId());
+                nabSpecimenEntries.put("DataId", data.getRowId());
+                nabSpecimenEntries.put("RunId", run.getRowId());
+                nabSpecimenEntries.put("SpecimenLsid", specimenLsid);
+                nabSpecimenEntries.put("FitError", group.get(FIT_ERROR_PROPERTY));
+                nabSpecimenEntries.put("Auc_Poly", group.get(AUC_PREFIX + POLY_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_Poly", group.get(pAUC_PREFIX + POLY_SUFFIX));
+                nabSpecimenEntries.put("Auc_4pl", group.get(AUC_PREFIX + PL4_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_4pl", group.get(pAUC_PREFIX + PL4_SUFFIX));
+                nabSpecimenEntries.put("Auc_5pl", group.get(AUC_PREFIX + PL5_SUFFIX));
+                nabSpecimenEntries.put("PositiveAuc_5pl", group.get(pAUC_PREFIX + PL5_SUFFIX));
+                String virusWellGroupName = (String) group.get(AbstractPlateBasedAssayProvider.VIRUS_WELL_GROUP_NAME);
+                nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
+                nabSpecimenEntries.put(FIT_PARAMETERS_PROPERTY_NAME, group.get(FIT_PARAMETERS_PROPERTY_NAME));
+
+                int nabRowid = 0;
                 if (commitData)
-                    cutoffEntries.put("NabSpecimenId", nabRowid);
+                {
+                    nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);
+                    wellGroupNameToNabSpecimen.put(groupName, new Pair<>(nabRowid, specimenLsid));
+                }
                 else
-                    cutoffEntries.put("NabSpecimenId", specimenLsid);
-                cutoffEntries.put("Cutoff", (double)cutoffValue);
+                    specimenRows.add(new CaseInsensitiveHashMap<>(nabSpecimenEntries));
 
-                String cutoffStr = cutoffValue.toString();
-                String icKey = POINT_IC_PREFIX + cutoffStr;
-                cutoffEntries.put("Point", group.get(icKey));
-                icKey = POINT_IC_PREFIX + cutoffStr + OOR_SUFFIX;
-                cutoffEntries.put("PointOORIndicator", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX;
-                cutoffEntries.put("IC_Poly", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX + OOR_SUFFIX;
-                cutoffEntries.put("IC_PolyOORIndicator", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX;
-                cutoffEntries.put("IC_4pl", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX + OOR_SUFFIX;
-                cutoffEntries.put("IC_4plOORIndicator", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX;
-                cutoffEntries.put("IC_5pl", group.get(icKey));
-                icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX + OOR_SUFFIX;
-                cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
+                for (Integer cutoffValue : cutoffFormats.keySet())
+                {
+                    Map<String, Object> cutoffEntries = new HashMap<>();
+                    if (commitData)
+                        cutoffEntries.put("NabSpecimenId", nabRowid);
+                    else
+                        cutoffEntries.put("NabSpecimenId", specimenLsid);
+                    cutoffEntries.put("Cutoff", (double) cutoffValue);
 
-                if (commitData)
-                    NabManager.get().insertCutoffValueRow(null, cutoffEntries);
-                else
-                    cutoffRows.add(new CaseInsensitiveHashMap<>(cutoffEntries));
+                    String cutoffStr = cutoffValue.toString();
+                    String icKey = POINT_IC_PREFIX + cutoffStr;
+                    cutoffEntries.put("Point", group.get(icKey));
+                    icKey = POINT_IC_PREFIX + cutoffStr + OOR_SUFFIX;
+                    cutoffEntries.put("PointOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX;
+                    cutoffEntries.put("IC_Poly", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + POLY_SUFFIX + OOR_SUFFIX;
+                    cutoffEntries.put("IC_PolyOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX;
+                    cutoffEntries.put("IC_4pl", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL4_SUFFIX + OOR_SUFFIX;
+                    cutoffEntries.put("IC_4plOORIndicator", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX;
+                    cutoffEntries.put("IC_5pl", group.get(icKey));
+                    icKey = CURVE_IC_PREFIX + cutoffStr + PL5_SUFFIX + OOR_SUFFIX;
+                    cutoffEntries.put("IC_5plOORIndicator", group.get(icKey));
+
+                    if (commitData)
+                        NabManager.get().insertCutoffValueRow(null, cutoffEntries);
+                    else
+                        cutoffRows.add(new CaseInsensitiveHashMap<>(cutoffEntries));
+                }
             }
+
             if (commitData)
                 NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
+        }
+        catch (ValidationException e)
+        {
+            throw new ExperimentException(e);
         }
     }
 
@@ -301,7 +312,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 {
                     try
                     {
-                        Double d = Double.valueOf((String)dataValue);
+                        double d = Double.valueOf((String)dataValue);
                         value = (int)Math.round(d);
                     }
                     catch (NumberFormatException nfe)
@@ -342,7 +353,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             errors.add(e);
         }
 
-        if (plates.size() > 0)
+        if (!plates.isEmpty())
             LOG.debug("found " + plates.size() + " list style plate data in " + dataFile.getName());
 
         return plates;
@@ -355,18 +366,17 @@ public abstract class NabDataHandler extends DilutionDataHandler
     protected Pair<Integer, Integer> getWellLocation(File dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(locationColumnHeader);
-        if (locationValue == null || !(locationValue instanceof String) || ((String) locationValue).length() < 2)
+        if (!(locationValue instanceof String location) || ((String) locationValue).length() < 2)
             //throw createWellLocationParseError(dataFile, locationColumnHeader, lineNumber, locationValue);
             return null;
 
-        String location = (String) locationValue;
-        Character rowChar = location.charAt(0);
+        char rowChar = location.charAt(0);
         rowChar = Character.toUpperCase(rowChar);
         if (!(rowChar >= 'A' && rowChar <= 'Z'))
             //throw createWellLocationParseError(dataFile, locationColumnHeader, lineNumber, locationValue);
             return null;
 
-        Integer col;
+        int col;
         try
         {
             col = Integer.parseInt(location.substring(1));

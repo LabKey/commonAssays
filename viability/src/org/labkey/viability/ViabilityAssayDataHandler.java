@@ -24,6 +24,7 @@ import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
@@ -32,6 +33,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -44,7 +46,6 @@ import org.labkey.api.view.ActionURL;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,7 +117,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                 Map<String, Object> row = it.next();
 
                 String poolID = String.valueOf(row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
-                if (poolID == null || poolID.length() == 0)
+                if (poolID == null || poolID.isEmpty())
                     throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
                 Object participantID = row.get(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME);
@@ -295,14 +296,25 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected List<Map<String, Object>> convertPropertyNamesToURIs(List<Map<String, Object>> dataMaps, Domain domain)
+    protected ValidatingDataRowIterator convertPropertyNamesToURIs(ValidatingDataRowIterator dataMaps, Domain domain)
     {
         // XXX: pass data thru untouched for now.
-        return dataMaps;
+        return ValidatingDataRowIterator.of(dataMaps);
     }
 
     @Override
-    protected List<Map<String, Object>> insertRowData(ExpData data, User user, Container container, ExpRun run, ExpProtocol protocol, AssayProvider provider, Domain dataDomain, List<Map<String, Object>> fileData, TableInfo tableInfo, boolean autoFillDefaultColumns) throws ValidationException
+    protected void insertRowData(ExpData data,
+                                                      User user,
+                                                      Container container,
+                                                      ExpRun run,
+                                                      ExpProtocol protocol,
+                                                      AssayProvider provider,
+                                                      Domain dataDomain,
+                                                      ValidatingDataRowIterator fileData,
+                                                      TableInfo tableInfo,
+                                                      boolean autoFillDefaultColumns,
+                                                      OntologyManager.RowCallback rowCallback)
+            throws ValidationException
     {
         // Find the target study property on the batch, run, or result domains.
         // If the target study is on the batch or run domain, get the value from the ExpRun or the ExpExperiment.
@@ -335,10 +347,10 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             importMap.put(prop.getName(), prop.getPropertyDescriptor());
         }
 
-        List<Map<String, Object>> results = new ArrayList<>(fileData.size());
         int rowIndex = 0;
-        for (Map<String, Object> row : fileData)
+        while (fileData.hasNext())
         {
+            Map<String, Object> row = fileData.next();
             Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap, resultLevelTargetStudyProperty);
             Map<String, Object> base = pair.first;
             Map<PropertyDescriptor, Object> extra = pair.second;
@@ -360,12 +372,9 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             result.setProtocolID(protocol.getRowId());
 
             ViabilityManager.saveResult(user, container, result, rowIndex++);
-            results.add(result.toMap());
         }
 
         ViabilityManager.updateSpecimenAggregates(user, container, provider, protocol, run);
-
-        return results;
     }
 
     private Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> splitBaseFromExtra(Map<String, Object> row, Map<String, PropertyDescriptor> importMap, DomainProperty resultLevelTargetStudyProperty)

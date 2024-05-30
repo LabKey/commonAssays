@@ -36,6 +36,7 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.assay.plate.Plate;
@@ -66,6 +67,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * User: Karl Lum
@@ -83,20 +85,16 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return ELISPOT_DATA_TYPE;
     }
 
-    class ElispotFileParser implements ElispotDataFileParser
+    static class ElispotFileParser implements ElispotDataFileParser
     {
-        private ExpData _data;
-        private File _dataFile;
-        private ViewBackgroundInfo _info;
-        private Logger _log;
-        private XarContext _context;
+        private final ExpData _data;
+        private final File _dataFile;
+        private final XarContext _context;
 
-        public ElispotFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
+        public ElispotFileParser(ExpData data, File dataFile, XarContext context)
         {
             _data = data;
             _dataFile = dataFile;
-            _info = info;
-            _log = log;
             _context = context;
         }
 
@@ -116,9 +114,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             if (runProperties.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
                 DomainProperty readerProp = runProperties.get(ElispotAssayProvider.READER_PROPERTY_NAME);
-                if (_context instanceof AssayUploadXarContext)
+                if (_context instanceof AssayUploadXarContext xarContext)
                 {
-                    Map<DomainProperty, String> runPropValues = ((AssayUploadXarContext)_context).getContext().getRunProperties();
+                    Map<DomainProperty, String> runPropValues = xarContext.getContext().getRunProperties();
                     PlateReader reader = provider.getPlateReader(runPropValues.get(readerProp));
                     Map<PlateInfo, Plate> plates = initializePlates(protocol, _dataFile, template, reader);
 
@@ -129,22 +127,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                     // create a map of analyte to cytokine names (third step of the upload wizard)
                     Map<String, Object> analyteToCytokine = new HashMap<>();
 
-                    if (_context instanceof AssayUploadXarContext)
-                    {
-                        AssayRunUploadContext assayContext = ((AssayUploadXarContext) _context).getContext();
-                        Map<String, Map<DomainProperty, String>> analyteProperties = ((ElispotRunUploadForm)assayContext).getAnalyteProperties();
+                    AssayRunUploadContext<?> assayContext = xarContext.getContext();
+                    Map<String, Map<DomainProperty, String>> analyteProperties = ((ElispotRunUploadForm)assayContext).getAnalyteProperties();
 
-                        if (analyteProperties != null)
+                    if (analyteProperties != null)
+                    {
+                        for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : analyteProperties.entrySet())
                         {
-                            for (Map.Entry<String, Map<DomainProperty, String>> groupEntry : analyteProperties.entrySet())
+                            String analyteName = groupEntry.getKey();
+                            Map<DomainProperty, String> properties = groupEntry.getValue();
+                            for (String value : properties.values())
                             {
-                                String analyteName = groupEntry.getKey();
-                                Map<DomainProperty, String> properties = groupEntry.getValue();
-                                for (String value : properties.values())
-                                {
-                                    assert !analyteToCytokine.containsKey(analyteName) : "only cytokine to analyte mapping supported";
-                                    analyteToCytokine.put(analyteName, value);
-                                }
+                                assert !analyteToCytokine.containsKey(analyteName) : "only cytokine to analyte mapping supported";
+                                analyteToCytokine.put(analyteName, value);
                             }
                         }
                     }
@@ -169,7 +164,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                     Map<String, Object> row;
                                     if (!rowMapMap.containsKey(mapMapKey))
                                     {
-                                        rowMapMap.put(mapMapKey, new LinkedHashMap<String, Object>());
+                                        rowMapMap.put(mapMapKey, new LinkedHashMap<>());
                                     }
                                     row = rowMapMap.get(mapMapKey);
 
@@ -195,10 +190,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                         }
                     }
 
-                    List<Map<String, Object>> results = new ArrayList<>();
-                    for (Map<String, Object> row : rowMapMap.values())
-                        results.add(row);
-                    return results;
+                    return new ArrayList<>(rowMapMap.values());
                 }
             }
             throw new ExperimentException("Unable to load data file: Plate reader type not found");
@@ -208,22 +200,23 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     @Override
     public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
     {
-        return new ElispotFileParser(data, dataFile, info, log, context);
+        return new ElispotFileParser(data, dataFile, context);
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMap) throws ExperimentException
     {
-        importData(data, run, context.getProtocol(), dataMap);
+        importData(run, dataMap);
     }
 
     @Override
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
-        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, parser.getResults());
+        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        List<Map<String, Object>> rows = parser.getResults();
+        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
 
         return datas;
     }
@@ -359,7 +352,6 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                 {
                     List<Map<String, Object>> antigenRows = new ArrayList<>();
 
-                    Set<String> antigenNames = new HashSet<>();
                     Lsid rowLsid = ElispotDataHandler.getAntigenRowLsid(dataLsid, material.getName());
 
                     // background mean/median values on a per specimen basis
@@ -398,7 +390,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
                                 {
 //                                    assert material.getName().equals(runDataRow.getWellgroupName());
                                     if (!statsDataMap.containsKey(runDataRow.getAnalyte()))
-                                        statsDataMap.put(runDataRow.getAnalyte(), new ArrayList<Double>());
+                                        statsDataMap.put(runDataRow.getAnalyte(), new ArrayList<>());
                                     List<Double> statsData = statsDataMap.get(runDataRow.getAnalyte());
 
                                     Double value = runDataRow.getSpotCount();
@@ -550,8 +542,4 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return fields;
     }
 
-    public static Lsid createPropertyLsid(String prefix, ExpRun run, String propName)
-    {
-        return new Lsid(prefix, run.getProtocol().getName(), propName);
-    }
 }
