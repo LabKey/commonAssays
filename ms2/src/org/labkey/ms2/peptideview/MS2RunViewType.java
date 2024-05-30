@@ -38,7 +38,7 @@ public enum MS2RunViewType
             return new QueryPeptideMS2RunView(viewContext, runs);
         }
     },
-    QUERY_PROTEIN_GROUPS("Protein Groups", "queryproteingroups")
+    QUERY_PROTEIN_GROUPS("FastaProtein Groups", "queryproteingroups")
     {
         @Override @NotNull
         public AbstractMS2RunView createView(ViewContext viewContext, MS2Run... runs)

@@ -35,9 +35,8 @@ import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.MS2Module;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.query.OrganismTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
 
@@ -56,7 +55,7 @@ public class ProteinUserSchema extends UserSchema
 
     public ProteinUserSchema(User user, Container container)
     {
-        super(NAME, "Protein annotation, gene ontology, and sequence tables", user, container, ProteinManager.getSchema());
+        super(NAME, "FastaProtein annotation, gene ontology, and sequence tables", user, container, ProteinSchema.getSchema());
     }
 
     public static void register(MS2Module module)
@@ -189,7 +188,7 @@ public class ProteinUserSchema extends UserSchema
 
     private TableInfo createFastaSequencesTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaSequences(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoFastaSequences(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("SeqId").setFk( QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.Sequences.name()) );
@@ -199,7 +198,7 @@ public class ProteinUserSchema extends UserSchema
 
     private TableInfo createIdentifiersTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoIdentifiers(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoIdentifiers(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("SeqId").setFk( QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.Sequences.name()) );
@@ -210,7 +209,7 @@ public class ProteinUserSchema extends UserSchema
 
     private TableInfo createIdentTypesTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoIdentTypes(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoIdentTypes(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("CannonicalSourceId").setFk( QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.InfoSources.name()) );
@@ -246,7 +245,7 @@ public class ProteinUserSchema extends UserSchema
 
     private SimpleUserSchema.SimpleTable createAnnotationTypesTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotationTypes(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoAnnotationTypes(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("SourceId").setFk( QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.InfoSources.name()) );
@@ -255,7 +254,7 @@ public class ProteinUserSchema extends UserSchema
 
     private SimpleUserSchema.SimpleTable createInfoSourcesTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoInfoSources(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoInfoSources(), null);
         table.init();
         table.setReadOnly(true);
         return table;
@@ -263,7 +262,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createAnnotationsTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoAnnotations(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoAnnotations(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("AnnotTypeId").setFk( QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.AnnotationTypes.name()) );
@@ -275,7 +274,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createGoGraphPath()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoGraphPath(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoGoGraphPath(), null);
         table.init();
         table.setReadOnly(true);
         return table;
@@ -283,7 +282,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createGoTerm()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTerm(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoGoTerm(), null);
         table.init();
         table.setReadOnly(true);
         return table;
@@ -291,7 +290,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createGoTerm2Term()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTerm2Term(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoGoTerm2Term(), null);
         table.init();
         table.setReadOnly(true);
         table.getMutableColumn("term1id").setFk(QueryForeignKey.from(this, table.getContainerFilter()).table(TableType.GoTerm.name()) );
@@ -301,7 +300,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createGoTermDefinition()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTermDefinition(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoGoTermDefinition(), null);
         table.init();
         table.setReadOnly(true);
         return table;
@@ -309,7 +308,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createGoTermSynonym()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoGoTermSynonym(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoGoTermSynonym(), null);
         table.init();
         table.setReadOnly(true);
         return table;
@@ -328,7 +327,7 @@ public class ProteinUserSchema extends UserSchema
 
     protected TableInfo createFastaFileTable()
     {
-        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinManager.getTableInfoFastaFiles(), null);
+        SimpleUserSchema.SimpleTable<ProteinUserSchema> table = new SimpleUserSchema.SimpleTable<>(this, ProteinSchema.getTableInfoFastaFiles(), null);
         table.init();
         table.setReadOnly(true);
         var shortName = table.addWrapColumn("ShortName", table.getRealTable().getColumn("FileName"));

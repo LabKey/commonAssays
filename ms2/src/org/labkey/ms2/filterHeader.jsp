@@ -42,7 +42,7 @@
             DOM.TD(HtmlString.NBSP, "Shows peptides. If you choose columns from ProteinProphet or the search engine assigned protein, the peptides will be grouped under those columns. Use Grid Views->Customize Grid to change the column list.")
         ),
         DOM.TR(
-            DOM.TD(DOM.at(style, "vertical-align: top; white-space:nowrap;"), DOM.B("Protein Groups")),
+            DOM.TD(DOM.at(style, "vertical-align: top; white-space:nowrap;"), DOM.B("FastaProtein Groups")),
             DOM.TD(HtmlString.NBSP, "Shows proteins, grouped under the ProteinProphet assigned groups. Use Grid Views->Customize Grid to change the column list.")
         )
     ));

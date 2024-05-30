@@ -87,7 +87,7 @@ if (null != bean.quantAlgorithm)
 
         if (run.hasProteinProphet())
         { %>
-            <%=link("Show Protein Prophet Details").href(urlFor(MS2Controller.ShowProteinProphetDetailsAction.class).addParameter("run", run.getRun())).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
+            <%=link("Show FastaProtein Prophet Details").href(urlFor(MS2Controller.ShowProteinProphetDetailsAction.class).addParameter("run", run.getRun())).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
         } %>
         </div>
     </td></tr>

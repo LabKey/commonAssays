@@ -35,6 +35,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,12 +181,12 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         ExprColumn proteinColumn;
         if (_config.isGroupedByProtein() || (form != null && form.hasTargetSeqIds()))
         {
-            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
+            proteinColumn = new ExprColumn(this, "FastaProtein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
             defaultCols.add(FieldKey.fromParts(proteinColumn.getName()));
         }
         else
         {
-            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment("NULL"), JdbcType.INTEGER);
+            proteinColumn = new ExprColumn(this, "FastaProtein", new SQLFragment("NULL"), JdbcType.INTEGER);
         }
         proteinColumn.setDescription("The protein associated with the peptide identification. Only available if a grouping by protein information, or a target protein has been specified.");
         addColumn(proteinColumn);
@@ -282,7 +283,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
 
         if (_config.isUsingProteinProphet())
         {
-            // Protein group measurements (values are the same for all proteins in a group, they are not aggs)
+            // FastaProtein group measurements (values are the same for all proteins in a group, they are not aggs)
             sql.append(", MIN(pg.groupnumber) as ProteinGroupNum\n");
             sql.append(", MIN(pg.indistinguishablecollectionid) as IndistinguishableCollectionId\n");
             sql.append(", MIN(pg.GroupProbability) AS GroupProbability\n");
@@ -349,9 +350,9 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
                 sql.append(" ON (pgm.ProteinGroupId = pg.rowId)\nINNER JOIN ");
                 sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
                 sql.append(" ON (frm.Run = r.Run)\nINNER JOIN ");
-                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
                 sql.append(" ON (fs.fastaid = frm.fastaid AND pgm.seqid = fs.seqid)\nINNER JOIN ");
-                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(ProteinSchema.getTableInfoSequences(), "s");
                 sql.append(" ON (fs.seqId = s.seqid)\n");
             }
             else
@@ -359,16 +360,16 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
                 sql.append(" INNER JOIN ");
                 sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
                 sql.append(" ON (frm.Run = r.Run)\n INNER JOIN ");
-                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
                 sql.append(" ON (fs.fastaid = frm.fastaid AND pd.seqid = fs.seqid)\n INNER JOIN ");
-                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(ProteinSchema.getTableInfoSequences(), "s");
                 sql.append(" ON (s.seqid = fs.seqid)\n");
             }
         }
         else if (_form != null && _form.hasTargetSeqIds())
         {
             sql.append("INNER JOIN ");
-            sql.append(ProteinManager.getTableInfoSequences(), "s");
+            sql.append(ProteinSchema.getTableInfoSequences(), "s");
             sql.append(" ON (s.SeqId IN ");
             _form.appendTargetSeqIdsClause(sql);
             sql.append(")\n");

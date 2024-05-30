@@ -42,12 +42,12 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 
     public ProteinDisplayColumn(ColumnInfo col, ActionURL url, Map<String, FieldKey> params)
     {
-        super(col, url, params, new JSONObject().put("width", 450).put("title", "Protein Details"));
+        super(col, url, params, new JSONObject().put("width", 450).put("title", "FastaProtein Details"));
         setLinkTarget("prot");
 
         FieldKey parentFK = getColumnInfo().getFieldKey().getParent();
         _seqIdFK = new FieldKey(parentFK, "SeqId");
-        _proteinNameFK = new FieldKey(parentFK, "Protein");
+        _proteinNameFK = new FieldKey(parentFK, "FastaProtein");
         addRequiredValue(_seqIdFK);
     }
 

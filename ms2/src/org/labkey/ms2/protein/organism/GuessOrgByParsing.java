@@ -16,34 +16,27 @@
 
 package org.labkey.ms2.protein.organism;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-/**
- * User: brittp
- * Date: Jan 2, 2006
- * Time: 3:42:03 PM
- */
 public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
 {
-    private Map<String, String> _cache = new HashMap<>();
-    private static final DbSchema _schema = ProteinManager.getSchema();
+    private final Map<String, String> _cache = new HashMap<>();
+
+    private static final DbSchema _schema = ProteinSchema.getSchema();
     private static final String CACHED_MISS_VALUE = "GuessOrgByParsing.CACHED_MISS_VALUE";
-    private static Logger _log = LogManager.getLogger(GuessOrgByParsing.class);
 
     private static final String _organismFromTaxIdSql =
                                     "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " +
-                                            ProteinManager.getTableInfoOrganisms() +
+                                            ProteinSchema.getTableInfoOrganisms() +
                                             " WHERE identid = (SELECT identid FROM " +
-                                            ProteinManager.getTableInfoIdentifiers() +
+                                            ProteinSchema.getTableInfoIdentifiers() +
                                             " WHERE identifier=? AND identtypeid = " + getNcbiId() + ")";
 
     private static Integer _ncbiId = null;
@@ -52,7 +45,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
     {
         if (null == _ncbiId)
             _ncbiId = new SqlSelector(_schema,
-                "SELECT identtypeid FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE Name='NCBI Taxonomy'").getObject(Integer.class);
+                "SELECT identtypeid FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE Name='NCBI Taxonomy'").getObject(Integer.class);
 
         return _ncbiId;
     }

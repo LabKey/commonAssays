@@ -118,7 +118,7 @@ public class ProteinCoverageMapBuilder
 
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body>");
-        sb.append("<p> Protein: &nbsp; " + PageFlowUtil.filter(_protein.getBestName()) + (_showAllPeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
+        sb.append("<p> FastaProtein: &nbsp; " + PageFlowUtil.filter(_protein.getBestName()) + (_showAllPeptides ? "  (all matching peptides) " : "  (search engine matches) ") + "<br/> ");
         sb.append("Run: &nbsp; " + (null!=_ms2Run.getDescription()?  PageFlowUtil.filter(_ms2Run.getDescription()) : _ms2Run.getRun()) +  "<br/> ");
         sb.append("Peptide Filter: &nbsp; " + PageFlowUtil.filter(_peptideFilter.getFilterText()) + "<br/> ");
         sb.append("Peptide Counts:<br/>");
@@ -147,7 +147,7 @@ public class ProteinCoverageMapBuilder
         public void setUp()
         {
             _protein = new Protein();
-            _protein.setBestName("Test Protein 1");
+            _protein.setBestName("Test FastaProtein 1");
             _protein.setSeqId(-1);
             _protein.setSequence("SQKFGRIINTASPAGLFGNFGQANYSAAKMGRRVIGQLFEVGGGWCGQTRWQRSSGYVSIEQYFKLCTPTMPSNGTLKTLAKPLQVLDKNGKAALVVGGFETYDIKTKKLIAYNEGSFFIRGAHVPPEKE");
 
@@ -212,7 +212,7 @@ public class ProteinCoverageMapBuilder
 
             // verify the header information in the export html
             String exportHtml = pcm1.getProteinExportHtml();
-            assertTrue("Unexpected protein name text", exportHtml.contains("Protein: &nbsp; Test Protein 1  (search engine matches)"));
+            assertTrue("Unexpected protein name text", exportHtml.contains("FastaProtein: &nbsp; Test FastaProtein 1  (search engine matches)"));
             assertTrue("Unexpected run name text", exportHtml.contains("Run: &nbsp; Test Run 1"));
             assertTrue("Unexpected peptide filter text", exportHtml.contains("Peptide Filter: &nbsp; (SeqId = -1)"));
             assertTrue("Unexpected total peptide count text", exportHtml.contains("9 Total peptides matching sequence"));
@@ -222,7 +222,7 @@ public class ProteinCoverageMapBuilder
 
             pcm1.setShowAllPeptides(true);
             exportHtml = pcm1.getProteinExportHtml();
-            assertTrue("Unexpected protein name text", exportHtml.contains("Protein: &nbsp; Test Protein 1  (all matching peptides)"));
+            assertTrue("Unexpected protein name text", exportHtml.contains("FastaProtein: &nbsp; Test FastaProtein 1  (all matching peptides)"));
 
             // verify the protein coverage map table html for peptides1
             exportHtml = _protein.getCoverageMap(_run, null).toString();

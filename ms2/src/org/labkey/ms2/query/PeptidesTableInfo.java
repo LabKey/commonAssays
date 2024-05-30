@@ -42,7 +42,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -219,7 +219,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         ActionURL showProteinURL = url.clone();
         showProteinURL.setAction(MS2Controller.ShowProteinAction.class);
         showProteinURL.replaceParameter("seqId", "${SeqId}");
-        showProteinURL.replaceParameter("protein", "${Protein}");
+        showProteinURL.replaceParameter("protein", "${FastaProtein}");
 
         setupProteinColumns(showProteinURL, containerFilter);
 
@@ -384,8 +384,8 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo<MS2Schema> sequenceTable = new SequencesTableInfo<>(ProteinManager.getTableInfoSequences().getName(), _userSchema, containerFilter);
-                SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
+                SequencesTableInfo<MS2Schema> sequenceTable = new SequencesTableInfo<>(ProteinSchema.getTableInfoSequences().getName(), _userSchema, containerFilter);
+                SQLFragment fastaNameSQL = new SQLFragment(getName() + ".FastaProtein");
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);
 
@@ -402,9 +402,9 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
         getMutableColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURL));
         getMutableColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
-        getMutableColumn("SeqId").setLabel("Search Engine Protein");
-        getMutableColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURL));
-        getMutableColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
+        getMutableColumn("SeqId").setLabel("Search Engine FastaProtein");
+        getMutableColumn("FastaProtein").setURL(StringExpressionFactory.createURL(showProteinURL));
+        getMutableColumn("FastaProtein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
     }
 
     private void addScoreColumns()
@@ -544,7 +544,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         result.add(FieldKey.fromParts("PeptideProphet"));
         result.add(FieldKey.fromParts("Peptide"));
         result.add(FieldKey.fromParts("ProteinHits"));
-        result.add(FieldKey.fromParts("Protein"));
+        result.add(FieldKey.fromParts("FastaProtein"));
         return Collections.unmodifiableList(result);
     }
 

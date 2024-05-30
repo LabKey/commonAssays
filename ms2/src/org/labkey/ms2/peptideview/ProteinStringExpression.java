@@ -49,7 +49,7 @@ public class ProteinStringExpression implements StringExpression, Cloneable
         Integer seqId = (Integer)ctx.get("SeqId");
 
         // Always include protein (use as a title in the details page); include SeqId if it's not null
-        return _localURI + (null != seqId ? "&seqId=" + seqId : "") + "&protein=" + PageFlowUtil.encode((String)ctx.get("Protein"));
+        return _localURI + (null != seqId ? "&seqId=" + seqId : "") + "&protein=" + PageFlowUtil.encode((String)ctx.get("FastaProtein"));
     }
 
     @Override

@@ -106,7 +106,7 @@ public enum MS2ExportType
             MS2Peptide[] peptides = new TableSelector(MS2Manager.getTableInfoPeptides(), filter, new Sort("Scan")).getArray(MS2Peptide.class);
             response.setContentType("text/tab-separated-values");
             response.setHeader("Content-disposition", "attachment; filename=\"" + run.getDescription() + ".MS2Ions.tsv");
-            response.getWriter().write("Scan\tPeptide\tPeptideProphet\tProtein\tIonType\tFragmentLength\tAverageTheoreticalMass\tAverageObservedMass\tAverageDeltaMass\tAverageIntensity\tMonoisotopicTheoreticalMass\tMonoisotopicObservedMass\tMonoisotopicDeltaMass\tMonoisotopicIntesity\n");
+            response.getWriter().write("Scan\tPeptide\tPeptideProphet\tFastaProtein\tIonType\tFragmentLength\tAverageTheoreticalMass\tAverageObservedMass\tAverageDeltaMass\tAverageIntensity\tMonoisotopicTheoreticalMass\tMonoisotopicObservedMass\tMonoisotopicDeltaMass\tMonoisotopicIntesity\n");
             for (MS2Peptide peptide : peptides)
             {
                 peptide.init(0.5, 0, 10000);

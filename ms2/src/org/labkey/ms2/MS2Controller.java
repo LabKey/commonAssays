@@ -50,7 +50,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms.Replicate;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
@@ -60,10 +59,11 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.ReturnURLString;
+import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -262,7 +262,7 @@ public class MS2Controller extends SpringActionController
 
     private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
+        addAdminNavTrail(root, "FastaProtein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
 
 
@@ -349,7 +349,7 @@ public class MS2Controller extends SpringActionController
         {
             searchEngineURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs"));
+        compareMenu.addMenuItem("Search Engine FastaProtein", view.createVerifySelectedScript(searchEngineURL, "runs"));
 
         ActionURL spectraURL = new ActionURL(SpectraCountSetupAction.class, container);
         if (experimentRunIds)
@@ -1387,7 +1387,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Compare Search Engine Protein Setup");
+            root.addChild("Compare Search Engine FastaProtein Setup");
         }
     }
 
@@ -1619,7 +1619,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Disambiguate Protein");
+            root.addChild("Disambiguate FastaProtein");
         }
     }
 
@@ -1815,7 +1815,7 @@ public class MS2Controller extends SpringActionController
         {
             if (null != lookupProteins() && lookupProteins().size() > 0 && null != getTargetProtein())
             {
-                title.append("Protein ");
+                title.append("FastaProtein ");
                 title.append(getTargetProtein());
 
                 List<String> bestNames = new ArrayList<>();
@@ -2567,7 +2567,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
             String idList = StringUtils.join(fastaIds, ',');
-            List<Integer> validIds = new SqlSelector(ProteinManager.getSchema(), "SELECT FastaId FROM " + ProteinManager.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))").getArrayList(Integer.class);
+            List<Integer> validIds = new SqlSelector(ProteinSchema.getSchema(), "SELECT FastaId FROM " + ProteinSchema.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))").getArrayList(Integer.class);
 
             fastaIds.removeAll(validIds);
 
@@ -2668,12 +2668,12 @@ public class MS2Controller extends SpringActionController
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
-            annots.setTitle("Protein Annotations Loaded");
+            annots.setTitle("FastaProtein Annotations Loaded");
 
             QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
             jobsView.getSettings().setBaseFilter(new SimpleFilter(FieldKey.fromParts("Provider"), ProteinAnnotationPipelineProvider.NAME));
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
-            jobsView.setTitle("Protein Annotation Load Jobs");
+            jobsView.setTitle("FastaProtein Annotation Load Jobs");
 
             VBox result = new VBox(blastView, grid, annots, jobsView);
             if (form.getMessage() != null)
@@ -2707,7 +2707,7 @@ public class MS2Controller extends SpringActionController
             String columnNames = "InsertId, FileName, FileType, Comment, InsertDate, CompletionDate, RecordsProcessed";
             DataRegion rgn = new DataRegion();
 
-            rgn.addColumns(ProteinManager.getTableInfoAnnotInsertions(), columnNames);
+            rgn.addColumns(ProteinSchema.getTableInfoAnnotInsertions(), columnNames);
             rgn.getDisplayColumn("fileType").setWidth("20");
             rgn.getDisplayColumn("insertId").setCaption("ID");
             rgn.getDisplayColumn("insertId").setWidth("5");
@@ -2745,7 +2745,7 @@ public class MS2Controller extends SpringActionController
         private GridView getFastaAdminGrid()
         {
             DataRegion rgn = new DataRegion();
-            rgn.setColumns(ProteinManager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
+            rgn.setColumns(ProteinSchema.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
             ActionURL runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot())
                 .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
             rgn.getDisplayColumn("Runs").setURL(runsURL);
@@ -2770,7 +2770,7 @@ public class MS2Controller extends SpringActionController
             testFastaHeader.setActionType(ActionButton.Action.LINK);
             bb.add(testFastaHeader);
 
-            MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
+            MenuButton setBestNameMenu = new MenuButton("Set FastaProtein Best Name...");
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
 
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
@@ -2793,7 +2793,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", getClass(), getContainer());
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "FastaProtein Database Admin", getClass(), getContainer());
         }
     }
 
@@ -3018,7 +3018,7 @@ public class MS2Controller extends SpringActionController
             // Disable R and other reporting until there's an implementation that respects the search criteria
             groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
-            groupsView.setTitle("Protein Group Results");
+            groupsView.setTitle("FastaProtein Group Results");
             return groupsView;
         }
 
@@ -3090,7 +3090,7 @@ public class MS2Controller extends SpringActionController
             }
 
             if (form.isShowProteinGroups() &&
-                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
+                    // Add the "FastaProtein Group Results" web part only if the targetedms module is not enabled in the container.
                     (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
                             !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms"))))
             {
@@ -3112,7 +3112,7 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             setHelpTopic("proteinSearch");
-            root.addChild("Protein Search Results");
+            root.addChild("FastaProtein Search Results");
         }
     }
 
@@ -3503,7 +3503,7 @@ public class MS2Controller extends SpringActionController
         {
             MS2Run run = form.validateRun();
 
-            String title = "Protein Prophet Details";
+            String title = "FastaProtein Prophet Details";
             setTitle(title);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
@@ -4025,7 +4025,7 @@ public class MS2Controller extends SpringActionController
             ActionURL currentURL = getViewContext().getActionURL();
 
             if (0 == seqId)
-                throw new NotFoundException("Protein sequence not found");
+                throw new NotFoundException("FastaProtein sequence not found");
 
             _protein = ProteinManager.getProtein(seqId);
             if (_protein == null)
@@ -4163,7 +4163,7 @@ public class MS2Controller extends SpringActionController
 
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideQueryView);
             JspView summaryView = new JspView<>("/org/labkey/ms2/showProteinGroup.jsp", group);
-            summaryView.setTitle("Protein Group Details");
+            summaryView.setTitle("FastaProtein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
             return new VBox(summaryView, view);
@@ -4174,23 +4174,6 @@ public class MS2Controller extends SpringActionController
         {
         }
     }
-
-
-    public static class ProteinViewBean
-    {
-        public Protein protein;
-        public boolean showPeptides;
-        public MS2Run run;
-        public String showRunUrl;
-        public boolean enableAllPeptidesFeature;
-        public boolean showViewSettings;
-        public boolean showLegendAndLabel = true;
-        public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
-        public int aaRowWidth;
-        public List<ProteinFeature> features = Collections.emptyList();
-        public List<Replicate> replicates = Collections.emptyList();
-    }
-
 
     private static class ProteinsView extends VBox
     {
@@ -4232,7 +4215,7 @@ public class MS2Controller extends SpringActionController
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
-                addView(HtmlView.unsafe("<a name=\"Protein" + i + "\"></a>"));
+                addView(HtmlView.unsafe("<a name=\"FastaProtein" + i + "\"></a>"));
                 protein.setPeptides(peptides);
                 if (peptides != null)
                 {
@@ -4269,7 +4252,7 @@ public class MS2Controller extends SpringActionController
                     sequenceView = new JspView<>("/org/labkey/ms2/proteinSequence.jsp", bean);
                 }
                 sequenceView.enableExpandCollapse("ProteinCoverageMap", false);
-                sequenceView.setTitle("Protein Sequence");
+                sequenceView.setTitle("FastaProtein Sequence");
                 addView(sequenceView);
 
                 // Add annotations
@@ -5529,7 +5512,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            addProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
+            addProteinAdminNavTrail(root, "Load FastaProtein Annotations", getPageConfig(), null);
         }
     }
 
@@ -5656,7 +5639,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(AnnotationInsertionForm form, BindException errors)
         {
-            _insertion = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
+            _insertion = new SqlSelector(ProteinSchema.getSchema(), "SELECT * FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
 
             return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
         }
@@ -6345,7 +6328,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add(ProteinManager.getSqlDialect().encodeLikeOpSearchString(param) + "%");
+                        sqlFragment.add(ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param) + "%");
                     }
                 },
         SUFFIX("Suffix")
@@ -6354,7 +6337,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + ProteinManager.getSqlDialect().encodeLikeOpSearchString(param));
+                        sqlFragment.add("%" + ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param));
                     }
                 },
         SUBSTRING("Substring")
@@ -6363,7 +6346,7 @@ public class MS2Controller extends SpringActionController
                     public void appendMatchClause(SQLFragment sqlFragment, String param)
                     {
                         sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + ProteinManager.getSqlDialect().encodeLikeOpSearchString(param) + "%");
+                        sqlFragment.add("%" + ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param) + "%");
                     }
                 };
 

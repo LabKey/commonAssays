@@ -36,7 +36,7 @@ import static org.labkey.api.util.PageFlowUtil.filter;
  */
 public class CustomProteinListView extends VBox
 {
-    public static final String NAME = "Custom Protein Lists";
+    public static final String NAME = "Custom FastaProtein Lists";
 
     public CustomProteinListView(ViewContext context, boolean includeButtons)
     {
@@ -44,7 +44,7 @@ public class CustomProteinListView extends VBox
 
         DataRegion rgn = new DataRegion();
         rgn.setSettings(settings);
-        rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
+        rgn.setColumns(ProteinSchema.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
         rgn.getDisplayColumn("Name").setURLExpression(new DetailsURL(new ActionURL(ProteinController.ShowAnnotationSetAction.class, context.getContainer()), Collections.singletonMap("CustomAnnotation.queryName", "Name")));
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
         GridView gridView = new GridView(rgn, (BindException)null);
@@ -62,7 +62,7 @@ public class CustomProteinListView extends VBox
             deleteButton.setDisplayPermission(DeletePermission.class);
             buttonBar.add(deleteButton);
 
-            ActionButton addButton = new ActionButton(new ActionURL(ProteinController.UploadCustomProteinAnnotations.class, context.getContainer()), "Import Custom Protein List");
+            ActionButton addButton = new ActionButton(new ActionURL(ProteinController.UploadCustomProteinAnnotations.class, context.getContainer()), "Import Custom FastaProtein List");
             addButton.setDisplayPermission(InsertPermission.class);
             addButton.setActionType(ActionButton.Action.LINK);
             buttonBar.add(addButton);

@@ -58,6 +58,9 @@ import org.labkey.ms2.RunListException;
 import org.labkey.ms2.protein.ProteinManager;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.ms2.protein.ProteinViewBean;
+
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -510,10 +513,10 @@ public class MS2Schema extends UserSchema
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, cf, includeFirstProteinColumn);
         result.addProteinsColumn(cf);
         List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
-        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Mass"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Description"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "BestGeneName"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "Mass"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "Description"));
         result.setDefaultVisibleColumns(defaultColumns);
         return result;
     }
@@ -574,7 +577,7 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        result.getMutableColumn("SeqId").setLabel("Protein");
+        result.getMutableColumn("SeqId").setLabel("FastaProtein");
         result.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         if (_runs != null && filterByRuns)
@@ -1064,10 +1067,10 @@ public class MS2Schema extends UserSchema
 
         CrosstabTable result;
         CrosstabSettings settings = new CrosstabSettings(baseTable);
-        CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First Protein Group");
-        CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
+        CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First FastaProtein Group");
+        CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run FastaProtein Group Count");
 
-        settings.getRowAxis().setCaption("Normalized Protein Group");
+        settings.getRowAxis().setCaption("Normalized FastaProtein Group");
 
         CrosstabDimension colDim;
         if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
@@ -1254,9 +1257,9 @@ public class MS2Schema extends UserSchema
             return dc;
         });
 
-        CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
+        CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "FastaProtein Group");
 
-        settings.getRowAxis().setCaption("Protein Information");
+        settings.getRowAxis().setCaption("FastaProtein Information");
 
         CrosstabDimension colDim;
         if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
@@ -1379,12 +1382,12 @@ public class MS2Schema extends UserSchema
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts( "Run"));
         ActionURL linkUrlOnRunColuumn;
-        // if matching on a single target protein, go straight to the Protein Details page in "all peptides" mode
+        // if matching on a single target protein, go straight to the FastaProtein Details page in "all peptides" mode
         if ((form != null) && (form.getTargetSeqIds()!=null) && form.getTargetSeqIds().size() == 1)
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
             linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqIds().get(0));
-            linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
+            linkUrlOnRunColuumn.addParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
             linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
             if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)
             {
@@ -1491,7 +1494,7 @@ public class MS2Schema extends UserSchema
             filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
-        baseTable.getMutableColumn("SeqId").setLabel("Search Engine Protein");
+        baseTable.getMutableColumn("SeqId").setLabel("Search Engine FastaProtein");
         baseTable.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         return baseTable;
@@ -1513,7 +1516,7 @@ public class MS2Schema extends UserSchema
                 if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
                 {
                     SQLFragment sql = new SQLFragment();
-                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinSchema.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
                     sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
                     appendRunInClause(sql);
                     sql.append(")))");

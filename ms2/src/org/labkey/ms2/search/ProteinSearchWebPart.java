@@ -25,7 +25,7 @@ import org.labkey.ms2.MS2Controller;
  */
 public class ProteinSearchWebPart extends JspView<ProteinSearchBean>
 {
-    public static final String NAME = "Protein Search";
+    public static final String NAME = "FastaProtein Search";
 
     public ProteinSearchWebPart(boolean horizontal, MS2Controller.ProbabilityProteinSearchForm form)
     {

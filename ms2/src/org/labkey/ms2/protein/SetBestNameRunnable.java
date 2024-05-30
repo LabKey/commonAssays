@@ -45,45 +45,45 @@ public class SetBestNameRunnable implements Runnable
             {
                 case IPI:
                     identifierSQL = new SQLFragment();
-                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                    identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                    identifierSQL.append(IdentifierType.IPI + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinSchema.getTableInfoIdentifiers() + " i, ");
+                    identifierSQL.append(ProteinSchema.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                    identifierSQL.append(IdentifierType.IPI + "' AND " + ProteinSchema.getTableInfoSequences() + ".SeqId = i.SeqId");
                     break;
                 case SWISS_PROT:
                     identifierSQL = new SQLFragment();
-                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                    identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                    identifierSQL.append(IdentifierType.SwissProt + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinSchema.getTableInfoIdentifiers() + " i, ");
+                    identifierSQL.append(ProteinSchema.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                    identifierSQL.append(IdentifierType.SwissProt + "' AND " + ProteinSchema.getTableInfoSequences() + ".SeqId = i.SeqId");
                     break;
                 case SWISS_PROT_ACCN:
                     identifierSQL = new SQLFragment();
-                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                    identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                    identifierSQL.append(IdentifierType.SwissProtAccn + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinSchema.getTableInfoIdentifiers() + " i, ");
+                    identifierSQL.append(ProteinSchema.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                    identifierSQL.append(IdentifierType.SwissProtAccn + "' AND " + ProteinSchema.getTableInfoSequences() + ".SeqId = i.SeqId");
                     break;
                 case GEN_INFO:
                     identifierSQL = new SQLFragment();
-                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, ");
-                    identifierSQL.append(ProteinManager.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-                    identifierSQL.append(IdentifierType.GI + "' AND " + ProteinManager.getTableInfoSequences() + ".SeqId = i.SeqId");
+                    identifierSQL.append("SELECT MAX(i.Identifier) FROM " + ProteinSchema.getTableInfoIdentifiers() + " i, ");
+                    identifierSQL.append(ProteinSchema.getTableInfoIdentTypes() + " it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
+                    identifierSQL.append(IdentifierType.GI + "' AND " + ProteinSchema.getTableInfoSequences() + ".SeqId = i.SeqId");
                     break;
                 case LOOKUP_STRING:
                     identifierSQL = new SQLFragment();
-                    String nameSubstring = ProteinManager.getSqlDialect().getSubstringFunction("MAX(fs.LookupString)", "0", "50");
-                    identifierSQL.append("SELECT " + nameSubstring + " FROM " + ProteinManager.getTableInfoFastaSequences() + " fs ");
-                    identifierSQL.append(" WHERE fs.SeqId = " + ProteinManager.getTableInfoSequences() + ".SeqId");
+                    String nameSubstring = ProteinSchema.getSqlDialect().getSubstringFunction("MAX(fs.LookupString)", "0", "50");
+                    identifierSQL.append("SELECT " + nameSubstring + " FROM " + ProteinSchema.getTableInfoFastaSequences() + " fs ");
+                    identifierSQL.append(" WHERE fs.SeqId = " + ProteinSchema.getTableInfoSequences() + ".SeqId");
                     break;
                 default:
                     throw new IllegalArgumentException("Unexpected NameType: " + _nameType);
             }
 
-            SQLFragment sql = new SQLFragment("UPDATE " + ProteinManager.getTableInfoSequences() + " SET BestName = (");
+            SQLFragment sql = new SQLFragment("UPDATE " + ProteinSchema.getTableInfoSequences() + " SET BestName = (");
             sql.append(identifierSQL);
-            sql.append(") WHERE " + ProteinManager.getTableInfoSequences() + ".SeqId IN (SELECT fs.SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " fs WHERE FastaId = " + fastaId + ") AND ");
+            sql.append(") WHERE " + ProteinSchema.getTableInfoSequences() + ".SeqId IN (SELECT fs.SeqId FROM " + ProteinSchema.getTableInfoFastaSequences() + " fs WHERE FastaId = " + fastaId + ") AND ");
             sql.append("(");
             sql.append(identifierSQL);
             sql.append(") IS NOT NULL");
-            new SqlExecutor(ProteinManager.getSchema()).execute(sql);
+            new SqlExecutor(ProteinSchema.getSchema()).execute(sql);
         }
     }
 }

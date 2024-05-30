@@ -390,7 +390,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 {
                     String name = matcher.group(MASS_DELTA_NAME_GROUP_NUM);
                     Float massDelta = Float.parseFloat(matcher.group(MASS_DELTA_GROUP_NUM));
-                    boolean isProteinTerm = name.contains("Protein");
+                    boolean isProteinTerm = name.contains("FastaProtein");
 
                     // CONSIDER: This index is possibly important for matching up modifications for individual proteins, but is not used now ('cause I don't know how)
                     int deltaNum = Integer.parseInt(matcher.group(MASS_INDEX_GROUP_NUM));

@@ -83,7 +83,7 @@ public class SpectraCountConfiguration
         }
         if (_groupedByProtein)
         {
-            queryName.append("Protein");
+            queryName.append("FastaProtein");
             if (_usingProteinProphet)
             {
                 queryName.append("PP");

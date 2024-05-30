@@ -69,7 +69,7 @@ public class ProteinController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Custom Protein Lists");
+            root.addChild("Custom FastaProtein Lists");
         }
     }
 
@@ -104,7 +104,7 @@ public class ProteinController extends SpringActionController
 
             // 41640: Expect valid "CustomAnnotation.queryName" URL parameter
             if (StringUtils.isEmpty(_setName))
-                throw new NotFoundException("Custom Protein List not found.");
+                throw new NotFoundException("Custom FastaProtein List not found.");
 
             QueryView queryView = new QueryView(schema, settings, errors)
             {
@@ -119,7 +119,7 @@ public class ProteinController extends SpringActionController
                 @Override
                 public MenuButton createQueryPickerButton(String label)
                 {
-                    return super.createQueryPickerButton("Custom Protein List");
+                    return super.createQueryPickerButton("Custom FastaProtein List");
                 }
             };
 
@@ -151,8 +151,8 @@ public class ProteinController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
-            root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
-            root.addChild("Custom Protein List: " + _setName);
+            root.addChild("Custom FastaProtein Lists", getBeginURL(getContainer()));
+            root.addChild("Custom FastaProtein List: " + _setName);
         }
     }
 
@@ -292,7 +292,7 @@ public class ProteinController extends SpringActionController
                 return false;
             }
 
-            DbScope scope = ProteinManager.getSchema().getScope();
+            DbScope scope = ProteinSchema.getSchema().getScope();
 
             try (DbScope.Transaction transaction = scope.ensureTransaction())
             {
@@ -308,13 +308,13 @@ public class ProteinController extends SpringActionController
                 annotationSet.setName(form.getName());
                 annotationSet.setCustomAnnotationType(type.toString());
 
-                annotationSet = Table.insert(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet);
+                annotationSet = Table.insert(getUser(), ProteinSchema.getTableInfoCustomAnnotationSet(), annotationSet);
                 annotationSet.setLsid(new Lsid(CustomAnnotationSet.TYPE, Integer.toString(annotationSet.getCustomAnnotationSetId())).toString());
-                annotationSet = Table.update(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId());
+                annotationSet = Table.update(getUser(), ProteinSchema.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId());
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("INSERT INTO ");
-                sb.append(ProteinManager.getTableInfoCustomAnnotation());
+                sb.append(ProteinSchema.getTableInfoCustomAnnotation());
                 sb.append("(CustomAnnotationSetId, LookupString, ObjectURI) VALUES (?, ?, ?)");
 
                 PreparedStatement stmt = connection.prepareStatement(sb.toString());
@@ -373,8 +373,8 @@ public class ProteinController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
-            root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
-            root.addChild("Upload Custom Protein List");
+            root.addChild("Custom FastaProtein Lists", getBeginURL(getContainer()));
+            root.addChild("Upload Custom FastaProtein List");
         }
     }
 

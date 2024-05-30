@@ -41,7 +41,7 @@ public class FastaValidator
 
         for (ProteinFastaLoader.ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext();)
         {
-            Protein protein = proteinIterator.next();
+            FastaProtein protein = proteinIterator.next();
             String lookupString = protein.getLookup().toLowerCase();
 
             if (_proteinNames.containsKey(lookupString))

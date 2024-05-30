@@ -104,7 +104,7 @@ public class PeptidesView extends QueryView
         defCols.add(FieldKey.fromParts("PeptideProphet"));
         defCols.add(FieldKey.fromParts("Peptide"));
         defCols.add(FieldKey.fromParts("ProteinHits"));
-        defCols.add(FieldKey.fromParts("Protein"));
+        defCols.add(FieldKey.fromParts("FastaProtein"));
 
         ContainerFilter.Type type = _searchSubfolders ? ContainerFilter.Type.CurrentAndSubfolders : ContainerFilter.Type.Current;
         ContainerFilter containerFilter = type.create(getSchema());

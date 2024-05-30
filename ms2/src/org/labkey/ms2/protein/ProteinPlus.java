@@ -16,34 +16,29 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.api.util.HashHelpers;
 
-/**
- * User: brittp
- * Date: Jan 2, 2006
- * Time: 3:47:22 PM
- */
 public class ProteinPlus
 {
     protected String _hash;
     protected String _fullOrg;
     protected String _species;
     protected String _genus;
-    protected Protein _protein;
+    protected FastaProtein _protein;
 
-    public ProteinPlus(Protein p)
+    public ProteinPlus(FastaProtein p)
     {
         setProtein(p);
         genHash();
     }
 
-    public Protein getProtein()
+    public FastaProtein getProtein()
     {
         return _protein;
     }
 
-    public void setProtein(Protein p)
+    public void setProtein(FastaProtein p)
     {
         _protein = p;
     }

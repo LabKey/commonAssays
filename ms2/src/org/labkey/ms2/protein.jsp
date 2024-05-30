@@ -23,10 +23,11 @@
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.ProteinManager" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.ProteinViewBean bean = ((JspView<MS2Controller.ProteinViewBean>)HttpView.currentView()).getModelBean();
+    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
     Format intFormat = Formats.commaf0;
     Format percentFormat = Formats.percent;
 %>
@@ -44,7 +45,7 @@
     if (bean.enableAllPeptidesFeature)
     {
         ActionURL urlProteinDetailsPage = getViewContext().cloneActionURL();
-        urlProteinDetailsPage.deleteParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
+        urlProteinDetailsPage.deleteParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
         <tr>
             <td class="labkey-form-label">Peptides<%=helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true)%></td>
             <td>
@@ -52,8 +53,8 @@
                     <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
                         <input type="hidden" name="<%= h(param.getKey()) %>" value="<%= h(param.getValue()) %>" />
                     <% } %>
-                    <% addHandler(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "change", "this.form.submit();"); %>
-                    <select id="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" name="<%= h(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>">
+                    <% addHandler(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "change", "this.form.submit();"); %>
+                    <select id="<%= h(ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" name="<%= h(ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>">
                         <option value="false">Show only peptides assigned by search engine</option>
                         <option value="true" <%=selected(ProteinManager.showAllPeptides(getActionURL(), getUser()))%>>Show all peptides with sequence matches</option>
                     </select>

@@ -16,7 +16,6 @@
 package org.labkey.ms2;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
@@ -27,7 +26,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
 import org.labkey.ms2.reader.MS2Loader;
 import org.labkey.ms2.reader.PeptideProphetHandler;
@@ -142,9 +141,9 @@ public abstract class PeptideImporter extends MS2Importer
                 // Insert a row into the run/FASTA mapping table
                 new SqlExecutor(MS2Manager.getSchema()).execute(new SQLFragment("INSERT INTO " + MS2Manager.getTableInfoFastaRunMapping() + " (Run, FastaId) VALUES (?, ?)", _runId, fastaId));
 
-                _scoringAnalysis |= new SqlSelector(ProteinManager.getSchema(),
+                _scoringAnalysis |= new SqlSelector(ProteinSchema.getSchema(),
                         "SELECT ScoringAnalysis " +
-                                "FROM " + ProteinManager.getTableInfoFastaFiles() + " " +
+                                "FROM " + ProteinSchema.getTableInfoFastaFiles() + " " +
                                 "WHERE FastaId = ?", fastaId).getObject(Boolean.class);
             }
         }

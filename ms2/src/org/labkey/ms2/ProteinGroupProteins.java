@@ -19,8 +19,8 @@ package org.labkey.ms2;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.data.RenderContext;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.*;
 import java.sql.SQLException;
@@ -105,11 +105,11 @@ public class ProteinGroupProteins
 
     private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
     {
-        String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
-                "FROM " + ProteinManager.getTableInfoSequences() + " protseq, " +
+        String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS FastaProtein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
+                "FROM " + ProteinSchema.getTableInfoSequences() + " protseq, " +
                 "   " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                 "   " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
-                "   " + ProteinManager.getTableInfoFastaSequences() + " proteinseq, " +
+                "   " + ProteinSchema.getTableInfoFastaSequences() + " proteinseq, " +
                 "   " + MS2Manager.getTableInfoFastaRunMapping() + " frm, " +
                 "   " + MS2Manager.getTableInfoRuns() + " r, " +
                 "   " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n" +
@@ -128,7 +128,7 @@ public class ProteinGroupProteins
         for (Map<String, Object> row : rows)
         {
             Integer rowId = ((Number)row.get("RowId")).intValue();
-            String lookupString = (String)row.get("Protein");
+            String lookupString = (String)row.get("FastaProtein");
             int seqId = ((Number)row.get("SeqId")).intValue();
             String description = (String)row.get("Description");
             String bestName = (String)row.get("BestName");

@@ -70,7 +70,7 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
             ActionURL url = getViewContext().getActionURL().clone();
             url.setAction(MS2Controller.ExportComparisonProteinCoverageMapAction.class);
 
-            ActionButton exportProteinCoverage = new ActionButton(url, "Export Protein Coverage");
+            ActionButton exportProteinCoverage = new ActionButton(url, "Export FastaProtein Coverage");
             exportProteinCoverage.setActionType(ActionButton.Action.POST);
             exportProteinCoverage.setDisplayPermission(ReadPermission.class);
             bar.add(exportProteinCoverage);

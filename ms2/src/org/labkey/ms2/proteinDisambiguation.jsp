@@ -97,7 +97,7 @@
 
         for (Protein protein : proteins) {
             String divId = GUID.makeGUID();
-            JSONObject props = new JSONObject().put("width", 450).put("title", "Protein Details");
+            JSONObject props = new JSONObject().put("width", 450).put("title", "FastaProtein Details");
             JSONObject autoLoadProp = new JSONObject();
             ActionURL ajaxURL = new ActionURL(MS2Controller.ShowProteinAJAXAction.class, getContainer());
             ajaxURL.addParameter("seqId", protein.getSeqId());

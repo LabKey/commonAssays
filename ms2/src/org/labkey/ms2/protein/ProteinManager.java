@@ -30,8 +30,6 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -53,13 +51,12 @@ import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Peptide;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.Protein;
 import org.labkey.ms2.protein.fasta.FastaFile;
-import org.labkey.ms2.protein.fasta.PeptideGenerator;
+import org.labkey.ms2.protein.fasta.PeptideHelpers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -81,179 +78,36 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * User: arauch
- * Date: Mar 23, 2005
- * Time: 9:58:17 PM
- */
 public class ProteinManager
 {
     private static final Logger LOG = LogManager.getLogger(ProteinManager.class);
-    private static final String SCHEMA_NAME = "prot";
 
     public static final int RUN_FILTER = 1;
     public static final int URL_FILTER = 2;
     public static final int EXTRA_FILTER = 4;
     public static final int PROTEIN_FILTER = 8;
     public static final int ALL_FILTERS = RUN_FILTER + URL_FILTER + EXTRA_FILTER + PROTEIN_FILTER;
-    private static final String ALL_PEPTIDES_PREFERENCE_NAME = ProteinManager.class.getName() + "." + MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM;
-
-    public static String getSchemaName()
-    {
-        return SCHEMA_NAME;
-    }
-
-
-    public static DbSchema getSchema()
-    {
-        return DbSchema.get(SCHEMA_NAME, DbSchemaType.Module);
-    }
-
-
-    public static SqlDialect getSqlDialect()
-    {
-        return getSchema().getSqlDialect();
-    }
-
-
-    public static TableInfo getTableInfoFastaFiles()
-    {
-        return getSchema().getTable("FastaFiles");
-    }
-
-
-    public static TableInfo getTableInfoFastaSequences()
-    {
-        return getSchema().getTable("FastaSequences");
-    }
-
-
-    public static TableInfo getTableInfoFastaAdmin()
-    {
-        return getSchema().getTable("FastaAdmin");
-    }
-
-
-    public static TableInfo getTableInfoAnnotInsertions()
-    {
-        return getSchema().getTable("AnnotInsertions");
-    }
-
-
-    public static TableInfo getTableInfoCustomAnnotation()
-    {
-        return getSchema().getTable("CustomAnnotation");
-    }
-
-    public static TableInfo getTableInfoCustomAnnotationSet()
-    {
-        return getSchema().getTable("CustomAnnotationSet");
-    }
-
-    public static TableInfo getTableInfoAnnotations()
-    {
-        return getSchema().getTable("Annotations");
-    }
-
-
-    public static TableInfo getTableInfoAnnotationTypes()
-    {
-        return getSchema().getTable("AnnotationTypes");
-    }
-
-
-    public static TableInfo getTableInfoIdentifiers()
-    {
-        return getSchema().getTable("Identifiers");
-    }
-
-
-    public static TableInfo getTableInfoIdentTypes()
-    {
-        return getSchema().getTable("IdentTypes");
-    }
-
-
-    public static TableInfo getTableInfoOrganisms()
-    {
-        return getSchema().getTable("Organisms");
-    }
-
-
-    public static TableInfo getTableInfoInfoSources()
-    {
-        return getSchema().getTable("InfoSources");
-    }
-
-
-    public static TableInfo getTableInfoSequences()
-    {
-        return getSchema().getTable("Sequences");
-    }
-
-
-    public static TableInfo getTableInfoFastaLoads()
-    {
-        return getSchema().getTable("FastaLoads");
-    }
-
-
-    public static TableInfo getTableInfoSprotOrgMap()
-    {
-        return getSchema().getTable("SprotOrgMap");
-    }
-
-    public static TableInfo getTableInfoGoTerm()
-    {
-        return getSchema().getTable("GoTerm");
-    }
-
-    public static TableInfo getTableInfoGoTerm2Term()
-    {
-        return getSchema().getTable("GoTerm2Term");
-    }
-
-    public static TableInfo getTableInfoGoGraphPath()
-    {
-        return getSchema().getTable("GoGraphPath");
-    }
-
-    public static TableInfo getTableInfoGoTermDefinition()
-    {
-        return getSchema().getTable("GoTermDefinition");
-    }
-
-    public static TableInfo getTableInfoGoTermSynonym()
-    {
-        return getSchema().getTable("GoTermSynonym");
-    }
-
+    private static final String ALL_PEPTIDES_PREFERENCE_NAME = ProteinManager.class.getName() + "." + ProteinViewBean.ALL_PEPTIDES_URL_PARAM;
 
     public static Protein getProtein(int seqId)
     {
-        return new SqlSelector(getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE SeqId = ?",
+        return new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE SeqId = ?",
                 seqId).getObject(Protein.class);
     }
 
     public static Protein getProtein(String sequence, int organismId)
     {
-        return new SqlSelector(getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
+        return new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
                 hashSequence(sequence), organismId).getObject(Protein.class);
     }
 
     public static List<Protein> getProtein(String sequence)
     {
-        return new SqlSelector(getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + getTableInfoSequences() + " WHERE Hash = ?",
+        return new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ?",
                 hashSequence(sequence)).getArrayList(Protein.class);
-    }
-
-    public static String getProteinSequence(int seqId)
-    {
-        Protein protein = getProtein(seqId);
-        return protein != null ? protein.getSequence() : null;
     }
 
     public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds)
@@ -266,7 +120,7 @@ public class ProteinManager
         if (hits == 1 && peptide.getSeqId() != null)
         {
             sql.append("SELECT SeqId, ProtSequence AS Sequence, Mass, Description, ? AS BestName, BestGeneName FROM ");
-            sql.append(getTableInfoSequences(), "s");
+            sql.append(ProteinSchema.getTableInfoSequences(), "s");
             sql.append(" WHERE SeqId = ?");
             sql.add(peptide.getProtein());
             sql.add(peptide.getSeqId());
@@ -275,13 +129,13 @@ public class ProteinManager
         {
             // TODO: make search tryptic so that number that match = ProteinHits.
             sql.append("SELECT s.SeqId, s.ProtSequence AS Sequence, s.Mass, s.Description, fs.LookupString AS BestName, s.BestGeneName FROM ");
-            sql.append(getTableInfoSequences(), "s");
+            sql.append(ProteinSchema.getTableInfoSequences(), "s");
             sql.append(", ");
-            sql.append(getTableInfoFastaSequences(), "fs");
+            sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
             sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId IN (");
             sql.append(StringUtils.repeat("?", ", ", fastaIds.length));
             sql.append(") AND ProtSequence ");
-            sql.append(getSqlDialect().getCharClassLikeOperator());
+            sql.append(ProteinSchema.getSqlDialect().getCharClassLikeOperator());
             sql.append(" ?" );
             for (int fastaId : fastaIds)
             {
@@ -290,10 +144,10 @@ public class ProteinManager
             sql.add("%" + peptide.getTrimmedPeptide() + "%");
 
             //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
-            sql = getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
+            sql = ProteinSchema.getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
         }
 
-        List<Protein> proteins = new SqlSelector(getSchema(), sql).getArrayList(Protein.class);
+        List<Protein> proteins = new SqlSelector(ProteinSchema.getSchema(), sql).getArrayList(Protein.class);
 
         if (proteins.isEmpty())
             LOG.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA files " + Arrays.asList(fastaIds));
@@ -306,7 +160,7 @@ public class ProteinManager
 
     public static FastaFile getFastaFile(int fastaId)
     {
-        return new TableSelector(ProteinManager.getTableInfoFastaFiles()).getObject(fastaId, FastaFile.class);
+        return new TableSelector(ProteinSchema.getTableInfoFastaFiles()).getObject(fastaId, FastaFile.class);
     }
 
     public static void addExtraFilter(SimpleFilter filter, MS2Run run, ActionURL currentUrl)
@@ -320,7 +174,7 @@ public class ProteinManager
         {
             String threshold = currentUrl.getParameter(paramName + (i + 1));
 
-            if (null != threshold && !"".equals(threshold))
+            if (null != threshold && !threshold.isEmpty())
             {
                 try
                 {
@@ -351,7 +205,7 @@ public class ProteinManager
     {
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT * FROM ");
-        sql.append(getTableInfoCustomAnnotationSet());
+        sql.append(ProteinSchema.getTableInfoCustomAnnotationSet());
         sql.append(" WHERE Container = ? ");
         sql.add(container.getId());
         if (includeProject)
@@ -364,7 +218,7 @@ public class ProteinManager
             }
         }
         sql.append(" ORDER BY Name");
-        Collection<CustomAnnotationSet> allSets = new SqlSelector(getSchema(), sql).getCollection(CustomAnnotationSet.class);
+        Collection<CustomAnnotationSet> allSets = new SqlSelector(ProteinSchema.getSchema(), sql).getCollection(CustomAnnotationSet.class);
 
         Set<String> setNames = new CaseInsensitiveHashSet();
         List<CustomAnnotationSet> dedupedSets = new ArrayList<>(allSets.size());
@@ -414,10 +268,10 @@ public class ProteinManager
             throw new RuntimeException(e);
         }
 
-        try (DbScope.Transaction transaction = getSchema().getScope().ensureTransaction())
+        try (DbScope.Transaction transaction = ProteinSchema.getSchema().getScope().ensureTransaction())
         {
-            new SqlExecutor(getSchema()).execute("DELETE FROM " + getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", set.getCustomAnnotationSetId());
-            Table.delete(getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
+            new SqlExecutor(ProteinSchema.getSchema()).execute("DELETE FROM " + ProteinSchema.getTableInfoCustomAnnotation() + " WHERE CustomAnnotationSetId = ?", set.getCustomAnnotationSetId());
+            Table.delete(ProteinSchema.getTableInfoCustomAnnotationSet(), set.getCustomAnnotationSetId());
             transaction.commit();
         }
     }
@@ -426,7 +280,7 @@ public class ProteinManager
     {
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT * FROM ");
-        sql.append(getTableInfoCustomAnnotationSet());
+        sql.append(ProteinSchema.getTableInfoCustomAnnotationSet());
         sql.append(" WHERE (Container = ?");
         sql.add(c.getId());
         if (includeProject)
@@ -436,7 +290,7 @@ public class ProteinManager
         }
         sql.append(") AND CustomAnnotationSetId = ?");
         sql.add(id);
-        List<CustomAnnotationSet> matches = new SqlSelector(getSchema(), sql).getArrayList(CustomAnnotationSet.class);
+        List<CustomAnnotationSet> matches = new SqlSelector(ProteinSchema.getSchema(), sql).getArrayList(CustomAnnotationSet.class);
         if (matches.size() > 1)
         {
             for (CustomAnnotationSet set : matches)
@@ -461,9 +315,9 @@ public class ProteinManager
     {
         SQLFragment mappingSQL = new SQLFragment("SELECT fs1.seqid AS OldSeqId, fs2.seqid AS NewSeqId\n");
         mappingSQL.append("FROM \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + oldFastaId + ") fs1 \n");
+        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + ProteinSchema.getTableInfoFastaSequences() + " ff, " + ProteinSchema.getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + oldFastaId + ") fs1 \n");
         mappingSQL.append("\tLEFT OUTER JOIN \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + getTableInfoFastaSequences() + " ff, " + getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + newFastaId + ") fs2 \n");
+        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + ProteinSchema.getTableInfoFastaSequences() + " ff, " + ProteinSchema.getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + newFastaId + ") fs2 \n");
         mappingSQL.append("\tON (fs1.Hash = fs2.Hash AND fs1.LookupString = fs2.LookupString)");
 
         SQLFragment missingCountSQL = new SQLFragment("SELECT COUNT(*) FROM (");
@@ -474,7 +328,7 @@ public class ProteinManager
         missingCountSQL.append("(SELECT pgm.SeqId FROM ").append(MS2Manager.getTableInfoProteinGroupMemberships()).append(" pgm, ").append(MS2Manager.getTableInfoProteinGroups()).append(" pg, ").append(MS2Manager.getTableInfoProteinProphetFiles()).append(" ppf, ").append(MS2Manager.getTableInfoRuns()).append(" r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = ").appendValue(oldFastaId).append("))\n");
         missingCountSQL.append("AND NewSeqId IS NULL");
 
-        int missingCount = new SqlSelector(getSchema(), missingCountSQL).getObject(Integer.class);
+        int missingCount = new SqlSelector(ProteinSchema.getSchema(), missingCountSQL).getObject(Integer.class);
         if (missingCount > 0)
         {
             throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");
@@ -529,29 +383,19 @@ public class ProteinManager
         return protein.getSeqId();
     }
 
-    public static int ensureProtein(String sequence, int orgId, String name, String description)
-    {
-        Organism organism = new TableSelector(getTableInfoOrganisms()).getObject(orgId, Organism.class);
-        if (organism == null)
-            throw new IllegalArgumentException("Organism " + orgId + " does not exist");
-
-        Protein protein = ensureProteinInDatabase(sequence, organism, name, description);
-        return protein.getSeqId();
-    }
-
     private static Protein ensureProteinInDatabase(String sequence, String organismName, String name, String description)
     {
         String genus = FastaDbLoader.extractGenus(organismName);
         String species = FastaDbLoader.extractSpecies(organismName);
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("species"), species);
         filter.addCondition(FieldKey.fromParts("genus"), genus);
-        Organism organism = new TableSelector(getTableInfoOrganisms(), filter, null).getObject(Organism.class);
+        Organism organism = new TableSelector(ProteinSchema.getTableInfoOrganisms(), filter, null).getObject(Organism.class);
         if (organism == null)
         {
             organism = new Organism();
             organism.setGenus(genus);
             organism.setSpecies(species);
-            organism = Table.insert(null, getTableInfoOrganisms(), organism);
+            organism = Table.insert(null, ProteinSchema.getTableInfoOrganisms(), organism);
         }
 
         return ensureProteinInDatabase(sequence, organism, name, description);
@@ -565,7 +409,7 @@ public class ProteinManager
             Map<String, Object> map = new CaseInsensitiveHashMap<>();
             map.put("ProtSequence", sequence);
             byte[] sequenceBytes = getSequenceBytes(sequence);
-            map.put("Mass", PeptideGenerator.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES));
+            map.put("Mass", PeptideHelpers.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideHelpers.AMINO_ACID_AVERAGE_MASSES));
             map.put("OrgId", organism.getOrgId());
             map.put("Hash", hashSequence(sequence));
             map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
@@ -574,7 +418,7 @@ public class ProteinManager
             map.put("InsertDate", new Date());
             map.put("ChangeDate", new Date());
 
-            Table.insert(null, getTableInfoSequences(), map);
+            Table.insert(null, ProteinSchema.getTableInfoSequences(), map);
             protein = getProtein(sequence, organism.getOrgId());
         }
         return protein;
@@ -592,7 +436,7 @@ public class ProteinManager
 
     private static void ensureIdentifiers(Protein protein, Map<String, Set<String>> typeAndIdentifiers)
     {
-        if(typeAndIdentifiers == null || typeAndIdentifiers.size() == 0)
+        if(typeAndIdentifiers == null || typeAndIdentifiers.isEmpty())
         {
             return;
         }
@@ -633,7 +477,7 @@ public class ProteinManager
         values.put("identTypeId", identifierTypeId);
         values.put("seqId", seqId);
         values.put("entryDate", new Date());
-        Table.insert(null, getTableInfoIdentifiers(), values);
+        Table.insert(null, ProteinSchema.getTableInfoIdentifiers(), values);
     }
 
     private static boolean identifierExists(String identifier, int identifierTypeId, int seqId)
@@ -642,7 +486,7 @@ public class ProteinManager
         filter.addCondition(FieldKey.fromParts("identifier"), identifier);
         filter.addCondition(FieldKey.fromParts("identTypeId"), identifierTypeId);
         filter.addCondition(FieldKey.fromParts("seqId"), seqId);
-        return new TableSelector(getTableInfoIdentifiers(), filter, null).exists();
+        return new TableSelector(ProteinSchema.getTableInfoIdentifiers(), filter, null).exists();
     }
 
     @Nullable
@@ -652,8 +496,8 @@ public class ProteinManager
         if(identifierType == null)
             return null;
 
-        Integer identTypeId = new SqlSelector(getSchema(),
-                            "SELECT MIN(identTypeId) FROM " + getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
+        Integer identTypeId = new SqlSelector(ProteinSchema.getSchema(),
+                            "SELECT MIN(identTypeId) FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
                             identifierType.toLowerCase()).getObject(Integer.class);
 
         if(identTypeId == null)
@@ -662,7 +506,7 @@ public class ProteinManager
             map.put("identTypeId", null);
             map.put("name", identifierType);
             map.put("entryDate", new Date());
-            map = Table.insert(null, getTableInfoIdentTypes(), map);
+            map = Table.insert(null, ProteinSchema.getTableInfoIdentTypes(), map);
             identTypeId = (Integer)map.get("identTypeId");
         }
         return identTypeId;
@@ -691,8 +535,8 @@ public class ProteinManager
 
     public static class ChargeFilter extends SimpleFilter.FilterClause
     {
-        private FieldKey _fieldKey;
-        private Float[] _values;
+        private final FieldKey _fieldKey;
+        private final Float[] _values;
 
         // At least one value must be non-null
         public ChargeFilter(FieldKey fieldKey, Float[] values)
@@ -738,7 +582,6 @@ public class ProteinManager
             return sql.append(" ELSE 0 END");
         }
 
-
         @Override
         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
@@ -758,10 +601,9 @@ public class ProteinManager
         }
     }
 
-
     public static class TrypticFilter extends SimpleFilter.FilterClause
     {
-        private int _termini;
+        private final int _termini;
 
         public TrypticFilter(int termini)
         {
@@ -1005,7 +847,7 @@ public class ProteinManager
     public static boolean showAllPeptides(ActionURL url, User user)
     {
         // First look for a value on the URL
-        String param = url.getParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM);
+        String param = url.getParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM);
         if (param != null)
         {
             boolean result = Boolean.parseBoolean(param);
@@ -1154,9 +996,9 @@ public class ProteinManager
     {
         final MultiValuedMap<String, String> map = new ArrayListValuedHashMap<>();
 
-        new SqlSelector(getSchema(),
+        new SqlSelector(ProteinSchema.getSchema(),
                 "SELECT T.name AS name, I.identifier\n" +
-                "FROM " + getTableInfoIdentifiers() + " I INNER JOIN " + getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
+                "FROM " + ProteinSchema.getTableInfoIdentifiers() + " I INNER JOIN " + ProteinSchema.getTableInfoIdentTypes() + " T ON I.identtypeid = T.identtypeid\n" +
                 "WHERE seqId = ?",
                 seqid).forEach(rs -> {
                     String name = rs.getString(1).toLowerCase();
@@ -1173,16 +1015,16 @@ public class ProteinManager
     public static Set<String> getOrganismsFromId(int id)
     {
         Set<String> retVal = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        List<String> rvString = new SqlSelector(getSchema(),
-                "SELECT annotVal FROM " + getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + getTableInfoAnnotationTypes() + " WHERE name " + getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
+        List<String> rvString = new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT annotVal FROM " + ProteinSchema.getTableInfoAnnotations() + " WHERE annotTypeId in (SELECT annotTypeId FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " WHERE name " + ProteinSchema.getSqlDialect().getCharClassLikeOperator() + " '%Organism%') AND SeqId = ?",
                 id).getArrayList(String.class);
 
         retVal.addAll(rvString);
 
-        SQLFragment sql = new SQLFragment("SELECT " + getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
-                " FROM " + getTableInfoOrganisms() + " WHERE OrgId = " +
-                "(SELECT OrgId FROM " + getTableInfoSequences() + " WHERE SeqId = ?)", id);
-        String org = new SqlSelector(getSchema(), sql).getObject(String.class);
+        SQLFragment sql = new SQLFragment("SELECT " + ProteinSchema.getSchema().getSqlDialect().concatenate("genus", "' '", "species") +
+                " FROM " + ProteinSchema.getTableInfoOrganisms() + " WHERE OrgId = " +
+                "(SELECT OrgId FROM " + ProteinSchema.getTableInfoSequences() + " WHERE SeqId = ?)", id);
+        String org = new SqlSelector(ProteinSchema.getSchema(), sql).getObject(String.class);
         retVal.add(org);
 
         return retVal;
@@ -1218,9 +1060,9 @@ public class ProteinManager
         String url = cacheURLs.get(identType);
         if (url == null)
         {
-            url = new SqlSelector(getSchema(),
+            url = new SqlSelector(ProteinSchema.getSchema(),
                     "SELECT S.url\n" +
-                    "FROM " + ProteinManager.getTableInfoInfoSources() + " S INNER JOIN " + ProteinManager.getTableInfoIdentTypes() +" T " +
+                    "FROM " + ProteinSchema.getTableInfoInfoSources() + " S INNER JOIN " + ProteinSchema.getTableInfoIdentTypes() +" T " +
                         "ON S.sourceId = T.cannonicalSourceId\n" +
                     "WHERE T.name=?",
                     identType).getObject(String.class);
@@ -1271,18 +1113,18 @@ public class ProteinManager
     /** Deletes all ProteinSequences, and the FastaFile record as well */
     public static void deleteFastaFile(int fastaId)
     {
-        SqlExecutor executor = new SqlExecutor(getSchema());
-        executor.execute("DELETE FROM " + getTableInfoFastaSequences() + " WHERE FastaId = ?", fastaId);
-        executor.execute("UPDATE " + getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", fastaId);
-        executor.execute("DELETE FROM " + getTableInfoFastaFiles() + " WHERE FastaId = ?", fastaId);
+        SqlExecutor executor = new SqlExecutor(ProteinSchema.getSchema());
+        executor.execute("DELETE FROM " + ProteinSchema.getTableInfoFastaSequences() + " WHERE FastaId = ?", fastaId);
+        executor.execute("UPDATE " + ProteinSchema.getTableInfoFastaFiles() + " SET Loaded=NULL WHERE FastaId = ?", fastaId);
+        executor.execute("DELETE FROM " + ProteinSchema.getTableInfoFastaFiles() + " WHERE FastaId = ?", fastaId);
     }
 
 
     public static void deleteAnnotationInsertion(int id)
     {
-        SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?");
+        SQLFragment sql = new SQLFragment("DELETE FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?");
         sql.add(id);
 
-        new SqlExecutor(ProteinManager.getSchema()).execute(sql);
+        new SqlExecutor(ProteinSchema.getSchema()).execute(sql);
     }
 }

@@ -19,9 +19,10 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.ProteinPlus" %>
-<%@ page import="org.labkey.ms2.protein.fasta.Protein" %>
+<%@ page import="org.labkey.ms2.protein.fasta.FastaProtein" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.ms2.protein.fasta.FastaProtein" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -39,7 +40,7 @@
         </tr>
 
         <% if (form.getHeader() != null) {
-            ProteinPlus p = new ProteinPlus(new Protein(form.getHeader(), new byte[0]));
+            ProteinPlus p = new ProteinPlus(new FastaProtein(form.getHeader(), new byte[0]));
             Map<String, Set<String>> idents = p.getProtein().getIdentifierMap(); %>
             <tr>
                 <td><strong>Protein name:</strong></td>

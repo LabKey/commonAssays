@@ -21,9 +21,9 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableSelector;
 import org.labkey.ms2.protein.IdentifierType;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
-import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 
 import java.sql.SQLException;
@@ -31,19 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-/**
- * User: brittp
- * Date: Jan 2, 2006
- * Time: 3:42:03 PM
- */
 public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrategy
 {
     //TODO: improve this heuristic to guess organism from FASTA header line
     //TODO: consider checking genus against organism table; consider putting options in as parameters
     //TODO: consider parsing TAX_ID
-    private static final DbSchema _schema = ProteinManager.getSchema();
+    private static final DbSchema _schema = ProteinSchema.getSchema();
 
-    private Map<String, String> _sprotCache = new WeakHashMap<>();
+    private final Map<String, String> _sprotCache = new WeakHashMap<>();
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedIdents.CACHED_MISS_VALUE";
 
     private enum SPROTload
@@ -62,7 +57,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
 
         String pName = p.getProtein().getLookup();
         String wholeHeader = p.getProtein().getHeader();
-        Map<String, Set<String>> possibleIdents = Protein.identParse(pName, wholeHeader);
+        Map<String, Set<String>> possibleIdents = FastaProtein.identParse(pName, wholeHeader);
 
         if (null == possibleIdents)
             return null;
@@ -80,7 +75,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
     {
         if (sprotLoadStatus == SPROTload.not_tried_yet)
         {
-            if (!new TableSelector(ProteinManager.getTableInfoSprotOrgMap()).exists())
+            if (!new TableSelector(ProteinSchema.getTableInfoSprotOrgMap()).exists())
             {
                 try
                 {
@@ -108,7 +103,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
             return retVal;
 
         retVal = new SqlSelector(_schema,
-                "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " + ProteinManager.getTableInfoSprotOrgMap() + " " +
+                "SELECT " + _schema.getSqlDialect().concatenate("genus", "' '", "species") + " FROM " + ProteinSchema.getTableInfoSprotOrgMap() + " " +
                         " WHERE SprotSuffix=?",
                 pName).getObject(String.class);
         _sprotCache.put(pName, retVal != null ? retVal : CACHED_MISS_VALUE);

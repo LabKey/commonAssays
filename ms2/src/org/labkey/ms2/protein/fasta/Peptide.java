@@ -25,7 +25,7 @@ import org.labkey.ms2.Hydrophobicity3;
  */
 public class Peptide
 {
-    Protein protein;
+    FastaProtein protein;
     int start;
     int length;
     double[] _massTab = null;
@@ -67,7 +67,7 @@ public class Peptide
         return true;
     }
 
-    public Peptide(Protein protein, int start, int length)
+    public Peptide(FastaProtein protein, int start, int length)
     {
         this.start = start;
         this.length = length;
@@ -76,7 +76,137 @@ public class Peptide
 
     public double getPi()
     {
-        return PeptideGenerator.computePI(protein.getBytes(), start, length);
+        return computePI(protein.getBytes(), start, length);
+    }
+
+    /**
+     * PI Calculation
+     */
+
+    private static final double  EPSI   = 0.0001;  /* desired precision */
+
+
+    /* the 7 amino acid which matter */
+    private static final int R = 'R' - 'A',
+                             H = 'H' - 'A',
+                             K = 'K' - 'A',
+                             D = 'D' - 'A',
+                             E = 'E' - 'A',
+                             C = 'C' - 'A',
+                             Y = 'Y' - 'A';
+
+    /*
+     *  table of pk values :
+     *  Note: the current algorithm does not use the last two columns. Each
+     *  row corresponds to an amino acid starting with Ala. J, O and U are
+     *  non-existent, but here only in order to have the complete alphabet.
+     *
+     *          Ct    Nt   Sm     Sc     Sn
+     */
+
+    private static final double[][] pk = new double[][]
+    {
+            /* A */    {3.55, 7.59, 0.0  , 0.0  , 0.0   },
+            /* B */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* C */    {3.55, 7.50, 9.00 , 9.00 , 9.00  },
+            /* D */    {4.55, 7.50, 4.05 , 4.05 , 4.05  },
+            /* E */    {4.75, 7.70, 4.45 , 4.45 , 4.45  },
+            /* F */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* G */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* H */    {3.55, 7.50, 5.98 , 5.98 , 5.98  },
+            /* I */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* J */    {0.00, 0.00, 0.0  , 0.0  , 0.0   },
+            /* K */    {3.55, 7.50, 10.00, 10.00, 10.00 },
+            /* L */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* M */    {3.55, 7.00, 0.0  , 0.0  , 0.0   },
+            /* N */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* O */    {0.00, 0.00, 0.0  , 0.0  , 0.0   },
+            /* P */    {3.55, 8.36, 0.0  , 0.0  , 0.0   },
+            /* Q */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* R */    {3.55, 7.50, 12.0 , 12.0 , 12.0  },
+            /* S */    {3.55, 6.93, 0.0  , 0.0  , 0.0   },
+            /* T */    {3.55, 6.82, 0.0  , 0.0  , 0.0   },
+            /* U */    {0.00, 0.00, 0.0  , 0.0  , 0.0   },
+            /* V */    {3.55, 7.44, 0.0  , 0.0  , 0.0   },
+            /* W */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* X */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+            /* Y */    {3.55, 7.50, 10.00, 10.00, 10.00 },
+            /* Z */    {3.55, 7.50, 0.0  , 0.0  , 0.0   },
+    };
+
+    private static double exp10(double value)
+    {
+        return Math.pow(10.0,value);
+    }
+
+    private static final double PH_MIN = 0;        /* minimum pH value */
+    private static final double PH_MAX = 14;       /* maximum pH value */
+    private static final double MAX_LOOP = 2000;    /* maximum number of iterations */
+
+    private static double computePI(byte[] seq, int start, int seq_length)
+    {
+        int[]             comp = new int[26];    /* Amino acid composition of the protein */
+        int    nterm_res,   /* N-terminal residue */
+                cterm_res;   /* C-terminal residue */
+        int i;
+        int charge_increment = 0;
+        double charge,
+                ph_mid = 0,
+                ph_min,
+                ph_max;
+        double          cter,
+                nter;
+        double          carg,
+                clys,
+                chis,
+                casp,
+                cglu,
+                ctyr,
+                ccys;
+
+
+        for (i = 0; i < seq_length; i++)        /* compute the amino acid composition */
+        {
+            comp[seq[i + start] - 'A']++;
+        }
+
+        nterm_res = seq[start] - 'A';               /* Look up N-terminal residue */
+        cterm_res = seq[start + seq_length-1] - 'A';    /* Look up C-terminal residue */
+
+        ph_min = PH_MIN;
+        ph_max = PH_MAX;
+
+        for (i = 0, charge = 1.0; i< MAX_LOOP && (ph_max - ph_min)>EPSI; i++)
+        {
+            ph_mid = ph_min + (ph_max - ph_min) / 2.0;
+
+            cter = exp10(-pk[cterm_res][0]) / (exp10(-pk[cterm_res][0]) + exp10(-ph_mid));
+            nter = exp10(-ph_mid) / (exp10(-pk[nterm_res][1]) + exp10(-ph_mid));
+
+            carg = comp[R] * exp10(-ph_mid) / (exp10(-pk[R][2]) + exp10(-ph_mid));
+            chis = comp[H] * exp10(-ph_mid) / (exp10(-pk[H][2]) + exp10(-ph_mid));
+            clys = comp[K] * exp10(-ph_mid) / (exp10(-pk[K][2]) + exp10(-ph_mid));
+
+            casp = comp[D] * exp10(-pk[D][2]) / (exp10(-pk[D][2]) + exp10(-ph_mid));
+            cglu = comp[E] * exp10(-pk[E][2]) / (exp10(-pk[E][2]) + exp10(-ph_mid));
+
+            ccys = comp[C] * exp10(-pk[C][2]) / (exp10(-pk[C][2]) + exp10(-ph_mid));
+            ctyr = comp[Y] * exp10(-pk[Y][2]) / (exp10(-pk[Y][2]) + exp10(-ph_mid));
+
+            charge = carg + clys + chis + nter + charge_increment
+                    - (casp + cglu + ctyr + ccys + cter);
+
+            if (charge > 0.0)
+            {
+                ph_min = ph_mid;
+            }
+            else
+            {
+                ph_max = ph_mid;
+            }
+        }
+
+        return ph_mid;
     }
 
     public double getHydrophobicity()
@@ -177,21 +307,21 @@ public class Peptide
         if (null == _massTab)
         {
             _massTab = massTab;
-            _mass = PeptideGenerator.computeMass(protein.getBytes(), start, length, massTab);
+            _mass = PeptideHelpers.computeMass(protein.getBytes(), start, length, massTab);
             return _mass;
         }
         else
-            return PeptideGenerator.computeMass(protein.getBytes(), start, length, massTab);
+            return PeptideHelpers.computeMass(protein.getBytes(), start, length, massTab);
     }
 
     public double getAverageMass()
     {
-       return getMass(PeptideGenerator.AMINO_ACID_AVERAGE_MASSES);
+       return getMass(PeptideHelpers.AMINO_ACID_AVERAGE_MASSES);
     }
 
     public double getMonoisotopicMass()
     {
-        return getMass(PeptideGenerator.AMINO_ACID_MONOISOTOPIC_MASSES);
+        return getMass(PeptideHelpers.AMINO_ACID_MONOISOTOPIC_MASSES);
     }
 
     public char[] getChars()
@@ -209,12 +339,12 @@ public class Peptide
         return new String(protein.getBytes(), start, length);
     }
 
-    public Protein getProtein()
+    public FastaProtein getProtein()
     {
         return protein;
     }
 
-    public void setProtein(Protein protein)
+    public void setProtein(FastaProtein protein)
     {
         this.protein = protein;
     }
