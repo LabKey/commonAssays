@@ -80,6 +80,6 @@ public class MS2FolderType extends MultiPortalFolderType
         super.addManageLinks(adminNavTree, container, user);
 
         if (container.hasPermission(user, ReadPermission.class))
-            adminNavTree.addChild(new NavTree("Manage Custom FastaProtein Lists", ProteinController.getBeginURL(container)));
+            adminNavTree.addChild(new NavTree("Manage Custom Protein Lists", ProteinController.getBeginURL(container)));
     }
 }

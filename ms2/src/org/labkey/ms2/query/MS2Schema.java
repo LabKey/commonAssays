@@ -513,10 +513,10 @@ public class MS2Schema extends UserSchema
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, cf, includeFirstProteinColumn);
         result.addProteinsColumn(cf);
         List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
-        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "BestGeneName"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "Mass"));
-        defaultColumns.add(FieldKey.fromParts("Proteins", "FastaProtein", "Description"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "BestGeneName"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Mass"));
+        defaultColumns.add(FieldKey.fromParts("Proteins", "Protein", "Description"));
         result.setDefaultVisibleColumns(defaultColumns);
         return result;
     }
@@ -577,7 +577,7 @@ public class MS2Schema extends UserSchema
             }
         });
 
-        result.getMutableColumn("SeqId").setLabel("FastaProtein");
+        result.getMutableColumn("SeqId").setLabel("Protein");
         result.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         if (_runs != null && filterByRuns)
@@ -1067,10 +1067,10 @@ public class MS2Schema extends UserSchema
 
         CrosstabTable result;
         CrosstabSettings settings = new CrosstabSettings(baseTable);
-        CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First FastaProtein Group");
-        CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run FastaProtein Group Count");
+        CrosstabMeasure firstProteinGroupMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.MIN, "Run First Protein Group");
+        CrosstabMeasure groupCountMeasure = settings.addMeasure(proteinGroupIdCol.getFieldKey(), CrosstabMeasure.AggregateFunction.COUNT, "Run Protein Group Count");
 
-        settings.getRowAxis().setCaption("Normalized FastaProtein Group");
+        settings.getRowAxis().setCaption("Normalized Protein Group");
 
         CrosstabDimension colDim;
         if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
@@ -1257,9 +1257,9 @@ public class MS2Schema extends UserSchema
             return dc;
         });
 
-        CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "FastaProtein Group");
+        CrosstabMeasure proteinGroupMeasure = settings.addMeasure(FieldKey.fromParts("ProteinGroupId"), CrosstabMeasure.AggregateFunction.MIN, "Protein Group");
 
-        settings.getRowAxis().setCaption("FastaProtein Information");
+        settings.getRowAxis().setCaption("Protein Information");
 
         CrosstabDimension colDim;
         if (form != null && form.getPivotTypeEnum() == MS2Controller.PivotType.fraction)
@@ -1382,7 +1382,7 @@ public class MS2Schema extends UserSchema
 
         CrosstabDimension colDim = settings.getColumnAxis().addDimension(FieldKey.fromParts( "Run"));
         ActionURL linkUrlOnRunColuumn;
-        // if matching on a single target protein, go straight to the FastaProtein Details page in "all peptides" mode
+        // if matching on a single target protein, go straight to the Protein Details page in "all peptides" mode
         if ((form != null) && (form.getTargetSeqIds()!=null) && form.getTargetSeqIds().size() == 1)
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
@@ -1494,7 +1494,7 @@ public class MS2Schema extends UserSchema
             filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
-        baseTable.getMutableColumn("SeqId").setLabel("Search Engine FastaProtein");
+        baseTable.getMutableColumn("SeqId").setLabel("Search Engine Protein");
         baseTable.getMutableColumn("SeqId").setFk(createSequencesLookup());
 
         return baseTable;

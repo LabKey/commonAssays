@@ -333,18 +333,18 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     @Override
     public Widget getLabel()
     {
-        Label label = new Label("FastaProtein database");
+        Label label = new Label("Protein database");
         label.setStylePrimaryName(LABEL_STYLE_NAME);
         HorizontalPanel panel = new HorizontalPanel();
         panel.add(label);
-        panel.add(new HelpPopup("FastaProtein Database", "A protein database defines the set of sequences that are searched for matches against the input spectra. This is typically in the <a href=\"http://en.wikipedia.org/wiki/FASTA_format\" target=\"_blank\">FASTA format</a>."));
+        panel.add(new HelpPopup("Protein Database", "A protein database defines the set of sequences that are searched for matches against the input spectra. This is typically in the <a href=\"http://en.wikipedia.org/wiki/FASTA_format\" target=\"_blank\">FASTA format</a>."));
         return panel;
     }
 
     @Override
     public String validate()
     {
-        if(getSelectedDb().equals("") || getSelectedDb().equals("None found.") )
+        if (getSelectedDb().isEmpty() || getSelectedDb().equals("None found.") )
         {
             return "A sequence database must be selected.";
         }

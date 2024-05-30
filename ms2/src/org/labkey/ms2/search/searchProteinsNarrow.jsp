@@ -34,7 +34,7 @@
     <input type="hidden" name="restrictProteins" value="true" />
     <table class="lk-fields-table">
         <tr>
-            <td class="labkey-form-label">Protein name *<%= helpPopup("FastaProtein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
+            <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
             <td nowrap><input size="12" type="text" name="identifier" value="<%= h(bean.getForm().getIdentifier()) %>"/></td>
         </tr>
         <tr>

@@ -79,7 +79,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 
         if (includeSeqId)
         {
-            defaultCols.add(FieldKey.fromParts("FastaProtein", "BestName"));
+            defaultCols.add(FieldKey.fromParts("Protein", "BestName"));
             addProteinDetailsColumn();
         }
 
@@ -100,7 +100,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
     private void addProteinDetailsColumn()
     {
         SQLFragment sql = new SQLFragment(getName() + ".SeqId");
-        var col = new ExprColumn(this, "FastaProtein", sql, JdbcType.INTEGER);
+        var col = new ExprColumn(this, "Protein", sql, JdbcType.INTEGER);
         col.setFk(new LookupForeignKey("SeqId")
         {
             @Override

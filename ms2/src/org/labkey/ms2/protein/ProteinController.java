@@ -69,7 +69,7 @@ public class ProteinController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Custom FastaProtein Lists");
+            root.addChild("Custom Protein Lists");
         }
     }
 
@@ -104,7 +104,7 @@ public class ProteinController extends SpringActionController
 
             // 41640: Expect valid "CustomAnnotation.queryName" URL parameter
             if (StringUtils.isEmpty(_setName))
-                throw new NotFoundException("Custom FastaProtein List not found.");
+                throw new NotFoundException("Custom Protein List not found.");
 
             QueryView queryView = new QueryView(schema, settings, errors)
             {
@@ -119,7 +119,7 @@ public class ProteinController extends SpringActionController
                 @Override
                 public MenuButton createQueryPickerButton(String label)
                 {
-                    return super.createQueryPickerButton("Custom FastaProtein List");
+                    return super.createQueryPickerButton("Custom Protein List");
                 }
             };
 
@@ -151,8 +151,8 @@ public class ProteinController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
-            root.addChild("Custom FastaProtein Lists", getBeginURL(getContainer()));
-            root.addChild("Custom FastaProtein List: " + _setName);
+            root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
+            root.addChild("Custom Protein List: " + _setName);
         }
     }
 
@@ -373,8 +373,8 @@ public class ProteinController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
-            root.addChild("Custom FastaProtein Lists", getBeginURL(getContainer()));
-            root.addChild("Upload Custom FastaProtein List");
+            root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
+            root.addChild("Upload Custom Protein List");
         }
     }
 

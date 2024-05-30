@@ -83,11 +83,11 @@ public class SpectraCountConfiguration
         }
         if (_groupedByProtein)
         {
-            queryName.append("FastaProtein");
+            queryName.append("Protein");
             if (_usingProteinProphet)
             {
                 queryName.append("PP");
-                if (description.length() == 0)
+                if (description.isEmpty())
                 {
                     description.append("ProteinProphet protein assignment");
                 }
@@ -98,7 +98,7 @@ public class SpectraCountConfiguration
             }
             else
             {
-                if (description.length() == 0)
+                if (description.isEmpty())
                 {
                     description.append("Search engine protein assignment");
                 }

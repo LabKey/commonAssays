@@ -53,7 +53,7 @@
             items: [{
                 // protein search webpart from the ... module
                 xtype: 'panel',
-                title: 'FastaProtein Search',
+                title: 'Protein Search',
                 cls: 'non-ext-search-tab-panel',
                 items : [{
                     xtype: 'component',
@@ -62,7 +62,7 @@
                         scope: this,
                         afterrender : function(cmp) {
                             var wp = new LABKEY.WebPart({
-                                partName: <%=q(targetedMSModuleActive ? "Targeted MS FastaProtein Search" : "FastaProtein Search")%>,
+                                partName: <%=q(targetedMSModuleActive ? "Targeted MS Protein Search" : "Protein Search")%>,
                                 frame: 'none',
                                 renderTo: cmp.getId(),
                                 success: function() { cmp.up('panel').doLayout(); }

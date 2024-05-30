@@ -82,7 +82,7 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
 
         ProteinGroupQueryView peptideView = new ProteinGroupQueryView(schema, settings, expanded, forExport);
 
-        peptideView.setTitle("FastaProtein Groups");
+        peptideView.setTitle("Protein Groups");
         return peptideView;
     }
 
@@ -90,7 +90,7 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
     public SQLFragment getProteins(ActionURL queryUrl, MS2Run run, MS2Controller.ChartForm form)
     {
         NestableQueryView queryView = createGridView(false, false);
-        FieldKey desiredFK = FieldKey.fromParts("Proteins", "FastaProtein", "SeqId");
+        FieldKey desiredFK = FieldKey.fromParts("Proteins", "Protein", "SeqId");
 
         Pair<ColumnInfo, SQLFragment> pair = generateSubSelect(queryView, queryUrl, null, desiredFK);
         ColumnInfo desiredCol = pair.first;

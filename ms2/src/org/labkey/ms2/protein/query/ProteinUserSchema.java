@@ -55,7 +55,7 @@ public class ProteinUserSchema extends UserSchema
 
     public ProteinUserSchema(User user, Container container)
     {
-        super(NAME, "FastaProtein annotation, gene ontology, and sequence tables", user, container, ProteinSchema.getSchema());
+        super(NAME, "Protein annotation, gene ontology, and sequence tables", user, container, ProteinSchema.getSchema());
     }
 
     public static void register(MS2Module module)

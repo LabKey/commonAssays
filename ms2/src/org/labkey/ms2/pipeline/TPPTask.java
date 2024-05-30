@@ -101,7 +101,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     private static final String PEPTIDE_PROPHET_ACTION_NAME = "PeptideProphet";
     private static final String PROTEIN_PROPHET_ACTION_NAME = "ProteinProphet";
     private static final String PEPTIDE_QUANITATION_ACTION_NAME = "Peptide Quantitation";
-    private static final String PROTEIN_QUANITATION_ACTION_NAME = "FastaProtein Quantitation";
+    private static final String PROTEIN_QUANITATION_ACTION_NAME = "Protein Quantitation";
 
     public static final String PEP_XML_INPUT_ROLE = "PepXML";
     public static final String PROT_XML_INPUT_ROLE = "ProtXML";

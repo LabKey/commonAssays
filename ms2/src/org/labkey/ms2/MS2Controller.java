@@ -262,7 +262,7 @@ public class MS2Controller extends SpringActionController
 
     private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
-        addAdminNavTrail(root, "FastaProtein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
+        addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
 
 
@@ -349,7 +349,7 @@ public class MS2Controller extends SpringActionController
         {
             searchEngineURL.addParameter("experimentRunIds", "true");
         }
-        compareMenu.addMenuItem("Search Engine FastaProtein", view.createVerifySelectedScript(searchEngineURL, "runs"));
+        compareMenu.addMenuItem("Search Engine Protein", view.createVerifySelectedScript(searchEngineURL, "runs"));
 
         ActionURL spectraURL = new ActionURL(SpectraCountSetupAction.class, container);
         if (experimentRunIds)
@@ -1387,7 +1387,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Compare Search Engine FastaProtein Setup");
+            root.addChild("Compare Search Engine Protein Setup");
         }
     }
 
@@ -1619,7 +1619,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("Disambiguate FastaProtein");
+            root.addChild("Disambiguate Protein");
         }
     }
 
@@ -1815,7 +1815,7 @@ public class MS2Controller extends SpringActionController
         {
             if (null != lookupProteins() && lookupProteins().size() > 0 && null != getTargetProtein())
             {
-                title.append("FastaProtein ");
+                title.append("Protein ");
                 title.append(getTargetProtein());
 
                 List<String> bestNames = new ArrayList<>();
@@ -2668,12 +2668,12 @@ public class MS2Controller extends SpringActionController
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
-            annots.setTitle("FastaProtein Annotations Loaded");
+            annots.setTitle("Protein Annotations Loaded");
 
             QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
             jobsView.getSettings().setBaseFilter(new SimpleFilter(FieldKey.fromParts("Provider"), ProteinAnnotationPipelineProvider.NAME));
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
-            jobsView.setTitle("FastaProtein Annotation Load Jobs");
+            jobsView.setTitle("Protein Annotation Load Jobs");
 
             VBox result = new VBox(blastView, grid, annots, jobsView);
             if (form.getMessage() != null)
@@ -2770,7 +2770,7 @@ public class MS2Controller extends SpringActionController
             testFastaHeader.setActionType(ActionButton.Action.LINK);
             bb.add(testFastaHeader);
 
-            MenuButton setBestNameMenu = new MenuButton("Set FastaProtein Best Name...");
+            MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
             ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
 
             setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
@@ -2793,7 +2793,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "FastaProtein Database Admin", getClass(), getContainer());
+            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", getClass(), getContainer());
         }
     }
 
@@ -3018,7 +3018,7 @@ public class MS2Controller extends SpringActionController
             // Disable R and other reporting until there's an implementation that respects the search criteria
             groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
-            groupsView.setTitle("FastaProtein Group Results");
+            groupsView.setTitle("Protein Group Results");
             return groupsView;
         }
 
@@ -3090,7 +3090,7 @@ public class MS2Controller extends SpringActionController
             }
 
             if (form.isShowProteinGroups() &&
-                    // Add the "FastaProtein Group Results" web part only if the targetedms module is not enabled in the container.
+                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
                     (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
                             !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms"))))
             {
@@ -3112,7 +3112,7 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             setHelpTopic("proteinSearch");
-            root.addChild("FastaProtein Search Results");
+            root.addChild("Protein Search Results");
         }
     }
 
@@ -3503,7 +3503,7 @@ public class MS2Controller extends SpringActionController
         {
             MS2Run run = form.validateRun();
 
-            String title = "FastaProtein Prophet Details";
+            String title = "Protein Prophet Details";
             setTitle(title);
             getPageConfig().setTemplate(PageConfig.Template.Print);
 
@@ -4025,7 +4025,7 @@ public class MS2Controller extends SpringActionController
             ActionURL currentURL = getViewContext().getActionURL();
 
             if (0 == seqId)
-                throw new NotFoundException("FastaProtein sequence not found");
+                throw new NotFoundException("Protein sequence not found");
 
             _protein = ProteinManager.getProtein(seqId);
             if (_protein == null)
@@ -4163,7 +4163,7 @@ public class MS2Controller extends SpringActionController
 
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideQueryView);
             JspView summaryView = new JspView<>("/org/labkey/ms2/showProteinGroup.jsp", group);
-            summaryView.setTitle("FastaProtein Group Details");
+            summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
             return new VBox(summaryView, view);
@@ -4215,7 +4215,7 @@ public class MS2Controller extends SpringActionController
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
 
-                addView(HtmlView.unsafe("<a name=\"FastaProtein" + i + "\"></a>"));
+                addView(HtmlView.unsafe("<a name=\"Protein" + i + "\"></a>"));
                 protein.setPeptides(peptides);
                 if (peptides != null)
                 {
@@ -4252,7 +4252,7 @@ public class MS2Controller extends SpringActionController
                     sequenceView = new JspView<>("/org/labkey/ms2/proteinSequence.jsp", bean);
                 }
                 sequenceView.enableExpandCollapse("ProteinCoverageMap", false);
-                sequenceView.setTitle("FastaProtein Sequence");
+                sequenceView.setTitle("Protein Sequence");
                 addView(sequenceView);
 
                 // Add annotations
@@ -5512,7 +5512,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            addProteinAdminNavTrail(root, "Load FastaProtein Annotations", getPageConfig(), null);
+            addProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
         }
     }
 

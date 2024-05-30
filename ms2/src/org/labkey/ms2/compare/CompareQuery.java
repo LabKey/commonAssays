@@ -93,23 +93,23 @@ public class CompareQuery extends SQLFragment
                 header.append("and ");
             header.append("unique peptides ");
         }
-        if ("1".equals(currentUrl.getParameter("sumLightArea-FastaProtein")))
+        if ("1".equals(currentUrl.getParameter("sumLightArea-Protein")))
         {
             addGridColumn("SumLightArea", "lightarea", "SUM");
         }
-        if ("1".equals(currentUrl.getParameter("sumHeavyArea-FastaProtein")))
+        if ("1".equals(currentUrl.getParameter("sumHeavyArea-Protein")))
         {
             addGridColumn("SumHeavyArea", "heavyarea", "SUM");
         }
-        if ("1".equals(currentUrl.getParameter("avgDecimalRatio-FastaProtein")))
+        if ("1".equals(currentUrl.getParameter("avgDecimalRatio-Protein")))
         {
             addGridColumn("AvgDecimalRatio", "DecimalRatio", "AVG");
         }
-        if ("1".equals(currentUrl.getParameter("maxDecimalRatio-FastaProtein")))
+        if ("1".equals(currentUrl.getParameter("maxDecimalRatio-Protein")))
         {
             addGridColumn("MaxDecimalRatio", "DecimalRatio", "MAX");
         }
-        if ("1".equals(currentUrl.getParameter("minDecimalRatio-FastaProtein")))
+        if ("1".equals(currentUrl.getParameter("minDecimalRatio-Protein")))
         {
             addGridColumn("MinDecimalRatio", "DecimalRatio", "MIN");
         }
@@ -161,7 +161,7 @@ public class CompareQuery extends SQLFragment
         // Use subselect to make it easier to join seqid to prot.sequences for bestname
         append("SELECT ");
         append(getLabelColumn());
-        append(" AS FastaProtein, grouped.* FROM");
+        append(" AS Protein, grouped.* FROM");
         appendNewLine();
         append("(");
         indent();
@@ -353,7 +353,7 @@ public class CompareQuery extends SQLFragment
     protected void sort()
     {
         appendNewLine();
-        // ORDER BY RunCount DESC, Pattern DESC, FastaProtein ASC (plus apply any URL sort)
+        // ORDER BY RunCount DESC, Pattern DESC, Protein ASC (plus apply any URL sort)
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
         sort.addURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
 
@@ -371,7 +371,7 @@ public class CompareQuery extends SQLFragment
             }
         }
 
-        // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "FastaProtein"
+        // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "Protein"
         // are in the list, in which case SQL server will fail to execute the query.  Therefore, we restrict the number
         // of columns you can sort on to 3.
         while (sort.getSortList().size() > 3)
@@ -503,7 +503,7 @@ public class CompareQuery extends SQLFragment
         DataColumn dc = new DataColumn(ci);
 
         linkURL.setAction(MS2Controller.ShowProteinAction.class)   // Could target the "prot" window instead of using the main window
-            .addParameter("protein", "${FastaProtein}")
+            .addParameter("protein", "${Protein}")
             .addParameter("seqId", "${SeqId}");
         dc.setURL(linkURL);
 
@@ -512,7 +512,7 @@ public class CompareQuery extends SQLFragment
 
     protected ColumnInfo getComparisonCommonColumn(TableInfo ti)
     {
-        return ti.getColumn("FastaProtein");
+        return ti.getColumn("Protein");
     }
 
     public List<Pair<String, String>> getSQLSummaries()
@@ -521,7 +521,7 @@ public class CompareQuery extends SQLFragment
         SimpleFilter peptideFilter = new SimpleFilter();
         addWhereClauses(peptideFilter);
         result.add(new Pair<>("Peptide Filter", peptideFilter.getFilterText()));
-        result.add(new Pair<>("FastaProtein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
+        result.add(new Pair<>("Protein Filter", new SimpleFilter(_currentUrl, MS2Manager.getDataRegionNameProteins()).getFilterText()));
         return result;
     }
 

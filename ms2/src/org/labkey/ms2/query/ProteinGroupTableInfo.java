@@ -221,7 +221,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                     }
                 }
 
-                var proteinColumn = result.wrapColumn("FastaProtein", info.getColumn("SeqId"));
+                var proteinColumn = result.wrapColumn("Protein", info.getColumn("SeqId"));
                 proteinColumn.setDisplayColumnFactory(colInfo -> {
                     DataColumn result1 = new DataColumn(colInfo);
                     result1.setLinkTarget("prot");
@@ -297,7 +297,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             return result;
         };
 
-        var proteinNameColumn = wrapColumn("FastaProtein", rowIdColumn);
+        var proteinNameColumn = wrapColumn("Protein", rowIdColumn);
         proteinNameColumn.setDisplayColumnFactory(factory);
         addColumn(proteinNameColumn);
 

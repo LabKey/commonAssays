@@ -29,11 +29,6 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: adam
- * Date: Aug 3, 2006
- * Time: 10:42 AM
- */
 public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 {
     private final FieldKey _seqIdFK;
@@ -42,12 +37,12 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 
     public ProteinDisplayColumn(ColumnInfo col, ActionURL url, Map<String, FieldKey> params)
     {
-        super(col, url, params, new JSONObject().put("width", 450).put("title", "FastaProtein Details"));
+        super(col, url, params, new JSONObject().put("width", 450).put("title", "Protein Details"));
         setLinkTarget("prot");
 
         FieldKey parentFK = getColumnInfo().getFieldKey().getParent();
         _seqIdFK = new FieldKey(parentFK, "SeqId");
-        _proteinNameFK = new FieldKey(parentFK, "FastaProtein");
+        _proteinNameFK = new FieldKey(parentFK, "Protein");
         addRequiredValue(_seqIdFK);
     }
 

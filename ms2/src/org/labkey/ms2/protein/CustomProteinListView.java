@@ -36,7 +36,7 @@ import static org.labkey.api.util.PageFlowUtil.filter;
  */
 public class CustomProteinListView extends VBox
 {
-    public static final String NAME = "Custom FastaProtein Lists";
+    public static final String NAME = "Custom Protein Lists";
 
     public CustomProteinListView(ViewContext context, boolean includeButtons)
     {
@@ -62,7 +62,7 @@ public class CustomProteinListView extends VBox
             deleteButton.setDisplayPermission(DeletePermission.class);
             buttonBar.add(deleteButton);
 
-            ActionButton addButton = new ActionButton(new ActionURL(ProteinController.UploadCustomProteinAnnotations.class, context.getContainer()), "Import Custom FastaProtein List");
+            ActionButton addButton = new ActionButton(new ActionURL(ProteinController.UploadCustomProteinAnnotations.class, context.getContainer()), "Import Custom Protein List");
             addButton.setDisplayPermission(InsertPermission.class);
             addButton.setActionType(ActionButton.Action.LINK);
             buttonBar.add(addButton);

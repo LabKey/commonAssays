@@ -27,13 +27,9 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 
-/**
- * User: jeckels
- * Date: Feb 1, 2008
- */
 public class PeptideCrosstabView extends AbstractQueryCrosstabView
 {
-    private MS2Controller.PeptideFilteringComparisonForm _form;
+    private final MS2Controller.PeptideFilteringComparisonForm _form;
     private boolean _addExportProteinCoverage = false;
 
     public PeptideCrosstabView(MS2Schema schema, MS2Controller.PeptideFilteringComparisonForm form, ViewContext viewContext, boolean addExportProteinCoverage)
@@ -70,7 +66,7 @@ public class PeptideCrosstabView extends AbstractQueryCrosstabView
             ActionURL url = getViewContext().getActionURL().clone();
             url.setAction(MS2Controller.ExportComparisonProteinCoverageMapAction.class);
 
-            ActionButton exportProteinCoverage = new ActionButton(url, "Export FastaProtein Coverage");
+            ActionButton exportProteinCoverage = new ActionButton(url, "Export Protein Coverage");
             exportProteinCoverage.setActionType(ActionButton.Action.POST);
             exportProteinCoverage.setDisplayPermission(ReadPermission.class);
             bar.add(exportProteinCoverage);

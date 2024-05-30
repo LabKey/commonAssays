@@ -151,7 +151,7 @@ public class PeptideProphetGraphs
                         chargeSQL + " AND PeptideProphet = 0",
                         runId, charge).getObject(Integer.class);
         int zeroScoresNegative = new SqlSelector(MS2Manager.getSchema(),
-                        chargeSQL + " AND PeptideProphet = 0 AND FastaProtein LIKE ?",
+                        chargeSQL + " AND PeptideProphet = 0 AND Protein LIKE ?",
                         runId, charge, negHitPrefix + '%').getObject(Integer.class);
         int zeroScoresPositive = zeroScores - zeroScoresNegative;
 
@@ -166,7 +166,7 @@ public class PeptideProphetGraphs
         float score = 0.0f;
 
         ResultSet rs = new SqlSelector(MS2Manager.getSchema(),
-                "SELECT FastaProtein, PeptideProphet " +
+                "SELECT Protein, PeptideProphet " +
                 "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
                 "WHERE Run = ? AND Charge = ? " +
                 "ORDER BY PeptideProphet",

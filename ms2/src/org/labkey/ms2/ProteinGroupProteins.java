@@ -26,14 +26,10 @@ import java.util.*;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-/**
- * User: jeckels
- * Date: May 5, 2006
- */
 public class ProteinGroupProteins
 {
     private List<MS2Run> _runs;
-    private Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<>();
+    private final Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<>();
 
     public ProteinGroupProteins()
     {
@@ -105,7 +101,7 @@ public class ProteinGroupProteins
 
     private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
     {
-        String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS FastaProtein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
+        String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
                 "FROM " + ProteinSchema.getTableInfoSequences() + " protseq, " +
                 "   " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                 "   " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
@@ -128,19 +124,14 @@ public class ProteinGroupProteins
         for (Map<String, Object> row : rows)
         {
             Integer rowId = ((Number)row.get("RowId")).intValue();
-            String lookupString = (String)row.get("FastaProtein");
+            String lookupString = (String)row.get("Protein");
             int seqId = ((Number)row.get("SeqId")).intValue();
             String description = (String)row.get("Description");
             String bestName = (String)row.get("BestName");
             String bestGeneName = (String)row.get("BestGeneName");
             double sequenceMass = ((Number)row.get("Mass")).doubleValue();
             ProteinSummary summary = new ProteinSummary(lookupString, seqId, description, bestName, bestGeneName, sequenceMass);
-            List<ProteinSummary> summaries = result.get(rowId);
-            if (summaries == null)
-            {
-                summaries = new ArrayList<>();
-                result.put(rowId, summaries);
-            }
+            List<ProteinSummary> summaries = result.computeIfAbsent(rowId, k -> new ArrayList<>());
             summaries.add(summary);
         }
     }

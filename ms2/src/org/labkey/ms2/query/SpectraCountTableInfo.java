@@ -181,12 +181,12 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         ExprColumn proteinColumn;
         if (_config.isGroupedByProtein() || (form != null && form.hasTargetSeqIds()))
         {
-            proteinColumn = new ExprColumn(this, "FastaProtein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
+            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment(ExprColumn.STR_TABLE_ALIAS + (_config.isGroupedByProtein() ? ".SequenceId" : ".SeqId")), JdbcType.INTEGER);
             defaultCols.add(FieldKey.fromParts(proteinColumn.getName()));
         }
         else
         {
-            proteinColumn = new ExprColumn(this, "FastaProtein", new SQLFragment("NULL"), JdbcType.INTEGER);
+            proteinColumn = new ExprColumn(this, "Protein", new SQLFragment("NULL"), JdbcType.INTEGER);
         }
         proteinColumn.setDescription("The protein associated with the peptide identification. Only available if a grouping by protein information, or a target protein has been specified.");
         addColumn(proteinColumn);
@@ -283,7 +283,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
 
         if (_config.isUsingProteinProphet())
         {
-            // FastaProtein group measurements (values are the same for all proteins in a group, they are not aggs)
+            // Protein group measurements (values are the same for all proteins in a group, they are not aggs)
             sql.append(", MIN(pg.groupnumber) as ProteinGroupNum\n");
             sql.append(", MIN(pg.indistinguishablecollectionid) as IndistinguishableCollectionId\n");
             sql.append(", MIN(pg.GroupProbability) AS GroupProbability\n");

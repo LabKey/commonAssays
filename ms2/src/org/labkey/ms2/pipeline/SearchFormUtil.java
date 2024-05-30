@@ -76,7 +76,7 @@ public class SearchFormUtil
                 new CutSite[]{new CutSite( new char[]{}, new char[]{},"[X]|[X]", true)}));
         tppEnzymeList.add(new Enzyme("PepsinA", new String[]{"pepsina"},
                 new CutSite[]{new CutSite(new char[]{'F','L'}, new char[]{'-'},"[FL]|[X]", false)}));
-        tppEnzymeList.add(new Enzyme("FastaProtein endopeptidase", new String[]{"protein_endopeptidase"},
+        tppEnzymeList.add(new Enzyme("Protein endopeptidase", new String[]{"protein_endopeptidase"},
                 new CutSite[]{new CutSite( new char[]{'P'}, new char[]{'-'},"[P]|[X]", false)}));
         tppEnzymeList.add(new Enzyme("Staph protease", new String[]{"staph_protease"},
                 new CutSite[]{new CutSite(new char[]{'E'}, new char[]{'-'},"[E]|[X]", false)}));
