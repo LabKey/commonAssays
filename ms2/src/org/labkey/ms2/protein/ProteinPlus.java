@@ -16,8 +16,8 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.api.util.HashHelpers;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 
 public class ProteinPlus
 {

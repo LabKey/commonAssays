@@ -20,8 +20,9 @@ package org.labkey.ms2.protein.uniprot;
   Date: Mar 3, 2005
  */
 
-import org.xml.sax.*;
-import org.labkey.ms2.protein.*;
+import org.labkey.ms2.protein.ParseActions;
+import org.labkey.ms2.protein.ParseContext;
+import org.xml.sax.Attributes;
 
 public class uniprot_entry_feature_location_end extends ParseActions
 {

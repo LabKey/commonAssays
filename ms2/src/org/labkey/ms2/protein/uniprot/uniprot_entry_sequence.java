@@ -15,12 +15,14 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import java.sql.*;
-
-import org.xml.sax.*;
-import org.labkey.ms2.protein.*;
-import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.HashHelpers;
+import org.labkey.ms2.protein.CharactersParseActions;
+import org.labkey.ms2.protein.ParseContext;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import java.sql.Timestamp;
 
 public class uniprot_entry_sequence extends CharactersParseActions
 {

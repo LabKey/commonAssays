@@ -15,8 +15,11 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import org.xml.sax.*;
-import org.labkey.ms2.protein.*;
+import org.labkey.ms2.protein.CharactersParseActions;
+import org.labkey.ms2.protein.IdentifierType;
+import org.labkey.ms2.protein.ParseContext;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 public class uniprot_entry_gene_name extends CharactersParseActions
 {

@@ -23,7 +23,11 @@ import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewContext;
 import org.springframework.validation.BindException;
 
 import java.util.Collections;

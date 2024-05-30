@@ -20,10 +20,9 @@
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.protein.ProteinManager" %>
-<%@ page import="java.text.Format" %>
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
+<%@ page import="java.text.Format" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

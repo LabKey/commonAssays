@@ -22,7 +22,6 @@
 <%@ page import="org.labkey.ms2.protein.fasta.FastaProtein" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
-<%@ page import="org.labkey.ms2.protein.fasta.FastaProtein" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

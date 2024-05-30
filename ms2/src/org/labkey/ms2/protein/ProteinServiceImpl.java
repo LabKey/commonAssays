@@ -35,6 +35,7 @@ import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.AnnotationView;
+import org.labkey.ms2.Protein;
 import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.protein.organism.GuessOrgByParsing;
 import org.labkey.ms2.protein.organism.GuessOrgBySharedHash;
@@ -195,7 +196,7 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public WebPartView<?> getAnnotationsView(int seqId, Map<String, Collection<HtmlString>> extraAnnotations)
     {
-        org.labkey.ms2.Protein protein = ProteinManager.getProtein(seqId);
+        Protein protein = ProteinManager.getProtein(seqId);
         return new AnnotationView(protein, extraAnnotations);
     }
 
