@@ -96,18 +96,11 @@ public class ProteinManager
                 seqId).getObject(Protein.class);
     }
 
-    public static Protein getProtein(String sequence, int organismId)
+    private static Protein getProtein(String sequence, int organismId)
     {
         return new SqlSelector(ProteinSchema.getSchema(),
                 "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
                 hashSequence(sequence), organismId).getObject(Protein.class);
-    }
-
-    public static List<Protein> getProtein(String sequence)
-    {
-        return new SqlSelector(ProteinSchema.getSchema(),
-                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ?",
-                hashSequence(sequence)).getArrayList(Protein.class);
     }
 
     public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds)
