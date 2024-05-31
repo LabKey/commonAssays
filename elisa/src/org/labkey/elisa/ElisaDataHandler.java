@@ -119,6 +119,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         return null;
     }
 
+    @Override
     public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         List<Map<String, Object>> results = new ArrayList<>();

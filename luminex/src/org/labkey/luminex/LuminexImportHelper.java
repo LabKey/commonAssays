@@ -29,9 +29,9 @@ import java.util.Map;
 public class LuminexImportHelper implements OntologyManager.UpdateableTableImportHelper
 {
     @Override
-    public void afterImportObject(Map<String, Object> map)
+    public String afterImportObject(Map<String, Object> map)
     {
-
+        return (String)map.get("LSID");
     }
 
     @Override
