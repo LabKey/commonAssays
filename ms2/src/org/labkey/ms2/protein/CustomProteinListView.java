@@ -23,7 +23,11 @@ import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.view.*;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.GridView;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewContext;
 import org.springframework.validation.BindException;
 
 import java.util.Collections;
@@ -44,7 +48,7 @@ public class CustomProteinListView extends VBox
 
         DataRegion rgn = new DataRegion();
         rgn.setSettings(settings);
-        rgn.setColumns(ProteinManager.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
+        rgn.setColumns(ProteinSchema.getTableInfoCustomAnnotationSet().getColumns("Name, Created, CreatedBy, CustomAnnotationSetId"));
         rgn.getDisplayColumn("Name").setURLExpression(new DetailsURL(new ActionURL(ProteinController.ShowAnnotationSetAction.class, context.getContainer()), Collections.singletonMap("CustomAnnotation.queryName", "Name")));
         rgn.getDisplayColumn("CustomAnnotationSetId").setVisible(false);
         GridView gridView = new GridView(rgn, (BindException)null);

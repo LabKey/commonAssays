@@ -24,6 +24,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class CustomAnnotationSetsTable extends VirtualTable<CustomAnnotationSche
 {
     public CustomAnnotationSetsTable(TableInfo parentTable, CustomAnnotationSchema schema)
     {
-        super(ProteinManager.getSchema(), parentTable.getName(), schema);
+        super(ProteinSchema.getSchema(), parentTable.getName(), schema);
         Map<String, CustomAnnotationSet> annotationSets = ProteinManager.getCustomAnnotationSets(schema.getContainer(), true);
         SQLFragment sqlFragment = new SQLFragment("SELECT 1");
 

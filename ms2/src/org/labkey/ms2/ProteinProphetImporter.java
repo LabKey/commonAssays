@@ -34,8 +34,8 @@ import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
@@ -243,7 +243,7 @@ public class ProteinProphetImporter
                 String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
                         "(ProteinGroupId, Probability, SeqId) " +
                         "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
-                        "   FROM " + ProteinManager.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
+                        "   FROM " + ProteinSchema.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
                         "   WHERE s.FastaId IN(" + StringUtils.repeat("?", ", ", fastaIds.length) + ") AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
 
                 mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
@@ -408,13 +408,13 @@ public class ProteinProphetImporter
         int proteinIndex = 1;
         proteinStmt.setInt(proteinIndex++, groupId);
         proteinStmt.setFloat(proteinIndex++, protein.getProbability());
-        Protein p = new org.labkey.ms2.protein.fasta.Protein(protein.getProteinName(), new byte[0]);
+        FastaProtein p = new FastaProtein(protein.getProteinName(), new byte[0]);
         proteinStmt.setString(proteinIndex, p.getLookup());
         proteinStmt.execute();
 
         for (String indistinguishableProteinName : protein.getIndistinguishableProteinNames())
         {
-            p = new Protein(indistinguishableProteinName, new byte[0]);
+            p = new FastaProtein(indistinguishableProteinName, new byte[0]);
             proteinStmt.setString(proteinIndex, p.getLookup());
             proteinStmt.execute();
         }

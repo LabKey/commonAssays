@@ -34,7 +34,8 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.PeptideManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -328,7 +329,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
             }
             if (_form != null && _form.hasTargetSeqIds())
             {
-                filter.addClause(ProteinManager.getSequencesFilter(_form.getTargetSeqIds()));
+                filter.addClause(PeptideManager.getSequencesFilter(_form.getTargetSeqIds()));
             }
             peptidesSQL = _userSchema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }
@@ -349,9 +350,9 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
                 sql.append(" ON (pgm.ProteinGroupId = pg.rowId)\nINNER JOIN ");
                 sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
                 sql.append(" ON (frm.Run = r.Run)\nINNER JOIN ");
-                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
                 sql.append(" ON (fs.fastaid = frm.fastaid AND pgm.seqid = fs.seqid)\nINNER JOIN ");
-                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(ProteinSchema.getTableInfoSequences(), "s");
                 sql.append(" ON (fs.seqId = s.seqid)\n");
             }
             else
@@ -359,16 +360,16 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
                 sql.append(" INNER JOIN ");
                 sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
                 sql.append(" ON (frm.Run = r.Run)\n INNER JOIN ");
-                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
                 sql.append(" ON (fs.fastaid = frm.fastaid AND pd.seqid = fs.seqid)\n INNER JOIN ");
-                sql.append(ProteinManager.getTableInfoSequences(), "s");
+                sql.append(ProteinSchema.getTableInfoSequences(), "s");
                 sql.append(" ON (s.seqid = fs.seqid)\n");
             }
         }
         else if (_form != null && _form.hasTargetSeqIds())
         {
             sql.append("INNER JOIN ");
-            sql.append(ProteinManager.getTableInfoSequences(), "s");
+            sql.append(ProteinSchema.getTableInfoSequences(), "s");
             sql.append(" ON (s.SeqId IN ");
             _form.appendTargetSeqIdsClause(sql);
             sql.append(")\n");

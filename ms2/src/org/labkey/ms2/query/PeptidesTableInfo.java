@@ -42,7 +42,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -384,7 +384,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo<MS2Schema> sequenceTable = new SequencesTableInfo<>(ProteinManager.getTableInfoSequences().getName(), _userSchema, containerFilter);
+                SequencesTableInfo<MS2Schema> sequenceTable = new SequencesTableInfo<>(ProteinSchema.getTableInfoSequences().getName(), _userSchema, containerFilter);
                 SQLFragment fastaNameSQL = new SQLFragment(getName() + ".Protein");
                 ExprColumn fastaNameColumn = new ExprColumn(sequenceTable, "Database Sequence Name", fastaNameSQL, JdbcType.VARCHAR);
                 sequenceTable.addColumn(fastaNameColumn);

@@ -65,7 +65,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
         boolean success = false;
         info("Starting annotation load for " + _file);
         setStatus(TaskStatus.running);
-        try (DbScope.Transaction transaction = ProteinManager.getSchema().getScope().ensureTransaction())
+        try (DbScope.Transaction transaction = ProteinSchema.getSchema().getScope().ensureTransaction())
         {
             validate();
             Connection conn = transaction.getConnection();

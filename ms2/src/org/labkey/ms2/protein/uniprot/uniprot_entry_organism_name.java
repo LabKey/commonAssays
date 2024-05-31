@@ -16,9 +16,10 @@
 package org.labkey.ms2.protein.uniprot;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-import org.xml.sax.*;
-import org.labkey.ms2.protein.*;
+import org.labkey.ms2.protein.CharactersParseActions;
+import org.labkey.ms2.protein.ParseContext;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 public class uniprot_entry_organism_name extends CharactersParseActions
 {

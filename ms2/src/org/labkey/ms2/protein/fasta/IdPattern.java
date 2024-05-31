@@ -16,30 +16,31 @@
 
 package org.labkey.ms2.protein.fasta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * User: peter@labkey.com
- * Date: Nov 18, 2007
- * Time: 11:52:56 PM
- *
  * this class implements a regular expression-based recognition of identifiers parsed from the fasta files.
- *
- *
  */
 public class IdPattern
 {
-    private String _typeName;
-    private Pattern _pattern;
-    private String _strReplace;
-    private String _typeAfter;
+    private final String _typeName;
+    private final Pattern _pattern;
+    private final String _strReplace;
+    private final String _typeAfter;
     private SortedMap<Integer, Pattern> _mapReplPatterns =null;
 
     // poplulate the map of id patterns
-    public static final Map<String,IdPattern> ID_PATTERN_MAP = new HashMap<>();
+    public static final Map<String, IdPattern> ID_PATTERN_MAP = new HashMap<>();
     public static final List<String> UNTYPED_ID_PATTERN_LIST = new ArrayList<>();
     public static final List<String> TYPED_ID_PATTERN_LIST = new ArrayList<>();
     public static final List<String> WHOLE_HEADER_ID_PATTERN_LIST = new ArrayList<>();
@@ -64,11 +65,11 @@ public class IdPattern
 
     /**
      * This object handles "unqualified" tokens in the fasta header line; ie those that aren't prefaced
-     * with a <identtype>| that is in the Protein.IdentTypeMap.  It could also be used to verify
+     * with a <identtype>| that is in the FastaProtein.IdentTypeMap.  It could also be used to verify
      * qualified token values, but it would need to handle semi-colon delimited id sets and also handle
      * two-part tokens differntly.
      *
-     * @param type:  the type name for the identifier, from the set of values of the Protein.IdentTypeMap
+     * @param type:  the type name for the identifier, from the set of values of the FastaProtein.IdentTypeMap
      * @param match  a regular expression which matches identifiers of that type
      * @param replace an optional replacement string for use when the identifer needs to be extracted or built up
      *              from the string being tested.  Can use regular expression capture groups $0 through $9, where

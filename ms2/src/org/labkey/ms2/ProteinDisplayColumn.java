@@ -29,11 +29,6 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: adam
- * Date: Aug 3, 2006
- * Time: 10:42 AM
- */
 public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 {
     private final FieldKey _seqIdFK;

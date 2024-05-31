@@ -22,13 +22,7 @@ import org.jfree.data.general.DefaultPieDataset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
-/**
- * User: tholzman
- * Date: Oct 31, 2005
- * Time: 4:30:14 PM
- */
 public class ProteinPieDataset extends DefaultPieDataset
 {
     public Map<String, Set<Integer>> getExtraInfo()

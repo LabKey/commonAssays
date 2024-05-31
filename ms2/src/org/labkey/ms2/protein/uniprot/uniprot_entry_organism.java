@@ -15,8 +15,9 @@
  */
 package org.labkey.ms2.protein.uniprot;
 
-import org.xml.sax.*;
-import org.labkey.ms2.protein.*;
+import org.labkey.ms2.protein.ParseActions;
+import org.labkey.ms2.protein.ParseContext;
+import org.xml.sax.Attributes;
 
 public class uniprot_entry_organism extends ParseActions
 {

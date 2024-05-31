@@ -44,6 +44,7 @@ import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
@@ -210,7 +211,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
         @Override
         protected Sort getBaseSort()
         {
-            return ProteinManager.getPeptideBaseSort();
+            return PeptideManager.getPeptideBaseSort();
         }
 
         @Override
@@ -290,7 +291,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
+        filter.addAllClauses(PeptideManager.getPeptideFilter(_url, PeptideManager.EXTRA_FILTER, getUser(), getSingleRun()));
         filter.addCondition(view.getSelectedNestingOption().getRowIdFieldKey(), groupId);
         result.getRenderContext().setBaseFilter(filter);
 

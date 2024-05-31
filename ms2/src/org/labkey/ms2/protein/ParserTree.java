@@ -16,13 +16,29 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.ms2.protein.uniprot.uniprot;
-import org.labkey.ms2.protein.uniprot.*;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.labkey.ms2.protein.uniprot.uniprot;
+import org.labkey.ms2.protein.uniprot.uniprot_entry;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_accession;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_dbReference;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_dbReference_property;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_feature;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_feature_location_begin;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_feature_location_end;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_gene_name;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_keyword;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_name;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_organism;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_organism_dbReference;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_organism_name;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_protein_name;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_protein_recommendedName;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_protein_recommendedName_fullName;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_protein_recommendedName_shortName;
+import org.labkey.ms2.protein.uniprot.uniprot_entry_sequence;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * User: jeckels
