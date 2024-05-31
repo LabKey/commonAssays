@@ -52,12 +52,15 @@ import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
-import org.labkey.ms2.protein.ProteinManager;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.ms2.protein.ProteinViewBean;
+
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -921,7 +924,7 @@ public class MS2Schema extends UserSchema
 
         if (targetSeqIds != null && targetSeqIds.size() > 0)
         {
-            filter.addCondition(ProteinManager.getSequencesFilter(targetSeqIds));
+            filter.addCondition(PeptideManager.getSequencesFilter(targetSeqIds));
         }
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -1384,7 +1387,7 @@ public class MS2Schema extends UserSchema
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
             linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqIds().get(0));
-            linkUrlOnRunColuumn.addParameter(MS2Controller.ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
+            linkUrlOnRunColuumn.addParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
             linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
             if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)
             {
@@ -1488,7 +1491,7 @@ public class MS2Schema extends UserSchema
 
         if (form != null && form.hasTargetSeqIds())
         {
-            filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
+            filt = PeptideManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
         baseTable.getMutableColumn("SeqId").setLabel("Search Engine Protein");
@@ -1513,7 +1516,7 @@ public class MS2Schema extends UserSchema
                 if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
                 {
                     SQLFragment sql = new SQLFragment();
-                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinManager.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
+                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinSchema.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
                     sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
                     appendRunInClause(sql);
                     sql.append(")))");

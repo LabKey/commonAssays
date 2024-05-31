@@ -32,7 +32,7 @@ import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.ms2.protein.CustomAnnotationSet;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 
     public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema, ContainerFilter cf, boolean includeSeqId)
     {
-        super(ProteinManager.getTableInfoCustomAnnotation(), schema, cf);
+        super(ProteinSchema.getTableInfoCustomAnnotation(), schema, cf);
         _includeSeqId = includeSeqId;
         wrapAllColumns(true);
         _annotationSet = annotationSet;

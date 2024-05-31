@@ -41,7 +41,7 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -145,7 +145,7 @@ public abstract class GoLoader implements Closeable
 
     private void loadGoFromGz() throws SQLException, IOException, ServletException
     {
-        DbSchema schema = ProteinManager.getSchema();
+        DbSchema schema = ProteinSchema.getSchema();
         Map<String, GoLoadBean> map = getGoLoadMap();
         long start = System.currentTimeMillis();
 
@@ -190,7 +190,7 @@ public abstract class GoLoader implements Closeable
         TableInfo ti = bean.tinfo;
 
         logStatus("Clearing table " + bean.tinfo);
-        new SqlExecutor(ProteinManager.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
+        new SqlExecutor(ProteinSchema.getSchema()).execute("TRUNCATE TABLE " + bean.tinfo);
 
         logStatus("Starting to load " + filename);
         BufferedReader isr = Readers.getReader(is);
@@ -216,7 +216,7 @@ public abstract class GoLoader implements Closeable
 
         List<ColumnInfo> columns = ti.getColumns();
 
-        DbScope scope = ProteinManager.getSchema().getScope();
+        DbScope scope = ProteinSchema.getSchema().getScope();
         Connection conn = null;
         PreparedStatement ps = null;
 
@@ -359,11 +359,11 @@ public abstract class GoLoader implements Closeable
     {
         Map<String, GoLoadBean> map = new HashMap<>(10);
 
-        map.put(GOTERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm(), new String[]{"Id", "Name", "TermType", "Acc", "IsObsolete", "IsRoot"}));
-        map.put(GOTERM2TERM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTerm2Term(), new String[]{"Id", "RelationshipTypeId", "Term1Id", "Term2Id", "Complete"}));
-        map.put(GOTERMDEFINITION_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTermDefinition(), new String[]{"TermId", "TermDefinition", "DbXrefId", "TermComment", "Reference"}));
-        map.put(GOTERMSYNONYM_FILE, new GoLoadBean(ProteinManager.getTableInfoGoTermSynonym(), new String[]{"TermId", "TermSynonym", "AccSynonym", "SynonymTypeId"}));
-        map.put(GOGRAPHPATH_FILE, new GoLoadBean(ProteinManager.getTableInfoGoGraphPath(), new String[]{"Id", "Term1Id", "Term2Id", "Distance"}));
+        map.put(GOTERM_FILE, new GoLoadBean(ProteinSchema.getTableInfoGoTerm(), new String[]{"Id", "Name", "TermType", "Acc", "IsObsolete", "IsRoot"}));
+        map.put(GOTERM2TERM_FILE, new GoLoadBean(ProteinSchema.getTableInfoGoTerm2Term(), new String[]{"Id", "RelationshipTypeId", "Term1Id", "Term2Id", "Complete"}));
+        map.put(GOTERMDEFINITION_FILE, new GoLoadBean(ProteinSchema.getTableInfoGoTermDefinition(), new String[]{"TermId", "TermDefinition", "DbXrefId", "TermComment", "Reference"}));
+        map.put(GOTERMSYNONYM_FILE, new GoLoadBean(ProteinSchema.getTableInfoGoTermSynonym(), new String[]{"TermId", "TermSynonym", "AccSynonym", "SynonymTypeId"}));
+        map.put(GOGRAPHPATH_FILE, new GoLoadBean(ProteinSchema.getTableInfoGoGraphPath(), new String[]{"Id", "Term1Id", "Term2Id", "Distance"}));
 
         return map;
     }
@@ -379,7 +379,7 @@ public abstract class GoLoader implements Closeable
         {
             try
             {
-                _goLoaded = new TableSelector(ProteinManager.getTableInfoGoTerm()).exists();
+                _goLoaded = new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists();
             }
             catch(Exception e)
             {

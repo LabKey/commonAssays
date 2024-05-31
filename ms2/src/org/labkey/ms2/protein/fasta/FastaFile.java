@@ -18,10 +18,6 @@ package org.labkey.ms2.protein.fasta;
 
 import java.util.Date;
 
-/**
- * User: jeckels
- * Date: Feb 16, 2007
- */
 public class FastaFile
 {
     private int _fastaId;
@@ -29,7 +25,6 @@ public class FastaFile
     private Date _loaded;
     private String _fileChecksum;
     private boolean _scoringAnalysis;
-
 
     public int getFastaId()
     {

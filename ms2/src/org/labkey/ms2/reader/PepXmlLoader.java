@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Modification;
-import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -607,7 +607,7 @@ public class PepXmlLoader extends MS2XmlLoader
                                 }
                             }
 
-                            Protein p = new Protein(proteinName, new byte[0]);
+                            FastaProtein p = new FastaProtein(proteinName, new byte[0]);
                             _protein = p.getLookup();
                         }
                         else

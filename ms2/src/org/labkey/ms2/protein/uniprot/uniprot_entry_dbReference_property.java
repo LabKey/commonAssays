@@ -16,18 +16,14 @@
 
 package org.labkey.ms2.protein.uniprot;
 
-/**
- * User: tholzman
- * Date: Feb 28, 2005
- */
+import org.labkey.ms2.protein.ParseActions;
+import org.labkey.ms2.protein.ParseContext;
 import org.xml.sax.Attributes;
-import org.labkey.ms2.protein.*;
 
-import java.util.*;
+import java.util.List;
 
 public class uniprot_entry_dbReference_property extends ParseActions
 {
-
     @Override
     public void beginElement(ParseContext context, Attributes attrs)
     {

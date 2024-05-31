@@ -15,25 +15,20 @@
  */
 package org.labkey.ms2.protein.fasta;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.reader.FastaLoader;
 
 import java.io.File;
 
-/**
- * User: migra
- * Date: Jun 16, 2004
- * Time: 2:40:58 PM
- *
- */
-public class ProteinFastaLoader extends FastaLoader<Protein> implements Iterable<Protein>
+public class ProteinFastaLoader extends FastaLoader<FastaProtein> implements Iterable<FastaProtein>
 {
     public ProteinFastaLoader(File fastaFile)
     {
-        super(fastaFile, Protein::new);
+        super(fastaFile, FastaProtein::new);
     }
 
     @Override
-    public ProteinIterator iterator()
+    public @NotNull ProteinIterator iterator()
     {
         return new ProteinIterator();
     }

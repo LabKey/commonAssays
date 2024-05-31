@@ -16,16 +16,20 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.ms2.protein.uniprot.*;
+import org.labkey.ms2.protein.uniprot.UniprotAnnotation;
+import org.labkey.ms2.protein.uniprot.UniprotIdentifier;
+import org.labkey.ms2.protein.uniprot.UniprotOrganism;
+import org.labkey.ms2.protein.uniprot.UniprotSequence;
+import org.labkey.ms2.protein.uniprot.uniprot;
 
-import java.util.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * User: jeckels
- * Date: Nov 30, 2007
- */
 public class ParseContext
 {
     private uniprot _uniprotRoot;

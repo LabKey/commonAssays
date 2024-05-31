@@ -77,6 +77,7 @@ import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.fasta.PeptideTestCase;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
@@ -290,12 +291,12 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             }
         });
         FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinManager.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
+        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
 
         UsageMetricsService.get().registerUsageMetrics(getName(), () -> {
                 Map<String, Object> results = new HashMap<>();
-                results.put("hasGeneOntologyData", new TableSelector(ProteinManager.getTableInfoGoTerm()).exists());
+                results.put("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists());
                 return results;
         });
     }
@@ -320,7 +321,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @NotNull
     public List<String> getSchemaNames()
     {
-        return List.of(ProteinManager.getSchemaName(), MS2Schema.SCHEMA_NAME);
+        return List.of(ProteinSchema.getSchemaName(), MS2Schema.SCHEMA_NAME);
     }
 
     @Override

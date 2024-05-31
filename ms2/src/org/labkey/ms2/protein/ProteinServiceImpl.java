@@ -35,8 +35,8 @@ import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.AnnotationView;
-import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.protein.fasta.Protein;
+import org.labkey.ms2.Protein;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.protein.organism.GuessOrgByParsing;
 import org.labkey.ms2.protein.organism.GuessOrgBySharedHash;
 import org.labkey.ms2.protein.organism.GuessOrgBySharedIdents;
@@ -64,12 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-/**
- * User: jeckels
- * Date: May 3, 2012
- */
 public class ProteinServiceImpl implements ProteinService
 {
     private List<OrganismGuessStrategy> _strategies;
@@ -104,16 +99,10 @@ public class ProteinServiceImpl implements ProteinService
         return ProteinManager.ensureProtein(sequence, organism, name, description);
     }
 
-    @Override
-    public int ensureProtein(String sequence, int orgId, String name, String description)
-    {
-        return ProteinManager.ensureProtein(sequence, orgId, name, description);
-    }
-
     private String guessOrganism(String sequence, String organism, String name, String description)
     {
         String fullHeader = getWholeHeader(name, description);
-        ProteinPlus pp = new ProteinPlus(new Protein(fullHeader, sequence.getBytes()));
+        ProteinPlus pp = new ProteinPlus(new FastaProtein(fullHeader, sequence.getBytes()));
         if (organism == null)
         {
             for (OrganismGuessStrategy strategy : getStrategies())
@@ -143,7 +132,7 @@ public class ProteinServiceImpl implements ProteinService
     {
         String combinedNames = StringUtils.join(names, "|");
         String wholeHeader = getWholeHeader(combinedNames, description);
-        return Protein.getIdentifierMap(combinedNames, wholeHeader);
+        return FastaProtein.getIdentifierMap(combinedNames, wholeHeader);
     }
 
     private String getWholeHeader(String identifier, String description)
@@ -179,7 +168,7 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
     {
-        MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
+        ProteinViewBean bean = new ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
@@ -191,7 +180,7 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures , List<Replicate> replicates, List<PeptideCharacteristic> modifiedPeptideCharacteristics, boolean showStackedPeptides)
     {
-        MS2Controller.ProteinViewBean bean = new MS2Controller.ProteinViewBean();
+        ProteinViewBean bean = new ProteinViewBean();
         bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
@@ -207,36 +196,14 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public WebPartView<?> getAnnotationsView(int seqId, Map<String, Collection<HtmlString>> extraAnnotations)
     {
-        org.labkey.ms2.Protein protein = ProteinManager.getProtein(seqId);
+        Protein protein = ProteinManager.getProtein(seqId);
         return new AnnotationView(protein, extraAnnotations);
-    }
-
-    @Override
-    public String getProteinSequence(int seqId)
-    {
-        return ProteinManager.getProteinSequence(seqId);
-    }
-
-    @Override
-    public Integer getProteinSeqId(String sequence, int organismId)
-    {
-        org.labkey.ms2.Protein protein = ProteinManager.getProtein(sequence, organismId);
-        return protein != null ? protein.getSeqId() : null;
-    }
-
-    @Override
-    public List<Integer> getProteinSeqId(String sequence)
-    {
-        return ProteinManager.getProtein(sequence)
-                .stream()
-                .map(org.labkey.ms2.Protein::getSeqId)
-                .collect(Collectors.toList());
     }
 
     @Override
     public TableInfo getSequencesTable()
     {
-        return ProteinManager.getTableInfoSequences();
+        return ProteinSchema.getTableInfoSequences();
     }
 
     public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
@@ -402,5 +369,4 @@ public class ProteinServiceImpl implements ProteinService
             return Collections.unmodifiableList(result);
         }
     }
-
 }

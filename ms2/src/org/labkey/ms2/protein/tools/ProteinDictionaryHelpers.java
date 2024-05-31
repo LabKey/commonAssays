@@ -28,7 +28,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.WebdavResolver;
 import org.labkey.api.webdav.WebdavResource;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,11 +42,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: tholzman
- * Date: Sep 28, 2005
- * Time: 1:21:09 PM
- */
 public class ProteinDictionaryHelpers
 {
     private static final Logger _log = LogManager.getLogger(ProteinDictionaryHelpers.class);
@@ -63,12 +58,12 @@ public class ProteinDictionaryHelpers
             _log.info("Reloading ProtSprotOrgMap");
             int orgLineCount = 0;
 
-            new SqlExecutor(ProteinManager.getSchema()).execute("DELETE FROM " + ProteinManager.getTableInfoSprotOrgMap());
+            new SqlExecutor(ProteinSchema.getSchema()).execute("DELETE FROM " + ProteinSchema.getTableInfoSprotOrgMap());
 
-            DbScope scope = ProteinManager.getSchema().getScope();
+            DbScope scope = ProteinSchema.getSchema().getScope();
 
             try (Connection conn = scope.getConnection(); PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO " + ProteinManager.getTableInfoSprotOrgMap() +
+                    "INSERT INTO " + ProteinSchema.getTableInfoSprotOrgMap() +
                             " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
                             " VALUES (?,?,?,?,?,?,?,?)");)
             {
@@ -171,7 +166,7 @@ public class ProteinDictionaryHelpers
 
     private static String getGODefinitionFromId(int id)
     {
-        return new SqlSelector(ProteinManager.getSchema(), "SELECT TermDefinition FROM " + ProteinManager.getTableInfoGoTermDefinition() + " WHERE TermId=?", id).getObject(String.class);
+        return new SqlSelector(ProteinSchema.getSchema(), "SELECT TermDefinition FROM " + ProteinSchema.getTableInfoGoTermDefinition() + " WHERE TermId=?", id).getObject(String.class);
     }
 
     public static String getGODefinitionFromAcc(String acc)
@@ -181,7 +176,7 @@ public class ProteinDictionaryHelpers
 
     public static int getGOIdFromAcc(String acc)
     {
-        Integer goId = new SqlSelector(ProteinManager.getSchema(), "SELECT Id FROM " + ProteinManager.getTableInfoGoTerm() + " WHERE Acc = ?", acc).getObject(Integer.class);
+        Integer goId = new SqlSelector(ProteinSchema.getSchema(), "SELECT Id FROM " + ProteinSchema.getTableInfoGoTerm() + " WHERE Acc = ?", acc).getObject(Integer.class);
 
         return (null == goId ? 0 : goId);
     }
@@ -257,7 +252,7 @@ public class ProteinDictionaryHelpers
         {
             if (gTypeC == 0 || gTypeF == 0 || gTypeP == 0)
             {
-                new SqlSelector(ProteinManager.getSchema(), "SELECT annottypeid,name FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(rs -> {
+                new SqlSelector(ProteinSchema.getSchema(), "SELECT annottypeid,name FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(rs -> {
                     int antypeid = rs.getInt(1);
                     String gt = rs.getString(2);
                     if (gt.equals("GO_C"))

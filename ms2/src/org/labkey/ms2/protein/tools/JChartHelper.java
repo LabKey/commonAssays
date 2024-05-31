@@ -16,12 +16,12 @@
 
 package org.labkey.ms2.protein.tools;
 
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.JFreeChart;
 import org.jfree.chart.entity.StandardEntityCollection;
 import org.jfree.chart.plot.Plot;
+import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.AbstractDataset;
 import org.jfree.ui.HorizontalAlignment;
 

@@ -15,15 +15,18 @@
  */
 package org.labkey.ms2.protein.tools;
 
-import java.util.*;
-import java.util.regex.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * User: tholzman
- * Date: Mar 10, 2005
- * Time: 5:26:38 PM
- */
 public class REProperties extends java.util.Properties
 {
     public Set<String> REGetValues(String pattern)

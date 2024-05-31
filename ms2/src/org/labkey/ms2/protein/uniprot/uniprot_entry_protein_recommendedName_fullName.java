@@ -20,9 +20,10 @@ package org.labkey.ms2.protein.uniprot;
  * Date: Feb 28, 2005
  */
 
-import org.labkey.ms2.protein.*;
-import org.xml.sax.SAXException;
+import org.labkey.ms2.protein.CharactersParseActions;
+import org.labkey.ms2.protein.ParseContext;
 import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
 
 public class uniprot_entry_protein_recommendedName_fullName extends CharactersParseActions
 {

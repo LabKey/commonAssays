@@ -23,7 +23,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -115,22 +115,22 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
         SQLFragment sql = new SQLFragment();
 
         sql.append("SELECT SeqId, LocId, Acc, Name FROM ");
-        sql.append(ProteinManager.getTableInfoGoTerm());
+        sql.append(ProteinSchema.getTableInfoGoTerm());
         sql.append(" INNER JOIN\n(\n   SELECT SeqId, ThirdLevelId, LocId FROM\n   (\n");
         sql.append("      SELECT pa.SeqId, Term2Id AS LocId, CASE WHEN Term1Id IS NULL THEN gt.Id ELSE Term1Id END AS ThirdLevelId FROM ");
-        sql.append(ProteinManager.getTableInfoAnnotations(), "pa");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "pa");
         sql.append(" INNER JOIN\n      ");
-        sql.append(ProteinManager.getTableInfoGoTerm(), "gt");
+        sql.append(ProteinSchema.getTableInfoGoTerm(), "gt");
         sql.append(" ON gt.acc = ");
-        sql.append(ProteinManager.getSqlDialect().getSubstringFunction("pa.AnnotVal", "1", "10"));
+        sql.append(ProteinSchema.getSqlDialect().getSubstringFunction("pa.AnnotVal", "1", "10"));
         sql.append(" AND pa.");
         sql.append(ProteinDictionaryHelpers.getAnnotTypeWhereClause(goChartType));
         sql.append(" AND pa.SeqId IN (");
         sql.append(distinctSeqIdsSql);
         sql.append(") LEFT OUTER JOIN\n      ");
-        sql.append(ProteinManager.getTableInfoGoGraphPath(), "ggp");
+        sql.append(ProteinSchema.getTableInfoGoGraphPath(), "ggp");
         sql.append(" ON ggp.term2Id = gt.id AND ggp.term1Id IN (SELECT Term2Id FROM ");
-        sql.append(ProteinManager.getTableInfoGoGraphPath());
+        sql.append(ProteinSchema.getTableInfoGoGraphPath());
         sql.append(" WHERE Term1Id = 1 AND Distance = 3)\n   ) x\n");
         sql.append(") y ON ThirdLevelId = Id\nGROUP BY SeqId, ThirdLevelId, LocId, Acc, Name\n");
         sql.append("ORDER BY SeqId, LocId, ThirdLevelId");
@@ -139,7 +139,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
         Map<String, Integer> thirdLevTallies = new HashMap<>();
         Map<String, Set<Integer>> extra = new HashMap<>();
 
-        try (ResultSet rs = new SqlSelector(ProteinManager.getSchema(), sql).getResultSet())
+        try (ResultSet rs = new SqlSelector(ProteinSchema.getSchema(), sql).getResultSet())
         {
             int prevSeqId = -1;
             int prevLocId = -1;
