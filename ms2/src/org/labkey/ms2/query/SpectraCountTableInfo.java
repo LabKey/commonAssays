@@ -34,7 +34,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
@@ -329,7 +329,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
             }
             if (_form != null && _form.hasTargetSeqIds())
             {
-                filter.addClause(ProteinManager.getSequencesFilter(_form.getTargetSeqIds()));
+                filter.addClause(PeptideManager.getSequencesFilter(_form.getTargetSeqIds()));
             }
             peptidesSQL = _userSchema.getPeptideSelectSQL(filter, peptideFieldKeys);
         }

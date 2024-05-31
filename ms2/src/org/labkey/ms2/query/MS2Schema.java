@@ -52,10 +52,10 @@ import org.labkey.ms2.MS2Fraction;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
-import org.labkey.ms2.protein.ProteinManager;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.labkey.ms2.protein.ProteinSchema;
@@ -924,7 +924,7 @@ public class MS2Schema extends UserSchema
 
         if (targetSeqIds != null && targetSeqIds.size() > 0)
         {
-            filter.addCondition(ProteinManager.getSequencesFilter(targetSeqIds));
+            filter.addCondition(PeptideManager.getSequencesFilter(targetSeqIds));
         }
         CustomView view = queryDef.getCustomView(getUser(), request, viewName);
         if (view != null)
@@ -1491,7 +1491,7 @@ public class MS2Schema extends UserSchema
 
         if (form != null && form.hasTargetSeqIds())
         {
-            filt = ProteinManager.getSequencesFilter(form.getTargetSeqIds());
+            filt = PeptideManager.getSequencesFilter(form.getTargetSeqIds());
             baseTable.addCondition(filt.toSQLFragment(null, this.getDbSchema().getSqlDialect()));
         }
         baseTable.getMutableColumn("SeqId").setLabel("Search Engine Protein");

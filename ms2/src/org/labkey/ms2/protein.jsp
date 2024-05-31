@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.ms2.protein.ProteinManager" %>
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.ms2.PeptideManager" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -55,7 +56,7 @@
                     <% addHandler(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "change", "this.form.submit();"); %>
                     <select id="<%= h(ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>" name="<%= h(ProteinViewBean.ALL_PEPTIDES_URL_PARAM) %>">
                         <option value="false">Show only peptides assigned by search engine</option>
-                        <option value="true" <%=selected(ProteinManager.showAllPeptides(getActionURL(), getUser()))%>>Show all peptides with sequence matches</option>
+                        <option value="true" <%=selected(PeptideManager.showAllPeptides(getActionURL(), getUser()))%>>Show all peptides with sequence matches</option>
                     </select>
                 </labkey:form>
             </td>
