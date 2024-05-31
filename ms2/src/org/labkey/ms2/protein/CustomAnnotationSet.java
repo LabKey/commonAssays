@@ -16,7 +16,6 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 

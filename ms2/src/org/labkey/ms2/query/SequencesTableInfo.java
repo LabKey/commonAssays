@@ -43,6 +43,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.CustomAnnotationType;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
@@ -68,7 +69,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
 
     public SequencesTableInfo(SchemaType schema, ContainerFilter cf)
     {
-        super(ProteinManager.getTableInfoSequences(), schema, cf);
+        super(ProteinSchema.getTableInfoSequences(), schema, cf);
         setPublicSchemaName(ProteinUserSchema.NAME);
         setTitleColumn("BestName");
         wrapAllColumns(true);
@@ -110,7 +111,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                         SQLFragment sql = new SQLFragment();
 
                         sql.append("(SELECT MIN(CustomAnnotationId) FROM ");
-                        sql.append(ProteinManager.getTableInfoCustomAnnotation(), "ca");
+                        sql.append(ProteinSchema.getTableInfoCustomAnnotation(), "ca");
                         CustomAnnotationType type = annotationSet.lookupCustomAnnotationType();
                         sql.append(" WHERE CustomAnnotationSetId = ? AND LookupString IN (");
                         sql.append(type.getLookupStringSelect(parent));
@@ -230,11 +231,11 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
 
     public void addContainerCondition(Container c, User u, boolean includeSubfolders)
     {
-        SqlDialect d = ProteinManager.getSqlDialect();
+        SqlDialect d = ProteinSchema.getSqlDialect();
         List<Container> containers = ContainerManager.getAllChildren(c, u);
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
         sql.append(", ");
         sql.append(MS2Manager.getTableInfoRuns(), "r");
         sql.append(", ");
@@ -261,25 +262,25 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
         SQLFragment sql = new SQLFragment();
         sql.append("SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoSequences(), "s");
+        sql.append(ProteinSchema.getTableInfoSequences(), "s");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoAnnotations(), "a");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
+        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
         sql.append("\n");

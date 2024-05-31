@@ -25,11 +25,11 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.Spectrum;
 import org.labkey.ms2.SpectrumException;
 import org.labkey.ms2.SpectrumImporter;
 import org.labkey.ms2.SpectrumIterator;
-import org.labkey.ms2.protein.ProteinManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -314,7 +314,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
         @Override
         public ResultSet getNextResultSet()
         {
-            ProteinManager.replaceRunCondition(_filter, null, _iter.next());
+            PeptideManager.replaceRunCondition(_filter, null, _iter.next());
 
             SQLFragment sql = getBaseResultSetSql();
             sql.append(") X\n");

@@ -37,7 +37,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.reader.AbstractMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
 
@@ -402,7 +402,7 @@ public abstract class MS2Importer
         _updateSeqIdSql = "UPDATE " +
                 MS2Manager.getTableInfoPeptidesData() +
                 " SET SeqId = fs.SeqId\nFROM " +
-                ProteinManager.getTableInfoFastaSequences() +
+                ProteinSchema.getTableInfoFastaSequences() +
                 " fs WHERE Fraction = ? AND " +
                 MS2Manager.getTableInfoPeptidesData() +
                 ".Protein = fs.LookupString AND fs.FastaId = ? AND " +
@@ -424,7 +424,7 @@ public abstract class MS2Importer
         _updateSpPrefixSeqIdSql = "UPDATE " +
                 MS2Manager.getTableInfoPeptidesData() +
                 " SET SeqId = fs.SeqId\nFROM " +
-                ProteinManager.getTableInfoFastaSequences() +
+                ProteinSchema.getTableInfoFastaSequences() +
                 " fs WHERE Fraction = ? AND fs.LookupString LIKE " +
                 MS2Manager.getSqlDialect().concatenate("'sp|'", MS2Manager.getTableInfoPeptidesData() + ".Protein", "'|%'") +
                 " AND fs.FastaId = ? AND " +
@@ -469,13 +469,13 @@ public abstract class MS2Importer
         sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
         sql.append(" SET SeqId = (");
         sql.append("    SELECT ");
-        sql.append("        CASE (SELECT Count(*) FROM ").append(ProteinManager.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
+        sql.append("        CASE (SELECT Count(*) FROM ").append(ProteinSchema.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinSchema.getTableInfoIdentTypes()).append(" IT ");
         sql.append("                ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
-        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
+        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
         sql.append("        WHEN 1 THEN ");
-        sql.append("            (SELECT SeqId FROM ").append(ProteinManager.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinManager.getTableInfoIdentTypes()).append(" IT ");
+        sql.append("            (SELECT SeqId FROM ").append(ProteinSchema.getTableInfoIdentifiers()).append(" I ").append(" INNER JOIN ").append(ProteinSchema.getTableInfoIdentTypes()).append(" IT ");
         sql.append("                ON IT.IdentTypeId = I.IdentTypeId AND IT.Name = 'SwissProt'");
-        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
+        sql.append("                WHERE I.Identifier = Protein AND SeqId IN (SELECT SeqId FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" WHERE FastaId = ?))");
         sql.append("        ELSE ");
         sql.append("            NULL");
         sql.append("        END");
@@ -522,7 +522,7 @@ public abstract class MS2Importer
         sql.append("                COUNT(Distinct fs.SeqId) AS MatchCount,\n");
         sql.append("                Protein\n");
         sql.append("            FROM\n");
-        sql.append("                ").append(ProteinManager.getTableInfoFastaSequences(), "fs").append("\n");
+        sql.append("                ").append(ProteinSchema.getTableInfoFastaSequences(), "fs").append("\n");
         sql.append("            INNER JOIN\n");
         sql.append("                (SELECT Protein FROM ").append(MS2Manager.getTableInfoPeptidesData(), "pd").append(" WHERE Fraction=?) pd\n");
         sql.append("            ON\n");
@@ -566,10 +566,10 @@ public abstract class MS2Importer
         sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
         sql.append(" SET SeqId = (");
         sql.append("    SELECT " );
-        sql.append("        CASE (SELECT COUNT(*) FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
+        sql.append("        CASE (SELECT COUNT(*) FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" fs ");
         sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
         sql.append("        WHEN 1 THEN " );
-        sql.append("            (SELECT SeqId FROM ").append(ProteinManager.getTableInfoFastaSequences()).append(" fs ");
+        sql.append("            (SELECT SeqId FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" fs ");
         sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
         sql.append("        ELSE  ");
         sql.append("            NULL");
@@ -602,7 +602,7 @@ public abstract class MS2Importer
                 "           END\n" +
                 "       END\n" +
                 ", 0)\n" +
-                "FROM ").append(ProteinManager.getTableInfoSequences()).append(" ps\n" +
+                "FROM ").append(ProteinSchema.getTableInfoSequences()).append(" ps\n" +
                 "WHERE ").append(MS2Manager.getTableInfoPeptidesData()).append(".SeqId = ps.SeqId AND ").append(MS2Manager.getTableInfoPeptidesData()).append(".Fraction = ?");
         _updateSequencePositionSql.add(null); // fractionid
     }

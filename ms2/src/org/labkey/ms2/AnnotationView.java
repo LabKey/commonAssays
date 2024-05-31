@@ -29,10 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
-* User: jeckels
-* Date: May 14, 2012
-*/
 public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
 {
     public AnnotationView(Protein protein)

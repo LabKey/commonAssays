@@ -20,7 +20,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.util.StringUtilsLabKey;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,27 +36,27 @@ public class FastaDbHelper
     private static final SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
 
     private static final String INITIAL_INSERTION_COMMAND =
-            "INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,DefaultOrganism,OrgShouldBeGuessed,InsertDate) VALUES (?,'fasta',?,?,?,?)";
+            "INSERT INTO " + ProteinSchema.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,DefaultOrganism,OrgShouldBeGuessed,InsertDate) VALUES (?,'fasta',?,?,?,?)";
 
     private static final String UPDATE_INSERTION_COMMAND =
-            "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
+            "UPDATE " + ProteinSchema.getTableInfoAnnotInsertions() + " SET " +
                     " Mouthsful=?,SequencesAdded=?,AnnotationsAdded=?,IdentifiersAdded=?," +
                     " OrganismsAdded=?, MRMSequencesAdded=?,MRMAnnotationsAdded=?,MRMIdentifiersAdded=?," +
                     " MRMOrganismsAdded=?,MRMSize=?,RecordsProcessed=?,ChangeDate=? " +
                     " WHERE  InsertId=?";
 
-    private static final String UPDATE_BEST_GENE_NAME_COMMAND = "UPDATE " + ProteinManager.getTableInfoSequences() + " SET BestGeneName = (" +
-            "SELECT MIN(identifier) FROM " + ProteinManager.getTableInfoIdentifiers() + " i, " + ProteinManager.getTableInfoIdentTypes() + " it WHERE i.identtypeid = it.identtypeid AND " +
-            "i.seqid = " + ProteinManager.getTableInfoSequences() + ".seqid AND it.name='GeneName') WHERE BestGeneName IS NULL AND seqid IN (SELECT seqid FROM " +
-            ProteinManager.getTableInfoFastaSequences() + " WHERE fastaid = ?)";
+    private static final String UPDATE_BEST_GENE_NAME_COMMAND = "UPDATE " + ProteinSchema.getTableInfoSequences() + " SET BestGeneName = (" +
+            "SELECT MIN(identifier) FROM " + ProteinSchema.getTableInfoIdentifiers() + " i, " + ProteinSchema.getTableInfoIdentTypes() + " it WHERE i.identtypeid = it.identtypeid AND " +
+            "i.seqid = " + ProteinSchema.getTableInfoSequences() + ".seqid AND it.name='GeneName') WHERE BestGeneName IS NULL AND seqid IN (SELECT seqid FROM " +
+            ProteinSchema.getTableInfoFastaSequences() + " WHERE fastaid = ?)";
 
     private static final String FINALIZE_INSERTION_COMMAND =
-            "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
+            "UPDATE " + ProteinSchema.getTableInfoAnnotInsertions() + " SET " +
                     " CompletionDate=? WHERE InsertId=?";
 
     private static final String GET_CURRENT_INSERT_STATS_COMMAND =
             "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed" +
-                    " FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
+                    " FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
 
     private final String _tableSuffix = StringUtilsLabKey.getPaddedUniquifier(9);
     public final String _seqTableName = _dialect.getTempTablePrefix() +  "sequences" + _tableSuffix;
@@ -98,7 +98,7 @@ public class FastaDbHelper
     public FastaDbHelper(Connection c) throws SQLException
     {
         SQLFragment initialInsert = new SQLFragment(INITIAL_INSERTION_COMMAND);
-        _dialect.addReselect(initialInsert, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
+        _dialect.addReselect(initialInsert, ProteinSchema.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
         _initialInsertionStmt = c.prepareStatement(initialInsert.getSQL());
         _getCurrentInsertStatsStmt = c.prepareStatement(GET_CURRENT_INSERT_STATS_COMMAND);
         _updateInsertionStmt = c.prepareStatement(UPDATE_INSERTION_COMMAND);
@@ -140,48 +140,48 @@ public class FastaDbHelper
                 " (ProtSequence,hash,description,mass,length,best_name,fname,lookup,genus,species,fullOrg,entry_date) " +
                 " VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ");
 
-        _insertIntoOrgsStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoOrganisms() + " (Genus,Species) " +
+        _insertIntoOrgsStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoOrganisms() + " (Genus,Species) " +
                 "SELECT DISTINCT genus,species FROM " + _seqTableName +
                 " WHERE " + _seqTableName + ".orgid IS NULL AND NOT EXISTS (" +
-                "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE UPPER(" + _seqTableName + ".genus) = UPPER(" + ProteinManager.getTableInfoOrganisms() + ".genus) AND UPPER(" +
-                _seqTableName + ".species) = UPPER(" + ProteinManager.getTableInfoOrganisms() + ".species))");
+                "SELECT * FROM " + ProteinSchema.getTableInfoOrganisms() + " WHERE UPPER(" + _seqTableName + ".genus) = UPPER(" + ProteinSchema.getTableInfoOrganisms() + ".genus) AND UPPER(" +
+                _seqTableName + ".species) = UPPER(" + ProteinSchema.getTableInfoOrganisms() + ".species))");
 
         _updateSTempWithGuessedOrgStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET genus = x.genus, species = x.species, fullorg = x.fullorg \n" +
             "FROM ( SELECT " + _dialect.concatenate("a.genus", "' '", "a.species") + " AS fullorg, a.species as species, a.genus as genus, c.identifier as identifier " +
-                "  FROM " + ProteinManager.getTableInfoOrganisms() + " a JOIN " + ProteinManager.getTableInfoSequences() + " b ON (a.orgid=b.orgid) JOIN " + ProteinManager.getTableInfoIdentifiers() + " c ON (c.seqid=b.seqid)) x \n" +
+                "  FROM " + ProteinSchema.getTableInfoOrganisms() + " a JOIN " + ProteinSchema.getTableInfoSequences() + " b ON (a.orgid=b.orgid) JOIN " + ProteinSchema.getTableInfoIdentifiers() + " c ON (c.seqid=b.seqid)) x \n" +
                 " WHERE " + _seqTableName + ".fullorg IS NULL AND x.identifier=" + _seqTableName + ".lookup");
 
         _updateSTempWithOrgIDsStmt = c.prepareStatement("UPDATE " + _seqTableName +
-                " SET orgid = " + ProteinManager.getTableInfoOrganisms() + ".orgid FROM " + ProteinManager.getTableInfoOrganisms() +
-                " WHERE UPPER(" + ProteinManager.getTableInfoOrganisms() + ".genus) = UPPER(" + _seqTableName + ".genus)" +
-                " AND UPPER(" + ProteinManager.getTableInfoOrganisms() + ".species) = UPPER(" + _seqTableName + ".species)");
+                " SET orgid = " + ProteinSchema.getTableInfoOrganisms() + ".orgid FROM " + ProteinSchema.getTableInfoOrganisms() +
+                " WHERE UPPER(" + ProteinSchema.getTableInfoOrganisms() + ".genus) = UPPER(" + _seqTableName + ".genus)" +
+                " AND UPPER(" + ProteinSchema.getTableInfoOrganisms() + ".species) = UPPER(" + _seqTableName + ".species)");
 
-        _insertIntoSeqsStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoSequences() + " (ProtSequence, Hash, Description, Mass, Length, OrgId, BestName, InsertDate) " +
+        _insertIntoSeqsStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoSequences() + " (ProtSequence, Hash, Description, Mass, Length, OrgId, BestName, InsertDate) " +
                 " SELECT a.ProtSequence,a.hash,a.description,a.mass,a.length,a.OrgId,substring(a.best_name,1,50),entry_date " +
                 " FROM " + _seqTableName + " a " +
                 " WHERE NOT EXISTS (" +
-                "   SELECT * FROM " + ProteinManager.getTableInfoSequences() + " " +
+                "   SELECT * FROM " + ProteinSchema.getTableInfoSequences() + " " +
                 "   WHERE " +
-                "     a.Hash = " + ProteinManager.getTableInfoSequences() + ".Hash AND a.OrgId=" + ProteinManager.getTableInfoSequences() + ".OrgId" +
+                "     a.Hash = " + ProteinSchema.getTableInfoSequences() + ".Hash AND a.OrgId=" + ProteinSchema.getTableInfoSequences() + ".OrgId" +
                 " ) AND srowid IN (SELECT MIN(srowid) FROM " + _seqTableName + " GROUP BY Hash, OrgId)");
 
-        _updateSTempWithSeqIDsStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET seqid = " + ProteinManager.getTableInfoSequences() + ".seqid FROM " + ProteinManager.getTableInfoSequences() + " WHERE " + ProteinManager.getTableInfoSequences() + ".hash=" + _seqTableName + ".hash" +
-                " AND " + ProteinManager.getTableInfoSequences() + ".orgid=" + _seqTableName + ".orgid");
+        _updateSTempWithSeqIDsStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET seqid = " + ProteinSchema.getTableInfoSequences() + ".seqid FROM " + ProteinSchema.getTableInfoSequences() + " WHERE " + ProteinSchema.getTableInfoSequences() + ".hash=" + _seqTableName + ".hash" +
+                " AND " + ProteinSchema.getTableInfoSequences() + ".orgid=" + _seqTableName + ".orgid");
 
         _getIdentsStmt = c.prepareStatement("SELECT best_name,seqid,description FROM " + _seqTableName);
 
-        _insertIdentTypesStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoIdentTypes() + " (name,EntryDate) SELECT DISTINCT a.identType,max(a.entry_date) FROM " +
-            _identTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentTypes() + " " +
-                " WHERE a.identType = " + ProteinManager.getTableInfoIdentTypes() + ".name) GROUP BY a.identType");
+        _insertIdentTypesStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoIdentTypes() + " (name,EntryDate) SELECT DISTINCT a.identType,max(a.entry_date) FROM " +
+            _identTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoIdentTypes() + " " +
+                " WHERE a.identType = " + ProteinSchema.getTableInfoIdentTypes() + ".name) GROUP BY a.identType");
 
         _updateIdentsWithIdentTypesStmt = c.prepareStatement("UPDATE " + _identTableName + " SET identTypeId = a.IdentTypeId " +
-                " FROM " + ProteinManager.getTableInfoIdentTypes() + " a WHERE a.name=" + _identTableName + ".identType");
+                " FROM " + ProteinSchema.getTableInfoIdentTypes() + " a WHERE a.name=" + _identTableName + ".identType");
 
         _addIdentStmt = c.prepareStatement("INSERT INTO " + _identTableName + " (identifier,identTYpe,seqid,entry_date) VALUES (?,?,?,?)");
 
-        _insertIntoIdentsStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " (Identifier,IdentTypeId,SeqId,EntryDate) " +
+        _insertIntoIdentsStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoIdentifiers() + " (Identifier,IdentTypeId,SeqId,EntryDate) " +
                 " SELECT DISTINCT Identifier,IdentTypeId,SeqId,max(entry_date) FROM " + _identTableName +
-                "  WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentifiers() + " a " +
+                "  WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoIdentifiers() + " a " +
                 "    WHERE a.Identifier = " + _identTableName + ".Identifier AND " +
                 "          a.IdentTypeId = " + _identTableName + ".IdentTypeId AND " +
                 "          a.SeqId = " + _identTableName + ".SeqId) " +
@@ -191,42 +191,42 @@ public class FastaDbHelper
         _emptyIdentsStmt = c.prepareStatement("TRUNCATE TABLE " + _identTableName);
 
         _guessOrgBySharedHashStmt = c.prepareStatement("UPDATE " + _seqTableName + " SET orgid = ( SELECT MIN(PS.orgid) " +
-                    " FROM " + ProteinManager.getTableInfoSequences() + " PS INNER JOIN " +  ProteinManager.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +
+                    " FROM " + ProteinSchema.getTableInfoSequences() + " PS INNER JOIN " +  ProteinSchema.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +
                     " AND PS.hash = " + _seqTableName + ".hash " +
                     " AND (PO.genus<>'Unknown' OR PO.species<>'unknown')  )" +
                 " WHERE " + _seqTableName + ".genus= ? AND "+ _seqTableName + ".species= ? " +
                 " AND 1 = ( SELECT COUNT(*) " +
-                    " FROM " + ProteinManager.getTableInfoSequences() + " PS INNER JOIN " +  ProteinManager.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +
+                    " FROM " + ProteinSchema.getTableInfoSequences() + " PS INNER JOIN " +  ProteinSchema.getTableInfoOrganisms() + " PO ON (PS.orgid = PO.orgid) " +
                     " AND PS.hash = " + _seqTableName + ".hash " +
                     " AND (PO.genus<>'Unknown' OR PO.species<>'unknown')  )");
 
 
         // TODO: Switch to SqlSelector or TableSelector
-        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeId FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='FullOrganismName'"))
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeId FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " WHERE name='FullOrganismName'"))
         {
             rs.next();
             _fullOrganismNameIdent = rs.getInt(1);
         }
 
         // TODO: Switch to SqlSelector or TableSelector
-        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeID FROM " + ProteinManager.getTableInfoAnnotationTypes() + " WHERE name='LookupString'"))
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT AnnotTypeID FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " WHERE name='LookupString'"))
         {
             rs.next();
             _lookupStringIdent = rs.getInt(1);
         }
 
         _insertOrgsIntoAnnotationsStmt = c.prepareStatement(
-                "INSERT INTO " + ProteinManager.getTableInfoAnnotations() + " (annotval,annotTypeId,seqid,InsertDate) " +
+                "INSERT INTO " + ProteinSchema.getTableInfoAnnotations() + " (annotval,annotTypeId,seqid,InsertDate) " +
                         "  SELECT DISTINCT s.fullorg," + _fullOrganismNameIdent + ",s.seqid,max(s.entry_date) " +
                         "     FROM " + _seqTableName + " s " +
                         "     WHERE " +
                         "        s.fullorg IS NOT NULL AND " +
                         "        NOT EXISTS (" +
-                        "           SELECT * FROM " + ProteinManager.getTableInfoOrganisms() +
+                        "           SELECT * FROM " + ProteinSchema.getTableInfoOrganisms() +
                         "             WHERE " +  _dialect.concatenate("genus", "' '", "species") + " = s.fullorg " +
                         "        )                     AND " +
                         "        NOT EXISTS (" +
-                        "           SELECT * FROM " + ProteinManager.getTableInfoAnnotations() + " c " +
+                        "           SELECT * FROM " + ProteinSchema.getTableInfoAnnotations() + " c " +
                         "              WHERE c.annotTypeId=" + _fullOrganismNameIdent + " AND " +
                         "                    s.fullorg = c.annotval                  AND " +
                         "                    s.seqid = c.seqid " +
@@ -234,9 +234,9 @@ public class FastaDbHelper
                         " GROUP BY s.fullorg,s.seqid"
         );
 
-        _insertFastaSequencesStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoFastaSequences() + " (fastaid, lookupstring, seqid) ( SELECT ? AS fastaid, lookup, seqid FROM " + _seqTableName + ")");
+        _insertFastaSequencesStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoFastaSequences() + " (fastaid, lookupstring, seqid) ( SELECT ? AS fastaid, lookup, seqid FROM " + _seqTableName + ")");
 
-        _insertIntoFastasStmt = c.prepareStatement("INSERT INTO " + ProteinManager.getTableInfoFastaLoads() + " (filename,nsequences,comment,filechecksum,InsertDate) VALUES (?,?,?,?,?)");
+        _insertIntoFastasStmt = c.prepareStatement("INSERT INTO " + ProteinSchema.getTableInfoFastaLoads() + " (filename,nsequences,comment,filechecksum,InsertDate) VALUES (?,?,?,?,?)");
         _dropSeqTempStmt = c.prepareStatement("DROP TABLE " + _seqTableName);
         _dropIdentTempStmt = c.prepareStatement("DROP TABLE " + _identTableName);
     }

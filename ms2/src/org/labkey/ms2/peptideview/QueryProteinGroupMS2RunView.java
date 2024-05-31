@@ -39,6 +39,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
@@ -170,7 +171,7 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
 
         Filter customViewFilter = result.getRenderContext().getBaseFilter();
         SimpleFilter filter = new SimpleFilter(customViewFilter);
-        filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER, getUser(), getSingleRun()));
+        filter.addAllClauses(PeptideManager.getPeptideFilter(_url, PeptideManager.EXTRA_FILTER, getUser(), getSingleRun()));
 
         try
         {

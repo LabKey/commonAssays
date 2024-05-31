@@ -344,7 +344,7 @@ public abstract class SequenceDbComposite extends SearchFormComposite
     @Override
     public String validate()
     {
-        if(getSelectedDb().equals("") || getSelectedDb().equals("None found.") )
+        if (getSelectedDb().isEmpty() || getSelectedDb().equals("None found.") )
         {
             return "A sequence database must be selected.";
         }

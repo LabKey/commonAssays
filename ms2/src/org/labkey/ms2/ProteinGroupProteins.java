@@ -19,21 +19,17 @@ package org.labkey.ms2;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.api.data.RenderContext;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.*;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-/**
- * User: jeckels
- * Date: May 5, 2006
- */
 public class ProteinGroupProteins
 {
     private List<MS2Run> _runs;
-    private Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<>();
+    private final Map<ResultSet, Map<Integer, List<ProteinSummary>>> _summaries = new WeakHashMap<>();
 
     public ProteinGroupProteins()
     {
@@ -106,10 +102,10 @@ public class ProteinGroupProteins
     private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
     {
         String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
-                "FROM " + ProteinManager.getTableInfoSequences() + " protseq, " +
+                "FROM " + ProteinSchema.getTableInfoSequences() + " protseq, " +
                 "   " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                 "   " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
-                "   " + ProteinManager.getTableInfoFastaSequences() + " proteinseq, " +
+                "   " + ProteinSchema.getTableInfoFastaSequences() + " proteinseq, " +
                 "   " + MS2Manager.getTableInfoFastaRunMapping() + " frm, " +
                 "   " + MS2Manager.getTableInfoRuns() + " r, " +
                 "   " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n" +
@@ -135,12 +131,7 @@ public class ProteinGroupProteins
             String bestGeneName = (String)row.get("BestGeneName");
             double sequenceMass = ((Number)row.get("Mass")).doubleValue();
             ProteinSummary summary = new ProteinSummary(lookupString, seqId, description, bestName, bestGeneName, sequenceMass);
-            List<ProteinSummary> summaries = result.get(rowId);
-            if (summaries == null)
-            {
-                summaries = new ArrayList<>();
-                result.put(rowId, summaries);
-            }
+            List<ProteinSummary> summaries = result.computeIfAbsent(rowId, k -> new ArrayList<>());
             summaries.add(summary);
         }
     }

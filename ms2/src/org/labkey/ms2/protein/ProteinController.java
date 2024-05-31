@@ -21,19 +21,41 @@ import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.*;
-import org.labkey.api.exp.*;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
-import org.labkey.api.query.*;
-import org.labkey.api.security.RequiresPermission;
-import org.labkey.api.security.permissions.*;
-import org.labkey.api.security.User;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.Table;
+import org.labkey.api.exp.DomainDescriptor;
+import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.PropertyDescriptor;
+import org.labkey.api.exp.PropertyType;
+import org.labkey.api.query.QuerySettings;
+import org.labkey.api.query.QueryView;
+import org.labkey.api.query.UserSchema;
+import org.labkey.api.query.ValidationError;
+import org.labkey.api.query.ValidationException;
+import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.reader.TabLoader;
+import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.DeletePermission;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.*;
-import org.labkey.api.reader.TabLoader;
-import org.labkey.api.reader.ColumnDescriptor;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.DataView;
+import org.labkey.api.view.HtmlView;
+import org.labkey.api.view.JspView;
+import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.VBox;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.springframework.validation.BindException;
@@ -43,7 +65,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: jeckels
@@ -293,7 +319,7 @@ public class ProteinController extends SpringActionController
                 return false;
             }
 
-            DbScope scope = ProteinManager.getSchema().getScope();
+            DbScope scope = ProteinSchema.getSchema().getScope();
 
             try (DbScope.Transaction transaction = scope.ensureTransaction())
             {
@@ -309,13 +335,13 @@ public class ProteinController extends SpringActionController
                 annotationSet.setName(form.getName());
                 annotationSet.setCustomAnnotationType(type.toString());
 
-                annotationSet = Table.insert(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet);
+                annotationSet = Table.insert(getUser(), ProteinSchema.getTableInfoCustomAnnotationSet(), annotationSet);
                 annotationSet.setLsid(new Lsid(CustomAnnotationSet.TYPE, Integer.toString(annotationSet.getCustomAnnotationSetId())).toString());
-                annotationSet = Table.update(getUser(), ProteinManager.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId());
+                annotationSet = Table.update(getUser(), ProteinSchema.getTableInfoCustomAnnotationSet(), annotationSet, annotationSet.getCustomAnnotationSetId());
 
                 StringBuilder sb = new StringBuilder();
                 sb.append("INSERT INTO ");
-                sb.append(ProteinManager.getTableInfoCustomAnnotation());
+                sb.append(ProteinSchema.getTableInfoCustomAnnotation());
                 sb.append("(CustomAnnotationSetId, LookupString, ObjectURI) VALUES (?, ?, ?)");
 
                 PreparedStatement stmt = connection.prepareStatement(sb.toString());

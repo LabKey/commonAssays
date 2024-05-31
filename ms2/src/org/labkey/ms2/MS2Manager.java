@@ -73,6 +73,7 @@ import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.protein.fasta.FastaFile;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
@@ -853,8 +854,8 @@ public class MS2Manager
             getTableInfoProteinProphetFiles() + " ppf, " +
             getTableInfoRuns() + " r, " +
             getTableInfoFastaRunMapping() + " frm, " +
-            ProteinManager.getTableInfoFastaSequences() + " fs, " +
-            ProteinManager.getTableInfoSequences() + " seq " +
+            ProteinSchema.getTableInfoFastaSequences() + " fs, " +
+            ProteinSchema.getTableInfoSequences() + " seq " +
             "WHERE pg.RowId = pgm.ProteinGroupId " +
             "AND seq.SeqId = pgm.SeqId " +
             "AND pg.ProteinProphetFileId = ppf.RowId " +
@@ -1379,7 +1380,7 @@ public class MS2Manager
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("FastaId"), fastaFileId);
 
-        TableSelector seqIdSelector = new TableSelector(ProteinManager.getTableInfoFastaSequences(), PageFlowUtil.set("LookupString", "SeqId"), filter, null);
+        TableSelector seqIdSelector = new TableSelector(ProteinSchema.getTableInfoFastaSequences(), PageFlowUtil.set("LookupString", "SeqId"), filter, null);
         return seqIdSelector.fillValueMap(new CaseInsensitiveHashMap<>());
     }
 

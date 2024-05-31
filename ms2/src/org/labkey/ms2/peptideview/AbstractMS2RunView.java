@@ -60,6 +60,7 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MassType;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;
 import org.labkey.ms2.SpectrumRenderer;
@@ -301,17 +302,17 @@ public abstract class AbstractMS2RunView
 
     private SimpleFilter getPeptideFilter(ActionURL url)
     {
-        return ProteinManager.getPeptideFilter(url, ProteinManager.ALL_FILTERS, getUser(), _runs[0]);
+        return PeptideManager.getPeptideFilter(url, PeptideManager.ALL_FILTERS, getUser(), _runs[0]);
     }
 
     protected ImmutableLongArray generatePeptideIndex(ActionURL url)
     {
-        Sort sort = ProteinManager.getPeptideBaseSort();
+        Sort sort = PeptideManager.getPeptideBaseSort();
         sort.insertSort(getPeptideSort());
-        sort = ProteinManager.reduceToValidColumns(sort, MS2Manager.getTableInfoPeptides());
+        sort = PeptideManager.reduceToValidColumns(sort, MS2Manager.getTableInfoPeptides());
 
         SimpleFilter filter = getPeptideFilter(url);
-        filter = ProteinManager.reduceToValidColumns(filter, MS2Manager.getTableInfoPeptides());
+        filter = PeptideManager.reduceToValidColumns(filter, MS2Manager.getTableInfoPeptides());
 
         return ImmutableLongArray.copyOf(new TableSelector(MS2Manager.getTableInfoPeptides().getColumn("RowId"), filter, sort).getCollection(Long.class));
     }
@@ -561,7 +562,7 @@ public abstract class AbstractMS2RunView
                 filter.addClause(_selectedRowsClause);
             }
 
-            filter.addAllClauses(ProteinManager.getPeptideFilter(_url, ProteinManager.EXTRA_FILTER | ProteinManager.PROTEIN_FILTER, getUser(), _runs));
+            filter.addAllClauses(PeptideManager.getPeptideFilter(_url, PeptideManager.EXTRA_FILTER | PeptideManager.PROTEIN_FILTER, getUser(), _runs));
             result.getRenderContext().setBaseFilter(filter);
             return result;
         }

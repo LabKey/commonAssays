@@ -16,11 +16,11 @@
 
 package org.labkey.ms2.protein;
 
-import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.Lsid;
+import org.labkey.api.exp.OntologyManager;
 
-import java.sql.PreparedStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 

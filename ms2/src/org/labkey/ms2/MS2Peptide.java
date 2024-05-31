@@ -16,10 +16,9 @@
 
 package org.labkey.ms2;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.util.Pair;
-import org.labkey.ms2.protein.fasta.Peptide;
 import org.labkey.ms2.reader.LibraQuantResult;
 
 import java.util.ArrayList;
@@ -436,7 +435,9 @@ public class MS2Peptide
     {
         // Trim and strip the peptide to ensure accurate AA length
         peptide = stripPeptide(trimPeptide(peptide));
-        return Peptide.getHydrophobicity3(peptide);
+
+        // Call version 3.0 hydrophobicity algorithm by Krokhin, et al
+        return Hydrophobicity3.TSUM3(peptide);
     }
 
 

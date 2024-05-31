@@ -16,9 +16,9 @@
 
 package org.labkey.ms2.protein.uniprot;
 
+import org.labkey.api.util.DateUtil;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ParseContext;
-import org.labkey.api.util.DateUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

@@ -20,13 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: migra
- * Date: Jun 23, 2004
- * Time: 10:28:04 PM
- *
- */
-public class Protein
+public class FastaProtein
 {
     private String _header;
     private byte[] _bytes;
@@ -36,7 +30,7 @@ public class Protein
     private String _origHeader;
     private Map<String, Set<String>> _identifierMap;
 
-    //known identifier types.  Multiple identifiers found in fasta files can often
+    //known identifier types. Multiple identifiers found in fasta files can often
     //boil down to the same thing
     public static final HashMap<String, String> IDENT_TYPE_MAP = new HashMap<>();
 
@@ -81,7 +75,7 @@ public class Protein
 
 
 
-    public Protein(String header, byte[] bytes)
+    public FastaProtein(String header, byte[] bytes)
     {
         _bytes = bytes;
         int firstAliasIndex = 0;
@@ -131,7 +125,7 @@ public class Protein
             massStart = header.length();
 
         if (0 == _mass)
-            _mass = PeptideGenerator.computeMass(_bytes, 0, _bytes.length, PeptideGenerator.AMINO_ACID_AVERAGE_MASSES);
+            _mass = PeptideHelpers.computeMass(_bytes, 0, _bytes.length, PeptideHelpers.AMINO_ACID_AVERAGE_MASSES);
 
         _header = header.substring(firstAliasIndex, massStart);
     }
@@ -219,14 +213,14 @@ public class Protein
     }
 
     /**
-     *  New version of parseIdent using regular expressions.  Identifiers found in the lookup string
-     *  portion of the header come in two basic flavors-- typed and untyped.  Typed ids look like
+     *  New version of parseIdent using regular expressions. Identifiers found in the lookup string
+     *  portion of the header come in two basic flavors-- typed and untyped. Typed ids look like
      *          <typename>|<idvalue>|<typename>|<idvalue>...
      *  Untyped ids are not separated into typename and value, but sometimes have a leading character
-     *  sequence that identifies them (e.g. IPI id) or a reasonably well defined pattern (e.g. SwissProt
-     *  names like HPH2_YEAST).  Regular expressions are used by the IdPattern class to recognize
-     *  untyped identiers and to transform them as necessary.  The IdPattern class is also used
-     *  to validate and transform typed identifiers in a small number of cases..
+     *  sequence that identifies them (e.g. IPI id) or a reasonably well-defined pattern (e.g. SwissProt
+     *  names like HPH2_YEAST). Regular expressions are used by the IdPattern class to recognize
+     *  untyped identifiers and to transform them as necessary. The IdPattern class is also used
+     *  to validate and transform typed identifiers in a small number of cases.
      *
      * 2/09/2008 added a third mechanism, a single regex that looks at the whole header rather than tokens
      *
@@ -243,7 +237,7 @@ public class Protein
 
         for (int i = 0; i < tokens.length; i++)
         {
-            Map<String, Set<String>>  additionalIds=null;
+            Map<String, Set<String>> additionalIds = null;
             // if the current token is the last or only token, or the token is
             // not recognized as an Identtype name, see if it matches a pattern in the list
             if ((i == tokens.length - 1) || (!IDENT_TYPE_MAP.containsKey(tokens[i].toUpperCase())))
@@ -251,14 +245,13 @@ public class Protein
                 for (String typeName : IdPattern.UNTYPED_ID_PATTERN_LIST)
                 {
                     additionalIds = IdPattern.ID_PATTERN_MAP.get(typeName).getIdFromPattern(tokens, i);
-                    if (null!=additionalIds) break;
+                    if (null != additionalIds) break;
                 }
             }
 
-            // if the pattern matching found identifiers, add them to the map and
-            // go to the next token.  if the pattern matching found multiple identifiers,
-            // bump the token an extra bump for each identifier beyond 1
-            if (null!=additionalIds && additionalIds.size() > 0)
+            // If the pattern matching found identifiers, add them to the map and go to the next token. If the pattern
+            // matching found multiple identifiers, bump the token an extra bump for each identifier beyond 1
+            if (null != additionalIds && !additionalIds.isEmpty())
             {
                 identifiers = IdPattern.addIdMap(identifiers, additionalIds);
                 i = i + additionalIds.size() -1 ;
@@ -300,12 +293,11 @@ public class Protein
             {
                 Map<String, Set<String>> additionalIds = IdPattern.ID_PATTERN_MAP.get(typeName).getIdFromPattern(new String[]{wholeHeader}, 0);
 
-                if (null != additionalIds && additionalIds.size() > 0)
+                if (null != additionalIds && !additionalIds.isEmpty())
                 {
                     identifiers = IdPattern.addIdMap(identifiers, additionalIds);
                 }
             }
-
         }
 
         return identifiers;
@@ -317,19 +309,14 @@ public class Protein
         for (String key : identifiers.keySet())
         {
             String identTypeName = key;
-            if (!Protein.IDENT_TYPE_MAP.containsValue(key))
+            if (!FastaProtein.IDENT_TYPE_MAP.containsValue(key))
             {
-                // unexpected ident type.  first check to see if it is an alias
-                if (Protein.IDENT_TYPE_MAP.containsKey(key))
-                    identTypeName=Protein.IDENT_TYPE_MAP.get(key);
+                // unexpected ident type. first check to see if it is an alias
+                if (FastaProtein.IDENT_TYPE_MAP.containsKey(key))
+                    identTypeName= FastaProtein.IDENT_TYPE_MAP.get(key);
             }
 
-            Set<String> identifierSet = returnVals.get(identTypeName);
-            if(identifierSet == null)
-            {
-                identifierSet = new HashSet<>();
-                returnVals.put(identTypeName, identifierSet);
-            }
+            Set<String> identifierSet = returnVals.computeIfAbsent(identTypeName, k -> new HashSet<>());
             identifierSet.addAll(identifiers.get(key));
         }
         return returnVals;

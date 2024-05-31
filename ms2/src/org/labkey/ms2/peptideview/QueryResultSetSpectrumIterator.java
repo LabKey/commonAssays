@@ -19,7 +19,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.ResultSet;
 import java.util.List;
@@ -57,7 +57,7 @@ public class QueryResultSetSpectrumIterator extends ResultSetSpectrumIterator
             sql.append(")) X WHERE Run = ?");
             sql.add(ms2Run.getRun());
 
-            return new SqlSelector(ProteinManager.getSchema(), sql).getResultSet(false);
+            return new SqlSelector(ProteinSchema.getSchema(), sql).getResultSet(false);
         }
     }
 }

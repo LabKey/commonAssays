@@ -31,7 +31,7 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         @Override
         protected String getIdentifierSelectSQL()
         {
-            return ProteinManager.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12");
+            return ProteinSchema.getSchema().getSqlDialect().getSubstringFunction("Identifier", "0", "12");
         }
 
         @Override
@@ -67,9 +67,9 @@ public enum CustomAnnotationType implements SafeToRenderEnum
     {
         StringBuilder sql = new StringBuilder();
         sql.append("(SELECT MIN(Identifier) FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers());
+        sql.append(ProteinSchema.getTableInfoIdentifiers());
         sql.append(" i, ");
-        sql.append(ProteinManager.getTableInfoIdentTypes());
+        sql.append(ProteinSchema.getTableInfoIdentTypes());
         sql.append(" it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
         sql.append(_type.toString());
         sql.append("' AND i.SeqId = ");
@@ -92,7 +92,7 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         StringBuilder sb = new StringBuilder("SELECT ");
         sb.append(getIdentifierSelectSQL());
         sb.append(" FROM ");
-        sb.append(ProteinManager.getTableInfoIdentifiers());
+        sb.append(ProteinSchema.getTableInfoIdentifiers());
         sb.append(" WHERE SeqId = ");
         sb.append(colSeqId.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         sb.append(" AND IdentTypeId IN ");
@@ -106,7 +106,7 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         sb.append("SELECT SeqId, ");
         sb.append(getIdentifierSelectSQL());
         sb.append(" AS Ident FROM ");
-        sb.append(ProteinManager.getTableInfoIdentifiers());
+        sb.append(ProteinSchema.getTableInfoIdentifiers());
         sb.append(" WHERE IdentTypeId IN ");
         sb.append(getIdentTypeIdSelect());
         return sb.toString();
@@ -114,7 +114,7 @@ public enum CustomAnnotationType implements SafeToRenderEnum
 
     protected String getIdentTypeIdSelect()
     {
-        return "(SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE Name = '" + _type.toString() + "')";
+        return "(SELECT IdentTypeId FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE Name = '" + _type.toString() + "')";
     }
 
     public String getDescription()

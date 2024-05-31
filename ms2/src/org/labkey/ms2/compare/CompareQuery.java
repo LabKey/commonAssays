@@ -40,7 +40,9 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
+import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;
@@ -320,14 +322,14 @@ public class CompareQuery extends SQLFragment
     protected String getFromClause()
     {
         return MS2Manager.getTableInfoPeptides() + " p LEFT OUTER JOIN " +
-                "(SELECT Mass AS SequenceMass, BestName, BestGeneName, SeqId AS SeqSeqId FROM " + ProteinManager.getTableInfoSequences() + ") s ON " +
+                "(SELECT Mass AS SequenceMass, BestName, BestGeneName, SeqId AS SeqSeqId FROM " + ProteinSchema.getTableInfoSequences() + ") s ON " +
                 "p.SeqId = s.SeqSeqId ";
     }
 
     protected void addWhereClauses(SimpleFilter filter)
     {
-        SimpleFilter peptideFilter = ProteinManager.getPeptideFilter(_currentUrl, _runs, ProteinManager.URL_FILTER + ProteinManager.EXTRA_FILTER, _user);
-        peptideFilter = ProteinManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
+        SimpleFilter peptideFilter = PeptideManager.getPeptideFilter(_currentUrl, _runs, PeptideManager.URL_FILTER + PeptideManager.EXTRA_FILTER, _user);
+        peptideFilter = PeptideManager.reduceToValidColumns(peptideFilter, MS2Manager.getTableInfoPeptides());
         filter.addAllClauses(peptideFilter);
     }
 
@@ -345,7 +347,7 @@ public class CompareQuery extends SQLFragment
         outdent();
         appendNewLine();
         append(") grouped INNER JOIN ");
-        append(ProteinManager.getTableInfoSequences(), "seq");
+        append(ProteinSchema.getTableInfoSequences(), "seq");
         append(" ON grouped.SeqId = seq.SeqId");
     }
 

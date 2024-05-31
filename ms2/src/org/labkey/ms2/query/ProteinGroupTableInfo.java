@@ -41,7 +41,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinListDisplayColumn;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,11 +133,11 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
             firstProteinSQL.append("SELECT s.SeqId FROM ");
             firstProteinSQL.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
             firstProteinSQL.append(", ");
-            firstProteinSQL.append(ProteinManager.getTableInfoSequences(), "s");
+            firstProteinSQL.append(ProteinSchema.getTableInfoSequences(), "s");
             firstProteinSQL.append(" WHERE s.SeqId = pgm.SeqId AND pgm.ProteinGroupId = ");
             firstProteinSQL.append(ExprColumn.STR_TABLE_ALIAS);
             firstProteinSQL.append(".RowId ORDER BY s.Length, s.BestName");
-            ProteinManager.getSqlDialect().limitRows(firstProteinSQL, 1);
+            ProteinSchema.getSqlDialect().limitRows(firstProteinSQL, 1);
             firstProteinSQL.insert(0, "(");
             firstProteinSQL.append(")");
 
@@ -249,7 +249,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                             {
                                 SQLFragment sql = new SQLFragment();
                                 sql.append("SELECT LookupString FROM ");
-                                sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+                                sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
                                 sql.append(", ");
                                 sql.append(MS2Manager.getTableInfoRuns(), "r");
                                 sql.append(", ");
@@ -393,19 +393,19 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
         sql.append(" WHERE pgm.SeqId IN (\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoAnnotations(), "a");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoFastaSequences(), "fs");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "fs.LookupString"));
         sql.append("\n");
         sql.append("UNION\n");
         sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinManager.getTableInfoIdentifiers(), "i");
+        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
         sql.append(" WHERE ");
         sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
         sql.append("\n");

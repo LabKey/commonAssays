@@ -18,11 +18,6 @@ package org.labkey.ms2.protein.fasta;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * User: migra
- * Date: Oct 20, 2004
- * Time: 9:59:18 AM
- */
 public class PeptideTestCase extends Assert
 {
     @Test

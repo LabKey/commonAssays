@@ -16,16 +16,17 @@
 
 package org.labkey.ms2.protein.query;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
-import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
+import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
-import org.labkey.api.data.Container;
-import org.labkey.api.data.TableInfo;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,7 @@ public class CustomAnnotationSchema extends UserSchema
 
     public CustomAnnotationSchema(User user, Container container, boolean includeSequences)
     {
-        super(includeSequences ? SCHEMA_WITH_SEQUENCES_NAME : SCHEMA_WITHOUT_SEQUENCES_NAME, SCHEMA_DESCR, user, container, ProteinManager.getSchema());
+        super(includeSequences ? SCHEMA_WITH_SEQUENCES_NAME : SCHEMA_WITHOUT_SEQUENCES_NAME, SCHEMA_DESCR, user, container, ProteinSchema.getSchema());
         _includeSequences = includeSequences;
         _annotationSets = ProteinManager.getCustomAnnotationSets(container, true);
     }

@@ -16,25 +16,20 @@
 
 package org.labkey.ms2.protein.organism;
 
+import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinPlus;
-import org.labkey.api.data.DbSchema;
+import org.labkey.ms2.protein.ProteinSchema;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-/**
- * User: brittp
- * Date: Jan 2, 2006
- * Time: 3:42:03 PM
- */
 public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
 {
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedHash.CACHED_MISS_VALUE";
     private Map<String, String> _cache = new HashMap<>();  // TODO: This could easily blow out all available memory for large FASTA; once we enable this guessing strategy, switch to Map with limit
-    private static final DbSchema _schema = ProteinManager.getSchema();
+    private static final DbSchema _schema = ProteinSchema.getSchema();
     private static final SQLFragment HASHCMD;
 
     static
@@ -42,9 +37,9 @@ public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
         SQLFragment sql = new SQLFragment("SELECT ");
         sql.append(_schema.getSqlDialect().concatenate("o.genus", "' '", "o.species"));
         sql.append(" FROM ");
-        sql.append(ProteinManager.getTableInfoSequences(), "s");
+        sql.append(ProteinSchema.getTableInfoSequences(), "s");
         sql.append(" JOIN ");
-        sql.append(ProteinManager.getTableInfoOrganisms(), "o");
+        sql.append(ProteinSchema.getTableInfoOrganisms(), "o");
         sql.append(" ON (o.orgid=s.orgid) WHERE s.hash = ? ");
         sql.append(" GROUP BY o.orgid, o.genus, o.species ORDER BY COUNT(*) DESC");
         _schema.getSqlDialect().limitRows(sql, 1);

@@ -18,7 +18,6 @@ package org.labkey.ms2.protein;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.SqlExecutor;
@@ -32,9 +31,9 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.protein.fasta.FastaDbHelper;
 import org.labkey.ms2.protein.fasta.FastaFile;
+import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.protein.fasta.FastaValidator;
 import org.labkey.ms2.protein.fasta.IdPattern;
-import org.labkey.ms2.protein.fasta.Protein;
 import org.labkey.ms2.protein.fasta.ProteinFastaLoader;
 import org.labkey.ms2.protein.fasta.ProteinFastaLoader.ProteinIterator;
 import org.labkey.ms2.protein.organism.GuessOrgByParsing;
@@ -163,7 +162,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             FastaFile file = new FastaFile();
             file.setFilename(_file.getPath());
             file.setFileChecksum(_fileHash);
-            file = Table.insert(null, ProteinManager.getTableInfoFastaFiles(), file);
+            file = Table.insert(null, ProteinSchema.getTableInfoFastaFiles(), file);
             associatedFastaId = file.getFastaId();
         }
 
@@ -173,7 +172,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             {
                 parse(logger, parsingStrategy, sharedIdentsStrategy);
 
-                new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() + " SET Loaded = ? WHERE FastaId = ?", new Date(), associatedFastaId);
+                new SqlExecutor(ProteinSchema.getSchema()).execute("UPDATE " + ProteinSchema.getTableInfoFastaFiles() + " SET Loaded = ? WHERE FastaId = ?", new Date(), associatedFastaId);
             }
             finally
             {
@@ -200,7 +199,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             fdbu._initialInsertionStmt.setInt(4, organismToBeGuessed ? 1 : 0);
             fdbu._initialInsertionStmt.setTimestamp(5, new java.sql.Timestamp(new java.util.Date().getTime()));
 
-            try (ResultSet rs = ProteinManager.getSqlDialect().executeWithResults(fdbu._initialInsertionStmt))
+            try (ResultSet rs = ProteinSchema.getSqlDialect().executeWithResults(fdbu._initialInsertionStmt))
             {
                 if (rs.next())
                     currentInsertId = rs.getInt(1);
@@ -208,7 +207,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         }
         else
         {
-            skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
+            skipEntries = new SqlSelector(ProteinSchema.getSchema(), "SELECT RecordsProcessed FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
         }
         //c.commit();
         return currentInsertId;
@@ -406,7 +405,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 if (null != desc)
                     wholeHeader += " " + desc;
 
-                Map<String, Set<String>> identifiers = Protein.getIdentifierMap(rawIdentString, wholeHeader);
+                Map<String, Set<String>> identifiers = FastaProtein.getIdentifierMap(rawIdentString, wholeHeader);
 
                 for (String key : identifiers.keySet())
                 {
@@ -479,7 +478,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     {
         String bfn = baseFileName(_file.getPath());
 
-        try (ResultSet rs = new SqlSelector(ProteinManager.getSchema(), "SELECT FastaId,FileName FROM " + ProteinManager.getTableInfoFastaFiles()).getResultSet())
+        try (ResultSet rs = new SqlSelector(ProteinSchema.getSchema(), "SELECT FastaId,FileName FROM " + ProteinSchema.getTableInfoFastaFiles()).getResultSet())
         {
             while (rs.next())
             {
@@ -594,7 +593,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     {
         ProteinFastaLoader curLoader = new ProteinFastaLoader(_file);
 
-        try (Connection conn = ProteinManager.getSchema().getScope().getConnection())
+        try (Connection conn = ProteinSchema.getSchema().getScope().getConnection())
         {
             //conn.setAutoCommit(false);
             //Determine whether this file has ever been
@@ -611,7 +610,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
             else
             {
-                try (ResultSet rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId))
+                try (ResultSet rs = conn.createStatement().executeQuery("SELECT DefaultOrganism,OrgShouldBeGuessed FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE insertId=" + currentInsertId))
                 {
                     if (rs.next())
                     {
@@ -622,8 +621,8 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                         logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
                 }
 
-                skipEntries = new SqlSelector(ProteinManager.getSchema(), "SELECT RecordsProcessed FROM " +
-                        ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
+                skipEntries = new SqlSelector(ProteinSchema.getSchema(), "SELECT RecordsProcessed FROM " +
+                        ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", currentInsertId).getObject(Integer.class);
             }
 
             int protCount = 0;
@@ -663,7 +662,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
             if (protCount / 3 < negCount)
             {
-                new SqlExecutor(ProteinManager.getSchema()).execute("UPDATE " + ProteinManager.getTableInfoFastaFiles() +
+                new SqlExecutor(ProteinSchema.getSchema()).execute("UPDATE " + ProteinSchema.getTableInfoFastaFiles() +
                         " SET ScoringAnalysis = ?" +
                         " WHERE FastaId = ?", true, associatedFastaId);
             }
@@ -707,7 +706,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         String convertedName = getCanonicalPath(f);
         String hash = HashHelpers.hashFileContents(f);
 
-        Collection<FastaFile> files = new SqlSelector(ProteinManager.getSchema(), "SELECT * FROM " + ProteinManager.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hash).getCollection(FastaFile.class);
+        Collection<FastaFile> files = new SqlSelector(ProteinSchema.getSchema(), "SELECT * FROM " + ProteinSchema.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hash).getCollection(FastaFile.class);
         FastaFile loadedFile = null;
 
         for (FastaFile file : files)
@@ -722,12 +721,12 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
         }
 
-        Long existingProtFastasCount = new SqlSelector(ProteinManager.getSchema(), "SELECT COUNT(*) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(Long.class);
+        Long existingProtFastasCount = new SqlSelector(ProteinSchema.getSchema(), "SELECT COUNT(*) FROM " + ProteinSchema.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(Long.class);
 
         if (loadedFile != null && existingProtFastasCount != null && existingProtFastasCount > 0)
         {
             String previousFileWithSameChecksum =
-                    new SqlSelector(ProteinManager.getSchema(), "SELECT MIN(FileName) FROM " + ProteinManager.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(String.class);
+                    new SqlSelector(ProteinSchema.getSchema(), "SELECT MIN(FileName) FROM " + ProteinSchema.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
                 log.info("FASTA file \"" + convertedName + "\" has already been imported");
@@ -1040,14 +1039,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
         protected void parseAndCompare(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
         {
-            Map<String, Set<String>> idMapReturned = Protein.identParse(strLookup, wholeHeader);
+            Map<String, Set<String>> idMapReturned = FastaProtein.identParse(strLookup, wholeHeader);
             assertTrue("map not as expected.  Actual: " + idMapReturned + " Expected: " + idMapExpected, compareIdMaps(idMapExpected, idMapReturned));
         }
 
         protected void parseAndCompareReplaceAlias(String strLookup, Map<String, Set<String>> idMapExpected, String wholeHeader)
         {
             // getIdentifierMap will replace aliases like SGD_GN and GN with the GeneName identifier type
-            Map<String, Set<String>> idMapReturned = Protein.getIdentifierMap(strLookup, wholeHeader);
+            Map<String, Set<String>> idMapReturned = FastaProtein.getIdentifierMap(strLookup, wholeHeader);
             assertTrue(compareIdMaps(idMapExpected, idMapReturned));
         }
     }

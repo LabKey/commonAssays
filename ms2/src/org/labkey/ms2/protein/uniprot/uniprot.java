@@ -17,14 +17,13 @@
 package org.labkey.ms2.protein.uniprot;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ParseContext;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.ProteinSchema;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
@@ -108,7 +107,7 @@ public class uniprot extends ParseActions
             else
             {
                 try (ResultSet rs = context.getConnection().createStatement().executeQuery(
-                            "SELECT RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=" + getCurrentInsertId()))
+                            "SELECT RecordsProcessed FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId=" + getCurrentInsertId()))
                 {
                     rs.next();
                     setSkipEntries(rs.getInt("RecordsProcessed"));
@@ -262,60 +261,60 @@ public class uniprot extends ParseActions
         );
 
         _insertIntoOrgCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoOrganisms() + " (Genus,Species,CommonName,Comments) " +
+                "INSERT INTO " + ProteinSchema.getTableInfoOrganisms() + " (Genus,Species,CommonName,Comments) " +
                         "SELECT genus,species,common_name,comments FROM " + _oTableName +
                         " WHERE NOT EXISTS (" +
-                        "SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + " WHERE " + _oTableName + ".genus = " + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
-                        _oTableName + ".species = " + ProteinManager.getTableInfoOrganisms() + ".species)";
+                        "SELECT * FROM " + ProteinSchema.getTableInfoOrganisms() + " WHERE " + _oTableName + ".genus = " + ProteinSchema.getTableInfoOrganisms() + ".genus AND " +
+                        _oTableName + ".species = " + ProteinSchema.getTableInfoOrganisms() + ".species)";
 
         _deleteFromTmpOrgCommand =
                 "DELETE FROM " + _oTableName +
                         " WHERE EXISTS (" +
-                        "   SELECT * FROM " + ProteinManager.getTableInfoOrganisms() + "," + _oTableName +
-                        "      WHERE " + _oTableName + ".genus=" + ProteinManager.getTableInfoOrganisms() + ".genus AND " +
-                        _oTableName + ".species=" + ProteinManager.getTableInfoOrganisms() + ".species AND " + ProteinManager.getTableInfoOrganisms() + ".IdentId IS NOT NULL" +
+                        "   SELECT * FROM " + ProteinSchema.getTableInfoOrganisms() + "," + _oTableName +
+                        "      WHERE " + _oTableName + ".genus=" + ProteinSchema.getTableInfoOrganisms() + ".genus AND " +
+                        _oTableName + ".species=" + ProteinSchema.getTableInfoOrganisms() + ".species AND " + ProteinSchema.getTableInfoOrganisms() + ".IdentId IS NOT NULL" +
                         " )";
 
         final int taxonomyTypeIndex;
 
         // TODO: Just use a TableSelector
-        try (ResultSet rs = c.createStatement().executeQuery("SELECT IdentTypeId FROM " + ProteinManager.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'"))
+        try (ResultSet rs = c.createStatement().executeQuery("SELECT IdentTypeId FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE name='NCBI Taxonomy'"))
         {
             rs.next();
             taxonomyTypeIndex = rs.getInt(1);
         }
 
         _insertOrgIDCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " (identifier,IdentTypeId,EntryDate) " +
+                "INSERT INTO " + ProteinSchema.getTableInfoIdentifiers() + " (identifier,IdentTypeId,EntryDate) " +
                         "SELECT DISTINCT identID," + taxonomyTypeIndex + ",entry_date " +
                         "FROM " + _oTableName + " " +
-                        "WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentifiers() + " WHERE " +
-                        "" + ProteinManager.getTableInfoIdentifiers() + ".identifier = " + _oTableName + ".identID AND " +
-                        "" + ProteinManager.getTableInfoIdentifiers() + ".identtypeid=" + taxonomyTypeIndex + ")";
+                        "WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoIdentifiers() + " WHERE " +
+                        "" + ProteinSchema.getTableInfoIdentifiers() + ".identifier = " + _oTableName + ".identID AND " +
+                        "" + ProteinSchema.getTableInfoIdentifiers() + ".identtypeid=" + taxonomyTypeIndex + ")";
         _updateOrgCommand =
-                "UPDATE " + ProteinManager.getTableInfoOrganisms() + " SET identid=c.identid " +
-                        "FROM " + ProteinManager.getTableInfoOrganisms() + " a," + _oTableName + " b, " + ProteinManager.getTableInfoIdentifiers() + " c " +
+                "UPDATE " + ProteinSchema.getTableInfoOrganisms() + " SET identid=c.identid " +
+                        "FROM " + ProteinSchema.getTableInfoOrganisms() + " a," + _oTableName + " b, " + ProteinSchema.getTableInfoIdentifiers() + " c " +
                         "WHERE a.genus=b.genus AND a.species=b.species AND " +
                         "  c.identtypeid=" + taxonomyTypeIndex + " AND " +
                         "  c.identifier=b.identID";
 
         _clearExistingIdentifiersCommand =
-                "DELETE FROM " + ProteinManager.getTableInfoIdentifiers() + " WHERE SeqId IN (SELECT seq_id FROM " + _iTableName + ")";
+                "DELETE FROM " + ProteinSchema.getTableInfoIdentifiers() + " WHERE SeqId IN (SELECT seq_id FROM " + _iTableName + ")";
 
         _clearExistingAnnotationsCommand =
-                "DELETE FROM " + ProteinManager.getTableInfoAnnotations() + " WHERE SeqId IN (SELECT seq_id FROM " + _aTableName + ")";
+                "DELETE FROM " + ProteinSchema.getTableInfoAnnotations() + " WHERE SeqId IN (SELECT seq_id FROM " + _aTableName + ")";
 
         _insertIntoSeqCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoSequences() + " (ProtSequence,hash,description," +
+                "INSERT INTO " + ProteinSchema.getTableInfoSequences() + " (ProtSequence,hash,description," +
                         "SourceChangeDate,SourceInsertDate,mass,length,OrgId," +
                         "SourceId,BestName,InsertDate,BestGeneName) " +
                         "SELECT a.ProtSequence,a.hash,a.description,a.source_change_date," +
                         "a.source_insert_date,a.mass,a.length,b.OrgId,c.SourceId," +
                         "a.best_name, a.entry_date, a.best_gene_name " +
-                        "  FROM " + _sTableName + " a, " + ProteinManager.getTableInfoOrganisms() + " b, " + ProteinManager.getTableInfoInfoSources() + " c " +
+                        "  FROM " + _sTableName + " a, " + ProteinSchema.getTableInfoOrganisms() + " b, " + ProteinSchema.getTableInfoInfoSources() + " c " +
                         " WHERE NOT EXISTS (" +
-                        "SELECT * FROM " + ProteinManager.getTableInfoSequences() + " WHERE " +
-                        "a.hash = " + ProteinManager.getTableInfoSequences() + ".hash AND b.OrgId=" + ProteinManager.getTableInfoSequences() + ".OrgId AND " +
+                        "SELECT * FROM " + ProteinSchema.getTableInfoSequences() + " WHERE " +
+                        "a.hash = " + ProteinSchema.getTableInfoSequences() + ".hash AND b.OrgId=" + ProteinSchema.getTableInfoSequences() + ".OrgId AND " +
                         " UPPER(b.genus)=UPPER(a.genus) AND " +
                         " UPPER(a.species)=UPPER(b.species)) AND " +
                         " UPPER(a.species)=UPPER(b.species) AND  " + " " +
@@ -323,53 +322,53 @@ public class uniprot extends ParseActions
                         "c.name=a.source";
 
         _updateSeqTableCommand =
-                "UPDATE "+ ProteinManager.getTableInfoSequences() +
+                "UPDATE "+ ProteinSchema.getTableInfoSequences() +
                         " SET description=a.description, bestgenename=a.best_gene_name " +
-                        " FROM " + _sTableName + " a, "+ProteinManager.getTableInfoOrganisms() + " b " +
-                        " WHERE " + ProteinManager.getTableInfoSequences()+".hash = a.hash AND " +
-                        ProteinManager.getTableInfoSequences()+".orgid=b.orgid AND UPPER(a.genus)=UPPER(b.genus) AND " +
+                        " FROM " + _sTableName + " a, "+ ProteinSchema.getTableInfoOrganisms() + " b " +
+                        " WHERE " + ProteinSchema.getTableInfoSequences()+".hash = a.hash AND " +
+                        ProteinSchema.getTableInfoSequences()+".orgid=b.orgid AND UPPER(a.genus)=UPPER(b.genus) AND " +
                         " UPPER(a.species)=UPPER(b.species)";
 
         _insertIdentTypesCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoIdentTypes() + " (name,EntryDate) " +
+                "INSERT INTO " + ProteinSchema.getTableInfoIdentTypes() + " (name,EntryDate) " +
                         " SELECT DISTINCT a.identType,max(a.entry_date) FROM " +
-                        _iTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoIdentTypes() + " " +
-                        " WHERE a.identType = " + ProteinManager.getTableInfoIdentTypes() + ".name) GROUP BY a.identType";
+                        _iTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoIdentTypes() + " " +
+                        " WHERE a.identType = " + ProteinSchema.getTableInfoIdentTypes() + ".name) GROUP BY a.identType";
 
         _insertInfoSourceFromSeqCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoInfoSources() + " (name,InsertDate) SELECT DISTINCT source,max(entry_date) FROM " +
-                        _sTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoInfoSources() + " " +
-                        " WHERE a.source = " + ProteinManager.getTableInfoInfoSources() + ".name) GROUP BY a.source";
+                "INSERT INTO " + ProteinSchema.getTableInfoInfoSources() + " (name,InsertDate) SELECT DISTINCT source,max(entry_date) FROM " +
+                        _sTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoInfoSources() + " " +
+                        " WHERE a.source = " + ProteinSchema.getTableInfoInfoSources() + ".name) GROUP BY a.source";
 
         _insertIntoIdentsCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoIdentifiers() + " " +
+                "INSERT INTO " + ProteinSchema.getTableInfoIdentifiers() + " " +
                         "  (identifier,IdentTypeId,SeqId,EntryDate) " +
                         "  SELECT DISTINCT b.identifier,a.identtypeid,b.seq_id,max(b.entry_date) " +
-                        "  FROM " + ProteinManager.getTableInfoIdentTypes() + " a," + _iTableName + " b " +
+                        "  FROM " + ProteinSchema.getTableInfoIdentTypes() + " a," + _iTableName + " b " +
                         "  WHERE " +
                         "    a.name = b.identType  AND " +
                         "    NOT EXISTS (" +
-                        "       SELECT * FROM " + ProteinManager.getTableInfoIdentifiers() + " c WHERE " +
+                        "       SELECT * FROM " + ProteinSchema.getTableInfoIdentifiers() + " c WHERE " +
                         "    a.name = b.identType              AND " +
                         "    c.identtypeid = a.identtypeid AND " +
                         "    b.seq_id=c.seqid                 AND " +
                         "    b.identifier = c.identifier " +
                         "   ) GROUP BY b.identifier,a.identtypeid,b.seq_id";
         _insertAnnotTypesCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoAnnotationTypes() + " (name,EntryDate) SELECT DISTINCT a.annotType,max(a.entry_date) FROM " +
-                        _aTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinManager.getTableInfoAnnotationTypes() + " " +
-                        " WHERE a.annotType = " + ProteinManager.getTableInfoAnnotationTypes() + ".name) GROUP BY a.annotType";
+                "INSERT INTO " + ProteinSchema.getTableInfoAnnotationTypes() + " (name,EntryDate) SELECT DISTINCT a.annotType,max(a.entry_date) FROM " +
+                        _aTableName + " a WHERE NOT EXISTS (SELECT * FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " " +
+                        " WHERE a.annotType = " + ProteinSchema.getTableInfoAnnotationTypes() + ".name) GROUP BY a.annotType";
 
         _insertIntoAnnotsCommand =
-                "INSERT INTO " + ProteinManager.getTableInfoAnnotations() + " " +
+                "INSERT INTO " + ProteinSchema.getTableInfoAnnotations() + " " +
                         "  (annotval,annottypeid,annotident,seqid,startpos,endpos,insertdate) " +
                         "  SELECT DISTINCT b.annot_val,a.annottypeid, b.ident_id, " +
                         "b.seq_id, b.start_pos, b.end_pos,max(b.entry_date) " +
-                        "  FROM " + ProteinManager.getTableInfoAnnotationTypes() + " a," + _aTableName + " b " +
+                        "  FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " a," + _aTableName + " b " +
                         "  WHERE " +
                         "    a.name = b.annotType              AND " +
                         "    NOT EXISTS (" +
-                        "       SELECT * FROM " + ProteinManager.getTableInfoAnnotations() + " c WHERE " +
+                        "       SELECT * FROM " + ProteinSchema.getTableInfoAnnotations() + " c WHERE " +
                         "    a.name = b.annotType              AND " +
                         "    b.annot_val = c.annotval          AND " +
                         "    b.seq_id = c.seqid                AND " +
@@ -380,39 +379,39 @@ public class uniprot extends ParseActions
         _updateAnnotsWithSeqsCommand =
                 "UPDATE " + _aTableName + " SET seq_id = " +
                         "(SELECT c.seqId FROM " +
-                        ProteinManager.getTableInfoOrganisms() + " b, " +
-                        ProteinManager.getTableInfoSequences() + " c " +
+                        ProteinSchema.getTableInfoOrganisms() + " b, " +
+                        ProteinSchema.getTableInfoSequences() + " c " +
                         " WHERE c.hash=" + _aTableName + ".hash AND " + _aTableName + ".genus=b.genus AND " + _aTableName + ".species=b.species AND b.orgid=c.orgid" +
                         ")"
                 ;
 
         _updateAnnotsWithIdentsCommand =
                 "UPDATE " + _aTableName + " SET ident_id = (SELECT DISTINCT b.identID FROM " +
-                        ProteinManager.getTableInfoIdentifiers() + " b, " + ProteinManager.getTableInfoIdentTypes() + " c " +
+                        ProteinSchema.getTableInfoIdentifiers() + " b, " + ProteinSchema.getTableInfoIdentTypes() + " c " +
                         " WHERE " + _aTableName + ".seq_id=b.seqid AND " + _aTableName + ".identifier=b.identifier AND " +
                         "  b.identtypeid=c.identtypeid AND " + _aTableName + ".identType=c.name)";
 
         _updateIdentsWithSeqsCommand =
                 "UPDATE " + _iTableName + " SET seq_id = " +
                         "(SELECT c.seqId FROM " +
-                        ProteinManager.getTableInfoOrganisms() + " b, " +
-                        ProteinManager.getTableInfoSequences() + " c " +
+                        ProteinSchema.getTableInfoOrganisms() + " b, " +
+                        ProteinSchema.getTableInfoSequences() + " c " +
                         " WHERE c.hash=" + _iTableName + ".hash AND " + _iTableName + ".genus=b.genus AND " + _iTableName + ".species=b.species AND b.orgid=c.orgid" +
                         ")";
 
-        SQLFragment initialInsertionCommand = new SQLFragment("INSERT INTO " + ProteinManager.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
-        _dialect.addReselect(initialInsertionCommand, ProteinManager.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
+        SQLFragment initialInsertionCommand = new SQLFragment("INSERT INTO " + ProteinSchema.getTableInfoAnnotInsertions() + " (FileName,FileType,Comment,InsertDate) VALUES (?,'uniprot',?,?)");
+        _dialect.addReselect(initialInsertionCommand, ProteinSchema.getTableInfoAnnotInsertions().getColumn("InsertId"), null);
         _initialInsertion = c.prepareStatement(initialInsertionCommand.getSQL());
         String getCurrentInsertStatsCommand =
-                "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinManager.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
+                "SELECT SequencesAdded,AnnotationsAdded,IdentifiersAdded,OrganismsAdded,Mouthsful,RecordsProcessed FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId=?";
         _getCurrentInsertStats = c.prepareStatement(getCurrentInsertStatsCommand);
-        String updateInsertionCommand = "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
+        String updateInsertionCommand = "UPDATE " + ProteinSchema.getTableInfoAnnotInsertions() + " SET " +
                 " Mouthsful=?,SequencesAdded=?,AnnotationsAdded=?,IdentifiersAdded=?,OrganismsAdded=?, " +
                 " MRMSequencesAdded=?,MRMAnnotationsAdded=?,MRMIdentifiersAdded=?,MRMOrganismsAdded=?,MRMSize=?," +
                 " RecordsProcessed=?,ChangeDate=? " +
                 " WHERE InsertId=?";
         _updateInsertion = c.prepareStatement(updateInsertionCommand);
-        String finalizeInsertionCommand = "UPDATE " + ProteinManager.getTableInfoAnnotInsertions() + " SET " +
+        String finalizeInsertionCommand = "UPDATE " + ProteinSchema.getTableInfoAnnotInsertions() + " SET " +
                 " CompletionDate=? WHERE InsertId=?";
         _finalizeInsertion = c.prepareStatement(finalizeInsertionCommand);
     }

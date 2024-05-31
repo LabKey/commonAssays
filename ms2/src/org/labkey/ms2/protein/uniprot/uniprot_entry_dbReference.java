@@ -20,9 +20,11 @@ package org.labkey.ms2.protein.uniprot;
  * User: tholzman
  * Date: Feb 28, 2005
  */
+
+import org.labkey.ms2.protein.ParseActions;
+import org.labkey.ms2.protein.ParseContext;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.labkey.ms2.protein.*;
 
 public class uniprot_entry_dbReference extends ParseActions
 {
