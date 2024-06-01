@@ -36,6 +36,7 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.protein.CustomAnnotationType;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.QuerySettings;
@@ -59,7 +60,6 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.VBox;
-import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -74,10 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: jeckels
- * Date: Apr 3, 2007
- */
 public class ProteinController extends SpringActionController
 {
     private static final DefaultActionResolver _actionResolver = new DefaultActionResolver(ProteinController.class);
@@ -180,7 +176,6 @@ public class ProteinController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
             root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
             root.addChild("Custom Protein List: " + _setName);
         }
@@ -209,10 +204,10 @@ public class ProteinController extends SpringActionController
             Set<Integer> setIds = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
             for (Integer id : setIds)
             {
-                CustomAnnotationSet set = ProteinManager.getCustomAnnotationSet(getContainer(), id, false);
+                CustomAnnotationSet set = CustomAnnotationSetManager.getCustomAnnotationSet(getContainer(), id, false);
                 if (set != null)
                 {
-                    ProteinManager.deleteCustomAnnotationSet(set);
+                    CustomAnnotationSetManager.deleteCustomAnnotationSet(set);
                 }
             }
             return true;
@@ -247,11 +242,11 @@ public class ProteinController extends SpringActionController
         @Override
         public boolean handlePost(UploadAnnotationsForm form, BindException errors) throws Exception
         {
-            if (form.getName().length() == 0)
+            if (form.getName().isEmpty())
             {
                 errors.addError(new ObjectError("main", null, null, "You must enter a name for the protein list."));
             }
-            Map<String, CustomAnnotationSet> sets = ProteinManager.getCustomAnnotationSets(getContainer(), false);
+            Map<String, CustomAnnotationSet> sets = CustomAnnotationSetManager.getCustomAnnotationSets(getContainer(), false);
             CaseInsensitiveHashSet names = new CaseInsensitiveHashSet(sets.keySet());
             if (names.contains(form.getName()))
             {
@@ -266,7 +261,7 @@ public class ProteinController extends SpringActionController
 
             CustomAnnotationType type = CustomAnnotationType.valueOf(form.getAnnotationType());
 
-            if (rows.size() < 1)
+            if (rows.isEmpty())
             {
                 errors.addError(new ObjectError("main", null, null, "Your protein list must have at least one protein, plus the header line"));
             }
@@ -402,7 +397,6 @@ public class ProteinController extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            root.addChild("MS2", MS2Controller.getBeginURL(getContainer()));
             root.addChild("Custom Protein Lists", getBeginURL(getContainer()));
             root.addChild("Upload Custom Protein List");
         }

@@ -3,6 +3,7 @@ package org.labkey.ms2;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.security.User;
 import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
@@ -24,9 +25,9 @@ public class MS2ContainerListener implements ContainerManager.ContainerListener
         MS2Manager.markAsDeleted(c, user);
         MS2Manager.deleteExpressionData(c);
 
-        for (CustomAnnotationSet set : ProteinManager.getCustomAnnotationSets(c, false).values())
+        for (CustomAnnotationSet set : CustomAnnotationSetManager.getCustomAnnotationSets(c, false).values())
         {
-            ProteinManager.deleteCustomAnnotationSet(set);
+            CustomAnnotationSetManager.deleteCustomAnnotationSet(set);
         }
     }
 

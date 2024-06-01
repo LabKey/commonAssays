@@ -20,11 +20,11 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.VirtualTable;
+import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.protein.CustomAnnotationSet;
-import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class CustomAnnotationSetsTable extends VirtualTable<CustomAnnotationSche
     public CustomAnnotationSetsTable(TableInfo parentTable, CustomAnnotationSchema schema)
     {
         super(ProteinSchema.getSchema(), parentTable.getName(), schema);
-        Map<String, CustomAnnotationSet> annotationSets = ProteinManager.getCustomAnnotationSets(schema.getContainer(), true);
+        Map<String, CustomAnnotationSet> annotationSets = CustomAnnotationSetManager.getCustomAnnotationSets(schema.getContainer(), true);
         SQLFragment sqlFragment = new SQLFragment("SELECT 1");
 
         if (annotationSets.isEmpty())

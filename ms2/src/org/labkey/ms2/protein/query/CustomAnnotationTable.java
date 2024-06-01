@@ -38,16 +38,12 @@ import org.labkey.ms2.query.MS2Schema;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: jeckels
- * Date: Apr 3, 2007
- */
 public class CustomAnnotationTable extends FilteredTable<CustomAnnotationSchema>
 {
     private final CustomAnnotationSet _annotationSet;
     private final boolean _includeSeqId;
 
-    private Domain _domain;
+    private final Domain _domain;
 
     public CustomAnnotationTable(CustomAnnotationSet annotationSet, CustomAnnotationSchema schema)
     {

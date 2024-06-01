@@ -28,6 +28,9 @@ import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSetManager;
+import org.labkey.api.protein.CustomAnnotationType;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.ExprColumn;
@@ -41,9 +44,6 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.api.protein.CustomAnnotationSet;
-import org.labkey.api.protein.CustomAnnotationType;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.CustomAnnotationSetsTable;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
@@ -54,9 +54,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * User: jeckels
- * Date: Feb 9, 2007
- *
  * NOTE: The SequencesTableInfo is attached to both the MS2Schema and the ProteinUserSchema.
  */
 public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredTable<SchemaType>
@@ -104,7 +101,7 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
                 if (displayField == null)
                     return null;
 
-                for (final CustomAnnotationSet annotationSet : ProteinManager.getCustomAnnotationSets(_userSchema.getContainer(), true).values())
+                for (final CustomAnnotationSet annotationSet : CustomAnnotationSetManager.getCustomAnnotationSets(_userSchema.getContainer(), true).values())
                 {
                     if (displayField.equals(annotationSet.getName()))
                     {

@@ -29,6 +29,7 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
+import org.labkey.api.protein.query.OrganismTableInfo;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
@@ -36,16 +37,10 @@ import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
-import org.labkey.ms2.MS2Module;
-import org.labkey.ms2.query.OrganismTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.util.Set;
 
-/**
- * User: kevink
- * Date: 4/20/15
- */
 public class ProteinUserSchema extends UserSchema
 {
     public static final String NAME = "protein";
@@ -58,7 +53,7 @@ public class ProteinUserSchema extends UserSchema
         super(NAME, "Protein annotation, gene ontology, and sequence tables", user, container, ProteinSchema.getSchema());
     }
 
-    public static void register(MS2Module module)
+    public static void register(Module module)
     {
         DefaultSchema.registerProvider(NAME, new DefaultSchema.SchemaProvider(module)
         {

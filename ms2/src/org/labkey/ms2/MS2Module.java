@@ -31,6 +31,8 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.CustomAnnotationSetManager;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
@@ -74,9 +76,7 @@ import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
@@ -307,7 +307,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         long count = MS2Manager.getRunCount(c);
         if (count > 0)
             list.add("" + count + " MS2 Run" + (count > 1 ? "s" : ""));
-        int customAnnotationCount = ProteinManager.getCustomAnnotationSets(c, false).size();
+        int customAnnotationCount = CustomAnnotationSetManager.getCustomAnnotationSets(c, false).size();
         if (customAnnotationCount > 0)
         {
             list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
