@@ -25,6 +25,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.IdentifierType;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
@@ -353,7 +354,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         {
             return null;
         }
-        String separateParts[] = fullOrg.split(" ");
+        String[] separateParts = fullOrg.split(" ");
         if (separateParts.length >= 1)
         {
             return separateParts[0];
@@ -370,7 +371,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         {
             return null;
         }
-        String separateParts[] = fullOrg.split(" ");
+        String[] separateParts = fullOrg.split(" ");
         if (separateParts.length == 0) return "unknown";
         if (separateParts.length == 1) return "sp.";
         return separateParts[1];

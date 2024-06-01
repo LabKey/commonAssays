@@ -224,11 +224,12 @@ public class Protein
         formatted.deleteCharAt(formatted.length() - 1);  // Get rid of extra space at end
         return HtmlString.unsafe(formatted.toString());
     }
+
     /*
         Formats and returns an html table showing where peptides matched a specific portion of a protein.
         done in 3 passes. first pass builds up an array of SequencePos objects, one for each AA of the protein
-        sequence.  Second pass loops through the range objectds which are the peptide evidence for the
-        protein, marking each SequencePos object in the coverage region.  third pass loops through all SequencePos
+        sequence. Second pass loops through the range objects which are the peptide evidence for the
+        protein, marking each SequencePos object in the coverage region. third pass loops through all SequencePos
         objects and accumulates their html output.
      */
     public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
@@ -365,10 +366,9 @@ public class Protein
     }
 
     /*
-        new inner class used to build the proteinCoverageMap.  Reprsents a single AA in the protein sequence
-        and any peptides that overlap that sequence position.  When a peptide is added, the necesssary html for
-        all the table cells that show that peptide is generated. The html for a non-covered AA in the protein
-        is generated only at render time.
+        Used to build the proteinCoverageMap. Represents a single AA in the protein sequence and any peptides that
+        overlap that sequence position. When a peptide is added, the necessary html for all the table cells that show
+        that peptide is generated. The html for a non-covered AA in the protein is generated only at render time.
      */
     private class SequencePos
     {
@@ -802,15 +802,15 @@ public class Protein
         return _coverageRanges;
     }
     /*
-        method extracted from getCoverageRanges.  There are 3 different versions of the peptide.
+        method extracted from getCoverageRanges. There are 3 different versions of the peptide.
         the UniqueMap holds "stripped" peptides -- they still have the prev and next AA, including a "-" if
-         at the end of a protein.  The stripped peptide is used to determine uniqueness, and then this
-        method matches the stripped peptide to the protein and keeps only the matching tirmmed peptide
-        (no previous and next AAs) in a range object.  the range object was modified to hold the counts
+        at the end of a protein. The stripped peptide is used to determine uniqueness, and then this
+        method matches the stripped peptide to the protein and keeps only the matching trimmed peptide
+        (no previous and next AAs) in a range object. the range object was modified to hold the counts
         needed by the ProteinCoverageMap
 
         TODO:
-        unlike the old-style getCoverageRanges, the uncolaesced ranges are not cached in a class-level variable;
+        unlike the old-style getCoverageRanges, the uncoalesced ranges are not cached in a class-level variable;
         would need to keep separate by run
      */
     private List<Range> getUncoalescedPeptideRanges(MS2Run run)
@@ -1003,9 +1003,8 @@ public class Protein
 
     public List<Range> getModifiedPeptideRanges(MS2Run run)
     {
-        Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
         List<Range> modifiedPeptides = new ArrayList<>();
-        if (null == _modifiedPeptideCharacteristics || _modifiedPeptideCharacteristics.size() <= 0)
+        if (null == _modifiedPeptideCharacteristics || _modifiedPeptideCharacteristics.isEmpty())
             return modifiedPeptides;
 
         // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
