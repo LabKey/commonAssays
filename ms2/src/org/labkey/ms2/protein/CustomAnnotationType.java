@@ -17,6 +17,8 @@
 package org.labkey.ms2.protein;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.SafeToRenderEnum;
 

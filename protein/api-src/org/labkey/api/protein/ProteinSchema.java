@@ -1,4 +1,4 @@
-package org.labkey.ms2.protein;
+package org.labkey.api.protein;
 
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;

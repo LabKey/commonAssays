@@ -17,8 +17,8 @@
 package org.labkey.ms2;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
@@ -26,6 +26,8 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
+import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.NetworkDrive;
@@ -34,8 +36,6 @@ import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.protein.ProteinSchema;
-import org.labkey.ms2.protein.fasta.FastaProtein;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;

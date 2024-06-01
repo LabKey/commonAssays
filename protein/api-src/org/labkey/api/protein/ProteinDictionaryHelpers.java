@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.protein.tools;
+package org.labkey.api.protein;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,7 +28,6 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ViewServlet;
 import org.labkey.api.webdav.WebdavResolver;
 import org.labkey.api.webdav.WebdavResource;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

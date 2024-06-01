@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.protein.fasta;
+package org.labkey.api.protein.fasta;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,8 +72,6 @@ public class FastaProtein
         IDENT_TYPE_MAP.put("SGD_GN", "GeneName");
         IDENT_TYPE_MAP.put("GN", "GeneName");
     }
-
-
 
     public FastaProtein(String header, byte[] bytes)
     {

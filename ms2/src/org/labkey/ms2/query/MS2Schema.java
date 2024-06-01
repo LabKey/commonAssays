@@ -16,15 +16,46 @@
 
 package org.labkey.ms2.query;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.SpringActionController;
-import org.labkey.api.data.*;
+import org.labkey.api.data.AggregateColumnInfo;
+import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.CrosstabDimension;
+import org.labkey.api.data.CrosstabMeasure;
+import org.labkey.api.data.CrosstabMember;
+import org.labkey.api.data.CrosstabSettings;
+import org.labkey.api.data.CrosstabTable;
+import org.labkey.api.data.CrosstabTableInfo;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbScope;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.FilterInfo;
+import org.labkey.api.data.ForeignKey;
+import org.labkey.api.data.IconDisplayColumn;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MultiValuedForeignKey;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TempTableTracker;
+import org.labkey.api.data.VirtualTable;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.module.Module;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.CustomViewInfo;
@@ -56,9 +87,6 @@ import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.ProteinGroupProteins;
 import org.labkey.ms2.RunListCache;
 import org.labkey.ms2.RunListException;
-
-import jakarta.servlet.http.HttpServletRequest;
-import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.protein.ProteinViewBean;
 
 import java.net.URISyntaxException;

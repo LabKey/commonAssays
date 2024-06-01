@@ -18,6 +18,7 @@ package org.labkey.ms2.protein.tools;
 
 import org.jfree.chart.labels.PieToolTipGenerator;
 import org.jfree.data.general.PieDataset;
+import org.labkey.api.protein.ProteinDictionaryHelpers;
 
 /**
  * User: tholzman

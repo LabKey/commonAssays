@@ -18,8 +18,8 @@
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.Protein" %>
 <%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
+<%@ page import="org.labkey.ms2.protein.Protein" %>
 <%@ page import="org.labkey.ms2.reader.ITraqProteinQuantitation" %>
 <%@ page import="java.text.Format" %>
 <%@ page import="java.util.List" %>

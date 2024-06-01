@@ -20,13 +20,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.ms2.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.Map;
 import java.util.Set;

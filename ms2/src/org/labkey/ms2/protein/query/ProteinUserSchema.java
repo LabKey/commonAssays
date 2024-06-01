@@ -27,6 +27,7 @@ import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QueryForeignKey;
@@ -36,7 +37,6 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
 import org.labkey.ms2.MS2Module;
-import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.query.OrganismTableInfo;
 import org.labkey.ms2.query.SequencesTableInfo;
 

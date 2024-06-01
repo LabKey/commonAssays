@@ -26,13 +26,13 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
 import org.labkey.ms2.protein.CustomAnnotationSet;
-import org.labkey.ms2.protein.ProteinSchema;
 import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;

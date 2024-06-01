@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.protein.fasta;
 
+import org.labkey.api.protein.fasta.FastaProtein;
+import org.labkey.api.protein.fasta.PeptideHelpers;
 import org.labkey.ms2.Hydrophobicity3;
 
 /**

@@ -16,6 +16,8 @@
 package org.labkey.ms2;
 
 import com.google.common.primitives.ImmutableLongArray;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +46,32 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ContainerDisplayColumn;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SQLGenerationException;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -59,12 +85,9 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.PeptideCharacteristic;
+import org.labkey.api.protein.ProteinDictionaryHelpers;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.ReturnURLString;
-import org.labkey.ms2.protein.ProteinSchema;
-import org.labkey.ms2.protein.ProteinViewBean;
-import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -98,11 +121,13 @@ import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
@@ -146,15 +171,17 @@ import org.labkey.ms2.protein.AnnotationInsertion;
 import org.labkey.ms2.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.FastaReloaderJob;
+import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
+import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.SetBestNameRunnable;
 import org.labkey.ms2.protein.XMLProteinLoader;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
-import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.ms2.query.FilterView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
@@ -173,8 +200,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -2590,26 +2615,6 @@ public class MS2Controller extends SpringActionController
         public ActionURL getSuccessURL(Object o)
         {
             return MS2UrlsImpl.get().getShowProteinAdminUrl(_message);
-        }
-    }
-
-
-    public static class FastaParsingForm
-    {
-        private String _header;
-
-        public String getHeader()
-        {
-            if (_header != null && !_header.isEmpty() && _header.startsWith(">"))
-            {
-                return _header.substring(1);
-            }
-            return _header;
-        }
-
-        public void setHeader(String headers)
-        {
-            _header = headers;
         }
     }
 

@@ -28,6 +28,7 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.CheckedInputStream;
@@ -41,7 +42,6 @@ import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

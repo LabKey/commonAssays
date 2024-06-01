@@ -19,6 +19,7 @@ import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Sort;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.permissions.DeletePermission;

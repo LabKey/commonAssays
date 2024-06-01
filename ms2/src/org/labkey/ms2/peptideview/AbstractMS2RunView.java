@@ -17,6 +17,7 @@
 package org.labkey.ms2.peptideview;
 
 import com.google.common.primitives.ImmutableLongArray;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +39,7 @@ import org.labkey.api.data.TSVGridWriter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryNestingOption;
@@ -66,9 +68,7 @@ import org.labkey.ms2.SpectrumIterator;
 import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
-import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;

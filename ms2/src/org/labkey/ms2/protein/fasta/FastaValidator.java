@@ -16,6 +16,7 @@
 package org.labkey.ms2.protein.fasta;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.labkey.api.protein.fasta.FastaProtein;
 
 import java.io.File;
 import java.text.DecimalFormat;

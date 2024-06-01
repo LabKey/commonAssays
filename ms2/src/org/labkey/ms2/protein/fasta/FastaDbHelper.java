@@ -18,9 +18,9 @@ package org.labkey.ms2.protein.fasta;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.util.StringUtilsLabKey;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

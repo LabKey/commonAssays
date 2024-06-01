@@ -16,15 +16,20 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
-import org.labkey.api.data.RenderContext;
-import org.labkey.ms2.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinSchema;
 
-import java.util.*;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class ProteinGroupProteins
 {

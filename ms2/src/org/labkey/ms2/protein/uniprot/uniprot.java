@@ -20,10 +20,10 @@ import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.CoreSchema;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.protein.ParseActions;
 import org.labkey.ms2.protein.ParseContext;
-import org.labkey.ms2.protein.ProteinSchema;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
