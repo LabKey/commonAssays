@@ -32,7 +32,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.PropertyForeignKey;
-import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;

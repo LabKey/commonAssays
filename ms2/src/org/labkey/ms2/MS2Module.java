@@ -30,7 +30,6 @@ import org.labkey.api.module.FolderTypeManager;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
-import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
@@ -40,7 +39,7 @@ import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
 import org.labkey.api.usageMetrics.UsageMetricsService;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.Portal;
@@ -75,11 +74,10 @@ import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.CustomProteinListView;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
-import org.labkey.ms2.protein.fasta.PeptideTestCase;
 import org.labkey.ms2.protein.query.CustomAnnotationSchema;
 import org.labkey.ms2.protein.query.ProteinUserSchema;
 import org.labkey.ms2.query.MS2Schema;
@@ -142,7 +140,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 {
                     QueryView result = ExperimentService.get().createExperimentRunWebPart(new ViewContext(portalCtx), SEARCH_RUN_TYPE);
                     result.setTitle(MS2_RUNS_NAME);
-                    result.setTitleHref(PageFlowUtil.urlProvider(MS2Urls.class).getShowListUrl(portalCtx.getContainer()));
+                    result.setTitleHref(new ActionURL(MS2Controller.ShowListAction.class, portalCtx.getContainer()));
                     return result;
                 }
             },
@@ -355,7 +353,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             NaturalNumberParamsValidator.TestCase.class,
             NonNegativeIntegerParamsValidator.TestCase.class,
             PeptideProphetSummary.TestCase.class,
-            PeptideTestCase.class,
             PositiveDoubleParamsValidator.TestCase.class,
             Protein.TestCase.class,
             ProteinCoverageMapBuilder.TestCase.class,

@@ -76,7 +76,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -172,7 +171,7 @@ import org.labkey.ms2.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.FastaReloaderJob;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.ProteinViewBean;
@@ -338,7 +337,7 @@ public class MS2Controller extends SpringActionController
 
             QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             gridView.setTitle(MS2Module.MS2_RUNS_NAME);
-            gridView.setTitleHref(urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
+            gridView.setTitleHref(new ActionURL(ShowListAction.class, getContainer()));
 
             return new VBox(searchView, gridView);
         }
@@ -6080,21 +6079,9 @@ public class MS2Controller extends SpringActionController
 
     public static class MS2UrlsImpl implements MS2Urls
     {
-        @Override
-        public ActionURL getShowPeptideUrl(Container container)
-        {
-            return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
-        }
-
         public ActionURL getShowRunUrl(User user, MS2Run run)
         {
             return getShowRunURL(user, run.getContainer(), run.getRun());
-        }
-
-        @Override
-        public ActionURL getShowListUrl(Container container)
-        {
-            return new ActionURL(ShowListAction.class, container);
         }
 
         @Override
@@ -6124,15 +6111,13 @@ public class MS2Controller extends SpringActionController
             return getPepSearchUrl(container, null);
         }
 
-        @Override
-        public ActionURL getPepSearchUrl(Container container, String sequence)
+        public static ActionURL getPepSearchUrl(Container container, String sequence)
         {
             ActionURL url = new ActionURL(PepSearchAction.class, container);
             if(null != sequence)
                 url.addParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
             return url;
         }
-
 
         public static MS2UrlsImpl get()
         {
@@ -6178,10 +6163,10 @@ public class MS2Controller extends SpringActionController
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
-            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getUser(), getContainer());
-            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getUser(), getContainer()), peptidesTable.getPublicName());
+            TableInfo peptidesTable = new MS2Schema(getUser(), getContainer()).createPeptidesTableInfo();
+            PeptidesView pepView = new PeptidesView(new MS2Schema(getUser(), getContainer()), peptidesTable.getPublicName());
             pepView.setSearchSubfolders(form.isSubfolders());
-            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+            if(null != form.getPepSeq() && !form.getPepSeq().isEmpty())
                 pepView.setPeptideFilter(new PeptideSequenceFilter(form.getPepSeq(), form.isExact()));
             pepView.setTitle("Matching MS2 Peptides");
             pepView.enableExpandCollapse("peptides", false);

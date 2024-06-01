@@ -35,6 +35,8 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationType;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;

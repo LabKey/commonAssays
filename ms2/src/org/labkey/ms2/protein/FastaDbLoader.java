@@ -37,11 +37,10 @@ import org.labkey.api.protein.organism.OrganismGuessStrategy;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protein.fasta.FastaDbHelper;
-import org.labkey.ms2.protein.fasta.FastaValidator;
-import org.labkey.ms2.protein.fasta.ProteinFastaLoader;
-import org.labkey.ms2.protein.fasta.ProteinFastaLoader.ProteinIterator;
+import org.labkey.api.protein.fasta.FastaDbHelper;
+import org.labkey.api.protein.fasta.FastaValidator;
+import org.labkey.api.protein.fasta.ProteinFastaLoader;
+import org.labkey.api.protein.fasta.ProteinFastaLoader.ProteinIterator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -631,7 +630,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             int protCount = 0;
             int negCount = 0;
             // TODO: Need a container to make this configurable.
-            String negPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
+            String negPrefix = ProteinManager.NEGATIVE_HIT_PREFIX;
 
             //Main loop
             for (ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext(); )

@@ -33,6 +33,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.api.protein.Organism;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.fasta.FastaFile;
@@ -41,13 +42,10 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Link.LinkBuilder;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.ms2.MS2Manager;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +62,8 @@ import java.util.stream.Collectors;
 
 public class ProteinManager
 {
+    public static final String NEGATIVE_HIT_PREFIX = "rev_";
+
     public static Protein getProtein(int seqId)
     {
         return new SqlSelector(ProteinSchema.getSchema(),
@@ -192,72 +192,6 @@ public class ProteinManager
         return null;
     }
 
-    public static void migrateRuns(int oldFastaId, int newFastaId) throws SQLException
-    {
-        SQLFragment mappingSQL = new SQLFragment("SELECT fs1.seqid AS OldSeqId, fs2.seqid AS NewSeqId\n");
-        mappingSQL.append("FROM \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + ProteinSchema.getTableInfoFastaSequences() + " ff, " + ProteinSchema.getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + oldFastaId + ") fs1 \n");
-        mappingSQL.append("\tLEFT OUTER JOIN \n");
-        mappingSQL.append("\t(SELECT ff.SeqId, s.Hash, ff.LookupString FROM " + ProteinSchema.getTableInfoFastaSequences() + " ff, " + ProteinSchema.getTableInfoSequences() + " s WHERE ff.SeqId = s.SeqId AND ff.FastaId = " + newFastaId + ") fs2 \n");
-        mappingSQL.append("\tON (fs1.Hash = fs2.Hash AND fs1.LookupString = fs2.LookupString)");
-
-        SQLFragment missingCountSQL = new SQLFragment("SELECT COUNT(*) FROM (");
-        missingCountSQL.append(mappingSQL);
-        missingCountSQL.append(") Mapping WHERE OldSeqId IN (\n");
-        missingCountSQL.append("(SELECT p.SeqId FROM " + MS2Manager.getTableInfoPeptides() + " p, " + MS2Manager.getTableInfoRuns() + " r WHERE p.run = r.Run AND r.FastaId = " + oldFastaId + ")\n");
-        missingCountSQL.append("UNION\n");
-        missingCountSQL.append("(SELECT pgm.SeqId FROM ").append(MS2Manager.getTableInfoProteinGroupMemberships()).append(" pgm, ").append(MS2Manager.getTableInfoProteinGroups()).append(" pg, ").append(MS2Manager.getTableInfoProteinProphetFiles()).append(" ppf, ").append(MS2Manager.getTableInfoRuns()).append(" r WHERE pgm.ProteinGroupId = pg.RowId AND pg.ProteinProphetFileId = ppf.RowId AND ppf.Run = r.Run AND r.FastaId = ").appendValue(oldFastaId).append("))\n");
-        missingCountSQL.append("AND NewSeqId IS NULL");
-
-        int missingCount = new SqlSelector(ProteinSchema.getSchema(), missingCountSQL).getObject(Integer.class);
-        if (missingCount > 0)
-        {
-            throw new SQLException("There are " + missingCount + " protein sequences in the original FASTA file that are not in the new file");
-        }
-
-        SqlExecutor executor = new SqlExecutor(MS2Manager.getSchema());
-
-        try (DbScope.Transaction transaction = MS2Manager.getSchema().getScope().ensureTransaction())
-        {
-            SQLFragment updatePeptidesSQL = new SQLFragment();
-            updatePeptidesSQL.append("UPDATE " + MS2Manager.getTableInfoPeptidesData() + " SET SeqId = map.NewSeqId");
-            updatePeptidesSQL.append("\tFROM " + MS2Manager.getTableInfoFractions() + " f \n");
-            updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
-            updatePeptidesSQL.append("\t, " + MS2Manager.getTableInfoFastaRunMapping() + " frm\n");
-            updatePeptidesSQL.append("\t, (");
-            updatePeptidesSQL.append(mappingSQL);
-            updatePeptidesSQL.append(") map \n");
-            updatePeptidesSQL.append("WHERE f.Fraction = " + MS2Manager.getTableInfoPeptidesData() + ".Fraction\n");
-            updatePeptidesSQL.append("\tAND r.Run = f.Run\n");
-            updatePeptidesSQL.append("\tAND frm.Run = r.Run\n");
-            updatePeptidesSQL.append("\tAND " + MS2Manager.getTableInfoPeptidesData() + ".SeqId = map.OldSeqId \n");
-            updatePeptidesSQL.append("\tAND frm.FastaId = " + oldFastaId);
-
-            executor.execute(updatePeptidesSQL);
-
-            SQLFragment updateProteinsSQL = new SQLFragment();
-            updateProteinsSQL.append("UPDATE " + MS2Manager.getTableInfoProteinGroupMemberships() + " SET SeqId= map.NewSeqId\n");
-            updateProteinsSQL.append("FROM " + MS2Manager.getTableInfoProteinGroups() + " pg\n");
-            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n");
-            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoRuns() + " r\n");
-            updateProteinsSQL.append("\t, " + MS2Manager.getTableInfoFastaRunMapping() + " frm\n");
-            updateProteinsSQL.append("\t, (");
-            updateProteinsSQL.append(mappingSQL);
-            updateProteinsSQL.append(") map \n");
-            updateProteinsSQL.append("WHERE " + MS2Manager.getTableInfoProteinGroupMemberships() + ".ProteinGroupId = pg.RowId\n");
-            updateProteinsSQL.append("\tAND pg.ProteinProphetFileId = ppf.RowId\n");
-            updateProteinsSQL.append("\tAND r.Run = ppf.Run\n");
-            updateProteinsSQL.append("\tAND frm.Run = r.Run\n");
-            updateProteinsSQL.append("\tAND " + MS2Manager.getTableInfoProteinGroupMemberships() + ".SeqId = map.OldSeqId\n");
-            updateProteinsSQL.append("\tAND frm.FastaId = " + oldFastaId);
-
-            executor.execute(updateProteinsSQL);
-
-            executor.execute("UPDATE " + MS2Manager.getTableInfoFastaRunMapping() + " SET FastaID = ? WHERE FastaID = ?", newFastaId, oldFastaId);
-            transaction.commit();
-        }
-    }
-
     public static int ensureProtein(String sequence, String organismName, String name, String description)
     {
         Protein protein = ensureProteinInDatabase(sequence, organismName, name, description);
@@ -308,7 +242,7 @@ public class ProteinManager
     public static void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
         Protein protein = getProtein(seqId);
-        if(protein == null)
+        if (protein == null)
         {
             throw new NotFoundException("SeqId " + seqId + " does not exist.");
         }
@@ -317,7 +251,7 @@ public class ProteinManager
 
     private static void ensureIdentifiers(Protein protein, Map<String, Set<String>> typeAndIdentifiers)
     {
-        if(typeAndIdentifiers == null || typeAndIdentifiers.isEmpty())
+        if (typeAndIdentifiers == null || typeAndIdentifiers.isEmpty())
         {
             return;
         }
@@ -328,7 +262,7 @@ public class ProteinManager
             Set<String> identifiers = typeAndIdentifier.getValue();
 
             Integer identifierTypeId = ensureIdentifierType(identifierType);
-            if(identifierTypeId == null)
+            if (identifierTypeId == null)
                 continue;
 
             for(String identifier: identifiers)
@@ -341,11 +275,11 @@ public class ProteinManager
     private static void ensureIdentifier(Protein protein, Integer identifierTypeId, String identifier)
     {
         identifier = StringUtils.trimToNull(identifier);
-        if(identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
+        if (identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
         {
             return;
         }
-        if(!identifierExists(identifier, identifierTypeId, protein.getSeqId()))
+        if (!identifierExists(identifier, identifierTypeId, protein.getSeqId()))
         {
            addIdentifier(identifier, identifierTypeId, protein.getSeqId());
         }
@@ -374,14 +308,14 @@ public class ProteinManager
     private static Integer ensureIdentifierType(String identifierType)
     {
         identifierType = StringUtils.trimToNull(identifierType);
-        if(identifierType == null)
+        if (identifierType == null)
             return null;
 
         Integer identTypeId = new SqlSelector(ProteinSchema.getSchema(),
                             "SELECT MIN(identTypeId) FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE LOWER(name) = ?",
                             identifierType.toLowerCase()).getObject(Integer.class);
 
-        if(identTypeId == null)
+        if (identTypeId == null)
         {
             Map<String, Object> map = new HashMap<>();
             map.put("identTypeId", null);
@@ -456,14 +390,7 @@ public class ProteinManager
         if (identifier == null || infoSourceURLString == null)
             return null;
 
-        try
-        {
-            identifier = java.net.URLEncoder.encode(identifier, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new UnexpectedException(e);
-        }
+        identifier = java.net.URLEncoder.encode(identifier, StandardCharsets.UTF_8);
 
         return infoSourceURLString.replaceAll("\\{\\}", identifier);
     }

@@ -31,7 +31,7 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms2.SearchClient;
+import org.labkey.ms2.pipeline.SearchClient;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;

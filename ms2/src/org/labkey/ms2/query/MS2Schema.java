@@ -1556,4 +1556,20 @@ public class MS2Schema extends UserSchema
         };
     }
 
+    public TableInfo createPeptidesTableInfo()
+    {
+        return createPeptidesTableInfo(true, ContainerFilter.current(getContainer()), null, null);
+    }
+
+    public TableInfo createPeptidesTableInfo(boolean includeFeatureFk, ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns)
+    {
+        // Go through the schema so we get metadata applied correctly
+        PeptidesTableInfo table = (PeptidesTableInfo)getTable(MS2Schema.TableType.Peptides.name(), containerFilter, true, true);
+        if (null != filter)
+            table.addCondition(filter);
+        if (null != defaultColumns)
+            table.setDefaultVisibleColumns(defaultColumns);
+        table.setLocked(true);
+        return table;
+    }
 }

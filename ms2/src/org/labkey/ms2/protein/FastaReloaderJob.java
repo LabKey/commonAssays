@@ -16,8 +16,10 @@
 
 package org.labkey.ms2.protein;
 
+import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.fasta.FastaFile;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
@@ -27,10 +29,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * User: jeckels
-* Date: Feb 12, 2008
-*/
 public class FastaReloaderJob extends PipelineJob
 {
     private int[] _fastaIds;
@@ -81,7 +79,9 @@ public class FastaReloaderJob extends PipelineJob
                     fdbl.setOrganismIsToGuessed(true);
                     fdbl.parseFile(getLogger());
 
-                    ProteinManager.migrateRuns(oldFastaId, fdbl.getFastaId());
+                    MS2Service service = MS2Service.get();
+                    if (null != service)
+                        service.migrateRuns(oldFastaId, fdbl.getFastaId());
                     ProteinManager.deleteFastaFile(oldFastaId);
                     info("Completed processing FASTA " + filename);
                 }
@@ -102,5 +102,4 @@ public class FastaReloaderJob extends PipelineJob
             setStatus(TaskStatus.complete);
         }
     }
-
 }

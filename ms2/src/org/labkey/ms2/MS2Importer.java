@@ -38,6 +38,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.reader.AbstractMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
 
@@ -685,7 +686,7 @@ public abstract class MS2Importer
     {
         progress.getCumulativeTimer().setCurrentTask(Tasks.UpdateCounts);
 
-        String negativeHitLike = MS2Manager.NEGATIVE_HIT_PREFIX + "%";
+        String negativeHitLike = ProteinManager.NEGATIVE_HIT_PREFIX + "%";
 
         new SqlExecutor(MS2Manager.getSchema()).execute(_updateCountsSql, negativeHitLike, _runId);
     }

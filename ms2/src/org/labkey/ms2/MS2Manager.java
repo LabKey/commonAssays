@@ -1287,8 +1287,6 @@ public class MS2Manager
         return new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Container = ?", Boolean.FALSE, c).getObject(Long.class);
     }
 
-    public static final String NEGATIVE_HIT_PREFIX = "rev_";
-
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
     {
         String type = null;

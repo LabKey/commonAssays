@@ -23,7 +23,7 @@ import org.labkey.api.data.VirtualTable;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.LookupForeignKey;
-import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.util.Map;

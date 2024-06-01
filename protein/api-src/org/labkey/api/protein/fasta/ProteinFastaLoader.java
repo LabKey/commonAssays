@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.protein.fasta;
+package org.labkey.api.protein.fasta;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.reader.FastaLoader;
 
 import java.io.File;

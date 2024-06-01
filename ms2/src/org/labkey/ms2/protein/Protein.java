@@ -63,7 +63,6 @@ public class Protein
     // TODO: Delete
     private String _lookupString;
 
-    private String[] _peptides;
     private List<Range> _coverageRanges;
     private boolean _computeCoverage = true;
     private boolean _showEntireFragmentInCoverage = false;
@@ -621,7 +620,6 @@ public class Protein
 
     public void setPeptides(String... peptides)
     {
-        _peptides = peptides;
         _computeCoverage = true;
     }
 
@@ -647,9 +645,8 @@ public class Protein
     }
 
     /*
-            new class to hold counts of scans matching a single peptide sequence, as well as counts of
-            peptides found with modifications
-         */
+        holds counts of scans matching a single peptide sequence, as well as counts of peptides found with modifications
+    */
     private static class PeptideCounts
     {
         @Getter int countScans;

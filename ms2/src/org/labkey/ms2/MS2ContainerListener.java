@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.User;
-import org.labkey.ms2.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.ms2.protein.ProteinManager;
 
 import java.beans.PropertyChangeEvent;

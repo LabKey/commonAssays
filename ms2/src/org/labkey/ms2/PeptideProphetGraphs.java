@@ -27,6 +27,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 
@@ -142,7 +143,7 @@ public class PeptideProphetGraphs
         String chargeSQL = "SELECT count(*) " +
                         "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? AND Charge = ?";
-        String negHitPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
+        String negHitPrefix = ProteinManager.NEGATIVE_HIT_PREFIX;
 
         int total = new SqlSelector(MS2Manager.getSchema(),
                         chargeSQL,

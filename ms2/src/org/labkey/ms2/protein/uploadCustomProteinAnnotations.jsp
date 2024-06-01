@@ -18,7 +18,7 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.ms2.protein.CustomAnnotationType" %>
+<%@ page import="org.labkey.api.protein.CustomAnnotationType" %>
 <%@ page import="org.labkey.ms2.protein.ProteinController.UploadAnnotationsForm" %>
 <%@ page import="org.labkey.ms2.protein.ProteinController.UploadCustomProteinAnnotations" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
