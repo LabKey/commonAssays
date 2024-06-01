@@ -1,0 +1,10 @@
+plugins {
+    id 'org.labkey.build.module'
+}
+
+dependencies
+{
+    // This makes lombok available in main, but not api. TODO: Fix this so we can move PeptideCharacteristic, Protein, etc.
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
