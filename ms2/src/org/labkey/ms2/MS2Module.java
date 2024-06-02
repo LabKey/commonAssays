@@ -36,6 +36,9 @@ import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
+import org.labkey.api.protein.query.CustomAnnotationSchema;
+import org.labkey.api.protein.query.ProteinUserSchema;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
@@ -78,8 +81,6 @@ import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinController;
 import org.labkey.ms2.protein.ProteinServiceImpl;
-import org.labkey.ms2.protein.query.CustomAnnotationSchema;
-import org.labkey.ms2.protein.query.ProteinUserSchema;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.DatDocumentParser;
 import org.labkey.ms2.reader.MGFDocumentParser;
@@ -94,7 +95,6 @@ import org.labkey.ms2.search.ProteinSearchWebPart;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +102,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Module that supports mass-spectrometry based protein database searches. Can convert raw intrument files to mzXML
+ * Module that supports mass-spectrometry based protein database searches. Can convert raw instrument files to mzXML
  * and then analyze using a variety of search engines like XTandem or Comet, load the results, and show reports.
  */
 public class MS2Module extends SpringModule implements ProteomicsModule
@@ -262,41 +262,43 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             ss.addDocumentParser(new MGFDocumentParser());
         }
 
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
+        FileContentService fcs = FileContentService.get();
+        if (fcs != null)
         {
-            @Override
-            public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoRuns(), "Path", TableUpdaterFileListener.Type.filePathForwardSlash, "Run")
             {
-                int result = super.fileMoved(srcFile, destFile, user, container);
-                MS2Manager.clearRunCache();
-                return result;
-            }
-        });
+                @Override
+                public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+                {
+                    int result = super.fileMoved(srcFile, destFile, user, container);
+                    MS2Manager.clearRunCache();
+                    return result;
+                }
+            });
 
-        SQLFragment containerFrag = new SQLFragment();
-        containerFrag.append("SELECT r.Container FROM ");
-        containerFrag.append(MS2Manager.getTableInfoRuns(), "r");
-        containerFrag.append(" WHERE r.Run = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".Run");
+            SQLFragment containerFrag = new SQLFragment();
+            containerFrag.append("SELECT r.Container FROM ");
+            containerFrag.append(MS2Manager.getTableInfoRuns(), "r");
+            containerFrag.append(" WHERE r.Run = ").append(TableUpdaterFileListener.TABLE_ALIAS).append(".Run");
 
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
-        {
-            @Override
-            public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+            fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoFractions(), "MzXMLURL", TableUpdaterFileListener.Type.uri, "Fraction", containerFrag)
             {
-                int result = super.fileMoved(srcFile, destFile, user, container);
-                MS2Manager.clearFractionCache();
-                return result;
-            }
-        });
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
-        FileContentService.get().addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+                @Override
+                public int fileMoved(@NotNull File srcFile, @NotNull File destFile, @Nullable User user, @Nullable Container container)
+                {
+                    int result = super.fileMoved(srcFile, destFile, user, container);
+                    MS2Manager.clearFractionCache();
+                    return result;
+                }
+            });
+            fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
+            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
+            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+        }
 
-        UsageMetricsService.get().registerUsageMetrics(getName(), () -> {
-                Map<String, Object> results = new HashMap<>();
-                results.put("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists());
-                return results;
-        });
+        UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
+
+        SequencesTableInfo.setTableModifier(MS2Schema.STANDARD_MODIFIER);
     }
 
     @NotNull
@@ -306,7 +308,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         Collection<String> list = new LinkedList<>();
         long count = MS2Manager.getRunCount(c);
         if (count > 0)
-            list.add("" + count + " MS2 Run" + (count > 1 ? "s" : ""));
+            list.add(count + " MS2 Run" + (count > 1 ? "s" : ""));
         int customAnnotationCount = CustomAnnotationSetManager.getCustomAnnotationSets(c, false).size();
         if (customAnnotationCount > 0)
         {

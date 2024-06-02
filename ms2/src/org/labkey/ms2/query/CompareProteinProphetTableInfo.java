@@ -16,30 +16,26 @@
 
 package org.labkey.ms2.query;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.ExprColumn;
-import org.labkey.api.query.LookupForeignKey;
 import org.labkey.api.query.FieldKey;
-import org.labkey.ms2.MS2Run;
+import org.labkey.api.query.LookupForeignKey;
 import org.labkey.ms2.MS2Manager;
-import org.jetbrains.annotations.NotNull;
+import org.labkey.ms2.MS2Run;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-/**
- * User: jeckels
- * Date: Apr 12, 2007
- */
 public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema>
 {
     private final List<MS2Run> _runs;
-    private final boolean _forExport;
     private final HttpServletRequest _request;
     private final String _peptideViewName;
 
@@ -48,7 +44,6 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         super(MS2Schema.HiddenTableType.CompareProteinProphet.toString(), schema, null);
 
         _runs = runs;
-        _forExport = forExport;
         _request = request;
         _peptideViewName = peptideViewName;
 
@@ -95,7 +90,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
                          return new ProteinGroupTableInfo(_userSchema, getContainerFilter(), false);
                     }
                 };
-                if (!_forExport)
+                if (!forExport)
                 {
                     fk.setPrefixColumnCaption(false);
                 }
@@ -158,7 +153,6 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
 
         setDefaultVisibleColumns(defaultCols);
     }
-
 
     @Override @NotNull
     public SQLFragment getFromSQL(String alias)

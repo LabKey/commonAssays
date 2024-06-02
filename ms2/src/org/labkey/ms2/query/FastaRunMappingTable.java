@@ -17,16 +17,12 @@ package org.labkey.ms2.query;
 
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.protein.query.ProteinUserSchema;
 
-/**
- * Created by: jeckels
- * Date: 2/21/16
- */
 public class FastaRunMappingTable extends FilteredTable<MS2Schema>
 {
     private static final FieldKey CONTAINER_FIELD_KEY = FieldKey.fromParts("Container");

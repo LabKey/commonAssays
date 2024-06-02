@@ -57,6 +57,7 @@ import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.CustomViewInfo;
 import org.labkey.api.query.DefaultSchema;
@@ -74,6 +75,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.StringExpression;
+import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -101,6 +103,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * User: jeckels
@@ -778,6 +781,17 @@ public class MS2Schema extends UserSchema
 
         return result;
     }
+
+    // Customizes the SequencesTableInfo, adding "BestName" column and ShowProteinAction details URL
+    public static Consumer<SequencesTableInfo<?>> STANDARD_MODIFIER = (SequencesTableInfo<?> tableInfo) ->
+    {
+        ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, tableInfo.getContainer());
+        url.addParameter("seqId", "${SeqId}");
+        var bnColumn = tableInfo.getMutableColumn("BestName");
+        bnColumn.setURL(StringExpressionFactory.createURL(url));
+        bnColumn.setURLTargetWindow("prot");
+        tableInfo.setDetailsURL(new DetailsURL(url));
+    };
 
     public SequencesTableInfo<MS2Schema> createSequencesTable(ContainerFilter cf)
     {

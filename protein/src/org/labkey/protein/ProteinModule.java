@@ -42,7 +42,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 24.000;
+        return 0.000; // TODO: Switch to 24.000 once prot scripts move here
     }
 
     @Override
@@ -82,6 +82,6 @@ public class ProteinModule extends DefaultModule
     @NotNull
     public Set<String> getSchemaNames()
     {
-        return Collections.singleton(ProteinSchema.getSchemaName());
+        return Collections.singleton(ProteinSchema.getSchemaName()); // TODO: Switch to "prot" when scripts move
     }
 }

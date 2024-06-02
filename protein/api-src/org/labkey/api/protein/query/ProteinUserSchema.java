@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.protein.query;
+package org.labkey.api.protein.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +29,6 @@ import org.labkey.api.data.TableInfo;
 import org.labkey.api.module.Module;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
-import org.labkey.api.protein.query.OrganismTableInfo;
 import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySchema;
@@ -37,7 +36,6 @@ import org.labkey.api.query.SimpleUserSchema;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
 import org.labkey.api.util.HtmlString;
-import org.labkey.ms2.query.SequencesTableInfo;
 
 import java.util.Set;
 
@@ -369,5 +367,4 @@ public class ProteinUserSchema extends UserSchema
         });
         return table;
     }
-
 }

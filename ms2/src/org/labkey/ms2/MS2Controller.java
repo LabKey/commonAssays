@@ -72,6 +72,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -83,10 +84,14 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.PeptideCharacteristic;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.XMLProteinLoader;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -167,16 +172,13 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
 import org.labkey.ms2.protein.AnnotationInsertion;
-import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.ms2.protein.FastaDbLoader;
 import org.labkey.ms2.protein.FastaReloaderJob;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.SetBestNameRunnable;
-import org.labkey.api.protein.XMLProteinLoader;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
@@ -188,7 +190,6 @@ import org.labkey.ms2.query.PeptideCrosstabView;
 import org.labkey.ms2.query.PeptideFilter;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.ProteinProphetCrosstabView;
-import org.labkey.ms2.query.SequencesTableInfo;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
@@ -216,6 +217,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -433,7 +435,7 @@ public class MS2Controller extends SpringActionController
                     Map<String, String> savedViews = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), MS2_VIEWS_CATEGORY);
                     String params = savedViews.get(defaultViewName);
 
-                    if (params != null && params.trim().length() > 0)
+                    if (params != null && !params.trim().isEmpty())
                     {
                         throw new RedirectException(currentURL + "&" + params);
                     }
@@ -1601,7 +1603,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
             MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
-            tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
+            addProteinNameFilter(tableInfo, form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
             ActionURL targetURL;
             try
@@ -2978,14 +2980,14 @@ public class MS2Controller extends SpringActionController
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
-                sequencesTableInfo.addSeqIdFilter(seqIds);
+                addSeqIdFilter(sequencesTableInfo, seqIds);
             }
             else
             {
-                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                addProteinNameFilter(sequencesTableInfo, form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (form.isRestrictProteins())
                 {
-                    sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+                    addContainerCondition(sequencesTableInfo, getContainer(), getUser(), true);
                 }
             }
             proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
@@ -3120,6 +3122,103 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    private static void addContainerCondition(SequencesTableInfo tableInfo, Container c, User u, boolean includeSubfolders)
+    {
+        SqlDialect d = ProteinSchema.getSqlDialect();
+        List<Container> containers = ContainerManager.getAllChildren(c, u);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+        sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container IN ");
+        sql.add(Boolean.FALSE);
+        if (includeSubfolders)
+        {
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
+        }
+        else
+        {
+            sql.append("(");
+            sql.appendValue(c,d);
+            sql.append(")");
+        }
+        sql.append(")");
+        tableInfo.addCondition(sql);
+    }
+
+    public static List<String> getIdentifierParameters(String identifiers)
+    {
+        List<String> result = new ArrayList<>();
+        if (identifiers == null || identifiers.trim().isEmpty())
+        {
+            return result;
+        }
+
+        StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
+        while (st.hasMoreTokens())
+        {
+            result.add(st.nextToken());
+        }
+        return result;
+    }
+
+    private static void addProteinNameFilter(SequencesTableInfo tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
+    {
+        List<String> params = getIdentifierParameters(identifier);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoSequences(), "s");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
+        sql.append("\n");
+        sql.append(")");
+        tableInfo.addCondition(sql);
+    }
+
+    private static void addSeqIdFilter(SequencesTableInfo tableInfo, int[] seqIds)
+    {
+        SQLFragment sql = new SQLFragment("SeqId IN (");
+        if (seqIds.length == 0)
+        {
+            sql.append("NULL");
+        }
+        else
+        {
+            String separator = "";
+            for (long seqId : seqIds)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(Long.toString(seqId));
+            }
+        }
+        sql.append(")");
+        tableInfo.addCondition(sql, FieldKey.fromParts("SeqId"));
+    }
+
+
     public static class ProbabilityProteinSearchForm extends ProteinService.ProteinSearchForm implements HasViewContext
     {
         private Float _minimumProbability;
@@ -3209,10 +3308,10 @@ public class MS2Controller extends SpringActionController
             {
                 MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
                 SequencesTableInfo tableInfo = schema.createSequencesTable(null);
-                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                addProteinNameFilter(tableInfo, getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
-                    tableInfo.addContainerCondition(_context.getContainer(), _context.getUser(), true);
+                    addContainerCondition(tableInfo, _context.getContainer(), _context.getUser(), true);
                 }
                 _seqId = ArrayUtils.toPrimitive(new TableSelector(tableInfo.getColumn("SeqId")).getArray(Integer.class));
             }

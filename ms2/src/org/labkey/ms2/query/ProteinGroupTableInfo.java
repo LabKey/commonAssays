@@ -30,6 +30,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -39,6 +40,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.MS2Controller.MatchCriteria;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinListDisplayColumn;
@@ -384,9 +386,9 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         addCondition(sql);
     }
     
-    public void addProteinNameFilter(String identifier, MS2Controller.MatchCriteria matchCriteria)
+    public void addProteinNameFilter(String identifier, MatchCriteria matchCriteria)
     {
-        List<String> params = SequencesTableInfo.getIdentifierParameters(identifier);
+        List<String> params = MS2Controller.getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
@@ -440,6 +442,5 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         }
         sql.append("))");
         addCondition(sql);
-
     }
 }
