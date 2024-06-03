@@ -1,6 +1,6 @@
 package org.labkey.ms2.protein;
 
-import org.labkey.api.ms.Replicate;
+import org.labkey.api.protein.Replicate;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.ms2.MS2Run;
 
