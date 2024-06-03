@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.ms2.protein;
+package org.labkey.api.protein.fasta;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -27,21 +27,17 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.fasta.FastaFile;
-import org.labkey.api.protein.fasta.FastaProtein;
-import org.labkey.api.protein.fasta.IdPattern;
+import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.fasta.ProteinFastaLoader.ProteinIterator;
 import org.labkey.api.protein.organism.GuessOrgByParsing;
 import org.labkey.api.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.api.protein.organism.OrganismGuessStrategy;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.protein.fasta.FastaDbHelper;
-import org.labkey.api.protein.fasta.FastaValidator;
-import org.labkey.api.protein.fasta.ProteinFastaLoader;
-import org.labkey.api.protein.fasta.ProteinFastaLoader.ProteinIterator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -151,7 +147,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         if (!errors.isEmpty())
         {
             logger.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
-                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequeces so the names must be unique.  " +
+                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequences so the names must be unique.  " +
                     "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
 
             String errorString = StringUtils.join(errors, "\n");
@@ -631,7 +627,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             int protCount = 0;
             int negCount = 0;
             // TODO: Need a container to make this configurable.
-            String negPrefix = ProteinManager.NEGATIVE_HIT_PREFIX;
+            String negPrefix = ProteinService.NEGATIVE_HIT_PREFIX;
 
             //Main loop
             for (ProteinIterator proteinIterator = curLoader.iterator(); proteinIterator.hasNext(); )

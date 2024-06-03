@@ -84,6 +84,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.AnnotationInsertion;
 import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
@@ -91,6 +92,8 @@ import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.XMLProteinLoader;
+import org.labkey.api.protein.fasta.FastaDbLoader;
+import org.labkey.api.protein.fasta.FastaReloaderJob;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -171,9 +174,6 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
-import org.labkey.ms2.protein.AnnotationInsertion;
-import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.FastaReloaderJob;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
@@ -2607,7 +2607,7 @@ public class MS2Controller extends SpringActionController
             }
 
             for (int id : validIds)
-                ProteinManager.deleteFastaFile(id);
+                org.labkey.api.protein.ProteinManager.deleteFastaFile(id);
 
             return true;
         }
@@ -4199,7 +4199,7 @@ public class MS2Controller extends SpringActionController
             String delimiter = "";
             for (int i : run.getFastaIds())
             {
-                summary.append(delimiter).append(ProteinManager.getFastaFile(i).getFilename());
+                summary.append(delimiter).append(org.labkey.api.protein.ProteinManager.getFastaFile(i).getFilename());
                 delimiter = ", ";
             }
             summary.append(" that contain the peptide " + peptide).unsafeAppend("</span></p>");
@@ -5705,7 +5705,7 @@ public class MS2Controller extends SpringActionController
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
             for (int id : ids)
-                ProteinManager.deleteAnnotationInsertion(id);
+                org.labkey.api.protein.ProteinManager.deleteAnnotationInsertion(id);
 
             return true;
         }

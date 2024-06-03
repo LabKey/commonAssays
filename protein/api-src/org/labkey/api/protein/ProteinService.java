@@ -38,6 +38,8 @@ import java.util.Set;
  */
 public interface ProteinService
 {
+    String NEGATIVE_HIT_PREFIX = "rev_";
+
     static ProteinService get()
     {
         return ServiceRegistry.get().getService(ProteinService.class);

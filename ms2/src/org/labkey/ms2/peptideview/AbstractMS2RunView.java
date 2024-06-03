@@ -40,6 +40,7 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.protein.ProteinDictionaryHelpers;
+import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryNestingOption;
@@ -66,7 +67,6 @@ import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;
 import org.labkey.ms2.SpectrumRenderer;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.tools.GoLoader;
 
 import java.io.IOException;
