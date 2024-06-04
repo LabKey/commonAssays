@@ -18,6 +18,7 @@ package org.labkey.ms2.protein;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.labkey.api.protein.IdentifierType;
 import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 
@@ -31,12 +32,12 @@ import java.util.Set;
 
 public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
 {
-    public AnnotationView(Protein protein)
+    public AnnotationView(SimpleProtein protein)
     {
         this(protein, Collections.emptyMap());
     }
 
-    public AnnotationView(Protein protein, Map<String, Collection<HtmlString>> extraAnnotations)
+    public AnnotationView(SimpleProtein protein, Map<String, Collection<HtmlString>> extraAnnotations)
     {
         super("/org/labkey/ms2/protein/view/protAnnots.jsp", getBean(protein, extraAnnotations));
         setTitle("Annotations for " + protein.getBestName());
@@ -52,7 +53,7 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
         public Map<String, Collection<HtmlString>> annotations = new LinkedHashMap<>();
     }
 
-    private static AnnotViewBean getBean(Protein protein, Map<String, Collection<HtmlString>> extraAnnotations)
+    private static AnnotViewBean getBean(SimpleProtein protein, Map<String, Collection<HtmlString>> extraAnnotations)
     {
         int seqId = protein.getSeqId();
 

@@ -85,6 +85,7 @@ import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -200,6 +201,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -1505,17 +1507,17 @@ public class MS2Controller extends SpringActionController
         private String _targetProtein;
         private List<Integer> _targetSeqIds;
 
-        private List<Protein> _proteins;
+        private List<SimpleProtein> _proteins;
 
         @Nullable
-        public List<Protein> lookupProteins()
+        public List<SimpleProtein> lookupProteins()
         {
             if (_proteins == null && _targetSeqIds != null)
             {
                 _proteins = new ArrayList<>();
                 for (Integer targetSeqId : _targetSeqIds)
                 {
-                    _proteins.add(ProteinManager.getProtein(targetSeqId.intValue()));
+                    _proteins.add(org.labkey.api.protein.ProteinManager.getProtein(targetSeqId.intValue()));
                 }
             }
             return _proteins;
@@ -1676,13 +1678,14 @@ public class MS2Controller extends SpringActionController
 
         public void appendPeptideFilterDescription(StringBuilder title, ViewContext context)
         {
-            if (null != lookupProteins() && lookupProteins().size() > 0 && null != getTargetProtein())
+            List<SimpleProtein> proteins = lookupProteins();
+            if (null != proteins && !proteins.isEmpty() && null != getTargetProtein())
             {
                 title.append("Protein ");
                 title.append(getTargetProtein());
 
                 List<String> bestNames = new ArrayList<>();
-                for (Protein lookup : lookupProteins())
+                for (SimpleProtein lookup : proteins)
                 {
                     // Show both what the user searched for, and what they resolved it to
                     if (!lookup.getBestName().equals(getTargetProtein()))
@@ -3532,6 +3535,7 @@ public class MS2Controller extends SpringActionController
             return _reset;
         }
 
+        @SuppressWarnings("unused")
         public void setReset(boolean reset)
         {
             _reset = reset;
@@ -3542,6 +3546,7 @@ public class MS2Controller extends SpringActionController
             return (null == _mascotServer) ? "" : _mascotServer;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotServer(String mascotServer)
         {
             _mascotServer = mascotServer;
@@ -3552,6 +3557,7 @@ public class MS2Controller extends SpringActionController
             return (null == _mascotUserAccount) ? "" : _mascotUserAccount;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotUserAccount(String mascotUserAccount)
         {
             _mascotUserAccount = mascotUserAccount;
@@ -3562,6 +3568,7 @@ public class MS2Controller extends SpringActionController
             return (null == _mascotUserPassword) ? "" : _mascotUserPassword;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotUserPassword(String mascotUserPassword)
         {
             _mascotUserPassword = mascotUserPassword;
@@ -3572,6 +3579,7 @@ public class MS2Controller extends SpringActionController
             return (null == _mascotHTTPProxy) ? "" : _mascotHTTPProxy;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotHTTPProxy(String mascotHTTPProxy)
         {
             _mascotHTTPProxy = mascotHTTPProxy;
@@ -3716,7 +3724,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     /**
      * Used by link on SeqHits column of peptides grid view, calculates all proteins within the
      * fasta for the current run that have the given peptide sequence. No peptides grid shown.
@@ -3759,7 +3766,6 @@ public class MS2Controller extends SpringActionController
         {
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class ShowProteinGroupAction extends SimpleViewAction<DetailsForm>
@@ -3998,8 +4004,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
-            Protein protein;
-            protein = ProteinManager.getProtein(form.getSeqIdInt());
+            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
             if (protein == null)
                 throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
             ms2Run = form.validateRun();
@@ -4295,15 +4300,15 @@ public class MS2Controller extends SpringActionController
 
             String sqids = form.getSqids();
             String sqidArr[] = sqids.split(",");
-            List<Protein> proteins = new ArrayList<>(sqidArr.length);
+            List<SimpleProtein> proteins = new ArrayList<>(sqidArr.length);
             for (String curSqid : sqidArr)
             {
                 int curSeqId = Integer.parseInt(curSqid);
-                proteins.add(ProteinManager.getProtein(curSeqId));
+                proteins.add(org.labkey.api.protein.ProteinManager.getProtein(curSeqId));
             }
 
-            proteins.sort(Comparator.comparing(Protein::getBestName));
-            for (Protein protein : proteins)
+            proteins.sort(Comparator.comparing(SimpleProtein::getBestName));
+            for (SimpleProtein protein : proteins)
             {
                 vbox.addView(new AnnotationView(protein));
             }

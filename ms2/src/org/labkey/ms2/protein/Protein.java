@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinFeature;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.ms2.MS2Manager;
@@ -44,16 +45,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class Protein
+public class Protein extends SimpleProtein
 {
     private static final Logger _log = LogManager.getLogger(Protein.class);
 
-    private double _mass;
-    private String _sequence;
-    private int _seqId;
-    private String _description;
-    private String _bestName;
-    private String _bestGeneName;
+    public Protein(SimpleProtein simpleProtein)
+    {
+        setSeqId(simpleProtein.getSeqId());
+        setSequence(simpleProtein.getSequence());
+        setMass(simpleProtein.getMass());
+        setDescription(simpleProtein.getDescription());
+        setBestName(simpleProtein.getBestName());
+        setBestGeneName(simpleProtein.getBestGeneName());
+    }
 
     private List<PeptideCharacteristic> _combinedPeptideCharacteristics;
     // _modifiedPeptideCharacteristics contains peptides and their modified forms
@@ -91,28 +95,20 @@ public class Protein
     {
     }
 
-
     public String getLookupString()
     {
         return _lookupString;
     }
-
 
     public void setLookupString(String lookupString)
     {
         _lookupString = lookupString;
     }
 
-
-    public String getSequence()
-    {
-        return _sequence;
-    }
-
-
+    @Override
     public void setSequence(String sequence)
     {
-        _sequence = (sequence == null ? "" : sequence);    // Sequence can be null if FASTA is not loaded
+        super.setSequence(sequence);
         _computeCoverage = true;
     }
 
@@ -126,66 +122,6 @@ public class Protein
     public void setProtSequence(String sequence)
     {
         setSequence(sequence);
-    }
-
-
-    public double getMass()
-    {
-        return _mass;
-    }
-
-
-    public void setMass(double mass)
-    {
-        _mass = mass;
-    }
-
-
-    public int getSeqId()
-    {
-        return _seqId;
-    }
-
-
-    public void setSeqId(int seqId)
-    {
-        _seqId = seqId;
-    }
-
-
-    public String getDescription()
-    {
-        return _description;
-    }
-
-
-    public void setDescription(String description)
-    {
-        _description = description;
-    }
-
-
-    public String getBestName()
-    {
-        return _bestName;
-    }
-
-
-    public void setBestName(String bestName)
-    {
-        _bestName = bestName;
-    }
-
-
-    public String getBestGeneName()
-    {
-        return _bestGeneName;
-    }
-
-
-    public void setBestGeneName(String bestGeneName)
-    {
-        _bestGeneName = bestGeneName;
     }
 
     public boolean isShowStakedPeptides()

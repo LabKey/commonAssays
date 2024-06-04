@@ -14,6 +14,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.PreferenceService;
@@ -550,7 +551,7 @@ public class PeptideManager
         public SequenceFilter(int seqid)
         {
             _seqid = seqid;
-            Protein prot = ProteinManager.getProtein(seqid);
+            SimpleProtein prot = org.labkey.api.protein.ProteinManager.getProtein(seqid);
             _sequence = prot.getSequence();
             _bestName = prot.getBestName();
         }

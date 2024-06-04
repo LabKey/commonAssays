@@ -4,6 +4,7 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -11,11 +12,14 @@ import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaFile;
+import org.labkey.api.protein.fasta.PeptideHelpers;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Link;
+import org.labkey.api.view.NotFoundException;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -33,13 +37,117 @@ import java.util.stream.Collectors;
 
 public class ProteinManager
 {
-
     public static FastaFile getFastaFile(int fastaId)
     {
         return new TableSelector(ProteinSchema.getTableInfoFastaFiles()).getObject(fastaId, FastaFile.class);
     }
 
-    // Unused private methods below are waiting for the migration of other ProteinManger methods
+    public static SimpleProtein getProtein(int seqId)
+    {
+        return new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE SeqId = ?",
+                seqId).getObject(SimpleProtein.class);
+    }
+
+    private static SimpleProtein getProtein(String sequence, int organismId)
+    {
+        return new SqlSelector(ProteinSchema.getSchema(),
+                "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
+                hashSequence(sequence), organismId).getObject(SimpleProtein.class);
+    }
+
+    public static int ensureProtein(String sequence, String organismName, String name, String description)
+    {
+        SimpleProtein protein = ensureProteinInDatabase(sequence, organismName, name, description);
+        return protein.getSeqId();
+    }
+
+    private static SimpleProtein ensureProteinInDatabase(String sequence, String organismName, String name, String description)
+    {
+        String genus = FastaDbLoader.extractGenus(organismName);
+        String species = FastaDbLoader.extractSpecies(organismName);
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("species"), species);
+        filter.addCondition(FieldKey.fromParts("genus"), genus);
+        Organism organism = new TableSelector(ProteinSchema.getTableInfoOrganisms(), filter, null).getObject(Organism.class);
+        if (organism == null)
+        {
+            organism = new Organism();
+            organism.setGenus(genus);
+            organism.setSpecies(species);
+            organism = Table.insert(null, ProteinSchema.getTableInfoOrganisms(), organism);
+        }
+
+        return ensureProteinInDatabase(sequence, organism, name, description);
+    }
+
+    private static SimpleProtein ensureProteinInDatabase(String sequence, Organism organism, String name, String description)
+    {
+        SimpleProtein protein = getProtein(sequence, organism.getOrgId());
+        if (protein == null)
+        {
+            Map<String, Object> map = new CaseInsensitiveHashMap<>();
+            map.put("ProtSequence", sequence);
+            byte[] sequenceBytes = getSequenceBytes(sequence);
+            map.put("Mass", PeptideHelpers.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideHelpers.AMINO_ACID_AVERAGE_MASSES));
+            map.put("OrgId", organism.getOrgId());
+            map.put("Hash", hashSequence(sequence));
+            map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
+            map.put("BestName", name);
+            map.put("Length", sequence.length());
+            map.put("InsertDate", new Date());
+            map.put("ChangeDate", new Date());
+
+            Table.insert(null, ProteinSchema.getTableInfoSequences(), map);
+            protein = getProtein(sequence, organism.getOrgId());
+        }
+        return protein;
+    }
+
+    public static void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
+    {
+        SimpleProtein protein = getProtein(seqId);
+        if (protein == null)
+        {
+            throw new NotFoundException("SeqId " + seqId + " does not exist.");
+        }
+        ensureIdentifiers(protein, typeAndIdentifiers);
+    }
+
+    private static void ensureIdentifiers(SimpleProtein protein, Map<String, Set<String>> typeAndIdentifiers)
+    {
+        if (typeAndIdentifiers == null || typeAndIdentifiers.isEmpty())
+        {
+            return;
+        }
+
+        for(Map.Entry<String, Set<String>> typeAndIdentifier: typeAndIdentifiers.entrySet())
+        {
+            String identifierType = typeAndIdentifier.getKey();
+            Set<String> identifiers = typeAndIdentifier.getValue();
+
+            Integer identifierTypeId = ensureIdentifierType(identifierType);
+            if (identifierTypeId == null)
+                continue;
+
+            for(String identifier: identifiers)
+            {
+                ensureIdentifier(protein, identifierTypeId, identifier);
+            }
+        }
+    }
+
+    private static void ensureIdentifier(SimpleProtein protein, Integer identifierTypeId, String identifier)
+    {
+        identifier = StringUtils.trimToNull(identifier);
+        if (identifier == null || identifier.equalsIgnoreCase(protein.getBestName()))
+        {
+            return;
+        }
+        if (!identifierExists(identifier, identifierTypeId, protein.getSeqId()))
+        {
+            addIdentifier(identifier, identifierTypeId, protein.getSeqId());
+        }
+    }
 
     private static void addIdentifier(String identifier, int identifierTypeId, int seqId)
     {

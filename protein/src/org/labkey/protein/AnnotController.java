@@ -252,6 +252,7 @@ public class AnnotController extends SpringActionController
         {
         }
 
+        @Migrate // TODO: Don't reference FastaAdmin directly (ms2 could register a call-back)
         @Override
         public boolean handlePost(Object o, BindException errors)
         {
@@ -295,7 +296,6 @@ public class AnnotController extends SpringActionController
         }
     }
 
-    @Migrate
     @RequiresSiteAdmin
     public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
     {
