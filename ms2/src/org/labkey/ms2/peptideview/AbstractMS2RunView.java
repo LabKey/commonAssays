@@ -67,7 +67,7 @@ import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;
 import org.labkey.ms2.SpectrumRenderer;
-import org.labkey.ms2.protein.tools.GoLoader;
+import org.labkey.api.protein.go.GoLoader;
 
 import java.io.IOException;
 import java.sql.SQLException;

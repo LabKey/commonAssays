@@ -31,6 +31,7 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
@@ -71,6 +72,7 @@ import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
+import org.labkey.ms2.protein.AnnotController;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.query.MS2Schema;
@@ -175,6 +177,8 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     protected void init()
     {
+        // TODO: Temporary to help clear MS2 references from protein actions
+        addController("annot", AnnotController.class);
         addController("ms2", MS2Controller.class);
         addController("ms2-pipeline", PipelineController.class);
 
@@ -227,6 +231,8 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
+        // TODO: Migrate to ProteinModule
+        AnnotController.registerAdminConsoleLinks();
 
         SearchService ss = SearchService.get();
 
@@ -275,6 +281,14 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         }
 
         SequencesTableInfo.setTableModifier(MS2Schema.STANDARD_MODIFIER);
+
+        // Use FastaAdmin view and add Runs column with link to show all runs action
+        ProteinManager.registerFastaAdminDataRegionModifier(rgn -> {
+            rgn.setColumns(ProteinSchema.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
+            ActionURL runsURL = new ActionURL(MS2Controller.ShowAllRunsAction.class, ContainerManager.getRoot())
+                    .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
+            rgn.getDisplayColumn("Runs").setURL(runsURL);
+        });
     }
 
     @NotNull
@@ -301,6 +315,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     public Set<Class> getIntegrationTests()
     {
         return Set.of(
+            AnnotController.TestCase.class,
             Comet2014ParamsBuilder.FullParseTestCase.class,
             Comet2015ParamsBuilder.FullParseTestCase.class,
             MascotClientImpl.TestCase.class,

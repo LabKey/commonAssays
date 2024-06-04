@@ -20,18 +20,14 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.protein.IdentifierType;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.ms2.MS2Controller;
+import org.labkey.ms2.protein.AnnotController.SetBestNameForm;
 
-/**
- * User: jeckels
- * Date: Mar 12, 2008
- */
 public class SetBestNameRunnable implements Runnable
 {
     private final int[] _fastaIds;
-    private final MS2Controller.SetBestNameForm.NameType _nameType;
+    private final SetBestNameForm.NameType _nameType;
 
-    public SetBestNameRunnable(int[] fastaIds, MS2Controller.SetBestNameForm.NameType nameType)
+    public SetBestNameRunnable(int[] fastaIds, SetBestNameForm.NameType nameType)
     {
         _fastaIds = fastaIds;
         _nameType = nameType;

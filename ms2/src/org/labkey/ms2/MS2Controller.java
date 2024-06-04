@@ -43,17 +43,13 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.data.ActionButton;
-import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerDisplayColumn;
-import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
@@ -85,16 +81,10 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.protein.AnnotationInsertion;
-import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.protein.XMLProteinLoader;
-import org.labkey.api.protein.fasta.FastaDbLoader;
-import org.labkey.api.protein.fasta.FastaReloaderJob;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -107,7 +97,6 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
-import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresLogin;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
@@ -115,7 +104,6 @@ import org.labkey.api.security.RequiresSiteAdmin;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AbstractActionPermissionTest;
 import org.labkey.api.security.permissions.AdminOperationsPermission;
-import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
@@ -130,7 +118,6 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
@@ -152,7 +139,6 @@ import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
-import org.labkey.api.view.TabStripView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -179,8 +165,6 @@ import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.ProteinViewBean;
-import org.labkey.ms2.protein.SetBestNameRunnable;
-import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.query.ComparisonCrosstabView;
@@ -197,7 +181,6 @@ import org.labkey.ms2.reader.SensitivitySummary;
 import org.labkey.ms2.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -207,7 +190,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -244,13 +226,10 @@ public class MS2Controller extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-    @Migrate
     public static void registerAdminConsoleLinks()
     {
         AdminConsole.addLink(SettingsLinkType.Premium, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
         AdminConsole.addLink(SettingsLinkType.Premium, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
-        // TODO: Migrate to ProteinModule
-        AdminConsole.addLink(SettingsLinkType.Premium, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
     private void addRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
@@ -283,12 +262,6 @@ public class MS2Controller extends SpringActionController
         root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
         root.addChild(adminPageTitle, adminPageURL);
         root.addChild(title);
-    }
-
-    @Migrate
-    private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
-    {
-        addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
 
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs)
@@ -936,130 +909,6 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static ActionURL getLoadGoURL()
-    {
-        return new ActionURL(LoadGoAction.class, ContainerManager.getRoot());
-    }
-
-
-    @RequiresSiteAdmin
-    public class LoadGoAction extends FormViewAction<Object>
-    {
-        private String _message = null;
-
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public ModelAndView getView(Object o, boolean reshow, BindException errors)
-        {
-            return new GoView();
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            addProteinAdminNavTrail(root, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " GO Annotations", getPageConfig(), "annotations");
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            GoLoader loader;
-
-            if ("1".equals(getViewContext().get("manual")))
-            {
-                Map<String, MultipartFile> fileMap = getFileMap();
-                MultipartFile goFile = fileMap.get("gofile");                       // TODO: Check for NULL and display error
-                loader = GoLoader.getStreamLoader(goFile.getInputStream());
-            }
-            else
-            {
-                loader = GoLoader.getHttpLoader();
-            }
-
-            if (null != loader)
-            {
-                loader.load();
-                Thread.sleep(2000);
-            }
-            else
-            {
-                _message = "Can't load GO annotations, a GO annotation load is already in progress.  See below for details.";
-            }
-
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(Object o)
-        {
-            return getGoStatusURL(_message);
-        }
-
-        private static class GoView extends TabStripView
-        {
-            @Override
-            public List<NavTree> getTabList()
-            {
-                return Arrays.asList(new TabInfo("Automatic", "automatic", getLoadGoURL()), new TabInfo("Manual", "manual", getLoadGoURL()));
-            }
-
-            @Override
-            public HttpView getTabView(String tabId)
-            {
-                if ("manual".equals(tabId))
-                    return new JspView<>("/org/labkey/ms2/loadGoManual.jsp");
-                else
-                    return new JspView<>("/org/labkey/ms2/loadGoAutomatic.jsp");
-            }
-        }
-    }
-
-
-    private ActionURL getGoStatusURL(String message)
-    {
-        ActionURL url = new ActionURL(GoStatusAction.class, ContainerManager.getRoot());
-        if (null != message)
-            url.addParameter("message", message);
-        return url;
-    }
-
-
-    @RequiresSiteAdmin
-    public class GoStatusAction extends SimpleViewAction<GoForm>
-    {
-        @Override
-        public ModelAndView getView(GoForm form, BindException errors)
-        {
-            return GoLoader.getCurrentStatus(form.getMessage());
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            addProteinAdminNavTrail(root, "GO Load Status", getPageConfig(), "annotations");
-        }
-    }
-
-    public static class GoForm
-    {
-        String _message = null;
-
-        public String getMessage()
-        {
-            return _message;
-        }
-
-        public void setMessage(String message)
-        {
-            _message = message;
-        }
-    }
-
-
     @RequiresPermission(ReadPermission.class)
     public class PeptideChartsAction extends SimpleViewAction<ChartForm>
     {
@@ -1126,7 +975,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static class GoChartBean
     {
         public MS2Run run;
@@ -1140,7 +988,6 @@ public class MS2Controller extends SpringActionController
         public String queryString;
         public String grouping;
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class GetProteinGroupingPeptidesAction extends SimpleViewAction<RunForm>
@@ -1161,7 +1008,6 @@ public class MS2Controller extends SpringActionController
         {
         }
     }
-
 
     private ActionURL getManageViewsURL(MS2Run run, ActionURL runURL)
     {
@@ -2528,267 +2374,6 @@ public class MS2Controller extends SpringActionController
         return null;
     }
 
-    @RequiresSiteAdmin
-    public class ReloadFastaAction extends FormHandlerAction<Object>
-    {
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
-
-            FastaReloaderJob job = new FastaReloaderJob(ids, getViewBackgroundInfo(), null);
-
-            PipelineService.get().queueJob(job);
-
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(Object o)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl("FASTA reload queued. Monitor its progress using the job list at the bottom of this page.");
-        }
-    }
-
-
-    @RequiresSiteAdmin
-    public static class DeleteDataBasesAction extends FormHandlerAction<Object>
-    {
-        private String _message;
-
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors)
-        {
-            Set<String> fastaIdStrings = DataRegionSelection.getSelected(getViewContext(), true);
-            Set<Integer> fastaIds = new HashSet<>();
-            for (String fastaIdString : fastaIdStrings)
-            {
-                try
-                {
-                    fastaIds.add(Integer.parseInt(fastaIdString));
-                }
-                catch (NumberFormatException e)
-                {
-                    throw new NotFoundException("Invalid FASTA ID: " + fastaIdString);
-                }
-            }
-            String idList = StringUtils.join(fastaIds, ',');
-            List<Integer> validIds = new SqlSelector(ProteinSchema.getSchema(), "SELECT FastaId FROM " + ProteinSchema.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))").getArrayList(Integer.class);
-
-            fastaIds.removeAll(validIds);
-
-            if (!fastaIds.isEmpty())
-            {
-                _message = "Unable to delete FASTA ID(s) " + StringUtils.join(fastaIds, ", ") + " as they are still referenced by runs";
-            }
-            else
-            {
-                _message = "Successfully deleted " + validIds.size() + " FASTA record(s)";
-            }
-
-            for (int id : validIds)
-                org.labkey.api.protein.ProteinManager.deleteFastaFile(id);
-
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(Object o)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl(_message);
-        }
-    }
-
-    @Migrate
-    @RequiresSiteAdmin
-    public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
-    {
-        @Override
-        public ModelAndView getView(FastaParsingForm form, BindException errors)
-        {
-            return new JspView<>("/org/labkey/ms2/testFastaParsing.jsp", form);
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            addProteinAdminNavTrail(root, "Test FASTA header parsing", getPageConfig(), null);
-        }
-    }
-
-    @AdminConsoleAction
-    @RequiresPermission(AdminOperationsPermission.class)
-    public class ShowProteinAdminAction extends SimpleViewAction<Object>
-    {
-        @Override
-        public ModelAndView getView(Object o, BindException errors)
-        {
-            GridView grid = getFastaAdminGrid();
-            grid.setTitle("FASTA Files");
-            GridView annots = new GridView(getAnnotInsertsGrid(), errors);
-            annots.setTitle("Protein Annotations Loaded");
-
-            QueryView jobsView = PipelineService.get().getPipelineQueryView(getViewContext(), PipelineService.PipelineButtonOption.Standard);
-            jobsView.getSettings().setBaseFilter(new SimpleFilter(FieldKey.fromParts("Provider"), ProteinAnnotationPipelineProvider.NAME));
-            jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
-            jobsView.setTitle("Protein Annotation Load Jobs");
-
-            return new VBox(grid, annots, jobsView);
-        }
-
-        private DataRegion getAnnotInsertsGrid()
-        {
-            String columnNames = "InsertId, FileName, FileType, Comment, InsertDate, CompletionDate, RecordsProcessed";
-            DataRegion rgn = new DataRegion();
-
-            rgn.addColumns(ProteinSchema.getTableInfoAnnotInsertions(), columnNames);
-            rgn.getDisplayColumn("fileType").setWidth("20");
-            rgn.getDisplayColumn("insertId").setCaption("ID");
-            rgn.getDisplayColumn("insertId").setWidth("5");
-            ActionURL showURL = new ActionURL(ShowAnnotInsertDetailsAction.class, getContainer())
-                .addParameter("insertId", "${InsertId}");
-            rgn.getDisplayColumn("insertId").setURL(showURL);
-            rgn.setShowRecordSelectors(true);
-
-            ButtonBar bb = new ButtonBar();
-
-            ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
-            delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: The protein annotations themselves will not be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: The protein annotations themselves will not be deleted.)");
-            delete.setActionType(ActionButton.Action.POST);
-            bb.add(delete);
-
-            ActionButton insertAnnots = new ActionButton(new ActionURL(InsertAnnotsAction.class, getContainer()), "Import Data");
-            insertAnnots.setActionType(ActionButton.Action.LINK);
-            bb.add(insertAnnots);
-
-            ActionButton testFastaHeader = new ActionButton(new ActionURL(TestFastaParsingAction.class, getContainer()), "Test FASTA Header Parsing");
-            testFastaHeader.setActionType(ActionButton.Action.LINK);
-            bb.add(testFastaHeader);
-
-            // Note: This button POSTSs (default type)
-            bb.add(new ActionButton(ReloadSPOMAction.class, "Reload SWP Org Map"));
-
-            ActionButton reloadGO = new ActionButton(LoadGoAction.class, (GoLoader.isGoLoaded().booleanValue() ? "Reload" : "Load") + " Gene Ontology Data");
-            reloadGO.setActionType(ActionButton.Action.LINK);
-            bb.add(reloadGO);
-
-            rgn.setButtonBar(bb);
-            return rgn;
-        }
-
-        private GridView getFastaAdminGrid()
-        {
-            DataRegion rgn = new DataRegion();
-            rgn.setColumns(ProteinSchema.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
-            ActionURL runsURL = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot())
-                .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
-            rgn.getDisplayColumn("Runs").setURL(runsURL);
-            rgn.setShowRecordSelectors(true);
-
-            GridView result = new GridView(rgn, (BindException)null);
-            result.getRenderContext().setBaseSort(new Sort("FastaId"));
-
-            ButtonBar bb = new ButtonBar();
-
-            ActionButton delete = new ActionButton(new ActionURL(DeleteDataBasesAction.class, getContainer()), "Delete");
-            delete.setActionType(ActionButton.Action.POST);
-            delete.setRequiresSelection(true, "Are you sure you want to delete this FASTA record?", "Are you sure you want to delete these FASTA records?");
-            bb.add(delete);
-
-            ActionButton reload = new ActionButton(ReloadFastaAction.class, "Reload FASTA");
-            reload.setActionType(ActionButton.Action.POST);
-            reload.setRequiresSelection(true);
-            bb.add(reload);
-
-            ActionButton testFastaHeader = new ActionButton(new ActionURL(TestFastaParsingAction.class, getContainer()), "Test FASTA Header Parsing");
-            testFastaHeader.setActionType(ActionButton.Action.LINK);
-            bb.add(testFastaHeader);
-
-            MenuButton setBestNameMenu = new MenuButton("Set Protein Best Name...");
-            ActionURL setBestNameURL = new ActionURL(SetBestNameAction.class, getContainer());
-
-            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.LOOKUP_STRING.toString());
-            setBestNameMenu.addMenuItem("to name from FASTA", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
-            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.IPI.toString());
-            setBestNameMenu.addMenuItem("to IPI (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
-            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Name (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
-            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.SWISS_PROT_ACCN.toString());
-            setBestNameMenu.addMenuItem("to Swiss-Prot Accession (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
-            setBestNameURL.replaceParameter("nameType", SetBestNameForm.NameType.GEN_INFO.toString());
-            setBestNameMenu.addMenuItem("to GI number (if available)", result.createVerifySelectedScript(setBestNameURL, "FASTA files"));
-
-            bb.add(setBestNameMenu);
-
-            rgn.setButtonBar(bb, DataRegion.MODE_GRID);
-            return result;
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            urlProvider(AdminUrls.class).addAdminNavTrail(root, "Protein Database Admin", getClass(), getContainer());
-        }
-    }
-
-    public static class SetBestNameForm
-    {
-        public enum NameType
-        { LOOKUP_STRING, IPI, SWISS_PROT, SWISS_PROT_ACCN, GEN_INFO }
-
-        private String _nameType;
-
-        public String getNameType()
-        {
-            return _nameType;
-        }
-
-        public NameType lookupNameType()
-        {
-            return NameType.valueOf(getNameType());
-        }
-
-        public void setNameType(String nameType)
-        {
-            _nameType = nameType;
-        }
-    }
-
-    @RequiresPermission(AdminPermission.class)
-    public static class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
-    {
-        @Override
-        public void validateCommand(SetBestNameForm form, Errors errors)
-        {
-        }
-
-        @Override
-        public boolean handlePost(SetBestNameForm form, BindException errors)
-        {
-            int[] fastaIds = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
-            SetBestNameRunnable runnable = new SetBestNameRunnable(fastaIds, form.lookupNameType());
-            JobRunner.getDefault().execute(runnable);
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(SetBestNameForm form)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
-        }
-    }
-
-
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedProteinGroupsAction extends ExportAction<ExportForm>
     {
@@ -3245,7 +2830,7 @@ public class MS2Controller extends SpringActionController
             if (_seqId == null)
             {
                 MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
-                SequencesTableInfo tableInfo = schema.createSequencesTable(null);
+                SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
                 addProteinNameFilter(tableInfo, getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
@@ -3266,7 +2851,6 @@ public class MS2Controller extends SpringActionController
             exportPeptides(form, false);
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedPeptidesAction extends ExportAction<ExportForm>
@@ -3434,7 +3018,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public static class ShowPeptideProphetSensitivityPlotAction extends ExportAction<PeptideProphetForm>
     {
@@ -3448,7 +3031,6 @@ public class MS2Controller extends SpringActionController
             PeptideProphetGraphs.renderSensitivityGraph(response, summary);
         }
     }
-
 
     public static class PeptideProphetForm extends RunForm
     {
@@ -3476,7 +3058,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
@@ -3503,7 +3084,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static class PeptideProphetDetailsBean
     {
         public MS2Run run;
@@ -3520,7 +3100,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public static class ShowProteinProphetSensitivityPlotAction extends ExportAction<RunForm>
     {
@@ -3535,9 +3114,8 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
-    public class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
+    public static class ShowProteinProphetDetailsAction extends SimpleViewAction<RunForm>
     {
         @Override
         public ModelAndView getView(RunForm form, BindException errors)
@@ -3561,9 +3139,8 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresSiteAdmin
-    public class PurgeRunsAction extends FormHandlerAction
+    public class PurgeRunsAction extends FormHandlerAction<Object>
     {
         private int _days;
 
@@ -3666,7 +3243,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     private ActionURL showRunsURL(Boolean deleted, Integer statusId)
     {
         ActionURL url = new ActionURL(ShowAllRunsAction.class, ContainerManager.getRoot());
@@ -3680,7 +3256,6 @@ public class MS2Controller extends SpringActionController
         return url;
     }
 
-
     public static class MS2AdminBean
     {
         public ActionURL successfulURL;
@@ -3691,7 +3266,6 @@ public class MS2Controller extends SpringActionController
         public int days;
         public String purgeStatus;
     }
-
 
     private int getDays()
     {
@@ -3713,7 +3287,6 @@ public class MS2Controller extends SpringActionController
 
         return days;
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class ShowAllRunsAction extends SimpleViewAction
@@ -4368,6 +3941,7 @@ public class MS2Controller extends SpringActionController
     {
         return getAllPeptidesFilter(ctx, currentUrl, run, MS2Manager.getDataRegionNamePeptides() + "." + "viewName", run.getRunType().getPeptideTableName());
     }
+
     private static SimpleFilter getAllPeptidesFilter(ViewContext ctx, ActionURL currentUrl, MS2Run run, String viewNameParam, String tableName )
     {
         User user = ctx.getUser();
@@ -5082,31 +4656,6 @@ public class MS2Controller extends SpringActionController
         return forwardURL.setAction(action);
     }
 
-
-    @RequiresSiteAdmin
-    public static class ReloadSPOMAction extends FormHandlerAction<Object>
-    {
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors) throws SQLException
-        {
-            ProteinDictionaryHelpers.loadProtSprotOrgMap();
-
-            return true;
-        }
-
-        @Override
-        public URLHelper getSuccessURL(Object o)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl("SWP organism map reload successful");
-        }
-    }
-
-
     private static final Cache<String, PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
 
     @RequiresPermission(ReadPermission.class)
@@ -5143,7 +4692,6 @@ public class MS2Controller extends SpringActionController
             }
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class AddExtraFilterAction extends SimpleRedirectAction<RunForm>
@@ -5519,216 +5067,6 @@ public class MS2Controller extends SpringActionController
             return null;
         }
     }
-
-
-    @RequiresSiteAdmin
-    public class InsertAnnotsAction extends FormViewAction<LoadAnnotForm>
-    {
-        @Override
-        public void validateCommand(LoadAnnotForm target, Errors errors)
-        {
-        }
-
-        @Override
-        public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors)
-        {
-            return new JspView<>("/org/labkey/ms2/insertAnnots.jsp", form, errors);
-        }
-
-        @Override
-        public boolean handlePost(LoadAnnotForm form, BindException errors) throws Exception
-        {
-            String fname = form.getFileName();
-            if (fname == null)
-            {
-                errors.addError(new LabKeyError("Please enter a file path."));
-                return false;
-            }
-            File file = FileUtil.getAbsoluteCaseSensitiveFile(new File(fname));
-
-            try
-            {
-                DefaultAnnotationLoader loader;
-
-                //TODO: this style of dealing with different file types must be repaired.
-                if ("uniprot".equalsIgnoreCase(form.getFileType()))
-                {
-                    loader = new XMLProteinLoader(file, getViewBackgroundInfo(), null, form.isClearExisting());
-                }
-                else if ("fasta".equalsIgnoreCase(form.getFileType()))
-                {
-                    FastaDbLoader fdbl = new FastaDbLoader(file, getViewBackgroundInfo(), null);
-                    fdbl.setDefaultOrganism(form.getDefaultOrganism());
-                    fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
-                    loader = fdbl;
-                }
-                else
-                {
-                    throw new IllegalArgumentException("Unknown annotation file type: " + form.getFileType());
-                }
-
-                loader.setComment(form.getComment());
-                loader.validate();
-                PipelineService.get().queueJob(loader);
-
-                return true;
-            }
-            catch (IOException e)
-            {
-                errors.addError(new LabKeyError(e.getMessage()));
-                return false;
-            }
-        }
-
-        @Override
-        public ActionURL getSuccessURL(LoadAnnotForm loadAnnotForm)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl("Annotation load queued. Monitor its progress using the job list at the bottom of this page.");
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            addProteinAdminNavTrail(root, "Load Protein Annotations", getPageConfig(), null);
-        }
-    }
-
-
-    public static class LoadAnnotForm
-    {
-        private String _fileType = "uniprot";
-        private String _comment;
-        private String _fileName;
-        private String _defaultOrganism = "Unknown unknown";
-        private String _shouldGuess = "1";
-        private boolean _clearExisting;
-
-        public void setFileType(String ft)
-        {
-            _fileType = ft;
-        }
-
-        public String getFileType()
-        {
-            return _fileType;
-        }
-
-        public void setFileName(String file)
-        {
-            _fileName = file;
-        }
-
-        public String getFileName()
-        {
-            return _fileName;
-        }
-
-        public void setComment(String s)
-        {
-            _comment = s;
-        }
-
-        public String getComment()
-        {
-            return _comment;
-        }
-
-        public String getDefaultOrganism()
-        {
-            return _defaultOrganism;
-        }
-
-        public void setDefaultOrganism(String o)
-        {
-            _defaultOrganism = o;
-        }
-
-        public String getShouldGuess()
-        {
-            return _shouldGuess;
-        }
-
-        public void setShouldGuess(String shouldGuess)
-        {
-            _shouldGuess = shouldGuess;
-        }
-
-        public boolean isClearExisting()
-        {
-            return _clearExisting;
-        }
-
-        public void setClearExisting(boolean clearExisting)
-        {
-            _clearExisting = clearExisting;
-        }
-    }
-
-
-    @RequiresSiteAdmin
-    public static class DeleteAnnotInsertEntriesAction extends FormHandlerAction
-    {
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors)
-        {
-            int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
-
-            for (int id : ids)
-                org.labkey.api.protein.ProteinManager.deleteAnnotationInsertion(id);
-
-            return true;
-        }
-
-        @Override
-        public URLHelper getSuccessURL(Object o)
-        {
-            return MS2UrlsImpl.get().getShowProteinAdminUrl();
-        }
-    }
-
-
-    public static class AnnotationInsertionForm
-    {
-        private int _insertId;
-
-        public int getInsertId()
-        {
-            return _insertId;
-        }
-
-        @SuppressWarnings("unused")
-        public void setInsertId(int insertId)
-        {
-            _insertId = insertId;
-        }
-    }
-
-    @RequiresSiteAdmin
-    public class ShowAnnotInsertDetailsAction extends SimpleViewAction<AnnotationInsertionForm>
-    {
-        private AnnotationInsertion _insertion;
-
-        @Override
-        public ModelAndView getView(AnnotationInsertionForm form, BindException errors)
-        {
-            _insertion = new SqlSelector(ProteinSchema.getSchema(), "SELECT * FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
-
-            return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            addProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
-        }
-    }
-
-
     @RequiresPermission(ReadPermission.class)
     public static class ShowParamsFileAction extends ExportAction<DetailsForm>
     {
@@ -6163,21 +5501,6 @@ public class MS2Controller extends SpringActionController
             return new ActionURL(DoProteinSearchAction.class, container);
         }
 
-        public ActionURL getShowProteinAdminUrl()
-        {
-            return getShowProteinAdminUrl(null);
-        }
-
-        public ActionURL getShowProteinAdminUrl(String message)
-        {
-            ActionURL url = new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
-            if (message != null)
-            {
-                url.addParameter("message", message);
-            }
-            return url;
-        }
-
         @Override
         public ActionURL getPepSearchUrl(Container container)
         {
@@ -6500,37 +5823,17 @@ public class MS2Controller extends SpringActionController
                 controller.new EditElutionGraphAction()
             );
 
-            // @RequiresPermission(AdminPermission.class)
-            assertForAdminPermission(user,
-                    new SetBestNameAction()
-            );
-
             // @RequiresPermission(AdminOperationsPermission.class)
             assertForAdminOperationsPermission(user,
-                    new MascotConfigAction(),
-                    new MascotTestAction()
+                new MascotConfigAction(),
+                new MascotTestAction()
             );
 
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
-                controller.new LoadGoAction(),
-                controller.new GoStatusAction(),
-                controller.new ReloadFastaAction(),
-                    new DeleteDataBasesAction(),
-                controller.new TestFastaParsingAction(),
                 controller.new PurgeRunsAction(),
                 controller.new ShowMS2AdminAction(),
-                    new ReloadSPOMAction(),
-                controller.new InsertAnnotsAction(),
-                    new DeleteAnnotInsertEntriesAction(),
-                controller.new ShowAnnotInsertDetailsAction(),
                 controller.new ImportMSScanCountsUpgradeAction()
-            );
-
-            // @AdminConsoleAction
-            // @RequiresPermission(AdminOperationsPermission.class)
-            assertForAdminOperationsPermission(ContainerManager.getRoot(), user,
-                controller.new ShowProteinAdminAction()
             );
         }
     }

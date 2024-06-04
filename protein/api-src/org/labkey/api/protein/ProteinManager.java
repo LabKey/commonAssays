@@ -4,6 +4,7 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ProteinManager
@@ -222,5 +224,17 @@ public class ProteinManager
         sql.add(id);
 
         new SqlExecutor(ProteinSchema.getSchema()).execute(sql);
+    }
+
+    private static Consumer<DataRegion> FASTA_DATA_REGION_MODIFIER = rgn -> rgn.setColumns(ProteinSchema.getTableInfoFastaFiles().getColumns("FileName, Loaded, FastaId"));
+
+    public static void registerFastaAdminDataRegionModifier(Consumer<DataRegion> fastaDataRegionModifier)
+    {
+        FASTA_DATA_REGION_MODIFIER = fastaDataRegionModifier;
+    }
+
+    public static Consumer<DataRegion> getFastaDataRegionModifier()
+    {
+        return FASTA_DATA_REGION_MODIFIER;
     }
 }
