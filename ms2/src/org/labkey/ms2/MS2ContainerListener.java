@@ -1,12 +1,12 @@
 package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.security.User;
-import org.labkey.api.protein.CustomAnnotationSet;
-import org.labkey.ms2.protein.ProteinManager;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Collection;
@@ -19,12 +19,14 @@ public class MS2ContainerListener implements ContainerManager.ContainerListener
     {
     }
 
+    @Migrate
     @Override
     public void containerDeleted(Container c, User user)
     {
         MS2Manager.markAsDeleted(c, user);
         MS2Manager.deleteExpressionData(c);
 
+        // TODO: Migrate to ProteinContainerListener
         for (CustomAnnotationSet set : CustomAnnotationSetManager.getCustomAnnotationSets(c, false).values())
         {
             CustomAnnotationSetManager.deleteCustomAnnotationSet(set);

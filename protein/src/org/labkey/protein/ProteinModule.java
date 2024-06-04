@@ -18,6 +18,7 @@ package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableSelector;
@@ -56,6 +57,7 @@ public class ProteinModule extends DefaultModule
         return NAME;
     }
 
+    @Migrate
     @Override
     public @Nullable Double getSchemaVersion()
     {
@@ -119,6 +121,7 @@ public class ProteinModule extends DefaultModule
         return list;
     }
 
+    @Migrate
     @Override
     @NotNull
     public Set<String> getSchemaNames()

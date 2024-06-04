@@ -17,6 +17,7 @@
 package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
 import org.labkey.api.security.User;
@@ -32,6 +33,7 @@ public class ProteinContainerListener implements ContainerListener
     {
     }
 
+    @Migrate
     @Override
     public void containerDeleted(Container c, User user)
     {

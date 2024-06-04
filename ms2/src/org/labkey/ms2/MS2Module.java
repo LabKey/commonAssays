@@ -17,6 +17,7 @@ package org.labkey.ms2;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
@@ -170,6 +171,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         return true;
     }
 
+    @Migrate
     @Override
     protected void init()
     {
@@ -179,9 +181,11 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         MS2Schema.register(this);
         MS2Service.setInstance(new MS2ServiceImpl());
 
+        // TODO: Move to ProteinModule after migrating ProteinServiceImpl
         ProteinService.setInstance(new ProteinServiceImpl());
     }
 
+    @Migrate
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
@@ -265,6 +269,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 }
             });
             fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
+            // TODO: Move to ProteinModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
@@ -283,6 +288,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         return list;
     }
 
+    @Migrate
     @Override
     @NotNull
     public List<String> getSchemaNames()

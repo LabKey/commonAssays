@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ProteinController extends SpringActionController
@@ -80,7 +81,7 @@ public class ProteinController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -104,7 +105,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    public abstract class ShowSetAction extends SimpleViewAction
+    public abstract class ShowSetAction extends SimpleViewAction<Object>
     {
         private final boolean _showSequences;
         private String _setName;
@@ -187,7 +188,7 @@ public class ProteinController extends SpringActionController
     }
 
     @RequiresPermission(DeletePermission.class)
-    public class DeleteCustomAnnotationSetsAction extends FormHandlerAction
+    public static class DeleteCustomAnnotationSetsAction extends FormHandlerAction<Object>
     {
         @Override
         public void validateCommand(Object target, Errors errors)
@@ -222,7 +223,7 @@ public class ProteinController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class UploadCustomProteinAnnotations extends FormViewAction<UploadAnnotationsForm>
+    public static class UploadCustomProteinAnnotations extends FormViewAction<UploadAnnotationsForm>
     {
         @Override
         public void validateCommand(UploadAnnotationsForm target, Errors errors)
@@ -278,7 +279,7 @@ public class ProteinController extends SpringActionController
                 for (Map<String, Object> row : rows)
                 {
                     String lookupString = CustomAnnotationImportHelper.convertLookup(row.get(lookupStringColumnName));
-                    if (lookupString == null || lookupString.length() == 0)
+                    if (lookupString == null || lookupString.isEmpty())
                     {
                         errors.addError(new ObjectError("main", null, null, "All rows must contain a protein identifier."));
                         break;
@@ -406,11 +407,7 @@ public class ProteinController extends SpringActionController
 
         public String getName()
         {
-            if (_name == null)
-            {
-                return "";
-            }
-            return _name;
+            return Objects.requireNonNullElse(_name, "");
         }
 
         public void setName(String name)
@@ -424,11 +421,7 @@ public class ProteinController extends SpringActionController
 
         public String getAnnotationsText()
         {
-            if (_annotationsText == null)
-            {
-                return "";
-            }
-            return _annotationsText;
+            return Objects.requireNonNullElse(_annotationsText, "");
         }
 
         public void setAnnotationsText(String annotationsText)

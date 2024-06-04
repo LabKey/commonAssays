@@ -43,6 +43,7 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -243,11 +244,12 @@ public class MS2Controller extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-
+    @Migrate
     public static void registerAdminConsoleLinks()
     {
         AdminConsole.addLink(SettingsLinkType.Premium, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
         AdminConsole.addLink(SettingsLinkType.Premium, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
+        // TODO: Migrate to ProteinModule
         AdminConsole.addLink(SettingsLinkType.Premium, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
@@ -258,7 +260,6 @@ public class MS2Controller extends SpringActionController
         if (null != title)
             root.addChild(title);
     }
-
 
     private void addRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
     {
@@ -276,7 +277,6 @@ public class MS2Controller extends SpringActionController
             root.addChild(title);
     }
 
-
     private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(null == helpTopic ? "ms2" : helpTopic);
@@ -285,24 +285,21 @@ public class MS2Controller extends SpringActionController
         root.addChild(title);
     }
 
-
+    @Migrate
     private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
         addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
-
 
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs)
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
 
-
     public static ActionURL getBeginURL(Container c)
     {
         return new ActionURL(BeginAction.class, c);
     }
-
 
     public static ActionURL getPeptideChartURL(Container c, ProteinDictionaryHelpers.GoTypes chartType)
     {
@@ -310,7 +307,6 @@ public class MS2Controller extends SpringActionController
         url.addParameter("chartType", chartType.toString());
         return url;
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class BeginAction extends SimpleRedirectAction<Object>
@@ -322,15 +318,13 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static ActionURL getShowListURL(Container c)
     {
         return new ActionURL(ShowListAction.class, c);
     }
 
-
     @RequiresPermission(ReadPermission.class)
-    public class ShowListAction extends SimpleViewAction
+    public class ShowListAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -2619,6 +2613,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    @Migrate
     @RequiresSiteAdmin
     public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
     {
