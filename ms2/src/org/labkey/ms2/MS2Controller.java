@@ -634,7 +634,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     /**
      * Render current user's MS2Views in a drop down box with a submit button beside.
      * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
@@ -669,7 +668,6 @@ public class MS2Controller extends SpringActionController
 
         return select;
     }
-
 
     private LinkBuilder modificationHref(MS2Run run)
     {
@@ -706,7 +704,6 @@ public class MS2Controller extends SpringActionController
                     TD(at(DOM.Attribute.align, "right"), entry.getValue()))));
     }
 
-
     public static class RenameForm extends RunForm
     {
         private String description;
@@ -721,7 +718,6 @@ public class MS2Controller extends SpringActionController
             this.description = description;
         }
     }
-
 
     public static ActionURL getRenameRunURL(Container c, MS2Run run, ActionURL returnURL)
     {
@@ -2630,42 +2626,13 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static class BlastForm
-    {
-        private String _blastServerBaseURL;
-        private String _message;
-
-        public String getMessage()
-        {
-            return _message;
-        }
-
-        public void setMessage(String message)
-        {
-            _message = message;
-        }
-
-        public String getBlastServerBaseURL()
-        {
-            return _blastServerBaseURL;
-        }
-
-        public void setBlastServerBaseURL(String blastServerBaseURL)
-        {
-            _blastServerBaseURL = blastServerBaseURL;
-        }
-    }
-
     @AdminConsoleAction
     @RequiresPermission(AdminOperationsPermission.class)
-    public class ShowProteinAdminAction extends FormViewAction<BlastForm>
+    public class ShowProteinAdminAction extends SimpleViewAction<Object>
     {
         @Override
-        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors)
+        public ModelAndView getView(Object o, BindException errors)
         {
-            JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
-            blastView.setTitle("BLAST Configuration");
-
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
@@ -2676,31 +2643,7 @@ public class MS2Controller extends SpringActionController
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
-            VBox result = new VBox(blastView, grid, annots, jobsView);
-            if (form.getMessage() != null)
-            {
-                HtmlView messageView = new HtmlView("Admin Message", HtmlString.unsafe("<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>"));
-                result.addView(messageView, 0);
-            }
-            return result;
-        }
-
-        @Override
-        public URLHelper getSuccessURL(BlastForm o)
-        {
-            return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
-        }
-
-        @Override
-        public void validateCommand(BlastForm target, Errors errors) {}
-
-        @Override
-        public boolean handlePost(BlastForm o, BindException errors)
-        {
-            WriteableAppProps props = AppProps.getWriteableInstance();
-            props.setBLASTServerBaseURL(o.getBlastServerBaseURL());
-            props.save(getUser());
-            return true;
+            return new VBox(grid, annots, jobsView);
         }
 
         private DataRegion getAnnotInsertsGrid()
@@ -3646,7 +3589,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static ActionURL getShowMS2AdminURL(Integer days)
     {
         ActionURL url = new ActionURL(ShowMS2AdminAction.class, ContainerManager.getRoot());
@@ -3657,12 +3599,27 @@ public class MS2Controller extends SpringActionController
         return url;
     }
 
+    public static class BlastForm
+    {
+        private String _blastServerBaseURL;
+
+        public String getBlastServerBaseURL()
+        {
+            return _blastServerBaseURL;
+        }
+
+        @SuppressWarnings("unused")
+        public void setBlastServerBaseURL(String blastServerBaseURL)
+        {
+            _blastServerBaseURL = blastServerBaseURL;
+        }
+    }
 
     @RequiresSiteAdmin
-    public class ShowMS2AdminAction extends SimpleViewAction
+    public class ShowMS2AdminAction extends FormViewAction<BlastForm>
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors)
+        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors)
         {
             MS2AdminBean bean = new MS2AdminBean();
 
@@ -3674,16 +3631,38 @@ public class MS2Controller extends SpringActionController
             bean.failedURL = showRunsURL(false, 2);
             bean.deletedURL = showRunsURL(true, null);
 
-            JspView<MS2AdminBean> result = new JspView<>("/org/labkey/ms2/ms2Admin.jsp", bean);
-            result.setFrame(WebPartView.FrameType.PORTAL);
-            result.setTitle("MS2 Data Overview");
-            return result;
+            JspView<MS2AdminBean> overview = new JspView<>("/org/labkey/ms2/ms2Admin.jsp", bean);
+            overview.setFrame(WebPartView.FrameType.PORTAL);
+            overview.setTitle("MS2 Data Overview");
+
+            JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
+            blastView.setTitle("BLAST Configuration");
+
+            return new VBox(overview, blastView);
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
             urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", getClass(), getContainer());
+        }
+
+        @Override
+        public URLHelper getSuccessURL(BlastForm form)
+        {
+            return new ActionURL(ShowMS2AdminAction.class, ContainerManager.getRoot());
+        }
+
+        @Override
+        public void validateCommand(BlastForm form, Errors errors) {}
+
+        @Override
+        public boolean handlePost(BlastForm form, BindException errors)
+        {
+            WriteableAppProps props = AppProps.getWriteableInstance();
+            props.setBLASTServerBaseURL(form.getBlastServerBaseURL());
+            props.save(getUser());
+            return true;
         }
     }
 
