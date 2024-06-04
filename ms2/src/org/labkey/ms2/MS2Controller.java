@@ -161,6 +161,7 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
+import org.labkey.ms2.protein.AnnotationView;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
@@ -3893,7 +3894,7 @@ public class MS2Controller extends SpringActionController
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
                         new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
-                        new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean));
+                        new JspView<>("/org/labkey/ms2/protein/view/proteinCoverageMap.jsp", bean));
                     box.setFrame(FrameType.PORTAL);
                     sequenceView = box;
                 }

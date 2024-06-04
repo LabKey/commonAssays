@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.api.protein;
+package org.labkey.protein;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
@@ -35,6 +35,11 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.protein.CustomAnnotationImportHelper;
+import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSetManager;
+import org.labkey.api.protein.CustomAnnotationType;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;

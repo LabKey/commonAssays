@@ -17,8 +17,8 @@
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.protein.AnnotController.InsertAnnotsAction" %>
-<%@ page import="org.labkey.ms2.protein.AnnotController.LoadAnnotForm" %>
+<%@ page import="org.labkey.protein.AnnotController.InsertAnnotsAction" %>
+<%@ page import="org.labkey.protein.AnnotController.LoadAnnotForm" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

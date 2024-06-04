@@ -17,11 +17,13 @@ package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.QueryViewAction;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.xml.sax.SAXException;
@@ -88,6 +90,12 @@ public interface ProteinService
     }
 
     List<ProteinFeature> getProteinFeatures(String accession) throws IOException, ParserConfigurationException, SAXException;
+
+    default ActionURL getProteinBeginUrl(Container c)
+    {
+        // TODO: Temporary... switch to reference action class once ProteinServiceImpl resides in Protein module
+        return new ActionURL("protein", "begin.view", c);
+    }
 
     abstract class PeptideSearchForm extends QueryViewAction.QueryExportForm
     {

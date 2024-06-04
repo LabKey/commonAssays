@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.protein.AnnotController" %>
 <%@ page import="org.labkey.api.protein.go.GoLoader" %>
+<%@ page import="org.labkey.protein.AnnotController" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

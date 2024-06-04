@@ -42,7 +42,6 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
-import org.labkey.ms2.AnnotationView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -176,7 +175,7 @@ public class ProteinServiceImpl implements ProteinService
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
-        return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+        return new JspView<>("/org/labkey/ms2/protein/view/proteinCoverageMap.jsp", bean);
     }
 
     @Override
@@ -192,7 +191,7 @@ public class ProteinServiceImpl implements ProteinService
         bean.showViewSettings = true;
         bean.protein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
         bean.protein.setShowStakedPeptides(showStackedPeptides);
-        return new JspView<>("/org/labkey/ms2/proteinCoverageMap.jsp", bean);
+        return new JspView<>("/org/labkey/ms2/protein/view/proteinCoverageMap.jsp", bean);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.labkey.ms2.protein;
+package org.labkey.protein;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
@@ -169,9 +169,9 @@ public class AnnotController extends SpringActionController
             public HttpView getTabView(String tabId)
             {
                 if ("manual".equals(tabId))
-                    return new JspView<>("/org/labkey/ms2/protein/view/loadGoManual.jsp");
+                    return new JspView<>("/org/labkey/protein/view/loadGoManual.jsp");
                 else
-                    return new JspView<>("/org/labkey/ms2/protein/view/loadGoAutomatic.jsp");
+                    return new JspView<>("/org/labkey/protein/view/loadGoAutomatic.jsp");
             }
         }
     }
@@ -522,7 +522,7 @@ public class AnnotController extends SpringActionController
         @Override
         public ModelAndView getView(LoadAnnotForm form, boolean reshow, BindException errors)
         {
-            return new JspView<>("/org/labkey/ms2/protein/view/insertAnnots.jsp", form, errors);
+            return new JspView<>("/org/labkey/protein/view/insertAnnots.jsp", form, errors);
         }
 
         @Override
@@ -583,7 +583,6 @@ public class AnnotController extends SpringActionController
         }
     }
 
-
     public static class LoadAnnotForm
     {
         private String _fileType = "uniprot";
@@ -593,19 +592,15 @@ public class AnnotController extends SpringActionController
         private String _shouldGuess = "1";
         private boolean _clearExisting;
 
-        public void setFileType(String ft)
-        {
-            _fileType = ft;
-        }
-
         public String getFileType()
         {
             return _fileType;
         }
 
-        public void setFileName(String file)
+        @SuppressWarnings("unused")
+        public void setFileType(String ft)
         {
-            _fileName = file;
+            _fileType = ft;
         }
 
         public String getFileName()
@@ -613,9 +608,10 @@ public class AnnotController extends SpringActionController
             return _fileName;
         }
 
-        public void setComment(String s)
+        @SuppressWarnings("unused")
+        public void setFileName(String file)
         {
-            _comment = s;
+            _fileName = file;
         }
 
         public String getComment()
@@ -623,11 +619,18 @@ public class AnnotController extends SpringActionController
             return _comment;
         }
 
+        @SuppressWarnings("unused")
+        public void setComment(String s)
+        {
+            _comment = s;
+        }
+
         public String getDefaultOrganism()
         {
             return _defaultOrganism;
         }
 
+        @SuppressWarnings("unused")
         public void setDefaultOrganism(String o)
         {
             _defaultOrganism = o;
@@ -638,6 +641,7 @@ public class AnnotController extends SpringActionController
             return _shouldGuess;
         }
 
+        @SuppressWarnings("unused")
         public void setShouldGuess(String shouldGuess)
         {
             _shouldGuess = shouldGuess;
@@ -648,6 +652,7 @@ public class AnnotController extends SpringActionController
             return _clearExisting;
         }
 
+        @SuppressWarnings("unused")
         public void setClearExisting(boolean clearExisting)
         {
             _clearExisting = clearExisting;
@@ -706,7 +711,7 @@ public class AnnotController extends SpringActionController
         {
             _insertion = new SqlSelector(ProteinSchema.getSchema(), "SELECT * FROM " + ProteinSchema.getTableInfoAnnotInsertions() + " WHERE InsertId = ?", form.getInsertId()).getObject(AnnotationInsertion.class);
 
-            return new JspView<>("/org/labkey/ms2/annotLoadDetails.jsp", _insertion);
+            return new JspView<>("/org/labkey/protein/view/annotLoadDetails.jsp", _insertion);
         }
 
         @Override
@@ -733,15 +738,15 @@ public class AnnotController extends SpringActionController
 
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
-                    controller.new LoadGoAction(),
-                    controller.new GoStatusAction(),
-                    controller.new ReloadFastaAction(),
-                    new DeleteDataBasesAction(),
-                    controller.new TestFastaParsingAction(),
-                    new ReloadSPOMAction(),
-                    controller.new InsertAnnotsAction(),
-                    new DeleteAnnotInsertEntriesAction(),
-                    controller.new ShowAnnotInsertDetailsAction()
+                controller.new LoadGoAction(),
+                controller.new GoStatusAction(),
+                controller.new ReloadFastaAction(),
+                new DeleteDataBasesAction(),
+                controller.new TestFastaParsingAction(),
+                new ReloadSPOMAction(),
+                controller.new InsertAnnotsAction(),
+                new DeleteAnnotInsertEntriesAction(),
+                controller.new ShowAnnotInsertDetailsAction()
             );
 
             // @AdminConsoleAction

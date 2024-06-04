@@ -72,7 +72,6 @@ import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
-import org.labkey.ms2.protein.AnnotController;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.query.MS2Schema;
@@ -177,8 +176,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     protected void init()
     {
-        // TODO: Temporary to help clear MS2 references from protein actions
-        addController("annot", AnnotController.class);
         addController("ms2", MS2Controller.class);
         addController("ms2-pipeline", PipelineController.class);
 
@@ -231,8 +228,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ReportService.get().registerReport(new SingleMS2RunRReport());
         ReportService.get().addUIProvider(new MS2ReportUIProvider());
         MS2Controller.registerAdminConsoleLinks();
-        // TODO: Migrate to ProteinModule
-        AnnotController.registerAdminConsoleLinks();
 
         SearchService ss = SearchService.get();
 
@@ -275,6 +270,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 }
             });
             fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
+
             // TODO: Move to ProteinModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
@@ -315,7 +311,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     public Set<Class> getIntegrationTests()
     {
         return Set.of(
-            AnnotController.TestCase.class,
             Comet2014ParamsBuilder.FullParseTestCase.class,
             Comet2015ParamsBuilder.FullParseTestCase.class,
             MascotClientImpl.TestCase.class,
