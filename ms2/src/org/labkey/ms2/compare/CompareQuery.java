@@ -32,6 +32,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
@@ -41,8 +42,6 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.PeptideManager;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.ProteinSchema;
 import org.springframework.validation.BindException;
 
 import java.sql.ResultSet;

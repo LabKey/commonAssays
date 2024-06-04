@@ -21,20 +21,10 @@ import org.labkey.api.data.Container;
 
 /**
  * UrlProvider interface for the MS2 module
- *
- * User: Dave
- * Date: Jan 21, 2008
- * Time: 9:58:15 AM
  */
 public interface MS2Urls extends UrlProvider
 {
-    ActionURL getShowPeptideUrl(Container container);
-
-    ActionURL getShowListUrl(Container container);
-
     ActionURL getProteinSearchUrl(Container container);
 
     ActionURL getPepSearchUrl(Container container);
-    ActionURL getPepSearchUrl(Container container, String sequence);
-
 }

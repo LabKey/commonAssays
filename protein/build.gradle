@@ -1,0 +1,11 @@
+plugins {
+    id 'org.labkey.build.module'
+}
+
+dependencies
+{
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    apiCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    apiAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}

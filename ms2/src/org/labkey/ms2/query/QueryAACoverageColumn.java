@@ -16,12 +16,13 @@
 
 package org.labkey.ms2.query;
 
-import org.labkey.api.data.*;
-import org.labkey.ms2.Protein;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.ms2.protein.Protein;
 
-import java.util.Set;
-import java.util.List;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * User: jeckels

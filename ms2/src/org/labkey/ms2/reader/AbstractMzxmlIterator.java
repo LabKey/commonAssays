@@ -16,16 +16,10 @@
 
 package org.labkey.ms2.reader;
 
-import org.labkey.api.util.massSpecDataFileType;
-
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * User: jeckels
- * Date: May 8, 2006
- */
 public abstract class AbstractMzxmlIterator implements SimpleScanIterator
 {
     public static final int NO_SCAN_FILTER = 0;

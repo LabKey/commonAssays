@@ -21,9 +21,10 @@ import org.jfree.chart.plot.PiePlot;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.protein.ProteinDictionaryHelpers;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

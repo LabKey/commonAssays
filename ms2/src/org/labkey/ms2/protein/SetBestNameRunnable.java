@@ -18,6 +18,8 @@ package org.labkey.ms2.protein;
 
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.ms2.MS2Controller;
 
 /**
