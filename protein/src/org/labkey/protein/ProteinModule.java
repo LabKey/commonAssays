@@ -20,13 +20,30 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.CustomAnnotationSetManager;
+import org.labkey.api.protein.CustomProteinListView;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.ProteinController;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.fasta.FastaDbLoader;
+import org.labkey.api.protein.query.CustomAnnotationSchema;
+import org.labkey.api.protein.query.ProteinUserSchema;
+import org.labkey.api.usageMetrics.UsageMetricsService;
+import org.labkey.api.view.BaseWebPartFactory;
+import org.labkey.api.view.Portal;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
+import org.labkey.api.view.WebPartView;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ProteinModule extends DefaultModule
@@ -55,33 +72,66 @@ public class ProteinModule extends DefaultModule
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
-        return Collections.emptyList();
+        return List.of(
+            new BaseWebPartFactory(CustomProteinListView.NAME)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+                {
+                    CustomProteinListView result = new CustomProteinListView(portalCtx, false);
+                    result.setFrame(WebPartView.FrameType.PORTAL);
+                    result.setTitle(CustomProteinListView.NAME);
+                    result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
+                    return result;
+                }
+            }
+        );
     }
 
     @Override
     protected void init()
     {
-//        addController(ProteinController.NAME, ProteinController.class);
+        addController("protein", ProteinController.class);
+
+        ProteinUserSchema.register(this);
+        CustomAnnotationSchema.register(this);
     }
 
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
-        // add a container listener so we'll know when our container is deleted:
         ContainerManager.addContainerListener(new ProteinContainerListener());
+        PipelineService service = PipelineService.get();
+        service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
+        UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
     }
 
     @Override
     @NotNull
     public Collection<String> getSummary(Container c)
     {
-        return Collections.emptyList();
+        Collection<String> list = new LinkedList<>();
+        int customAnnotationCount = CustomAnnotationSetManager.getCustomAnnotationSets(c, false).size();
+        if (customAnnotationCount > 0)
+        {
+            list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
+        }
+        return list;
     }
 
     @Override
     @NotNull
     public Set<String> getSchemaNames()
     {
-        return Collections.singleton(ProteinSchema.getSchemaName()); // TODO: Switch to "prot" when scripts move
+        // TODO: Switch to "prot" when scripts move
+        return Collections.singleton(ProteinSchema.getSchemaName());
+    }
+
+    @Override
+    public @NotNull Set<Class> getUnitTests()
+    {
+        return Set.of(
+            FastaDbLoader.TestCase.class
+        );
     }
 }

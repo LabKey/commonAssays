@@ -20,7 +20,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExperimentService;
@@ -31,22 +30,14 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.protein.CustomAnnotationSetManager;
-import org.labkey.api.protein.CustomProteinListView;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
-import org.labkey.api.protein.ProteinController;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
-import org.labkey.api.protein.fasta.FastaDbLoader;
-import org.labkey.api.protein.query.CustomAnnotationSchema;
-import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
 import org.labkey.api.security.User;
-import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.JspView;
@@ -98,7 +89,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -152,18 +142,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                     return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
                 }
             },
-            new BaseWebPartFactory(CustomProteinListView.NAME)
-            {
-                @Override
-                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                {
-                    CustomProteinListView result = new CustomProteinListView(portalCtx, false);
-                    result.setFrame(WebPartView.FrameType.PORTAL);
-                    result.setTitle(CustomProteinListView.NAME);
-                    result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
-                    return result;
-                }
-            },
             new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
             {
                 @Override
@@ -196,13 +174,9 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     protected void init()
     {
         addController("ms2", MS2Controller.class);
-        addController("protein", ProteinController.class);
         addController("ms2-pipeline", PipelineController.class);
 
         MS2Schema.register(this);
-        ProteinUserSchema.register(this);
-        CustomAnnotationSchema.register(this);
-
         MS2Service.setInstance(new MS2ServiceImpl());
 
         ProteinService.setInstance(new ProteinServiceImpl());
@@ -213,7 +187,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     {
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new MS2PipelineProvider(this));
-        service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
         service.registerPipelineProvider(new XTandemPipelineProvider(this), "X!Tandem (Cluster)");
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestPipelineProvider(this));
@@ -296,8 +269,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
 
-        UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
-
         SequencesTableInfo.setTableModifier(MS2Schema.STANDARD_MODIFIER);
     }
 
@@ -309,11 +280,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         long count = MS2Manager.getRunCount(c);
         if (count > 0)
             list.add(count + " MS2 Run" + (count > 1 ? "s" : ""));
-        int customAnnotationCount = CustomAnnotationSetManager.getCustomAnnotationSets(c, false).size();
-        if (customAnnotationCount > 0)
-        {
-            list.add(customAnnotationCount + " custom protein annotation set" + (customAnnotationCount > 1 ? "s" : ""));
-        }
         return list;
     }
 
@@ -346,7 +312,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             BooleanParamsValidator.TestCase.class,
             Comet2014ParamsBuilder.LimitedParseTestCase.class,
             Comet2015ParamsBuilder.LimitedParseTestCase.class,
-            FastaDbLoader.TestCase.class,
             ListParamsValidator.TestCase.class,
             MS2Modification.MS2ModificationTest.class,
             MS2RunType.TestCase.class,

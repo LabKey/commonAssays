@@ -35,6 +35,7 @@ public class ProteinContainerListener implements ContainerListener
     @Override
     public void containerDeleted(Container c, User user)
     {
+        // TODO: Move CustomAnnotationSet delete here (from MS2ContainerListener) once this module manages the underlying schema
     }
 
     @Override
