@@ -81,10 +81,11 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.AnnotationView;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.ProteinServiceImpl;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
@@ -162,11 +163,10 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
-import org.labkey.ms2.protein.AnnotationView;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.ProteinServiceImpl;
 import org.labkey.ms2.protein.ProteinViewBean;
+import org.labkey.ms2.protein.tools.GoHelpers;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
 import org.labkey.ms2.query.ComparisonCrosstabView;
@@ -201,7 +201,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -277,7 +276,7 @@ public class MS2Controller extends SpringActionController
         return new ActionURL(BeginAction.class, c);
     }
 
-    public static ActionURL getPeptideChartURL(Container c, ProteinDictionaryHelpers.GoTypes chartType)
+    public static ActionURL getPeptideChartURL(Container c, GoHelpers.GoTypes chartType)
     {
         ActionURL url = new ActionURL(PeptideChartsAction.class, c);
         url.addParameter("chartType", chartType.toString());
@@ -911,11 +910,10 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class PeptideChartsAction extends SimpleViewAction<ChartForm>
     {
-        private ProteinDictionaryHelpers.GoTypes _goChartType;
+        private GoHelpers.GoTypes _goChartType;
         private MS2Run _run;
 
         @Override
@@ -937,7 +935,7 @@ public class MS2Controller extends SpringActionController
             }
             _run = form.validateRun();
 
-            _goChartType = ProteinDictionaryHelpers.GTypeStringToEnum(form.getChartType());
+            _goChartType = GoHelpers.GTypeStringToEnum(form.getChartType());
             if (_goChartType == null)
             {
                 throw new NotFoundException("Unsupported GO chart type: " + form.getChartType());
@@ -981,7 +979,7 @@ public class MS2Controller extends SpringActionController
     public static class GoChartBean
     {
         public MS2Run run;
-        public ProteinDictionaryHelpers.GoTypes goChartType;
+        public GoHelpers.GoTypes goChartType;
         public String chartTitle;
         public Map<String, SimpleFilter> filterInfos;
         public String pieHelperObjName;
@@ -4291,7 +4289,7 @@ public class MS2Controller extends SpringActionController
             }
 
             String accn = form.getSliceTitle().split(" ")[0];
-            String sliceDefinition = ProteinDictionaryHelpers.getGODefinitionFromAcc(accn);
+            String sliceDefinition = GoHelpers.getGODefinitionFromAcc(accn);
             if (StringUtils.isBlank(sliceDefinition))
                 sliceDefinition = "Miscellaneous or Defunct Category";
             String html = "<font size=\"+1\">" + PageFlowUtil.filter(sliceDefinition) + "</font>";
@@ -5492,7 +5490,6 @@ public class MS2Controller extends SpringActionController
             root.addChild("Edit Elution Profile");
         }
     }
-
 
     public static class MS2UrlsImpl implements MS2Urls
     {

@@ -15,10 +15,10 @@ z<%
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.AnnotationView" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.protein.AnnotationView" %>
 <%@ page import="java.util.Collection" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%

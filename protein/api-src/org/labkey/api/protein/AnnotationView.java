@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.protein;
+package org.labkey.api.protein;
 
 import org.apache.commons.collections4.MultiValuedMap;
-import org.labkey.api.protein.IdentifierType;
-import org.labkey.api.protein.ProteinManager;
-import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 
@@ -39,7 +36,7 @@ public class AnnotationView extends JspView<AnnotationView.AnnotViewBean>
 
     public AnnotationView(SimpleProtein protein, Map<String, Collection<HtmlString>> extraAnnotations)
     {
-        super("/org/labkey/ms2/protein/view/protAnnots.jsp", getBean(protein, extraAnnotations));
+        super("/org/labkey/protein/view/protAnnots.jsp", getBean(protein, extraAnnotations));
         setTitle("Annotations for " + protein.getBestName());
     }
 

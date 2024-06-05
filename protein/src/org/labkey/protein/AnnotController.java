@@ -21,8 +21,8 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.AnnotationInsertion;
 import org.labkey.api.protein.DefaultAnnotationLoader;
+import org.labkey.api.protein.ProtSprotOrgMap;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
-import org.labkey.api.protein.ProteinDictionaryHelpers;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.XMLProteinLoader;
@@ -499,7 +499,7 @@ public class AnnotController extends SpringActionController
         @Override
         public boolean handlePost(Object o, BindException errors) throws SQLException
         {
-            ProteinDictionaryHelpers.loadProtSprotOrgMap();
+            ProtSprotOrgMap.loadProtSprotOrgMap();
 
             return true;
         }

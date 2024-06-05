@@ -26,10 +26,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +86,7 @@ public interface ProteinService
         WebPartView createView(ViewContext viewContext, FormType form);
     }
 
-    List<ProteinFeature> getProteinFeatures(String accession) throws IOException, ParserConfigurationException, SAXException;
+    List<ProteinFeature> getProteinFeatures(String accession);
 
     default ActionURL getProteinBeginUrl(Container c)
     {

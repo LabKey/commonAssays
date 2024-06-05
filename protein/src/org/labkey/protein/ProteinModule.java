@@ -28,6 +28,8 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.ProteinServiceImpl;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
@@ -97,6 +99,7 @@ public class ProteinModule extends DefaultModule
 
         ProteinUserSchema.register(this);
         CustomAnnotationSchema.register(this);
+        ProteinService.setInstance(new ProteinServiceImpl());
     }
 
     @Override
@@ -128,14 +131,13 @@ public class ProteinModule extends DefaultModule
     public Set<String> getSchemaNames()
     {
         // TODO: Switch to "prot" when scripts move
-        return Collections.singleton(ProteinSchema.getSchemaName());
+        return Collections.emptySet();
     }
 
     @Override
     public @NotNull Set<Class> getIntegrationTests()
     {
-        return Set.of
-        (
+        return Set.of(
             AnnotController.TestCase.class
         );
     }
@@ -143,8 +145,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @NotNull Set<Class> getUnitTests()
     {
-        return Set.of
-        (
+        return Set.of(
             FastaDbLoader.TestCase.class
         );
     }
