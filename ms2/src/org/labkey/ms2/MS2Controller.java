@@ -16,6 +16,8 @@
 package org.labkey.ms2;
 
 import com.google.common.primitives.ImmutableLongArray;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,16 +43,41 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ActionButton;
+import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.*;
+import org.labkey.api.data.ContainerDisplayColumn;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DataRegion;
+import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.NestableQueryView;
+import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.ResultsImpl;
+import org.labkey.api.data.RuntimeSQLException;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SQLGenerationException;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.Sort;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
@@ -58,13 +85,17 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.AnnotationInsertion;
+import org.labkey.api.protein.DefaultAnnotationLoader;
 import org.labkey.api.protein.PeptideCharacteristic;
+import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.ProteinDictionaryHelpers;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.ReturnURLString;
-import org.labkey.ms2.protein.ProteinSchema;
-import org.labkey.ms2.protein.ProteinViewBean;
-import org.labkey.ms2.query.ComparisonCrosstabView;
+import org.labkey.api.protein.XMLProteinLoader;
+import org.labkey.api.protein.fasta.FastaDbLoader;
+import org.labkey.api.protein.fasta.FastaReloaderJob;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -98,11 +129,13 @@ import org.labkey.api.util.DOM;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.SafeToRenderEnum;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
@@ -142,19 +175,15 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
-import org.labkey.ms2.protein.AnnotationInsertion;
-import org.labkey.ms2.protein.DefaultAnnotationLoader;
-import org.labkey.ms2.protein.FastaDbLoader;
-import org.labkey.ms2.protein.FastaReloaderJob;
-import org.labkey.ms2.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinServiceImpl;
+import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.SetBestNameRunnable;
-import org.labkey.ms2.protein.XMLProteinLoader;
 import org.labkey.ms2.protein.tools.GoLoader;
 import org.labkey.ms2.protein.tools.NullOutputStream;
 import org.labkey.ms2.protein.tools.PieJChartHelper;
-import org.labkey.ms2.protein.tools.ProteinDictionaryHelpers;
+import org.labkey.ms2.query.ComparisonCrosstabView;
 import org.labkey.ms2.query.FilterView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
@@ -162,7 +191,6 @@ import org.labkey.ms2.query.PeptideCrosstabView;
 import org.labkey.ms2.query.PeptideFilter;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.ProteinProphetCrosstabView;
-import org.labkey.ms2.query.SequencesTableInfo;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
@@ -173,8 +201,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -192,6 +218,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -217,11 +244,12 @@ public class MS2Controller extends SpringActionController
         setActionResolver(_actionResolver);
     }
 
-
+    @Migrate
     public static void registerAdminConsoleLinks()
     {
         AdminConsole.addLink(SettingsLinkType.Premium, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
         AdminConsole.addLink(SettingsLinkType.Premium, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
+        // TODO: Migrate to ProteinModule
         AdminConsole.addLink(SettingsLinkType.Premium, "protein databases", MS2UrlsImpl.get().getShowProteinAdminUrl(), AdminOperationsPermission.class);
     }
 
@@ -232,7 +260,6 @@ public class MS2Controller extends SpringActionController
         if (null != title)
             root.addChild(title);
     }
-
 
     private void addRunNavTrail(NavTree root, MS2Run run, URLHelper runURL, String title, PageConfig page, String helpTopic)
     {
@@ -250,7 +277,6 @@ public class MS2Controller extends SpringActionController
             root.addChild(title);
     }
 
-
     private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
     {
         page.setHelpTopic(null == helpTopic ? "ms2" : helpTopic);
@@ -259,24 +285,21 @@ public class MS2Controller extends SpringActionController
         root.addChild(title);
     }
 
-
+    @Migrate
     private void addProteinAdminNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
     {
         addAdminNavTrail(root, "Protein Database Admin", MS2UrlsImpl.get().getShowProteinAdminUrl(), title, page, helpTopic);
     }
-
 
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs)
     {
         return MS2RunViewType.getViewType(grouping).createView(getViewContext(), runs);
     }
 
-
     public static ActionURL getBeginURL(Container c)
     {
         return new ActionURL(BeginAction.class, c);
     }
-
 
     public static ActionURL getPeptideChartURL(Container c, ProteinDictionaryHelpers.GoTypes chartType)
     {
@@ -284,7 +307,6 @@ public class MS2Controller extends SpringActionController
         url.addParameter("chartType", chartType.toString());
         return url;
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class BeginAction extends SimpleRedirectAction<Object>
@@ -296,15 +318,13 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static ActionURL getShowListURL(Container c)
     {
         return new ActionURL(ShowListAction.class, c);
     }
 
-
     @RequiresPermission(ReadPermission.class)
-    public class ShowListAction extends SimpleViewAction
+    public class ShowListAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -313,7 +333,7 @@ public class MS2Controller extends SpringActionController
 
             QueryView gridView = ExperimentService.get().createExperimentRunWebPart(getViewContext(), MS2Module.SEARCH_RUN_TYPE);
             gridView.setTitle(MS2Module.MS2_RUNS_NAME);
-            gridView.setTitleHref(urlProvider(MS2Urls.class).getShowListUrl(getContainer()));
+            gridView.setTitleHref(new ActionURL(ShowListAction.class, getContainer()));
 
             return new VBox(searchView, gridView);
         }
@@ -409,7 +429,7 @@ public class MS2Controller extends SpringActionController
                     Map<String, String> savedViews = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), MS2_VIEWS_CATEGORY);
                     String params = savedViews.get(defaultViewName);
 
-                    if (params != null && params.trim().length() > 0)
+                    if (params != null && !params.trim().isEmpty())
                     {
                         throw new RedirectException(currentURL + "&" + params);
                     }
@@ -614,7 +634,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     /**
      * Render current user's MS2Views in a drop down box with a submit button beside.
      * Caller is responsible for wrapping this in a <form> and (if desired) a <table>
@@ -649,7 +668,6 @@ public class MS2Controller extends SpringActionController
 
         return select;
     }
-
 
     private LinkBuilder modificationHref(MS2Run run)
     {
@@ -686,7 +704,6 @@ public class MS2Controller extends SpringActionController
                     TD(at(DOM.Attribute.align, "right"), entry.getValue()))));
     }
 
-
     public static class RenameForm extends RunForm
     {
         private String description;
@@ -701,7 +718,6 @@ public class MS2Controller extends SpringActionController
             this.description = description;
         }
     }
-
 
     public static ActionURL getRenameRunURL(Container c, MS2Run run, ActionURL returnURL)
     {
@@ -1577,7 +1593,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
             MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
-            tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
+            addProteinNameFilter(tableInfo, form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
             ActionURL targetURL;
             try
@@ -2581,7 +2597,7 @@ public class MS2Controller extends SpringActionController
             }
 
             for (int id : validIds)
-                ProteinManager.deleteFastaFile(id);
+                org.labkey.api.protein.ProteinManager.deleteFastaFile(id);
 
             return true;
         }
@@ -2593,26 +2609,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
-    public static class FastaParsingForm
-    {
-        private String _header;
-
-        public String getHeader()
-        {
-            if (_header != null && !_header.isEmpty() && _header.startsWith(">"))
-            {
-                return _header.substring(1);
-            }
-            return _header;
-        }
-
-        public void setHeader(String headers)
-        {
-            _header = headers;
-        }
-    }
-
+    @Migrate
     @RequiresSiteAdmin
     public class TestFastaParsingAction extends SimpleViewAction<FastaParsingForm>
     {
@@ -2629,42 +2626,13 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static class BlastForm
-    {
-        private String _blastServerBaseURL;
-        private String _message;
-
-        public String getMessage()
-        {
-            return _message;
-        }
-
-        public void setMessage(String message)
-        {
-            _message = message;
-        }
-
-        public String getBlastServerBaseURL()
-        {
-            return _blastServerBaseURL;
-        }
-
-        public void setBlastServerBaseURL(String blastServerBaseURL)
-        {
-            _blastServerBaseURL = blastServerBaseURL;
-        }
-    }
-
     @AdminConsoleAction
     @RequiresPermission(AdminOperationsPermission.class)
-    public class ShowProteinAdminAction extends FormViewAction<BlastForm>
+    public class ShowProteinAdminAction extends SimpleViewAction<Object>
     {
         @Override
-        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors)
+        public ModelAndView getView(Object o, BindException errors)
         {
-            JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
-            blastView.setTitle("BLAST Configuration");
-
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
@@ -2675,31 +2643,7 @@ public class MS2Controller extends SpringActionController
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
-            VBox result = new VBox(blastView, grid, annots, jobsView);
-            if (form.getMessage() != null)
-            {
-                HtmlView messageView = new HtmlView("Admin Message", HtmlString.unsafe("<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>"));
-                result.addView(messageView, 0);
-            }
-            return result;
-        }
-
-        @Override
-        public URLHelper getSuccessURL(BlastForm o)
-        {
-            return new ActionURL(ShowProteinAdminAction.class, ContainerManager.getRoot());
-        }
-
-        @Override
-        public void validateCommand(BlastForm target, Errors errors) {}
-
-        @Override
-        public boolean handlePost(BlastForm o, BindException errors)
-        {
-            WriteableAppProps props = AppProps.getWriteableInstance();
-            props.setBLASTServerBaseURL(o.getBlastServerBaseURL());
-            props.save(getUser());
-            return true;
+            return new VBox(grid, annots, jobsView);
         }
 
         private DataRegion getAnnotInsertsGrid()
@@ -2974,14 +2918,14 @@ public class MS2Controller extends SpringActionController
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
-                sequencesTableInfo.addSeqIdFilter(seqIds);
+                addSeqIdFilter(sequencesTableInfo, seqIds);
             }
             else
             {
-                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                addProteinNameFilter(sequencesTableInfo, form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (form.isRestrictProteins())
                 {
-                    sequencesTableInfo.addContainerCondition(getContainer(), getUser(), true);
+                    addContainerCondition(sequencesTableInfo, getContainer(), getUser(), true);
                 }
             }
             proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
@@ -3116,6 +3060,103 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    private static void addContainerCondition(SequencesTableInfo tableInfo, Container c, User u, boolean includeSubfolders)
+    {
+        SqlDialect d = ProteinSchema.getSqlDialect();
+        List<Container> containers = ContainerManager.getAllChildren(c, u);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoRuns(), "r");
+        sql.append(", ");
+        sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
+        sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container IN ");
+        sql.add(Boolean.FALSE);
+        if (includeSubfolders)
+        {
+            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
+        }
+        else
+        {
+            sql.append("(");
+            sql.appendValue(c,d);
+            sql.append(")");
+        }
+        sql.append(")");
+        tableInfo.addCondition(sql);
+    }
+
+    public static List<String> getIdentifierParameters(String identifiers)
+    {
+        List<String> result = new ArrayList<>();
+        if (identifiers == null || identifiers.trim().isEmpty())
+        {
+            return result;
+        }
+
+        StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
+        while (st.hasMoreTokens())
+        {
+            result.add(st.nextToken());
+        }
+        return result;
+    }
+
+    private static void addProteinNameFilter(SequencesTableInfo tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
+    {
+        List<String> params = getIdentifierParameters(identifier);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoSequences(), "s");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
+        sql.append("\n");
+        sql.append(")");
+        tableInfo.addCondition(sql);
+    }
+
+    private static void addSeqIdFilter(SequencesTableInfo tableInfo, int[] seqIds)
+    {
+        SQLFragment sql = new SQLFragment("SeqId IN (");
+        if (seqIds.length == 0)
+        {
+            sql.append("NULL");
+        }
+        else
+        {
+            String separator = "";
+            for (long seqId : seqIds)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(Long.toString(seqId));
+            }
+        }
+        sql.append(")");
+        tableInfo.addCondition(sql, FieldKey.fromParts("SeqId"));
+    }
+
+
     public static class ProbabilityProteinSearchForm extends ProteinService.ProteinSearchForm implements HasViewContext
     {
         private Float _minimumProbability;
@@ -3205,10 +3246,10 @@ public class MS2Controller extends SpringActionController
             {
                 MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
                 SequencesTableInfo tableInfo = schema.createSequencesTable(null);
-                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                addProteinNameFilter(tableInfo, getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
-                    tableInfo.addContainerCondition(_context.getContainer(), _context.getUser(), true);
+                    addContainerCondition(tableInfo, _context.getContainer(), _context.getUser(), true);
                 }
                 _seqId = ArrayUtils.toPrimitive(new TableSelector(tableInfo.getColumn("SeqId")).getArray(Integer.class));
             }
@@ -3548,7 +3589,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     public static ActionURL getShowMS2AdminURL(Integer days)
     {
         ActionURL url = new ActionURL(ShowMS2AdminAction.class, ContainerManager.getRoot());
@@ -3559,12 +3599,27 @@ public class MS2Controller extends SpringActionController
         return url;
     }
 
+    public static class BlastForm
+    {
+        private String _blastServerBaseURL;
+
+        public String getBlastServerBaseURL()
+        {
+            return _blastServerBaseURL;
+        }
+
+        @SuppressWarnings("unused")
+        public void setBlastServerBaseURL(String blastServerBaseURL)
+        {
+            _blastServerBaseURL = blastServerBaseURL;
+        }
+    }
 
     @RequiresSiteAdmin
-    public class ShowMS2AdminAction extends SimpleViewAction
+    public class ShowMS2AdminAction extends FormViewAction<BlastForm>
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors)
+        public ModelAndView getView(BlastForm form, boolean reshow, BindException errors)
         {
             MS2AdminBean bean = new MS2AdminBean();
 
@@ -3576,16 +3631,38 @@ public class MS2Controller extends SpringActionController
             bean.failedURL = showRunsURL(false, 2);
             bean.deletedURL = showRunsURL(true, null);
 
-            JspView<MS2AdminBean> result = new JspView<>("/org/labkey/ms2/ms2Admin.jsp", bean);
-            result.setFrame(WebPartView.FrameType.PORTAL);
-            result.setTitle("MS2 Data Overview");
-            return result;
+            JspView<MS2AdminBean> overview = new JspView<>("/org/labkey/ms2/ms2Admin.jsp", bean);
+            overview.setFrame(WebPartView.FrameType.PORTAL);
+            overview.setTitle("MS2 Data Overview");
+
+            JspView<String> blastView = new JspView<>("/org/labkey/ms2/blastAdmin.jsp", AppProps.getInstance().getBLASTServerBaseURL(), errors);
+            blastView.setTitle("BLAST Configuration");
+
+            return new VBox(overview, blastView);
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
             urlProvider(AdminUrls.class).addAdminNavTrail(root, "MS2 Admin", getClass(), getContainer());
+        }
+
+        @Override
+        public URLHelper getSuccessURL(BlastForm form)
+        {
+            return new ActionURL(ShowMS2AdminAction.class, ContainerManager.getRoot());
+        }
+
+        @Override
+        public void validateCommand(BlastForm form, Errors errors) {}
+
+        @Override
+        public boolean handlePost(BlastForm form, BindException errors)
+        {
+            WriteableAppProps props = AppProps.getWriteableInstance();
+            props.setBLASTServerBaseURL(form.getBlastServerBaseURL());
+            props.save(getUser());
+            return true;
         }
     }
 
@@ -4096,7 +4173,7 @@ public class MS2Controller extends SpringActionController
             String delimiter = "";
             for (int i : run.getFastaIds())
             {
-                summary.append(delimiter).append(ProteinManager.getFastaFile(i).getFilename());
+                summary.append(delimiter).append(org.labkey.api.protein.ProteinManager.getFastaFile(i).getFilename());
                 delimiter = ", ";
             }
             summary.append(" that contain the peptide " + peptide).unsafeAppend("</span></p>");
@@ -5602,7 +5679,7 @@ public class MS2Controller extends SpringActionController
             int[] ids = PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), true));
 
             for (int id : ids)
-                ProteinManager.deleteAnnotationInsertion(id);
+                org.labkey.api.protein.ProteinManager.deleteAnnotationInsertion(id);
 
             return true;
         }
@@ -6075,21 +6152,9 @@ public class MS2Controller extends SpringActionController
 
     public static class MS2UrlsImpl implements MS2Urls
     {
-        @Override
-        public ActionURL getShowPeptideUrl(Container container)
-        {
-            return new ActionURL(MS2Controller.ShowPeptideAction.class, container);
-        }
-
         public ActionURL getShowRunUrl(User user, MS2Run run)
         {
             return getShowRunURL(user, run.getContainer(), run.getRun());
-        }
-
-        @Override
-        public ActionURL getShowListUrl(Container container)
-        {
-            return new ActionURL(ShowListAction.class, container);
         }
 
         @Override
@@ -6119,15 +6184,13 @@ public class MS2Controller extends SpringActionController
             return getPepSearchUrl(container, null);
         }
 
-        @Override
-        public ActionURL getPepSearchUrl(Container container, String sequence)
+        public static ActionURL getPepSearchUrl(Container container, String sequence)
         {
             ActionURL url = new ActionURL(PepSearchAction.class, container);
             if(null != sequence)
                 url.addParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
             return url;
         }
-
 
         public static MS2UrlsImpl get()
         {
@@ -6173,10 +6236,10 @@ public class MS2Controller extends SpringActionController
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
-            TableInfo peptidesTable = MS2Service.get().createPeptidesTableInfo(getUser(), getContainer());
-            PeptidesView pepView = new PeptidesView(MS2Service.get().createSchema(getUser(), getContainer()), peptidesTable.getPublicName());
+            TableInfo peptidesTable = new MS2Schema(getUser(), getContainer()).createPeptidesTableInfo();
+            PeptidesView pepView = new PeptidesView(new MS2Schema(getUser(), getContainer()), peptidesTable.getPublicName());
             pepView.setSearchSubfolders(form.isSubfolders());
-            if(null != form.getPepSeq() && form.getPepSeq().length() > 0)
+            if(null != form.getPepSeq() && !form.getPepSeq().isEmpty())
                 pepView.setPeptideFilter(new PeptideSequenceFilter(form.getPepSeq(), form.isExact()));
             pepView.setTitle("Matching MS2 Peptides");
             pepView.enableExpandCollapse("peptides", false);

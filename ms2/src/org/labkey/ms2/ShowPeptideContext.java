@@ -17,16 +17,10 @@
 package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
-import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Link.LinkBuilder;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 
-/**
- * User: jeckels
-* Date: Feb 6, 2007
-*/
 public class ShowPeptideContext
 {
     public MS2Controller.DetailsForm form;
@@ -56,8 +50,6 @@ public class ShowPeptideContext
         this.showGzUrl = showGzUrl;
         this.modificationHref = modHref;
 
-        MS2Urls urls = PageFlowUtil.urlProvider(MS2Urls.class);
-        if(null != url)
-            pepSearchHref = urls.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
+        pepSearchHref = MS2Controller.MS2UrlsImpl.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
     }
 }

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.AnnotationInsertion" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.protein.AnnotationInsertion" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     AnnotationInsertion insertion = ((JspView<AnnotationInsertion>) HttpView.currentView()).getModelBean();

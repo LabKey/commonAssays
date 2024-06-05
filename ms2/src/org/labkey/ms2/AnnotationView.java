@@ -16,10 +16,11 @@
 package org.labkey.ms2;
 
 import org.apache.commons.collections4.MultiValuedMap;
+import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
-import org.labkey.ms2.protein.IdentifierType;
-import org.labkey.ms2.protein.ProteinManager;
+import org.labkey.ms2.protein.Protein;
 
 import java.util.Collection;
 import java.util.Collections;

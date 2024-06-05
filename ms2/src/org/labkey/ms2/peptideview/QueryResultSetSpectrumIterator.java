@@ -18,8 +18,8 @@ package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.ResultSet;
 import java.util.List;

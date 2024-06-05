@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -27,10 +28,10 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -142,7 +143,7 @@ public class PeptideProphetGraphs
         String chargeSQL = "SELECT count(*) " +
                         "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +
                         "WHERE Run = ? AND Charge = ?";
-        String negHitPrefix = MS2Manager.NEGATIVE_HIT_PREFIX;
+        String negHitPrefix = ProteinService.NEGATIVE_HIT_PREFIX;
 
         int total = new SqlSelector(MS2Manager.getSchema(),
                         chargeSQL,

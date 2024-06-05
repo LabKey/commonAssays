@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.ProteinPlus" %>
+<%@ page import="org.labkey.api.protein.fasta.FastaProtein" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.protein.ProteinPlus" %>
-<%@ page import="org.labkey.ms2.protein.fasta.FastaProtein" %>
+<%@ page import="org.labkey.ms2.FastaParsingForm" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.FastaParsingForm form = ((JspView<MS2Controller.FastaParsingForm>) HttpView.currentView()).getModelBean();
+    FastaParsingForm form = ((JspView<FastaParsingForm>) HttpView.currentView()).getModelBean();
 %>
 <labkey:form method="POST">
     <table width="100%">

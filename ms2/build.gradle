@@ -22,10 +22,13 @@ dependencies {
    compileOnly "org.projectlombok:lombok:${lombokVersion}"
    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
+   BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "protein"), depProjectConfig: "apiJarFile")
+   BuildUtils.addLabKeyDependency(project: project, config: "jspImplementation", depProjectPath: BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "protein"), depProjectConfig: "apiJarFile")
 
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "experiment"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "pipeline"), depProjectConfig: "published", depExtension: "module")
+   BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "protein"), depProjectConfig: "published", depExtension: "module")
    BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
 }
 
