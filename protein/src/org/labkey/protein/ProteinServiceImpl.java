@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.api.protein;
+package org.labkey.protein;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +23,16 @@ import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.protein.AnnotationView;
+import org.labkey.api.protein.PeptideCharacteristic;
+import org.labkey.api.protein.ProteinCoverageViewService;
+import org.labkey.api.protein.ProteinFeature;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.protein.ProteinPlus;
+import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.Replicate;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.protein.organism.GuessOrgByParsing;
@@ -160,6 +170,18 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     @Override
+    public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
+    {
+        return Collections.unmodifiableList(_proteinSearchViewProviders);
+    }
+
+    @Override
+    public List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders()
+    {
+        return Collections.unmodifiableList(_proteinSearchFormViewProviders);
+    }
+
+    @Override
     public WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
     {
         return ProteinCoverageViewService.get().getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures);
@@ -182,21 +204,6 @@ public class ProteinServiceImpl implements ProteinService
     public TableInfo getSequencesTable()
     {
         return ProteinSchema.getTableInfoSequences();
-    }
-
-    public List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders()
-    {
-        return Collections.unmodifiableList(_proteinSearchViewProviders);
-    }
-
-    public List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders()
-    {
-        return Collections.unmodifiableList(_proteinSearchFormViewProviders);
-    }
-
-    public static ProteinServiceImpl getInstance()
-    {
-        return (ProteinServiceImpl) ProteinService.get();
     }
 
     private static final Cache<String, List<ProteinFeature>> FEATURE_CACHE =

@@ -29,7 +29,6 @@ import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.protein.ProteinServiceImpl;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;

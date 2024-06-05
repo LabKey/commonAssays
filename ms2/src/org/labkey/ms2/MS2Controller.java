@@ -85,7 +85,8 @@ import org.labkey.api.protein.AnnotationView;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.protein.ProteinServiceImpl;
+import org.labkey.api.protein.ProteinService.FormViewProvider;
+import org.labkey.api.protein.ProteinService.ProteinSearchForm;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
@@ -2393,7 +2394,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ExportProteinGroupsAction extends ExportAction<ExportForm>
     {
@@ -2408,7 +2408,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ExportAllProteinsAction extends ExportAction<ExportForm>
     {
@@ -2422,7 +2421,6 @@ public class MS2Controller extends SpringActionController
             exportType.export(peptideView, form, null, getViewContext().getActionURL(), null);
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class ExportSelectedProteinsAction extends ExportAction<ExportForm>
@@ -2442,7 +2440,6 @@ public class MS2Controller extends SpringActionController
             exportType.export(peptideView, form, proteins, getViewContext().getActionURL(), null);
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
@@ -2467,7 +2464,7 @@ public class MS2Controller extends SpringActionController
                 return createProteinSearchView(form, errors);
             }
 
-            for (QueryViewProvider provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
             {
                 if (provider.getDataRegionName().equals(dataRegion))
                 {
@@ -2493,15 +2490,14 @@ public class MS2Controller extends SpringActionController
                 protected TableInfo createTable()
                 {
                     MS2Schema schema = (MS2Schema)getSchema();
-                    SequencesTableInfo tableInfo = schema.createSequencesTable(null);
-                    return tableInfo;
+                    return schema.createSequencesTable(null);
                 }
             };
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
-            SequencesTableInfo sequencesTableInfo = (SequencesTableInfo)proteinsView.getTable();
+            SequencesTableInfo<MS2Schema> sequencesTableInfo = (SequencesTableInfo<MS2Schema>)proteinsView.getTable();
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
@@ -2596,7 +2592,7 @@ public class MS2Controller extends SpringActionController
             }
 
             WebPartView searchFormView = null;
-            for (ProteinService.FormViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchFormViewProviders())
+            for (FormViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchFormViewProviders())
             {
                 WebPartView formView = provider.createView(getViewContext(), form);
                 if (formView != null)
@@ -2604,7 +2600,7 @@ public class MS2Controller extends SpringActionController
                     searchFormView = formView;
                 }
             }
-            if(searchFormView == null)
+            if (searchFormView == null)
             {
                 // If no protein search form view providers are registered, add the default form search view.
                 searchFormView = new ProteinSearchWebPart(true, form);
@@ -2630,7 +2626,7 @@ public class MS2Controller extends SpringActionController
                 result.addView(groupsView);
             }
 
-            for (QueryViewProvider<ProteinService.ProteinSearchForm> provider : ProteinServiceImpl.getInstance().getProteinSearchViewProviders())
+            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
             {
                 QueryView queryView = provider.createView(getViewContext(), form, errors);
                 if (queryView != null)
@@ -2647,7 +2643,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private static void addContainerCondition(SequencesTableInfo tableInfo, Container c, User u, boolean includeSubfolders)
+    private static void addContainerCondition(SequencesTableInfo<MS2Schema> tableInfo, Container c, User u, boolean includeSubfolders)
     {
         SqlDialect d = ProteinSchema.getSqlDialect();
         List<Container> containers = ContainerManager.getAllChildren(c, u);
@@ -2690,7 +2686,7 @@ public class MS2Controller extends SpringActionController
         return result;
     }
 
-    private static void addProteinNameFilter(SequencesTableInfo tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
+    private static void addProteinNameFilter(SequencesTableInfo<MS2Schema> tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
     {
         List<String> params = getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
@@ -2744,7 +2740,7 @@ public class MS2Controller extends SpringActionController
     }
 
 
-    public static class ProbabilityProteinSearchForm extends ProteinService.ProteinSearchForm implements HasViewContext
+    public static class ProbabilityProteinSearchForm extends ProteinSearchForm implements HasViewContext
     {
         private Float _minimumProbability;
         private Float _maximumErrorRate;
@@ -5513,7 +5509,7 @@ public class MS2Controller extends SpringActionController
         public static ActionURL getPepSearchUrl(Container container, String sequence)
         {
             ActionURL url = new ActionURL(PepSearchAction.class, container);
-            if(null != sequence)
+            if (null != sequence)
                 url.addParameter(ProteinService.PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
             return url;
         }
@@ -5565,7 +5561,7 @@ public class MS2Controller extends SpringActionController
             TableInfo peptidesTable = new MS2Schema(getUser(), getContainer()).createPeptidesTableInfo();
             PeptidesView pepView = new PeptidesView(new MS2Schema(getUser(), getContainer()), peptidesTable.getPublicName());
             pepView.setSearchSubfolders(form.isSubfolders());
-            if(null != form.getPepSeq() && !form.getPepSeq().isEmpty())
+            if (null != form.getPepSeq() && !form.getPepSeq().isEmpty())
                 pepView.setPeptideFilter(new PeptideSequenceFilter(form.getPepSeq(), form.isExact()));
             pepView.setTitle("Matching MS2 Peptides");
             pepView.enableExpandCollapse("peptides", false);
@@ -5582,7 +5578,7 @@ public class MS2Controller extends SpringActionController
             searchView.setTitle("Search Criteria");
 
             //if no search terms were specified, return just the search view
-            if(searchModel.noSearchTerms())
+            if (searchModel.noSearchTerms())
             {
                 searchModel.setErrorMsg("You must specify at least one Peptide Sequence");
                 return searchView;

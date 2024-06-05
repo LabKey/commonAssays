@@ -17,6 +17,7 @@ package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.QueryViewAction;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
@@ -28,6 +29,7 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,11 +67,14 @@ public interface ProteinService
      */
     Map<String, Set<String>> getIdentifiers(String description, String... names);
 
+    @Migrate // The register*() methods are called by TargetedMS and MaxQuant, but the get() methods are called only by MS2 (??)
     void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider);
     void registerPeptideSearchView(QueryViewProvider<PeptideSearchForm> provider);
     void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider);
 
     List<QueryViewProvider<PeptideSearchForm>> getPeptideSearchViews();
+    List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders();
+    List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders();
 
     /** @param aaRowWidth the number of amino acids to display in a single row */
     WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures);
