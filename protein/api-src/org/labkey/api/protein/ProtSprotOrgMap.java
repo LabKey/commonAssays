@@ -17,10 +17,9 @@ package org.labkey.api.protein;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.SqlSelector;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.Path;
@@ -41,9 +40,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ProteinDictionaryHelpers
+public class ProtSprotOrgMap
 {
-    private static final Logger _log = LogManager.getLogger(ProteinDictionaryHelpers.class);
+    private static final Logger _log = LogManager.getLogger(ProtSprotOrgMap.class);
+    @Migrate // TODO: Move this file into Protein module
     private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 
@@ -143,7 +143,6 @@ public class ProteinDictionaryHelpers
         }
     }
 
-
     private static InputStream getSProtOrgMap() throws IOException
     {
         WebdavResource r = ServiceRegistry.get(WebdavResolver.class).lookup(Path.parse(FILE));
@@ -160,137 +159,6 @@ public class ProteinDictionaryHelpers
             throw new FileNotFoundException("Unable to find " + FILE + ". This can be caused when Tomcat redeploys the webapp when running. Please try restarting Tomcat.");
         }
         return is;
-    }
-
-
-    private static String getGODefinitionFromId(int id)
-    {
-        return new SqlSelector(ProteinSchema.getSchema(), "SELECT TermDefinition FROM " + ProteinSchema.getTableInfoGoTermDefinition() + " WHERE TermId=?", id).getObject(String.class);
-    }
-
-    public static String getGODefinitionFromAcc(String acc)
-    {
-        return getGODefinitionFromId(getGOIdFromAcc(acc));
-    }
-
-    public static int getGOIdFromAcc(String acc)
-    {
-        Integer goId = new SqlSelector(ProteinSchema.getSchema(), "SELECT Id FROM " + ProteinSchema.getTableInfoGoTerm() + " WHERE Acc = ?", acc).getObject(Integer.class);
-
-        return (null == goId ? 0 : goId);
-    }
-
-    public enum GoTypes
-    {
-        CELL_LOCATION {
-            public String toString()
-            {
-                return "Cellular Location";
-            }
-        },
-        FUNCTION {
-            public String toString()
-            {
-                return "Molecular Function";
-            }
-        },
-        PROCESS {
-            public String toString()
-            {
-                return "Metabolic Process";
-            }
-        },
-        ALL {
-            public String toString()
-            {
-                return "All GO Ontologies";
-            }
-        }
-    }
-
-    @Nullable
-    public static GoTypes GTypeStringToEnum(String label)
-    {
-        for (GoTypes g : GoTypes.values())
-        {
-            if (label.equals(g.toString())) return g;
-        }
-        return null;
-    }
-
-    public static int gTypeC = 0;
-    public static int gTypeF = 0;
-    public static int gTypeP = 0;
-
-    public static int getgTypeC()
-    {
-        if (gTypeC == 0) getGOTypes();
-        return gTypeC;
-    }
-
-
-    public static int getgTypeF()
-    {
-        if (gTypeF == 0) getGOTypes();
-        return gTypeF;
-    }
-
-
-    public static int getgTypeP()
-    {
-        if (gTypeP == 0) getGOTypes();
-        return gTypeP;
-    }
-
-
-    private static final Object _lock = new Object();
-
-    protected static void getGOTypes()
-    {
-        synchronized (_lock)
-        {
-            if (gTypeC == 0 || gTypeF == 0 || gTypeP == 0)
-            {
-                new SqlSelector(ProteinSchema.getSchema(), "SELECT annottypeid,name FROM " + ProteinSchema.getTableInfoAnnotationTypes() + " WHERE name in ('GO_C','GO_F','GO_P')").forEach(rs -> {
-                    int antypeid = rs.getInt(1);
-                    String gt = rs.getString(2);
-                    if (gt.equals("GO_C"))
-                    {
-                        gTypeC = antypeid;
-                    }
-                    if (gt.equals("GO_F"))
-                    {
-                        gTypeF = antypeid;
-                    }
-                    if (gt.equals("GO_P"))
-                    {
-                        gTypeP = antypeid;
-                    }
-                });
-            }
-        }
-    }
-
-
-    public static String getAnnotTypeWhereClause(GoTypes kind)
-    {
-        if (kind == null)
-        {
-            kind = GoTypes.ALL;
-        }
-        switch (kind)
-        {
-            case CELL_LOCATION:
-                return "AnnotTypeId=" + getgTypeC();
-            case FUNCTION:
-                return "AnnotTypeId=" + getgTypeF();
-            case PROCESS:
-                return "AnnotTypeId=" + getgTypeP();
-            case ALL:
-                return "AnnotTypeId IN (" + getgTypeC() + "," + getgTypeF() + "," + getgTypeC() + ")";
-        }
-
-        return null;
     }
 }
 

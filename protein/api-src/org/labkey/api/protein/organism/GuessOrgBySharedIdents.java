@@ -21,7 +21,7 @@ import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.protein.IdentifierType;
-import org.labkey.api.protein.ProteinDictionaryHelpers;
+import org.labkey.api.protein.ProtSprotOrgMap;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.fasta.FastaProtein;
@@ -79,7 +79,7 @@ public class GuessOrgBySharedIdents extends Timer implements OrganismGuessStrate
             {
                 try
                 {
-                    ProteinDictionaryHelpers.loadProtSprotOrgMap();
+                    ProtSprotOrgMap.loadProtSprotOrgMap();
                 }
                 catch (SQLException e)
                 {

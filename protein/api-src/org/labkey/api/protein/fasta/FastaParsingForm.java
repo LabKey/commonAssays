@@ -1,4 +1,4 @@
-package org.labkey.ms2;
+package org.labkey.api.protein.fasta;
 
 public class FastaParsingForm
 {
