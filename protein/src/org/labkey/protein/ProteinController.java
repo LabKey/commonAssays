@@ -767,13 +767,6 @@ public class ProteinController extends SpringActionController
         @Override
         public ModelAndView getView(AdminForm form, BindException errors)
         {
-            ModelAndView messageView = null;
-
-            if (form.getMessage() != null)
-            {
-                messageView = new HtmlView(HtmlString.of(form.getMessage()));
-            }
-
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
@@ -784,7 +777,13 @@ public class ProteinController extends SpringActionController
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
-            return new VBox(messageView, grid, annots, jobsView);
+            VBox vbox = new VBox(grid, annots, jobsView);
+            if (form.getMessage() != null)
+            {
+                HtmlView messageView = new HtmlView("Admin Message", HtmlString.unsafe("<strong><span class=\"labkey-message\">" + PageFlowUtil.filter(form.getMessage()) + "</span></strong>"));
+                vbox.addView(messageView, 0);
+            }
+            return vbox;
         }
 
         private DataRegion getAnnotInsertsGrid()
