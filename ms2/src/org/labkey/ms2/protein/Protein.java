@@ -51,12 +51,7 @@ public class Protein extends SimpleProtein
 
     public Protein(SimpleProtein simpleProtein)
     {
-        setSeqId(simpleProtein.getSeqId());
-        setSequence(simpleProtein.getSequence());
-        setMass(simpleProtein.getMass());
-        setDescription(simpleProtein.getDescription());
-        setBestName(simpleProtein.getBestName());
-        setBestGeneName(simpleProtein.getBestGeneName());
+        super(simpleProtein);
     }
 
     private List<PeptideCharacteristic> _combinedPeptideCharacteristics;
@@ -960,7 +955,7 @@ public class Protein extends SimpleProtein
             if (start <= -1)
             {
                 // In most cases we've pre-filtered to just the peptides for a certain protein, but there
-                // are scenarios where we are looking at all of the peptides from the current run
+                // are scenarios where we are looking at all peptides from the current run
                 continue;
             }
 

@@ -2,12 +2,27 @@ package org.labkey.api.protein;
 
 public class SimpleProtein
 {
-    protected int _seqId;
+    private int _seqId;
+    private double _mass;
+    private String _description;
+    private String _bestName;
+    private String _bestGeneName;
+
     protected String _sequence;
-    protected double _mass;
-    protected String _description;
-    protected String _bestName;
-    protected String _bestGeneName;
+
+    public SimpleProtein()
+    {
+    }
+
+    public SimpleProtein(SimpleProtein protein)
+    {
+        _seqId = protein._seqId;
+        _sequence = protein._sequence;
+        _mass = protein._mass;
+        _description = protein._description;
+        _bestName = protein._bestName;
+        _bestGeneName = protein._bestGeneName;
+    }
 
     public int getSeqId()
     {

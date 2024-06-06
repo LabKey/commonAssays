@@ -56,7 +56,7 @@ public class GoHelpers
     {
         for (GoTypes g : GoTypes.values())
         {
-            if (label.equals(g.toString())) return g;
+            if (g.toString().equals(label)) return g;
         }
         return null;
     }
