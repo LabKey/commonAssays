@@ -105,10 +105,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-/**
- * User: jeckels
- * Date: Sep 25, 2006
- */
 public class MS2Schema extends UserSchema
 {
     public static final String SCHEMA_NAME = "ms2";
@@ -1266,7 +1262,6 @@ public class MS2Schema extends UserSchema
             }
         }
     }
-
 
     public CrosstabTableInfo createProteinProphetCrosstabTable(MS2Controller.PeptideFilteringComparisonForm form, ViewContext context)
     {

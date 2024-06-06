@@ -18,10 +18,11 @@ package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.files.FileContentService;
+import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
@@ -40,7 +41,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +56,10 @@ public class ProteinModule extends DefaultModule
         return NAME;
     }
 
-    @Migrate
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 0.000; // TODO: Switch to 24.000 once prot scripts move here
+        return 24.000;
     }
 
     @Override
@@ -109,6 +108,13 @@ public class ProteinModule extends DefaultModule
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
         UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
         AnnotController.registerAdminConsoleLinks();
+
+        FileContentService fcs = FileContentService.get();
+        if (fcs != null)
+        {
+            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
+            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
+        }
     }
 
     @Override
@@ -124,13 +130,11 @@ public class ProteinModule extends DefaultModule
         return list;
     }
 
-    @Migrate
     @Override
     @NotNull
     public Set<String> getSchemaNames()
     {
-        // TODO: Switch to "prot" when scripts move
-        return Collections.emptySet();
+        return Set.of(ProteinSchema.getSchemaName());
     }
 
     @Override

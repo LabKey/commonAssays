@@ -274,6 +274,11 @@ public class MS2Manager
         return getSchema().getTable("ExpressionData");
     }
 
+    public static TableInfo getTableInfoFastaAdmin()
+    {
+        return getSchema().getTable("FastaAdmin");
+    }
+
     public static MS2Run getRun(int runId)
     {
         MS2Run run = _getRunFromCache(runId);

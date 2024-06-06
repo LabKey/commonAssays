@@ -18,9 +18,11 @@ package org.labkey.ms2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.annotations.Migrate;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.ExperimentRunType;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.api.ExperimentService;
@@ -36,6 +38,7 @@ import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
@@ -186,7 +189,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ProteinCoverageViewService.setInstance(new ProteinCoverageViewServiceImpl());
     }
 
-    @Migrate
     @Override
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
@@ -270,21 +272,24 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 }
             });
             fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
-
-            // TODO: Move to ProteinModule
-            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
-            fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
 
         SequencesTableInfo.setTableModifier(MS2Schema.STANDARD_MODIFIER);
 
-        // Use FastaAdmin view and add Runs column with link to show all runs action
+        // Use ms2.FastaAdmin view and add Runs column with link to show all runs action
         ProteinManager.registerFastaAdminDataRegionModifier(rgn -> {
-            rgn.setColumns(ProteinSchema.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
+            rgn.setColumns(MS2Manager.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
             ActionURL runsURL = new ActionURL(MS2Controller.ShowAllRunsAction.class, ContainerManager.getRoot())
                     .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
             rgn.getDisplayColumn("Runs").setURL(runsURL);
         });
+
+        // On FASTA delete, check ms2.FastaAdmin for references to runs
+        ProteinSchema.registerFastaDeleteSelectorProducer(filter -> {
+            filter.addCondition(FieldKey.fromString("Runs"), null, CompareType.ISBLANK);
+            return new TableSelector(MS2Manager.getTableInfoFastaAdmin(), filter, null);
+        });
+        ProteinSchema.registerInvalidForFastaDeleteReason("are still referenced by runs");
     }
 
     @NotNull
@@ -298,12 +303,11 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         return list;
     }
 
-    @Migrate
     @Override
     @NotNull
     public List<String> getSchemaNames()
     {
-        return List.of(ProteinSchema.getSchemaName(), MS2Schema.SCHEMA_NAME);
+        return List.of(MS2Schema.SCHEMA_NAME);
     }
 
     @Override

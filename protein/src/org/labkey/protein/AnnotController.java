@@ -7,9 +7,9 @@ import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
@@ -41,12 +41,14 @@ import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
+import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
@@ -63,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -252,7 +255,6 @@ public class AnnotController extends SpringActionController
         {
         }
 
-        @Migrate // TODO: Don't reference FastaAdmin directly (ms2 could register a call-back)
         @Override
         public boolean handlePost(Object o, BindException errors)
         {
@@ -269,14 +271,16 @@ public class AnnotController extends SpringActionController
                     throw new NotFoundException("Invalid FASTA ID: " + fastaIdString);
                 }
             }
-            String idList = StringUtils.join(fastaIds, ',');
-            List<Integer> validIds = new SqlSelector(ProteinSchema.getSchema(), "SELECT FastaId FROM " + ProteinSchema.getTableInfoFastaAdmin() + " WHERE (FastaId <> 0) AND (Runs IS NULL) AND (FastaId IN (" + idList + "))").getArrayList(Integer.class);
+
+            SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("FastaId"), fastaIds));
+            filter.addCondition(FieldKey.fromString("FastaId"), 0, CompareType.NEQ);
+            Collection<Integer> validIds = ProteinSchema.getValidForFastaDeleteSelectorProvider().apply(filter).getCollection(Integer.class);
 
             fastaIds.removeAll(validIds);
 
             if (!fastaIds.isEmpty())
             {
-                _message = "Unable to delete FASTA ID(s) " + StringUtils.join(fastaIds, ", ") + " as they are still referenced by runs";
+                _message = "Unable to delete FASTA ID(s) " + StringUtils.join(fastaIds, ", ") + " as they " + ProteinSchema.getInvalidForFastaDeleteReason();
             }
             else
             {
@@ -327,13 +331,36 @@ public class AnnotController extends SpringActionController
         return url;
     }
 
+    public static class AdminForm
+    {
+        private String _message;
+
+        public String getMessage()
+        {
+            return _message;
+        }
+
+        @SuppressWarnings("unused")
+        public void setMessage(String message)
+        {
+            _message = message;
+        }
+    }
+
     @AdminConsoleAction
     @RequiresPermission(AdminOperationsPermission.class)
-    public class ShowProteinAdminAction extends SimpleViewAction<Object>
+    public class ShowProteinAdminAction extends SimpleViewAction<AdminForm>
     {
         @Override
-        public ModelAndView getView(Object o, BindException errors)
+        public ModelAndView getView(AdminForm form, BindException errors)
         {
+            ModelAndView messageView = null;
+
+            if (form.getMessage() != null)
+            {
+                messageView = new HtmlView(HtmlString.of(form.getMessage()));
+            }
+
             GridView grid = getFastaAdminGrid();
             grid.setTitle("FASTA Files");
             GridView annots = new GridView(getAnnotInsertsGrid(), errors);
@@ -344,7 +371,7 @@ public class AnnotController extends SpringActionController
             jobsView.getSettings().setContainerFilterName(ContainerFilter.Type.AllFolders.toString());
             jobsView.setTitle("Protein Annotation Load Jobs");
 
-            return new VBox(grid, annots, jobsView);
+            return new VBox(messageView, grid, annots, jobsView);
         }
 
         private DataRegion getAnnotInsertsGrid()
@@ -458,6 +485,7 @@ public class AnnotController extends SpringActionController
             return NameType.valueOf(getNameType());
         }
 
+        @SuppressWarnings("unused")
         public void setNameType(String nameType)
         {
             _nameType = nameType;
