@@ -803,7 +803,9 @@ public class ProteinController extends SpringActionController
             ButtonBar bb = new ButtonBar();
 
             ActionButton delete = new ActionButton(DeleteAnnotInsertEntriesAction.class, "Delete");
-            delete.setRequiresSelection(true, "Are you sure you want to remove this entry from the list?\\n(Note: The protein annotations themselves will not be deleted.)", "Are you sure you want to remove these entries from the list?\\n(Note: The protein annotations themselves will not be deleted.)");
+            delete.setRequiresSelection(true,
+                "Are you sure you want to remove this entry from the list? (Note: The protein annotations themselves will not be deleted.)",
+                "Are you sure you want to remove these entries from the list? (Note: The protein annotations themselves will not be deleted.)");
             delete.setActionType(ActionButton.Action.POST);
             bb.add(delete);
 
