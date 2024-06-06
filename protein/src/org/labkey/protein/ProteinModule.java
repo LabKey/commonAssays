@@ -18,7 +18,6 @@ package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableSelector;
@@ -89,14 +88,10 @@ public class ProteinModule extends DefaultModule
         );
     }
 
-    @Migrate
     @Override
     protected void init()
     {
-        // TODO: Merge with protein controller
-        addController("annot", AnnotController.class);
         addController("protein", ProteinController.class);
-
         ProteinUserSchema.register(this);
         CustomAnnotationSchema.register(this);
         ProteinService.setInstance(new ProteinServiceImpl());
@@ -109,7 +104,7 @@ public class ProteinModule extends DefaultModule
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
         UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
-        AnnotController.registerAdminConsoleLinks();
+        ProteinController.registerAdminConsoleLinks();
 
         FileContentService fcs = FileContentService.get();
         if (fcs != null)
@@ -143,7 +138,7 @@ public class ProteinModule extends DefaultModule
     public @NotNull Set<Class> getIntegrationTests()
     {
         return Set.of(
-            AnnotController.TestCase.class
+            ProteinController.TestCase.class
         );
     }
 
