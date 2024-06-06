@@ -49,7 +49,6 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.GridView;
 import org.labkey.api.view.HtmlView;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
@@ -169,7 +168,7 @@ public class AnnotController extends SpringActionController
             }
 
             @Override
-            public HttpView getTabView(String tabId)
+            public JspView<Object> getTabView(String tabId)
             {
                 if ("manual".equals(tabId))
                     return new JspView<>("/org/labkey/protein/view/loadGoManual.jsp");
@@ -212,6 +211,7 @@ public class AnnotController extends SpringActionController
             return _message;
         }
 
+        @SuppressWarnings("unused")
         public void setMessage(String message)
         {
             _message = message;

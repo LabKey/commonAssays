@@ -13,6 +13,7 @@ import java.util.function.Function;
 public class ProteinSchema
 {
     private static final String SCHEMA_NAME = "prot";
+
     private static Function<SimpleFilter, Selector> _validForFastaDeleteSelectorProvider = filter -> new TableSelector(ProteinSchema.getTableInfoFastaFiles(), filter, null);
     private static String _invalidForFastaDeleteReason = "don't exist";
 
@@ -126,20 +127,19 @@ public class ProteinSchema
         return getSchema().getTable("GoTermSynonym");
     }
 
-    public static void registerFastaDeleteSelectorProducer(Function<SimpleFilter, Selector> validForFastaDeleteSelectorProvider)
+    public static void registerValidForFastaDeleteSelectorProvider(Function<SimpleFilter, Selector> validForFastaDeleteSelectorProvider)
     {
-
         _validForFastaDeleteSelectorProvider = validForFastaDeleteSelectorProvider;
-    }
-
-    public static void registerInvalidForFastaDeleteReason(String invalidForFastaDeleteReason)
-    {
-        _invalidForFastaDeleteReason = invalidForFastaDeleteReason;
     }
 
     public static Function<SimpleFilter, Selector> getValidForFastaDeleteSelectorProvider()
     {
         return _validForFastaDeleteSelectorProvider;
+    }
+
+    public static void registerInvalidForFastaDeleteReason(String invalidForFastaDeleteReason)
+    {
+        _invalidForFastaDeleteReason = invalidForFastaDeleteReason;
     }
 
     public static String getInvalidForFastaDeleteReason()

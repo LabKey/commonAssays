@@ -285,7 +285,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         });
 
         // On FASTA delete, check ms2.FastaAdmin for references to runs
-        ProteinSchema.registerFastaDeleteSelectorProducer(filter -> {
+        ProteinSchema.registerValidForFastaDeleteSelectorProvider(filter -> {
             filter.addCondition(FieldKey.fromString("Runs"), null, CompareType.ISBLANK);
             return new TableSelector(MS2Manager.getTableInfoFastaAdmin(), filter, null);
         });

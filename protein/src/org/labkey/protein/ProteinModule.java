@@ -18,6 +18,7 @@ package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.TableSelector;
@@ -88,6 +89,7 @@ public class ProteinModule extends DefaultModule
         );
     }
 
+    @Migrate
     @Override
     protected void init()
     {
