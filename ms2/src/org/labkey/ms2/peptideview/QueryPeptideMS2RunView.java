@@ -45,7 +45,6 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.PeptideManager;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.PeptidesTableInfo;
 import org.springframework.validation.BindException;
@@ -57,10 +56,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-/**
- * User: jeckels
- * Date: Mar 6, 2006
- */
 public class QueryPeptideMS2RunView extends AbstractMS2RunView
 {
     private PeptidesTableInfo _peptidesTable;

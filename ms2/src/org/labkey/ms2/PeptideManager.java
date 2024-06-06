@@ -22,7 +22,6 @@ import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinViewBean;
 
 import java.text.DecimalFormat;
@@ -35,7 +34,8 @@ import java.util.Map;
 public class PeptideManager
 {
     private static final Logger LOG = LogHelper.getLogger(PeptideManager.class, "Peptide warnings");
-    private static final String ALL_PEPTIDES_PREFERENCE_NAME = ProteinManager.class.getName() + "." + ProteinViewBean.ALL_PEPTIDES_URL_PARAM;
+    // Hard-code package name to maintain backward-compatibility with saved preferences
+    private static final String ALL_PEPTIDES_PREFERENCE_NAME = "org.labkey.ms2.protein.ProteinManager." + ProteinViewBean.ALL_PEPTIDES_URL_PARAM;
 
     public static final int RUN_FILTER = 1;
     public static final int URL_FILTER = 2;
