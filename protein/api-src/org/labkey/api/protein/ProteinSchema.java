@@ -1,10 +1,12 @@
 package org.labkey.api.protein;
 
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
 
+@Migrate
 public class ProteinSchema
 {
     private static final String SCHEMA_NAME = "prot";
@@ -34,6 +36,7 @@ public class ProteinSchema
         return getSchema().getTable("FastaSequences");
     }
 
+    @Deprecated // TODO: Move to ms2 schema
     public static TableInfo getTableInfoFastaAdmin()
     {
         return getSchema().getTable("FastaAdmin");

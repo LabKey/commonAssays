@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.api.protein;
+package org.labkey.protein;
 
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Sort;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.permissions.DeletePermission;

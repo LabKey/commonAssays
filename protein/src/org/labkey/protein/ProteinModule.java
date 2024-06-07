@@ -26,10 +26,9 @@ import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.CustomAnnotationSetManager;
-import org.labkey.api.protein.CustomProteinListView;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
-import org.labkey.api.protein.ProteinController;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
@@ -93,10 +92,13 @@ public class ProteinModule extends DefaultModule
     @Override
     protected void init()
     {
+        // TODO: Merge with protein controller
+        addController("annot", AnnotController.class);
         addController("protein", ProteinController.class);
 
         ProteinUserSchema.register(this);
         CustomAnnotationSchema.register(this);
+        ProteinService.setInstance(new ProteinServiceImpl());
     }
 
     @Override
@@ -106,6 +108,7 @@ public class ProteinModule extends DefaultModule
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
         UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
+        AnnotController.registerAdminConsoleLinks();
     }
 
     @Override
@@ -127,7 +130,15 @@ public class ProteinModule extends DefaultModule
     public Set<String> getSchemaNames()
     {
         // TODO: Switch to "prot" when scripts move
-        return Collections.singleton(ProteinSchema.getSchemaName());
+        return Collections.emptySet();
+    }
+
+    @Override
+    public @NotNull Set<Class> getIntegrationTests()
+    {
+        return Set.of(
+            AnnotController.TestCase.class
+        );
     }
 
     @Override

@@ -31,8 +31,9 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.ProteinCoverageViewService;
+import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.QueryView;
@@ -72,7 +73,7 @@ import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 import org.labkey.ms2.pipeline.sequest.ThermoSequestParamsBuilder;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinServiceImpl;
+import org.labkey.ms2.protein.ProteinCoverageViewServiceImpl;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.DatDocumentParser;
 import org.labkey.ms2.reader.MGFDocumentParser;
@@ -181,8 +182,8 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         MS2Schema.register(this);
         MS2Service.setInstance(new MS2ServiceImpl());
 
-        // TODO: Move to ProteinModule after migrating ProteinServiceImpl
-        ProteinService.setInstance(new ProteinServiceImpl());
+        // TODO: Move to ProteinModule after migrating ProteinCoverageViewServiceImpl
+        ProteinCoverageViewService.setInstance(new ProteinCoverageViewServiceImpl());
     }
 
     @Migrate
@@ -269,12 +270,21 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 }
             });
             fcs.addFileListener(new TableUpdaterFileListener(MS2Manager.getTableInfoProteinProphetFiles(), "FilePath", TableUpdaterFileListener.Type.filePath, "RowId", containerFrag));
+
             // TODO: Move to ProteinModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
 
         SequencesTableInfo.setTableModifier(MS2Schema.STANDARD_MODIFIER);
+
+        // Use FastaAdmin view and add Runs column with link to show all runs action
+        ProteinManager.registerFastaAdminDataRegionModifier(rgn -> {
+            rgn.setColumns(ProteinSchema.getTableInfoFastaAdmin().getColumns("FileName, Loaded, FastaId, Runs"));
+            ActionURL runsURL = new ActionURL(MS2Controller.ShowAllRunsAction.class, ContainerManager.getRoot())
+                    .addParameter(MS2Manager.getDataRegionNameRuns() + ".FastaId~eq", "${FastaId}");
+            rgn.getDisplayColumn("Runs").setURL(runsURL);
+        });
     }
 
     @NotNull
