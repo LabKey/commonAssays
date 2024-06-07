@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-DROP VIEW IF EXISTS ms2.Peptides;
-DROP VIEW IF EXISTS ms2.SimplePeptides;
-DROP VIEW IF EXISTS ms2.ProteinGroupsWithQuantitation;
-DROP VIEW IF EXISTS ms2.ExperimentRuns;
-DROP VIEW IF EXISTS ms2.FastaAdmin;
-DROP VIEW IF EXISTS ms2.Spectra;
+EXEC core.fn_dropifexists 'Peptides', 'ms2', 'VIEW', NULL
+EXEC core.fn_dropifexists 'SimplePeptides', 'ms2', 'VIEW', NULL
+EXEC core.fn_dropifexists 'ProteinGroupsWithQuantitation', 'ms2', 'VIEW', NULL
+EXEC core.fn_dropifexists 'ExperimentRuns', 'ms2', 'VIEW', NULL
+EXEC core.fn_dropifexists 'FastaAdmin', 'ms2', 'VIEW', NULL
+EXEC core.fn_dropifexists 'Spectra', 'ms2', 'VIEW', NULL
 GO

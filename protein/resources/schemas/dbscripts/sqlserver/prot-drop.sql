@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
--- This view now lives in the ms2 schema. Keep this DROP statement until at least 2025
-DROP VIEW IF EXISTS prot.FastaAdmin;
+-- This view now lives in the ms2 schema (if present). Keep this DROP statement until at least 2025
+EXEC core.fn_dropifexists 'FastaAdmin', 'prot', 'VIEW', NULL
 GO
