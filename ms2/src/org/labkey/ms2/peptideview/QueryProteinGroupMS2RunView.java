@@ -40,7 +40,6 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.PeptideManager;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.springframework.validation.BindException;
@@ -48,10 +47,6 @@ import org.springframework.validation.BindException;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * User: jeckels
- * Date: Apr 11, 2007
- */
 public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
 {
     private static final String DATA_REGION_NAME = "ProteinGroups";

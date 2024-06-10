@@ -38,7 +38,7 @@ public class GOPieToolTipGenerator implements PieToolTipGenerator
         String tip = null;
         try
         {
-            tip = ProteinDictionaryHelpers.getGODefinitionFromAcc(acc);
+            tip = GoHelpers.getGODefinitionFromAcc(acc);
         }
         catch (Exception e)
         {

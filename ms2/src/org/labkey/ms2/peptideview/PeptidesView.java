@@ -21,24 +21,19 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.DataView;
+import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * User: Dave
- * Date: Feb 29, 2008
- * Time: 11:01:37 AM
- */
 public class PeptidesView extends QueryView
 {
     public static final String DATAREGION_NAME = "pv";
@@ -108,8 +103,8 @@ public class PeptidesView extends QueryView
 
         ContainerFilter.Type type = _searchSubfolders ? ContainerFilter.Type.CurrentAndSubfolders : ContainerFilter.Type.Current;
         ContainerFilter containerFilter = type.create(getSchema());
-        return MS2Service.get().createPeptidesTableInfo(getViewContext().getUser(),
-                getViewContext().getContainer(), false, containerFilter, filter, defCols);
+        return new MS2Schema(getViewContext().getUser(),
+                getViewContext().getContainer()).createPeptidesTableInfo(false, containerFilter, filter, defCols);
     }
 
     @Override
@@ -119,5 +114,4 @@ public class PeptidesView extends QueryView
         view.getRenderContext().setBaseSort(new Sort("Fraction/Run/Description,Scan,Charge"));
         return view;
     }
-
 }

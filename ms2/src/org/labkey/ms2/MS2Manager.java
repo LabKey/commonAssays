@@ -54,6 +54,9 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.fasta.FastaFile;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.DeletePermission;
@@ -72,9 +75,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
-import org.labkey.ms2.protein.ProteinManager;
-import org.labkey.ms2.protein.ProteinSchema;
-import org.labkey.ms2.protein.fasta.FastaFile;
+import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.LibraQuantResult;
@@ -1285,8 +1286,6 @@ public class MS2Manager
     {
         return new SqlSelector(getSchema(), "SELECT COUNT(*) FROM " + getTableInfoRuns() + " WHERE Deleted = ? AND Container = ?", Boolean.FALSE, c).getObject(Long.class);
     }
-
-    public static final String NEGATIVE_HIT_PREFIX = "rev_";
 
     public static void validateRuns(List<MS2Run> runs, boolean requireSameType, User user) throws UnauthorizedException, RunListException
     {

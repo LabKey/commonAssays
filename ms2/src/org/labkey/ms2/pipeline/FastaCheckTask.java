@@ -24,10 +24,9 @@ import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
-import org.labkey.ms2.protein.fasta.FastaValidator;
+import org.labkey.api.protein.fasta.FastaValidator;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

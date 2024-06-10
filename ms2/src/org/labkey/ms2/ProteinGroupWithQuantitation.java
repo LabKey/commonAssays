@@ -20,6 +20,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.security.User;
+import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.reader.ProteinGroup;
 
 import java.util.List;

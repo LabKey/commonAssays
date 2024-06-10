@@ -30,6 +30,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
+import org.labkey.ms2.protein.Protein;
 
 import java.util.ArrayList;
 import java.util.Arrays;

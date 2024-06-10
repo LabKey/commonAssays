@@ -20,7 +20,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Controller.PeptideChartsAction" %>
-<%@ page import="org.labkey.ms2.protein.tools.ProteinDictionaryHelpers.GoTypes" %>
+<%@ page import="org.labkey.ms2.protein.tools.GoHelpers.GoTypes" %>
 <%@ page import="java.util.Map" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>

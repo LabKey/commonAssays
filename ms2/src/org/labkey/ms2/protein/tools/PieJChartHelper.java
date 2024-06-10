@@ -21,9 +21,9 @@ import org.jfree.chart.plot.PiePlot;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -110,7 +110,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
        single SeqId.
 
     */
-    public static PieJChartHelper prepareGOPie(String title, SQLFragment distinctSeqIdsSql, ProteinDictionaryHelpers.GoTypes goChartType, Container c) throws SQLException
+    public static PieJChartHelper prepareGOPie(String title, SQLFragment distinctSeqIdsSql, GoHelpers.GoTypes goChartType, Container c) throws SQLException
     {
         SQLFragment sql = new SQLFragment();
 
@@ -124,7 +124,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
         sql.append(" ON gt.acc = ");
         sql.append(ProteinSchema.getSqlDialect().getSubstringFunction("pa.AnnotVal", "1", "10"));
         sql.append(" AND pa.");
-        sql.append(ProteinDictionaryHelpers.getAnnotTypeWhereClause(goChartType));
+        sql.append(GoHelpers.getAnnotTypeWhereClause(goChartType));
         sql.append(" AND pa.SeqId IN (");
         sql.append(distinctSeqIdsSql);
         sql.append(") LEFT OUTER JOIN\n      ");

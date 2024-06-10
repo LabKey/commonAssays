@@ -17,16 +17,15 @@
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
+<%@ page import="org.labkey.api.protein.ProteinManager" %>
+<%@ page import="org.labkey.api.protein.fasta.FastaFile" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
 <%@ page import="org.labkey.ms2.pipeline.mascot.MascotRun" %>
-<%@ page import="org.labkey.ms2.protein.ProteinManager" %>
-<%@ page import="org.labkey.ms2.protein.fasta.FastaFile" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Collections" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());

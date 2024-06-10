@@ -17,11 +17,11 @@
 package org.labkey.ms2.reader;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Modification;
-import org.labkey.ms2.protein.fasta.FastaProtein;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;

@@ -26,6 +26,8 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -42,7 +44,6 @@ import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.peptideview.ProteinDisplayColumnFactory;
-import org.labkey.ms2.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -392,7 +393,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
                 fastaNameColumn.setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer(), showProteinURL));
                 fastaNameColumn.setURL(StringExpressionFactory.createURL(showProteinURL));
 
-                sequenceTable.addPeptideAggregationColumns();
+                addPeptideAggregationColumns(sequenceTable);
 
                 return sequenceTable;
             }
@@ -405,6 +406,31 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         getMutableColumn("SeqId").setLabel("Search Engine Protein");
         getMutableColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURL));
         getMutableColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
+    }
+
+    public static void addPeptideAggregationColumns(SequencesTableInfo<MS2Schema> tableInfo)
+    {
+        var aaColumn = tableInfo.wrapColumn("AACoverage", tableInfo.getRealTable().getColumn("ProtSequence"));
+        aaColumn.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            ColumnInfo seqIdColumn = colInfo.getParentTable().getColumn("SeqId");
+            return new QueryAACoverageColumn(colInfo, seqIdColumn, peptideColumn);
+        });
+        tableInfo.addColumn(aaColumn);
+
+        var totalCount = tableInfo.wrapColumn("Peptides", tableInfo.getRealTable().getColumn("SeqId"));
+        totalCount.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            return new PeptideCountCoverageColumn(colInfo, peptideColumn, "Peptides");
+        });
+        tableInfo.addColumn(totalCount);
+
+        var uniqueCount = tableInfo.wrapColumn("UniquePeptides", tableInfo.getRealTable().getColumn("SeqId"));
+        uniqueCount.setDisplayColumnFactory(colInfo -> {
+            ColumnInfo peptideColumn = colInfo.getParentTable().getColumn("Peptide");
+            return new UniquePeptideCountCoverageColumn(colInfo, peptideColumn, "Unique");
+        });
+        tableInfo.addColumn(uniqueCount);
     }
 
     private void addScoreColumns()
