@@ -18,7 +18,7 @@ CREATE VIEW ms2.Spectra AS
     FROM ms2.SpectraData sd INNER JOIN
         ms2.Fractions f ON sd.Fraction = f.Fraction;
 
-CREATE VIEW prot.FastaAdmin AS
+CREATE VIEW ms2.FastaAdmin AS
     SELECT ff.FileName, ff.FastaId, ff.Loaded, runs.Runs
     FROM prot.FastaFiles ff LEFT OUTER JOIN
         (SELECT FastaId, COUNT(Run) AS Runs

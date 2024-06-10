@@ -22,14 +22,17 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.protein.AnnotationView;
 import org.labkey.api.protein.PeptideCharacteristic;
+import org.labkey.api.protein.PeptideSearchForm;
 import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.Replicate;
 import org.labkey.api.protein.SimpleProtein;
@@ -44,6 +47,7 @@ import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -208,6 +212,12 @@ public class ProteinServiceImpl implements ProteinService
 
     private static final Cache<String, List<ProteinFeature>> FEATURE_CACHE =
             CacheManager.getBlockingCache(100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
+
+    @Override
+    public ActionURL getProteinBeginUrl(Container c)
+    {
+        return new ActionURL(ProteinController.BeginAction.class, c);
+    }
 
     @Override
     public List<ProteinFeature> getProteinFeatures(String accession)

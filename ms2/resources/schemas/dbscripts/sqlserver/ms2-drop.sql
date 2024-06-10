@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
--- DROP all views (current and obsolete)
-
--- NOTE: Don't remove any of these drop statements, even if we stop re-creating the view in *-create.sql. Drop statements must
--- remain in place so we can correctly upgrade from older versions, which we commit to for two years after each release.
-
 EXEC core.fn_dropifexists 'Peptides', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'SimplePeptides', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'ProteinGroupsWithQuantitation', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'ExperimentRuns', 'ms2', 'VIEW', NULL
-EXEC core.fn_dropifexists 'FastaAdmin', 'prot', 'VIEW', NULL
+EXEC core.fn_dropifexists 'FastaAdmin', 'ms2', 'VIEW', NULL
 EXEC core.fn_dropifexists 'Spectra', 'ms2', 'VIEW', NULL
 GO

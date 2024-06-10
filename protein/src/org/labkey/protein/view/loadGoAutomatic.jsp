@@ -16,7 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.protein.go.GoLoader" %>
-<%@ page import="org.labkey.protein.AnnotController" %>
+<%@ page import="org.labkey.protein.ProteinController" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -48,8 +48,8 @@ Your LabKey Server must be able to connect via the Internet to geneontology.org.
     normally. You can monitor the process by refreshing the status information on the next page.<br><br>
 
 If you wish to proceed, click the "Continue" button. Otherwise, click "Cancel".<br><br>
-<labkey:form action="<%=urlFor(AnnotController.LoadGoAction.class)%>" method="post">
+<labkey:form action="<%=urlFor(ProteinController.LoadGoAction.class)%>" method="post">
     <%= button("Continue").submit(true) %>
-    <%= button("Cancel").href(AnnotController.getShowProteinAdminUrl()) %>
+    <%= button("Cancel").href(ProteinController.getShowProteinAdminUrl()) %>
 </labkey:form>
 </td></tr></table>

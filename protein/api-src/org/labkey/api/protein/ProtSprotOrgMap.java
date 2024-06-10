@@ -17,21 +17,16 @@ package org.labkey.api.protein;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.services.ServiceRegistry;
-import org.labkey.api.util.Path;
 import org.labkey.api.util.UnexpectedException;
-import org.labkey.api.view.ViewServlet;
-import org.labkey.api.webdav.WebdavResolver;
-import org.labkey.api.webdav.WebdavResource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -43,8 +38,7 @@ import java.util.Set;
 public class ProtSprotOrgMap
 {
     private static final Logger _log = LogManager.getLogger(ProtSprotOrgMap.class);
-    @Migrate // TODO: Move this file into Protein module
-    private static final String FILE = "/MS2/externalData/ProtSprotOrgMap.txt";
+    private static final String FILE = "ProtSprotOrgMap.txt";
     private static final int SPOM_BATCH_SIZE = 1000;
 
     private static final Object SPOM_LOCK = new Object();
@@ -61,12 +55,15 @@ public class ProtSprotOrgMap
 
             DbScope scope = ProteinSchema.getSchema().getScope();
 
-            try (Connection conn = scope.getConnection(); PreparedStatement ps = conn.prepareStatement(
+            try (Connection conn = scope.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
                     "INSERT INTO " + ProteinSchema.getTableInfoSprotOrgMap() +
                             " (SprotSuffix,SuperKingdomCode,TaxonId,FullName,Genus,Species,CommonName,Synonym) " +
-                            " VALUES (?,?,?,?,?,?,?,?)");)
+                            " VALUES (?,?,?,?,?,?,?,?)");
+                 Reader reader = new InputStreamReader(getSProtOrgMap(), StandardCharsets.UTF_8);
+                 TabLoader t = new TabLoader(reader, false)
+            )
             {
-                TabLoader t = new TabLoader(new InputStreamReader(getSProtOrgMap()), false);
                 Set<String> sprotSuffixes = new HashSet<>();
 
                 for (Map<String, Object> curRec : t)
@@ -145,20 +142,7 @@ public class ProtSprotOrgMap
 
     private static InputStream getSProtOrgMap() throws IOException
     {
-        WebdavResource r = ServiceRegistry.get(WebdavResolver.class).lookup(Path.parse(FILE));
-        InputStream is;
-        if (null != r)
-        {
-            is = r.getInputStream(null);
-            if (null != is)
-                return is;
-        }
-        is = ViewServlet.getViewServletContext().getResourceAsStream(FILE);
-        if (is == null)
-        {
-            throw new FileNotFoundException("Unable to find " + FILE + ". This can be caused when Tomcat redeploys the webapp when running. Please try restarting Tomcat.");
-        }
-        return is;
+        return ProtSprotOrgMap.class.getClassLoader().getResourceAsStream(FILE);
     }
 }
 
