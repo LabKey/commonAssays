@@ -1,15 +1,21 @@
 package org.labkey.api.protein;
 
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
+import org.labkey.api.data.Selector;
+import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.dialect.SqlDialect;
 
-@Migrate
+import java.util.function.Function;
+
 public class ProteinSchema
 {
     private static final String SCHEMA_NAME = "prot";
+
+    private static Function<SimpleFilter, Selector> _validForFastaDeleteSelectorProvider = filter -> new TableSelector(ProteinSchema.getTableInfoFastaFiles(), filter, null);
+    private static String _invalidForFastaDeleteReason = "don't exist";
 
     public static String getSchemaName()
     {
@@ -34,12 +40,6 @@ public class ProteinSchema
     public static TableInfo getTableInfoFastaSequences()
     {
         return getSchema().getTable("FastaSequences");
-    }
-
-    @Deprecated // TODO: Move to ms2 schema
-    public static TableInfo getTableInfoFastaAdmin()
-    {
-        return getSchema().getTable("FastaAdmin");
     }
 
     public static TableInfo getTableInfoAnnotInsertions()
@@ -125,5 +125,25 @@ public class ProteinSchema
     public static TableInfo getTableInfoGoTermSynonym()
     {
         return getSchema().getTable("GoTermSynonym");
+    }
+
+    public static void registerValidForFastaDeleteSelectorProvider(Function<SimpleFilter, Selector> validForFastaDeleteSelectorProvider)
+    {
+        _validForFastaDeleteSelectorProvider = validForFastaDeleteSelectorProvider;
+    }
+
+    public static Function<SimpleFilter, Selector> getValidForFastaDeleteSelectorProvider()
+    {
+        return _validForFastaDeleteSelectorProvider;
+    }
+
+    public static void registerInvalidForFastaDeleteReason(String invalidForFastaDeleteReason)
+    {
+        _invalidForFastaDeleteReason = invalidForFastaDeleteReason;
+    }
+
+    public static String getInvalidForFastaDeleteReason()
+    {
+        return _invalidForFastaDeleteReason;
     }
 }

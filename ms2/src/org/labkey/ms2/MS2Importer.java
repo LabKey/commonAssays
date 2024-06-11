@@ -788,10 +788,9 @@ public abstract class MS2Importer
         }
     }
 
-
     // Calculates progress of an MS2 import.  PepXML file progress is based on offset within the peptide portion of the file;
     // progress through each fraction's spectra based on actual number of scans imported vs. expected.
-    protected class MS2Progress
+    public class MS2Progress
     {
         // Default assumption is equal weighting between scans and spectra... change this value if (for example) importing
         // a spectrum takes significantly longer than importing a peptide.  Value is time to import a peptide as a fraction

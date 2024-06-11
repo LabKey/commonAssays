@@ -18,7 +18,7 @@ public class ProteinCoverageViewServiceImpl implements ProteinCoverageViewServic
     private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<ProteinViewBean> beanModifier)
     {
         ProteinViewBean bean = new ProteinViewBean();
-        bean.protein = org.labkey.ms2.protein.ProteinManager.getProtein(seqId);
+        bean.protein = ProteinManager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = ProteinService.get().getProteinFeatures(accessionForFeatures);

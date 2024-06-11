@@ -20,14 +20,14 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.protein.IdentifierType;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.protein.AnnotController.SetBestNameForm;
+import org.labkey.protein.ProteinController.SetBestNameForm.NameType;
 
 public class SetBestNameRunnable implements Runnable
 {
     private final int[] _fastaIds;
-    private final SetBestNameForm.NameType _nameType;
+    private final NameType _nameType;
 
-    public SetBestNameRunnable(int[] fastaIds, SetBestNameForm.NameType nameType)
+    public SetBestNameRunnable(int[] fastaIds, NameType nameType)
     {
         _fastaIds = fastaIds;
         _nameType = nameType;

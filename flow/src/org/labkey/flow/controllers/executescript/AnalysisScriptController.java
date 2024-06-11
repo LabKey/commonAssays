@@ -703,7 +703,8 @@ public class AnalysisScriptController extends BaseFlowController
                 try
                 {
                     // save the uploaded workspace
-                    Path dir = AssayFileWriter.ensureUploadDirectoryPath(getContainer(), DIR_NAME);
+                    Path path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
+                    Path dir = AssayFileWriter.ensureUploadDirectoryPath(path);
                     Path uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
                     file.transferTo(uploadedFile);
 

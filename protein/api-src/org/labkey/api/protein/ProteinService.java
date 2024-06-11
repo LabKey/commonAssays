@@ -16,10 +16,8 @@
 package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.services.ServiceRegistry;
@@ -29,7 +27,6 @@ import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,186 +88,7 @@ public interface ProteinService
         WebPartView createView(ViewContext viewContext, FormType form);
     }
 
+    ActionURL getProteinBeginUrl(Container c);
+
     List<ProteinFeature> getProteinFeatures(String accession);
-
-    default ActionURL getProteinBeginUrl(Container c)
-    {
-        // TODO: Temporary... switch to reference action class once ProteinServiceImpl resides in Protein module
-        return new ActionURL("protein", "begin.view", c);
-    }
-
-    abstract class PeptideSearchForm extends QueryViewAction.QueryExportForm
-    {
-        public enum ParamNames
-        {
-            pepSeq,
-            exact,
-            subfolders,
-            runIds
-        }
-
-        private String _pepSeq = "";
-        private boolean _exact = false;
-        private boolean _subfolders = false;
-        private String _runIds = null;
-
-        public String getPepSeq()
-        {
-            return _pepSeq;
-        }
-
-        public void setPepSeq(String pepSeq)
-        {
-            _pepSeq = pepSeq;
-        }
-
-        public boolean isExact()
-        {
-            return _exact;
-        }
-
-        public void setExact(boolean exact)
-        {
-            _exact = exact;
-        }
-
-        public boolean isSubfolders()
-        {
-            return _subfolders;
-        }
-
-        public void setSubfolders(boolean subfolders)
-        {
-            _subfolders = subfolders;
-        }
-
-        public String getRunIds()
-        {
-            return _runIds;
-        }
-
-        public void setRunIds(String runIds)
-        {
-            _runIds = runIds;
-        }
-
-        public abstract SimpleFilter.FilterClause createFilter(String sequenceColumnName);
-    }
-
-    abstract class ProteinSearchForm extends QueryViewAction.QueryExportForm
-    {
-        private String _identifier;
-        private String _peptideFilterType = "none";
-        private Float _peptideProphetProbability;
-        private boolean _includeSubfolders;
-        private boolean _exactMatch;
-        private boolean _restrictProteins;
-        protected String _defaultCustomView;
-        private boolean _showMatchingProteins = true;
-        private boolean _showProteinGroups = true;
-        private int[] _seqIds;
-        private String _location;
-
-        public String getDefaultCustomView()
-        {
-            return _defaultCustomView;
-        }
-
-        public void setDefaultCustomView(String defaultCustomView)
-        {
-            _defaultCustomView = defaultCustomView;
-        }
-
-        public boolean isExactMatch()
-        {
-            return _exactMatch;
-        }
-
-        public void setExactMatch(boolean exactMatch)
-        {
-            _exactMatch = exactMatch;
-        }
-
-        public String getPeptideFilterType()
-        {
-            return _peptideFilterType;
-        }
-
-        public void setPeptideFilterType(String peptideFilterType)
-        {
-            _peptideFilterType = peptideFilterType;
-        }
-
-        public Float getPeptideProphetProbability()
-        {
-            return _peptideProphetProbability;
-        }
-
-        public void setPeptideProphetProbability(Float peptideProphetProbability)
-        {
-            _peptideProphetProbability = peptideProphetProbability;
-        }
-
-        public String getIdentifier()
-        {
-            return _identifier;
-        }
-
-        public void setIdentifier(String identifier)
-        {
-            _identifier = identifier;
-        }
-
-        public boolean isIncludeSubfolders()
-        {
-            return _includeSubfolders;
-        }
-
-        public void setIncludeSubfolders(boolean includeSubfolders)
-        {
-            _includeSubfolders = includeSubfolders;
-        }
-
-        public boolean isRestrictProteins()
-        {
-            return _restrictProteins;
-        }
-
-        public void setRestrictProteins(boolean restrictProteins)
-        {
-            _restrictProteins = restrictProteins;
-        }
-
-        public abstract int[] getSeqId();
-
-        public boolean isShowMatchingProteins()
-        {
-            return _showMatchingProteins;
-        }
-
-        public void setShowMatchingProteins(boolean showMatchingProteins)
-        {
-            _showMatchingProteins = showMatchingProteins;
-        }
-
-        public boolean isShowProteinGroups()
-        {
-            return _showProteinGroups;
-        }
-
-        public void setShowProteinGroups(boolean showProteinGroups)
-        {
-            _showProteinGroups = showProteinGroups;
-        }
-
-        public String getLocation()
-        {
-            return _location;
-        }
-
-        public void setLocation(String location)
-        {
-            _location = location;
-        }
-    }
 }

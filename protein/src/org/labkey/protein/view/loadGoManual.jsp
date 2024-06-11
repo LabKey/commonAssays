@@ -17,12 +17,12 @@
 %>
 <%@ page import="org.labkey.api.protein.go.GoLoader" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
-<%@ page import="org.labkey.protein.AnnotController" %>
+<%@ page import="org.labkey.protein.ProteinController" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     boolean loaded = GoLoader.isGoLoaded().booleanValue();
-    ActionURL loadGo = urlFor(AnnotController.LoadGoAction.class).addParameter("manual", 1);
+    ActionURL loadGo = urlFor(ProteinController.LoadGoAction.class).addParameter("manual", 1);
 %>
 <table><tr><td>
     This is a deprecated feature. It will be completely removed in a future version.<br><br>
@@ -60,7 +60,7 @@ Click "Cancel" to return to the Protein Databases Admin page.<br><br>
 <labkey:form action="<%=loadGo%>" enctype="multipart/form-data" method="post">
     <input type="file" name="gofile" id="gofile" size="60">&nbsp;<label id="filename"></label><br><br>
     <%= button("Continue").submit(true) %>
-    <%= button("Cancel").href(AnnotController.getShowProteinAdminUrl()) %>
+    <%= button("Cancel").href(ProteinController.getShowProteinAdminUrl()) %>
 </labkey:form>
 </td></tr></table>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">

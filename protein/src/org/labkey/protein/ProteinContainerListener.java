@@ -17,9 +17,10 @@
 package org.labkey.protein;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
+import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.security.User;
 
 import java.beans.PropertyChangeEvent;
@@ -33,11 +34,13 @@ public class ProteinContainerListener implements ContainerListener
     {
     }
 
-    @Migrate
     @Override
     public void containerDeleted(Container c, User user)
     {
-        // TODO: Move CustomAnnotationSet delete here (from MS2ContainerListener) once this module manages the underlying schema
+        for (CustomAnnotationSet set : CustomAnnotationSetManager.getCustomAnnotationSets(c, false).values())
+        {
+            CustomAnnotationSetManager.deleteCustomAnnotationSet(set);
+        }
     }
 
     @Override

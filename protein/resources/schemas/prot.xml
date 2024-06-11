@@ -83,7 +83,6 @@
 		</columns>
 	</table>
 	<table tableName="FastaFiles" tableDbType="TABLE">
-		<deleteUrl>ms2/deleteDataBases.view</deleteUrl>
 		<columns>
 			<column columnName="FastaId">
                 <isHidden>true</isHidden>
@@ -93,11 +92,6 @@
 			<column columnName="FileChecksum"/>
             <column columnName="ScoringAnalysis"/>
 		</columns>
-		<buttonBarOptions includeStandardButtons="true">
-			<item text="Reload FASTA" requiresSelection="true" permission="ADMIN" insertPosition="end">
-				<target method="POST">ms2/reloadFasta.view</target>
-			</item>
-		</buttonBarOptions>
 	</table>
 	<table tableName="FastaSequences" tableDbType="TABLE">
 		<columns>
@@ -252,52 +246,6 @@
 			<column columnName="CommonName"/>
 			<column columnName="Synonym"/>
 		</columns>
-	</table>
-	<table tableName="FastaAdmin" tableDbType="VIEW">
-		<deleteUrl>ms2/deleteDataBases.view</deleteUrl>
-		<columns>
-			<column columnName="Filename">
-				<columnTitle>FASTA File Name</columnTitle>
-				<inputType>text</inputType>
-				<displayWidth>400</displayWidth>
-				<scale>200</scale>
-				<inputLength>40</inputLength>
-				<isReadOnly>false</isReadOnly>
-				<isUserEditable>false</isUserEditable>
-			</column>
-			<column columnName="FastaId">
-				<datatype>int identity</datatype>
-				<columnTitle>ID</columnTitle>
-				<inputType>text</inputType>
-				<displayWidth>50</displayWidth>
-				<inputLength>10</inputLength>
-				<nullable>false</nullable>
-				<isAutoInc>true</isAutoInc>
-				<isReadOnly>true</isReadOnly>
-				<isKeyField>true</isKeyField>
-			</column>
-			<column columnName="Loaded">
-				<columnTitle>Loaded</columnTitle>
-				<inputType>text</inputType>
-				<formatString>DateTime</formatString>
-				<displayWidth>120</displayWidth>
-				<scale>100</scale>
-				<inputLength>23</inputLength>
-				<isReadOnly>true</isReadOnly>
-			</column>
-			<column columnName="Runs">
-				<columnTitle>Runs</columnTitle>
-				<inputType>text</inputType>
-				<formatString>#,###</formatString>
-				<displayWidth>40</displayWidth>
-				<inputLength>10</inputLength>
-				<nullable>false</nullable>
-				<isReadOnly>true</isReadOnly>
-				<isUserEditable>true</isUserEditable>
-			</column>
-		</columns>
-		<tableTitle>FastaAdmin</tableTitle>
-		<pkColumnName>FastaId</pkColumnName>
 	</table>
 	<table tableName="GoGraphPath" tableDbType="TABLE">
 		<columns>
