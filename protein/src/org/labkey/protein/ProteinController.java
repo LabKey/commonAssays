@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.LabKeyError;
+import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
@@ -51,10 +52,14 @@ import org.labkey.api.protein.CustomAnnotationSet;
 import org.labkey.api.protein.CustomAnnotationSetManager;
 import org.labkey.api.protein.CustomAnnotationType;
 import org.labkey.api.protein.DefaultAnnotationLoader;
+import org.labkey.api.protein.PepSearchModel;
+import org.labkey.api.protein.PeptideFilterSearchForm;
+import org.labkey.api.protein.PeptideSearchForm;
 import org.labkey.api.protein.ProtSprotOrgMap;
 import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.XMLProteinLoader;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaParsingForm;
@@ -64,6 +69,7 @@ import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
+import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
@@ -1165,6 +1171,62 @@ public class ProteinController extends SpringActionController
             addProteinAdminNavTrail(root, _insertion.getFiletype() + " Annotation Insertion Details: " + _insertion.getFilename(), getPageConfig(), null);
         }
     }
+
+    @RequiresPermission(ReadPermission.class)
+    public static class PepSearchAction extends QueryViewAction<PeptideFilterSearchForm, QueryView>
+    {
+        public PepSearchAction()
+        {
+            super(PeptideFilterSearchForm.class);
+        }
+
+        @Override
+        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion)
+        {
+            for (QueryViewProvider<PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            {
+                if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
+                {
+                    return viewProvider.createView(getViewContext(), pepSearchForm, bindErrors);
+                }
+            }
+
+            throw new NotFoundException("Unknown data region: " + dataRegion);
+        }
+
+        @Override
+        public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors)
+        {
+            //create the search view
+            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(), form.isExact(), form.isSubfolders(), form.getRunIds());
+            JspView<PepSearchModel> searchView = new JspView<>("/org/labkey/protein/view/PepSearchView.jsp", searchModel);
+            searchView.setTitle("Search Criteria");
+
+            //if no search terms were specified, return just the search view
+            if (searchModel.noSearchTerms())
+            {
+                searchModel.setErrorMsg("You must specify at least one Peptide Sequence");
+                return searchView;
+            }
+
+            VBox result = new VBox(searchView);
+
+            for (QueryViewProvider<PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
+            {
+                QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
+                if (queryView != null)
+                    result.addView(queryView);
+            }
+
+            return result;
+        }
+
+        @Override
+        public void addNavTrail(NavTree root)
+        {
+            root.addChild("Peptide Search Results");
+        }
+    } //PepSearchAction
 
     public static class TestCase extends AbstractActionPermissionTest
     {

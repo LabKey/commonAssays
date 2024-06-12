@@ -220,6 +220,23 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     @Override
+    public ActionURL getPeptideSearchUrl(Container c)
+    {
+        return new ActionURL(ProteinController.PepSearchAction.class, c);
+    }
+
+    @Override
+    public ActionURL getPeptideSearchUrl(Container c, String sequence)
+    {
+        ActionURL url = getPeptideSearchUrl(c);
+
+        if (null != sequence)
+            url.addParameter(PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
+
+        return url;
+    }
+
+    @Override
     public List<ProteinFeature> getProteinFeatures(String accession)
     {
         if (accession != null)

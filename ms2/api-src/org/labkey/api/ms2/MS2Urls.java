@@ -25,6 +25,4 @@ import org.labkey.api.data.Container;
 public interface MS2Urls extends UrlProvider
 {
     ActionURL getProteinSearchUrl(Container container);
-
-    ActionURL getPepSearchUrl(Container container);
 }

@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2;
+package org.labkey.api.protein;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.view.ActionURL;
-import org.labkey.ms2.MS2Controller.PepSearchAction;
 
 /**
  * Model for the PepSearchView.jsp
- * 
- * User: Dave
- * Date: Jan 9, 2008
- * Time: 9:25:10 AM
  */
 public class PepSearchModel
 {
@@ -37,7 +32,7 @@ public class PepSearchModel
 
     public PepSearchModel(Container container)
     {
-        _resultsUri = new ActionURL(PepSearchAction.class, container);
+        _resultsUri = ProteinService.get().getPeptideSearchUrl(container);
     }
 
     public PepSearchModel(Container container, String pepSeq, boolean exact, boolean includeSubfolders, String runIds)
@@ -86,7 +81,7 @@ public class PepSearchModel
 
     public boolean noSearchTerms()
     {
-        return (null == _pepSeq || _pepSeq.length() == 0);
+        return (null == _pepSeq || _pepSeq.isEmpty());
     }
 
     public String getErrorMsg()
@@ -101,7 +96,7 @@ public class PepSearchModel
 
     public boolean hasErrorMsg()
     {
-        return (null != _errorMsg && _errorMsg.length() > 0);
+        return (null != _errorMsg && !_errorMsg.isEmpty());
     }
 
     public String getRunIds()

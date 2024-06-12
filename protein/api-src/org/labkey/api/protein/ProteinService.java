@@ -16,7 +16,6 @@
 package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.QueryViewProvider;
@@ -64,7 +63,6 @@ public interface ProteinService
      */
     Map<String, Set<String>> getIdentifiers(String description, String... names);
 
-    @Migrate // The register*() methods are called by TargetedMS and MaxQuant, but the get() methods are called only by MS2 (??)
     void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider);
     void registerPeptideSearchView(QueryViewProvider<PeptideSearchForm> provider);
     void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider);
@@ -91,4 +89,8 @@ public interface ProteinService
     ActionURL getProteinBeginUrl(Container c);
 
     List<ProteinFeature> getProteinFeatures(String accession);
+
+    ActionURL getPeptideSearchUrl(Container c);
+
+    ActionURL getPeptideSearchUrl(Container c, String sequence);
 }

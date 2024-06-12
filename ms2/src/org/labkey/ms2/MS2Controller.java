@@ -45,7 +45,6 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -82,8 +81,10 @@ import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.AnnotationView;
+import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.PeptideSearchForm;
+import org.labkey.api.protein.PeptideSequenceFilter;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
@@ -156,8 +157,8 @@ import org.labkey.ms2.compare.CompareQuery;
 import org.labkey.ms2.compare.RunColumn;
 import org.labkey.ms2.compare.SpectraCountQueryView;
 import org.labkey.ms2.peptideview.AbstractMS2RunView;
+import org.labkey.ms2.peptideview.AbstractMS2RunView.AbstractMS2QueryView;
 import org.labkey.ms2.peptideview.MS2RunViewType;
-import org.labkey.ms2.peptideview.PeptideSequenceFilter;
 import org.labkey.ms2.peptideview.PeptidesView;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
@@ -205,7 +206,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -259,14 +259,6 @@ public class MS2Controller extends SpringActionController
 
         if (null != title)
             root.addChild(title);
-    }
-
-    private void addAdminNavTrail(NavTree root, String adminPageTitle, ActionURL adminPageURL, String title, PageConfig page, String helpTopic)
-    {
-        page.setHelpTopic(null == helpTopic ? "ms2" : helpTopic);
-        root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
-        root.addChild(adminPageTitle, adminPageURL);
-        root.addChild(title);
     }
 
     private AbstractMS2RunView getPeptideView(String grouping, MS2Run... runs)
@@ -378,7 +370,6 @@ public class MS2Controller extends SpringActionController
         return url;
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ShowRunAction extends SimpleViewAction<RunForm>
     {
@@ -414,7 +405,7 @@ public class MS2Controller extends SpringActionController
                 }
             }
 
-            WebPartView grid = peptideView.createGridView(form);
+            AbstractMS2QueryView grid = peptideView.createGridView(form);
 
             VBox vBox = new VBox();
             JspView<RunSummaryBean> runSummary = new JspView<>("/org/labkey/ms2/runSummary.jsp", new RunSummaryBean());
@@ -546,7 +537,6 @@ public class MS2Controller extends SpringActionController
         public int tryptic;
     }
 
-
     public static String defaultIfNull(String s, String def)
     {
         return (null != s ? s : def);
@@ -585,7 +575,6 @@ public class MS2Controller extends SpringActionController
 
         return m;
     }
-
 
     public static class CurrentFilterView extends JspView<CurrentFilterView.CurrentFilterBean>
     {
@@ -704,7 +693,6 @@ public class MS2Controller extends SpringActionController
         url.addReturnURL(returnURL);
         return url;
     }
-
 
     @RequiresPermission(UpdatePermission.class)
     public class RenameRunAction extends FormViewAction<RenameForm>
@@ -1032,6 +1020,7 @@ public class MS2Controller extends SpringActionController
             return _defaultViewType;
         }
 
+        @SuppressWarnings("unused")
         public void setDefaultViewType(String defaultViewType)
         {
             _defaultViewType = defaultViewType;
@@ -1042,6 +1031,7 @@ public class MS2Controller extends SpringActionController
             return _defaultViewName;
         }
 
+        @SuppressWarnings("unused")
         public void setDefaultViewName(String defaultViewName)
         {
             _defaultViewName = defaultViewName;
@@ -1052,6 +1042,7 @@ public class MS2Controller extends SpringActionController
             return _viewsToDelete;
         }
 
+        @SuppressWarnings("unused")
         public void setViewsToDelete(String[] viewsToDelete)
         {
             _viewsToDelete = viewsToDelete;
@@ -1443,7 +1434,7 @@ public class MS2Controller extends SpringActionController
             MS2Schema schema = new MS2Schema(getUser(), getContainer());
             SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
             MatchCriteria matchCriteria = MatchCriteria.getMatchCriteria(form.getTargetProteinMatchCriteria());
-            addProteinNameFilter(tableInfo, form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
+            tableInfo.addProteinNameFilter(form.getTargetProtein(), matchCriteria == null ? MatchCriteria.PREFIX : matchCriteria);
 
             ActionURL targetURL;
             try
@@ -2443,44 +2434,62 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresPermission(ReadPermission.class)
-    public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
+    public static class ProteinSearchGroupViewProvider implements QueryViewProvider<ProteinSearchForm>
     {
-        private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
-        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
-
-        public DoProteinSearchAction()
+        @Override
+        public String getDataRegionName()
         {
-            super(ProbabilityProteinSearchForm.class);
+            return DoProteinSearchAction.PROTEIN_DATA_REGION;
         }
 
         @Override
-        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
+        public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
-            if (PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
+            UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), MS2Schema.SCHEMA_NAME);
+            QuerySettings groupsSettings = schema.getSettings(ctx, DoProteinSearchAction.PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
+            QueryView groupsView = new QueryView(schema, groupsSettings, errors)
             {
-                return createProteinGroupSearchView(form, errors);
-            }
-            else if (POTENTIAL_PROTEIN_DATA_REGION.equalsIgnoreCase(dataRegion))
-            {
-                return createProteinSearchView(form, errors);
-            }
-
-            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
-            {
-                if (provider.getDataRegionName().equals(dataRegion))
+                @Override
+                protected TableInfo createTable()
                 {
-                    return provider.createView(getViewContext(), form, errors);
-                }
-            }
+                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
+                    table.addPeptideFilter((ProbabilityProteinSearchForm)form, getViewContext());
+                    int[] seqIds = form.getSeqId();
+                    if (seqIds.length <= 500)
+                    {
+                        table.addSeqIdFilter(seqIds);
+                    }
+                    else
+                    {
+                        table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                    }
+                    table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
 
-            throw new NotFoundException("Unsupported dataRegion name: " + dataRegion);
+                    return table;
+                }
+            };
+            groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+            // Disable R and other reporting until there's an implementation that respects the search criteria
+            groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
+            groupsView.setTitle("Protein Group Results");
+
+            return groupsView;
+        }
+    }
+
+    public static class ProteinSearchViewProvider implements QueryViewProvider<ProteinSearchForm>
+    {
+        @Override
+        public String getDataRegionName()
+        {
+            return DoProteinSearchAction.POTENTIAL_PROTEIN_DATA_REGION;
         }
 
-        private QueryView createProteinSearchView(ProbabilityProteinSearchForm form, BindException errors)
+        @Override
+        public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
-            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), ProteinUserSchema.NAME);
-            QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
+            UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), ProteinUserSchema.NAME);
+            QuerySettings proteinsSettings = schema.getSettings(ctx, DoProteinSearchAction.POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors)
             {
@@ -2499,52 +2508,45 @@ public class MS2Controller extends SpringActionController
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
-                addSeqIdFilter(sequencesTableInfo, seqIds);
+                sequencesTableInfo.addSeqIdFilter(seqIds);
             }
             else
             {
-                addProteinNameFilter(sequencesTableInfo, form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (form.isRestrictProteins())
                 {
-                    addContainerCondition(sequencesTableInfo, getContainer(), getUser(), true);
+                    addContainerCondition(sequencesTableInfo, ctx.getContainer(), ctx.getUser(), true);
                 }
             }
             proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
+
             return proteinsView;
         }
+    }
 
-        private QueryView createProteinGroupSearchView(final ProbabilityProteinSearchForm form, BindException errors)
+    @RequiresPermission(ReadPermission.class)
+    public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
+    {
+        private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
+        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
+
+        public DoProteinSearchAction()
         {
-            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-            QuerySettings groupsSettings = schema.getSettings(getViewContext(), PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
-            QueryView groupsView = new QueryView(schema, groupsSettings, errors)
+            super(ProbabilityProteinSearchForm.class);
+        }
+
+        @Override
+        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
+        {
+            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
             {
-                @Override
-                protected TableInfo createTable()
+                if (provider.getDataRegionName().equals(dataRegion))
                 {
-                    ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
-                    table.addPeptideFilter(form, getViewContext());
-                    int[] seqIds = form.getSeqId();
-                    if (seqIds.length <= 500)
-                    {
-                        table.addSeqIdFilter(seqIds);
-                    }
-                    else
-                    {
-                        table.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
-                    }
-                    table.addContainerCondition(getContainer(), getUser(), form.isIncludeSubfolders());
-
-                    return table;
+                    return provider.createView(getViewContext(), form, errors);
                 }
+            }
 
-            };
-            groupsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
-            // Disable R and other reporting until there's an implementation that respects the search criteria
-            groupsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
-
-            groupsView.setTitle("Protein Group Results");
-            return groupsView;
+            throw new NotFoundException("Unsupported dataRegion name: " + dataRegion);
         }
 
         @Override
@@ -2668,77 +2670,6 @@ public class MS2Controller extends SpringActionController
         tableInfo.addCondition(sql);
     }
 
-    public static List<String> getIdentifierParameters(String identifiers)
-    {
-        List<String> result = new ArrayList<>();
-        if (identifiers == null || identifiers.trim().isEmpty())
-        {
-            return result;
-        }
-
-        StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
-        while (st.hasMoreTokens())
-        {
-            result.add(st.nextToken());
-        }
-        return result;
-    }
-
-    // TODO: Move to SequencesTableInfo?
-    public static void addProteinNameFilter(SequencesTableInfo<?> tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
-    {
-        List<String> params = getIdentifierParameters(identifier);
-        SQLFragment sql = new SQLFragment();
-        sql.append("SeqId IN (\n");
-        sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinSchema.getTableInfoSequences(), "s");
-        sql.append(" WHERE ");
-        sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
-        sql.append("\n");
-        sql.append("UNION\n");
-        sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
-        sql.append(" WHERE ");
-        sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
-        sql.append("\n");
-        sql.append("UNION\n");
-        sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
-        sql.append(" WHERE ");
-        sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
-        sql.append("\n");
-        sql.append("UNION\n");
-        sql.append("SELECT SeqId FROM ");
-        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
-        sql.append(" WHERE ");
-        sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
-        sql.append("\n");
-        sql.append(")");
-        tableInfo.addCondition(sql);
-    }
-
-    private static void addSeqIdFilter(SequencesTableInfo<ProteinUserSchema> tableInfo, int[] seqIds)
-    {
-        SQLFragment sql = new SQLFragment("SeqId IN (");
-        if (seqIds.length == 0)
-        {
-            sql.append("NULL");
-        }
-        else
-        {
-            String separator = "";
-            for (long seqId : seqIds)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.append(Long.toString(seqId));
-            }
-        }
-        sql.append(")");
-        tableInfo.addCondition(sql, FieldKey.fromParts("SeqId"));
-    }
-
-
     public static class ProbabilityProteinSearchForm extends ProteinSearchForm implements HasViewContext
     {
         private Float _minimumProbability;
@@ -2828,7 +2759,7 @@ public class MS2Controller extends SpringActionController
             {
                 ProteinUserSchema schema = new ProteinUserSchema(_context.getUser(), _context.getContainer());
                 SequencesTableInfo<ProteinUserSchema> tableInfo = schema.createSequences();
-                addProteinNameFilter(tableInfo, getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
                     addContainerCondition(tableInfo, _context.getContainer(), _context.getUser(), true);
@@ -3466,7 +3397,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowProteinAJAXAction extends SimpleViewAction<DetailsForm>
+    public static class ShowProteinAJAXAction extends SimpleViewAction<DetailsForm>
     {
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
@@ -3485,7 +3416,7 @@ public class MS2Controller extends SpringActionController
                 run = form.validateRun();
                 QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run);
                 SimpleFilter filter = getAllPeptidesFilter(getViewContext(), getViewContext().getActionURL().clone(), run);
-                AbstractMS2RunView.AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
+                AbstractMS2QueryView gridView = peptideQueryView.createGridView(filter);
                 protein.setPeptides(new TableSelector(gridView.getTable(), PageFlowUtil.set("Peptide"), filter, new Sort("Peptide")).getArray(String.class));
             }
 
@@ -3812,7 +3743,7 @@ public class MS2Controller extends SpringActionController
             QueryPeptideMS2RunView peptideQueryView = new QueryPeptideMS2RunView(getViewContext(), run1);
 
             VBox view = new ProteinsView(getViewContext().getActionURL(), run1, form, proteins, null, peptideQueryView);
-            JspView summaryView = new JspView<>("/org/labkey/ms2/showProteinGroup.jsp", group);
+            JspView<ProteinGroupWithQuantitation> summaryView = new JspView<>("/org/labkey/ms2/showProteinGroup.jsp", group);
             summaryView.setTitle("Protein Group Details");
             summaryView.setFrame(WebPartView.FrameType.PORTAL);
 
@@ -3881,7 +3812,7 @@ public class MS2Controller extends SpringActionController
                 protein.setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;
-                JspView proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
+                JspView<ProteinViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
                 proteinSummary.setTitle(getProteinTitle(protein, true));
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
@@ -4251,6 +4182,7 @@ public class MS2Controller extends SpringActionController
             return _sliceTitle;
         }
 
+        @SuppressWarnings("unused")
         public void setSliceTitle(String sliceTitle)
         {
             _sliceTitle = sliceTitle;
@@ -4261,6 +4193,7 @@ public class MS2Controller extends SpringActionController
             return _sqids;
         }
 
+        @SuppressWarnings("unused")
         public void setSqids(String sqids)
         {
             _sqids = sqids;
@@ -4389,7 +4322,6 @@ public class MS2Controller extends SpringActionController
         g.render(response);
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ShowLightElutionGraphAction extends ExportAction<DetailsForm>
     {
@@ -4400,7 +4332,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresPermission(ReadPermission.class)
     public class ShowHeavyElutionGraphAction extends ExportAction<DetailsForm>
     {
@@ -4410,7 +4341,6 @@ public class MS2Controller extends SpringActionController
             showElutionGraph(response, form, false, true);
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public class ShowCombinedElutionGraphAction extends ExportAction<DetailsForm>
@@ -4484,6 +4414,7 @@ public class MS2Controller extends SpringActionController
             return _mascotUserAccount;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotUserAccount(String mascotUserAccount)
         {
             _mascotUserAccount = mascotUserAccount;
@@ -4514,6 +4445,7 @@ public class MS2Controller extends SpringActionController
             return _mascotHTTPProxy;
         }
 
+        @SuppressWarnings("unused")
         public void setMascotHTTPProxy(String mascotHTTPProxy)
         {
             _mascotHTTPProxy = mascotHTTPProxy;
@@ -4574,7 +4506,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private static class MS2SearchOptions
+    public static class MS2SearchOptions
     {
         private String _searchEngine;
         private boolean _saveValues = false;
@@ -5110,9 +5042,8 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-
     @RequiresNoPermission
-    public class UpdateShowPeptideAction extends SimpleRedirectAction
+    public class UpdateShowPeptideAction extends SimpleRedirectAction<Object>
     {
         @Override
         public ActionURL getRedirectURL(Object o)
@@ -5139,7 +5070,6 @@ public class MS2Controller extends SpringActionController
             return redirectURL;
         }
     }
-
 
     @RequiresPermission(ReadPermission.class)
     public static class ShowGZFileAction extends ExportAction<DetailsForm>
@@ -5499,66 +5429,27 @@ public class MS2Controller extends SpringActionController
             return new ActionURL(DoProteinSearchAction.class, container);
         }
 
-        @Override
-        public ActionURL getPepSearchUrl(Container container)
-        {
-            return getPepSearchUrl(container, null);
-        }
-
-        public static ActionURL getPepSearchUrl(Container container, String sequence)
-        {
-            ActionURL url = new ActionURL(PepSearchAction.class, container);
-            if (null != sequence)
-                url.addParameter(PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
-            return url;
-        }
-
         public static MS2UrlsImpl get()
         {
             return (MS2UrlsImpl) urlProvider(MS2Urls.class);
         }
     }
 
-    public static class PeptideFilterSearchForm extends PeptideSearchForm
+    public static class PeptidesViewProvider implements QueryViewProvider<PeptideSearchForm>
     {
         @Override
-        public PeptideSequenceFilter createFilter(String sequenceColumnName)
+        public String getDataRegionName()
         {
-            return new PeptideSequenceFilter(getPepSeq(), isExact(), sequenceColumnName, null);
-        }
-    }
-
-    @RequiresPermission(ReadPermission.class)
-    public static class PepSearchAction extends QueryViewAction<PeptideFilterSearchForm, QueryView>
-    {
-        public PepSearchAction()
-        {
-            super(PeptideFilterSearchForm.class);
+            return PeptidesView.DATAREGION_NAME;
         }
 
         @Override
-        protected QueryView createQueryView(PeptideFilterSearchForm pepSearchForm, BindException bindErrors, boolean forExport, String dataRegion)
-        {
-            if (PeptidesView.DATAREGION_NAME.equalsIgnoreCase(dataRegion))
-                return getPeptidesView(pepSearchForm, bindErrors, forExport);
-
-            for (QueryViewProvider<PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
-            {
-                if (viewProvider.getDataRegionName().equalsIgnoreCase(dataRegion))
-                {
-                    return viewProvider.createView(getViewContext(), pepSearchForm, bindErrors);
-                }
-            }
-
-            throw new NotFoundException("Unknown data region: " + dataRegion);
-        }
-
-        protected PeptidesView getPeptidesView(PeptideFilterSearchForm form, BindException bindErrors, boolean forExport)
+        public @Nullable QueryView createView(ViewContext ctx, PeptideSearchForm form, BindException errors)
         {
             //create the peptide search results view
             //get a peptides table so that we can get the public schema and query name for it
-            TableInfo peptidesTable = new MS2Schema(getUser(), getContainer()).createPeptidesTableInfo();
-            PeptidesView pepView = new PeptidesView(new MS2Schema(getUser(), getContainer()), peptidesTable.getPublicName());
+            TableInfo peptidesTable = new MS2Schema(ctx.getUser(), ctx.getContainer()).createPeptidesTableInfo();
+            PeptidesView pepView = new PeptidesView(new MS2Schema(ctx.getUser(), ctx.getContainer()), peptidesTable.getPublicName());
             pepView.setSearchSubfolders(form.isSubfolders());
             if (null != form.getPepSeq() && !form.getPepSeq().isEmpty())
                 pepView.setPeptideFilter(new PeptideSequenceFilter(form.getPepSeq(), form.isExact()));
@@ -5566,48 +5457,7 @@ public class MS2Controller extends SpringActionController
             pepView.enableExpandCollapse("peptides", false);
             return pepView;
         }
-
-        @Override
-        public ModelAndView getHtmlView(PeptideFilterSearchForm form, BindException errors) throws Exception
-        {
-            //create the search view
-            PepSearchModel searchModel = new PepSearchModel(getContainer(), form.getPepSeq(),
-                    form.isExact(), form.isSubfolders(), form.getRunIds());
-            JspView<PepSearchModel> searchView = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", searchModel);
-            searchView.setTitle("Search Criteria");
-
-            //if no search terms were specified, return just the search view
-            if (searchModel.noSearchTerms())
-            {
-                searchModel.setErrorMsg("You must specify at least one Peptide Sequence");
-                return searchView;
-            }
-
-            VBox result = new VBox(searchView);
-
-            if (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)))
-            {
-                //create the peptide search results view
-                PeptidesView pepView = (PeptidesView)createInitializedQueryView(form, errors, false, PeptidesView.DATAREGION_NAME);
-                result.addView(pepView);
-            }
-
-            for (QueryViewProvider<PeptideSearchForm> viewProvider : ProteinService.get().getPeptideSearchViews())
-            {
-                QueryView queryView = viewProvider.createView(getViewContext(), form, errors);
-                if (queryView != null)
-                    result.addView(queryView);
-            }
-
-            return result;
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Peptide Search Results");
-        }
-    } //PepSearchAction
+    }
 
     public class CompareOptionsBean<Form extends PeptideFilteringComparisonForm>
     {
@@ -5653,7 +5503,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresSiteAdmin
-    public class ImportMSScanCountsUpgradeAction extends FormViewAction
+    public class ImportMSScanCountsUpgradeAction extends FormViewAction<Object>
     {
         @Override
         public void validateCommand(Object target, Errors errors)
@@ -5663,7 +5513,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(Object o, boolean reshow, BindException errors)
         {
-            return new JspView("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
+            return new JspView<>("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
         }
 
         @Override
@@ -5692,110 +5542,6 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("Load MS scan counts");
-        }
-    }
-
-    public enum MatchCriteria
-    {
-        EXACT("Exact")
-                {
-                    @Override
-                    public void appendMatchClause(SQLFragment sqlFragment, String param)
-                    {
-                        sqlFragment.append(" = ?");
-                        sqlFragment.add(param);
-                    }
-                },
-        PREFIX("Prefix")
-                {
-                    @Override
-                    public void appendMatchClause(SQLFragment sqlFragment, String param)
-                    {
-                        sqlFragment.append(" LIKE ?");
-                        sqlFragment.add(ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param) + "%");
-                    }
-                },
-        SUFFIX("Suffix")
-                {
-                    @Override
-                    public void appendMatchClause(SQLFragment sqlFragment, String param)
-                    {
-                        sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param));
-                    }
-                },
-        SUBSTRING("Substring")
-                {
-                    @Override
-                    public void appendMatchClause(SQLFragment sqlFragment, String param)
-                    {
-                        sqlFragment.append(" LIKE ?");
-                        sqlFragment.add("%" + ProteinSchema.getSqlDialect().encodeLikeOpSearchString(param) + "%");
-                    }
-                };
-
-
-        private String label;
-
-        private static final Map<String, MatchCriteria> _criteriaMap = new CaseInsensitiveHashMap<>();
-        MatchCriteria(String label)
-        {
-            this.label = label;
-        }
-
-        static
-        {
-            for (MatchCriteria criteria : MatchCriteria.values())
-            {
-                if (criteria != null)
-                    _criteriaMap.put(criteria.getLabel(), criteria);
-            }
-        }
-
-        public String getLabel()
-        {
-            return label;
-        }
-
-        public void setLabel(String label)
-        {
-            this.label = label;
-        }
-
-        @Nullable
-        public static MatchCriteria getMatchCriteria(String label)
-        {
-            if (label == null)
-                return null;
-            return _criteriaMap.get(label);
-        }
-
-        public void appendMatchClause(SQLFragment sqlFragment, String param)
-        {
-        }
-
-        /**
-         * Build up a SQLFragment that filters identifiers based on a set of possible values. Passing in an empty
-         * list will result in no matches
-         */
-        public SQLFragment getIdentifierClause(List<String> params, String columnName)
-        {
-            SQLFragment sqlFragment = new SQLFragment();
-            String separator = "";
-            sqlFragment.append("(");
-            if (params.isEmpty())
-            {
-                sqlFragment.append("1 = 2");
-            }
-            for (String param : params)
-            {
-                sqlFragment.append(separator);
-                sqlFragment.append(columnName);
-                appendMatchClause(sqlFragment, param);
-                separator = " OR ";
-            }
-            sqlFragment.append(")");
-            return sqlFragment;
         }
     }
 

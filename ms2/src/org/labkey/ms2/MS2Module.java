@@ -33,9 +33,11 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.PepSearchModel;
 import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.FieldKey;
@@ -50,6 +52,9 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.MS2Controller.PeptidesViewProvider;
+import org.labkey.ms2.MS2Controller.ProteinSearchGroupViewProvider;
+import org.labkey.ms2.MS2Controller.ProteinSearchViewProvider;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -161,7 +166,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     PepSearchModel model = new PepSearchModel(portalCtx.getContainer());
-                    JspView<PepSearchModel> view = new JspView<>("/org/labkey/ms2/peptideview/PepSearchView.jsp", model);
+                    JspView<PepSearchModel> view = new JspView<>("/org/labkey/protein/view/PepSearchView.jsp", model);
                     view.setTitle(WEBPART_PEP_SEARCH);
                     return view;
                 }
@@ -290,6 +295,10 @@ public class MS2Module extends SpringModule implements ProteomicsModule
             return new TableSelector(MS2Manager.getTableInfoFastaAdmin(), filter, null);
         });
         ProteinSchema.registerInvalidForFastaDeleteReason("are still referenced by runs");
+
+        ProteinService.get().registerPeptideSearchView(new PeptidesViewProvider());
+        ProteinService.get().registerProteinSearchView(new ProteinSearchGroupViewProvider());
+        ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
     }
 
     @NotNull
