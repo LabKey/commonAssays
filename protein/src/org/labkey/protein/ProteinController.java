@@ -297,10 +297,15 @@ public class ProteinController extends SpringActionController
                 errors.addError(new ObjectError("main", null, null, "There is already an protein list with the name '" + form.getName() + "' loaded."));
             }
 
-            TabLoader tabLoader = new TabLoader(form.getAnnotationsText(), true);
+            final List<Map<String, Object>> rows;
+            final ColumnDescriptor[] columns;
 
-            List<Map<String, Object>> rows = tabLoader.load();
-            ColumnDescriptor[] columns = tabLoader.getColumns();
+            try (TabLoader tabLoader = new TabLoader(form.getAnnotationsText(), true))
+            {
+                rows = tabLoader.load();
+                columns = tabLoader.getColumns();
+            }
+
             String lookupStringColumnName = null;
 
             CustomAnnotationType type = CustomAnnotationType.valueOf(form.getAnnotationType());
@@ -408,8 +413,6 @@ public class ProteinController extends SpringActionController
                     cd.name = pd.getPropertyURI();
                     descriptors.add(pd);
                 }
-
-                rows = tabLoader.load();
 
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);

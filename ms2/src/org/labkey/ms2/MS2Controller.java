@@ -89,6 +89,7 @@ import org.labkey.api.protein.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteinService.FormViewProvider;
 import org.labkey.api.protein.SimpleProtein;
+import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -2478,27 +2479,23 @@ public class MS2Controller extends SpringActionController
 
         private QueryView createProteinSearchView(ProbabilityProteinSearchForm form, BindException errors)
         {
-            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), MS2Schema.SCHEMA_NAME);
-            if (schema == null)
-            {
-                throw new NotFoundException("MS2 module is not enabled in " + getContainer().getPath());
-            }
+            UserSchema schema = QueryService.get().getUserSchema(getUser(), getContainer(), ProteinUserSchema.NAME);
             QuerySettings proteinsSettings = schema.getSettings(getViewContext(), POTENTIAL_PROTEIN_DATA_REGION);
-            proteinsSettings.setQueryName(MS2Schema.TableType.Sequences.toString());
+            proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors)
             {
                 @Override
                 protected TableInfo createTable()
                 {
-                    MS2Schema schema = (MS2Schema)getSchema();
-                    return schema.createSequencesTable(null);
+                    ProteinUserSchema schema = (ProteinUserSchema)getSchema();
+                    return schema.createSequences();
                 }
             };
             // Disable R and other reporting until there's an implementation that respects the search criteria
             proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
-            SequencesTableInfo<MS2Schema> sequencesTableInfo = (SequencesTableInfo<MS2Schema>)proteinsView.getTable();
+            SequencesTableInfo<ProteinUserSchema> sequencesTableInfo = (SequencesTableInfo<ProteinUserSchema>)proteinsView.getTable();
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
@@ -2644,7 +2641,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private static void addContainerCondition(SequencesTableInfo<MS2Schema> tableInfo, Container c, User u, boolean includeSubfolders)
+    private static void addContainerCondition(SequencesTableInfo<ProteinUserSchema> tableInfo, Container c, User u, boolean includeSubfolders)
     {
         SqlDialect d = ProteinSchema.getSqlDialect();
         List<Container> containers = ContainerManager.getAllChildren(c, u);
@@ -2687,7 +2684,8 @@ public class MS2Controller extends SpringActionController
         return result;
     }
 
-    private static void addProteinNameFilter(SequencesTableInfo<MS2Schema> tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
+    // TODO: Move to SequencesTableInfo?
+    public static void addProteinNameFilter(SequencesTableInfo<?> tableInfo, String identifier, @NotNull MatchCriteria matchCriteria)
     {
         List<String> params = getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
@@ -2719,7 +2717,7 @@ public class MS2Controller extends SpringActionController
         tableInfo.addCondition(sql);
     }
 
-    private static void addSeqIdFilter(SequencesTableInfo tableInfo, int[] seqIds)
+    private static void addSeqIdFilter(SequencesTableInfo<ProteinUserSchema> tableInfo, int[] seqIds)
     {
         SQLFragment sql = new SQLFragment("SeqId IN (");
         if (seqIds.length == 0)
@@ -2828,8 +2826,8 @@ public class MS2Controller extends SpringActionController
         {
             if (_seqId == null)
             {
-                MS2Schema schema = new MS2Schema(_context.getUser(), _context.getContainer());
-                SequencesTableInfo<MS2Schema> tableInfo = schema.createSequencesTable(null);
+                ProteinUserSchema schema = new ProteinUserSchema(_context.getUser(), _context.getContainer());
+                SequencesTableInfo<ProteinUserSchema> tableInfo = schema.createSequences();
                 addProteinNameFilter(tableInfo, getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (isRestrictProteins())
                 {
