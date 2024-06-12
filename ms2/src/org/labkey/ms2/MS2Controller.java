@@ -80,18 +80,19 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.search.PeptideSearchForm;
-import org.labkey.api.protein.search.PeptideSequenceFilter;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteinService.FormViewProvider;
 import org.labkey.api.protein.SimpleProtein;
+import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.PeptideSequenceFilter;
+import org.labkey.api.protein.search.ProphetFilterType;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -1383,6 +1384,7 @@ public class MS2Controller extends SpringActionController
             return _targetProtein;
         }
 
+        @SuppressWarnings("unused")
         public void setTargetProtein(String targetProtein)
         {
             _targetProtein = targetProtein;
@@ -1393,6 +1395,7 @@ public class MS2Controller extends SpringActionController
             return _targetURL;
         }
 
+        @SuppressWarnings("unused")
         public void setTargetURL(String targetURL)
         {
             _targetURL = targetURL;
@@ -1403,6 +1406,7 @@ public class MS2Controller extends SpringActionController
             return _targetProteinMatchCriteria;
         }
 
+        @SuppressWarnings("unused")
         public void setTargetProteinMatchCriteria(String targetProteinMatchCriteria)
         {
             _targetProteinMatchCriteria = targetProteinMatchCriteria;
@@ -1477,11 +1481,6 @@ public class MS2Controller extends SpringActionController
         {
             root.addChild("Disambiguate Protein");
         }
-    }
-
-    public enum ProphetFilterType implements SafeToRenderEnum
-    {
-        none, probability, customView
     }
 
     public static class PeptideFilteringComparisonForm extends RunListForm implements PeptideFilter
