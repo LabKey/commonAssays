@@ -18,7 +18,7 @@ package org.labkey.protein;
 
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.annotation.IdentifierType;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.protein.ProteinController.SetBestNameForm.NameType;
 

@@ -20,7 +20,7 @@ package org.labkey.api.protein.uniprot;
  * Date: Feb 28, 2005
  */
 
-import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.annotation.IdentifierType;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 

@@ -80,13 +80,13 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
-import org.labkey.api.protein.AnnotationView;
+import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.PeptideSearchForm;
-import org.labkey.api.protein.PeptideSequenceFilter;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.PeptideSequenceFilter;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.ProteinSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteinService.FormViewProvider;
 import org.labkey.api.protein.SimpleProtein;
@@ -1350,7 +1350,6 @@ public class MS2Controller extends SpringActionController
             root.addChild("Compare Peptides Options");
         }
     }
-
 
     public enum PeptideFilteringFormElements implements SafeToRenderEnum
     {

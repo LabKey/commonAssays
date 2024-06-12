@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;

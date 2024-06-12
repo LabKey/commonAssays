@@ -1,4 +1,4 @@
-package org.labkey.api.protein;
+package org.labkey.api.protein.search;
 
 public class PeptideFilterSearchForm extends PeptideSearchForm
 {

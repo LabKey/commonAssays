@@ -16,7 +16,7 @@
 
 package org.labkey.api.protein.uniprot;
 
-import org.labkey.api.protein.IdentifierType;
+import org.labkey.api.protein.annotation.IdentifierType;
 import org.xml.sax.Attributes;
 
 public class uniprot_entry_accession extends CharactersParseActions

@@ -19,8 +19,8 @@ package org.labkey.protein;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager.ContainerListener;
-import org.labkey.api.protein.CustomAnnotationSet;
-import org.labkey.api.protein.CustomAnnotationSetManager;
+import org.labkey.api.protein.annotation.CustomAnnotationSet;
+import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
 import org.labkey.api.security.User;
 
 import java.beans.PropertyChangeEvent;

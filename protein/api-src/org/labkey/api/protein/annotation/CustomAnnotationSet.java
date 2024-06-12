@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;

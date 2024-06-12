@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.xml.sax.SAXException;
 

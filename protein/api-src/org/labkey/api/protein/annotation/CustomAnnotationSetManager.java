@@ -1,4 +1,4 @@
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
@@ -10,6 +10,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.DomainNotFoundException;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.protein.ProteinSchema;
 
 import java.util.ArrayList;
 import java.util.Collection;
