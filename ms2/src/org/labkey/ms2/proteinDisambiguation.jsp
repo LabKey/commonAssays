@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.json.JSONObject" %>
+<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
@@ -107,7 +108,7 @@
             props.put("target", divId);
 
             ActionURL proteinUrl = baseUrl.clone();
-            proteinUrl.addParameter(MS2Controller.PeptideFilteringFormElements.targetSeqIds, protein.getSeqId());
+            proteinUrl.addParameter(PeptideFilteringFormElements.targetSeqIds, protein.getSeqId());
 
     %>
 

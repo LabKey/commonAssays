@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
+<%@ page import="org.labkey.api.protein.search.ProteinSearchBean" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.api.view.ViewContext" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
-<%@ page import="org.labkey.ms2.search.ProteinSearchBean" %>
+<%@ page import="org.labkey.ms2.MS2Controller.DoProteinSearchAction" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -37,11 +33,8 @@
 <%
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
-    ViewContext ctx = getViewContext();
-
-    String viewName = bean.getPeptideCustomViewName(ctx);
 %>
-<labkey:form action="<%= new ActionURL(MS2Controller.DoProteinSearchAction.class, getContainer()) %>">
+<labkey:form action="<%= new ActionURL(DoProteinSearchAction.class, getContainer()) %>">
     <table class="lk-fields-table">
         <tr>
             <td class="labkey-form-label">Protein name *<%= helpPopup("Protein name", "Required to search for proteins. You may use the name as specified by the FASTA file, or an annotation, such as a gene name, that has been loaded from an annotations file. You may comma separate multiple names.") %></td>
@@ -64,19 +57,12 @@
             <td class="labkey-form-label">Restrict proteins<%= helpPopup("Restrict proteins", "If checked, the search will only look for proteins that are in FASTA files that have been searched by the included runs. If not checked, the list of Matching Proteins will include all proteins that match the criteria.") %></td>
             <td nowrap><input type="checkbox" name="restrictProteins"<%=checked(bean.getForm().isRestrictProteins())%> /></td>
         </tr>
-        <tr>
-            <td valign="center" height="100%" class="labkey-form-label">Peptide criteria<%= helpPopup("Peptide criteria", "If specified, at least one peptide assigned to the protein group must meet the criteria.") %></td>
-            <td colspan="100">
-                <div><input type="radio" name="<%=PeptideFilteringFormElements.peptideFilterType%>" value="<%=ProphetFilterType.none%>" <%=checked(bean.getForm().isNoPeptideFilter())%> />None</div>
-                <div style="padding-top: 5px"><input type="radio" name="<%=PeptideFilteringFormElements.peptideFilterType%>" id="peptideProphetRadioButton" value="<%=ProphetFilterType.probability%>" <%=checked(bean.getForm().isPeptideProphetFilter())%>/>Minimum PeptideProphet prob <input type="text" size="4" id="<%=PeptideFilteringFormElements.peptideProphetProbability%>" name="<%=PeptideFilteringFormElements.peptideProphetProbability%>" value="<%=h(bean.getForm().getPeptideProphetProbability() == null ? "" : bean.getForm().getPeptideProphetProbability())%>" /></div>
-                <% addHandler(PeptideFilteringFormElements.peptideProphetProbability.name(), "focus", "document.getElementById('peptideProphetRadioButton').checked=true;"); %>
-                <div style="padding-top: 5px"><input type="radio" name="<%=PeptideFilteringFormElements.peptideFilterType%>" id="customViewRadioButton" value="<%=ProphetFilterType.customView%>"<%=checked(bean.getForm().isCustomViewPeptideFilter())%>/>Custom filter:
-                    <% String peptideViewSelectId = bean.getPeptideView(ctx).renderViewList(request, out, viewName); %>
-                    <%=link("Create or Edit View").onClick("showViewDesigner('" + org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter + "', 'peptidesCustomizeView', " + PageFlowUtil.jsString(peptideViewSelectId) + "); return false;") %>
-                </div>
-                <span id="peptidesCustomizeView"></span>
-            </td>
-        </tr>
+        <%
+            // Optional peptide panel -- MS2 only
+            JspView<ProteinSearchBean> view = bean.getPeptidePanelView();
+            if (null != view)
+                include(view, out);
+        %>
         <tr>
             <td colspan="4" style="padding-top: 10px;">
                 <labkey:button text="Search" />

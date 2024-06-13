@@ -4,6 +4,8 @@ import org.labkey.api.action.QueryViewAction;
 
 public abstract class ProteinSearchForm extends QueryViewAction.QueryExportForm
 {
+    public static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
+    public static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
     private String _identifier;
     private String _peptideFilterType = "none";
     private Float _peptideProphetProbability;

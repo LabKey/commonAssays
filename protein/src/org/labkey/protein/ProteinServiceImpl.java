@@ -19,29 +19,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.Replicate;
 import org.labkey.api.protein.SimpleProtein;
+import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.protein.organism.GuessOrgByParsing;
 import org.labkey.api.protein.organism.GuessOrgBySharedHash;
 import org.labkey.api.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.api.protein.organism.OrganismGuessStrategy;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
@@ -234,6 +235,13 @@ public class ProteinServiceImpl implements ProteinService
             url.addParameter(PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
 
         return url;
+    }
+
+    @Migrate // Use action class
+    @Override
+    public ActionURL getProteinSearchUrl(Container c)
+    {
+        return new ActionURL("ms2", "doProteinSearch", c);
     }
 
     @Override

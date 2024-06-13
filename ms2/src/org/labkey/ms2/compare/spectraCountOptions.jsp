@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
@@ -23,13 +24,13 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideFilterType" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideProphetProbability" %>
 <%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -48,7 +49,7 @@
 <%=getScriptTag("MS2/inlineViewDesigner.js")%>
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
+    <input name="<%= PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>
         Group by:<br/>
         <div class="labkey-indented">

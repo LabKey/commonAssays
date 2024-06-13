@@ -94,5 +94,7 @@ public interface ProteinService
 
     ActionURL getPeptideSearchUrl(Container c);
 
+    ActionURL getProteinSearchUrl(Container c);
+
     ActionURL getPeptideSearchUrl(Container c, String sequence);
 }

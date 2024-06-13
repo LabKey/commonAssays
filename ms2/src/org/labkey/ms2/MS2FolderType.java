@@ -25,7 +25,7 @@ import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.WebPartFactory;
-import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 
 import java.util.ArrayList;
 import java.util.Arrays;

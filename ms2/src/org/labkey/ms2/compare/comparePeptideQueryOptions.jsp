@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.query.FilterView" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideProphetProbability" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideFilterType" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="org.labkey.ms2.query.FilterView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -40,7 +41,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
+    <input name="<%= PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>Peptides to include in the comparison:</p>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" value="<%= ProphetFilterType.none %>"<%=checked(form.isNoPeptideFilter())%> /> All peptides</div>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="peptideProphetRadioButton" value="<%= probability %>"<%=checked(form.isPeptideProphetFilter())%>/> Peptides with PeptideProphet probability &ge; <input type="text" size="2" id="<%= peptideProphetProbability %>" name="<%= peptideProphetProbability %>" value="<%=h(form.getPeptideProphetProbability())%>" /></div>

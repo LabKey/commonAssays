@@ -33,13 +33,14 @@ import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.SpringModule;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.protein.search.PepSearchModel;
 import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.PepSearchModel;
+import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.reports.ReportService;
@@ -91,7 +92,7 @@ import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator;
 import org.labkey.ms2.reader.SequestLogDocumentParser;
 import org.labkey.ms2.search.MSSearchWebpart;
-import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 
 import java.io.File;
 import java.util.Collection;
@@ -149,7 +150,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 @Override
                 public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
-                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), MS2Controller.ProbabilityProteinSearchForm.createDefault());
+                    return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), ProbabilityProteinSearchForm.createDefault());
                 }
             },
             new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
@@ -299,6 +300,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ProteinService.get().registerPeptideSearchView(new PeptidesViewProvider());
         ProteinService.get().registerProteinSearchView(new ProteinSearchGroupViewProvider());
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
+        MS2Controller.registerPeptidePanelForSearch();
     }
 
     @NotNull

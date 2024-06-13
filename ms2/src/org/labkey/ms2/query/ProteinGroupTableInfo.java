@@ -32,6 +32,7 @@ import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -170,7 +171,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         setDefaultVisibleColumns(defaultColumns);
     }
 
-    public void addPeptideFilter(MS2Controller.ProbabilityProteinSearchForm form, ViewContext context)
+    public void addPeptideFilter(ProbabilityProteinSearchForm form, ViewContext context)
     {
         if (form.isNoPeptideFilter())
         {

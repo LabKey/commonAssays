@@ -19,7 +19,6 @@ import com.google.common.primitives.ImmutableLongArray;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.beanutils.ConversionException;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,7 +72,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.ms2.MS2Urls;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
@@ -89,9 +87,13 @@ import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.PeptideFilter;
+import org.labkey.api.protein.search.PeptideFilteringFormElements;
 import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.PeptideSequenceFilter;
+import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.protein.search.ProphetFilterType;
+import org.labkey.api.protein.search.ProteinSearchBean;
 import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
@@ -179,13 +181,12 @@ import org.labkey.ms2.query.FilterView;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.query.NormalizedProteinProphetCrosstabView;
 import org.labkey.ms2.query.PeptideCrosstabView;
-import org.labkey.ms2.query.PeptideFilter;
 import org.labkey.ms2.query.ProteinGroupTableInfo;
 import org.labkey.ms2.query.ProteinProphetCrosstabView;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.ms2.search.ProteinSearchWebPart;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -1352,22 +1353,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public enum PeptideFilteringFormElements implements SafeToRenderEnum
-    {
-        peptideFilterType,
-        peptideProphetProbability,
-        proteinGroupFilterType,
-        proteinProphetProbability,
-        orCriteriaForEachRun,
-        runList,
-        spectraConfig,
-        pivotType,
-        targetProtein,
-        targetSeqIds,
-        targetProteinMsg,
-        targetURL
-    }
-
     public enum PivotType implements SafeToRenderEnum
     {
         run, fraction
@@ -2036,9 +2021,9 @@ public class MS2Controller extends SpringActionController
     }
 
     public static final String PEPTIDES_FILTER = "PeptidesFilter";
-    public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName.toString();
+    public static final String PEPTIDES_FILTER_VIEW_NAME = PEPTIDES_FILTER + "." + QueryParam.viewName;
     public static final String PROTEIN_GROUPS_FILTER = "ProteinGroupsFilter";
-    public static final String PROTEIN_GROUPS_FILTER_VIEW_NAME = PROTEIN_GROUPS_FILTER + "." + QueryParam.viewName.toString();
+    public static final String PROTEIN_GROUPS_FILTER_VIEW_NAME = PROTEIN_GROUPS_FILTER + "." + QueryParam.viewName;
     public static final String NORMALIZE_PROTEIN_GROUPS_NAME = "normalizeProteinGroups";
     public static final String PIVOT_TYPE_NAME = "pivotType";
 
@@ -2437,14 +2422,14 @@ public class MS2Controller extends SpringActionController
         @Override
         public String getDataRegionName()
         {
-            return DoProteinSearchAction.PROTEIN_DATA_REGION;
+            return ProteinSearchForm.PROTEIN_DATA_REGION;
         }
 
         @Override
         public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
             UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), MS2Schema.SCHEMA_NAME);
-            QuerySettings groupsSettings = schema.getSettings(ctx, DoProteinSearchAction.PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
+            QuerySettings groupsSettings = schema.getSettings(ctx, ProteinSearchForm.PROTEIN_DATA_REGION, MS2Schema.HiddenTableType.ProteinGroupsForSearch.toString());
             QueryView groupsView = new QueryView(schema, groupsSettings, errors)
             {
                 @Override
@@ -2452,6 +2437,7 @@ public class MS2Controller extends SpringActionController
                 {
                     ProteinGroupTableInfo table = ((MS2Schema)getSchema()).createProteinGroupsForSearchTable(null);
                     table.addPeptideFilter((ProbabilityProteinSearchForm)form, getViewContext());
+                    ((ProbabilityProteinSearchForm) form).setRestrictCondition(getContainerCondition(getContainer(), getUser()));
                     int[] seqIds = form.getSeqId();
                     if (seqIds.length <= 500)
                     {
@@ -2475,19 +2461,25 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public static void registerPeptidePanelForSearch()
+    {
+        // Peptide panel on the protein search webpart is MS2-specific, so MS2Controller registers it
+        ProteinSearchBean.registerPeptidePanelViewFactory(bean -> new JspView<>("/org/labkey/ms2/search/peptidePanel.jsp", bean));
+    }
+
     public static class ProteinSearchViewProvider implements QueryViewProvider<ProteinSearchForm>
     {
         @Override
         public String getDataRegionName()
         {
-            return DoProteinSearchAction.POTENTIAL_PROTEIN_DATA_REGION;
+            return ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION;
         }
 
         @Override
         public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
             UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), ProteinUserSchema.NAME);
-            QuerySettings proteinsSettings = schema.getSettings(ctx, DoProteinSearchAction.POTENTIAL_PROTEIN_DATA_REGION);
+            QuerySettings proteinsSettings = schema.getSettings(ctx, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors)
             {
@@ -2503,6 +2495,7 @@ public class MS2Controller extends SpringActionController
 
             proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
             SequencesTableInfo<ProteinUserSchema> sequencesTableInfo = (SequencesTableInfo<ProteinUserSchema>)proteinsView.getTable();
+            ((ProbabilityProteinSearchForm)form).setRestrictCondition(getContainerCondition(ctx.getContainer(), ctx.getUser()));
             int[] seqIds = form.getSeqId();
             if (seqIds.length <= 500)
             {
@@ -2513,7 +2506,7 @@ public class MS2Controller extends SpringActionController
                 sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                 if (form.isRestrictProteins())
                 {
-                    addContainerCondition(sequencesTableInfo, ctx.getContainer(), ctx.getUser(), true);
+                    sequencesTableInfo.addCondition(getContainerCondition(ctx.getContainer(), ctx.getUser()));
                 }
             }
             proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
@@ -2525,9 +2518,6 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
     {
-        private static final String PROTEIN_DATA_REGION = "ProteinSearchResults";
-        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
-
         public DoProteinSearchAction()
         {
             super(ProbabilityProteinSearchForm.class);
@@ -2608,7 +2598,7 @@ public class MS2Controller extends SpringActionController
 
             if (form.isShowMatchingProteins())
             {
-                QueryView proteinsView = createInitializedQueryView(form, errors, false, POTENTIAL_PROTEIN_DATA_REGION);
+                QueryView proteinsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
                 proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
 
                 result.addView(proteinsView);
@@ -2616,10 +2606,9 @@ public class MS2Controller extends SpringActionController
 
             if (form.isShowProteinGroups() &&
                     // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
-                    (getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule(MS2Module.class)) &&
-                            !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms"))))
+                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
             {
-                QueryView groupsView = createInitializedQueryView(form, errors, false, PROTEIN_DATA_REGION);
+                QueryView groupsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.PROTEIN_DATA_REGION);
                 groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
                 result.addView(groupsView);
             }
@@ -2641,7 +2630,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private static void addContainerCondition(SequencesTableInfo<ProteinUserSchema> tableInfo, Container c, User u, boolean includeSubfolders)
+    private static SQLFragment getContainerCondition(Container c, User u)
     {
         SqlDialect d = ProteinSchema.getSqlDialect();
         List<Container> containers = ContainerManager.getAllChildren(c, u);
@@ -2654,118 +2643,10 @@ public class MS2Controller extends SpringActionController
         sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
         sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container IN ");
         sql.add(Boolean.FALSE);
-        if (includeSubfolders)
-        {
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
-        }
-        else
-        {
-            sql.append("(");
-            sql.appendValue(c,d);
-            sql.append(")");
-        }
+        sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers), d));
         sql.append(")");
-        tableInfo.addCondition(sql);
-    }
 
-    public static class ProbabilityProteinSearchForm extends ProteinSearchForm implements HasViewContext
-    {
-        private Float _minimumProbability;
-        private Float _maximumErrorRate;
-        private ViewContext _context;
-        private int[] _seqId;
-
-        @Override
-        public void setViewContext(ViewContext context)
-        {
-            _context = context;
-        }
-
-        @Override
-        public ViewContext getViewContext()
-        {
-            return _context;
-        }
-
-        public boolean isPeptideProphetFilter()
-        {
-            return ProphetFilterType.probability.toString().equals(getPeptideFilterType());
-        }
-
-        public boolean isCustomViewPeptideFilter()
-        {
-            return ProphetFilterType.customView.toString().equals(getPeptideFilterType());
-        }
-
-        public Float getMaximumErrorRate()
-        {
-            return _maximumErrorRate;
-        }
-
-        public void setMaximumErrorRate(Float maximumErrorRate)
-        {
-            _maximumErrorRate = maximumErrorRate;
-        }
-
-        public Float getMinimumProbability()
-        {
-            return _minimumProbability;
-        }
-
-        public void setMinimumProbability(Float minimumProbability)
-        {
-            _minimumProbability = minimumProbability;
-        }
-
-        public String getCustomViewName(ViewContext context)
-        {
-            String result = context.getRequest().getParameter(MS2Controller.PEPTIDES_FILTER_VIEW_NAME);
-            if (result == null)
-            {
-                result = _defaultCustomView;
-            }
-            if ("".equals(result))
-            {
-                return null;
-            }
-            return result;
-        }
-
-        public boolean isNoPeptideFilter()
-        {
-            return !isCustomViewPeptideFilter() && !isPeptideProphetFilter();
-        }
-
-        public static ProbabilityProteinSearchForm createDefault()
-        {
-            ProbabilityProteinSearchForm result = new ProbabilityProteinSearchForm();
-            result.setIncludeSubfolders(true);
-            result.setRestrictProteins(true);
-            result.setExactMatch(true);
-            return result;
-        }
-
-        public void setSeqId(int[] seqIds)
-        {
-            _seqId = seqIds;
-        }
-
-        @Override
-        public int[] getSeqId()
-        {
-            if (_seqId == null)
-            {
-                ProteinUserSchema schema = new ProteinUserSchema(_context.getUser(), _context.getContainer());
-                SequencesTableInfo<ProteinUserSchema> tableInfo = schema.createSequences();
-                tableInfo.addProteinNameFilter(getIdentifier(), isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
-                if (isRestrictProteins())
-                {
-                    addContainerCondition(tableInfo, _context.getContainer(), _context.getUser(), true);
-                }
-                _seqId = ArrayUtils.toPrimitive(new TableSelector(tableInfo.getColumn("SeqId")).getArray(Integer.class));
-            }
-            return _seqId;
-        }
+        return sql;
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -3419,7 +3300,7 @@ public class MS2Controller extends SpringActionController
             }
 
             PrintWriter writer = getViewContext().getResponse().getWriter();
-            ActionURL searchURL = new ActionURL(DoProteinSearchAction.class, getContainer());
+            ActionURL searchURL = ProteinService.get().getProteinSearchUrl(getContainer());
             searchURL.addParameter("seqId", protein.getSeqId());
             searchURL.addParameter("identifier", protein.getBestName());
             writer.write("<div><a href=\"" + searchURL + "\">Search for other references to this protein</a></div>");
@@ -5411,25 +5292,6 @@ public class MS2Controller extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("Edit Elution Profile");
-        }
-    }
-
-    public static class MS2UrlsImpl implements MS2Urls
-    {
-        public ActionURL getShowRunUrl(User user, MS2Run run)
-        {
-            return getShowRunURL(user, run.getContainer(), run.getRun());
-        }
-
-        @Override
-        public ActionURL getProteinSearchUrl(Container container)
-        {
-            return new ActionURL(DoProteinSearchAction.class, container);
-        }
-
-        public static MS2UrlsImpl get()
-        {
-            return (MS2UrlsImpl) urlProvider(MS2Urls.class);
         }
     }
 
