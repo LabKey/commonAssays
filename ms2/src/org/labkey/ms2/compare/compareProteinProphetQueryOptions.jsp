@@ -21,20 +21,20 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.query.FilterView" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinProphetProbability" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
-<%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.ProteinGroupsFilter" %>
-<%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
-<%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.pivotType" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PivotType.run" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.PivotType.fraction" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.none" %>
+<%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.pivotType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinProphetProbability" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetURL" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PivotType.fraction" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PivotType.run" %>
+<%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter" %>
+<%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.ProteinGroupsFilter" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%

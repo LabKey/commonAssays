@@ -744,7 +744,7 @@ public class Protein extends SimpleProtein
         unlike the old-style getCoverageRanges, the uncoalesced ranges are not cached in a class-level variable;
         would need to keep separate by run
      */
-    private List<Range> getUncoalescedPeptideRanges(MS2Run run)
+    private List<Range> getUncoalescedPeptideRanges(@Nullable MS2Run run)
     {
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
         if (_modifiedPeptideCharacteristics != null && !_modifiedPeptideCharacteristics.isEmpty())
@@ -900,7 +900,7 @@ public class Protein extends SimpleProtein
         Changed to a map to keep track of number of duplicates and counts of modification status
         the keyset of the map becomes the set of unique peptides.
     */
-    public Map<String, PeptideCounts> getUniquePeptides(MS2Run run)
+    public Map<String, PeptideCounts> getUniquePeptides(@Nullable MS2Run run)
     {
         Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (null == _combinedPeptideCharacteristics || _combinedPeptideCharacteristics.size() <= 0)
@@ -932,7 +932,7 @@ public class Protein extends SimpleProtein
         return uniquePeptides;
     }
 
-    public List<Range> getModifiedPeptideRanges(MS2Run run)
+    public List<Range> getModifiedPeptideRanges(@Nullable MS2Run run)
     {
         List<Range> modifiedPeptides = new ArrayList<>();
         if (null == _modifiedPeptideCharacteristics || _modifiedPeptideCharacteristics.isEmpty())
