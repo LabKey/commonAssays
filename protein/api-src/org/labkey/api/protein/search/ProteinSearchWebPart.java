@@ -24,7 +24,7 @@ public class ProteinSearchWebPart extends JspView<ProteinSearchBean>
 
     public ProteinSearchWebPart(boolean horizontal, ProbabilityProteinSearchForm form)
     {
-        super(horizontal ? "/org/labkey/ms2/search/searchProteins.jsp" : "/org/labkey/ms2/search/searchProteinsNarrow.jsp");
+        super(horizontal ? "/org/labkey/protein/view/searchProteins.jsp" : "/org/labkey/protein/view/searchProteinsNarrow.jsp");
         setTitle(NAME);
         setModelBean(new ProteinSearchBean(horizontal, form));
     }

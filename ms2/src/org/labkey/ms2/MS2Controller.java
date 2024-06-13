@@ -45,7 +45,6 @@ import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerDisplayColumn;
 import org.labkey.api.data.ContainerManager;
@@ -71,7 +70,6 @@ import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
@@ -82,13 +80,11 @@ import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
-import org.labkey.api.protein.ProteinService.FormViewProvider;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.protein.search.PeptideFilter;
-import org.labkey.api.protein.search.PeptideFilteringFormElements;
 import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.PeptideSequenceFilter;
 import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
@@ -1353,6 +1349,22 @@ public class MS2Controller extends SpringActionController
         }
     }
 
+    public enum PeptideFilteringFormElements implements SafeToRenderEnum
+    {
+        peptideFilterType,
+        peptideProphetProbability,
+        proteinGroupFilterType,
+        proteinProphetProbability,
+        orCriteriaForEachRun,
+        runList,
+        spectraConfig,
+        pivotType,
+        targetProtein,
+        targetSeqIds,
+        targetProteinMsg,
+        targetURL
+    }
+
     public enum PivotType implements SafeToRenderEnum
     {
         run, fraction
@@ -2512,121 +2524,6 @@ public class MS2Controller extends SpringActionController
             proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
 
             return proteinsView;
-        }
-    }
-
-    @RequiresPermission(ReadPermission.class)
-    public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
-    {
-        public DoProteinSearchAction()
-        {
-            super(ProbabilityProteinSearchForm.class);
-        }
-
-        @Override
-        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
-        {
-            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
-            {
-                if (provider.getDataRegionName().equals(dataRegion))
-                {
-                    return provider.createView(getViewContext(), form, errors);
-                }
-            }
-
-            throw new NotFoundException("Unsupported dataRegion name: " + dataRegion);
-        }
-
-        @Override
-        protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors) throws Exception
-        {
-            HttpServletRequest request = getViewContext().getRequest();
-            SimpleFilter filter = new SimpleFilter();
-            boolean addedFilter = false;
-            if (form.getMaximumErrorRate() != null)
-            {
-                filter.addCondition(FieldKey.fromParts("ErrorRate"), form.getMaximumErrorRate(), CompareType.LTE);
-                addedFilter = true;
-            }
-            if (form.getMinimumProbability() != null)
-            {
-                filter.addCondition(FieldKey.fromParts("GroupProbability"), form.getMinimumProbability(), CompareType.GTE);
-                addedFilter = true;
-            }
-
-            if (addedFilter)
-            {
-                ActionURL url = getViewContext().cloneActionURL();
-                url.deleteParameter("minimumProbability");
-                url.deleteParameter("maximumErrorRate");
-                throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
-            }
-
-            if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
-            {
-                try
-                {
-                    form.setMinimumProbability(Float.parseFloat(request.getParameter("ProteinSearchResults.GroupProbability~gte")));
-                }
-                catch (NumberFormatException ignored) {}
-            }
-            if (request.getParameter("ProteinSearchResults.ErrorRate~lte") != null)
-            {
-                try
-                {
-                    form.setMaximumErrorRate(Float.parseFloat(request.getParameter("ProteinSearchResults.ErrorRate~lte")));
-                }
-                catch (NumberFormatException ignored) {}
-            }
-
-            WebPartView searchFormView = null;
-            for (FormViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchFormViewProviders())
-            {
-                WebPartView formView = provider.createView(getViewContext(), form);
-                if (formView != null)
-                {
-                    searchFormView = formView;
-                }
-            }
-            if (searchFormView == null)
-            {
-                // If no protein search form view providers are registered, add the default form search view.
-                searchFormView = new ProteinSearchWebPart(true, form);
-            }
-
-            VBox result = new VBox(searchFormView);
-
-            if (form.isShowMatchingProteins())
-            {
-                QueryView proteinsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
-                proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
-
-                result.addView(proteinsView);
-            }
-
-            if (form.isShowProteinGroups() &&
-                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
-                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
-            {
-                QueryView groupsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.PROTEIN_DATA_REGION);
-                groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
-                result.addView(groupsView);
-            }
-
-            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
-            {
-                QueryView queryView = provider.createView(getViewContext(), form, errors);
-                if (queryView != null)
-                    result.addView(queryView);
-            }
-            return result;
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            setHelpTopic("proteinSearch");
-            root.addChild("Protein Search Results");
         }
     }
 

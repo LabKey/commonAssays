@@ -16,7 +16,7 @@
  */
 %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>

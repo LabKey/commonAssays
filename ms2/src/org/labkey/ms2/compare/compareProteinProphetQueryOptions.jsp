@@ -21,20 +21,20 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.query.FilterView" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.proteinProphetProbability" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideProphetProbability" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.proteinGroupFilterType" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideFilterType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinProphetProbability" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.proteinGroupFilterType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
 <%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.ProteinGroupsFilter" %>
 <%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.pivotType" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.orCriteriaForEachRun" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.pivotType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.orCriteriaForEachRun" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PivotType.run" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PivotType.fraction" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.none" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.targetURL" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetURL" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
@@ -45,7 +45,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext());
 %>
 
-<%=getScriptTag("MS2/inlineViewDesigner.js")%>
+<%=getScriptTag("protein/inlineViewDesigner.js")%>
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

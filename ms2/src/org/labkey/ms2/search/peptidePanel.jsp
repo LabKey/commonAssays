@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.protein.search.ProteinSearchBean" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>

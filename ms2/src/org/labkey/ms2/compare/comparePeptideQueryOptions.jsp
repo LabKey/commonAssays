@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.protein.search.PeptideFilteringFormElements" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideProphetProbability" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.peptideFilterType" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
-<%@ page import="static org.labkey.api.protein.search.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetProtein" %>
 <%@ page import="org.labkey.ms2.query.FilterView" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -37,7 +37,7 @@ MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
 String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
 
-<%=getScriptTag("MS2/inlineViewDesigner.js")%>
+<%=getScriptTag("protein/inlineViewDesigner.js")%>
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

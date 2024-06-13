@@ -16,6 +16,7 @@
 
 package org.labkey.protein;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
@@ -45,6 +46,7 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.annotation.AnnotationInsertion;
 import org.labkey.api.protein.annotation.CustomAnnotationImportHelper;
@@ -66,6 +68,9 @@ import org.labkey.api.protein.fasta.FastaParsingForm;
 import org.labkey.api.protein.fasta.FastaReloaderJob;
 import org.labkey.api.protein.go.GoLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
+import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
@@ -100,8 +105,10 @@ import org.labkey.api.view.HtmlView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.TabStripView;
 import org.labkey.api.view.VBox;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -146,6 +153,121 @@ public class ProteinController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("Custom Protein Lists");
+        }
+    }
+
+    @RequiresPermission(ReadPermission.class)
+    public static class DoProteinSearchAction extends QueryViewAction<ProbabilityProteinSearchForm, QueryView>
+    {
+        public DoProteinSearchAction()
+        {
+            super(ProbabilityProteinSearchForm.class);
+        }
+
+        @Override
+        protected QueryView createQueryView(ProbabilityProteinSearchForm form, BindException errors, boolean forExport, String dataRegion)
+        {
+            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
+            {
+                if (provider.getDataRegionName().equals(dataRegion))
+                {
+                    return provider.createView(getViewContext(), form, errors);
+                }
+            }
+
+            throw new NotFoundException("Unsupported dataRegion name: " + dataRegion);
+        }
+
+        @Override
+        protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors) throws Exception
+        {
+            HttpServletRequest request = getViewContext().getRequest();
+            SimpleFilter filter = new SimpleFilter();
+            boolean addedFilter = false;
+            if (form.getMaximumErrorRate() != null)
+            {
+                filter.addCondition(FieldKey.fromParts("ErrorRate"), form.getMaximumErrorRate(), CompareType.LTE);
+                addedFilter = true;
+            }
+            if (form.getMinimumProbability() != null)
+            {
+                filter.addCondition(FieldKey.fromParts("GroupProbability"), form.getMinimumProbability(), CompareType.GTE);
+                addedFilter = true;
+            }
+
+            if (addedFilter)
+            {
+                ActionURL url = getViewContext().cloneActionURL();
+                url.deleteParameter("minimumProbability");
+                url.deleteParameter("maximumErrorRate");
+                throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
+            }
+
+            if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
+            {
+                try
+                {
+                    form.setMinimumProbability(Float.parseFloat(request.getParameter("ProteinSearchResults.GroupProbability~gte")));
+                }
+                catch (NumberFormatException ignored) {}
+            }
+            if (request.getParameter("ProteinSearchResults.ErrorRate~lte") != null)
+            {
+                try
+                {
+                    form.setMaximumErrorRate(Float.parseFloat(request.getParameter("ProteinSearchResults.ErrorRate~lte")));
+                }
+                catch (NumberFormatException ignored) {}
+            }
+
+            WebPartView searchFormView = null;
+            for (ProteinService.FormViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchFormViewProviders())
+            {
+                WebPartView formView = provider.createView(getViewContext(), form);
+                if (formView != null)
+                {
+                    searchFormView = formView;
+                }
+            }
+            if (searchFormView == null)
+            {
+                // If no protein search form view providers are registered, add the default form search view.
+                searchFormView = new ProteinSearchWebPart(true, form);
+            }
+
+            VBox result = new VBox(searchFormView);
+
+            if (form.isShowMatchingProteins())
+            {
+                QueryView proteinsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
+                proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
+
+                result.addView(proteinsView);
+            }
+
+            if (form.isShowProteinGroups() &&
+                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
+                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
+            {
+                QueryView groupsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.PROTEIN_DATA_REGION);
+                groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
+                result.addView(groupsView);
+            }
+
+            for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
+            {
+                QueryView queryView = provider.createView(getViewContext(), form, errors);
+                if (queryView != null)
+                    result.addView(queryView);
+            }
+            return result;
+        }
+
+        @Override
+        public void addNavTrail(NavTree root)
+        {
+            setHelpTopic("proteinSearch");
+            root.addChild("Protein Search Results");
         }
     }
 

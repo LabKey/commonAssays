@@ -18,7 +18,6 @@ package org.labkey.ms2.compare;
 
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.Results;
-import org.labkey.api.protein.search.PeptideFilteringFormElements;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.reports.report.r.RReport;
@@ -69,7 +68,7 @@ public class SpectraCountRReport extends RReport
 
     private SpectraCountQueryView getQueryView(ViewContext context) throws Exception
     {
-        String spectraConfig = context.getActionURL().getParameter(PeptideFilteringFormElements.spectraConfig);
+        String spectraConfig = context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig);
         final SpectraCountConfiguration config = SpectraCountConfiguration.findByTableName(spectraConfig);
         if (config == null)
         {
@@ -78,12 +77,12 @@ public class SpectraCountRReport extends RReport
 
         MS2Controller.SpectraCountForm form = new MS2Controller.SpectraCountForm();
         form.setRunList(Integer.valueOf(getRunList(context)));
-        form.setPeptideFilterType(context.getActionURL().getParameter(PeptideFilteringFormElements.peptideFilterType));
+        form.setPeptideFilterType(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType));
         try
         {
-            if (context.getActionURL().getParameter(PeptideFilteringFormElements.peptideProphetProbability) != null)
+            if (context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability) != null)
             {
-                form.setPeptideProphetProbability(Float.valueOf(context.getActionURL().getParameter(PeptideFilteringFormElements.peptideProphetProbability)));
+                form.setPeptideProphetProbability(Float.valueOf(context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideProphetProbability)));
             }
         }
         catch (NumberFormatException e) {}
@@ -101,7 +100,7 @@ public class SpectraCountRReport extends RReport
 
     private static String getRunList(ViewContext context)
     {
-        return context.getActionURL().getParameter(PeptideFilteringFormElements.runList);
+        return context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.runList);
     }
 
     @Override
@@ -123,9 +122,9 @@ public class SpectraCountRReport extends RReport
     private boolean hasValidParameters(ViewContext context)
     {
         if (getRunList(context) != null &&
-                context.getActionURL().getParameter(PeptideFilteringFormElements.spectraConfig) != null)
+                context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.spectraConfig) != null)
         {
-            return context.getActionURL().getParameter(PeptideFilteringFormElements.peptideFilterType) != null;
+            return context.getActionURL().getParameter(MS2Controller.PeptideFilteringFormElements.peptideFilterType) != null;
         }
         return false;
     }

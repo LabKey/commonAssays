@@ -50,6 +50,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
+import org.labkey.protein.ProteinController.DoProteinSearchAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -237,11 +238,10 @@ public class ProteinServiceImpl implements ProteinService
         return url;
     }
 
-    @Migrate // Use action class
     @Override
     public ActionURL getProteinSearchUrl(Container c)
     {
-        return new ActionURL("ms2", "doProteinSearch", c);
+        return new ActionURL(DoProteinSearchAction.class, c);
     }
 
     @Override
