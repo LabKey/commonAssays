@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.json.JSONObject" %>
-<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.util.GUID" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
@@ -24,14 +23,15 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.ms2.protein.Protein" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
-    LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
-    LABKEY.requiresScript("MS2/ProteinCoverageMap.js");
+    LABKEY.requiresCss("protein/ProteinCoverageMap.css");
+    LABKEY.requiresScript("protein/ProteinCoverageMap.js");
     LABKEY.requiresScript("util.js");
 
     function checkAll() {

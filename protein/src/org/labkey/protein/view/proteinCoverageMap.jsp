@@ -65,9 +65,9 @@
     @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
-        dependencies.add("MS2/ProteinCoverageMap.css");
-        dependencies.add("MS2/ProteinCoverageMap.js");
-        dependencies.add("MS2/PeptideCharacteristicLegend.js");
+        dependencies.add("protein/ProteinCoverageMap.css");
+        dependencies.add("protein/ProteinCoverageMap.js");
+        dependencies.add("protein/PeptideCharacteristicLegend.js");
         dependencies.add("util.js");
         dependencies.add("internal/jQuery");
         dependencies.add("vis/vis");

@@ -53,8 +53,8 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
         {
             out.write("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">");
             out.write("""
-                            LABKEY.requiresCss("MS2/ProteinCoverageMap.css");
-                            LABKEY.requiresScript("MS2/ProteinCoverageMap.js");
+                            LABKEY.requiresCss("protein/ProteinCoverageMap.css");
+                            LABKEY.requiresScript("protein/ProteinCoverageMap.js");
                             LABKEY.requiresScript("util.js");
                             """);
             out.write("</script>");
