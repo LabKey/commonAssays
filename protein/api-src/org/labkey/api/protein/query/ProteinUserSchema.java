@@ -312,7 +312,7 @@ public class ProteinUserSchema extends UserSchema
         return new OrganismTableInfo(this);
     }
 
-    protected SequencesTableInfo<ProteinUserSchema> createSequences()
+    public SequencesTableInfo<ProteinUserSchema> createSequences()
     {
         // TODO ContainerFilter
         return new SequencesTableInfo<>(this, null);

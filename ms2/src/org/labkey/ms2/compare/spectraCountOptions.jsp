@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
+<%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
@@ -22,13 +24,13 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.ProphetFilterType.probability" %>
-<%@ page import="static org.labkey.ms2.MS2Controller.ProphetFilterType.customView" %>
+<%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
+<%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideProphetProbability" %>
 <%@ page import="static org.labkey.ms2.query.MS2Schema.HiddenTableType.PeptidesFilter" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.targetProtein" %>
+<%@ page import="org.labkey.ms2.query.SpectraCountConfiguration" %>
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -47,7 +49,7 @@
 <%=getScriptTag("MS2/inlineViewDesigner.js")%>
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
-    <input name="<%= MS2Controller.PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
+    <input name="<%= PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />
     <p>
         Group by:<br/>
         <div class="labkey-indented">
@@ -68,7 +70,7 @@
         </div>
     </p>
     <p>There are three options for filtering the peptide identifications:</p>
-    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" value="<%= MS2Controller.ProphetFilterType.none %>"<%=checked(form.isNoPeptideFilter())%> /> All peptides</div>
+    <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" value="<%= ProphetFilterType.none %>"<%=checked(form.isNoPeptideFilter())%> /> All peptides</div>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="peptideProphetRadioButton" value="<%= probability %>"<%=checked(form.isPeptideProphetFilter())%>/> Peptides with PeptideProphet probability &ge; <input type="text" size="2" id="<%= peptideProphetProbability %>" name="<%= peptideProphetProbability %>" value="<%= form.getPeptideProphetProbability() == null ? HtmlString.EMPTY_STRING : h(form.getPeptideProphetProbability()) %>" /></div>
     <div class="labkey-indented"><input type="radio" name="<%= peptideFilterType %>" id="customViewRadioButton" value="<%= customView %>"<%=checked(form.isCustomViewPeptideFilter())%>/>
         Peptides that meet the filter criteria in a custom view:

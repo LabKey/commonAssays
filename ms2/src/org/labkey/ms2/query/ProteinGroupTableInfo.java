@@ -29,8 +29,10 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.dialect.SqlDialect;
+import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -40,7 +42,6 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.GroupNumberDisplayColumn;
 import org.labkey.ms2.MS2Controller;
-import org.labkey.ms2.MS2Controller.MatchCriteria;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.ProteinListDisplayColumn;
@@ -52,10 +53,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * User: jeckels
- * Date: Feb 8, 2007
- */
 public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 {
     private static final Set<String> HIDDEN_PROTEIN_GROUP_COLUMN_NAMES = Collections.unmodifiableSet(new CaseInsensitiveHashSet(Arrays.asList("RowId", "GroupNumber", "IndistinguishableCollectionId", "Deleted", "HasPeptideProphet")));
@@ -174,7 +171,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         setDefaultVisibleColumns(defaultColumns);
     }
 
-    public void addPeptideFilter(MS2Controller.ProbabilityProteinSearchForm form, ViewContext context)
+    public void addPeptideFilter(ProbabilityProteinSearchForm form, ViewContext context)
     {
         if (form.isNoPeptideFilter())
         {
@@ -388,7 +385,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
     
     public void addProteinNameFilter(String identifier, MatchCriteria matchCriteria)
     {
-        List<String> params = MS2Controller.getIdentifierParameters(identifier);
+        List<String> params = SequencesTableInfo.getIdentifierParameters(identifier);
         SQLFragment sql = new SQLFragment();
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");

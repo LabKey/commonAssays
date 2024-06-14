@@ -16,6 +16,7 @@
 
 package org.labkey.api.protein.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
@@ -24,9 +25,10 @@ import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.MultiValuedForeignKey;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.protein.CustomAnnotationSet;
-import org.labkey.api.protein.CustomAnnotationSetManager;
-import org.labkey.api.protein.CustomAnnotationType;
+import org.labkey.api.protein.annotation.CustomAnnotationSet;
+import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
+import org.labkey.api.protein.annotation.CustomAnnotationType;
+import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
@@ -37,6 +39,7 @@ import org.labkey.api.util.StringExpression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.function.Consumer;
 
 /**
@@ -171,5 +174,76 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
             return super.getColumn("Source");
 
         return null;
+    }
+
+    public static List<String> getIdentifierParameters(String identifiers)
+    {
+        List<String> result = new ArrayList<>();
+        if (identifiers == null || identifiers.trim().isEmpty())
+        {
+            return result;
+        }
+
+        StringTokenizer st = new StringTokenizer(identifiers, " \t\n\r,");
+        while (st.hasMoreTokens())
+        {
+            result.add(st.nextToken());
+        }
+        return result;
+    }
+
+    public void addProteinNameFilter(String identifier, @NotNull MatchCriteria matchCriteria)
+    {
+        List<String> params = getIdentifierParameters(identifier);
+        SQLFragment sql = new SQLFragment();
+        sql.append("SeqId IN (\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoSequences(), "s");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "s.BestName"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoAnnotations(), "a");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "a.AnnotVal"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "fs.lookupstring"));
+        sql.append("\n");
+        sql.append("UNION\n");
+        sql.append("SELECT SeqId FROM ");
+        sql.append(ProteinSchema.getTableInfoIdentifiers(), "i");
+        sql.append(" WHERE ");
+        sql.append(matchCriteria.getIdentifierClause(params, "i.Identifier"));
+        sql.append("\n");
+        sql.append(")");
+
+        addCondition(sql);
+    }
+
+    public void addSeqIdFilter(int[] seqIds)
+    {
+        SQLFragment sql = new SQLFragment("SeqId IN (");
+        if (seqIds.length == 0)
+        {
+            sql.append("NULL");
+        }
+        else
+        {
+            String separator = "";
+            for (long seqId : seqIds)
+            {
+                sql.append(separator);
+                separator = ", ";
+                sql.append(Long.toString(seqId));
+            }
+        }
+        sql.append(")");
+
+        addCondition(sql, FieldKey.fromParts("SeqId"));
     }
 }

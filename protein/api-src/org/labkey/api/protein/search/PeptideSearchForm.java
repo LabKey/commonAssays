@@ -1,4 +1,4 @@
-package org.labkey.api.protein;
+package org.labkey.api.protein.search;
 
 import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.data.SimpleFilter;

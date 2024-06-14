@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2.peptideview;
+package org.labkey.api.protein.search;
 
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.SQLFragment;
@@ -27,17 +27,14 @@ import java.util.Map;
 
 /**
  * Used to filter for a given set of peptide sequences
- *
- * User: Dave
- * Date: Jan 14, 2008
- * Time: 10:17:45 AM
  */
 public class PeptideSequenceFilter extends SimpleFilter.FilterClause
 {
-    private String[] _sequences;
-    private boolean _exact = false;
+    private final String[] _sequences;
     private final String _sequenceColumnName;
     private final String _exactSequenceColumnName;
+
+    private boolean _exact = false;
 
     public PeptideSequenceFilter(String sequenceList, boolean exact, String sequenceColumnName, String exactSequenceColumnName)
     {
@@ -112,26 +109,6 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
     public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
     {
         throw new UnsupportedOperationException();
-    }
-
-    public SQLFragment getWhereClause(Map<String, String> aliasMap, SqlDialect dialect)
-    {
-        if (null == _sequences)
-            return null;
-
-        String pepDataAlias = aliasMap.get("ms2.PeptidesData");
-        assert(null != pepDataAlias);
-
-        // OR together the sequence conditions
-        StringBuilder sql = new StringBuilder();
-        for (int idx = 0; idx < _sequences.length; ++idx)
-        {
-            if (idx > 0)
-                sql.append(" OR ");
-
-            sql.append(genSeqPredicate(_sequences[idx], pepDataAlias));
-        }
-        return new SQLFragment(sql.toString());
     }
 
     private String genSeqPredicate(String sequence, String pepDataAlias)

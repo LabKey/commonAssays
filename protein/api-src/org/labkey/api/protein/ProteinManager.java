@@ -15,6 +15,7 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaFile;
 import org.labkey.api.protein.fasta.PeptideHelpers;
+import org.labkey.api.protein.organism.Organism;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.HtmlString;

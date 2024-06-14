@@ -15,8 +15,8 @@
  */
 package org.labkey.ms2.search;
 
+import org.labkey.api.protein.search.ProteinSearchBean;
 import org.labkey.api.view.JspView;
-import org.labkey.ms2.MS2Controller;
 
 /**
  * User: cnathe

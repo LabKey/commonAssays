@@ -16,19 +16,19 @@
 
 package org.labkey.ms2;
 
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.exp.*;
+import org.labkey.api.data.Container;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.XarContext;
+import org.labkey.api.exp.api.AbstractExperimentDataHandler;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.AbstractExperimentDataHandler;
-import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
+import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
-import org.labkey.api.security.User;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -37,10 +37,6 @@ import java.sql.SQLException;
 
 import static org.labkey.ms2.PepXmlExperimentDataHandler.IMPORT_PROPHET_RESULTS;
 
-/**
- * User: jeckels
- * Date: Feb 22, 2006
- */
 public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataHandler
 {
     @Override
@@ -67,11 +63,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
                 importer.importFile(info, log);
             }
         }
-        catch (SQLException | XMLStreamException e)
-        {
-            throw new ExperimentException(e);
-        }
-        catch (IOException e)
+        catch (SQLException | XMLStreamException | IOException e)
         {
             throw new ExperimentException(e);
         }
@@ -92,7 +84,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
         {
             return null;
         }
-        ActionURL result = MS2Controller.MS2UrlsImpl.get().getShowRunUrl(null, run);
+        ActionURL result = MS2Controller.getShowRunURL(null, run.getContainer(), run.getRun());
         result.addParameter("expanded", "1");
         result.addParameter("grouping", "proteinprophet");
         return result;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 public enum IdentifierType
 {

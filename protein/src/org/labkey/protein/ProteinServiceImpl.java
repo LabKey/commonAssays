@@ -19,29 +19,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.protein.AnnotationView;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.PeptideSearchForm;
 import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.Replicate;
 import org.labkey.api.protein.SimpleProtein;
+import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.protein.organism.GuessOrgByParsing;
 import org.labkey.api.protein.organism.GuessOrgBySharedHash;
 import org.labkey.api.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.api.protein.organism.OrganismGuessStrategy;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
@@ -49,6 +50,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
+import org.labkey.protein.ProteinController.DoProteinSearchAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -217,6 +219,29 @@ public class ProteinServiceImpl implements ProteinService
     public ActionURL getProteinBeginUrl(Container c)
     {
         return new ActionURL(ProteinController.BeginAction.class, c);
+    }
+
+    @Override
+    public ActionURL getPeptideSearchUrl(Container c)
+    {
+        return new ActionURL(ProteinController.PepSearchAction.class, c);
+    }
+
+    @Override
+    public ActionURL getPeptideSearchUrl(Container c, String sequence)
+    {
+        ActionURL url = getPeptideSearchUrl(c);
+
+        if (null != sequence)
+            url.addParameter(PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
+
+        return url;
+    }
+
+    @Override
+    public ActionURL getProteinSearchUrl(Container c)
+    {
+        return new ActionURL(DoProteinSearchAction.class, c);
     }
 
     @Override

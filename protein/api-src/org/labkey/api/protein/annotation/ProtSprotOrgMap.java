@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.UnexpectedException;
 

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.labkey.api.protein;
+package org.labkey.api.protein.annotation;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.SafeToRenderEnum;
 
