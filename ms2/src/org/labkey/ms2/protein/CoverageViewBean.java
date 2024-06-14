@@ -7,11 +7,11 @@ import org.labkey.ms2.MS2Run;
 import java.util.Collections;
 import java.util.List;
 
-public class ProteinViewBean
+public class CoverageViewBean
 {
     public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
 
-    public Protein protein;
+    public CoverageProtein protein;
     public boolean showPeptides;
     public MS2Run run = null;
     public String showRunUrl;

@@ -76,6 +76,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
+import org.labkey.ms2.protein.CoverageProtein;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
@@ -1674,5 +1675,11 @@ public class MS2Manager
     {
         SimpleProtein simpleProtein = ProteinManager.getProtein(seqId);
         return simpleProtein != null ? new Protein(simpleProtein) : null;
+    }
+
+    public static CoverageProtein getCoverageProtein(int seqId)
+    {
+        SimpleProtein simpleProtein = ProteinManager.getProtein(seqId);
+        return simpleProtein != null ? new CoverageProtein(simpleProtein) : null;
     }
 }

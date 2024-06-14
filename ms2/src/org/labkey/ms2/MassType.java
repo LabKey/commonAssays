@@ -18,8 +18,6 @@ package org.labkey.ms2;
 /**
  * Different methods for calculating peptide and protein weighs, based on the different ways to handle
  * isotopic mass differences.
- * User: jeckels
- * Date: Dec 19, 2011
  */
 public enum MassType
 {

@@ -22,7 +22,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.api.visualization.ColorGradient" %>
-<%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
+<%@ page import="org.labkey.ms2.protein.CoverageViewBean" %>
 <%@ page import="java.awt.*" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>
@@ -36,7 +36,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
+    CoverageViewBean bean = ((JspView<CoverageViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
     var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");

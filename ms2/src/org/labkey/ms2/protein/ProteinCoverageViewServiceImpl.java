@@ -16,10 +16,10 @@ import java.util.function.Consumer;
 @Migrate
 public class ProteinCoverageViewServiceImpl implements ProteinCoverageViewService
 {
-    private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<ProteinViewBean> beanModifier)
+    private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<CoverageViewBean> beanModifier)
     {
-        ProteinViewBean bean = new ProteinViewBean();
-        bean.protein = MS2Manager.getProtein(seqId);
+        CoverageViewBean bean = new CoverageViewBean();
+        bean.protein = MS2Manager.getCoverageProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = ProteinService.get().getProteinFeatures(accessionForFeatures);
