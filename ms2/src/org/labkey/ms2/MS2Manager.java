@@ -56,6 +56,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.fasta.FastaFile;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
@@ -1519,8 +1520,6 @@ public class MS2Manager
         }
     }
 
-
-
     public static DecoySummaryBean getDecoySummaryForRun(int run, Float desiredFdr)
     {
         DbSchema schema = getSchema();
@@ -1669,5 +1668,11 @@ public class MS2Manager
         }
 
         return result;
+    }
+
+    public static Protein getProtein(int seqId)
+    {
+        SimpleProtein simpleProtein = ProteinManager.getProtein(seqId);
+        return simpleProtein != null ? new Protein(simpleProtein) : null;
     }
 }

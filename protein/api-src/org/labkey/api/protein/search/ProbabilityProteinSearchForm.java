@@ -61,10 +61,9 @@ public class ProbabilityProteinSearchForm extends ProteinSearchForm implements H
         _minimumProbability = minimumProbability;
     }
 
-    @Migrate
     public String getCustomViewName(ViewContext context)
     {
-        String result = context.getRequest().getParameter("PeptidesFilter." + QueryParam.viewName);
+        String result = context.getRequest().getParameter("PeptidesFilter." + QueryParam.viewName); // Needs to match MS2Controller.PEPTIDES_FILTER_VIEW_NAME
         if (result == null)
         {
             result = _defaultCustomView;

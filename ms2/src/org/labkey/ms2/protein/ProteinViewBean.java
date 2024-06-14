@@ -13,7 +13,7 @@ public class ProteinViewBean
 
     public Protein protein;
     public boolean showPeptides;
-    public MS2Run run;
+    public Integer run = null; // MS2Run ID or null for no run (e.g., TargetedMS use)
     public String showRunUrl;
     public boolean enableAllPeptidesFeature;
     public boolean showViewSettings;

@@ -19,7 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
@@ -216,35 +215,6 @@ public class ProteinServiceImpl implements ProteinService
             CacheManager.getBlockingCache(100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
 
     @Override
-    public ActionURL getProteinBeginUrl(Container c)
-    {
-        return new ActionURL(ProteinController.BeginAction.class, c);
-    }
-
-    @Override
-    public ActionURL getPeptideSearchUrl(Container c)
-    {
-        return new ActionURL(ProteinController.PepSearchAction.class, c);
-    }
-
-    @Override
-    public ActionURL getPeptideSearchUrl(Container c, String sequence)
-    {
-        ActionURL url = getPeptideSearchUrl(c);
-
-        if (null != sequence)
-            url.addParameter(PeptideSearchForm.ParamNames.pepSeq.name(), sequence);
-
-        return url;
-    }
-
-    @Override
-    public ActionURL getProteinSearchUrl(Container c)
-    {
-        return new ActionURL(DoProteinSearchAction.class, c);
-    }
-
-    @Override
     public List<ProteinFeature> getProteinFeatures(String accession)
     {
         if (accession != null)
@@ -388,5 +358,23 @@ public class ProteinServiceImpl implements ProteinService
             result.sort(Comparator.comparingInt(ProteinFeature::getStartIndex));
             return Collections.unmodifiableList(result);
         }
+    }
+
+    @Override
+    public ActionURL getProteinBeginUrl(Container c)
+    {
+        return new ActionURL(ProteinController.BeginAction.class, c);
+    }
+
+    @Override
+    public ActionURL getPeptideSearchUrl(Container c)
+    {
+        return new ActionURL(ProteinController.PepSearchAction.class, c);
+    }
+
+    @Override
+    public ActionURL getProteinSearchUrl(Container c)
+    {
+        return new ActionURL(DoProteinSearchAction.class, c);
     }
 }

@@ -1030,7 +1030,6 @@ public class Protein extends SimpleProtein
         return result;
     }
 
-
     public static class TestCase extends Assert
     {
         @Test

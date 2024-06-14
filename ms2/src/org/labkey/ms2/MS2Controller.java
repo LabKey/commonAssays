@@ -91,6 +91,7 @@ import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.protein.search.ProphetFilterType;
 import org.labkey.api.protein.search.ProteinSearchBean;
 import org.labkey.api.protein.search.ProteinSearchForm;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -167,7 +168,6 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.tools.GoHelpers;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -182,7 +182,6 @@ import org.labkey.ms2.query.ProteinProphetCrosstabView;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -3179,7 +3178,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             getPageConfig().setTemplate(PageConfig.Template.None);
-            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
+            Protein protein = MS2Manager.getProtein(form.getSeqIdInt());
 
             if (protein == null)
             {
@@ -3386,7 +3385,7 @@ public class MS2Controller extends SpringActionController
             if (0 == seqId)
                 throw new NotFoundException("Protein sequence not found");
 
-            _protein = ProteinManager.getProtein(seqId);
+            _protein = MS2Manager.getProtein(seqId);
             if (_protein == null)
             {
                 throw new NotFoundException("Could not find protein with SeqId " + seqId);
@@ -3594,7 +3593,7 @@ public class MS2Controller extends SpringActionController
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
                 WebPartView sequenceView;
-                bean.run = run;
+                bean.run = run.getRun();
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
@@ -3704,7 +3703,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
-            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
+            Protein protein = MS2Manager.getProtein(form.getSeqIdInt());
             if (protein == null)
                 throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
             ms2Run = form.validateRun();
@@ -3851,7 +3850,7 @@ public class MS2Controller extends SpringActionController
                 {
                     // No need to separately validate - we've already cleared the run permission checks
                     MS2Run ms2Run = MS2Manager.getRun(ids.getRun());
-                    Protein protein = ProteinManager.getProtein(ids.getSeqId());
+                    Protein protein = MS2Manager.getProtein(ids.getSeqId());
                     if (protein == null)
                         throw new NotFoundException("Could not find protein with SeqId " + ids.getSeqId());
 

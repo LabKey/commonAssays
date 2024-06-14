@@ -8,6 +8,7 @@ import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.Replicate;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
+import org.labkey.ms2.MS2Manager;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -18,7 +19,7 @@ public class ProteinCoverageViewServiceImpl implements ProteinCoverageViewServic
     private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<ProteinViewBean> beanModifier)
     {
         ProteinViewBean bean = new ProteinViewBean();
-        bean.protein = ProteinManager.getProtein(seqId);
+        bean.protein = MS2Manager.getProtein(seqId);
         bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
         bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = ProteinService.get().getProteinFeatures(accessionForFeatures);
