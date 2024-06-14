@@ -45,7 +45,7 @@ String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 String proteinGroupViewName = form.getProteinGroupCustomViewName(getViewContext());
 %>
 
-<%=getScriptTag("protein/inlineViewDesigner.js")%>
+<%=getScriptTag("MS2/inlineViewDesigner.js")%>
 
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />

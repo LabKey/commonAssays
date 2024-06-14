@@ -60,4 +60,9 @@ public class ProteinSearchBean implements PeptideFilter
     {
         PEPTIDE_PANEL_VIEW_FACTORY = factory;
     }
+
+    public static boolean includePeptidePanel()
+    {
+        return PEPTIDE_PANEL_VIEW_FACTORY != null;
+    }
 }

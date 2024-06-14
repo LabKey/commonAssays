@@ -46,7 +46,7 @@
     MS2Controller.SpectraCountForm form = bean.getForm();
     String peptideViewName = form.getPeptideCustomViewName(getViewContext());
 %>
-<%=getScriptTag("protein/inlineViewDesigner.js")%>
+<%=getScriptTag("MS2/inlineViewDesigner.js")%>
 <labkey:form action="<%= new ActionURL(MS2Controller.ProteinDisambiguationRedirectAction.class, getContainer()) %>" name="peptideFilterForm">
     <input name="runList" type="hidden" value="<%= bean.getRunList() %>" />
     <input name="<%= PeptideFilteringFormElements.targetURL %>" type="hidden" value="<%=h(bean.getTargetURL())%>" />

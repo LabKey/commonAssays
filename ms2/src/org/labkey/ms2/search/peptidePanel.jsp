@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.protein.search.ProteinSearchBean" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.ms2.query.FilterView" %>
 <%@ page import="org.labkey.ms2.query.MS2Schema.HiddenTableType" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
+    // This panel is optionally rendered by proteinPanel.jsp for MS2 deployments only. It requires "MS2/inlineViewDesigner.js",
+    // which is optionally included by searchProteins.jsp.
     JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = getViewContext();

@@ -27,7 +27,10 @@
     @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
-        dependencies.add("protein/inlineViewDesigner.js");
+        // Conditionally add dependency needed by peptidePanel.jsp. That JSP can't add the dependency itself since its
+        // addClientDependencies() gets called after <script> tags are output.
+        if (ProteinSearchBean.includePeptidePanel())
+            dependencies.add("MS2/inlineViewDesigner.js");
     }
 %>
 <%
