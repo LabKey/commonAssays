@@ -9,8 +9,6 @@ import java.util.List;
 
 public class CoverageViewBean
 {
-    public static final String ALL_PEPTIDES_URL_PARAM = "allPeps";
-
     public CoverageProtein protein;
     public boolean showPeptides;
     public MS2Run run = null;

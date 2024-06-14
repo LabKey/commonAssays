@@ -85,11 +85,11 @@ public class CoverageProtein extends SimpleProtein
             seqStacks.add(pos);
         }
 
-        List<Protein.Range> ranges = getUncoalescedPeptideRanges(run);
+        List<Range> ranges = getUncoalescedPeptideRanges(run);
 
         // now add the information on covering peptides.
         int overallMaxLevels = 0;
-        for (Protein.Range range : ranges)
+        for (Range range : ranges)
         {
             int maxLevelsInRange = 0;
 
@@ -517,7 +517,7 @@ public class CoverageProtein extends SimpleProtein
             return _levels;
         }
 
-        void addPeptide(Protein.Range range, Integer newLevel, int curIdx, int curRowStart, int nextRowStart, String showRunViewUrl)
+        void addPeptide(Range range, Integer newLevel, int curIdx, int curRowStart, int nextRowStart, String showRunViewUrl)
         {
             String td;
             String label;
@@ -742,7 +742,6 @@ public class CoverageProtein extends SimpleProtein
         @Getter @Setter String foregroundColor;
         @Getter @Setter String sequence;
         @Getter @Setter String modifiedSequence;
-
 
         public PeptideCounts()
         {

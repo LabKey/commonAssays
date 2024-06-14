@@ -19,10 +19,10 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
+<%@ page import="org.labkey.ms2.protein.CoverageViewBean" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
+    CoverageViewBean bean = ((JspView<CoverageViewBean>)HttpView.currentView()).getModelBean();
 
     if (bean.showPeptides)
     {

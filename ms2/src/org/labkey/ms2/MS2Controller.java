@@ -167,6 +167,7 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
+import org.labkey.ms2.protein.CoverageViewBean;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.tools.GoHelpers;
@@ -3566,7 +3567,7 @@ public class MS2Controller extends SpringActionController
             for (int i = 0; i < proteinCount; i++)
             {
                 Protein protein = proteins.get(i);
-                ProteinViewBean bean = new ProteinViewBean();
+                CoverageViewBean bean = new CoverageViewBean();
                 // the all peptides matching applies to peptides matching a single protein.  Don't
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
@@ -3587,13 +3588,13 @@ public class MS2Controller extends SpringActionController
                 protein.setShowEntireFragmentInCoverage(stringSearch);
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;
-                JspView<ProteinViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
+                JspView<CoverageViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
                 proteinSummary.setTitle(getProteinTitle(protein, true));
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
                 WebPartView sequenceView;
-                bean.run = run.getRun();
+                bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
