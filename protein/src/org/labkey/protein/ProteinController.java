@@ -408,7 +408,7 @@ public class ProteinController extends SpringActionController
         @Override
         public ModelAndView getView(UploadAnnotationsForm form, boolean reshow, BindException errors)
         {
-            return new JspView<>("/org/labkey/ms2/protein/uploadCustomProteinAnnotations.jsp", form, errors);
+            return new JspView<>("/org/labkey/protein/view/uploadCustomProteinAnnotations.jsp", form, errors);
         }
 
         @Override
