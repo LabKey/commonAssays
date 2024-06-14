@@ -167,6 +167,8 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
+import org.labkey.ms2.protein.CoverageProtein;
+import org.labkey.ms2.protein.CoverageProtein.ModificationHandler;
 import org.labkey.ms2.protein.CoverageViewBean;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
@@ -3211,7 +3213,7 @@ public class MS2Controller extends SpringActionController
             writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
             writer.write("</div>");
 
-            writer.write(protein.getCoverageMap(run, null, 40, Collections.emptyList()).toString());
+            writer.write(protein.getCoverageMap(new MS2ModificationHandler(run), null, 40, Collections.emptyList()).toString());
             return null;
         }
 
@@ -3589,7 +3591,7 @@ public class MS2Controller extends SpringActionController
                 bean.coverageProtein = protein;
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;
-                JspView<CoverageViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
+                JspView<ProteinViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
                 proteinSummary.setTitle(getProteinTitle(protein, true));
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
@@ -3598,6 +3600,7 @@ public class MS2Controller extends SpringActionController
                 bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
+                    bean.modificationHandler = new MS2ModificationHandler(run);
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
                         new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
@@ -3635,6 +3638,43 @@ public class MS2Controller extends SpringActionController
                 vBox.enableExpandCollapse("Peptides", false);
                 addView(vBox);
             }
+        }
+    }
+
+    public static class MS2ModificationHandler implements ModificationHandler
+    {
+        private final List<MS2Modification> mods;
+
+        public MS2ModificationHandler(MS2Run run)
+        {
+            mods = MS2Manager.getModifications(run);
+        }
+
+        @Override
+        public Boolean apply(String peptide, Map<String, Integer> countModifications)
+        {
+            boolean unmodified = true;
+
+            for (MS2Modification mod : mods)
+            {
+                if (!mod.getVariable())
+                    continue;
+                String marker= mod.getAminoAcid() + mod.getSymbol();
+                if (peptide.contains(marker))
+                {
+                    Integer curCount = countModifications.get(marker);
+                    if (null == curCount )
+                    {
+                        countModifications.put(marker, 0);
+                        curCount = countModifications.get(marker);
+                    }
+                    curCount++;
+                    countModifications.put(marker, curCount);
+                    unmodified = false;
+                }
+            }
+
+            return unmodified;
         }
     }
 

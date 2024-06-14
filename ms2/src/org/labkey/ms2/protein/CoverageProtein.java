@@ -11,10 +11,7 @@ import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2Peptide;
-import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.MassType;
 
 import java.util.ArrayList;
@@ -24,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiFunction;
 
 public class CoverageProtein extends SimpleProtein
 {
@@ -62,7 +60,7 @@ public class CoverageProtein extends SimpleProtein
         super(simpleProtein);
     }
 
-    public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl, int wrapCols, List<ProteinFeature> features)
+    public HtmlString getCoverageMap(@Nullable ModificationHandler modificationHandler, @Nullable String showRunViewUrl, int wrapCols, List<ProteinFeature> features)
     {
         if (_forCoverageMapExport)
             wrapCols = 16384;  //Excel's max number of columns
@@ -85,7 +83,7 @@ public class CoverageProtein extends SimpleProtein
             seqStacks.add(pos);
         }
 
-        List<Range> ranges = getUncoalescedPeptideRanges(run);
+        List<Range> ranges = getUncoalescedPeptideRanges(modificationHandler);
 
         // now add the information on covering peptides.
         int overallMaxLevels = 0;
@@ -207,7 +205,7 @@ public class CoverageProtein extends SimpleProtein
         unlike the old-style getCoverageRanges, the uncoalesced ranges are not cached in a class-level variable;
         would need to keep separate by run
      */
-    protected List<Range> getUncoalescedPeptideRanges(@Nullable MS2Run run)
+    protected List<Range> getUncoalescedPeptideRanges(@Nullable ModificationHandler modificationHandler)
     {
         List<Range> uncoalescedPeptideRanges = new ArrayList<>();
         if (_modifiedPeptideCharacteristics != null && !_modifiedPeptideCharacteristics.isEmpty())
@@ -230,18 +228,18 @@ public class CoverageProtein extends SimpleProtein
         }
         if (_showStakedPeptides)
         {
-            return getModifiedPeptideRanges(run);
+            return getModifiedPeptideRanges(modificationHandler);
         }
         else
         {
             if ("".equals(_sequence) || _combinedPeptideCharacteristics == null)     // Optimize case where sequence isn't available (FASTA not loaded)
                 return uncoalescedPeptideRanges;
 
-            Map<String,PeptideCounts> uniqueMap = getUniquePeptides(run);
+            Map<String,PeptideCounts> uniqueMap = getUniquePeptides(modificationHandler);
 
             List<Range> ranges = new ArrayList<>(uniqueMap.size());
 
-            if (run != null)  // in new style coverage map, we always have a run and are only looking for the trimmed part of the peptide
+            if (modificationHandler != null)  // in new style coverage map, we always have a run and are only looking for the trimmed part of the peptide
             {
                 for (String trimmedPeptide : uniqueMap.keySet())
                 {
@@ -329,21 +327,16 @@ public class CoverageProtein extends SimpleProtein
         }
     }
 
-    public List<Range> getModifiedPeptideRanges(@Nullable MS2Run run)
+    public List<Range> getModifiedPeptideRanges(@Nullable ModificationHandler modificationHandler)
     {
         List<Range> modifiedPeptides = new ArrayList<>();
         if (null == _modifiedPeptideCharacteristics || _modifiedPeptideCharacteristics.isEmpty())
             return modifiedPeptides;
 
-        // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
-        List<MS2Modification> mods = Collections.emptyList();
-        if (run != null && run.getRun() > -1)
-            mods = MS2Manager.getModifications(run);
-
         for (PeptideCharacteristic peptide : _modifiedPeptideCharacteristics)
         {
             String peptideToMap;
-            if (run == null)
+            if (modificationHandler == null)
                 peptideToMap = MS2Peptide.stripPeptideAZDash(peptide.getSequence());
             else
                 peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
@@ -359,7 +352,7 @@ public class CoverageProtein extends SimpleProtein
             PeptideCounts peptideCounts = createPeptideCounts(peptide, false);
             peptideCounts.setStartIndex(start);
             peptideCounts.setEndIndex(start + peptideToMap.length() -1);
-            peptideCounts.addPeptide(peptide.getSequence(), mods);
+            peptideCounts.addPeptide(peptide.getSequence(), modificationHandler);
 
             Range range = new Range(start, peptideToMap.length(), peptideCounts);
             modifiedPeptides.add(range);
@@ -401,21 +394,16 @@ public class CoverageProtein extends SimpleProtein
         Changed to a map to keep track of number of duplicates and counts of modification status
         the keyset of the map becomes the set of unique peptides.
     */
-    public Map<String, PeptideCounts> getUniquePeptides(@Nullable MS2Run run)
+    public Map<String, PeptideCounts> getUniquePeptides(@Nullable ModificationHandler modificationHandler)
     {
         Map<String, PeptideCounts> uniquePeptides = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (null == _combinedPeptideCharacteristics || _combinedPeptideCharacteristics.size() <= 0)
             return uniquePeptides;
 
-        // if called from old-style getCoverageRanges, the run value is 0 and we don't care about modifications
-        List<MS2Modification> mods = Collections.emptyList();
-        if (run != null && run.getRun() > -1)
-            mods = MS2Manager.getModifications(run);
-
         for (PeptideCharacteristic peptide : _combinedPeptideCharacteristics)
         {
             String peptideToMap;
-            if (run == null)
+            if (modificationHandler == null)
                 peptideToMap = MS2Peptide.stripPeptideAZDash(peptide.getSequence());
             else
                 peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
@@ -428,7 +416,7 @@ public class CoverageProtein extends SimpleProtein
                 uniquePeptides.put(peptideToMap, peptideCounts);
                 cnt = uniquePeptides.get(peptideToMap);
             }
-            cnt.addPeptide(peptide.getSequence(), mods);
+            cnt.addPeptide(peptide.getSequence(), modificationHandler);
         }
         return uniquePeptides;
     }
@@ -547,7 +535,7 @@ public class CoverageProtein extends SimpleProtein
                 trimmedPeptide= _sequence.substring(range.start,(range.start + range.length));
                 if (showRunViewUrl != null)
                 {
-                    onClickScript = "window.open('" +  showRunViewUrl + "&" + MS2Manager.getDataRegionNamePeptides() + ".TrimmedPeptide~eq=" + trimmedPeptide
+                    onClickScript = "window.open('" +  showRunViewUrl + "&MS2Peptides.TrimmedPeptide~eq=" + trimmedPeptide
                             +"', 'showMatchingPeptides');";
                 }
             }
@@ -751,30 +739,13 @@ public class CoverageProtein extends SimpleProtein
             countInstances =0;
         }
 
-        public void addPeptide(String peptide, List<MS2Modification> mods )
+        public void addPeptide(String peptide, ModificationHandler modificationHandler)
         {
             countScans++;
             boolean unmodified = true;
-            if (null!=mods)
+            if (null != modificationHandler)
             {
-                for (MS2Modification mod : mods)
-                {
-                    if (!mod.getVariable())
-                        continue;
-                    String marker= mod.getAminoAcid() + mod.getSymbol();
-                    if (peptide.contains(marker))
-                    {
-                        Integer curCount = countModifications.get(marker);
-                        if (null == curCount )
-                        {
-                            countModifications.put(marker, 0);
-                            curCount = countModifications.get(marker);
-                        }
-                        curCount++;
-                        countModifications.put(marker, curCount);
-                        unmodified = false;
-                    }
-                }
+                unmodified = modificationHandler.apply(peptide, countModifications);
             }
             if (unmodified)
                 countUnmodifiedPeptides++;
@@ -810,5 +781,10 @@ public class CoverageProtein extends SimpleProtein
         {
             return pepcounts;
         }
+    }
+
+    // Given a peptide and a "count modifications" map, updates the map as appropriate and returns true if peptide contains any modifications
+    public interface ModificationHandler extends BiFunction<String, Map<String, Integer>, Boolean>
+    {
     }
 }

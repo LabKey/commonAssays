@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
+import org.labkey.ms2.MS2Controller.MS2ModificationHandler;
 import org.labkey.ms2.MS2Run;
 
 import java.util.ArrayList;
@@ -117,7 +118,7 @@ public class Protein extends CoverageProtein
      */
     public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
-        return getCoverageMap(run, showRunViewUrl, DEFAULT_WRAP_COLUMNS, Collections.emptyList());
+        return getCoverageMap(new MS2ModificationHandler(run), showRunViewUrl, DEFAULT_WRAP_COLUMNS, Collections.emptyList());
     }
 
     public void setForCoverageMapExport(boolean forCoverageMapExport)
@@ -178,7 +179,7 @@ public class Protein extends CoverageProtein
             _coverageRanges = new ArrayList<>(0);
             return _coverageRanges;
         }
-        List<Range> ranges = getUncoalescedPeptideRanges(run);
+        List<Range> ranges = getUncoalescedPeptideRanges(new MS2ModificationHandler(run));
         // Coalesce ranges
         // Code below is only used by the old-style collapsed sequence and is unchanged
         _coverageRanges = new ArrayList<>(ranges.size());

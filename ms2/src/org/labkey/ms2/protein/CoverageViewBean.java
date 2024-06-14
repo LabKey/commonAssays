@@ -2,7 +2,7 @@ package org.labkey.ms2.protein;
 
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.Replicate;
-import org.labkey.ms2.MS2Run;
+import org.labkey.ms2.protein.CoverageProtein.ModificationHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
 public class CoverageViewBean
 {
     public CoverageProtein coverageProtein;
-    public MS2Run run = null;
+    public ModificationHandler modificationHandler = null;
     public String showRunUrl;
     public boolean showViewSettings;
     public int aaRowWidth;

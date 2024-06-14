@@ -113,7 +113,7 @@ public class MS2Peptide
     // Get rid of previous and next amino acid
     public static String trimPeptide(String peptide)
     {
-        String p[] = peptide.split("\\.");
+        String[] p = peptide.split("\\.");
 
         if (2 < p.length)
             return p[1];

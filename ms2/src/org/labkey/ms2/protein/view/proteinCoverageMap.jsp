@@ -283,7 +283,7 @@
 %>
 <div class="sequencePanel">
     <div class="coverageMap">
-        <%=bean.coverageProtein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
+        <%=bean.coverageProtein.getCoverageMap(bean.modificationHandler, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
     </div>
 <%
     var legendLabel = "";
