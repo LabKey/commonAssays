@@ -3212,7 +3212,7 @@ public class MS2Controller extends SpringActionController
             writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
             writer.write("</div>");
 
-            writer.write(protein.getCoverageMap(new MS2ModificationHandler(run), null, 40, Collections.emptyList()).toString());
+            writer.write(protein.getCoverageMap(MS2ModificationHandler.of(run), null, 40, Collections.emptyList()).toString());
             return null;
         }
 
@@ -3599,7 +3599,7 @@ public class MS2Controller extends SpringActionController
                 bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
-                    bean.modificationHandler = new MS2ModificationHandler(run);
+                    bean.modificationHandler = MS2ModificationHandler.of(run);
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
                         new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
@@ -3644,7 +3644,7 @@ public class MS2Controller extends SpringActionController
     {
         private final List<MS2Modification> mods;
 
-        public MS2ModificationHandler(MS2Run run)
+        private MS2ModificationHandler(@NotNull MS2Run run)
         {
             mods = MS2Manager.getModifications(run);
         }
@@ -3658,11 +3658,11 @@ public class MS2Controller extends SpringActionController
             {
                 if (!mod.getVariable())
                     continue;
-                String marker= mod.getAminoAcid() + mod.getSymbol();
+                String marker = mod.getAminoAcid() + mod.getSymbol();
                 if (peptide.contains(marker))
                 {
                     Integer curCount = countModifications.get(marker);
-                    if (null == curCount )
+                    if (null == curCount)
                     {
                         countModifications.put(marker, 0);
                         curCount = countModifications.get(marker);
@@ -3674,6 +3674,11 @@ public class MS2Controller extends SpringActionController
             }
 
             return unmodified;
+        }
+
+        public static @Nullable MS2ModificationHandler of(@Nullable MS2Run run)
+        {
+            return run != null ? new MS2ModificationHandler(run) : null;
         }
     }
 

@@ -119,7 +119,7 @@ public class Protein extends CoverageProtein
      */
     public HtmlString getCoverageMap(@Nullable MS2Run run, @Nullable String showRunViewUrl)
     {
-        return getCoverageMap(new MS2ModificationHandler(run), showRunViewUrl, DEFAULT_WRAP_COLUMNS, Collections.emptyList());
+        return getCoverageMap(MS2ModificationHandler.of(run), showRunViewUrl, DEFAULT_WRAP_COLUMNS, Collections.emptyList());
     }
 
     public void setForCoverageMapExport(boolean forCoverageMapExport)
@@ -180,7 +180,7 @@ public class Protein extends CoverageProtein
             _coverageRanges = new ArrayList<>(0);
             return _coverageRanges;
         }
-        List<Range> ranges = getUncoalescedPeptideRanges(new MS2ModificationHandler(run));
+        List<Range> ranges = getUncoalescedPeptideRanges(MS2ModificationHandler.of(run));
         // Coalesce ranges
         // Code below is only used by the old-style collapsed sequence and is unchanged
         _coverageRanges = new ArrayList<>(ranges.size());
