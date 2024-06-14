@@ -3567,7 +3567,7 @@ public class MS2Controller extends SpringActionController
             for (int i = 0; i < proteinCount; i++)
             {
                 Protein protein = proteins.get(i);
-                CoverageViewBean bean = new CoverageViewBean();
+                ProteinViewBean bean = new ProteinViewBean();
                 // the all peptides matching applies to peptides matching a single protein.  Don't
                 // offer it as a choice in the case of protein groups
                 bean.enableAllPeptidesFeature = !("proteinprophet".equalsIgnoreCase(form.getGrouping()) || proteinCount > 1 || !showPeptides);
@@ -3586,6 +3586,7 @@ public class MS2Controller extends SpringActionController
                     protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                 }
                 protein.setShowEntireFragmentInCoverage(stringSearch);
+                bean.coverageProtein = protein;
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;
                 JspView<CoverageViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);

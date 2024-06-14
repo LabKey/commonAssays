@@ -19,9 +19,9 @@ public class ProteinCoverageViewServiceImpl implements ProteinCoverageViewServic
     private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<CoverageViewBean> beanModifier)
     {
         CoverageViewBean bean = new CoverageViewBean();
-        bean.protein = MS2Manager.getCoverageProtein(seqId);
-        bean.protein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
-        bean.protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
+        bean.coverageProtein = MS2Manager.getCoverageProtein(seqId);
+        bean.coverageProtein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
+        bean.coverageProtein.setCombinedPeptideCharacteristics(peptideCharacteristics);
         bean.features = ProteinService.get().getProteinFeatures(accessionForFeatures);
         bean.aaRowWidth = aaRowWidth;
         beanModifier.accept(bean);
@@ -40,8 +40,8 @@ public class ProteinCoverageViewServiceImpl implements ProteinCoverageViewServic
         return getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, bean -> {
             bean.replicates = replicates;
             bean.showViewSettings = true;
-            bean.protein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
-            bean.protein.setShowStakedPeptides(showStackedPeptides);
+            bean.coverageProtein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
+            bean.coverageProtein.setShowStakedPeptides(showStackedPeptides);
         });
     }
 }

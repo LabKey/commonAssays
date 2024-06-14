@@ -120,9 +120,9 @@
     List<Double> iValues = new ArrayList<>();
 
     // combinedPeptideCharacteristics are always used for legend values
-    var combinedPeptideCharacteristics = bean.protein.getCombinedPeptideCharacteristics();
+    var combinedPeptideCharacteristics = bean.coverageProtein.getCombinedPeptideCharacteristics();
     // modifiedPeptideCharacteristics are used for stacked view of peptides
-    var modifiedPeptideCharacteristics = bean.protein.getModifiedPeptideCharacteristics();
+    var modifiedPeptideCharacteristics = bean.coverageProtein.getModifiedPeptideCharacteristics();
     List<PeptideCharacteristic> peptidesForSequenceMapDisplay;
 
     if (isCombined)
@@ -283,7 +283,7 @@
 %>
 <div class="sequencePanel">
     <div class="coverageMap">
-        <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
+        <%=bean.coverageProtein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
     </div>
 <%
     var legendLabel = "";

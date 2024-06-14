@@ -9,11 +9,9 @@ import java.util.List;
 
 public class CoverageViewBean
 {
-    public CoverageProtein protein;
-    public boolean showPeptides;
+    public CoverageProtein coverageProtein;
     public MS2Run run = null;
     public String showRunUrl;
-    public boolean enableAllPeptidesFeature;
     public boolean showViewSettings;
     public int aaRowWidth;
     public List<ProteinFeature> features = Collections.emptyList();
