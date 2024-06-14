@@ -19,6 +19,7 @@ package org.labkey.ms2.protein;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.protein.CoverageProtein;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.ms2.MS2Controller.MS2ModificationHandler;

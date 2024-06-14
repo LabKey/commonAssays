@@ -18,6 +18,8 @@ package org.labkey.ms2;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.labkey.api.protein.MassType;
+import org.labkey.api.protein.PeptideUtils;
 import org.labkey.api.util.Pair;
 import org.labkey.ms2.reader.LibraQuantResult;
 
@@ -109,62 +111,10 @@ public class MS2Peptide
         }
     }
 
-
-    // Get rid of previous and next amino acid
-    public static String trimPeptide(String peptide)
-    {
-        String[] p = peptide.split("\\.");
-
-        if (2 < p.length)
-            return p[1];
-        else
-            return peptide;
-    }
-
-
-    // Remove variable modification characters, leaving only A-Z
-    public static String stripPeptide(String peptide)
-    {
-        return stripPeptideAZ(peptide);
-    }
-
-
-    // Remove variable modifications and '.', leaving only A-Z
-    public static String stripPeptideAZ(String peptide)
-    {
-        StringBuffer stripped = new StringBuffer();
-
-        for (int i = 0; i < peptide.length(); i++)
-        {
-            char c = peptide.charAt(i);
-            if (c >= 'A' && c <= 'Z')
-                stripped.append(c);
-        }
-
-        return stripped.toString();
-    }
-
-
-    // String variable modifications and '.', leaving '-' and A-Z
-    public static String stripPeptideAZDash(String peptide)
-    {
-        StringBuffer stripped = new StringBuffer();
-
-        for (int i = 0; i < peptide.length(); i++)
-        {
-            char c = peptide.charAt(i);
-            if (c >= 'A' && c <= 'Z' || c == '-')
-                stripped.append(c);
-        }
-
-        return stripped.toString();
-    }
-
-
     // Remove variable modifications, leaving '-', '.', and A-Z
     public static String stripPeptideAZDashPeriod(String peptide)
     {
-        StringBuffer stripped = new StringBuffer();
+        StringBuilder stripped = new StringBuilder();
 
         for (int i = 0; i < peptide.length(); i++)
         {
@@ -176,11 +126,10 @@ public class MS2Peptide
         return stripped.toString();
     }
 
-
     private void fragment(MassType massType)
     {
         // TODO: Rename to eliminate confusion between trimmedPeptide, trimPeptide(), and _trimmedPeptide
-        String trimmedPeptide = trimPeptide(_peptide);
+        String trimmedPeptide = PeptideUtils.trimPeptide(_peptide);
 
         // Break up peptide into amino acid ArrayList
         List<String> aaList = new ArrayList<>(trimmedPeptide.length());
@@ -419,7 +368,7 @@ public class MS2Peptide
     public String getTrimmedPeptide()
     {
         if (null == _trimmedPeptide)
-            _trimmedPeptide = stripPeptide(trimPeptide(_peptide));
+            _trimmedPeptide = PeptideUtils.stripPeptide(PeptideUtils.trimPeptide(_peptide));
 
         return _trimmedPeptide;
     }
@@ -434,7 +383,7 @@ public class MS2Peptide
     public static double hydrophobicity(String peptide)
     {
         // Trim and strip the peptide to ensure accurate AA length
-        peptide = stripPeptide(trimPeptide(peptide));
+        peptide = PeptideUtils.stripPeptide(PeptideUtils.trimPeptide(peptide));
 
         // Call version 3.0 hydrophobicity algorithm by Krokhin, et al
         return Hydrophobicity3.TSUM3(peptide);

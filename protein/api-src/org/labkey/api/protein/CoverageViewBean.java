@@ -1,8 +1,6 @@
-package org.labkey.ms2.protein;
+package org.labkey.api.protein;
 
-import org.labkey.api.protein.ProteinFeature;
-import org.labkey.api.protein.Replicate;
-import org.labkey.ms2.protein.CoverageProtein.ModificationHandler;
+import org.labkey.api.protein.CoverageProtein.ModificationHandler;
 
 import java.util.Collections;
 import java.util.List;

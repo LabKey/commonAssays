@@ -16,13 +16,13 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.protein.CoverageViewBean" %>
 <%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.api.visualization.ColorGradient" %>
-<%@ page import="org.labkey.ms2.protein.CoverageViewBean" %>
 <%@ page import="java.awt.*" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>

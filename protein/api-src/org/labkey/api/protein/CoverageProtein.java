@@ -1,4 +1,4 @@
-package org.labkey.ms2.protein;
+package org.labkey.api.protein;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,13 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.ProteinFeature;
-import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.ms2.MS2Peptide;
-import org.labkey.ms2.MassType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -337,9 +332,9 @@ public class CoverageProtein extends SimpleProtein
         {
             String peptideToMap;
             if (modificationHandler == null)
-                peptideToMap = MS2Peptide.stripPeptideAZDash(peptide.getSequence());
+                peptideToMap = PeptideUtils.stripPeptideAZDash(peptide.getSequence());
             else
-                peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
+                peptideToMap = PeptideUtils.stripPeptide(PeptideUtils.trimPeptide(peptide.getSequence()));
 
             int start = _sequence.indexOf(peptideToMap);
             if (start <= -1)
@@ -404,9 +399,9 @@ public class CoverageProtein extends SimpleProtein
         {
             String peptideToMap;
             if (modificationHandler == null)
-                peptideToMap = MS2Peptide.stripPeptideAZDash(peptide.getSequence());
+                peptideToMap = PeptideUtils.stripPeptideAZDash(peptide.getSequence());
             else
-                peptideToMap = MS2Peptide.stripPeptide(MS2Peptide.trimPeptide(peptide.getSequence()));
+                peptideToMap = PeptideUtils.stripPeptide(PeptideUtils.trimPeptide(peptide.getSequence()));
 
             PeptideCounts cnt;
             cnt = uniquePeptides.get(peptideToMap);
@@ -758,7 +753,7 @@ public class CoverageProtein extends SimpleProtein
         public int length;
         private PeptideCounts pepcounts;
 
-        Range(int start, int length)
+        public Range(int start, int length)
         {
             this.start = start;
             this.length = length;

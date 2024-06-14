@@ -76,6 +76,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.MassType;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinSchema;
@@ -167,9 +168,7 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
-import org.labkey.ms2.protein.CoverageProtein;
-import org.labkey.ms2.protein.CoverageProtein.ModificationHandler;
-import org.labkey.ms2.protein.CoverageViewBean;
+import org.labkey.api.protein.CoverageProtein.ModificationHandler;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.tools.GoHelpers;
@@ -1506,7 +1505,7 @@ public class MS2Controller extends SpringActionController
                 _proteins = new ArrayList<>();
                 for (Integer targetSeqId : _targetSeqIds)
                 {
-                    _proteins.add(org.labkey.api.protein.ProteinManager.getProtein(targetSeqId.intValue()));
+                    _proteins.add(org.labkey.api.protein.ProteinManager.getSimpleProtein(targetSeqId.intValue()));
                 }
             }
             return _proteins;
@@ -3604,7 +3603,7 @@ public class MS2Controller extends SpringActionController
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
                         new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
-                        new JspView<>("/org/labkey/ms2/protein/view/proteinCoverageMap.jsp", bean));
+                        new JspView<>("/org/labkey/protein/view/proteinCoverageMap.jsp", bean));
                     box.setFrame(FrameType.PORTAL);
                     sequenceView = box;
                 }
@@ -4047,7 +4046,7 @@ public class MS2Controller extends SpringActionController
             for (String curSqid : sqidArr)
             {
                 int curSeqId = Integer.parseInt(curSqid);
-                proteins.add(org.labkey.api.protein.ProteinManager.getProtein(curSeqId));
+                proteins.add(org.labkey.api.protein.ProteinManager.getSimpleProtein(curSeqId));
             }
 
             proteins.sort(Comparator.comparing(SimpleProtein::getBestName));

@@ -1,5 +1,6 @@
 package org.labkey.ms2.protein;
 
+import org.labkey.api.protein.CoverageViewBean;
 import org.labkey.ms2.MS2Run;
 
 public class ProteinViewBean extends CoverageViewBean

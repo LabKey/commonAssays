@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.protein.MassType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.MemTracker;
 import org.labkey.api.view.ViewContext;

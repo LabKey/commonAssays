@@ -551,7 +551,7 @@ public class PeptideManager
         public SequenceFilter(int seqid)
         {
             _seqid = seqid;
-            SimpleProtein prot = org.labkey.api.protein.ProteinManager.getProtein(seqid);
+            SimpleProtein prot = org.labkey.api.protein.ProteinManager.getSimpleProtein(seqid);
             _sequence = prot.getSequence();
             _bestName = prot.getBestName();
         }
