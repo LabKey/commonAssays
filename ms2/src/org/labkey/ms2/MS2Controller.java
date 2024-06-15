@@ -2496,6 +2496,10 @@ public class MS2Controller extends SpringActionController
         public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
             UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), ProteinUserSchema.NAME);
+
+            if (null == schema)
+                return null;
+
             QuerySettings proteinsSettings = schema.getSettings(ctx, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
             proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
             QueryView proteinsView = new QueryView(schema, proteinsSettings, errors)
