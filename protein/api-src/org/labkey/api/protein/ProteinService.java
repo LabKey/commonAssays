@@ -52,7 +52,6 @@ public interface ProteinService
     int ensureProtein(String sequence, String organism, String name, String description);
 
     /**
-     *
      * @param seqId
      * @param typeAndIdentifiers A map of identifier types to identifiers.
      * Identifier type (e.g. SwissProtAccn) --> set of identifiers (e.g. B7Z1V4, P80404)
@@ -88,13 +87,11 @@ public interface ProteinService
         WebPartView createView(ViewContext viewContext, FormType form);
     }
 
-    ActionURL getProteinBeginUrl(Container c);
-
     List<ProteinFeature> getProteinFeatures(String accession);
+
+    ActionURL getProteinBeginUrl(Container c);
 
     ActionURL getPeptideSearchUrl(Container c);
 
     ActionURL getProteinSearchUrl(Container c);
-
-    ActionURL getPeptideSearchUrl(Container c, String sequence);
 }

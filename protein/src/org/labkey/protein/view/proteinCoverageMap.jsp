@@ -16,13 +16,13 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.api.protein.CoverageViewBean" %>
 <%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.api.visualization.ColorGradient" %>
-<%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ page import="java.awt.*" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Collections" %>
@@ -36,7 +36,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
+    CoverageViewBean bean = ((JspView<CoverageViewBean>)HttpView.currentView()).getModelBean();
     var currentURL = getActionURL();
     var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");
@@ -65,9 +65,9 @@
     @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
-        dependencies.add("MS2/ProteinCoverageMap.css");
-        dependencies.add("MS2/ProteinCoverageMap.js");
-        dependencies.add("MS2/PeptideCharacteristicLegend.js");
+        dependencies.add("protein/ProteinCoverageMap.css");
+        dependencies.add("protein/ProteinCoverageMap.js");
+        dependencies.add("protein/PeptideCharacteristicLegend.js");
         dependencies.add("util.js");
         dependencies.add("internal/jQuery");
         dependencies.add("vis/vis");
@@ -120,9 +120,9 @@
     List<Double> iValues = new ArrayList<>();
 
     // combinedPeptideCharacteristics are always used for legend values
-    var combinedPeptideCharacteristics = bean.protein.getCombinedPeptideCharacteristics();
+    var combinedPeptideCharacteristics = bean.coverageProtein.getCombinedPeptideCharacteristics();
     // modifiedPeptideCharacteristics are used for stacked view of peptides
-    var modifiedPeptideCharacteristics = bean.protein.getModifiedPeptideCharacteristics();
+    var modifiedPeptideCharacteristics = bean.coverageProtein.getModifiedPeptideCharacteristics();
     List<PeptideCharacteristic> peptidesForSequenceMapDisplay;
 
     if (isCombined)
@@ -283,7 +283,7 @@
 %>
 <div class="sequencePanel">
     <div class="coverageMap">
-        <%=bean.protein.getCoverageMap(bean.run, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
+        <%=bean.coverageProtein.getCoverageMap(bean.modificationHandler, bean.showRunUrl, bean.aaRowWidth, bean.features)%>
     </div>
 <%
     var legendLabel = "";

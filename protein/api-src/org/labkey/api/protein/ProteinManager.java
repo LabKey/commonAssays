@@ -43,18 +43,24 @@ public class ProteinManager
         return new TableSelector(ProteinSchema.getTableInfoFastaFiles()).getObject(fastaId, FastaFile.class);
     }
 
-    public static SimpleProtein getProtein(int seqId)
+    public static SimpleProtein getSimpleProtein(int seqId)
     {
         return new SqlSelector(ProteinSchema.getSchema(),
                 "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE SeqId = ?",
                 seqId).getObject(SimpleProtein.class);
     }
 
-    private static SimpleProtein getProtein(String sequence, int organismId)
+    private static SimpleProtein getSimpleProtein(String sequence, int organismId)
     {
         return new SqlSelector(ProteinSchema.getSchema(),
                 "SELECT SeqId, ProtSequence AS Sequence, Mass, Description, BestName, BestGeneName FROM " + ProteinSchema.getTableInfoSequences() + " WHERE Hash = ? AND OrgId = ?",
                 hashSequence(sequence), organismId).getObject(SimpleProtein.class);
+    }
+
+    public static CoverageProtein getCoverageProtein(int seqId)
+    {
+        SimpleProtein simpleProtein = ProteinManager.getSimpleProtein(seqId);
+        return simpleProtein != null ? new CoverageProtein(simpleProtein) : null;
     }
 
     public static int ensureProtein(String sequence, String organismName, String name, String description)
@@ -83,7 +89,7 @@ public class ProteinManager
 
     private static SimpleProtein ensureProteinInDatabase(String sequence, Organism organism, String name, String description)
     {
-        SimpleProtein protein = getProtein(sequence, organism.getOrgId());
+        SimpleProtein protein = getSimpleProtein(sequence, organism.getOrgId());
         if (protein == null)
         {
             Map<String, Object> map = new CaseInsensitiveHashMap<>();
@@ -99,14 +105,14 @@ public class ProteinManager
             map.put("ChangeDate", new Date());
 
             Table.insert(null, ProteinSchema.getTableInfoSequences(), map);
-            protein = getProtein(sequence, organism.getOrgId());
+            protein = getSimpleProtein(sequence, organism.getOrgId());
         }
         return protein;
     }
 
     public static void ensureIdentifiers(int seqId, Map<String, Set<String>> typeAndIdentifiers)
     {
-        SimpleProtein protein = getProtein(seqId);
+        SimpleProtein protein = getSimpleProtein(seqId);
         if (protein == null)
         {
             throw new NotFoundException("SeqId " + seqId + " does not exist.");

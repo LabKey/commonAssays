@@ -25,11 +25,12 @@
 <%@ page import="org.labkey.ms2.MS2Manager"%>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
-<%@ page import="org.labkey.ms2.MassType" %>
+<%@ page import="org.labkey.api.protein.MassType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.labkey.api.protein.PeptideUtils" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -261,7 +262,7 @@ if (mzs != null && intensities != null && mzs.length == intensities.length && mz
 var staticMods = [];
 <%
 int staticModIndex = 0;
-for (org.labkey.ms2.MS2Modification mod : run.getModifications(org.labkey.ms2.MassType.Average))
+for (org.labkey.ms2.MS2Modification mod : run.getModifications(MassType.Average))
 {
     if (!mod.getVariable())
     { %>
@@ -272,7 +273,7 @@ for (org.labkey.ms2.MS2Modification mod : run.getModifications(org.labkey.ms2.Ma
 
 var varMods = [];
 <%
-String trimmedWithMods = MS2Peptide.trimPeptide(p.getPeptide());
+String trimmedWithMods = PeptideUtils.trimPeptide(p.getPeptide());
 int aaIndex = 0;
 int varModIndex = 0;
 for (int i = 0; i < trimmedWithMods.length(); i++)

@@ -76,6 +76,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
+import org.labkey.api.protein.MassType;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.PeptideCharacteristic;
 import org.labkey.api.protein.ProteinSchema;
@@ -91,6 +92,7 @@ import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.protein.search.ProphetFilterType;
 import org.labkey.api.protein.search.ProteinSearchBean;
 import org.labkey.api.protein.search.ProteinSearchForm;
+import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.labkey.api.query.CustomView;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
@@ -166,8 +168,8 @@ import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
 import org.labkey.ms2.pipeline.mascot.MascotConfig;
+import org.labkey.api.protein.CoverageProtein.ModificationHandler;
 import org.labkey.ms2.protein.Protein;
-import org.labkey.ms2.protein.ProteinManager;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.tools.GoHelpers;
 import org.labkey.ms2.protein.tools.NullOutputStream;
@@ -182,7 +184,6 @@ import org.labkey.ms2.query.ProteinProphetCrosstabView;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
-import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -1504,7 +1505,7 @@ public class MS2Controller extends SpringActionController
                 _proteins = new ArrayList<>();
                 for (Integer targetSeqId : _targetSeqIds)
                 {
-                    _proteins.add(org.labkey.api.protein.ProteinManager.getProtein(targetSeqId.intValue()));
+                    _proteins.add(org.labkey.api.protein.ProteinManager.getSimpleProtein(targetSeqId.intValue()));
                 }
             }
             return _proteins;
@@ -3179,7 +3180,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             getPageConfig().setTemplate(PageConfig.Template.None);
-            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
+            Protein protein = MS2Manager.getProtein(form.getSeqIdInt());
 
             if (protein == null)
             {
@@ -3211,7 +3212,7 @@ public class MS2Controller extends SpringActionController
             writer.write(PageFlowUtil.filter(DecimalFormat.getIntegerInstance().format(protein.getSequence().length())));
             writer.write("</div>");
 
-            writer.write(protein.getCoverageMap(run, null, 40, Collections.emptyList()).toString());
+            writer.write(protein.getCoverageMap(MS2ModificationHandler.of(run), null, 40, Collections.emptyList()).toString());
             return null;
         }
 
@@ -3386,7 +3387,7 @@ public class MS2Controller extends SpringActionController
             if (0 == seqId)
                 throw new NotFoundException("Protein sequence not found");
 
-            _protein = ProteinManager.getProtein(seqId);
+            _protein = MS2Manager.getProtein(seqId);
             if (_protein == null)
             {
                 throw new NotFoundException("Could not find protein with SeqId " + seqId);
@@ -3586,6 +3587,7 @@ public class MS2Controller extends SpringActionController
                     protein.setCombinedPeptideCharacteristics(peptideCharacteristics);
                 }
                 protein.setShowEntireFragmentInCoverage(stringSearch);
+                bean.coverageProtein = protein;
                 bean.protein = protein;
                 bean.showPeptides = showPeptides;
                 JspView<ProteinViewBean> proteinSummary = new JspView<>("/org/labkey/ms2/protein.jsp", bean);
@@ -3597,10 +3599,11 @@ public class MS2Controller extends SpringActionController
                 bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
+                    bean.modificationHandler = MS2ModificationHandler.of(run);
                     bean.aaRowWidth = Protein.DEFAULT_WRAP_COLUMNS;
                     VBox box = new VBox(
                         new JspView<>("/org/labkey/ms2/proteinCoverageMapHeader.jsp", bean),
-                        new JspView<>("/org/labkey/ms2/protein/view/proteinCoverageMap.jsp", bean));
+                        new JspView<>("/org/labkey/protein/view/proteinCoverageMap.jsp", bean));
                     box.setFrame(FrameType.PORTAL);
                     sequenceView = box;
                 }
@@ -3634,6 +3637,48 @@ public class MS2Controller extends SpringActionController
                 vBox.enableExpandCollapse("Peptides", false);
                 addView(vBox);
             }
+        }
+    }
+
+    public static class MS2ModificationHandler implements ModificationHandler
+    {
+        private final List<MS2Modification> mods;
+
+        private MS2ModificationHandler(@NotNull MS2Run run)
+        {
+            mods = MS2Manager.getModifications(run);
+        }
+
+        @Override
+        public Boolean apply(String peptide, Map<String, Integer> countModifications)
+        {
+            boolean unmodified = true;
+
+            for (MS2Modification mod : mods)
+            {
+                if (!mod.getVariable())
+                    continue;
+                String marker = mod.getAminoAcid() + mod.getSymbol();
+                if (peptide.contains(marker))
+                {
+                    Integer curCount = countModifications.get(marker);
+                    if (null == curCount)
+                    {
+                        countModifications.put(marker, 0);
+                        curCount = countModifications.get(marker);
+                    }
+                    curCount++;
+                    countModifications.put(marker, curCount);
+                    unmodified = false;
+                }
+            }
+
+            return unmodified;
+        }
+
+        public static @Nullable MS2ModificationHandler of(@Nullable MS2Run run)
+        {
+            return run != null ? new MS2ModificationHandler(run) : null;
         }
     }
 
@@ -3704,7 +3749,7 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(DetailsForm form, BindException errors) throws Exception
         {
             MS2Run ms2Run;
-            Protein protein = ProteinManager.getProtein(form.getSeqIdInt());
+            Protein protein = MS2Manager.getProtein(form.getSeqIdInt());
             if (protein == null)
                 throw new NotFoundException("Could not find protein with SeqId " + form.getSeqIdInt());
             ms2Run = form.validateRun();
@@ -3851,7 +3896,7 @@ public class MS2Controller extends SpringActionController
                 {
                     // No need to separately validate - we've already cleared the run permission checks
                     MS2Run ms2Run = MS2Manager.getRun(ids.getRun());
-                    Protein protein = ProteinManager.getProtein(ids.getSeqId());
+                    Protein protein = MS2Manager.getProtein(ids.getSeqId());
                     if (protein == null)
                         throw new NotFoundException("Could not find protein with SeqId " + ids.getSeqId());
 
@@ -4006,7 +4051,7 @@ public class MS2Controller extends SpringActionController
             for (String curSqid : sqidArr)
             {
                 int curSeqId = Integer.parseInt(curSqid);
-                proteins.add(org.labkey.api.protein.ProteinManager.getProtein(curSeqId));
+                proteins.add(org.labkey.api.protein.ProteinManager.getSimpleProtein(curSeqId));
             }
 
             proteins.sort(Comparator.comparing(SimpleProtein::getBestName));
