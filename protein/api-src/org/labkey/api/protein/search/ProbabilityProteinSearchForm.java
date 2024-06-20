@@ -2,7 +2,6 @@ package org.labkey.api.protein.search;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.labkey.api.action.HasViewContext;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.protein.MatchCriteria;

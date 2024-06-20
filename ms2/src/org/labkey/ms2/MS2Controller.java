@@ -42,6 +42,7 @@ import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
+import org.labkey.api.annotations.Migrate;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.ColumnInfo;
@@ -2484,6 +2485,7 @@ public class MS2Controller extends SpringActionController
         ProteinSearchBean.registerPeptidePanelViewFactory(bean -> new JspView<>("/org/labkey/ms2/search/peptidePanel.jsp", bean));
     }
 
+    @Migrate // Move this to Protein module? Need a provision for registering getContainerCondition().
     public static class ProteinSearchViewProvider implements QueryViewProvider<ProteinSearchForm>
     {
         @Override
