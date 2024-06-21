@@ -65,13 +65,13 @@ import java.util.TreeMap;
 */
 public class LuminexExcelParser
 {
-    private Collection<File> _dataFiles;
+    private final Collection<File> _dataFiles;
     @Nullable
-    private Domain _excelRunDomain;
-    private Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<>();
-    private Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<>();
-    private Map<String, Titration> _titrations = new TreeMap<>();
-    private Map<String, SinglePointControl> _singlePointControls = new TreeMap<>();
+    private final Domain _excelRunDomain;
+    private final Map<Analyte, List<LuminexDataRow>> _sheets = new LinkedHashMap<>();
+    private final Map<File, Map<DomainProperty, String>> _excelRunProps = new HashMap<>();
+    private final Map<String, Titration> _titrations = new TreeMap<>();
+    private final Map<String, SinglePointControl> _singlePointControls = new TreeMap<>();
     private boolean _parsed;
     private boolean _imported;
 
@@ -80,7 +80,7 @@ public class LuminexExcelParser
         this(LuminexAssayProvider.getExcelRunDomain(protocol), dataFiles);
     }
 
-    private LuminexExcelParser(Domain excelRunDomain, Collection<File> dataFiles)
+    private LuminexExcelParser(@Nullable Domain excelRunDomain, Collection<File> dataFiles)
     {
         _excelRunDomain = excelRunDomain;
         _dataFiles = dataFiles;
@@ -121,7 +121,7 @@ public class LuminexExcelParser
                     String analyteName = analyteNameFromName(sheet.getSheetName());
                     String beadNumber = beadNumberFromName(sheet.getSheetName());
 
-                    // verify the each tab has a unique analyte name for the workbook
+                    // verify each tab has a unique analyte name for the workbook
                     if (!analyteNames.contains(analyteName))
                         analyteNames.add(analyteName);
                     else
@@ -168,13 +168,11 @@ public class LuminexExcelParser
                                 // track the number of rows per sample for summary and raw separately
                                 if (dataRow.isSummary())
                                 {
-                                    Integer count = potentialTitrationSummaryCounts.get(rowDescription);
-                                    potentialTitrationSummaryCounts.put(rowDescription, count == null ? 1 : count + 1);
+                                    potentialTitrationSummaryCounts.compute(rowDescription, (k, count) -> count == null ? 1 : count + 1);
                                 }
                                 else
                                 {
-                                    Integer count = potentialTitrationRawCounts.get(rowDescription);
-                                    potentialTitrationRawCounts.put(rowDescription, count == null ? 1 : count + 1);
+                                    potentialTitrationRawCounts.compute(rowDescription, (k, count) -> count == null ? 1 : count + 1);
                                 }
 
                                 if (!potentialTitrations.containsKey(rowDescription))
@@ -209,9 +207,9 @@ public class LuminexExcelParser
                     // Update crossFilePTRaw/crossFilePTSummary
                     if (firstSheet)
                     {
-                        if (potentialTitrationRawCounts.size() > 0)
+                        if (!potentialTitrationRawCounts.isEmpty())
                             buildCrossFilePTs(crossFilePTRaw, potentialTitrations, potentialTitrationRawCounts);
-                        if (potentialTitrationSummaryCounts.size() > 0)
+                        if (!potentialTitrationSummaryCounts.isEmpty())
                             buildCrossFilePTs(crossFilePTSummary, potentialTitrations, potentialTitrationSummaryCounts);
 
                         // Check for single-file titrations. Does not check for dilution counts.
@@ -422,12 +420,7 @@ public class LuminexExcelParser
         }
 
         Map<String, DomainProperty> excelProps = _excelRunDomain.createImportMap(true);
-        Map<DomainProperty, String> excelValues = _excelRunProps.get(dataFile);
-        if (excelValues == null)
-        {
-            excelValues = new HashMap<>();
-            _excelRunProps.put(dataFile, excelValues);
-        }
+        Map<DomainProperty, String> excelValues = _excelRunProps.computeIfAbsent(dataFile, k -> new HashMap<>());
 
         do
         {
@@ -500,7 +493,7 @@ public class LuminexExcelParser
                 if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex)
                 {
                     String fitProbValue = cellContents.substring(startIndex + 1, endIndex).trim();
-                    if (fitProbValue != null && !NumberUtils.isCreatable(fitProbValue))
+                    if (!NumberUtils.isCreatable(fitProbValue))
                         throw new ExperimentException("FitProb. value is not numeric: " + fitProbValue);
 
                     analyte.setFitProb(parseDouble(fitProbValue));
@@ -509,7 +502,7 @@ public class LuminexExcelParser
                 if (startIndex >= 0)
                 {
                     String resVarValue = cellContents.substring(startIndex + 1).trim();
-                    if (resVarValue != null && !NumberUtils.isCreatable(resVarValue))
+                    if (!NumberUtils.isCreatable(resVarValue))
                         throw new ExperimentException("ResVar. value is not numeric: " + resVarValue);
 
                     analyte.setResVar(parseDouble(resVarValue));
@@ -558,25 +551,22 @@ public class LuminexExcelParser
                     else if ("Type".equalsIgnoreCase(columnName))
                     {
                         dataRow.setType(StringUtils.trimToNull(value));
-                        if (value != null)
+                        String upper = value.toUpperCase();
+                        if (upper.startsWith("S") || upper.startsWith("ES"))
                         {
-                            String upper = value.toUpperCase();
-                            if (upper.startsWith("S") || upper.startsWith("ES"))
-                            {
-                                dataRow.setWellRole("Standard");
-                            }
-                            if (upper.startsWith("C"))
-                            {
-                                dataRow.setWellRole("Control");
-                            }
-                            if (upper.startsWith("U") || upper.startsWith("X"))
-                            {
-                                dataRow.setWellRole("Unknown");
-                            }
-                            if (upper.startsWith("B"))
-                            {
-                                dataRow.setWellRole("Background");
-                            }
+                            dataRow.setWellRole("Standard");
+                        }
+                        if (upper.startsWith("C"))
+                        {
+                            dataRow.setWellRole("Control");
+                        }
+                        if (upper.startsWith("U") || upper.startsWith("X"))
+                        {
+                            dataRow.setWellRole("Unknown");
+                        }
+                        if (upper.startsWith("B"))
+                        {
+                            dataRow.setWellRole("Background");
                         }
                     }
                     else if ("Well".equalsIgnoreCase(columnName))
@@ -586,7 +576,7 @@ public class LuminexExcelParser
                         {
                             trimmedValue = trimmedValue.replaceAll("\\s+", ",");
                             dataRow.setWell(trimmedValue);
-                            boolean summary = trimmedValue != null && trimmedValue.contains(",");
+                            boolean summary = trimmedValue.contains(",");
                             dataRow.setSummary(summary);
                         }
                     }
@@ -603,7 +593,7 @@ public class LuminexExcelParser
                     else if ("Outlier".equalsIgnoreCase(columnName))
                     {
                         double outlier = 0;
-                        if (value != null && !"".equals(value.trim()))
+                        if (!value.trim().isEmpty())
                         {
                             outlier = cell.getNumericCellValue();
                         }
@@ -651,7 +641,7 @@ public class LuminexExcelParser
                     else if ("Dilution".equalsIgnoreCase(columnName))
                     {
                         String dilutionValue = value;
-                        if (dilutionValue != null && dilutionValue.startsWith("1:"))
+                        if (dilutionValue.startsWith("1:"))
                         {
                             dilutionValue = dilutionValue.substring("1:".length());
                         }
@@ -705,7 +695,7 @@ public class LuminexExcelParser
 
     private Double parseDouble(String value)
     {
-        if (value == null || "".equals(value) || !NumberUtils.isCreatable(value))
+        if (value == null || value.isEmpty() || !NumberUtils.isCreatable(value))
         {
             return null;
         }
@@ -844,7 +834,7 @@ public class LuminexExcelParser
         private LuminexExcelParser createParser(String fileName) throws IOException
         {
             File luminexDir = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(LuminexModule.class), "luminex");
-            assertTrue("Couldn't find " + luminexDir, null != luminexDir && luminexDir.isDirectory());
+            assertTrue("Couldn't find " + luminexDir, luminexDir.isDirectory());
 
             Domain dummyDomain = PropertyService.get().createDomain(ContainerManager.getRoot(), "fakeURI", "dummyDomain");
             return new LuminexExcelParser(dummyDomain, Arrays.asList(FileUtil.appendName(luminexDir, fileName)));

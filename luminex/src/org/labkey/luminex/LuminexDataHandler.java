@@ -161,7 +161,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         if (!dataFile.exists())
         {
@@ -202,7 +202,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public static Double parseDouble(String value)
     {
-        if (value == null || "".equals(value))
+        if (value == null || value.isEmpty())
         {
             return null;
         }
@@ -249,12 +249,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     public interface Getter
     {
-        public Double getValue(LuminexDataRow dataRow);
+        Double getValue(LuminexDataRow dataRow);
     }
 
     public static LuminexOORIndicator determineOutOfRange(String value)
     {
-        if (value == null || "".equals(value))
+        if (value == null || value.isEmpty())
         {
             return LuminexOORIndicator.IN_RANGE;
         }
@@ -290,12 +290,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private static final String NUMBER_REGEX = "-??[0-9]+(?:\\.[0-9]+)?(?:[Ee][\\+\\-][0-9]+)?";
+    private static final String NUMBER_REGEX = "-??[0-9]+(?:\\.[0-9]+)?(?:[Ee][+\\-][0-9]+)?";
 
     // FI = 0.441049 + (30395.4 - 0.441049) / ((1 + (Conc / 5.04206)^-11.8884))^0.0999998
     // Captures 6 groups. In the example above: 0.441049, 30395.4, 0.441049, 5.04206, -11.8884, and 0.0999998
     private static final String CURVE_REGEX = "\\s*FI\\s*=\\s*" +  // 'FI = '
-            "(" + NUMBER_REGEX + ")\\s*\\+\\s*\\((" + NUMBER_REGEX + ")\\s*[\\+\\-]\\s*(" + NUMBER_REGEX + ")\\)" + // '0.441049 + (30395.4 - 0.441049)'
+            "(" + NUMBER_REGEX + ")\\s*\\+\\s*\\((" + NUMBER_REGEX + ")\\s*[+\\-]\\s*(" + NUMBER_REGEX + ")\\)" + // '0.441049 + (30395.4 - 0.441049)'
             "\\s*/\\s*\\(\\(1\\s*\\+\\s*\\(Conc\\s*/\\s*" + // ' / ((1 + (Conc / '
             "(" + NUMBER_REGEX + ")\\)\\s*\\^\\s*(" + NUMBER_REGEX + ")\\s*\\)\\s*\\)\\s*" + // '^-11.8884))'
             "\\^\\s*(" + NUMBER_REGEX + ")\\s*";
@@ -401,7 +401,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
                 for (LuminexDataRow dataRow : dataRows)
                 {
-                    // Iterate through all of the data rows, figuring out what data file they
+                    // Iterate through all the data rows, figuring out what data file they
                     // originally came from. Additionally, set that as the analyte's source file.
                     // This way they don't end up pointing at the transform script result file instead.
                     ExpData sourceDataForRow = data;
@@ -476,7 +476,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
 
                 insertTitrationAnalyteMappings(user, form, expRun, titrations, sheet.getValue(), analyte, conjugate, isotype, stndCurveFitInput, unkCurveFitInput, protocol);
-                insertSinglePointControlAnalyteMappings(user, form, expRun, singlePointControls, sheet.getValue(), analyte, conjugate, isotype, protocol);
+                insertSinglePointControlAnalyteMappings(user, expRun, singlePointControls, sheet.getValue(), analyte, conjugate, isotype, protocol);
 
                 // Now that we've made sure each data row to the appropriate data file, make sure that we
                 // have %CV and StdDev. It's important to wait so that we know the scope in which to do the aggregate
@@ -525,7 +525,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         catch (SQLException e)
         {
             log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
-            throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e.toString() + ")", e);
+            throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e + ")", e);
         }
     }
 
@@ -533,7 +533,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
             throws SQLException, ValidationException
     {
-        // Do a query to find all of the rows that have already been inserted
+        // Do a query to find all the rows that have already been inserted
         LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(null, false);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromParts("Data"), dataIds));
 
@@ -612,11 +612,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private static class DataRowKey
     {
-        private int _dataId;
-        private int _analyteId;
-        private String _well;
-        private String _type;
-        private Object _standard;
+        private final int _dataId;
+        private final int _analyteId;
+        private final String _well;
+        private final String _type;
+        private final Object _standard;
 
         public DataRowKey(LuminexDataRow dataRow)
         {
@@ -683,7 +683,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 if (fis.size() > 1)
                 {
                     StatsService service = StatsService.get();
-                    MathStat stats = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[fis.size()])));
+                    MathStat stats = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[0])));
                     double stdDev = stats.getStdDev();
                     double mean = Math.abs(stats.getMean());
                     dataRow.setStdDev(stdDev);
@@ -724,20 +724,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private GuideSet determineGuideSet(Analyte analyte, AbstractLuminexControl control, String conjugate, String isotype, ExpProtocol protocol, Boolean isTitration)
     {
-        GuideSet guideSet = GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype, isTitration);
-        if (guideSet != null)
-        {
-            return guideSet;
-        }
-
         // Should we create a new one automatically here?
-        return null;
+        return GuideSetTable.GuideSetTableUpdateService.getMatchingCurrentGuideSet(protocol, analyte.getName(), control.getName(), conjugate, isotype, isTitration);
     }
 
     private void insertTitrationAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, Titration> titrations, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, String stndCurveFitInput, String unkCurveFitInput, ExpProtocol protocol)
             throws ExperimentException
     {
-        // Insert mappings for all of the titrations that aren't standards
+        // Insert mappings for all the titrations that aren't standards
         for (Titration titration : titrations.values())
         {
             if (!titration.isStandard() && (titration.isQcControl() || titration.isUnknown() || titration.isOtherControl()))
@@ -758,9 +752,9 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private void insertSinglePointControlAnalyteMappings(User user, LuminexRunContext form, ExpRun expRun, Map<String, SinglePointControl> singlePointControls, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
+    private void insertSinglePointControlAnalyteMappings(User user, ExpRun expRun, Map<String, SinglePointControl> singlePointControls, List<LuminexDataRow> dataRows, Analyte analyte, String conjugate, String isotype, ExpProtocol protocol)
     {
-        // Insert mappings for all of the controls
+        // Insert mappings for all the controls
         for (SinglePointControl singlePointControl : singlePointControls.values())
         {
             insertAnalyteSinglePointControlMapping(user, expRun, dataRows, analyte, singlePointControl, conjugate, isotype, protocol);
@@ -880,14 +874,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
     }
 
-    private static Double getGuideSetRangeValue(boolean isValueBased, Object runBasedVal, Object valueBasedVal)
-    {
-        if (isValueBased)
-            return parseDouble(valueBasedVal != null ? valueBasedVal.toString() : null);
-        else
-            return parseDouble(runBasedVal != null ? runBasedVal.toString() : null);
-    }
-
     private void insertAnalyteTitrationMapping(User user, ExpRun expRun, List<LuminexDataRow> dataRows, Analyte analyte, Titration titration, String conjugate, String isotype, String curveFitInput, ExpProtocol protocol)
             throws ExperimentException
     {
@@ -944,11 +930,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             FitParameters fitParams = parseBioPlexStdCurve(stdCurve);
             if (fitParams != null)
             {
-                CurveFit fit = insertOrUpdateCurveFit(wellGroup, user, titration, analyte, fitParams, null, null, StatsService.CurveFitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
-                if (fit != null)
-                {
-                    newCurveFits.add(fit);
-                }
+                CurveFit fit = insertOrUpdateCurveFit(user, titration, analyte, fitParams, null, null, StatsService.CurveFitType.FIVE_PARAMETER, "BioPlex", existingCurveFits);
+                newCurveFits.add(fit);
             }
             else
             {
@@ -1093,7 +1076,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 params.asymmetry = asymmetry == null ? 1 : asymmetry.doubleValue();
             }
 
-            return insertOrUpdateCurveFit(wellGroup, user, titration, analyte, params, ec50, flag, fitType, null, existingCurveFits);
+            return insertOrUpdateCurveFit(user, titration, analyte, params, ec50, flag, fitType, null, existingCurveFits);
         }
         return null;
     }
@@ -1398,7 +1381,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @NotNull
-    private CurveFit insertOrUpdateCurveFit(LuminexWellGroup wellGroup, User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
+    private CurveFit insertOrUpdateCurveFit(User user, Titration titration, Analyte analyte, FitParameters params, Double ec50, Boolean flag, StatsService.CurveFitType fitType, String source, CurveFit[] existingCurveFits)
     {
         CurveFit fit = createCurveFit(titration, analyte, params, ec50, flag, fitType, source);
         return insertOrUpdateCurveFit(user, fit, existingCurveFits);
@@ -1668,65 +1651,40 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
     {
-        Getter fiGetter = new Getter()
-        {
-            @Override
-            public Double getValue(LuminexDataRow dataRow)
+        Getter fiGetter = dataRow -> {
+            if (determineOutOfRange(dataRow.getFiString()) == LuminexOORIndicator.IN_RANGE)
             {
-                if (determineOutOfRange(dataRow.getFiString()) == LuminexOORIndicator.IN_RANGE)
-                {
-                    return dataRow.getFi();
-                }
-                return null;
+                return dataRow.getFi();
             }
+            return null;
         };
-        Getter fiBackgroundGetter = new Getter()
-        {
-            @Override
-            public Double getValue(LuminexDataRow dataRow)
+        Getter fiBackgroundGetter = dataRow -> {
+            if (determineOutOfRange(dataRow.getFiBackgroundString()) == LuminexOORIndicator.IN_RANGE)
             {
-                if (determineOutOfRange(dataRow.getFiBackgroundString()) == LuminexOORIndicator.IN_RANGE)
-                {
-                    return dataRow.getFiBackground();
-                }
-                return null;
+                return dataRow.getFiBackground();
             }
+            return null;
         };
-        Getter stdDevGetter = new Getter()
-        {
-            @Override
-            public Double getValue(LuminexDataRow dataRow)
+        Getter stdDevGetter = dataRow -> {
+            if (determineOutOfRange(dataRow.getStdDevString()) == LuminexOORIndicator.IN_RANGE)
             {
-                if (determineOutOfRange(dataRow.getStdDevString()) == LuminexOORIndicator.IN_RANGE)
-                {
-                    return dataRow.getStdDev();
-                }
-                return null;
+                return dataRow.getStdDev();
             }
+            return null;
         };
-        Getter obsConcGetter = new Getter()
-        {
-            @Override
-            public Double getValue(LuminexDataRow dataRow)
+        Getter obsConcGetter = dataRow -> {
+            if (determineOutOfRange(dataRow.getObsConcString()) == LuminexOORIndicator.IN_RANGE)
             {
-                if (determineOutOfRange(dataRow.getObsConcString()) == LuminexOORIndicator.IN_RANGE)
-                {
-                    return dataRow.getObsConc();
-                }
-                return null;
+                return dataRow.getObsConc();
             }
+            return null;
         };
-        Getter concInRangeGetter = new Getter()
-        {
-            @Override
-            public Double getValue(LuminexDataRow dataRow)
+        Getter concInRangeGetter = dataRow -> {
+            if (determineOutOfRange(dataRow.getConcInRangeString()) == LuminexOORIndicator.IN_RANGE)
             {
-                if (determineOutOfRange(dataRow.getConcInRangeString()) == LuminexOORIndicator.IN_RANGE)
-                {
-                    return dataRow.getConcInRange();
-                }
-                return null;
+                return dataRow.getConcInRange();
             }
+            return null;
         };
 
         Double minStandardFI = getValidStandard(dataRows, fiGetter, true, analyte);
@@ -2096,7 +2054,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
 
-                // Merge in whether or not the data row is excluded via a "well exclusion".
+                // Merge in whether the data row is excluded via a "well exclusion".
                 // We write out all the wells, excluded or not, but the transform script can choose to ignore them
                 String dataRowWellKey = LuminexManager.get().createWellKey(dataFileHeaderKey, entry.getKey().getName(),
                         dataRow.getDescription(), dataRow.getType(), dataRow.getDilution(), dataRow.getWell());
