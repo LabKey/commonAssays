@@ -144,19 +144,16 @@ public class XTandemTest extends AbstractXTandemTest
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
         assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
-        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
 
         setFormElement(Locator.name("minimumProbability"), "2.0");
         clickButton("Search");
-        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
         assertElementNotPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
 
         setFormElement(Locator.name("identifier"), "GarbageProteinName");
         setFormElement(Locator.name("minimumProbability"), "");
         clickButton("Search");
-        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(!(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1)));
         assertTextNotPresent(SEARCH_FIND_FASTA1);
         assertTextPresent("No data to show");
@@ -166,7 +163,6 @@ public class XTandemTest extends AbstractXTandemTest
         setFormElement(Locator.name("identifier"), SEARCH_FASTA2);
         checkCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
-        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA2));
 
         log("Search for a protein in the third fasta file.");
@@ -174,7 +170,6 @@ public class XTandemTest extends AbstractXTandemTest
         setFormElement(Locator.name("identifier"), SEARCH_FASTA3);
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
-        clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA3));
     }
 
