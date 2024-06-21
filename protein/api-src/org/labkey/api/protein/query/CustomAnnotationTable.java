@@ -26,7 +26,7 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.PropertyService;
-import org.labkey.api.protein.CustomAnnotationSet;
+import org.labkey.api.protein.annotation.CustomAnnotationSet;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;

@@ -26,8 +26,8 @@ import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.protein.CustomAnnotationSetManager;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
+import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.fasta.FastaDbLoader;
@@ -59,7 +59,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 24.000;
+        return 24.001;
     }
 
     @Override

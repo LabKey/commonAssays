@@ -56,6 +56,7 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.protein.fasta.FastaFile;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
@@ -75,6 +76,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
+import org.labkey.api.protein.CoverageProtein;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
@@ -1519,8 +1521,6 @@ public class MS2Manager
         }
     }
 
-
-
     public static DecoySummaryBean getDecoySummaryForRun(int run, Float desiredFdr)
     {
         DbSchema schema = getSchema();
@@ -1669,5 +1669,17 @@ public class MS2Manager
         }
 
         return result;
+    }
+
+    public static Protein getProtein(int seqId)
+    {
+        SimpleProtein simpleProtein = ProteinManager.getSimpleProtein(seqId);
+        return simpleProtein != null ? new Protein(simpleProtein) : null;
+    }
+
+    public static CoverageProtein getCoverageProtein(int seqId)
+    {
+        SimpleProtein simpleProtein = ProteinManager.getSimpleProtein(seqId);
+        return simpleProtein != null ? new CoverageProtein(simpleProtein) : null;
     }
 }

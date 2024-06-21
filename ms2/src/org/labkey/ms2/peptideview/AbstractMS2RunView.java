@@ -62,7 +62,7 @@ import org.labkey.ms2.MS2ExportType;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.MassType;
+import org.labkey.api.protein.MassType;
 import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.RunListException;
 import org.labkey.ms2.SpectrumIterator;

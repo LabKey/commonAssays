@@ -24,31 +24,33 @@ import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.protein.AnnotationView;
+import org.labkey.api.protein.CoverageViewBean;
 import org.labkey.api.protein.PeptideCharacteristic;
-import org.labkey.api.protein.PeptideSearchForm;
-import org.labkey.api.protein.ProteinCoverageViewService;
 import org.labkey.api.protein.ProteinFeature;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinPlus;
 import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.ProteinSearchForm;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.Replicate;
 import org.labkey.api.protein.SimpleProtein;
+import org.labkey.api.protein.annotation.AnnotationView;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.protein.organism.GuessOrgByParsing;
 import org.labkey.api.protein.organism.GuessOrgBySharedHash;
 import org.labkey.api.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.api.protein.organism.OrganismGuessStrategy;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.JspView;
 import org.labkey.api.view.WebPartView;
+import org.labkey.protein.ProteinController.DoProteinSearchAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -71,6 +73,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class ProteinServiceImpl implements ProteinService
@@ -185,22 +188,39 @@ public class ProteinServiceImpl implements ProteinService
         return Collections.unmodifiableList(_proteinSearchFormViewProviders);
     }
 
+    private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<CoverageViewBean> beanModifier)
+    {
+        CoverageViewBean bean = new CoverageViewBean();
+        bean.coverageProtein = ProteinManager.getCoverageProtein(seqId);
+        bean.coverageProtein.setShowEntireFragmentInCoverage(showEntireFragmentInCoverage);
+        bean.coverageProtein.setCombinedPeptideCharacteristics(peptideCharacteristics);
+        bean.features = ProteinService.get().getProteinFeatures(accessionForFeatures);
+        bean.aaRowWidth = aaRowWidth;
+        beanModifier.accept(bean);
+        return new JspView<>("/org/labkey/protein/view/proteinCoverageMap.jsp", bean);
+    }
+
     @Override
     public WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
     {
-        return ProteinCoverageViewService.get().getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures);
+        return getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, bean -> {});
     }
 
     @Override
     public WebPartView<?> getProteinCoverageViewWithSettings(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, List<Replicate> replicates, List<PeptideCharacteristic> modifiedPeptideCharacteristics, boolean showStackedPeptides)
     {
-        return ProteinCoverageViewService.get().getProteinCoverageViewWithSettings(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, replicates, modifiedPeptideCharacteristics, showStackedPeptides);
+        return getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, bean -> {
+            bean.replicates = replicates;
+            bean.showViewSettings = true;
+            bean.coverageProtein.setModifiedPeptideCharacteristics(modifiedPeptideCharacteristics);
+            bean.coverageProtein.setShowStakedPeptides(showStackedPeptides);
+        });
     }
 
     @Override
     public WebPartView<?> getAnnotationsView(int seqId, Map<String, Collection<HtmlString>> extraAnnotations)
     {
-        SimpleProtein protein = ProteinManager.getProtein(seqId);
+        SimpleProtein protein = ProteinManager.getSimpleProtein(seqId);
         return new AnnotationView(protein, extraAnnotations);
     }
 
@@ -212,12 +232,6 @@ public class ProteinServiceImpl implements ProteinService
 
     private static final Cache<String, List<ProteinFeature>> FEATURE_CACHE =
             CacheManager.getBlockingCache(100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
-
-    @Override
-    public ActionURL getProteinBeginUrl(Container c)
-    {
-        return new ActionURL(ProteinController.BeginAction.class, c);
-    }
 
     @Override
     public List<ProteinFeature> getProteinFeatures(String accession)
@@ -363,5 +377,23 @@ public class ProteinServiceImpl implements ProteinService
             result.sort(Comparator.comparingInt(ProteinFeature::getStartIndex));
             return Collections.unmodifiableList(result);
         }
+    }
+
+    @Override
+    public ActionURL getProteinBeginUrl(Container c)
+    {
+        return new ActionURL(ProteinController.BeginAction.class, c);
+    }
+
+    @Override
+    public ActionURL getPeptideSearchUrl(Container c)
+    {
+        return new ActionURL(ProteinController.PepSearchAction.class, c);
+    }
+
+    @Override
+    public ActionURL getProteinSearchUrl(Container c)
+    {
+        return new ActionURL(DoProteinSearchAction.class, c);
     }
 }

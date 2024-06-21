@@ -19,7 +19,7 @@ package org.labkey.api.protein.fasta;
 import org.labkey.api.ms2.MS2Service;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.protein.ProteinAnnotationPipelineProvider;
+import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;

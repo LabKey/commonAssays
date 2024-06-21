@@ -15,7 +15,7 @@ z<%
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.protein.AnnotationView" %>
+<%@ page import="org.labkey.api.protein.annotation.AnnotationView" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>

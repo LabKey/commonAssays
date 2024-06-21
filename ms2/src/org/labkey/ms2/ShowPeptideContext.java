@@ -34,7 +34,6 @@ public class ShowPeptideContext
     public ActionURL nextUrl;
     public ActionURL showGzUrl;
     public LinkBuilder modificationHref;
-    public String pepSearchHref;
 
     ShowPeptideContext(MS2Controller.DetailsForm form, MS2Run run, MS2Peptide peptide, ActionURL url, ActionURL previousUrl, ActionURL nextUrl, ActionURL showGzUrl, LinkBuilder modHref, Container container, User user)
     {
@@ -49,7 +48,5 @@ public class ShowPeptideContext
         this.nextUrl = nextUrl;
         this.showGzUrl = showGzUrl;
         this.modificationHref = modHref;
-
-        pepSearchHref = MS2Controller.MS2UrlsImpl.getPepSearchUrl(container, peptide.getTrimmedPeptide()).getLocalURIString();
     }
 }

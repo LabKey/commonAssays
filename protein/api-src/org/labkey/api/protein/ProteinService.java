@@ -16,9 +16,10 @@
 package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.protein.search.PeptideSearchForm;
+import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.HtmlString;
@@ -51,7 +52,6 @@ public interface ProteinService
     int ensureProtein(String sequence, String organism, String name, String description);
 
     /**
-     *
      * @param seqId
      * @param typeAndIdentifiers A map of identifier types to identifiers.
      * Identifier type (e.g. SwissProtAccn) --> set of identifiers (e.g. B7Z1V4, P80404)
@@ -64,7 +64,6 @@ public interface ProteinService
      */
     Map<String, Set<String>> getIdentifiers(String description, String... names);
 
-    @Migrate // The register*() methods are called by TargetedMS and MaxQuant, but the get() methods are called only by MS2 (??)
     void registerProteinSearchView(QueryViewProvider<ProteinSearchForm> provider);
     void registerPeptideSearchView(QueryViewProvider<PeptideSearchForm> provider);
     void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider);
@@ -88,7 +87,11 @@ public interface ProteinService
         WebPartView createView(ViewContext viewContext, FormType form);
     }
 
+    List<ProteinFeature> getProteinFeatures(String accession);
+
     ActionURL getProteinBeginUrl(Container c);
 
-    List<ProteinFeature> getProteinFeatures(String accession);
+    ActionURL getPeptideSearchUrl(Container c);
+
+    ActionURL getProteinSearchUrl(Container c);
 }

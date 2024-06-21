@@ -526,7 +526,6 @@ microarray/src/org/labkey/microarray/query/FeatureAnnotationSetTable.java -text
 microarray/src/org/labkey/microarray/query/MicroarrayUserSchema.java -text
 microarray/src/org/labkey/microarray/view/FeatureAnnotationSetQueryView.java -text
 microarray/src/org/labkey/microarray/view/uploadFeatureAnnotation.jsp -text
-ms2/api-src/org/labkey/api/ms2/MS2Urls.java -text
 ms2/api-src/org/labkey/api/util/massSpecDataFileType.java -text
 ms2/build.gradle -text
 ms2/gwtsrc/org/labkey/ms2/pipeline/Search.gwt.xml -text
@@ -785,7 +784,6 @@ ms2/src/org/labkey/ms2/pipeline/tandem/XTandemToXMLTask.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/XTandemcometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/tandem/setTandemDefaults.jsp -text
 ms2/src/org/labkey/ms2/protein.jsp -text
-ms2/src/org/labkey/ms2/protein/ProteinManager.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieSectionLabelGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieToolTipGenerator.java -text
 ms2/src/org/labkey/ms2/protein/tools/GOPieURLGenerator.java -text
@@ -808,7 +806,6 @@ ms2/src/org/labkey/ms2/query/NormalizedProteinProphetCrosstabView.java -text
 ms2/src/org/labkey/ms2/query/PeptideAggregrationDisplayColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCountCoverageColumn.java -text
 ms2/src/org/labkey/ms2/query/PeptideCrosstabView.java -text
-ms2/src/org/labkey/ms2/query/PeptideFilter.java -text
 ms2/src/org/labkey/ms2/query/PeptidesTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinGroupTableInfo.java -text
 ms2/src/org/labkey/ms2/query/ProteinProphetCrosstabView.java -text
@@ -860,11 +857,7 @@ ms2/src/org/labkey/ms2/renameRun.jsp -text
 ms2/src/org/labkey/ms2/runSummary.jsp -text
 ms2/src/org/labkey/ms2/saveView.jsp -text
 ms2/src/org/labkey/ms2/search/MSSearchWebpart.java -text
-ms2/src/org/labkey/ms2/search/ProteinSearchBean.java -text
-ms2/src/org/labkey/ms2/search/ProteinSearchWebPart.java -text
 ms2/src/org/labkey/ms2/search/msTabbedSearch.jsp -text
-ms2/src/org/labkey/ms2/search/searchProteins.jsp -text
-ms2/src/org/labkey/ms2/search/searchProteinsNarrow.jsp -text
 ms2/src/org/labkey/ms2/showPeptide.jsp -text
 ms2/src/org/labkey/ms2/showPeptideProphetDetails.jsp -text
 ms2/src/org/labkey/ms2/showPeptideQuantitation.jsp -text

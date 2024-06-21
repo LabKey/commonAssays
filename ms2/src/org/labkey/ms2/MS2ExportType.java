@@ -19,6 +19,7 @@ import org.labkey.api.data.Filter;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.protein.MassType;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
