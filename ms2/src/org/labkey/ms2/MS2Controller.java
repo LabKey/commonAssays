@@ -2490,6 +2490,11 @@ public class MS2Controller extends SpringActionController
         ProteinSearchBean.registerPeptidePanelViewFactory(bean -> new JspView<>("/org/labkey/ms2/search/peptidePanel.jsp", bean));
     }
 
+    public static void registerProteinSearchViewContainerConditionProvider()
+    {
+        ProteinService.get().registerProteinSearchViewContainerConditionProvider(MS2Controller::getContainerCondition);
+    }
+
     private static SQLFragment getContainerCondition(Container c, User u)
     {
         SqlDialect d = ProteinSchema.getSqlDialect();

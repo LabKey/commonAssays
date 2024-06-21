@@ -26,7 +26,6 @@ import org.labkey.api.action.QueryViewAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
-import org.labkey.api.annotations.Migrate;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -39,6 +38,7 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
@@ -138,6 +138,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class ProteinController extends SpringActionController
 {
@@ -265,13 +266,16 @@ public class ProteinController extends SpringActionController
 
     public static class ProteinSearchViewProvider implements QueryViewProvider<ProteinSearchForm>
     {
+        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
+
+        private static BiFunction<Container, User, SQLFragment> _containerConditionProvider = (container, user) -> new SQLFragment();
+
         @Override
         public String getDataRegionName()
         {
-            return ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION;
+            return POTENTIAL_PROTEIN_DATA_REGION;
         }
 
-        @Migrate // address getContainerCondition()
         @Override
         public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
         {
@@ -283,8 +287,7 @@ public class ProteinController extends SpringActionController
 
                 if (null != schema)
                 {
-
-                    QuerySettings proteinsSettings = schema.getSettings(ctx, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
+                    QuerySettings proteinsSettings = schema.getSettings(ctx, POTENTIAL_PROTEIN_DATA_REGION);
                     proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
                     proteinsView = new QueryView(schema, proteinsSettings, errors)
                     {
@@ -300,8 +303,8 @@ public class ProteinController extends SpringActionController
 
                     proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
                     SequencesTableInfo<ProteinUserSchema> sequencesTableInfo = (SequencesTableInfo<ProteinUserSchema>) proteinsView.getTable();
-                    // TODO!!
-//            ((ProbabilityProteinSearchForm)form).setRestrictCondition(MS2Controller.getContainerCondition(ctx.getContainer(), ctx.getUser()));
+                    SQLFragment containerCondition = _containerConditionProvider.apply(ctx.getContainer(), ctx.getUser());
+                    ((ProbabilityProteinSearchForm)form).setRestrictCondition(containerCondition);
                     int[] seqIds = form.getSeqId();
                     if (seqIds.length <= 500)
                     {
@@ -312,8 +315,7 @@ public class ProteinController extends SpringActionController
                         sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
                         if (form.isRestrictProteins())
                         {
-                            // TODO!!
-//                    sequencesTableInfo.addCondition(getContainerCondition(ctx.getContainer(), ctx.getUser()));
+                            sequencesTableInfo.addCondition(containerCondition);
                         }
                     }
                     proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
@@ -321,6 +323,11 @@ public class ProteinController extends SpringActionController
             }
 
             return proteinsView;
+        }
+
+        public static void registerContainerConditionProvider(BiFunction<Container, User, SQLFragment> containerConditionProvider)
+        {
+            _containerConditionProvider = containerConditionProvider;
         }
     }
 

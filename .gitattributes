@@ -619,7 +619,6 @@ ms2/src/org/labkey/ms2/MS2SearchExperimentRunType.java -text
 ms2/src/org/labkey/ms2/MS2ServiceImpl.java -text
 ms2/src/org/labkey/ms2/MascotDatExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/MascotDatImporter.java -text
-ms2/src/org/labkey/ms2/MassType.java -text
 ms2/src/org/labkey/ms2/PepXmlExperimentDataHandler.java -text
 ms2/src/org/labkey/ms2/PepXmlImporter.java -text
 ms2/src/org/labkey/ms2/PeptideImporter.java -text
@@ -856,8 +855,6 @@ ms2/src/org/labkey/ms2/reader/XPressHandler.java -text
 ms2/src/org/labkey/ms2/renameRun.jsp -text
 ms2/src/org/labkey/ms2/runSummary.jsp -text
 ms2/src/org/labkey/ms2/saveView.jsp -text
-ms2/src/org/labkey/ms2/search/MSSearchWebpart.java -text
-ms2/src/org/labkey/ms2/search/msTabbedSearch.jsp -text
 ms2/src/org/labkey/ms2/showPeptide.jsp -text
 ms2/src/org/labkey/ms2/showPeptideProphetDetails.jsp -text
 ms2/src/org/labkey/ms2/showPeptideQuantitation.jsp -text

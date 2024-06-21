@@ -284,6 +284,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         ProteinService.get().registerPeptideSearchView(new PeptidesViewProvider());
         ProteinService.get().registerProteinSearchView(new ProteinSearchGroupViewProvider());
         MS2Controller.registerPeptidePanelForSearch();
+        MS2Controller.registerProteinSearchViewContainerConditionProvider();
     }
 
     @NotNull
