@@ -41,6 +41,7 @@ import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
+import org.labkey.protein.ProteinController.ProteinSearchViewProvider;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -122,6 +123,8 @@ public class ProteinModule extends DefaultModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
+
+        ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
     }
 
     @Override

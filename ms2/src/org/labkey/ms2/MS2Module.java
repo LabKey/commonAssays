@@ -55,7 +55,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Controller.PeptidesViewProvider;
 import org.labkey.ms2.MS2Controller.ProteinSearchGroupViewProvider;
-import org.labkey.ms2.MS2Controller.ProteinSearchViewProvider;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -284,7 +283,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
         ProteinService.get().registerPeptideSearchView(new PeptidesViewProvider());
         ProteinService.get().registerProteinSearchView(new ProteinSearchGroupViewProvider());
-        ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
         MS2Controller.registerPeptidePanelForSearch();
     }
 
