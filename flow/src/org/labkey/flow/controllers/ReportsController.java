@@ -15,6 +15,7 @@
  */
 package org.labkey.flow.controllers;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +70,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -182,10 +182,7 @@ public class ReportsController extends BaseFlowController
             if (errors.hasErrors())
                 return null;
 
-            int id = ReportService.get().saveReport(getViewContext(), null, r);
-            ReportIdentifier dbid = r.getReportId();
-            if (null == dbid)
-                dbid = new DbReportIdentifier(id);
+            ReportIdentifier dbid = ReportService.get().saveReportEx(getViewContext(), null, r);
             ApiSimpleResponse ret = new ApiSimpleResponse(r.getDescriptor().getProperties());
             ret.put("reportId", dbid.toString());
             ret.put("success",Boolean.TRUE);
@@ -296,8 +293,8 @@ public class ReportsController extends BaseFlowController
             r = getReport(getViewContext(), form);
             r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, null);
             r.getDescriptor().setReportName(form.getReportName());
-            int id = ReportService.get().saveReport(getViewContext(), null, r);
-            r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, new DbReportIdentifier(id).toString());
+            ReportIdentifier reportIdentifier = ReportService.get().saveReportEx(getViewContext(), null, r);
+            r.getDescriptor().setProperty(ReportDescriptor.Prop.reportId, reportIdentifier.toString());
             return true;
         }
 
