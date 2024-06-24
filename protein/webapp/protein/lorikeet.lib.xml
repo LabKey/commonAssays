@@ -1,0 +1,15 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="protein/lorikeet_0.3/css/lorikeet.css"/>
+        <script path="protein/lorikeet_0.3/css/jquery-ui-1.13.0.slider.min.css"/>
+
+        <script path="protein/lorikeet_0.3/js/jquery-ui-1.13.0.slider.min.js"/>
+        <script path="protein/lorikeet_0.3/js/jquery.flot.js"/>
+        <script path="protein/lorikeet_0.3/js/jquery.flot.selection.js"/>
+
+        <script path="protein/lorikeet_0.3/js/specview.js"/>
+        <script path="protein/lorikeet_0.3/js/peptide.js"/>
+        <script path="protein/lorikeet_0.3/js/aminoacid.js"/>
+        <script path="protein/lorikeet_0.3/js/ion.js"/>
+    </library>
+</libraries>
