@@ -36,6 +36,7 @@ import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.ProteomicsModule;
+import org.labkey.api.protein.ProteomicsWebPartFactory;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.protein.search.PepSearchModel;
 import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
@@ -54,7 +55,6 @@ import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Controller.PeptidesViewProvider;
 import org.labkey.ms2.MS2Controller.ProteinSearchGroupViewProvider;
-import org.labkey.ms2.MS2Controller.ProteinSearchViewProvider;
 import org.labkey.ms2.compare.MS2ReportUIProvider;
 import org.labkey.ms2.compare.SpectraCountRReport;
 import org.labkey.ms2.peptideview.SingleMS2RunRReport;
@@ -89,7 +89,6 @@ import org.labkey.ms2.reader.MzXMLDocumentParser;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessJrapMzxmlIterator;
 import org.labkey.ms2.reader.SequestLogDocumentParser;
-import org.labkey.ms2.search.MSSearchWebpart;
 
 import java.io.File;
 import java.util.Collection;
@@ -148,14 +147,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
                 public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
                 {
                     return new ProteinSearchWebPart(!WebPartFactory.LOCATION_RIGHT.equalsIgnoreCase(webPart.getLocation()), ProbabilityProteinSearchForm.createDefault());
-                }
-            },
-            new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
-            {
-                @Override
-                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
-                {
-                    return new MSSearchWebpart();
                 }
             },
             new ProteomicsWebPartFactory(WEBPART_PEP_SEARCH)
@@ -292,8 +283,8 @@ public class MS2Module extends SpringModule implements ProteomicsModule
 
         ProteinService.get().registerPeptideSearchView(new PeptidesViewProvider());
         ProteinService.get().registerProteinSearchView(new ProteinSearchGroupViewProvider());
-        ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
         MS2Controller.registerPeptidePanelForSearch();
+        MS2Controller.registerProteinSearchViewContainerConditionProvider();
     }
 
     @NotNull

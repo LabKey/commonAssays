@@ -17,10 +17,12 @@ package org.labkey.api.protein;
 
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
+import org.labkey.api.security.User;
 import org.labkey.api.services.ServiceRegistry;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.ActionURL;
@@ -31,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Basic support for importing and fetching individual proteins
@@ -68,6 +71,8 @@ public interface ProteinService
     void registerPeptideSearchView(QueryViewProvider<PeptideSearchForm> provider);
     void registerProteinSearchFormView(FormViewProvider<ProteinSearchForm> provider);
 
+    void registerProteinSearchViewContainerConditionProvider(BiFunction<Container, User, SQLFragment> containerConditionProvider);
+
     List<QueryViewProvider<PeptideSearchForm>> getPeptideSearchViews();
     List<QueryViewProvider<ProteinSearchForm>> getProteinSearchViewProviders();
     List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders();
@@ -90,8 +95,6 @@ public interface ProteinService
     List<ProteinFeature> getProteinFeatures(String accession);
 
     ActionURL getProteinBeginUrl(Container c);
-
     ActionURL getPeptideSearchUrl(Container c);
-
     ActionURL getProteinSearchUrl(Container c);
 }

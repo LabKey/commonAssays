@@ -26,19 +26,22 @@ import org.labkey.api.files.TableUpdaterFileListener;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
-import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteinService;
+import org.labkey.api.protein.ProteomicsWebPartFactory;
+import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
+import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
+import org.labkey.api.protein.search.MSSearchWebpart;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.api.view.WebPartView;
+import org.labkey.protein.ProteinController.ProteinSearchViewProvider;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -84,6 +87,14 @@ public class ProteinModule extends DefaultModule
                     result.setTitleHref(ProteinController.getBeginURL(portalCtx.getContainer()));
                     return result;
                 }
+            },
+            new ProteomicsWebPartFactory(MSSearchWebpart.NAME)
+            {
+                @Override
+                public WebPartView<?> getWebPartView(@NotNull ViewContext portalCtx, @NotNull Portal.WebPart webPart)
+                {
+                    return new MSSearchWebpart();
+                }
             }
         );
     }
@@ -112,6 +123,8 @@ public class ProteinModule extends DefaultModule
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoAnnotInsertions(), "FileName", TableUpdaterFileListener.Type.filePath, "InsertId"));
             fcs.addFileListener(new TableUpdaterFileListener(ProteinSchema.getTableInfoFastaFiles(), "FileName", TableUpdaterFileListener.Type.filePath, "FastaId"));
         }
+
+        ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
     }
 
     @Override

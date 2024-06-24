@@ -36,7 +36,7 @@
     @Override
     public void addClientDependencies(ClientDependencies dependencies)
     {
-        dependencies.add("MS2/lorikeet");
+        dependencies.add("protein/lorikeet");
     }
 %>
 <%
