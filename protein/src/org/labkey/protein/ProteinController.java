@@ -319,6 +319,7 @@ public class ProteinController extends SpringActionController
                         }
                     }
                     proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
+                    proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
                 }
             }
 
