@@ -59,7 +59,7 @@ public class XTandemTest extends AbstractXTandemTest
         log("Verifying that pipeline files were cleaned up properly");
         File test2 = new File(PIPELINE_PATH + "/bov_sample/" + SEARCH_TYPE + "/test2");
         if (test2.exists())
-            fail("Pipeline files were not cleaned up; test2(" + test2 + ") directory still exists");
+            fail("Pipeline files were not cleaned up; test2("+test2.toString()+") directory still exists");
 
         basicMS2Check();
     }
@@ -144,10 +144,6 @@ public class XTandemTest extends AbstractXTandemTest
         uncheckCheckbox(Locator.name("exactMatch"));
         clickButton("Search");
         assertElementPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
-
-        setFormElement(Locator.name("identifier"), "GarbageProteinName");
-        setFormElement(Locator.name("minimumProbability"), "");
-        clickButton("Search");
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
 
@@ -156,6 +152,10 @@ public class XTandemTest extends AbstractXTandemTest
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
         assertElementNotPresent(Locator.linkContainingText(SAMPLE_BASE_NAME + " (test2)"));
+
+        setFormElement(Locator.name("identifier"), "GarbageProteinName");
+        setFormElement(Locator.name("minimumProbability"), "");
+        clickButton("Search");
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
         assertTrue(!(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1)));
         assertTextNotPresent(SEARCH_FIND_FASTA1);
