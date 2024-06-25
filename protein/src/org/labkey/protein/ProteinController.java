@@ -18,6 +18,7 @@ package org.labkey.protein;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.LabKeyError;
@@ -37,10 +38,12 @@ import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.MenuButton;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.DomainDescriptor;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
@@ -49,30 +52,34 @@ import org.labkey.api.exp.PropertyType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.pipeline.PipelineService;
+import org.labkey.api.protein.MatchCriteria;
+import org.labkey.api.protein.ProteinManager;
+import org.labkey.api.protein.ProteinSchema;
+import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.annotation.AnnotationInsertion;
 import org.labkey.api.protein.annotation.CustomAnnotationImportHelper;
 import org.labkey.api.protein.annotation.CustomAnnotationSet;
 import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
 import org.labkey.api.protein.annotation.CustomAnnotationType;
 import org.labkey.api.protein.annotation.DefaultAnnotationLoader;
-import org.labkey.api.protein.search.PepSearchModel;
-import org.labkey.api.protein.search.PeptideFilterSearchForm;
-import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.annotation.ProtSprotOrgMap;
 import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
-import org.labkey.api.protein.ProteinManager;
-import org.labkey.api.protein.ProteinSchema;
-import org.labkey.api.protein.ProteinService;
 import org.labkey.api.protein.annotation.XMLProteinLoader;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.protein.fasta.FastaParsingForm;
 import org.labkey.api.protein.fasta.FastaReloaderJob;
 import org.labkey.api.protein.go.GoLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
+import org.labkey.api.protein.query.ProteinUserSchema;
+import org.labkey.api.protein.query.SequencesTableInfo;
+import org.labkey.api.protein.search.PepSearchModel;
+import org.labkey.api.protein.search.PeptideFilterSearchForm;
+import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.protein.search.ProteinSearchWebPart;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QueryViewProvider;
@@ -81,6 +88,7 @@ import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
+import org.labkey.api.reports.ReportService;
 import org.labkey.api.security.AdminConsoleAction;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.RequiresSiteAdmin;
@@ -109,6 +117,7 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.TabStripView;
 import org.labkey.api.view.VBox;
+import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
 import org.springframework.validation.BindException;
@@ -131,6 +140,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class ProteinController extends SpringActionController
 {
@@ -238,29 +248,13 @@ public class ProteinController extends SpringActionController
 
             VBox result = new VBox(searchFormView);
 
-            if (form.isShowMatchingProteins())
-            {
-                QueryView proteinsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.POTENTIAL_PROTEIN_DATA_REGION);
-                proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
-
-                result.addView(proteinsView);
-            }
-
-            if (form.isShowProteinGroups() &&
-                    // Add the "Protein Group Results" web part only if the targetedms module is not enabled in the container.
-                    !getContainer().getActiveModules().contains(ModuleLoader.getInstance().getModule("targetedms")))
-            {
-                QueryView groupsView = createInitializedQueryView(form, errors, false, ProteinSearchForm.PROTEIN_DATA_REGION);
-                groupsView.enableExpandCollapse("ProteinSearchGroupMatches", false);
-                result.addView(groupsView);
-            }
-
             for (QueryViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchViewProviders())
             {
                 QueryView queryView = provider.createView(getViewContext(), form, errors);
                 if (queryView != null)
                     result.addView(queryView);
             }
+
             return result;
         }
 
@@ -269,6 +263,74 @@ public class ProteinController extends SpringActionController
         {
             setHelpTopic("proteinSearch");
             root.addChild("Protein Search Results");
+        }
+    }
+
+    public static class ProteinSearchViewProvider implements QueryViewProvider<ProteinSearchForm>
+    {
+        private static final String POTENTIAL_PROTEIN_DATA_REGION = "PotentialProteins";
+
+        private static BiFunction<Container, User, SQLFragment> _containerConditionProvider = (container, user) -> new SQLFragment();
+
+        @Override
+        public String getDataRegionName()
+        {
+            return POTENTIAL_PROTEIN_DATA_REGION;
+        }
+
+        @Override
+        public @Nullable QueryView createView(ViewContext ctx, ProteinSearchForm form, BindException errors)
+        {
+            QueryView proteinsView = null;
+
+            if (form.isShowMatchingProteins())
+            {
+                UserSchema schema = QueryService.get().getUserSchema(ctx.getUser(), ctx.getContainer(), ProteinUserSchema.NAME);
+
+                if (null != schema)
+                {
+                    QuerySettings proteinsSettings = schema.getSettings(ctx, POTENTIAL_PROTEIN_DATA_REGION);
+                    proteinsSettings.setQueryName(ProteinUserSchema.TableType.Sequences.toString());
+                    proteinsView = new QueryView(schema, proteinsSettings, errors)
+                    {
+                        @Override
+                        protected TableInfo createTable()
+                        {
+                            ProteinUserSchema schema = (ProteinUserSchema) getSchema();
+                            return schema.createSequences();
+                        }
+                    };
+                    // Disable R and other reporting until there's an implementation that respects the search criteria
+                    proteinsView.setViewItemFilter(ReportService.EMPTY_ITEM_LIST);
+
+                    proteinsView.setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
+                    SequencesTableInfo<ProteinUserSchema> sequencesTableInfo = (SequencesTableInfo<ProteinUserSchema>) proteinsView.getTable();
+                    SQLFragment containerCondition = _containerConditionProvider.apply(ctx.getContainer(), ctx.getUser());
+                    ((ProbabilityProteinSearchForm)form).setRestrictCondition(containerCondition);
+                    int[] seqIds = form.getSeqId();
+                    if (seqIds.length <= 500)
+                    {
+                        sequencesTableInfo.addSeqIdFilter(seqIds);
+                    }
+                    else
+                    {
+                        sequencesTableInfo.addProteinNameFilter(form.getIdentifier(), form.isExactMatch() ? MatchCriteria.EXACT : MatchCriteria.PREFIX);
+                        if (form.isRestrictProteins())
+                        {
+                            sequencesTableInfo.addCondition(containerCondition);
+                        }
+                    }
+                    proteinsView.setTitle("Matching Proteins (" + (seqIds.length == 0 ? "None" : seqIds.length) + ")");
+                    proteinsView.enableExpandCollapse("ProteinSearchProteinMatches", true);
+                }
+            }
+
+            return proteinsView;
+        }
+
+        public static void registerContainerConditionProvider(BiFunction<Container, User, SQLFragment> containerConditionProvider)
+        {
+            _containerConditionProvider = containerConditionProvider;
         }
     }
 

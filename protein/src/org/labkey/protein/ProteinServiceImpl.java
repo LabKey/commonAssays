@@ -23,6 +23,7 @@ import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.protein.CoverageViewBean;
 import org.labkey.api.protein.PeptideCharacteristic;
@@ -44,6 +45,7 @@ import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.reader.Readers;
+import org.labkey.api.security.User;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.logging.LogHelper;
@@ -73,6 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -186,6 +189,12 @@ public class ProteinServiceImpl implements ProteinService
     public List<FormViewProvider<ProteinSearchForm>> getProteinSearchFormViewProviders()
     {
         return Collections.unmodifiableList(_proteinSearchFormViewProviders);
+    }
+
+    @Override
+    public void registerProteinSearchViewContainerConditionProvider(BiFunction<Container, User, SQLFragment> containerConditionProvider)
+    {
+        ProteinController.ProteinSearchViewProvider.registerContainerConditionProvider(containerConditionProvider);
     }
 
     private WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures, Consumer<CoverageViewBean> beanModifier)

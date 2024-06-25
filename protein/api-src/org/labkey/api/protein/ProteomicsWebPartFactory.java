@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.labkey.ms2;
+package org.labkey.api.protein;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
-import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.view.BaseWebPartFactory;
 
 /**
