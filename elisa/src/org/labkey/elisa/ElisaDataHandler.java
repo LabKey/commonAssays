@@ -47,6 +47,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
@@ -67,6 +68,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -117,21 +119,22 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         return null;
     }
 
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    @Override
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
         ExpRun run = data.getRun();
         AssayProvider provider = AssayService.get().getProvider(protocol);
 
-        if (provider instanceof PlateBasedAssayProvider && context instanceof AssayUploadXarContext)
+        if (provider instanceof PlateBasedAssayProvider plateProvider && context instanceof AssayUploadXarContext xarContext)
         {
             Domain runDomain = provider.getRunDomain(protocol);
             Domain resultDomain = provider.getResultsDomain(protocol);
-            Map<String, DomainProperty> sampleProperties = ((PlateBasedAssayProvider)provider).getSampleWellGroupDomain(protocol)
+            Map<String, DomainProperty> sampleProperties = plateProvider.getSampleWellGroupDomain(protocol)
                     .getProperties().stream()
                     .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
-            ElisaImportHelper importHelper = getImportHelper((AssayUploadXarContext)context, (PlateBasedAssayProvider)provider, protocol, dataFile);
+            ElisaImportHelper importHelper = getImportHelper(xarContext, plateProvider, protocol, dataFile);
 
             for (String plateName : importHelper.getPlates())
             {
@@ -294,8 +297,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 }
             }
         }
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
-        datas.put(getDataType(), results);
+        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        datas.put(getDataType(), () -> ValidatingDataRowIterator.of(results));
 
         return datas;
     }
@@ -315,8 +318,6 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
      * Calculates a curve fit to represent the calibration curve, the type of curve fit is determined by
      * the run level property. A simple regression object can be passed in to be populated by the same input
      * data and can be used to generate an R squared value.
-     *
-     * @throws ExperimentException
      */
     @Nullable
     private CurveFit calculateStandardCurve(ExpRun run, Plate plate, @Nullable SimpleRegression regression, Map<String, Double> standardConcentrations,

@@ -49,6 +49,8 @@ import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
+import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.ProteinManager;
@@ -606,7 +608,7 @@ public class ProteinController extends SpringActionController
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
-                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, rows, false);
+                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, ValidatingDataRowIterator.of(rows.iterator()), false);
 
                 stmt.executeBatch();
                 connection.commit();

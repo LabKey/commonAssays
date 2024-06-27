@@ -47,6 +47,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.SamplesSchema;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
@@ -1733,7 +1734,7 @@ public class FlowManager
                 }
             });
 
-            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, propMaps, true);
+            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, ValidatingDataRowIterator.of(propMaps.iterator()), true);
 
             tx.commit();
         }

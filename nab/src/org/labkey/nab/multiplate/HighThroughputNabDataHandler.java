@@ -33,6 +33,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -50,6 +51,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * User: brittp
@@ -236,18 +238,19 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    public Map<DataType, List<Map<String, Object>>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 
-        Map<DataType, List<Map<String, Object>>> datas = new HashMap<>();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, parser.getResults());
+        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        List<Map<String, Object>> rows = parser.getResults();
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
 
         return datas;
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext context, ExpRun run, List<Map<String, Object>> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMap) throws ExperimentException
     {
         importRows(data, run, context.getProtocol(), dataMap, context.getUser());
     }

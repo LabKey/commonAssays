@@ -88,8 +88,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final File TEST_ASSAY_LUM_FILE13 = TestFileUtils.getSampleData("luminex/PositivityThreshold.xls");
 
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_1 = TestFileUtils.getSampleData("luminex/plate 1_IgA-Biot (Standard2).xls");
+    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX = TestFileUtils.getSampleData("luminex/plate 1_IgA-Biot (Standard2).xlsx");
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_2 = TestFileUtils.getSampleData("luminex/plate 2_IgA-Biot (Standard2).xls");
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3 = TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls");
+    public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3_XLSX = TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls");
 
     public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
     public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
@@ -462,7 +464,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
      */
     protected void uploadMultipleCurveData()
     {
-        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3);
+        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3_XLSX);
         clickButton("Next");
         setNegativeBeads("Blank");
     }

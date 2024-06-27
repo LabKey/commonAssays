@@ -31,6 +31,7 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -40,6 +41,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -81,20 +83,22 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
     {
         ExpRun run = data.getRun();
-        ExpProtocol protocol = ExperimentService.get().getExpProtocol(run.getProtocol().getLSID());
 
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
-        importData(data, run, protocol, parser.getResults());
+        List<Map<String, Object>> rows = parser.getResults();
+        importData(run, () -> ValidatingDataRowIterator.of(rows));
     }
 
-    protected void importData(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> inputData) throws ExperimentException
+    protected void importData(ExpRun run, Supplier<ValidatingDataRowIterator> dataRows) throws ExperimentException
     {
-        try {
+        try (ValidatingDataRowIterator iter = dataRows.get())
+        {
             List<? extends ExpData> runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
             assert(runData.size() == 1);
 
-            for (Map<String, Object> row : inputData)
+            while (iter.hasNext())
             {
+                Map<String, Object> row = iter.next();
                 if (!row.containsKey(WELL_ROW_PROPERTY) || !row.containsKey(WELL_COLUMN_PROPERTY))
                     throw new ExperimentException("The row must contain values for well row and column locations : " + WELL_ROW_PROPERTY + ", " + WELL_COLUMN_PROPERTY);
 
@@ -154,9 +158,8 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
     {
         assert (antigenWellgroupName != null);
         assert (sampleName != null);
-        Lsid lsid = new Lsid.LsidBuilder(ELISPOT_ANTIGEN_LSID_PREFIX, assayName, "Run" + runId + "-" + antigenWellgroupName + "-" +
+        return new Lsid.LsidBuilder(ELISPOT_ANTIGEN_LSID_PREFIX, assayName, "Run" + runId + "-" + antigenWellgroupName + "-" +
                              sampleName + "-" + (null != analyte ? analyte : "")).build();
-        return lsid;
     }
 
     protected static ObjectProperty getObjectProperty(Container container, ExpProtocol protocol, String objectURI, String propertyName, Object value)

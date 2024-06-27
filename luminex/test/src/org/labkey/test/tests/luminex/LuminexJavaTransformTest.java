@@ -85,13 +85,13 @@ public final class LuminexJavaTransformTest extends LuminexTest
         // Create a run that imports 1 file
         createNewAssayRun(TEST_ASSAY_LUM, assayRunIds[0]);
 
-        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1);
+        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX);
         clickButton("Next");
         clickButton("Save and Finish", longWaitForPage);
 
         // Create a second run that imports the file again and check for error message
         createNewAssayRun(TEST_ASSAY_LUM, assayRunIds[1]);
-        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3);
+        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3_XLSX);
         // verify that conflict error message is present
         waitForText(WAIT_FOR_JAVASCRIPT, ERROR_TEXT);
         clickButton("Next");
@@ -107,7 +107,7 @@ public final class LuminexJavaTransformTest extends LuminexTest
 
         // Create a run with a duplicate file within the set of files
         createNewAssayRun(TEST_ASSAY_LUM, assayRunIds[2]);
-        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3, TEST_ASSAY_MULTIPLE_STANDARDS_3);
+        addFilesToAssayRun(TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, TEST_ASSAY_MULTIPLE_STANDARDS_2, TEST_ASSAY_MULTIPLE_STANDARDS_3, TEST_ASSAY_MULTIPLE_STANDARDS_3);
         // verify that the error message for duplicate entries pops up, and that the first remove button is enabled (checks prior bug)
         waitForText(WAIT_FOR_JAVASCRIPT, "duplicate");
         clickButton("OK", 0);
