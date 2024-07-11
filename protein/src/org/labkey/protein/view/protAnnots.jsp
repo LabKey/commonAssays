@@ -1,4 +1,4 @@
-z<%
+<%
 /*
  * Copyright (c) 2005-2018 Fred Hutchinson Cancer Research Center
  *
