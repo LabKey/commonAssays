@@ -40,7 +40,7 @@
     }
   },
   "dependencies": {
-    "@labkey/components": "4.0.5-fb-package-updates-0724.0"
+    "@labkey/components": "4.0.5-fb-package-updates-0724.2"
   },
   "devDependencies": {
     "@labkey/build": "7.3.1-fb-package-updates-0724.2",
