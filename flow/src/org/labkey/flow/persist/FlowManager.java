@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
+import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -1697,6 +1698,7 @@ public class FlowManager
 
         try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
         {
+            CaseInsensitiveMapWrapper<Object> sharedMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
             List<Map<String, Object>> propMaps = new ArrayList<>(1000);
 
             SqlSelector ss = new SqlSelector(getSchema(), sqlSelectDateTime);
@@ -1728,7 +1730,7 @@ public class FlowManager
                 }
                 else
                 {
-                    Map<String, Object> propMap = new HashMap<>();
+                    Map<String, Object> propMap = new CaseInsensitiveMapWrapper<>(new HashMap<>(), sharedMap);
                     propMap.put("lsid", row.get("lsid"));
                     propMap.put(fileDatePd.getPropertyURI(), d);
                     propMaps.add(propMap);

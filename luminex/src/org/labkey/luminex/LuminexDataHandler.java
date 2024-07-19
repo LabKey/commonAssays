@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -551,6 +552,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             existingRows.put(new DataRowKey(existingRow), existingRow);
         }
 
+        CaseInsensitiveMapWrapper<Object> sharedMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
         List<Map<String, Object>> insertRows = new ArrayList<>();
         List<Map<String, Object>> updateRows = new ArrayList<>();
 
@@ -560,11 +562,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexDataRow existingRow = existingRows.get(entry.getKey());
             if (existingRow == null)
             {
-                insertRows.add(entry.getValue());
+                insertRows.add(new CaseInsensitiveMapWrapper<>(entry.getValue(), sharedMap));
             }
             else
             {
-                Map<String, Object> updateRow = entry.getValue();
+                Map<String, Object> updateRow = new CaseInsensitiveMapWrapper<>(entry.getValue(), sharedMap);
                 updateRow.put("RowId", existingRow.getRowId());
                 updateRow.put("LSID", existingRow.getLsid());
                 updateRows.add(updateRow);
@@ -572,8 +574,14 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexImportHelper helper = new LuminexImportHelper();
-        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(insertRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
-        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(updateRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+        if (!insertRows.isEmpty())
+        {
+            OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(insertRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+        }
+        if (!updateRows.isEmpty())
+        {
+            OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(updateRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+        }
     }
 
     /** Inserts or updates an analyte row in the hard table */
@@ -1627,7 +1635,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         List<Map<String, Object>> excelRunPropsList = new ArrayList<>();
-        Map<String, Object> excelRunPropsByPropertyId = new HashMap<>();
+        Map<String, Object> excelRunPropsByPropertyId = new CaseInsensitiveMapWrapper<>(new HashMap<>());
         for (Map.Entry<DomainProperty, String> entry : parser.getExcelRunProps(data.getFile()).entrySet())
         {
             excelRunPropsByPropertyId.put(entry.getKey().getPropertyURI(), entry.getValue());
