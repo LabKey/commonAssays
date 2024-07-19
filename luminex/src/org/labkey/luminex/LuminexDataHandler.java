@@ -41,6 +41,12 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.dataiterator.AbstractMapDataIterator;
+import org.labkey.api.dataiterator.DataIterator;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.DataIteratorUtil;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
@@ -55,11 +61,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpQCFlagTable;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.study.ParticipantVisit;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -110,7 +115,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -518,7 +522,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
             transaction.commit();
         }
-        catch (ValidationException ve)
+        catch (BatchValidationException ve)
         {
             throw new ExperimentException(ve.toString(), ve);
         }
@@ -531,7 +535,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     /** Saves the data rows, updating if they already exist, inserting if not */
     private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
-            throws SQLException, ValidationException
+            throws SQLException, BatchValidationException
     {
         // Do a query to find all the rows that have already been inserted
         LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(null, false);
@@ -568,8 +572,8 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
 
         LuminexImportHelper helper = new LuminexImportHelper();
-        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, ValidatingDataRowIterator.of(insertRows.iterator()), LogManager.getLogger(LuminexDataHandler.class));
-        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, ValidatingDataRowIterator.of(updateRows.iterator()), LogManager.getLogger(LuminexDataHandler.class));
+        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(insertRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+        OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(updateRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
     }
 
     /** Inserts or updates an analyte row in the hard table */
@@ -1611,7 +1615,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             return result;
         }
 
-    private void insertExcelProperties(Domain domain, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, ValidationException, ExperimentException
+    private void insertExcelProperties(Domain domain, final ExpData data, LuminexExcelParser parser, User user, ExpProtocol protocol) throws SQLException, BatchValidationException, ExperimentException
     {
         Container container = data.getContainer();
         // Clear out the values - this is necessary if this is a XAR import where the run properties would
@@ -1646,7 +1650,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             public void updateStatistics(int currentRow)
             {
             }
-        }, domain, ValidatingDataRowIterator.of(excelRunPropsList.iterator()), true, null);
+        }, domain, AbstractMapDataIterator.of(excelRunPropsList, new DataIteratorContext()), true, null);
     }
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
@@ -2024,7 +2028,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
@@ -2035,7 +2039,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         // i.e. we don't care about resolving the study or lookup information at this time (that will happen after the transform is run)
         ParticipantVisitResolver resolver = new StudyParticipantVisitResolverType().createResolver(run, null, info.getUser());
 
-        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> dataRows = new ArrayList<>();
 
         Set<String> titrations = parser.getTitrations();
@@ -2063,12 +2067,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataRows.add(dataMap);
             }
         }
-        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(dataRows));
+        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, AbstractMapDataIterator.builderOf(dataRows));
         return datas;
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMaps) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, DataIteratorBuilder dataMaps) throws ExperimentException
     {
         ObjectFactory<Analyte> analyteFactory = ObjectFactory.Registry.getFactory(Analyte.class);
         if (null == analyteFactory)
@@ -2080,11 +2084,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<>();
         Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
-        try (ValidatingDataRowIterator iter = dataMaps.get())
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataMaps.getDataIterator(new DataIteratorContext()), true))
         {
-            while (iter.hasNext())
+            while (iter.next())
             {
-                Map<String, Object> dataMap = iter.next();
+                Map<String, Object> dataMap = iter.getMap();
 
                 // CONSIDER: subclass the rowFactory to ignore "titration"
                 // titration==true/false so leaving it causes ConversionException(NumberFormatException)
@@ -2104,7 +2108,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 entry.getValue().add(dataRow);
             }
         }
-        catch (ValidationException e)
+        catch (BatchValidationException | IOException e)
         {
             throw new ExperimentException(e);
         }

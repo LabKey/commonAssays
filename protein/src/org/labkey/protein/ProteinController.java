@@ -44,13 +44,13 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.dataiterator.AbstractMapDataIterator;
+import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.exp.DomainDescriptor;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.protein.MatchCriteria;
 import org.labkey.api.protein.ProteinManager;
@@ -78,13 +78,13 @@ import org.labkey.api.protein.search.PeptideSearchForm;
 import org.labkey.api.protein.search.ProbabilityProteinSearchForm;
 import org.labkey.api.protein.search.ProteinSearchForm;
 import org.labkey.api.protein.search.ProteinSearchWebPart;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.QueryViewProvider;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.query.ValidationError;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
@@ -190,7 +190,7 @@ public class ProteinController extends SpringActionController
         }
 
         @Override
-        protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors) throws Exception
+        protected ModelAndView getHtmlView(ProbabilityProteinSearchForm form, BindException errors)
         {
             HttpServletRequest request = getViewContext().getRequest();
             SimpleFilter filter = new SimpleFilter();
@@ -608,17 +608,17 @@ public class ProteinController extends SpringActionController
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
-                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, ValidatingDataRowIterator.of(rows.iterator()), false);
+                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, AbstractMapDataIterator.of(rows, new DataIteratorContext()), false);
 
                 stmt.executeBatch();
                 connection.commit();
 
                 transaction.commit();
             }
-            catch (ValidationException ve)
+            catch (BatchValidationException bve)
             {
-                for (ValidationError error : ve.getErrors())
-                    errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
+                for (ValidationException ve : bve.getRowErrors())
+                    errors.reject(SpringActionController.ERROR_MSG, ve.getMessage());
                 return false;
             }
             return true;

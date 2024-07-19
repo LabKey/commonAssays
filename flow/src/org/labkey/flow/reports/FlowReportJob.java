@@ -19,16 +19,15 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.dataiterator.DataIterator;
+import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.CloseableIterator;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
-import org.labkey.api.query.ValidationException;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reports.Report;
@@ -208,7 +207,7 @@ public class FlowReportJob extends RReportJob
         Map<String, DomainProperty> descriptorsByName = domain.createImportMap(true);
         for (ColumnDescriptor cd : cols)
         {
-            if (cd.name == null || cd.name.length() == 0)
+            if (cd.name == null || cd.name.isEmpty())
                 continue;
 
             if (cd.name.equalsIgnoreCase("lsid"))
@@ -237,7 +236,7 @@ public class FlowReportJob extends RReportJob
         _report.deleteSavedResults(getContainer());
     }
 
-    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws ValidationException, SQLException, ExperimentException, IOException
+    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws BatchValidationException, SQLException, IOException
     {
         OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
         {
@@ -272,9 +271,9 @@ public class FlowReportJob extends RReportJob
 
         Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 
-        try (CloseableIterator<Map<String, Object>> iter = loader.iterator())
+        try (DataIterator iter = loader.getDataIterator(new DataIteratorContext()))
         {
-            OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, ValidatingDataRowIterator.of(iter), true, null);
+            OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerId, helper, domain, iter, true, null);
         }
     }
 

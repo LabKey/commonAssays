@@ -38,6 +38,8 @@ import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.dataiterator.AbstractMapDataIterator;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
@@ -47,7 +49,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
@@ -120,7 +121,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
@@ -297,8 +298,8 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                 }
             }
         }
-        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
-        datas.put(getDataType(), () -> ValidatingDataRowIterator.of(results));
+        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
+        datas.put(getDataType(), AbstractMapDataIterator.builderOf(results));
 
         return datas;
     }

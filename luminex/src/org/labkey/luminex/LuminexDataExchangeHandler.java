@@ -18,10 +18,10 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.qc.TsvDataSerializer;
 import org.labkey.api.assay.AssayProvider;
@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * Adds analyte and titration info for transform scripts
@@ -100,7 +99,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     private static class LuminexDataSerializer extends TsvDataSerializer
     {
         @Override
-        public Supplier<ValidatingDataRowIterator> importRunData(ExpProtocol protocol, File runData) throws Exception
+        public DataIteratorBuilder importRunData(ExpProtocol protocol, File runData) throws Exception
         {
             return _importRunData(protocol, runData, false);
         }
