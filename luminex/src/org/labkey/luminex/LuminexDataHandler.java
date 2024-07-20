@@ -2057,12 +2057,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Set<String> excludedWells = LuminexManager.get().getWellExclusionKeysForRun(runId, protocol, info.getContainer(), info.getUser());
 
+        CaseInsensitiveMapWrapper<Object> casingMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
                 handleParticipantResolver(dataRow, resolver, new LinkedHashMap<>(), true);
-                Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
+                Map<String, Object> dataMap = new CaseInsensitiveMapWrapper<>(dataRow.toMap(entry.getKey()), casingMap);
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
 
