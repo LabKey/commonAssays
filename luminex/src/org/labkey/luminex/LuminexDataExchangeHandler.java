@@ -17,8 +17,11 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
@@ -31,6 +34,7 @@ import org.labkey.luminex.model.Titration;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +58,11 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<>();
 
+        CaseInsensitiveMapWrapper<Object> casingMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
+
         for (String analyteName : form.getAnalyteNames())
         {
-            Map<String, Object> row = new HashMap<>();
+            Map<String, Object> row = new CaseInsensitiveMapWrapper<>(new HashMap<>(), casingMap);
             row.put("Name", analyteName);
             // get the analyte domain property values
             for (Map.Entry<DomainProperty, String> entry : form.getAnalyteProperties(analyteName).entrySet())
@@ -74,10 +80,20 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         }
         addSampleProperties(ANALYTE_DATA_PROP_NAME, analytes);
 
+        List<Map<String, Object>> titrations = getTitrationMaps(form);
+        addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
+
+        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
+    }
+
+    private static @NotNull List<Map<String, Object>> getTitrationMaps(LuminexRunContext form) throws ExperimentException
+    {
+        CaseInsensitiveMapWrapper<Object> casingMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
+
         List<Map<String, Object>> titrations = new ArrayList<>();
         for (Titration titration : form.getTitrations())
         {
-            Map<String, Object> titrationRow = new HashMap<>();
+            Map<String, Object> titrationRow = new CaseInsensitiveMapWrapper<>(new HashMap<>(), casingMap);
             titrationRow.put("Name", titration.getName());
             titrationRow.put("QCControl", titration.isQcControl());
             titrationRow.put("Standard", titration.isStandard());
@@ -85,9 +101,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
             titrationRow.put("OtherControl", titration.isOtherControl());
             titrations.add(titrationRow);
         }
-        addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
-
-        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
+        return titrations;
     }
 
     @Override
