@@ -94,7 +94,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
     protected void importData(ExpRun run, DataIteratorBuilder dataRows) throws ExperimentException
     {
-        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataRows.getDataIterator(new DataIteratorContext()), true))
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataRows.getDataIterator(new DataIteratorContext()), false))
         {
             List<? extends ExpData> runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
             assert(runData.size() == 1);

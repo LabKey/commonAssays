@@ -2090,7 +2090,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Map<Analyte, List<LuminexDataRow>> sheets = new LinkedHashMap<>();
         Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
-        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataMaps.getDataIterator(new DataIteratorContext()), true))
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataMaps.getDataIterator(new DataIteratorContext()), false))
         {
             while (iter.next())
             {

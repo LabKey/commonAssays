@@ -318,7 +318,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                                                       OntologyManager.RowCallback rowCallback)
             throws BatchValidationException
     {
-        MapDataIterator mapData = DataIteratorUtil.wrapMap(fileData, true);
+        MapDataIterator mapData = DataIteratorUtil.wrapMap(fileData, false);
         // Find the target study property on the batch, run, or result domains.
         // If the target study is on the batch or run domain, get the value from the ExpRun or the ExpExperiment.
         // If the target study is on the result domain, pass the DomainProperty to splitBaseFromExtra()

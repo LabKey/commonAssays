@@ -164,7 +164,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
         for (ExpMaterial material : run.getMaterialInputs().keySet())
             inputMaterialMap.put(material.getLSID(), material);
 
-        try (MapDataIterator iter = DataIteratorUtil.wrapMap(rawData.getDataIterator(new DataIteratorContext()), true))
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(rawData.getDataIterator(new DataIteratorContext()), false))
         {
             while (iter.next())
             {
