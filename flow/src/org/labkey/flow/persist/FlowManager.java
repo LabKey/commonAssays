@@ -1698,7 +1698,6 @@ public class FlowManager
 
         try (DbScope.Transaction tx = getSchema().getScope().ensureTransaction())
         {
-            CaseInsensitiveMapWrapper<Object> sharedMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
             List<Map<String, Object>> propMaps = new ArrayList<>(1000);
 
             SqlSelector ss = new SqlSelector(getSchema(), sqlSelectDateTime);
@@ -1730,7 +1729,7 @@ public class FlowManager
                 }
                 else
                 {
-                    Map<String, Object> propMap = new CaseInsensitiveMapWrapper<>(new HashMap<>(), sharedMap);
+                    Map<String, Object> propMap = new HashMap<>();
                     propMap.put("lsid", row.get("lsid"));
                     propMap.put(fileDatePd.getPropertyURI(), d);
                     propMaps.add(propMap);

@@ -43,7 +43,6 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.AbstractMapDataIterator;
-import org.labkey.api.dataiterator.DataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.DataIteratorUtil;
@@ -552,7 +551,6 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             existingRows.put(new DataRowKey(existingRow), existingRow);
         }
 
-        CaseInsensitiveMapWrapper<Object> sharedMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
         List<Map<String, Object>> insertRows = new ArrayList<>();
         List<Map<String, Object>> updateRows = new ArrayList<>();
 
@@ -562,11 +560,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexDataRow existingRow = existingRows.get(entry.getKey());
             if (existingRow == null)
             {
-                insertRows.add(new CaseInsensitiveMapWrapper<>(entry.getValue(), sharedMap));
+                insertRows.add(entry.getValue());
             }
             else
             {
-                Map<String, Object> updateRow = new CaseInsensitiveMapWrapper<>(entry.getValue(), sharedMap);
+                Map<String, Object> updateRow = entry.getValue();
                 updateRow.put("RowId", existingRow.getRowId());
                 updateRow.put("LSID", existingRow.getLsid());
                 updateRows.add(updateRow);
@@ -2057,13 +2055,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         Set<String> excludedWells = LuminexManager.get().getWellExclusionKeysForRun(runId, protocol, info.getContainer(), info.getUser());
 
-        CaseInsensitiveMapWrapper<Object> casingMap = new CaseInsensitiveMapWrapper<>(Collections.emptyMap());
         for (Map.Entry<Analyte, List<LuminexDataRow>> entry : parser.getSheets().entrySet())
         {
             for (LuminexDataRow dataRow : entry.getValue())
             {
                 handleParticipantResolver(dataRow, resolver, new LinkedHashMap<>(), true);
-                Map<String, Object> dataMap = new CaseInsensitiveMapWrapper<>(dataRow.toMap(entry.getKey()), casingMap);
+                Map<String, Object> dataMap = dataRow.toMap(entry.getKey());
                 dataMap.put("titration", dataRow.getDescription() != null && titrations.contains(dataRow.getDescription()));
                 dataMap.remove("data");
 
