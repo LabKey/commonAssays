@@ -22,7 +22,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -42,7 +41,6 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.DataIteratorUtil;
@@ -79,6 +77,7 @@ import org.labkey.api.study.assay.StudyParticipantVisitResolverType;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -147,7 +146,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     public static final String NEGATIVE_BEAD_DISPLAY_NAME = "Subtract Negative Bead";
     public static final Double MAX_CURVE_PARAM_VALUE = 10e37; // Issue 15200
 
-    private static final Logger LOGGER = LogManager.getLogger(LuminexDataHandler.class);
+    private static final Logger LOGGER = LogHelper.getLogger(LuminexDataHandler.class, "Parses and imports Luminex data");
 
     public static final int MINIMUM_TITRATION_SUMMARY_COUNT = 5;
     public static final int MINIMUM_TITRATION_RAW_COUNT = 10;
@@ -574,11 +573,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         LuminexImportHelper helper = new LuminexImportHelper();
         if (!insertRows.isEmpty())
         {
-            OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(insertRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+            OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(insertRows).getDataIterator(new DataIteratorContext()), true, LOGGER, null);
         }
         if (!updateRows.isEmpty())
         {
-            OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, AbstractMapDataIterator.of(updateRows, new DataIteratorContext()), LogManager.getLogger(LuminexDataHandler.class));
+            OntologyManager.updateTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(updateRows).getDataIterator(new DataIteratorContext()), true, LOGGER);
         }
     }
 
@@ -1656,7 +1655,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             public void updateStatistics(int currentRow)
             {
             }
-        }, domain, AbstractMapDataIterator.of(excelRunPropsList, new DataIteratorContext()), true, null);
+        }, domain, MapDataIterator.of(excelRunPropsList).getDataIterator(new DataIteratorContext()), true, null);
     }
 
     protected void performOOR(List<LuminexDataRow> dataRows, Analyte analyte)
@@ -2073,7 +2072,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 dataRows.add(dataMap);
             }
         }
-        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, AbstractMapDataIterator.builderOf(dataRows));
+        datas.put(LUMINEX_TRANSFORMED_DATA_TYPE, MapDataIterator.of(dataRows));
         return datas;
     }
 

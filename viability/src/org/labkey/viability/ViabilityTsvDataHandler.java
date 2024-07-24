@@ -16,8 +16,8 @@
 
 package org.labkey.viability;
 
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpRun;
@@ -150,7 +150,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 
         Parser parser = getParser(runDomain, resultsDomain, dataFile);
         List<Map<String, Object>> dataMap = parser.getResultData();
-        result.put(ViabilityTsvDataHandler.DATA_TYPE, AbstractMapDataIterator.builderOf(dataMap));
+        result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(dataMap));
 
         return result;
     }

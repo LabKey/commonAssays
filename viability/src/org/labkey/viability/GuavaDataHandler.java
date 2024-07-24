@@ -24,8 +24,8 @@ import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -409,7 +409,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
             }
 
             // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transformation
-            result.put(ViabilityTsvDataHandler.DATA_TYPE, AbstractMapDataIterator.builderOf(rows));
+            result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(rows));
         }
         else
         {

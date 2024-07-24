@@ -44,8 +44,8 @@ import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.DomainDescriptor;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.OntologyManager;
@@ -608,7 +608,7 @@ public class ProteinController extends SpringActionController
                 int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
-                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, AbstractMapDataIterator.of(rows, new DataIteratorContext()), false);
+                OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, MapDataIterator.of(rows).getDataIterator(new DataIteratorContext()), false, null);
 
                 stmt.executeBatch();
                 connection.commit();

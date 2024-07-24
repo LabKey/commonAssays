@@ -37,8 +37,8 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -361,7 +361,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, AbstractMapDataIterator.builderOf(rows));
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
 
         return datas;
     }

@@ -38,8 +38,8 @@ import org.labkey.api.data.statistics.DoublePoint;
 import org.labkey.api.data.statistics.FitFailedException;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
@@ -69,7 +69,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -299,7 +298,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             }
         }
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
-        datas.put(getDataType(), AbstractMapDataIterator.builderOf(results));
+        datas.put(getDataType(), MapDataIterator.of(results));
 
         return datas;
     }

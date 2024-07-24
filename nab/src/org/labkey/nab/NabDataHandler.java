@@ -28,8 +28,6 @@ import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
-import org.labkey.api.dataiterator.DataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.DataIteratorUtil;
@@ -141,7 +139,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     public void recalculateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
                                          List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
-        _populateDilutionStats(data, run, protocol, AbstractMapDataIterator.builderOf(rawData), Collections.emptyMap(), false, specimenRows, cutoffRows);
+        _populateDilutionStats(data, run, protocol, MapDataIterator.of(rawData), Collections.emptyMap(), false, specimenRows, cutoffRows);
     }
 
     /**

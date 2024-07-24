@@ -21,7 +21,6 @@ import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.DataIteratorUtil;
@@ -89,7 +88,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
         List<Map<String, Object>> rows = parser.getResults();
-        importData(run, AbstractMapDataIterator.builderOf(rows));
+        importData(run, MapDataIterator.of(rows));
     }
 
     protected void importData(ExpRun run, DataIteratorBuilder dataRows) throws ExperimentException

@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
-import org.labkey.api.collections.CaseInsensitiveMapWrapper;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -41,8 +40,8 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -1736,7 +1735,7 @@ public class FlowManager
                 }
             });
 
-            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, AbstractMapDataIterator.of(propMaps, new DataIteratorContext()), true);
+            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, MapDataIterator.of(propMaps).getDataIterator(new DataIteratorContext()), true, null);
 
             tx.commit();
         }

@@ -25,8 +25,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
-import org.labkey.api.dataiterator.AbstractMapDataIterator;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -216,7 +216,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
-        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, AbstractMapDataIterator.builderOf(rows));
+        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
 
         return datas;
     }
