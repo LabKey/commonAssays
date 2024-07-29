@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
-import org.labkey.api.data.BaseSelector;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -159,9 +158,6 @@ public class ViabilityManager
 
     /**
      * Insert or update a ViabilityResult row.
-     * @param user
-     * @param result
-     * @throws SQLException
      */
     public static void saveResult(User user, Container c, ViabilityResult result, int rowIndex) throws ValidationException
     {
@@ -173,9 +169,9 @@ public class ViabilityManager
         if (result.getRowID() == 0)
         {
             String lsid = new Lsid(ViabilityAssayProvider.RESULT_LSID_PREFIX, result.getDataID() + "-" + result.getPoolID() + "-" + rowIndex).toString();
-            Integer id = OntologyManager.ensureObject(c, lsid);
+            int id = OntologyManager.ensureObject(c, lsid);
 
-            result.setObjectID(id.intValue());
+            result.setObjectID(id);
             ViabilityResult inserted = Table.insert(user, ViabilitySchema.getTableInfoResults(), result);
             result.setRowID(inserted.getRowID());
         }
@@ -188,7 +184,7 @@ public class ViabilityManager
         }
 
         insertSpecimens(user, result);
-        insertProperties(c, result);
+        insertProperties(c, user, result);
     }
 
     private static void insertSpecimens(User user, ViabilityResult result)
@@ -198,13 +194,13 @@ public class ViabilityManager
 
     private static void insertSpecimens(User user, int resultId, List<String> specimens)
     {
-        if (specimens == null || specimens.size() == 0)
+        if (specimens == null || specimens.isEmpty())
             return;
 
         for (int index = 0; index < specimens.size(); index++)
         {
             String specimenID = specimens.get(index);
-            if (specimenID == null || specimenID.length() == 0)
+            if (specimenID == null || specimenID.isEmpty())
                 continue;
             
             Map<String, Object> resultSpecimen = new HashMap<>();
@@ -216,10 +212,10 @@ public class ViabilityManager
         }
     }
 
-    private static void insertProperties(Container c, ViabilityResult result) throws ValidationException
+    private static void insertProperties(Container c, User user, ViabilityResult result) throws ValidationException
     {
         Map<PropertyDescriptor, Object> properties = result.getProperties();
-        if (properties == null || properties.size() == 0)
+        if (properties == null || properties.isEmpty())
             return;
 
         OntologyObject obj = OntologyManager.getOntologyObject(result.getObjectID());
@@ -238,7 +234,7 @@ public class ViabilityManager
             oprops.add(new ObjectProperty(obj.getObjectURI(), c, propertyURI, value));
         }
 
-        OntologyManager.insertProperties(c, obj.getObjectURI(), oprops.toArray(new ObjectProperty[oprops.size()]));
+        OntologyManager.insertProperties(c, user, obj.getObjectURI(), oprops.toArray(new ObjectProperty[0]));
     }
 
 
@@ -293,14 +289,9 @@ public class ViabilityManager
 
             if (LOG.isDebugEnabled())
             {
-                long count = executor.executeWithResults(new SQLFragment("SELECT COUNT(*) FROM " + tempTableName), new BaseSelector.ResultSetHandler<Long>()
-                {
-                    @Override
-                    public Long handle(ResultSet rs, Connection conn) throws SQLException
-                    {
-                        rs.next();
-                        return rs.getLong(1);
-                    }
+                long count = executor.executeWithResults(new SQLFragment("SELECT COUNT(*) FROM " + tempTableName), (rs, conn) -> {
+                    rs.next();
+                    return rs.getLong(1);
                 });
                 LOG.debug(String.format("viability specimens: create temp table: rows=%d, duration=%d", count, t.getTotalMilliseconds()));
             }
@@ -373,8 +364,7 @@ public class ViabilityManager
         finally
         {
             // Clean up the temp table
-            if (tracker != null)
-                tracker.delete();
+            tracker.delete();
         }
     }
 
@@ -457,16 +447,6 @@ public class ViabilityManager
     }
 
     /**
-     * Delete a ViabilityResult row.
-     */
-    public static void deleteResult(Container c, ViabilityResult result)
-    {
-        assert result.getRowID() > 0;
-        assert result.getObjectID() > 0;
-        deleteResult(c, result.getRowID(), result.getObjectID());
-    }
-
-    /**
      * Delete a ViabilityResult row by rowid.
      */
     public static void deleteResult(Container c, int resultRowID, int resultObjectID)
@@ -505,12 +485,6 @@ public class ViabilityManager
         if (dataId != null)
             return ExperimentService.get().getExpData(dataId.intValue());
         return null;
-    }
-
-    /** Delete all viability results that reference the ExpData. */
-    public static void deleteAll(ExpData data, Container c)
-    {
-        deleteAll(Arrays.asList(data), c);
     }
 
     /** Delete all viability results that reference the ExpData. */

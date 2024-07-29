@@ -25,6 +25,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -36,7 +38,6 @@ import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.assay.plate.Plate;
@@ -67,7 +68,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * User: Karl Lum
@@ -204,19 +204,19 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, DataIteratorBuilder dataMap) throws ExperimentException
     {
         importData(run, dataMap);
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
-        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
-        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
+        datas.put(ELISPOT_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
 
         return datas;
     }

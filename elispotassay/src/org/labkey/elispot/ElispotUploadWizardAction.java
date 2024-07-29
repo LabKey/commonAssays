@@ -562,7 +562,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             catch (ValidationException ve)
             {
                 for (ValidationError error : ve.getErrors())
-                    errors.reject(SpringActionController.ERROR_MSG, PageFlowUtil.filter(error.getMessage()));
+                    errors.reject(SpringActionController.ERROR_MSG, error.getMessage());
             }
             catch (ExperimentException e)
             {

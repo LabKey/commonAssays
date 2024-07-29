@@ -24,6 +24,8 @@ import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayUploadXarContext;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.XarContext;
@@ -32,7 +34,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -49,7 +50,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * User: kevink
@@ -73,7 +73,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
         if (DATA_TYPE.matches(lsid) || OLD_DATA_TYPE.matches(lsid))
         {
             File f = data.getFile();
-            if (f != null && f.getName() != null)
+            if (f != null)
             {
                 String lowerName = f.getName().toLowerCase();
                 if (lowerName.endsWith(".csv"))
@@ -125,15 +125,15 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
 
                     if (!foundBlankLine)
                     {
-                        if (line.length() == 0 || parts.length == 0 || parts[0].length() == 0)
+                        if (line.isEmpty() || parts.length == 0 || parts[0].isEmpty())
                         {
                             foundBlankLine = true;
                         }
                         else
                         {
-                            String firstCell = parts.length > 0 ? parts[0] : line;
+                            String firstCell = parts[0];
                             String[] runMeta = firstCell.split(" - ", 2);
-                            if (runMeta.length == 2 && runMeta[0].length() > 0 && runMeta[1].length() > 0)
+                            if (runMeta.length == 2 && !runMeta[0].isEmpty() && !runMeta[1].isEmpty())
                             {
                                 String runHeaderKey = runMeta[0].trim();
                                 String runHeaderValue = runMeta[1].trim();
@@ -157,7 +157,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                     else
                     {
                         // skip blank or entirely empty lines after the first
-                        if (line.length() == 0 || parts.length == 0 || Arrays.stream(parts).allMatch(StringUtils::isEmpty))
+                        if (line.isEmpty() || parts.length == 0 || Arrays.stream(parts).allMatch(StringUtils::isEmpty))
                             continue;
 
                         // skip line containing disclaimer
@@ -168,15 +168,11 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                         {
                             groupHeaders = parts;
                         }
-                        else if (headers == null)
+                        else
                         {
                             headers = parts;
                             // found both header lines.
                             break;
-                        }
-                        else
-                        {
-                            assert false : "should have stopped parsing";
                         }
                     }
 
@@ -386,9 +382,9 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        Map<DataType, Supplier<ValidatingDataRowIterator>> result = new HashMap<>();
+        Map<DataType, DataIteratorBuilder> result = new HashMap<>();
         if (context instanceof AssayUploadXarContext xarContext)
         {
             List<Map<String, Object>> rows;
@@ -412,8 +408,8 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                 ViabilityAssayDataHandler.validateData(rows, false);
             }
 
-            // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transormation
-            result.put(ViabilityTsvDataHandler.DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
+            // Use the .tsv DATA_TYPE so the results will be read back in by the ViabilityTsvDataHandler after transformation
+            result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(rows));
         }
         else
         {

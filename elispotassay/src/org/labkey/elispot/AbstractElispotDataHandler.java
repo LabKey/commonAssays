@@ -21,6 +21,10 @@ import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ConvertHelper;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.DataIteratorUtil;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
@@ -31,7 +35,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
@@ -41,7 +44,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -86,19 +88,19 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
         ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
         List<Map<String, Object>> rows = parser.getResults();
-        importData(run, () -> ValidatingDataRowIterator.of(rows));
+        importData(run, MapDataIterator.of(rows));
     }
 
-    protected void importData(ExpRun run, Supplier<ValidatingDataRowIterator> dataRows) throws ExperimentException
+    protected void importData(ExpRun run, DataIteratorBuilder dataRows) throws ExperimentException
     {
-        try (ValidatingDataRowIterator iter = dataRows.get())
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(dataRows.getDataIterator(new DataIteratorContext()), false))
         {
             List<? extends ExpData> runData = run.getOutputDatas(ExperimentService.get().getDataType(ElispotDataHandler.NAMESPACE));
             assert(runData.size() == 1);
 
-            while (iter.hasNext())
+            while (iter.next())
             {
-                Map<String, Object> row = iter.next();
+                Map<String, Object> row = iter.getMap();
                 if (!row.containsKey(WELL_ROW_PROPERTY) || !row.containsKey(WELL_COLUMN_PROPERTY))
                     throw new ExperimentException("The row must contain values for well row and column locations : " + WELL_ROW_PROPERTY + ", " + WELL_COLUMN_PROPERTY);
 

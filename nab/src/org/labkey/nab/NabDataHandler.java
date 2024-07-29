@@ -28,6 +28,10 @@ import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.DataIteratorUtil;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.api.DataType;
@@ -36,13 +40,13 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
-import org.labkey.api.query.ValidationException;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.query.NabProtocolSchema;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -112,7 +115,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData, User user) throws ExperimentException
+    protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData, User user) throws ExperimentException
     {
         Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
         Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
@@ -124,7 +127,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     /**
      * Populates cutoff and AUC information from the passed in raw data
      */
-    public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData,
+    public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData,
                                       Map<String, Pair<Integer, String>> wellgroupNameToNabSpecimen) throws ExperimentException
     {
         _populateDilutionStats(data, run, protocol, rawData, wellgroupNameToNabSpecimen, true, Collections.emptyList(), Collections.emptyList());
@@ -136,7 +139,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     public void recalculateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, List<Map<String, Object>> rawData,
                                          List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
-        _populateDilutionStats(data, run, protocol, () -> ValidatingDataRowIterator.of(rawData), Collections.emptyMap(), false, specimenRows, cutoffRows);
+        _populateDilutionStats(data, run, protocol, MapDataIterator.of(rawData), Collections.emptyMap(), false, specimenRows, cutoffRows);
     }
 
     /**
@@ -147,7 +150,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * @param specimenRows if commitData is false, then specimen data will be returned in this collection
      * @param cutoffRows if commitData is false, then cutoff data will be returned in this collection
      */
-    private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, Supplier<ValidatingDataRowIterator> rawData,
+    private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData,
                                         Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen, boolean commitData,
                                         List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
@@ -159,11 +162,11 @@ public abstract class NabDataHandler extends DilutionDataHandler
         for (ExpMaterial material : run.getMaterialInputs().keySet())
             inputMaterialMap.put(material.getLSID(), material);
 
-        try (ValidatingDataRowIterator iter = rawData.get())
+        try (MapDataIterator iter = DataIteratorUtil.wrapMap(rawData.getDataIterator(new DataIteratorContext()), false))
         {
-            while (iter.hasNext())
+            while (iter.next())
             {
-                Map<String, Object> group = iter.next();
+                Map<String, Object> group = iter.getMap();
                 if (!group.containsKey(WELLGROUP_NAME_PROPERTY))
                     throw new ExperimentException("The row must contain a value for the well group name : " + WELLGROUP_NAME_PROPERTY);
 
@@ -252,7 +255,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             if (commitData)
                 NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
         }
-        catch (ValidationException e)
+        catch (BatchValidationException | IOException e)
         {
             throw new ExperimentException(e);
         }

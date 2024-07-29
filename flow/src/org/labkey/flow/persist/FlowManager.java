@@ -40,6 +40,8 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.dataiterator.DataIteratorContext;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -47,12 +49,11 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.SamplesSchema;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.module.ModuleLoader;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
-import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
@@ -1734,11 +1735,11 @@ public class FlowManager
                 }
             });
 
-            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, ValidatingDataRowIterator.of(propMaps.iterator()), true);
+            OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, MapDataIterator.of(propMaps).getDataIterator(new DataIteratorContext()), true, null);
 
             tx.commit();
         }
-        catch (ValidationException | SQLException ex)
+        catch (BatchValidationException | SQLException ex)
         {
             throw UnexpectedException.wrap(ex);
         }

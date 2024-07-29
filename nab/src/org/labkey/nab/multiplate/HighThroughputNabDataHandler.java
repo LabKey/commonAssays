@@ -25,6 +25,8 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.XarContext;
@@ -33,7 +35,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.qc.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -51,7 +52,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * User: brittp
@@ -238,19 +238,19 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 
-        Map<DataType, Supplier<ValidatingDataRowIterator>> datas = new HashMap<>();
+        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, () -> ValidatingDataRowIterator.of(rows));
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
 
         return datas;
     }
 
     @Override
-    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, Supplier<ValidatingDataRowIterator> dataMap) throws ExperimentException
+    public void importTransformDataMap(ExpData data, AssayRunUploadContext<?> context, ExpRun run, DataIteratorBuilder dataMap) throws ExperimentException
     {
         importRows(data, run, context.getProtocol(), dataMap, context.getUser());
     }

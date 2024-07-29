@@ -23,6 +23,9 @@ import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.dataiterator.DataIterator;
+import org.labkey.api.dataiterator.DataIteratorUtil;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -33,7 +36,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
+import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -149,12 +152,12 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                             visit = poolID.substring(sep+1).trim();
                         }
 
-                        if (ptid != null && ptid.length() > 0)
+                        if (!ptid.isEmpty())
                         {
                             row.put(AbstractAssayProvider.PARTICIPANTID_PROPERTY_NAME, ptid);
                         }
 
-                        if (visit != null && visit.length() > 0)
+                        if (visit != null && !visit.isEmpty())
                         {
                             try
                             {
@@ -177,7 +180,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         protected Object convert(DomainProperty dp, String value) throws ExperimentException
         {
             PropertyDescriptor pd = dp.getPropertyDescriptor();
-            Class type = pd.getPropertyType().getJavaType();
+            Class<?> type = pd.getPropertyType().getJavaType();
             try
             {
                 return ConvertUtils.convert(value, type);
@@ -271,21 +274,20 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         {
             Map<String, Object> row = it.next();
             String poolID = String.valueOf(row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
-            if (poolID == null || poolID.length() == 0)
+            if (poolID == null || poolID.isEmpty())
                 throw new ExperimentException(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME + " required");
 
             if (requireSpecimens)
             {
                 Object obj = row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME);
-                if (!(obj instanceof String[]))
+                if (!(obj instanceof String[] specimenIDs))
                     throw new ExperimentException(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME + " required");
-                String[] specimenIDs = (String[]) obj;
                 if (specimenIDs.length == 0)
                     throw new ExperimentException(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME + " required");
                 for (int i = 0; i < specimenIDs.length; i++)
                 {
                     String specimenID = specimenIDs[i];
-                    if (specimenID == null || specimenID.length() == 0)
+                    if (specimenID == null || specimenID.isEmpty())
                         throw new ExperimentException(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME + "[" + i + "] is empty or null.");
 
                     // XXX: check all specimens come from the same study.
@@ -296,10 +298,10 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected ValidatingDataRowIterator convertPropertyNamesToURIs(ValidatingDataRowIterator dataMaps, Domain domain)
+    protected DataIterator convertPropertyNamesToURIs(DataIterator dataMaps, Domain domain)
     {
         // XXX: pass data thru untouched for now.
-        return ValidatingDataRowIterator.of(dataMaps);
+        return dataMaps;
     }
 
     @Override
@@ -310,12 +312,13 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
                                                       ExpProtocol protocol,
                                                       AssayProvider provider,
                                                       Domain dataDomain,
-                                                      ValidatingDataRowIterator fileData,
+                                                      DataIterator fileData,
                                                       TableInfo tableInfo,
                                                       boolean autoFillDefaultColumns,
                                                       OntologyManager.RowCallback rowCallback)
-            throws ValidationException
+            throws BatchValidationException
     {
+        MapDataIterator mapData = DataIteratorUtil.wrapMap(fileData, false);
         // Find the target study property on the batch, run, or result domains.
         // If the target study is on the batch or run domain, get the value from the ExpRun or the ExpExperiment.
         // If the target study is on the result domain, pass the DomainProperty to splitBaseFromExtra()
@@ -348,9 +351,9 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         }
 
         int rowIndex = 0;
-        while (fileData.hasNext())
+        while (mapData.next())
         {
-            Map<String, Object> row = fileData.next();
+            Map<String, Object> row = mapData.getMap();
             Pair<Map<String, Object>, Map<PropertyDescriptor, Object>> pair = splitBaseFromExtra(row, importMap, resultLevelTargetStudyProperty);
             Map<String, Object> base = pair.first;
             Map<PropertyDescriptor, Object> extra = pair.second;
@@ -371,7 +374,14 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             result.setContainer(container.getId());
             result.setProtocolID(protocol.getRowId());
 
-            ViabilityManager.saveResult(user, container, result, rowIndex++);
+            try
+            {
+                ViabilityManager.saveResult(user, container, result, rowIndex++);
+            }
+            catch (ValidationException e)
+            {
+                throw new BatchValidationException(e);
+            }
         }
 
         ViabilityManager.updateSpecimenAggregates(user, container, provider, protocol, run);
@@ -406,7 +416,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         private File getViabilitySampleDirectory() throws IOException
         {
             File viabilityFiles = JunitUtil.getSampleData(null, "viability");
-            assertTrue("Expected to find viability test files", null != viabilityFiles && viabilityFiles.exists());
+            assertTrue("Expected to find viability test files", viabilityFiles.exists());
 
             return viabilityFiles;
         }

@@ -16,6 +16,8 @@
 
 package org.labkey.viability;
 
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpRun;
@@ -25,7 +27,6 @@ import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.reader.ColumnDescriptor;
@@ -39,7 +40,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * User: kevink
@@ -62,7 +62,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         if (DATA_TYPE.matches(lsid) || OLD_DATA_TYPE.matches(lsid))
         {
             File f = data.getFile();
-            if (f != null && f.getName() != null)
+            if (f != null)
             {
                 String lowerName = f.getName().toLowerCase();
                 if (lowerName.endsWith(".tsv") || lowerName.endsWith(".txt"))
@@ -135,13 +135,13 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
     }
 
     @Override
-    public Map<DataType, Supplier<ValidatingDataRowIterator>> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         assert dataFile.getName().endsWith(".tsv") || dataFile.getName().endsWith(".TSV");
         
         // Uck.  The TsvDataExchangeHandler writes out GuavaDataHandler.getValidationDataMap() bfore running the transform script.
         // After the transform has run, this method is called to read that output back in.
-        Map<DataType, Supplier<ValidatingDataRowIterator>> result = new HashMap<>();
+        Map<DataType, DataIteratorBuilder> result = new HashMap<>();
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
         AssayProvider provider = AssayService.get().getProvider(protocol);
@@ -150,7 +150,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
 
         Parser parser = getParser(runDomain, resultsDomain, dataFile);
         List<Map<String, Object>> dataMap = parser.getResultData();
-        result.put(ViabilityTsvDataHandler.DATA_TYPE, () -> ValidatingDataRowIterator.of(dataMap));
+        result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(dataMap));
 
         return result;
     }

@@ -16,11 +16,12 @@
 
 package org.labkey.viability;
 
+import org.labkey.api.dataiterator.DataIteratorBuilder;
+import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentDataHandler;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.iterator.ValidatingDataRowIterator;
 import org.labkey.api.qc.TsvDataExchangeHandler;
 import org.labkey.api.qc.TsvDataSerializer;
 import org.labkey.api.assay.AssayProvider;
@@ -30,7 +31,6 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * User: klum
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  */
 public class ViabilityDataExchangeHandler extends TsvDataExchangeHandler
 {
-    private DataSerializer _serializer = new ViabilityDataSerializer();
+    private final DataSerializer _serializer = new ViabilityDataSerializer();
 
     @Override
     public DataSerializer getDataSerializer()
@@ -49,7 +49,7 @@ public class ViabilityDataExchangeHandler extends TsvDataExchangeHandler
     private static class ViabilityDataSerializer extends TsvDataSerializer
     {
         @Override
-        public Supplier<ValidatingDataRowIterator> importRunData(ExpProtocol protocol, File runData) throws Exception
+        public DataIteratorBuilder importRunData(ExpProtocol protocol, File runData) throws Exception
         {
             AssayProvider provider = AssayService.get().getProvider(protocol);
             ExpData data = ExperimentService.get().createData(protocol.getContainer(), ViabilityTsvDataHandler.DATA_TYPE);
@@ -60,9 +60,9 @@ public class ViabilityDataExchangeHandler extends TsvDataExchangeHandler
                 ViabilityAssayDataHandler.Parser parser = viabilityHandler.getParser(provider.getRunDomain(protocol),
                         provider.getResultsDomain(protocol), runData);
                 List<Map<String, Object>> rows = parser.getResultData();
-                return () -> ValidatingDataRowIterator.of(rows);
+                return MapDataIterator.of(rows);
             }
-            return () -> ValidatingDataRowIterator.of(Collections.emptyList());
+            return MapDataIterator.of(Collections.emptyList());
         }
     }
 }
