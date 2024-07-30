@@ -419,11 +419,10 @@ public class FlowRun extends FlowObject<ExpRun>
             }
             childProtocol = childFlowProtocol.getProtocol();
         }
-        for (ExpRun run : ExperimentService.get().getExpRuns(container, null, childProtocol))
-        {
-            if (runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(run.getFilePathRoot())))
-                ret.add(new FlowRun(run));
-        }
+
+        ExperimentService.get().getExpRuns(container, null, childProtocol, run -> 
+                runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(run.getFilePathRoot()))
+            ).forEach( run -> ret.add(new FlowRun(run)));
 
         if (comparator != null)
             ret.sort(comparator);
