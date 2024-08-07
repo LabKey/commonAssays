@@ -30,12 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/*
- * User: Karl Lum
- * Date: May 21, 2008
- * Time: 11:53:28 AM
- */
-
 public class MS2ReportUIProvider extends DefaultReportUIProvider
 {
     private static final Map<String, String> _typeToIconMap = new HashMap<>();
@@ -61,7 +55,7 @@ public class MS2ReportUIProvider extends DefaultReportUIProvider
             bean.setRedirectUrl(context.getActionURL().toString());
 
             reportDesigners.add(new DesignerInfoImpl(SpectraCountRReport.TYPE, "R Report", "MS2 Spectra Count R Report",
-                    ReportUtil.getRReportDesignerURL(context, bean), "/reports/r_logo.svg"));
+                ReportUtil.getScriptReportDesignerURL(context, bean), "/reports/r_logo.svg"));
         }
         return reportDesigners;
     }
