@@ -32,7 +32,6 @@ import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.study.assay.ParticipantVisitResolverType;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,8 +53,6 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
     public abstract String getSetPropertyName();
     public abstract String getRoleName();
     public abstract String getSetName();
-
-
 
     @Override
     public TransformResult transform(AssayRunUploadContext<ProviderType> context, ExpRun run) throws ValidationException
@@ -126,12 +123,12 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
     }
 
     @Override
-    protected void addInputMaterials(AssayRunUploadContext<ProviderType> context,
-                                     Map<ExpMaterial, String> inputMaterials,
-                                     ParticipantVisitResolverType resolverType,
-                                     @NotNull RemapCache cache,
-                                     @NotNull Map<Integer, ExpMaterial> materialCache)
-            throws ExperimentException
+    protected void addInputMaterials(
+        AssayRunUploadContext<ProviderType> context,
+        Map<ExpMaterial, String> inputMaterials,
+        @NotNull RemapCache cache,
+        @NotNull Map<Integer, ExpMaterial> materialCache
+    ) throws ExperimentException
     {
         // Attach the materials found in the matrix file to the run
         try
