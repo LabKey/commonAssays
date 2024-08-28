@@ -39,8 +39,8 @@
 
     Map<ExportAnalysisForm.SendTo, String> sendToOptions = new EnumMap<>(ExportAnalysisForm.SendTo.class);
     sendToOptions.put(ExportAnalysisForm.SendTo.Browser, "Browser");
-    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineZip, "Pipeline root as zip");
-    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineFiles, "Pipeline root as files");
+    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineZip, "File root as zip");
+    sendToOptions.put(ExportAnalysisForm.SendTo.PipelineFiles, "File root as files");
 
     FlowModule module = ModuleLoader.getInstance().getModule(FlowModule.class);
     if (module.getExportToScriptCommandLine(getContainer()) != null)
