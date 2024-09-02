@@ -18,8 +18,8 @@ function openExclusionsSinglepointUnknownWindow(assayId, runId)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Singlepoint Unknowns from Analysis',
-                    width: Ext.getBody().getViewSize().width < 550 ? Ext.getBody().getViewSize().width * .9 : 500,
-                    height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
+                    width: Math.max(600, Ext.getBody().getViewSize().width * .6),
+                    height: Math.max(600, Ext.getBody().getViewSize().height * .6),
                     items: new LABKEY.Exclusions.SinglepointUnknownPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,

@@ -18,8 +18,8 @@ function openExclusionsTitrationWindow(assayId, runId)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Titrations from Analysis',
-                    width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
-                    height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
+                    width: Math.max(600, Ext.getBody().getViewSize().width * .6),
+                    height: Math.max(600, Ext.getBody().getViewSize().height * .6),
                     items: new LABKEY.Exclusions.TitrationPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
