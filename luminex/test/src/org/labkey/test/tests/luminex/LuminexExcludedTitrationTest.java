@@ -35,8 +35,6 @@ import static org.junit.Assert.assertTrue;
 @BaseWebDriverTest.ClassTimeout(minutes = 8)
 public final class LuminexExcludedTitrationTest extends LuminexTest
 {
-    int pipelineJobCount = 1;
-
     /**
      * test of titration exclusion- the ability to exclude certain titrations and add a comment as to why
      * preconditions: LUMINEX project and assay list exist.  Having the Multiple Curve data will speed up execution
@@ -46,6 +44,8 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
     @Test
     public void testTitrationExclusion()
     {
+        int jobCount = executeSelectRowCommand("pipeline", "Job").getRows().size();
+
         ensureMultipleCurveDataPresent(TEST_ASSAY_LUM);
 
         clickAndWait(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
@@ -55,19 +55,21 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         String titration = "Sample 1";
         String exclusionMessage =  "excluding all analytes for titration " + titration;
-        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++pipelineJobCount, 1, 1);
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++jobCount, 1, 1);
         verifyTitrationExclusion(titration, exclusionMessage, 70);
 
         titration = "Sample 2";
         String analyte = "ENV6";
         exclusionMessage =  "excluding " + analyte + " analyte for titration " + titration;
-        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++pipelineJobCount, 1, 1, analyte);
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++jobCount, 1, 1, analyte);
         verifyTitrationAnalyteExclusion(titration, analyte, exclusionMessage, 12);
     }
 
     @Test
     public void testCrossPlateTitration()
     {
+        int jobCount = executeSelectRowCommand("pipeline", "Job").getRows().size();
+
         List<File> files = new ArrayList<>();
         files.add(TEST_ASSAY_LUM_FILE5);
         files.add(TEST_ASSAY_LUM_FILE6);
@@ -98,7 +100,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         // Issue 51084: verify exclusions for a cross plate titration (exclusions applied to all DataIds for the titration)
         clickAndWait(Locator.linkContainingText(runName));
         String exclusionMessage =  "excluding all analytes for titration " + titration;
-        excludeTitration(titration, exclusionMessage, runName, ++pipelineJobCount, 2, 1);
+        excludeTitration(titration, exclusionMessage, runName, ++jobCount, 2, 1);
 
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("ExclusionComment");
@@ -107,7 +109,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         titration = "Standard1";
         exclusionMessage =  "excluding one analyte for titration " + titration;
-        excludeTitration(titration, exclusionMessage, runName, ++pipelineJobCount, 5, 2, "GS Analyte B");
+        excludeTitration(titration, exclusionMessage, runName, ++jobCount, 5, 2, "GS Analyte B");
         verifyTitrationAnalyteExclusion(titration, "GS Analyte B", exclusionMessage, 50);
 
         clickAndWait(Locator.linkWithText("view excluded data"));
