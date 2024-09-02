@@ -68,7 +68,7 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
             this.exclusionsStore = new LABKEY.ext.Store({
                 schemaName: this.protocolSchemaName,
                 queryName: this.EXCLUSION_TABLE_NAME,
-                columns: 'Description,Analytes/RowId,RowId,Comment, DataId/Run',
+                columns: 'Description,Analytes/RowId,RowId,Comment,DataId,DataId/Run',
                 filterArray : [
                     LABKEY.Filter.create('DataId/Run', this.runId, LABKEY.Filter.Types.EQUALS)
                 ],
@@ -89,14 +89,16 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                     distinctitemgridloaded : function()
                     {
                         var records = this.exclusionsStore.data.items;
-                        var id;
                         for (var i = 0; i < records.length; i++)
                         {
                             var analyteRowIds = records[i].get('Analytes/RowId');
-                            id = this.getCombinedItemAnalytesStore().findExact(this.ITEM_RECORD_KEY, records[i].get('Description'));
-                            this.preAnalyteRowIds[id] = analyteRowIds;
-                            this.preExcludedIds[id] = ("" + analyteRowIds).split(",");
-                            this.comments[id] = records[i].get('Comment');
+                            var idx = this.getCombinedItemAnalytesStore().findBy(function(rec) {
+                                return rec.get(this.ITEM_RECORD_KEY) === records[i].get('Description')
+                                        && rec.get('DataId') === records[i].get('DataId');
+                            }, this);
+                            this.preAnalyteRowIds[idx] = analyteRowIds;
+                            this.preExcludedIds[idx] = ("" + analyteRowIds).split(",");
+                            this.comments[idx] = records[i].get('Comment');
                         }
                     }
                 }
@@ -120,28 +122,41 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                     scope : this,
                     load : function(store, records)
                     {
-                        var id;
                         for (var i = 0; i < this.getExclusionsStore().getCount(); i++)
                         {
-                            id = store.findExact(this.ITEM_RECORD_KEY, this.getExclusionsStore().getAt(i).get('Description'));
-                            if (id >= 0)
+                            var descVal = this.getExclusionsStore().getAt(i).get('Description');
+                            var dataIdVal = this.getExclusionsStore().getAt(i).get('DataId');
+                            var idx = store.findBy(function(rec) {
+                                return rec.get(this.ITEM_RECORD_KEY) === descVal && rec.get('DataId') === dataIdVal;
+                            }, this);
+                            if (idx >= 0)
                             {
                                 // coerce to string so that we can attempt to split by comma and space
                                 var analyteRowIds = "" + this.getExclusionsStore().getAt(i).get("Analytes/RowId");
 
-                                this.present[id] = analyteRowIds.split(",").length;
-                                this.getExclusionsStore().getAt(i).set('Present', this.present[id]);
+                                this.present[idx] = analyteRowIds.split(",").length;
+                                this.getExclusionsStore().getAt(i).set('Present', this.present[idx]);
                                 this.getExclusionsStore().getAt(i).commit();
                             }
                         }
 
                         var gridData = [];
+                        var distinctTitrationNames = [];
                         for (i = 0; i < records.length; i++)
                         {
                             gridData[i] = [];
                             for (var index in records[i].data)
                                 gridData[i].push(records[i].get(index));
                             gridData[i].push(this.present[i]);
+
+                            // Issue 51084
+                            var titrationName = records[i].get(this.ITEM_RECORD_KEY);
+                            if (distinctTitrationNames.indexOf(titrationName) === -1) {
+                                distinctTitrationNames.push(titrationName);
+                                gridData[i].push(true); // Visible
+                            } else {
+                                gridData[i].push(false); // Hidden
+                            }
                         }
                         this.getCombinedItemAnalytesStore().loadData(gridData);
 
@@ -159,7 +174,7 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
         if (!this.combinedItemAnalytesStore)
         {
             this.combinedItemAnalytesStore = new Ext.data.ArrayStore({
-                fields : [this.ITEM_RECORD_KEY, 'DataId', 'RunId', 'Present']
+                fields : [this.ITEM_RECORD_KEY, 'DataId', 'RunId', 'Present', 'Visible']
             });
         }
 
@@ -187,7 +202,10 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                 }),
                 autoExpandColumn: this.ITEM_RECORD_KEY,
                 viewConfig: {
-                    forceFit: true
+                    forceFit: true,
+                    getRowClass: function(record, index) {
+                        return record.get('Visible') ? 'visible' : 'hidden';
+                    }
                 },
                 sm: this.getItemRowSelectionModel(),
                 anchor: '100%',
@@ -209,40 +227,60 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                 header : 'Titration',
                 listeners : {
                     scope : this,
-                    rowdeselect : function(tsl, rowId, record)
+                    rowdeselect : function(tsl, _, record)
                     {
-                        this.excluded[rowId] = this.getGridCheckboxSelModel().getSelections();
-                        this.excluded[rowId][this.ITEM_RECORD_KEY] = record.get(this.ITEM_RECORD_KEY);
-                        this.comments[rowId] = Ext.getCmp('comment').getValue();
-                        this.present[rowId] = this.getGridCheckboxSelModel().getSelections().length;
-                        record.set('Present', this.present[rowId]);
-                        this.excludedDataIds[rowId] = record.get('DataId');
+                        var titrationName = record.get(this.ITEM_RECORD_KEY);
+                        var gridSelections = this.getGridCheckboxSelModel().getSelections();
+                        var comment = Ext.getCmp('comment').getValue();
+
+                        // Issue 51084: update the excluded analytes for all record indices matching this titration Name
+                        this.getCombinedItemAnalytesStore().getRange().forEach(function(rec, rowIndex) {
+                            if (rec.get(this.ITEM_RECORD_KEY) === titrationName) {
+                                this.excluded[rowIndex] = gridSelections;
+                                this.excluded[rowIndex][this.ITEM_RECORD_KEY] = titrationName;
+                                this.comments[rowIndex] = comment;
+                                this.present[rowIndex] = gridSelections.length;
+                                rec.set('Present', this.present[rowIndex]);
+
+                                // convert the preExcludedIds from a listing of excluded analytes to the RowId of the exclusion record
+                                if (typeof this.preExcludedIds[rowIndex] === 'object') {
+                                    var idx = this.getExclusionsStore().findBy(function(rec2) {
+                                        return rec2.get('Description') === rec.get(this.ITEM_RECORD_KEY)
+                                                && rec2.get('DataId') === rec.get('DataId');
+                                    }, this);
+                                    this.preExcludedIds[rowIndex] = this.getExclusionsStore().getAt(idx).get('RowId');
+                                }
+                            }
+                        }, this);
                     },
-                    rowselect : function(tsl, rowId, record)
+                    rowselect : function(tsl, rowIndex, record)
                     {
                         this.getAvailableAnalytesGrid().getStore().clearFilter();
                         this.getAvailableAnalytesGrid().getStore().filter({property: 'Titration', value: record.get(this.ITEM_RECORD_KEY), exactMatch: true});
                         this.getAvailableAnalytesGrid().setDisabled(false);
 
                         this.getGridCheckboxSelModel().suspendEvents(false);
-                        if (typeof this.preExcludedIds[rowId] === 'object')
+                        if (typeof this.preExcludedIds[rowIndex] === 'object')
                         {
                             this.getGridCheckboxSelModel().clearSelections();
-                            Ext.each(this.preExcludedIds[rowId], function(analyte)
-                            {
-                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id)
-                                {
+                            Ext.each(this.preExcludedIds[rowIndex], function(analyte) {
+                                var index = this.getAvailableAnalytesGrid().getStore().findBy(function(rec, id) {
                                     return rec.get('Titration') == record.get(this.ITEM_RECORD_KEY) && rec.get('RowId') == analyte;
                                 }, this);
                                 this.getAvailableAnalytesGrid().getSelectionModel().selectRow(index, true);
                             }, this);
-                            var id = this.getExclusionsStore().findExact('Description', record.get(this.ITEM_RECORD_KEY));
-                            this.preExcludedIds[rowId] = this.getExclusionsStore().getAt(id).get('RowId');
                             this.exclusionsExist = true;
+
+                            // convert the preExcludedIds from a listing of excluded analytes to the RowId of the exclusion record
+                            var idx = this.getExclusionsStore().findBy(function(rec) {
+                                return rec.get('Description') === record.get(this.ITEM_RECORD_KEY)
+                                        && rec.get('DataId') === record.get('DataId');
+                            }, this);
+                            this.preExcludedIds[rowIndex] = this.getExclusionsStore().getAt(idx).get('RowId');
                         }
-                        else if (this.excluded[rowId])
+                        else if (this.excluded[rowIndex])
                         {
-                            this.getGridCheckboxSelModel().selectRecords(this.excluded[rowId], false);
+                            this.getGridCheckboxSelModel().selectRecords(this.excluded[rowIndex], false);
                             this.exclusionsExist = true;
                         }
                         else
@@ -252,8 +290,8 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
                         }
                         this.getGridCheckboxSelModel().resumeEvents();
 
-                        if (this.comments[rowId])
-                            Ext.getCmp('comment').setValue(this.comments[rowId]);
+                        if (this.comments[rowIndex])
+                            Ext.getCmp('comment').setValue(this.comments[rowIndex]);
                         else
                             Ext.getCmp('comment').setValue('');
                     }
@@ -304,6 +342,28 @@ LABKEY.Exclusions.TitrationPanel = Ext.extend(LABKEY.Exclusions.SinglepointUnkno
         }
 
         return this.availableAnalytesGrid;
+    },
+
+    getExcludedString : function()
+    {
+        var retString = '';
+
+        for (var i = 0; i < this.present.length; i++)
+        {
+            // issue 21431
+            if (this.present[i] == undefined)
+                continue;
+
+            if (!(this.preExcludedIds[i] == undefined && this.present[i] == 0))
+            {
+                var noun = 'analyte' + (this.present[i] != 1 ? 's' : '');
+                var record = this.getAvailableItemsGrid().getStore().getAt(i);
+                if (record.get('Visible')) {
+                    retString += this.getExcludedStringKey(record) + ': ' + this.present[i] + ' ' + noun + ' excluded.<br>';
+                }
+            }
+        }
+        return retString;
     },
 
     getExcludedStringKey : function(record)
