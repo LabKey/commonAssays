@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class, Assays.class})
@@ -43,6 +44,8 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
     @Test
     public void testTitrationExclusion()
     {
+        int jobCount = executeSelectRowCommand("pipeline", "Job").getRows().size();
+
         ensureMultipleCurveDataPresent(TEST_ASSAY_LUM);
 
         clickAndWait(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
@@ -52,19 +55,21 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         String titration = "Sample 1";
         String exclusionMessage =  "excluding all analytes for titration " + titration;
-        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, 2);
-        verifyTitrationExclusion(titration, exclusionMessage);
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++jobCount, 1, 1);
+        verifyTitrationExclusion(titration, exclusionMessage, 70);
 
         titration = "Sample 2";
         String analyte = "ENV6";
         exclusionMessage =  "excluding " + analyte + " analyte for titration " + titration;
-        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, 3, analyte);
-        verifyTitrationAnalyteExclusion(titration, analyte, exclusionMessage);
+        excludeTitration(titration, exclusionMessage, MULTIPLE_CURVE_ASSAY_RUN_NAME, ++jobCount, 1, 1, analyte);
+        verifyTitrationAnalyteExclusion(titration, analyte, exclusionMessage, 12);
     }
 
     @Test
     public void testCrossPlateTitration()
     {
+        int jobCount = executeSelectRowCommand("pipeline", "Job").getRows().size();
+
         List<File> files = new ArrayList<>();
         files.add(TEST_ASSAY_LUM_FILE5);
         files.add(TEST_ASSAY_LUM_FILE6);
@@ -81,14 +86,47 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         table.clickHeaderButton("Import Data");
         clickButton("Next");
 
+        String runName = "Cross Plate titration";
         waitForElement(Locators.panelWebpartTitle.withText("Run Properties"));
-        setFormElement(Locator.name("name"), "Cross Plate titration");
+        setFormElement(Locator.name("name"), runName);
 
         uploadAssayFiles(files);
         clickButton("Next");
 
-        assertTextPresent("Standard1-CrossplateTitration");
+        String titration = "Standard1-CrossplateTitration";
+        assertTextPresent(titration);
+        clickButton("Save and Finish");
 
+        // Issue 51084: verify exclusions for a cross plate titration (exclusions applied to all DataIds for the titration)
+        clickAndWait(Locator.linkContainingText(runName));
+        String exclusionMessage =  "excluding all analytes for titration " + titration;
+        excludeTitration(titration, exclusionMessage, runName, ++jobCount, 2, 1);
+
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn("ExclusionComment");
+        _customizeViewsHelper.applyCustomView();
+        verifyTitrationExclusion(titration, exclusionMessage, 12);
+
+        titration = "Standard1";
+        exclusionMessage =  "excluding one analyte for titration " + titration;
+        excludeTitration(titration, exclusionMessage, runName, ++jobCount, 5, 2, "GS Analyte B");
+        verifyTitrationAnalyteExclusion(titration, "GS Analyte B", exclusionMessage, 50);
+
+        clickAndWait(Locator.linkWithText("view excluded data"));
+        DataRegionTable region = new DataRegionTable("TitrationExclusion", this);
+        region.setFilter("Description", "Equals", "Standard1-CrossplateTitration");
+        assertEquals("Expected 2 rows for titration", 2, region.getDataRowCount());
+        region.setFilter("Analytes", "Contains", "GS Analyte A");
+        assertEquals("Expected 2 rows for analyte A", 2, region.getDataRowCount());
+        region.setFilter("Analytes", "Contains", "GS Analyte B");
+        assertEquals("Expected 2 rows for analyte B", 2, region.getDataRowCount());
+        region.clearFilter("Analytes");
+        region.setFilter("Description", "Equals", "Standard1");
+        assertEquals("Expected 5 rows for titration", 5, region.getDataRowCount());
+        region.setFilter("Analytes", "Contains", "GS Analyte A");
+        assertEquals("Expected 0 rows for analyte B", 0, region.getDataRowCount());
+        region.setFilter("Analytes", "Contains", "GS Analyte B");
+        assertEquals("Expected 5 rows for analyte B", 5, region.getDataRowCount());
     }
 
     private void uploadAssayFiles(List<File> guavaFiles)
@@ -96,13 +134,13 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         setInput(Locator.name("__primaryFile__"), guavaFiles);
     }
 
-    private void verifyTitrationAnalyteExclusion(String excludedTitration, String excludedAnalyte, String exclusionMessage)
+    private void verifyTitrationAnalyteExclusion(String excludedTitration, String excludedAnalyte, String exclusionMessage, int rowCount)
     {
         DataRegionTable region = new DataRegionTable("Data", this);
 
         region.setFilter("Description", "Equals", excludedTitration);
         region.setFilter("Analyte", "Contains", excludedAnalyte);
-        waitForElement(Locator.paginationText(1, 12, 12));
+        waitForElement(Locator.paginationText(1, rowCount, rowCount));
         List<List<String>> vals = region.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
         List<String> descriptions = vals.get(1);
@@ -127,7 +165,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
             comment = comments.get(i);
             log("Comment: "+ comment);
             analyte= analytesPresent.get(i);
-            analyte = analyte.substring(0, 4);
+            analyte = analyte.contains("(") ? analyte.substring(0, 4) : analyte;
             log("Analyte: " + analyte);
 
             if (analyte.contains(excludedAnalyte) && description.equals(excludedTitration))
@@ -150,12 +188,12 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
         region.clearFilter("Description");
     }
 
-    private void verifyTitrationExclusion(String excludedTitration, String exclusionMessage)
+    private void verifyTitrationExclusion(String excludedTitration, String exclusionMessage, int rowCount)
     {
         DataRegionTable region = new DataRegionTable("Data", this);
 
         region.setFilter("Description", "Equals", excludedTitration);
-        waitForElement(Locator.paginationText(1, 70, 70));
+        waitForElement(Locator.paginationText(1, rowCount, rowCount));
         List<List<String>> vals = region.getFullColumnValues("Well", "Description", "Type", "Exclusion Comment", "Analyte");
         List<String> wells = vals.get(0);
         List<String> descriptions = vals.get(1);

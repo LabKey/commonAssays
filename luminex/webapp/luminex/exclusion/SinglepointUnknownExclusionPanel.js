@@ -18,8 +18,8 @@ function openExclusionsSinglepointUnknownWindow(assayId, runId)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Singlepoint Unknowns from Analysis',
-                    width: Ext.getBody().getViewSize().width < 550 ? Ext.getBody().getViewSize().width * .9 : 500,
-                    height: Ext.getBody().getViewSize().height > 700 ? 600 : Ext.getBody().getViewSize().height * .75,
+                    width: Math.max(600, Ext.getBody().getViewSize().width * .6),
+                    height: Math.max(600, Ext.getBody().getViewSize().height * .6),
                     items: new LABKEY.Exclusions.SinglepointUnknownPanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
@@ -65,7 +65,6 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
     {
         this.excluded = [];
         this.comments = [];
-        this.excludedDataIds = [];
         this.present = [];
         this.preExcludedIds = [];
         this.preAnalyteRowIds = [];
@@ -277,7 +276,6 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
                         this.comments[rowId] = Ext.getCmp('comment').getValue();
                         this.present[rowId] = this.getGridCheckboxSelModel().getSelections().length;
                         record.set('Present', this.present[rowId]);
-                        this.excludedDataIds[rowId] = record.get('DataId');
                     },
                     rowselect : function(tsl, rowId, record)
                     {
@@ -446,7 +444,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
         var commands = [];
         for (var index = 0; index < this.excluded.length; index++)
         {
-            var dataId = this.excludedDataIds[index];
+            var record = this.getAvailableItemsGrid().getStore().getAt(index);
             var analytesForExclusion = this.excluded[index];
             if (analytesForExclusion == undefined)
                 continue;
@@ -475,7 +473,7 @@ LABKEY.Exclusions.SinglepointUnknownPanel = Ext.extend(LABKEY.Exclusions.BasePan
             var commandConfig = {
                 command: command,
                 key: this.preExcludedIds[index], // this will be undefined for the insert case
-                dataId: dataId,
+                dataId: record.get('DataId'),
                 description: analytesForExclusion['Name'],
                 analyteRowIds: (analyteRowIds != "" ? analyteRowIds : null),
                 analyteNames: (analyteNames != "" ? analyteNames : null), // for logging purposes only

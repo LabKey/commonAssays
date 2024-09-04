@@ -320,7 +320,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickButton(SAVE_CHANGES_BUTTON, 0);
     }
 
-    protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobCount, String...analytes)
+    protected void excludeTitration(String titration, String exclusionMessage, String runName, int pipelineJobCount, int numCommands, int numMatchingJobs, String...analytes)
     {
         DataRegionTable table = new DataRegionTable("Data", getDriver());
         table.clickHeaderMenu("Exclusions", false, "Exclude Titrations");
@@ -343,7 +343,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
         clickButton("Save", 0);
         _extHelper.waitForExtDialog("Confirm Exclusions", WAIT_FOR_JAVASCRIPT);
         clickButtonContainingText("Yes", 0);
-        verifyExclusionPipelineJobComplete(pipelineJobCount, "INSERT titration exclusion (Description: " + titration + ")", runName, exclusionMessage);
+
+        String expectedInfo = numCommands > 1 ? "MULTIPLE titration exclusions" : "INSERT titration exclusion (Description: " + titration + ")";
+        verifyExclusionPipelineJobComplete(pipelineJobCount, expectedInfo, runName, exclusionMessage, numCommands, numMatchingJobs);
     }
 
     /**
@@ -516,6 +518,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         for (File additionalFile : additionalFiles)
         {
             sleep(500);
+            scrollIntoView(Locator.lkButton("Next"));
             click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
 
             String fieldName = ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD + (index++);
