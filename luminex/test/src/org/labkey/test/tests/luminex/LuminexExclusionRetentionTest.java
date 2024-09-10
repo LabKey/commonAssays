@@ -161,7 +161,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
 
         //Add titration exclusion that matches
         String titrationMatchComment = "titration match";
-        excludeTitration("Standard1", titrationMatchComment, RUN_NAME, 1, matchingAnalyte);
+        excludeTitration("Standard1", titrationMatchComment, RUN_NAME, 1, 1, 1, matchingAnalyte);
 
         //Re-import
         reimportAndReplaceRunFile(BASE_RUN_FILE, BASE_RUN_FILE, "Standard1", null);
