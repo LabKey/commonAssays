@@ -246,8 +246,8 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         _customizeViewsHelper.addColumn("StdDev");
         _customizeViewsHelper.addColumn("CV");
         _customizeViewsHelper.addColumn("Summary");
-        _customizeViewsHelper.addColumn("ANALYTE/ANALYTEWITHBEAD");
-        _customizeViewsHelper.addColumn("ANALYTE/BEADNUMBER");
+        _customizeViewsHelper.addColumn("Analyte/AnalyteWithBead");
+        _customizeViewsHelper.addColumn("Analyte/BeadNumber");
         _customizeViewsHelper.applyCustomView();
 
         // show all rows (> 100 in full data file)
