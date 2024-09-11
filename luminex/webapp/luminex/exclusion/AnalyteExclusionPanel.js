@@ -18,8 +18,8 @@ function openExclusionsAnalyteWindow(assayId, runId)
             {
                 var win = new LABKEY.Exclusions.BaseWindow({
                     title: 'Exclude Analytes from Analysis',
-                    width: Ext.getBody().getViewSize().width < 500 ? Ext.getBody().getViewSize().width * .9 : 450,
-                    height: Ext.getBody().getViewSize().height > 500 ? 460 : Ext.getBody().getViewSize().height * .75,
+                    width: Math.max(600, Ext.getBody().getViewSize().width * .5),
+                    height: Math.max(600, Ext.getBody().getViewSize().height * .5),
                     items: new LABKEY.Exclusions.AnalytePanel({
                         protocolSchemaName: assay[0].protocolSchemaName,
                         assayId: assayId,
