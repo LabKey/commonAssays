@@ -17,6 +17,7 @@
 package org.labkey.elisa;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
@@ -120,7 +121,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         List<Map<String, Object>> results = new ArrayList<>();
         ExpProtocol protocol = data.getRun().getProtocol();
@@ -134,7 +135,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             Map<String, DomainProperty> sampleProperties = plateProvider.getSampleWellGroupDomain(protocol)
                     .getProperties().stream()
                     .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
-            ElisaImportHelper importHelper = getImportHelper(xarContext, plateProvider, protocol, dataFile);
+            ElisaImportHelper importHelper = getImportHelper(xarContext, plateProvider, protocol, dataFile.getPath().toFile());
 
             for (String plateName : importHelper.getPlates())
             {

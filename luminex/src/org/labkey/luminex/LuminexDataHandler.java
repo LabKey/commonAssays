@@ -21,6 +21,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -2033,12 +2034,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
-        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
-        String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile.getPath().toFile()));
+        String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile.getPath().toFile());
 
         // create a temporary resolver to use for parsing the description value prior to creating the data file for the transform script
         // i.e. we don't care about resolving the study or lookup information at this time (that will happen after the transform is run)

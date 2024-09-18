@@ -18,6 +18,7 @@ package org.labkey.elispot;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.assay.plate.WellGroup;
@@ -210,9 +211,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
+        ElispotDataFileParser parser = getDataFileParser(data, dataFile.getPath().toFile(), info, log, context);
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();

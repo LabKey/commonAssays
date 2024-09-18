@@ -19,6 +19,7 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -703,12 +704,12 @@ public class AnalysisScriptController extends BaseFlowController
                 try
                 {
                     // save the uploaded workspace
-                    Path path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
-                    Path dir = AssayFileWriter.ensureUploadDirectoryPath(path);
-                    Path uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
-                    file.transferTo(uploadedFile);
+                    FileObject path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
+                    FileObject dir = AssayFileWriter.ensureUploadDirectoryPath(path);
+                    FileObject uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    file.transferTo(uploadedFile.getPath().toFile());
 
-                    String uploadedPath = root.relativePath(uploadedFile);
+                    String uploadedPath = root.relativePath(uploadedFile.getPath().toFile());
                     form.getWorkspace().setPath(uploadedPath);
                 }
                 catch (Exception e)
@@ -1153,7 +1154,7 @@ public class AnalysisScriptController extends BaseFlowController
                     Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                     for (ISampleInfo sampleInfo : sampleInfos)
                     {
-                        File sampleFile = new File(keywordDir, sampleInfo.getLabel());
+                        File sampleFile = FileUtil.appendName(keywordDir, sampleInfo.getLabel());
                         boolean exists = sampleFile.exists();
                         if (exists)
                             found = true;

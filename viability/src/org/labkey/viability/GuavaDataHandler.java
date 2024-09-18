@@ -19,6 +19,7 @@ package org.labkey.viability;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.Converter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayRunUploadContext;
@@ -382,7 +383,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         Map<DataType, DataIteratorBuilder> result = new HashMap<>();
         if (context instanceof AssayUploadXarContext xarContext)
@@ -403,7 +404,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                 Domain resultsDomain = provider.getResultsDomain(protocol);
 
                 // Parse with either Guava or TSV parser
-                ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(dataFile, runDomain, resultsDomain);
+                ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(dataFile.getPath().toFile(), runDomain, resultsDomain);
                 rows = parser.getResultData();
                 ViabilityAssayDataHandler.validateData(rows, false);
             }

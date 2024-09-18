@@ -16,6 +16,7 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.dilution.DilutionManager;
@@ -238,9 +239,9 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
+        DilutionDataFileParser parser = getDataFileParser(data, dataFile.getPath().toFile(), info);
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();

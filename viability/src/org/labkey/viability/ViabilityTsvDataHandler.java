@@ -16,6 +16,7 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.vfs2.FileObject;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.api.ExpData;
@@ -135,9 +136,9 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        assert dataFile.getName().endsWith(".tsv") || dataFile.getName().endsWith(".TSV");
+        assert dataFile.getName().getExtension().equals("tsv") || dataFile.getName().getExtension().endsWith(".TSV");
         
         // Uck.  The TsvDataExchangeHandler writes out GuavaDataHandler.getValidationDataMap() bfore running the transform script.
         // After the transform has run, this method is called to read that output back in.
@@ -148,7 +149,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         Domain runDomain = provider.getRunDomain(protocol);
         Domain resultsDomain = provider.getResultsDomain(protocol);
 
-        Parser parser = getParser(runDomain, resultsDomain, dataFile);
+        Parser parser = getParser(runDomain, resultsDomain, dataFile.getPath().toFile());
         List<Map<String, Object>> dataMap = parser.getResultData();
         result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(dataMap));
 

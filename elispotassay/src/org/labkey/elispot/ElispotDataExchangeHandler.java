@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.apache.commons.vfs2.FileObject;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.WellGroup;
@@ -44,7 +45,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     public static final String ANTIGEN_DATA_PROP_NAME = "antigenData";
 
     @Override
-    public Pair<File, Set<File>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, File scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<FileObject, Set<FileObject>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, FileObject scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         ElispotRunUploadForm form = (ElispotRunUploadForm)context;
 
@@ -61,7 +62,7 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     }
 
     @Override
-    public void createSampleData(@NotNull ExpProtocol protocol, ViewContext viewContext, File scriptDir) throws Exception
+    public void createSampleData(@NotNull ExpProtocol protocol, ViewContext viewContext, FileObject scriptDir) throws Exception
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
         if (provider instanceof ElispotAssayProvider)

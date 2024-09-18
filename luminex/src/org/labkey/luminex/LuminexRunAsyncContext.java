@@ -205,7 +205,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         if (_parser == null)
         {
-            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
+            _parser = LuminexExcelParser.create(getProtocol(), getUploadedData().values());
         }
         return _parser;
     }

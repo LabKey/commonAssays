@@ -17,6 +17,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.apache.commons.vfs2.FileObject;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SpringActionController;
@@ -69,7 +70,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -479,8 +479,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         //Get dataFileHeaderKey from the Run excel header property
         LuminexExcelParser parser = form.getParser();
         Map<String, String> fileNameToHeaderKeyMap = new HashMap<>();
-        for (File file : form.getUploadedData().values())
-            fileNameToHeaderKeyMap.put(file.getName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file));
+        for (FileObject file : form.getUploadedData().values())
+            fileNameToHeaderKeyMap.put(file.getName().getBaseName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file.getPath().toFile()));
 
         Set<MultiKey<String>> retainedExclusions = new HashSet<>();
 

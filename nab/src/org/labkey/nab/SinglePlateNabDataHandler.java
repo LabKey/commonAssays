@@ -16,6 +16,7 @@
 
 package org.labkey.nab;
 
+import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.NotNull;
@@ -355,9 +356,9 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
+        DilutionDataFileParser parser = getDataFileParser(data, dataFile.getPath().toFile(), info);
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();

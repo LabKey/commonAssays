@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.vfs2.FileObject;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -74,6 +75,11 @@ public class LuminexExcelParser
     private final Map<String, SinglePointControl> _singlePointControls = new TreeMap<>();
     private boolean _parsed;
     private boolean _imported;
+
+    public static LuminexExcelParser create(ExpProtocol protocol, Collection<FileObject> files)
+    {
+        return new LuminexExcelParser(protocol,files.stream().map(fo -> fo.getPath().toFile()).toList());
+    }
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {
