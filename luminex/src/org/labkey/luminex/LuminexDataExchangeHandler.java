@@ -17,7 +17,6 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.vfs2.FileObject;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
@@ -31,6 +30,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.util.Pair;
 import org.labkey.luminex.model.Titration;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     private final DataSerializer _serializer = new LuminexDataSerializer();
 
     @Override
-    public Pair<FileObject, Set<FileObject>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, FileObject scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<FileLike, Set<FileLike>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, FileLike scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
     {
         LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<>();

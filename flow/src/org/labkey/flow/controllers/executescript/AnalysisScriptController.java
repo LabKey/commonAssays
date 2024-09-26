@@ -19,7 +19,6 @@ package org.labkey.flow.controllers.executescript;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +84,7 @@ import org.labkey.flow.script.ImportResultsJob;
 import org.labkey.flow.script.KeywordsJob;
 import org.labkey.flow.script.WorkspaceJob;
 import org.labkey.flow.util.SampleUtil;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -704,12 +704,12 @@ public class AnalysisScriptController extends BaseFlowController
                 try
                 {
                     // save the uploaded workspace
-                    FileObject path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
-                    FileObject dir = AssayFileWriter.ensureUploadDirectoryPath(path);
-                    FileObject uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
-                    file.transferTo(uploadedFile.getPath().toFile());
+                    FileLike path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
+                    FileLike dir = AssayFileWriter.ensureUploadDirectoryPath(path);
+                    FileLike uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    file.transferTo(uploadedFile.toNioPathForWrite().toFile());
 
-                    String uploadedPath = root.relativePath(uploadedFile.getPath().toFile());
+                    String uploadedPath = root.relativePath(uploadedFile.toNioPathForRead().toFile());
                     form.getWorkspace().setPath(uploadedPath);
                 }
                 catch (Exception e)

@@ -18,8 +18,6 @@ package org.labkey.viability;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
@@ -34,6 +32,7 @@ import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.Errors;
 
 import java.io.File;
@@ -80,9 +79,9 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
         return _parser.getRunData();
     }
 
-    public FileObject getUploadedFile() throws ExperimentException
+    public FileLike getUploadedFile() throws ExperimentException
     {
-        Map<String, FileObject> uploaded = getUploadedData();
+        Map<String, FileLike> uploaded = getUploadedData();
         assert uploaded.containsKey(AssayDataCollector.PRIMARY_FILE);
         return uploaded.get(AssayDataCollector.PRIMARY_FILE);
     }
@@ -91,9 +90,9 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     {
         if (_parser == null)
         {
-            FileObject file = getUploadedFile();
+            FileLike file = getUploadedFile();
 
-            ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(file.getPath().toFile(), getProtocol());
+            ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(file.toNioPathForRead().toFile(), getProtocol());
             List<Map<String, Object>> rows = parser.getResultData();
             ViabilityAssayDataHandler.validateData(rows, false);
             _parser = parser;
@@ -226,11 +225,11 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
     }
 
     @Override @NotNull
-    public Map<String, FileObject> getUploadedData() throws ExperimentException
+    public Map<String, FileLike> getUploadedData() throws ExperimentException
     {
         // We don't want to re-populate the upload form with the re-run file if this is a reshow due to error during
         // a re-upload process:
-        Map<String, FileObject> currentUpload = super.getUploadedData();
+        Map<String, FileLike> currentUpload = super.getUploadedData();
         if (currentUpload.isEmpty())
         {
             ExpRun reRun = getReRun();
@@ -239,19 +238,12 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 List<ExpData> inputs = reRun.getDataOutputs();
                 if (!inputs.isEmpty())
                 {
-                    FileObject dataFile = inputs.get(0).getFileObject();
-                    try
+                    FileLike dataFile = inputs.get(0).getFileLike();
+                    if (null != dataFile && dataFile.exists())
                     {
-                        if (null != dataFile && dataFile.exists())
-                        {
-                            AssayFileWriter writer = new AssayFileWriter();
-                            FileObject dup = writer.safeDuplicate(getViewContext(), dataFile);
-                            return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
-                        }
-                    }
-                    catch (FileSystemException fse)
-                    {
-                        throw UnexpectedException.wrap(fse);
+                        AssayFileWriter writer = new AssayFileWriter();
+                        FileLike dup = writer.safeDuplicate(getViewContext(), dataFile);
+                        return Collections.singletonMap(AssayDataCollector.PRIMARY_FILE, dup);
                     }
                 }
             }

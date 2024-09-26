@@ -15,7 +15,6 @@
  */
 package org.labkey.elispot;
 
-import org.apache.commons.vfs2.FileObject;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
@@ -26,8 +25,8 @@ import org.labkey.api.exp.SamplePropertyHelper;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.elispot.plate.FluorescentPlateInfo;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +46,10 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
         super(antigenDomainProperties);
         _analyteNames = new ArrayList<>();
 
-        Map<String, FileObject> dataFiles = form.getUploadedData();
+        Map<String, FileLike> dataFiles = form.getUploadedData();
         if (dataFiles.containsKey(AssayDataCollector.PRIMARY_FILE))
         {
-            FileObject file = dataFiles.get(AssayDataCollector.PRIMARY_FILE);
+            FileLike file = dataFiles.get(AssayDataCollector.PRIMARY_FILE);
             PlateReader reader;
             Plate template = form.getProvider().getPlate(form.getContainer(), form.getProtocol());
 
@@ -62,7 +61,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
             if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
                 reader = form.getProvider().getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, file.getPath().toFile()))
+                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, file.toNioPathForRead().toFile()))
                 {
                     // attempt to parse the plate grid annotation into a PlateInfo object
                     FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(grid.getAnnotations());

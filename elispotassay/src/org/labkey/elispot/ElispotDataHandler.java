@@ -18,7 +18,6 @@ package org.labkey.elispot;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.vfs2.FileObject;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.plate.PlateUtils;
 import org.labkey.api.assay.plate.WellGroup;
@@ -58,6 +57,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.elispot.plate.ColorimetricPlateInfo;
 import org.labkey.elispot.plate.FluorescentPlateInfo;
 import org.labkey.elispot.plate.PlateInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -211,9 +211,9 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileObject dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        ElispotDataFileParser parser = getDataFileParser(data, dataFile.getPath().toFile(), info, log, context);
+        ElispotDataFileParser parser = getDataFileParser(data, dataFile.toNioPathForRead().toFile(), info, log, context);
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
