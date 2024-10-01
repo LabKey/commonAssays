@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.util.FileUtil;
 
 import java.io.File;
@@ -74,7 +75,7 @@ public class FlowSettings
     static public void setWorkingDirectoryPath(String path)
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, path != null);
+        WritablePropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, path != null);
         if (map == null)
         {
             assert path == null;
@@ -87,7 +88,7 @@ public class FlowSettings
     public static void setDeleteFiles(boolean deleteFiles)
     {
         Container container = ContainerManager.getRoot();
-        PropertyManager.PropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, !deleteFiles);
+        WritablePropertyMap map = PropertyManager.getWritableProperties(container, PROPCAT_FLOW, !deleteFiles);
         if (map == null)
             return;
 

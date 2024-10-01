@@ -55,6 +55,7 @@ import org.labkey.api.data.ExcelWriter;
 import org.labkey.api.data.MenuButton;
 import org.labkey.api.data.NestableQueryView;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.RuntimeSQLException;
@@ -1105,7 +1106,7 @@ public class MS2Controller extends SpringActionController
 
             if (null != viewNames)
             {
-                PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_VIEWS_CATEGORY, true);
+                WritablePropertyMap m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_VIEWS_CATEGORY, true);
 
                 for (String viewName : viewNames)
                     m.remove(viewName);
@@ -1142,7 +1143,7 @@ public class MS2Controller extends SpringActionController
                 viewName = form.getDefaultViewName();
             }
 
-            PropertyManager.PropertyMap m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_DEFAULT_VIEW_CATEGORY, true);
+            WritablePropertyMap m = PropertyManager.getWritableProperties(getUser(), ContainerManager.getRoot(), MS2_DEFAULT_VIEW_CATEGORY, true);
             m.put(DEFAULT_VIEW_NAME, viewName);
             m.save();
 
@@ -2106,12 +2107,12 @@ public class MS2Controller extends SpringActionController
 
     private void savePreferences(Map<String, String> prefs)
     {
-        if (prefs instanceof PropertyManager.PropertyMap)
+        if (prefs instanceof WritablePropertyMap writable)
         {
             // Non-guests are stored in the database, guests get it stored in their session
             try (var ignored = SpringActionController.ignoreSqlUpdates())
             {
-                ((PropertyManager.PropertyMap) prefs).save();
+                writable.save();
             }
         }
     }
@@ -3069,7 +3070,7 @@ public class MS2Controller extends SpringActionController
             String viewParams = (null == form.getViewParams() ? "" : form.getViewParams());
 
             String name = form.name;
-            PropertyManager.PropertyMap m;
+            WritablePropertyMap m;
             if (form.isShared() && getContainer().hasPermission(getUser(), InsertPermission.class))
                 m = PropertyManager.getWritableProperties(getContainer(), MS2_VIEWS_CATEGORY, true);
             else
@@ -4279,7 +4280,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public Object execute(MS2SearchOptions form, BindException errors)
         {
-            PropertyManager.PropertyMap properties = PropertyManager.getWritableProperties(getUser(), getContainer(), CATEGORY, true);
+            WritablePropertyMap properties = PropertyManager.getWritableProperties(getUser(), getContainer(), CATEGORY, true);
 
             Map<String, String> valuesToPersist = form.getOptions();
             if (!valuesToPersist.isEmpty())

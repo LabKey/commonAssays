@@ -18,6 +18,7 @@ package org.labkey.luminex;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.security.User;
@@ -174,7 +175,7 @@ public class AnalyteDefaultValueService
         return PropertyManager.getProperties(container, getAnalyteColumnCategory(protocol));
     }
 
-    public static PropertyManager.PropertyMap getWritableContainerDefaultValues(Container container, ExpProtocol protocol)
+    public static WritablePropertyMap getWritableContainerDefaultValues(Container container, ExpProtocol protocol)
     {
         return PropertyManager.getWritableProperties(container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
     }
@@ -184,7 +185,7 @@ public class AnalyteDefaultValueService
         return PropertyManager.getProperties(user, container, getAnalyteColumnCategory(protocol));
     }
 
-    public static PropertyManager.PropertyMap getWritableUserDefaultValues(User user, Container container, ExpProtocol protocol)
+    public static WritablePropertyMap getWritableUserDefaultValues(User user, Container container, ExpProtocol protocol)
     {
         return PropertyManager.getWritableProperties(user, container, AnalyteDefaultValueService.getAnalyteColumnCategory(protocol), true);
     }
@@ -253,7 +254,7 @@ public class AnalyteDefaultValueService
 
     public static void setAnalyteDefaultValues(Map<String, Map<String, String>> analyteProperties, Container container, ExpProtocol protocol)
     {
-        PropertyManager.PropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
+        WritablePropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
         defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
         for(Map.Entry<String, Map<String, String>> entry : analyteProperties.entrySet())
         {
@@ -280,7 +281,7 @@ public class AnalyteDefaultValueService
     // TODO: merge with the method above
     public static void setAnalyteDefaultValues(List<String> analytes, List<String> positivityThresholds, List<String> negativeBeads, Container container, ExpProtocol protocol)
     {
-        PropertyManager.PropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
+        WritablePropertyMap defaultAnalyteColumnValues = getWritableContainerDefaultValues(container, protocol);
         defaultAnalyteColumnValues.clear(); // NOTE: an empty property map would work too.
         if (analytes != null)
         {
