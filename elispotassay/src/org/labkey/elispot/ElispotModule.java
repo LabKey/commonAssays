@@ -32,6 +32,7 @@ import org.labkey.elispot.query.ElispotAntigenDomainKind;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class ElispotModule extends DefaultModule
@@ -70,9 +71,9 @@ public class ElispotModule extends DefaultModule
 
     @NotNull
     @Override
-    public Set<String> getSchemaNames()
+    public Collection<String> getSchemaNames()
     {
-        return Set.of(
+        return List.of(
             ElispotProtocolSchema.ELISPOT_DBSCHEMA_NAME,
             ElispotProtocolSchema.ELISPOT_ANTIGEN_SCHEMA_NAME
         );

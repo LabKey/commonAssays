@@ -17,12 +17,9 @@ package org.labkey.ms2.pipeline.mascot;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.settings.AbstractWriteableSettingsGroup;
 
-/**
- * Created by: jeckels
- * Date: 2/7/16
- */
 public class MascotConfig extends AbstractWriteableSettingsGroup
 {
     protected static final String MASCOT_SERVER_PROP = "MascotServer";
@@ -116,8 +113,9 @@ public class MascotConfig extends AbstractWriteableSettingsGroup
 
     public static void reset(Container container)
     {
-        PropertyManager.PropertyMap props = PropertyManager.getProperties(SITE_CONFIG_USER, container, GROUP_NAME);
-        props.delete();
+        WritablePropertyMap props = PropertyManager.getWritableProperties(SITE_CONFIG_USER, container, GROUP_NAME, false);
+        if (props != null)
+            props.delete();
     }
 
     public static MascotConfig getWriteableMascotConfig(Container container)
