@@ -16,6 +16,7 @@
 
 package org.labkey.luminex;
 
+import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabKeyError;
@@ -36,6 +37,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.PropertyManager;
+import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
@@ -68,7 +70,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -759,7 +760,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 saveExperimentRun(form);
 
                 // Save user last entered default values for analytes
-                PropertyManager.PropertyMap defaultAnalyteColumnValues = AnalyteDefaultValueService.getWritableUserDefaultValues(getUser(), getContainer(), form.getProtocol());
+                WritablePropertyMap defaultAnalyteColumnValues = AnalyteDefaultValueService.getWritableUserDefaultValues(getUser(), getContainer(), form.getProtocol());
                 for (String analyteName : form.getAnalyteNames())
                 {
                     // for analyte domain properties use the standard assay default value persistance
@@ -782,7 +783,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 defaultAnalyteColumnValues.save();
 
                 // save the default values for the analyte standards/titrations information in 2 categories: well roles and titrations
-                PropertyManager.PropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
+                WritablePropertyMap defaultWellRoleValues = PropertyManager.getWritableProperties(
                         getUser(), getContainer(), form.getProtocol().getName() + ": Well Role", true);
 
                 for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
@@ -816,7 +817,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     propertyName = getShowStandardCheckboxColumnName(titrationEntry.getValue());
                     if (!titrationEntry.getValue().isUnknown() && getViewContext().getRequest().getParameter(propertyName).equals("true"))
                     {
-                        PropertyManager.PropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
+                        WritablePropertyMap defaultTitrationValues = PropertyManager.getWritableProperties(
                                 getUser(), getContainer(),
                                 form.getProtocol().getName() + ": " + titrationEntry.getValue().getName(), true);
                         for (String analyteName : form.getAnalyteNames())
