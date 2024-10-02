@@ -71,8 +71,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
-import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
