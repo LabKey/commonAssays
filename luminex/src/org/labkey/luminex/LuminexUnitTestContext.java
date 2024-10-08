@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.labkey.api.collections.CollectionUtils;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -270,7 +271,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     @Override @NotNull
     public Map<String, FileLike> getUploadedData()
     {
-        Map<String, FileLike> map = new HashMap<>();
+        Map<String, FileLike> map = CollectionUtils.enforceValueClass(new HashMap<>(), FileLike.class);
         map.put("New File", FileSystemLike.wrapFile(new File("New").getAbsoluteFile()));
         return map;
     }
