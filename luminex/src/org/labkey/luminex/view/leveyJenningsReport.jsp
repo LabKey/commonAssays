@@ -104,6 +104,7 @@
 
             // Query to see if 4PL and/or 5PL curve fit data exists for this assay
             LABKEY.Query.selectDistinctRows({
+                containerFilter: LABKEY.Query.containerFilter.allFolders, // Issue 51353
                 schemaName: 'assay.Luminex.' + _protocolName,
                 queryName: 'CurveFit',
                 column: 'CurveType',
