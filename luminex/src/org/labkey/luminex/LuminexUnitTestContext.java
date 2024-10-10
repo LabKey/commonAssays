@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.labkey.api.collections.CollectionUtils;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -31,6 +32,8 @@ import org.labkey.api.assay.pipeline.AssayRunAsyncContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -266,10 +269,10 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
     }
 
     @Override @NotNull
-    public Map<String, File> getUploadedData()
+    public Map<String, FileLike> getUploadedData()
     {
-        Map<String, File> map = new HashMap<>();
-        map.put("New File", new File("New"));
+        Map<String, FileLike> map = CollectionUtils.enforceValueClass(new HashMap<>(), FileLike.class);
+        map.put("New File", FileSystemLike.wrapFile(new File("New").getAbsoluteFile()));
         return map;
     }
 

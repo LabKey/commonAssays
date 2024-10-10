@@ -98,6 +98,7 @@ import org.labkey.luminex.model.Titration;
 import org.labkey.luminex.query.GuideSetTable;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -2033,12 +2034,12 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         ExpRun run = data.getRun();
         ExpProtocol protocol = run.getProtocol();
-        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile));
-        String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile);
+        LuminexExcelParser parser = new LuminexExcelParser(protocol, Collections.singleton(dataFile.toNioPathForRead().toFile()));
+        String dataFileHeaderKey = LuminexManager.get().getDataFileHeaderKey(protocol, dataFile.toNioPathForRead().toFile());
 
         // create a temporary resolver to use for parsing the description value prior to creating the data file for the transform script
         // i.e. we don't care about resolving the study or lookup information at this time (that will happen after the transform is run)

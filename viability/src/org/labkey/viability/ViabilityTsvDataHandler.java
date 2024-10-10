@@ -36,6 +36,7 @@ import org.labkey.api.assay.AssayService;
 import org.apache.commons.beanutils.converters.StringArrayConverter;
 import org.apache.commons.beanutils.Converter;
 import org.apache.logging.log4j.Logger;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,7 +136,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         assert dataFile.getName().endsWith(".tsv") || dataFile.getName().endsWith(".TSV");
         
@@ -148,7 +149,7 @@ public class ViabilityTsvDataHandler extends ViabilityAssayDataHandler
         Domain runDomain = provider.getRunDomain(protocol);
         Domain resultsDomain = provider.getResultsDomain(protocol);
 
-        Parser parser = getParser(runDomain, resultsDomain, dataFile);
+        Parser parser = getParser(runDomain, resultsDomain, dataFile.toNioPathForRead().toFile());
         List<Map<String, Object>> dataMap = parser.getResultData();
         result.put(ViabilityTsvDataHandler.DATA_TYPE, MapDataIterator.of(dataMap));
 

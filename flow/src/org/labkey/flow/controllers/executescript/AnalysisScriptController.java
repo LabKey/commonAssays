@@ -84,6 +84,7 @@ import org.labkey.flow.script.ImportResultsJob;
 import org.labkey.flow.script.KeywordsJob;
 import org.labkey.flow.script.WorkspaceJob;
 import org.labkey.flow.util.SampleUtil;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -703,12 +704,12 @@ public class AnalysisScriptController extends BaseFlowController
                 try
                 {
                     // save the uploaded workspace
-                    Path path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
-                    Path dir = AssayFileWriter.ensureUploadDirectoryPath(path);
-                    Path uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
-                    file.transferTo(uploadedFile);
+                    FileLike path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
+                    FileLike dir = AssayFileWriter.ensureUploadDirectoryPath(path);
+                    FileLike uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    file.transferTo(uploadedFile.toNioPathForWrite().toFile());
 
-                    String uploadedPath = root.relativePath(uploadedFile);
+                    String uploadedPath = root.relativePath(uploadedFile.toNioPathForRead().toFile());
                     form.getWorkspace().setPath(uploadedPath);
                 }
                 catch (Exception e)
@@ -1153,7 +1154,7 @@ public class AnalysisScriptController extends BaseFlowController
                     Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                     for (ISampleInfo sampleInfo : sampleInfos)
                     {
-                        File sampleFile = new File(keywordDir, sampleInfo.getLabel());
+                        File sampleFile = FileUtil.appendName(keywordDir, sampleInfo.getLabel());
                         boolean exists = sampleFile.exists();
                         if (exists)
                             found = true;

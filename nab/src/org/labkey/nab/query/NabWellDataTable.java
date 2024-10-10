@@ -86,9 +86,8 @@ public class NabWellDataTable extends NabBaseTable
         }
 
         AssayProvider provider = AssayService.get().getProvider(_protocol);
-        if (provider instanceof NabAssayProvider)
+        if (provider instanceof NabAssayProvider nabAssayProvider)
         {
-            NabAssayProvider nabAssayProvider = (NabAssayProvider)provider;
             Plate template = nabAssayProvider.getPlate(getContainer(), _protocol);
             if (null != template)
             {

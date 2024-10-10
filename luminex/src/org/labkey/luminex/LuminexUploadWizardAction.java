@@ -66,11 +66,11 @@ import org.labkey.luminex.query.AnalytePropStandardsDisplayColumn;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnFactory;
 import org.labkey.luminex.query.NegativeBeadDisplayColumnGroup;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -480,8 +480,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         //Get dataFileHeaderKey from the Run excel header property
         LuminexExcelParser parser = form.getParser();
         Map<String, String> fileNameToHeaderKeyMap = new HashMap<>();
-        for (File file : form.getUploadedData().values())
-            fileNameToHeaderKeyMap.put(file.getName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file));
+        for (FileLike file : form.getUploadedData().values())
+            fileNameToHeaderKeyMap.put(file.getName(), LuminexManager.get().getDataFileHeaderKey(form.getProtocol(), file.toNioPathForRead().toFile()));
 
         Set<MultiKey<String>> retainedExclusions = new HashSet<>();
 
