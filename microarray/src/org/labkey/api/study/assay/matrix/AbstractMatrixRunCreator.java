@@ -32,6 +32,7 @@ import org.labkey.api.qc.TransformResult;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,10 +157,13 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
         }
     }
 
-    private File getPrimaryFile(AssayRunUploadContext context) throws ExperimentException
+    private File getPrimaryFile(AssayRunUploadContext<?> context) throws ExperimentException
     {
-        Map<String, File> files = context.getUploadedData();
+        Map<String, FileLike> files = context.getUploadedData();
         assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-        return files.get(AssayDataCollector.PRIMARY_FILE);
+        FileLike fl = files.get(AssayDataCollector.PRIMARY_FILE);
+        if (null == fl)
+            return null;
+        return fl.toNioPathForRead().toFile();
     }
 }

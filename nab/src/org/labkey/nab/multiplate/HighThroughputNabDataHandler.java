@@ -44,6 +44,7 @@ import org.labkey.api.reader.TabLoader;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -238,7 +239,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 

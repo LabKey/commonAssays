@@ -63,6 +63,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabVirusDomainKind;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -355,7 +356,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
 

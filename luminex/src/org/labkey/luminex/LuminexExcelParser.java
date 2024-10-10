@@ -44,6 +44,7 @@ import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.LuminexDataRow;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +75,11 @@ public class LuminexExcelParser
     private final Map<String, SinglePointControl> _singlePointControls = new TreeMap<>();
     private boolean _parsed;
     private boolean _imported;
+
+    public static LuminexExcelParser create(ExpProtocol protocol, Collection<FileLike> files)
+    {
+        return new LuminexExcelParser(protocol,files.stream().map(fo -> fo.toNioPathForRead().toFile()).toList());
+    }
 
     public LuminexExcelParser(ExpProtocol protocol, Collection<File> dataFiles)
     {

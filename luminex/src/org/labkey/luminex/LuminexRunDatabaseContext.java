@@ -144,10 +144,9 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     {
         if (_parser == null)
         {
-            _parser = new LuminexExcelParser(getProtocol(), getUploadedData().values());
+            _parser = LuminexExcelParser.create(getProtocol(), getUploadedData().values());
         }
         return _parser;
-
     }
 
     @Override

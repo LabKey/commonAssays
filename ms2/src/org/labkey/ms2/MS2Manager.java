@@ -343,7 +343,7 @@ public class MS2Manager
             if (existingPepXmlData == null)
             {
                 // Maybe the casing on one of the parent directories has changed
-                existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile.toURI().toString(), container);
+                existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile, container);
             }
             if (existingPepXmlData != null)
             {

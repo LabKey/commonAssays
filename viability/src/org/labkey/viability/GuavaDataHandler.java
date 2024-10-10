@@ -40,6 +40,7 @@ import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.FileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -382,7 +383,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
         Map<DataType, DataIteratorBuilder> result = new HashMap<>();
         if (context instanceof AssayUploadXarContext xarContext)
@@ -403,7 +404,7 @@ public class GuavaDataHandler extends ViabilityAssayDataHandler implements Trans
                 Domain resultsDomain = provider.getResultsDomain(protocol);
 
                 // Parse with either Guava or TSV parser
-                ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(dataFile, runDomain, resultsDomain);
+                ViabilityAssayDataHandler.Parser parser = ViabilityAssayDataHandler.createParser(dataFile.toNioPathForRead().toFile(), runDomain, resultsDomain);
                 rows = parser.getResultData();
                 ViabilityAssayDataHandler.validateData(rows, false);
             }
