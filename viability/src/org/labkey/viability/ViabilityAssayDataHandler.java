@@ -18,8 +18,10 @@ package org.labkey.viability;
 
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.beanutils.ConvertUtils;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.TableInfo;
@@ -305,18 +307,20 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     }
 
     @Override
-    protected void insertRowData(ExpData data,
-                                                      User user,
-                                                      Container container,
-                                                      ExpRun run,
-                                                      ExpProtocol protocol,
-                                                      AssayProvider provider,
-                                                      Domain dataDomain,
-                                                      DataIterator fileData,
-                                                      TableInfo tableInfo,
-                                                      boolean autoFillDefaultColumns,
-                                                      OntologyManager.RowCallback rowCallback)
-            throws BatchValidationException
+    protected void insertRowData(
+            ExpData data,
+            User user,
+            Container container,
+            ExpRun run,
+            ExpProtocol protocol,
+            AssayProvider provider,
+            Domain dataDomain,
+            DataIterator fileData,
+            TableInfo tableInfo,
+            boolean autoFillDefaultColumns,
+            OntologyManager.RowCallback rowCallback,
+            @Nullable AssayRunUploadContext<?> context
+    ) throws BatchValidationException
     {
         MapDataIterator mapData = DataIteratorUtil.wrapMap(fileData, false);
         // Find the target study property on the batch, run, or result domains.
