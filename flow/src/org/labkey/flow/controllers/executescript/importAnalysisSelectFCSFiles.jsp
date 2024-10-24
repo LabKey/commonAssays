@@ -42,7 +42,7 @@
 
     IWorkspace workspace = form.getWorkspace().getWorkspaceObject();
     List<String> warnings = workspace.getWarnings();
-    if (warnings.size() > 0)
+    if (!warnings.isEmpty())
     {
         %>
         <p class="labkey-warning-messages" style="display:inline-block">
@@ -166,7 +166,7 @@
                 Ext4.QuickTips.init();
 
                 fileSystem = Ext4.create('File.system.Webdav', {
-                    rootPath : <%=q(pipeRoot.getWebdavURL())%>,
+                    rootPath : <%=q(pipeRoot.getWebdavURL().toString())%>,
                     rootName : <%=q(AppProps.getInstance().getServerName())%>
                     //rootOffset : <%=q(keywordDir)%>
                 });
