@@ -1261,8 +1261,8 @@ public class NabAssayController extends SpringActionController
                     _exclusions.add(new WellExclusion(excluded.getInt("plate"),
                         excluded.getInt("row"),
                         excluded.getInt("col"),
-                        excluded.getString("comment"),
-                        excluded.getString("specimen")));
+                        excluded.optString("comment"), // issue 51532
+                        excluded.optString("specimen")));
                 }
             }
         }
