@@ -686,7 +686,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
         click(Locator.linkContainingText(expectedFlag).index(0));
         _extHelper.waitForExt3Mask(WAIT_FOR_JAVASCRIPT);
         sleep(1500);
-        assertTextPresent("CV", 4); // 3 occurances of PCV and 1 of %CV
+        assertTextPresent("PCV", 3);
+        assertTextPresent("%CV", 1);
 
         //verify text is in expected form
         waitForText("Standard1 " + analyteName + " - " + isotype + " " + conjugate + " under threshold for AUC");
