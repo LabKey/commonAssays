@@ -348,9 +348,9 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         try
         {
             AssayProvider provider = context.getProvider();
-            if (supportsMultiVirusPlate() && provider instanceof NabAssayProvider)
+            if (supportsMultiVirusPlate() && provider instanceof NabAssayProvider nabProvider && template != null)
             {
-                Domain domain = ((NabAssayProvider)provider).getVirusWellGroupDomain(context.getProtocol());
+                Domain domain = nabProvider.getVirusWellGroupDomain(context.getProtocol());
 
                 if (domain != null)
                 {
