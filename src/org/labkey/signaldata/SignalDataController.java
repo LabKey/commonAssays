@@ -43,11 +43,13 @@ import org.springframework.validation.BindException;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.labkey.api.files.FileContentService.UPLOADED_FILE;
 
@@ -75,14 +77,14 @@ public class SignalDataController extends SpringActionController
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
             String containerPath = null;
-            String webdavURL = null;
+            URI webdavURL = null;
 
             if (null != root)
             {
                 containerPath = root.getContainer().getPath();
                 webdavURL = root.getWebdavURL();
-                if (SignalDataAssayDataHandler.NAMESPACE.length() > 0)
-                    webdavURL += SignalDataAssayDataHandler.NAMESPACE;
+                if (!SignalDataAssayDataHandler.NAMESPACE.isEmpty())
+                    webdavURL = webdavURL.resolve(SignalDataAssayDataHandler.NAMESPACE);
 
                 //Create folder if needed
                 File sdFileRoot = new File(root.getRootPath(), SignalDataAssayDataHandler.NAMESPACE);
@@ -91,7 +93,7 @@ public class SignalDataController extends SpringActionController
             }
 
             resp.put("containerPath", containerPath);
-            resp.put("webDavURL", webdavURL);
+            resp.put("webDavURL", Objects.toString(webdavURL, null));
 
             return resp;
         }
@@ -128,7 +130,7 @@ public class SignalDataController extends SpringActionController
     public class getSignalDataResourceAction extends MutatingApiAction<SignalDataResourceForm>
     {
         @Override
-        public ApiResponse execute(SignalDataResourceForm form, BindException errors) throws Exception
+        public ApiResponse execute(SignalDataResourceForm form, BindException errors)
         {
             String path = form.getPath();
             WebdavResource resource = WebdavService.get().lookup(path);
@@ -190,7 +192,7 @@ public class SignalDataController extends SpringActionController
                     }
                     catch (MalformedURLException e)
                     {
-                        throw new UnexpectedException(e);
+                        throw UnexpectedException.wrap(e);
                     }
                     catch (SQLException e)
                     {

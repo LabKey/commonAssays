@@ -218,7 +218,7 @@
                     LABKEY.Ajax.request({
                         url: LABKEY.ActionURL.buildURL('signaldata', 'getSignalDataResource.api'),
                         method: 'POST',
-                        params: { path: file.id, test: true },
+                        params: { path: decodeURIComponent(file.id), test: true },
                         success: function(response) {
                             done(file, Ext4.decode(response.responseText));
                         }
