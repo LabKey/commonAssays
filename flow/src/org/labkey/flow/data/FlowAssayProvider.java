@@ -340,7 +340,13 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public List<Pair<Domain, Map<DomainProperty, Object>>> getDomains(ExpProtocol protocol)
+    public @NotNull List<Domain> getDomains(ExpProtocol protocol)
+    {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public @NotNull List<Pair<Domain, Map<DomainProperty, Object>>> getDomainsAndDefaultValues(ExpProtocol protocol)
     {
         return Collections.emptyList();
     }
