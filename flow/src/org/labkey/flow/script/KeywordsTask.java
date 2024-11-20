@@ -69,7 +69,7 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
         PipeRoot pr = PipelineService.get().findPipelineRoot(job.getContainer());
 
         KeywordsJob keywordsJob = new KeywordsJob(job.getInfo(), protocol, paths, targetStudyContainer, pr);
-        keywordsJob.setLogFile(job.getLogFile());
+        keywordsJob.setLogFile(job.getLogFilePath());
         keywordsJob.setLogLevel(job.getLogLevel());
         keywordsJob.setSubmitted();
 
