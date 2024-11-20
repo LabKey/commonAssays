@@ -961,7 +961,7 @@ public class AnalysisScriptController extends BaseFlowController
                         if (relPath != null)
                         {
                             String[] parts = StringUtils.split(relPath, File.separatorChar);
-                            String keywordPath = StringUtils.join(parts, "/");
+                            String keywordPath = "./" + StringUtils.join(parts, "/");
                             form.setKeywordDir(new String[] { keywordPath });
                         }
                         form.setSelectFCSFilesOption(SelectFCSFileOption.Browse);
