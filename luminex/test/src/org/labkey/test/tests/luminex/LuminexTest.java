@@ -60,13 +60,14 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.params.FieldDefinition.DOMAIN_TRICKY_CHARACTERS;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
-    public static final String TEST_ASSAY_LUM =  "&TestAssayLuminex></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
+    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS;
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
