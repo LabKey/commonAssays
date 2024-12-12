@@ -18,6 +18,7 @@ package org.labkey.test.tests.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
+import org.labkey.api.query.QueryKey;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.assay.GetProtocolCommand;
@@ -67,7 +68,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
-    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS;
+    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS.replaceAll("\\.", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
@@ -433,7 +434,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     @LogMethod(quiet = true)
     protected void assertAnalytesHaveCorrectStandards(String assayName, int runId, Map<String, Set<String>> expectedAnalyteStandards)
     {
-        SelectRowsCommand command = new SelectRowsCommand("assay.Luminex." + assayName, "Data");
+        SelectRowsCommand command = new SelectRowsCommand("assay.Luminex." + QueryKey.encodePart(assayName), "Data");
         command.setRequiredVersion(9.1); // Needed in order to get display values of lookup columns
         command.addFilter(new Filter("Run/RowId", runId, Filter.Operator.EQUAL));
         Connection connection = createDefaultConnection(true);
