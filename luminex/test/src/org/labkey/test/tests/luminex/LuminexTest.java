@@ -62,13 +62,15 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.params.FieldDefinition.DOMAIN_TRICKY_CHARACTERS;
+import static org.labkey.test.util.TestDataGenerator.DOMAIN_SPECIAL_STRING;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
-    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS.replaceAll("\\.", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
+    // public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS.replaceAll("\\.", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
+    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_SPECIAL_STRING.replaceAll("\\.", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
