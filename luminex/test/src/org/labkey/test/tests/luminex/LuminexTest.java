@@ -70,7 +70,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
     // public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_TRICKY_CHARACTERS.replaceAll("\\.", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
-    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_SPECIAL_STRING.replaceAll("\\.", "").replaceAll("/", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
+    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_SPECIAL_STRING
+            .replaceAll(":", "")
+            .replaceAll("\\.", "")
+            .replaceAll("/", ""); // Issue 51845: Luminex assay not working well when assay name contains dot (.)
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
