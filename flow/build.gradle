@@ -27,18 +27,3 @@ dependencies {
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "query"), depProjectConfig: "published", depExtension: "module")
     BuildUtils.addLabKeyDependency(project: project, config: "modules", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "published", depExtension: "module")
 }
-
-project.tasks.register("engineJar", Jar) {
-    Jar jar ->
-        jar.group = "Build"
-        jar.description = "produce jar file for flow engine source"
-        jar.archiveClassifier.set("engine")
-        jar.from project.sourceSets.engine.output
-        jar.archiveBaseName.set("${project.name}_engine")
-        jar.destinationDirectory.set(project.file(project.labkey.explodedModuleLibDir))
-        jar.dependsOn(project.tasks.schemasCompile)
-}
-
-project.tasks.named('engineJar').configure { dependsOn(project.engineClasses) }
-project.tasks.named('assemble').configure { dependsOn(project.tasks.engineJar) }
-project.tasks.named('module').configure { dependsOn(project.tasks.engineJar) }
