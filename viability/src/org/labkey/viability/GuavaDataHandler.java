@@ -35,7 +35,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.qc.DataLoaderSettings;
-import org.labkey.api.qc.TransformDataHandler;
+import org.labkey.api.assay.transform.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.util.FileType;

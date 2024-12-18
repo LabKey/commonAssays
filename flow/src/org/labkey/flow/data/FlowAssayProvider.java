@@ -18,6 +18,7 @@ package org.labkey.flow.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.transform.AnalysisScript;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
@@ -36,7 +37,7 @@ import org.labkey.api.gwt.client.DefaultValueType;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.qc.DataExchangeHandler;
+import org.labkey.api.assay.transform.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
@@ -474,14 +475,14 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<File> scripts)
+    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<AnalysisScript> scripts)
     {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public List<File> getValidationAndAnalysisScripts(ExpProtocol protocol, Scope scope)
+    public List<AnalysisScript> getValidationAndAnalysisScripts(ExpProtocol protocol, Scope scope)
     {
         throw new UnsupportedOperationException();
     }
