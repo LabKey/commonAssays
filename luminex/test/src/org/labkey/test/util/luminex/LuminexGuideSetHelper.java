@@ -79,7 +79,8 @@ public class LuminexGuideSetHelper
     public void verifyGuideSetsNotApplied(String assayName)
     {
         _test.goToSchemaBrowser();
-        _test.selectQuery("assay.Luminex." + assayName, "AnalyteTitration");
+        String[] schemaPart = {"assay", "Luminex", assayName};
+        _test.selectQuery(schemaPart, "AnalyteTitration");
         _test.waitForText("view data");
         _test.clickAndWait(Locator.linkContainingText("view data"));
         DataRegionTable table = new DataRegionTable("query", _test.getDriver());
@@ -297,7 +298,8 @@ public class LuminexGuideSetHelper
     {
         // see if the 3 uploaded runs got the correct 'current' guide set applied
         _test.goToSchemaBrowser();
-        _test.selectQuery("assay.Luminex." + assayName, "AnalyteTitration");
+        String[] schemaPart = {"assay", "Luminex", assayName};
+        _test.selectQuery(schemaPart, "AnalyteTitration");
         _test.waitForText("view data");
         _test.clickAndWait(Locator.linkContainingText("view data"));
         _test._customizeViewsHelper.openCustomizeViewPanel();
@@ -318,7 +320,8 @@ public class LuminexGuideSetHelper
     public Map<String, Integer> getGuideSetIdMap(String assayName)
     {
         _test.goToSchemaBrowser();
-        _test.selectQuery("assay.Luminex." + assayName, "GuideSet");
+        String[] schemaPart = {"assay", "Luminex", assayName};
+        _test.selectQuery(schemaPart, "GuideSet");
         _test.waitForText("view data");
         _test.clickAndWait(Locator.linkContainingText("view data"));
         Map<String, Integer> guideSetIds = new HashMap<>();

@@ -18,6 +18,7 @@ package org.labkey.test.tests.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
+import org.labkey.api.query.QueryKey;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.assay.GetProtocolCommand;
@@ -60,13 +61,18 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.params.FieldDefinition.DOMAIN_TRICKY_CHARACTERS;
+import static org.labkey.test.util.TestDataGenerator.DOMAIN_SPECIAL_STRING;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
 
-    public static final String TEST_ASSAY_LUM =  "&TestAssayLuminex></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
+    // Issue 51845:
+    //  - Luminex assay not working well when assay name contains dot (.)
+    //  - use DOMAIN_SPECIAL_STRING instead of DOMAIN_TRICKY_CHARACTERS since sql server is not working with unicode characters
+    public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_SPECIAL_STRING.replaceAll("\\.", "");
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 
     protected static final String TEST_ASSAY_XAR_NAME = "TestLuminexAssay";
@@ -432,7 +438,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     @LogMethod(quiet = true)
     protected void assertAnalytesHaveCorrectStandards(String assayName, int runId, Map<String, Set<String>> expectedAnalyteStandards)
     {
-        SelectRowsCommand command = new SelectRowsCommand("assay.Luminex." + assayName, "Data");
+        SelectRowsCommand command = new SelectRowsCommand("assay.Luminex." + QueryKey.encodePart(assayName), "Data");
         command.setRequiredVersion(9.1); // Needed in order to get display values of lookup columns
         command.addFilter(new Filter("Run/RowId", runId, Filter.Operator.EQUAL));
         Connection connection = createDefaultConnection(true);
