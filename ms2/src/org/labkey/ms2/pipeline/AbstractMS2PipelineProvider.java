@@ -30,15 +30,14 @@ import java.io.IOException;
  * Created by: jeckels
  * Date: 8/23/15
  */
-public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends AbstractFileAnalysisProtocolFactory> extends AbstractFileAnalysisProvider<ProtocolFactory, TaskPipeline>
+public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends AbstractFileAnalysisProtocolFactory<?>> extends AbstractFileAnalysisProvider<ProtocolFactory, TaskPipeline<?>>
 {
     public AbstractMS2PipelineProvider(String name, Module owningModule)
     {
         super(name, owningModule);
     }
 
-    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server
-     * @param container*/
+    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server */
     abstract public void ensureEnabled(Container container) throws PipelineValidationException;
 
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();

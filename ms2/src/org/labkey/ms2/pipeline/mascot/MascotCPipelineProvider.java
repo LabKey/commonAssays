@@ -75,7 +75,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
 
         String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchMascotAction.class, ACTION_LABEL,
-                directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+                directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     @Override
@@ -91,12 +91,12 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
 
     @Override
     @NotNull
-    public HttpView createSetupWebPart(Container container)
+    public HttpView<Object> createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
-    private static class SetupWebPart extends WebPartView
+    private static class SetupWebPart extends WebPartView<Object>
     {
         public SetupWebPart()
         {
@@ -151,7 +151,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         mascotClient.setProxyURL(config.getMascotHTTPProxy());
         List<String> sequenceDBs = mascotClient.getSequenceDbList();
 
-        if (0 == sequenceDBs.size())
+        if (sequenceDBs.isEmpty())
         {
             // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
             String connectivityResult = mascotClient.testConnectivity(false);
@@ -170,7 +170,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         mascotClient.setProxyURL(config.getMascotHTTPProxy());
         List<String> taxonomy = mascotClient.getTaxonomyList();
 
-        if (0 == taxonomy.size())
+        if (taxonomy.isEmpty())
         {
             // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
             String connectivityResult = mascotClient.testConnectivity(false);
@@ -251,7 +251,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         mascotClient.setProxyURL(config.getMascotHTTPProxy());
         Map<String, List<String>> enzymes = mascotClient.getEnzymeMap();
 
-        if (0 == enzymes.size())
+        if (enzymes.isEmpty())
         {
             throw new IOException("Could not find any enzymes, perhaps labkeydbmgmt.pl is out of date?");
         }
@@ -276,7 +276,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         mascotClient.setProxyURL(config.getMascotHTTPProxy());
         Map<String,String> mods = mascotClient.getResidueModsMap();
 
-        if (0 == mods.size())
+        if (mods.isEmpty())
         {
             String connectivityResult = mascotClient.testConnectivity(false);
             if (!"".equals(connectivityResult))
@@ -320,7 +320,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
     {
         MascotConfig config = MascotConfig.findMascotConfig(container);
         String mascotServer = config.getMascotServer();
-        if ((!config.hasMascotServer() || 0==mascotServer.length()))
+        if ((!config.hasMascotServer() || mascotServer.isEmpty()))
             throw new PipelineValidationException("Mascot server has not been specified in site customization.");
     }
 }

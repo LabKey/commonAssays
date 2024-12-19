@@ -25,6 +25,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -53,11 +54,10 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
                              ViewBackgroundInfo info,
                              PipeRoot root,
                              String name,
-                             File dirSequenceRoot,
-                             List<File> filesMzXML,
-                             File fileInputXML) throws IOException
+                             List<Path> filesMzXML,
+                             Path fileInputXML) throws IOException
     {
-        super(protocol, MascotCPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, MascotCPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
         MascotConfig config = MascotConfig.findMascotConfig(info.getContainer());
         _mascotServer = config.getMascotServer();

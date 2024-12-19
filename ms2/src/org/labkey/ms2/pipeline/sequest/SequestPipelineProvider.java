@@ -69,7 +69,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         if (!super.isEnabled())
             return false;
 
-        AbstractSequestSearchTaskFactory sequestFactory = findFactory();
+        AbstractSequestSearchTaskFactory<?> sequestFactory = findFactory();
         return sequestFactory != null && (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null);
     }
 
@@ -78,7 +78,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
     {
         String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchSequestAction.class, ACTION_LABEL,
-            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+            directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     @Override
@@ -94,12 +94,12 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
 
     @Override
     @NotNull
-    public HttpView createSetupWebPart(Container container)
+    public HttpView<Object> createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
-    class SetupWebPart extends WebPartView
+    static class SetupWebPart extends WebPartView<Object>
     {
         public SetupWebPart()
         {
@@ -131,7 +131,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
     @Override
     public List<String> getSequenceDbPaths(File sequenceRoot)
     {
-        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
+        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<>());
     }
 
     @Override

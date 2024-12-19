@@ -24,7 +24,6 @@ import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.pipeline.TaskFactorySettings;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -33,6 +32,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -77,18 +77,17 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         _dirSequenceRoot = dirSequenceRoot;
     }
 
-    public AbstractMS2SearchPipelineJob(AbstractFileAnalysisProtocol protocol,
+    public AbstractMS2SearchPipelineJob(AbstractMS2SearchProtocol<?> protocol,
                                         String providerName,
                                         ViewBackgroundInfo info,
                                         PipeRoot root,
                                         String protocolName,
-                                        File dirSequenceRoot,
-                                        File fileParameters,
-                                        List<File> filesInput) throws IOException
+                                        Path fileParameters,
+                                        List<Path> filesInput) throws IOException
     {
         super(protocol, providerName, info, root, protocolName, fileParameters, filesInput, true, false);
 
-        _dirSequenceRoot = dirSequenceRoot;
+        _dirSequenceRoot = MS2PipelineManager.getSequenceDatabaseRoot(info.getContainer(), false);
 
         // Make sure a sequence file is specified.
         String paramDatabase = getParameters().get("pipeline, database");
@@ -152,7 +151,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     @Override
     public File findOutputFile(String name)
     {
-        // Look through all of the tasks in this pipeline
+        // Look through all the tasks in this pipeline
         for (TaskId taskId : getTaskPipeline().getTaskProgression())
         {
             TaskFactory<? extends TaskFactorySettings> factory = PipelineJobService.get().getTaskFactory(taskId);
@@ -216,7 +215,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
         for (TaskId taskId : getTaskPipeline().getTaskProgression())
         {
-            TaskFactory factory = PipelineJobService.get().getTaskFactory(taskId);
+            TaskFactory<?> factory = PipelineJobService.get().getTaskFactory(taskId);
             // Try to find one that does an MS2 search
             if (factory instanceof AbstractMS2SearchTaskFactory)
             {
@@ -269,7 +268,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 arrFiles.add(MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot, path));
         }
 
-        return arrFiles.toArray(new File[arrFiles.size()]);
+        return arrFiles.toArray(new File[0]);
     }
 
     @Override

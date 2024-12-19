@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline.rollup;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
@@ -28,6 +27,7 @@ import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,10 +57,10 @@ public class FractionRollupPipelineJob extends AbstractMS2SearchPipelineJob
                                      ViewBackgroundInfo info,
                                      PipeRoot root,
                                      String name,
-                                     List<File> filesXtanXML,
-                                     File fileInputXML) throws IOException
+                                     List<Path> filesXtanXML,
+                                     Path fileInputXML) throws IOException
     {
-        super(protocol, FractionRollupPipelineProvider.NAME, info, root, name, null, fileInputXML, filesXtanXML);
+        super(protocol, FractionRollupPipelineProvider.NAME, info, root, name, fileInputXML, filesXtanXML);
 
         _fractions = true;
 

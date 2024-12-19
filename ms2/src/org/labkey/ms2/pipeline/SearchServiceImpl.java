@@ -49,10 +49,10 @@ import java.util.List;
 public class SearchServiceImpl extends BaseRemoteService implements SearchService
 {
 
-    private static Logger _log = LogManager.getLogger(SearchServiceImpl.class);
-    private GWTSearchServiceResult results= new GWTSearchServiceResult();
-    private AbstractMS2SearchPipelineProvider provider;
-    private AbstractMS2SearchProtocol protocol;
+    private static final Logger _log = LogManager.getLogger(SearchServiceImpl.class);
+    private final GWTSearchServiceResult results= new GWTSearchServiceResult();
+    private AbstractMS2SearchPipelineProvider<?> provider;
+    private AbstractMS2SearchProtocol<?> protocol;
 
     public SearchServiceImpl(ViewContext context)
     {
@@ -62,11 +62,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     @Override
     public GWTSearchServiceResult getSearchServiceResult(String searchEngine, String path, String[] fileNames)
     {
-        AbstractMS2PipelineProvider baseProvider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+        AbstractMS2PipelineProvider<?> baseProvider = (AbstractMS2PipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
         getProtocols("", baseProvider, searchEngine, path, fileNames);
         if (baseProvider != null && baseProvider.isSearch())
         {
-            if (results.getSelectedProtocol() == null || results.getSelectedProtocol().equals(""))
+            if (results.getSelectedProtocol() == null || results.getSelectedProtocol().isEmpty())
                 getSequenceDbs(results.getDefaultSequenceDb(), searchEngine, false);
             getMascotTaxonomy(searchEngine);
             getEnzymes(searchEngine);
@@ -98,7 +98,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     @Override
     public GWTSearchServiceResult getProtocol(String searchEngine, String protocolName, String path, String[] fileNames)
     {
-        AbstractMS2PipelineProvider provider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+        AbstractMS2PipelineProvider<?> provider = (AbstractMS2PipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
         if (provider == null)
         {
             results.setSelectedProtocol("Loading Error");
@@ -106,11 +106,11 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             results.appendError("Problem loading protocol: provider equals null\n");
         }
 
-        if(protocolName == null || protocolName.length() == 0)
+        if(protocolName == null || protocolName.isEmpty())
         {
             protocolName = PipelineService.get().getLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
                     getUser());
-            if(protocolName == null || protocolName.length() == 0)
+            if(protocolName == null || protocolName.isEmpty())
                 protocolName = "new";
         }
         if(protocolName.equals("new"))
@@ -128,7 +128,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             if(protocol == null)
             {
                 File protocolFile = protocolFactory.getParametersFile(root.resolvePath(path), protocolName, root);
-                if (protocolFile != null && NetworkDrive.exists(protocolFile))
+                if (NetworkDrive.exists(protocolFile))
                 {
                     protocolExists = true;
                     protocol = protocolFactory.loadInstance(protocolFile);
@@ -196,7 +196,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         if(provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+            provider = (AbstractMS2SearchPipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
             if (provider == null)
             {
                 results.appendError("Problem loading taxonomy: provider equals null\n");
@@ -218,7 +218,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         if(provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+            provider = (AbstractMS2SearchPipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
             if (provider == null)
             {
                 results.appendError("Problem loading enzymes: provider equals null\n");
@@ -239,7 +239,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         if(provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+            provider = (AbstractMS2SearchPipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
             if (provider == null)
             {
                 results.appendError("Problem loading residue modifications: provider equals null\n");
@@ -258,14 +258,14 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
 
     }
 
-    private void getProtocols(String defaultProtocol, AbstractMS2PipelineProvider provider, String searchEngine, String path, String[] fileNames)
+    private void getProtocols(String defaultProtocol, AbstractMS2PipelineProvider<?> provider, String searchEngine, String path, String[] fileNames)
     {
         ArrayList<String> protocolList = new ArrayList<>();
-        if(defaultProtocol == null || defaultProtocol.length() == 0 )
+        if(defaultProtocol == null || defaultProtocol.isEmpty())
         {
             if(provider == null)
             {
-                provider = (AbstractMS2PipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+                provider = (AbstractMS2PipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
             }
             defaultProtocol = PipelineService.get().getLastProtocolSetting(provider.getProtocolFactory(), getContainer(),
                     getUser());
@@ -288,13 +288,13 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
     {
         if(provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+            provider = (AbstractMS2SearchPipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
         }
         if(!provider.supportsDirectories()) return;
 
         List<String> sequenceDbPaths = PipelineService.get().getLastSequenceDbPathsSetting(provider.getProtocolFactory(),
                 getContainer(),getUser());
-        if(sequenceDbPaths == null || sequenceDbPaths.size() == 0 || refresh)
+        if(sequenceDbPaths == null || sequenceDbPaths.isEmpty() || refresh)
         {
             try
             {
@@ -324,13 +324,13 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         String savedRelativePath;
         if(provider == null)
         {
-            provider = (AbstractMS2SearchPipelineProvider) PipelineService.get().getPipelineProvider(searchEngine);
+            provider = (AbstractMS2SearchPipelineProvider<?>) PipelineService.get().getPipelineProvider(searchEngine);
         }
-        if((defaultDb.length() == 0)||(defaultDb.endsWith("/")))
+        if((defaultDb.isEmpty())||(defaultDb.endsWith("/")))
         {
             String savedDefaultDb = PipelineService.get().getLastSequenceDbSetting(provider.getProtocolFactory(), getContainer(),
                     getUser());
-            if(savedDefaultDb == null ||savedDefaultDb.length() == 0)
+            if(savedDefaultDb == null || savedDefaultDb.isEmpty())
             {
                 savedRelativePath = defaultDb;
                 defaultDb = "";
@@ -339,7 +339,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             {
                 savedRelativePath = savedDefaultDb.substring(0, savedDefaultDb.lastIndexOf('/') + 1);
             }
-            if(defaultDb.equals(""))
+            if(defaultDb.isEmpty())
             {
                 relativePath = savedRelativePath;
             }
@@ -347,7 +347,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             {
                 relativePath = defaultDb.substring(0, defaultDb.lastIndexOf('/') + 1);
             }
-            if(relativePath.equals(savedRelativePath) && (savedDefaultDb != null && savedDefaultDb.length() != 0))
+            if(relativePath.equals(savedRelativePath) && (savedDefaultDb != null && !savedDefaultDb.isEmpty()))
             {
                 defaultDb = savedDefaultDb;
             }
@@ -372,7 +372,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         {
             String savedDb =
                     PipelineService.get().getLastSequenceDbSetting(provider.getProtocolFactory(),getContainer(),getUser());
-            if(savedDb != null && savedDb.length() > 0)
+            if(savedDb != null && !savedDb.isEmpty())
             {
                 if(defaultDb.equals("/") && (!savedDb.contains("/") || savedDb.indexOf("/") == 0 ) )
                 {
@@ -435,7 +435,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             return results;
         }
 
-        if(sequenceDbs == null || sequenceDbs.size() == 0  )
+        if(sequenceDbs == null || sequenceDbs.isEmpty())
         {
             sequenceDbs = new ArrayList<>();
             sequenceDbs.add("None found.");
@@ -451,7 +451,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
             }
         }
 
-        if(returnList.size() == 0  )
+        if(returnList.isEmpty())
         {
             returnList = new ArrayList<>();
             returnList.add("None found.");
@@ -505,7 +505,7 @@ public class SearchServiceImpl extends BaseRemoteService implements SearchServic
         }
     }
 
-    private String getInputStatus(AbstractMS2SearchProtocol protocol, File dirData, File dirAnalysis,
+    private String getInputStatus(AbstractMS2SearchProtocol<?> protocol, File dirData, File dirAnalysis,
                               String fileInputName, boolean statusSingle)
     {
         File fileStatus = null;

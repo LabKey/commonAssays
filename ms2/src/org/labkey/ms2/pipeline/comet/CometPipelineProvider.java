@@ -66,7 +66,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     {
         String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
         addAction(actionId, PipelineController.SearchCometAction.class, ACTION_LABEL,
-            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+            directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     @Override
@@ -82,12 +82,12 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
 
     @Override
     @NotNull
-    public HttpView createSetupWebPart(Container container)
+    public HttpView<Object> createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
-    static class SetupWebPart extends WebPartView
+    static class SetupWebPart extends WebPartView<Object>
     {
         public SetupWebPart()
         {

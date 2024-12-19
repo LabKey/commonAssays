@@ -114,7 +114,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleRedirectAction
+    public static class BeginAction extends SimpleRedirectAction<Object>
     {
         @Override
         public ActionURL getRedirectURL(Object o)
@@ -290,7 +290,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SearchServiceAction extends GWTServiceAction
+    public static class SearchServiceAction extends GWTServiceAction
     {
         @Override
         protected BaseRemoteService createService()
@@ -337,7 +337,7 @@ public class PipelineController extends SpringActionController
                 throw new NotFoundException("No path specified");
             }
             _dirData = _root.resolvePath(form.getPath());
-            if (_dirData == null || !NetworkDrive.exists(_dirData))
+            if (!NetworkDrive.exists(_dirData))
                 throw new NotFoundException("Path does not exist " + form.getPath());
 
             if (getProviderName() != null)
@@ -354,7 +354,7 @@ public class PipelineController extends SpringActionController
                 // If protocol is empty check for a saved protocol
                 String protocolNameLast = PipelineService.get().getLastProtocolSetting(protocolFactory,
                         getContainer(), getUser());
-                if (protocolNameLast != null && !"".equals(protocolNameLast))
+                if (protocolNameLast != null && !protocolNameLast.isEmpty())
                 {
                     String[] protocolNames = protocolFactory.getProtocolNames(_root, _dirData.toPath(), false);
                     // Make sure it is still around.
@@ -369,7 +369,7 @@ public class PipelineController extends SpringActionController
             }
 
             String protocolName = form.getProtocol();
-            if ( !protocolName.equals("new") && !protocolName.equals("") )
+            if ( !protocolName.equals("new") && !protocolName.isEmpty())
             {
                 try
                 {
@@ -498,7 +498,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 AbstractMS2SearchPipelineJob job = _protocol.createPipelineJob(getViewBackgroundInfo(), _root,
-                        mzXMLFiles, fileParameters, null);
+                        mzXMLFiles.stream().map((f) -> f.toPath()).toList(), fileParameters.toPath(), null);
 
                 // Check for existing job
                 PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
@@ -641,7 +641,7 @@ public class PipelineController extends SpringActionController
 
             String newSequenceRoot = form.getLocalPathRoot();
             URI root = null;
-            if (newSequenceRoot != null && newSequenceRoot.length() > 0)
+            if (newSequenceRoot != null && !newSequenceRoot.isEmpty())
             {
                 File file = new File(newSequenceRoot);
                 if (!NetworkDrive.exists(file))
