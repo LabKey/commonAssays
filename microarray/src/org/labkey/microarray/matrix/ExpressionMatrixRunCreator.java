@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.qc.TransformResult;
+import org.labkey.api.assay.transform.TransformResult;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.study.assay.matrix.AbstractMatrixRunCreator;
