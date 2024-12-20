@@ -17,10 +17,13 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
+import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,4 +52,17 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
     abstract public boolean isSearch();
 
     abstract public boolean dbExists(Container container, File sequenceRoot, String dbName) throws IOException;
+
+    protected FileAnalysisTaskPipeline getTaskPipeline(Class<? extends AbstractMS2SearchPipelineJob> jobClass)
+    {
+        TaskId id = new TaskId(jobClass);
+        for (TaskPipeline<?> taskPipeline : PipelineJobService.get().getTaskPipelines(null))
+        {
+            if (taskPipeline.getId().equals(id) && taskPipeline instanceof FileAnalysisTaskPipeline fatp)
+            {
+                return fatp;
+            }
+        }
+        throw new IllegalStateException("Couldn't find task pipeline: " + id);
+    }
 }

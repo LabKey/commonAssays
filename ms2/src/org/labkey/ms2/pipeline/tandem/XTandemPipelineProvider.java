@@ -21,10 +21,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.TaskId;
-import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -68,24 +64,10 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<X
     @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        String actionId = createActionId(PipelineController.SearchXTandemAction.class, ACTION_LABEL);
-//        addAction(actionId, new ActionURL("pipeline-analysis", "analyze", context.getContainer()).addParameter("taskId", new TaskId(XTandemPipelineJob.class).toString()), ACTION_LABEL,
-//                directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
-        addAction(actionId, getTaskPipeline().getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchXTandemAction", ACTION_LABEL);
+        addAction(actionId, getTaskPipeline(XTandemPipelineJob.class).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
                 directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
-    }
-
-    protected FileAnalysisTaskPipeline getTaskPipeline()
-    {
-        TaskId id = new TaskId(XTandemPipelineJob.class);
-        for (TaskPipeline<?> taskPipeline : PipelineJobService.get().getTaskPipelines(null))
-        {
-            if (taskPipeline.getId().equals(id) && taskPipeline instanceof FileAnalysisTaskPipeline fatp)
-            {
-                return fatp;
-            }
-        }
-        throw new IllegalStateException("Couldn't find task pipeline: " + id);
     }
 
     @Override

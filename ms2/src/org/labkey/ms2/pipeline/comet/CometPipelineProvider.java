@@ -64,9 +64,10 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.SearchCometAction.class, ACTION_LABEL,
-            directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchCometAction", ACTION_LABEL);
+        addAction(actionId, getTaskPipeline(CometPipelineJob.class).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
+                directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     @Override

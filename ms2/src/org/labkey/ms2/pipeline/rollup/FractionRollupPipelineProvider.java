@@ -21,7 +21,6 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.AbstractMS2PipelineProvider;
@@ -71,9 +70,10 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
             return;
         }
 
-        String actionId = createActionId(PipelineController.FractionRollupAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.FractionRollupAction.class, ACTION_LABEL,
-                directory, directory.listFiles(new MS2PipelineManager.XtanXmlFileFilter()), true, true, includeAll);
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$org.labkey.ms2.pipeline.PipelineController$FractionRollupAction", ACTION_LABEL);
+        addAction(actionId, getTaskPipeline(FractionRollupPipelineJob.class).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
+                directory, directory.listPaths(new MS2PipelineManager.XtanXmlFileFilter()), true, true, includeAll);
     }
 
     @Override
@@ -90,13 +90,13 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getProtocolFactory(TaskPipeline pipeline)
+    public FractionRollupProtocolFactory getProtocolFactory(TaskPipeline pipeline)
     {
         return FractionRollupProtocolFactory.get();
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getProtocolFactory(File file)
+    public FractionRollupProtocolFactory getProtocolFactory(File file)
     {
         return FractionRollupProtocolFactory.get();
     }

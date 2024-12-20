@@ -73,8 +73,9 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         if (!MascotConfig.findMascotConfig(context.getContainer()).hasMascotServer())
             return;
 
-        String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.SearchMascotAction.class, ACTION_LABEL,
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchMascotAction", ACTION_LABEL);
+        addAction(actionId, getTaskPipeline(MascotPipelineJob.class).getAnalyzeURL(context.getContainer(), null, null), ACTION_LABEL,
                 directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 

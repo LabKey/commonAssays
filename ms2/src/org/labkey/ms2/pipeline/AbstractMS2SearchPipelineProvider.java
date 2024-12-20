@@ -21,7 +21,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineDirectory;
+import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.TaskPipeline;
+import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -66,7 +69,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     public abstract void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll);
 
     @Override
-    public final @Nullable HttpView getSetupWebPart(Container container)
+    public final @Nullable HttpView<?> getSetupWebPart(Container container)
     {
         if (isEnabled())
             return createSetupWebPart(container);
@@ -76,7 +79,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
 
     /** Called if the search provider is enabled */
     @NotNull
-    protected abstract HttpView createSetupWebPart(Container container);
+    protected abstract HttpView<?> createSetupWebPart(Container container);
 
     /** @return false if this type of search has been disabled via Spring XML config */
     protected boolean isEnabled()
@@ -100,7 +103,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     }
 
     @Override
-    public AbstractMS2SearchProtocolFactory getProtocolFactory(TaskPipeline pipeline)
+    public AbstractMS2SearchProtocolFactory getProtocolFactory(TaskPipeline<?> pipeline)
     {
         // MS2 search providers all support only one protocol factory each.
         return getProtocolFactory();
@@ -138,8 +141,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
 
     abstract public List<String> getTaxonomyList(Container container) throws IOException;
 
-    /** @return enzyme name -> cut patterns
-     * @param container*/
+    /** @return enzyme name -> cut patterns */
     abstract public Map<String, List<String>> getEnzymes(Container container) throws IOException;
 
     abstract public Map<String, String> getResidue0Mods(Container container) throws IOException;

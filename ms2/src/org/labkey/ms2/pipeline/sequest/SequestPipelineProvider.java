@@ -76,9 +76,10 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
     @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.SearchSequestAction.class, ACTION_LABEL,
-            directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchSequestAction", ACTION_LABEL);
+        addAction(actionId, getTaskPipeline(SequestPipelineJob.class).getAnalyzeURL(context.getContainer(), null, null), ACTION_LABEL,
+                directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
     }
 
     @Override
