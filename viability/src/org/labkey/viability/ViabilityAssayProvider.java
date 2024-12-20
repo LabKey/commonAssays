@@ -38,7 +38,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
-import org.labkey.api.qc.DataExchangeHandler;
+import org.labkey.api.assay.transform.DataExchangeHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.security.User;
