@@ -415,7 +415,7 @@ public class PeptideManager
         }
 
         @Override
-        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+        public void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
             String sep = "";
 
@@ -490,7 +490,7 @@ public class PeptideManager
         }
 
         @Override
-        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+        public void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
             sb.append("Trypic Ends ");
             sb.append(1 == _termini ? ">= " : "= ");
@@ -531,7 +531,7 @@ public class PeptideManager
             return Arrays.asList(FieldKey.fromParts("RowId"));
         }
          @Override
-         protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+         public void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
          {
              sb.append("Peptide member of ProteinGroup ").append(_groupNum);
              if (_indistinguishableProteinId > 0)
@@ -578,7 +578,7 @@ public class PeptideManager
         }
 
         @Override
-        protected void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
+        public void appendFilterText(StringBuilder sb, SimpleFilter.ColumnNameFormatter formatter)
         {
             sb.append("Matches sequence of ");
             sb.append(_bestName);
