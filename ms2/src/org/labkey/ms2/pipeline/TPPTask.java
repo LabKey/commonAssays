@@ -38,7 +38,6 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
-import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileNotFoundException;

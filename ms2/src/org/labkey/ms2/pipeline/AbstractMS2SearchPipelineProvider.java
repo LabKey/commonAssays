@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
@@ -66,7 +65,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     public abstract void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll);
 
     @Override
-    public final @Nullable HttpView getSetupWebPart(Container container)
+    public final @Nullable HttpView<?> getSetupWebPart(Container container)
     {
         if (isEnabled())
             return createSetupWebPart(container);
@@ -76,7 +75,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
 
     /** Called if the search provider is enabled */
     @NotNull
-    protected abstract HttpView createSetupWebPart(Container container);
+    protected abstract HttpView<?> createSetupWebPart(Container container);
 
     /** @return false if this type of search has been disabled via Spring XML config */
     protected boolean isEnabled()
@@ -100,7 +99,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     }
 
     @Override
-    public AbstractMS2SearchProtocolFactory getProtocolFactory(TaskPipeline pipeline)
+    public AbstractMS2SearchProtocolFactory getProtocolFactory(TaskPipeline<?> pipeline)
     {
         // MS2 search providers all support only one protocol factory each.
         return getProtocolFactory();
@@ -115,34 +114,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
         return null; 
     }
 
-    @Override
-    public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
-    {
-        File dbFile = FileUtil.appendName(sequenceRoot, db);
-        return NetworkDrive.exists(dbFile);
-    }
-
-    abstract public boolean supportsDirectories();
-
-    abstract public boolean remembersDirectories();
-
-    abstract public boolean hasRemoteDirectories();
-
-    /** @return the list of subdirectories that might contain sequence DBs */
-    @Nullable
-    abstract public List<String> getSequenceDbPaths(File sequenceRoot);
-
     /** @return the list of sequence DBs in a given directory */
     @Nullable
     abstract public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException;
-
-    abstract public List<String> getTaxonomyList(Container container) throws IOException;
-
-    /** @return enzyme name -> cut patterns
-     * @param container*/
-    abstract public Map<String, List<String>> getEnzymes(Container container) throws IOException;
-
-    abstract public Map<String, String> getResidue0Mods(Container container) throws IOException;
-
-    abstract public Map<String, String> getResidue1Mods(Container container);
 }

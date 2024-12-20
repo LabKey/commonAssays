@@ -30,7 +30,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 
 import java.io.BufferedWriter;
 import java.io.File;

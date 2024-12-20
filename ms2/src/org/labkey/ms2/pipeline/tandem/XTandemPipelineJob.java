@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline.tandem;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -26,6 +25,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -56,11 +56,10 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               ViewBackgroundInfo info,
                               PipeRoot root,
                               String name,
-                              File dirSequenceRoot,
-                              List<File> filesMzXML,
-                              File fileInputXML) throws IOException
+                              List<Path> filesMzXML,
+                              Path fileInputXML) throws IOException
     {
-        super(protocol, XTandemPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, XTandemPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
         header("X! Tandem search for " + getBaseName());
         writeInputFilesToLog();
@@ -88,7 +87,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     public boolean isProphetEnabled()
     {
         String paramScore = getParameters().get("scoring, algorithm");
-        if (paramScore == null || paramScore.length() == 0)
+        if (paramScore == null || paramScore.isEmpty())
             paramScore = "native";
 
         return ("native".equals(paramScore) ||

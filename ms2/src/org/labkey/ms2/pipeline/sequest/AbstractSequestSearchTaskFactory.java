@@ -37,7 +37,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
     private File _indexRootDir;
     private List<String> _sequestOptions = new ArrayList<>();
 
-    protected AbstractSequestSearchTaskFactory(Class namespaceClass)
+    protected AbstractSequestSearchTaskFactory(Class<?> namespaceClass)
     {
         super(namespaceClass);
     }

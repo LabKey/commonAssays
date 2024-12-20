@@ -29,7 +29,7 @@ import java.io.Reader;
 /**
  * <code>AbstractMS2SearchProtocolFactory</code>
  */
-abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnalysisProtocolFactory<AbstractMS2SearchProtocol>
+abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnalysisProtocolFactory<AbstractMS2SearchProtocol<?>>
 {
     public static final String SEQUENCE_FILE_SEPARATOR = ";";
 

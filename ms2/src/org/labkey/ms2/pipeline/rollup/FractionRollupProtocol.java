@@ -26,6 +26,7 @@ import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +49,8 @@ public class FractionRollupProtocol extends AbstractMS2SearchProtocol<FractionRo
 
     @Override
     public FractionRollupPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                       PipeRoot root, List<File> filesInput,
-                                                       File fileParameters, @Nullable Map<String, String> variableMap
+                                                       PipeRoot root, List<Path> filesInput,
+                                                       Path fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
         return new FractionRollupPipelineJob(this, info, root, getName(),

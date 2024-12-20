@@ -34,7 +34,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

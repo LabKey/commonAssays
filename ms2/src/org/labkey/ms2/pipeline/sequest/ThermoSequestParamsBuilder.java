@@ -16,7 +16,7 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.junit.Test;
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 
 import java.io.File;
 import java.io.IOException;
@@ -215,7 +215,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         String defaultCTerm = st.nextToken();
         String defaultNTerm = st.nextToken();
 
-        if (mass == null|| mass.length() == 0)
+        if (mass == null|| mass.isEmpty())
         {
             return Collections.singletonList("The mass value for term_diff_search_options is empty.");
         }
@@ -843,9 +843,9 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 //            actual = sp.getValue();
 //            assertEquals("enzyme_description", expected2, actual);
 
-            Param sp = spb.getProperties().getParam("enzyme_info");
-            String actual = sp.getValue();
-            assertEquals("enzyme_description", expected2, actual);
+           Param sp = spb.getProperties().getParam("enzyme_info");
+           String actual = sp.getValue();
+           assertEquals("enzyme_description", expected2, actual);
         }
 
         @Test

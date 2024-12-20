@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineValidationException;
@@ -27,6 +28,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
 {
     public static final FileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
+    public static final String PIPELINE_DATABASE = "pipeline, database";
 
     private File _dirSeqRoot;
     private String _dbPath;
@@ -88,32 +91,35 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     @Override
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
                                           PipeRoot root,
-                                          List<File> filesInput,
-                                          File fileParameters,
+                                          List<Path> filesInput,
+                                          Path fileParameters,
                                           @Nullable Map<String, String> variableMap) throws IOException;
 
     @Override
-    protected void save(File file, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
+    protected void save(Path path, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
     {
         if (addParams == null)
             addParams = new HashMap<>();
 
-        StringBuffer dbs = new StringBuffer();
-        for (String dbName : _dbNames)
+        if (_dbNames != null)
         {
-            if (dbs.length() > 0)
-                dbs.append(';');
-            dbs.append(dbName);
+            StringBuilder dbs = new StringBuilder();
+            for (String dbName : _dbNames)
+            {
+                if (!dbs.isEmpty())
+                    dbs.append(';');
+                dbs.append(dbName);
+            }
+            addParams.put(PIPELINE_DATABASE, dbs.toString());
         }
-        addParams.put("pipeline, database", dbs.toString());
 
-        super.save(file, addParams, instanceParams);        
+        super.save(path, addParams, instanceParams);
     }
 
     @Override
     public List<FileType> getInputTypes()
     {
-        TaskFactory taskFactory = PipelineJobService.get().getTaskFactory(MS2PipelineManager.MZXML_CONVERTER_TASK_ID);
+        TaskFactory<?> taskFactory = PipelineJobService.get().getTaskFactory(MS2PipelineManager.MZXML_CONVERTER_TASK_ID);
         if (taskFactory != null)
         {
             return taskFactory.getInputTypes();
@@ -126,7 +132,14 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     {
         super.validate(root);
 
-        if (_dbNames.length == 0 || _dbNames[0] == null || _dbNames[0].length() == 0)
-            throw new PipelineValidationException("Select a sequence database.");
+        if (_dbNames == null || _dbNames.length == 0 || _dbNames[0] == null || _dbNames[0].isEmpty())
+        {
+            ParamParser parser = parse();
+            String database = parser.getInputParameter(PIPELINE_DATABASE);
+            if (database == null)
+            {
+                throw new PipelineValidationException("Select a sequence database.");
+            }
+        }
     }
 }

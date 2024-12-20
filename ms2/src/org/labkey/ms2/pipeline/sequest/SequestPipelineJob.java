@@ -24,6 +24,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ import java.util.List;
  */
 public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
+    public static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
 
     @JsonCreator
     protected SequestPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
@@ -47,12 +48,11 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                               ViewBackgroundInfo info,
                               PipeRoot root,
                               String name,
-                              File dirSequenceRoot,
-                              List<File> filesMzXML,
-                              File fileInputXML
+                              List<Path> filesMzXML,
+                              Path fileInputXML
     ) throws IOException
     {
-        super(protocol, SequestPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, SequestPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
         header("Sequest search for " + getBaseName());
         writeInputFilesToLog();

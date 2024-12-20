@@ -15,7 +15,6 @@
  */
 package org.labkey.test.ms2.params;
 
-import org.labkey.test.Locator;
 import org.labkey.test.pipeline.AbstractPipelineTestParams;
 import org.labkey.test.pipeline.PipelineWebTestBase;
 
@@ -49,18 +48,5 @@ public class MS2TestParams extends AbstractPipelineTestParams
     {
         _test.log("X! Tandem Search");
         _test._fileBrowserHelper.selectImportDataAction("X!Tandem Peptide Search");
-    }
-
-    protected void setGrouping(String grouping)
-    {
-        _test.log("Set grouping to " + grouping);
-        _test.selectOptionByText(Locator.name("grouping"), grouping);
-        _test.clickAndWait(Locator.id("viewTypeSubmitButton"));
-    }
-
-    @Override
-    protected void clickSubmitButton()
-    {
-        _test.clickAndWait(Locator.id("button_Search"));
     }
 }

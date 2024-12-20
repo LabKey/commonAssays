@@ -25,6 +25,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -47,11 +48,11 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
 
     @Override
     public CometPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                              PipeRoot root, List<File> filesInput,
-                                              File fileParameters, @Nullable Map<String, String> variableMap
+                                              PipeRoot root, List<Path> filesInput,
+                                              Path fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
-        return new CometPipelineJob(this, info, root, getName(), getDirSeqRoot(),
+        return new CometPipelineJob(this, info, root, getName(),
                 filesInput, fileParameters);
     }
 

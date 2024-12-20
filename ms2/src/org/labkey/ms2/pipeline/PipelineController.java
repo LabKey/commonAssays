@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.GWTServiceAction;
@@ -32,7 +31,6 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
@@ -46,7 +44,6 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.HelpTopic;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.GWTView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
@@ -55,17 +52,10 @@ import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.pipeline.client.Search;
-import org.labkey.ms2.pipeline.comet.CometPipelineJob;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
-import org.labkey.ms2.pipeline.mascot.MascotPipelineJob;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
-import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineJob;
-import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
-import org.labkey.ms2.pipeline.sequest.SequestPipelineJob;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
-import org.labkey.ms2.pipeline.tandem.XTandemPipelineJob;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
 import org.springframework.validation.BindException;
@@ -79,9 +69,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <code>PipelineController</code>
@@ -114,7 +102,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleRedirectAction
+    public static class BeginAction extends SimpleRedirectAction<Object>
     {
         @Override
         public ActionURL getRedirectURL(Object o)
@@ -208,99 +196,6 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class SearchXTandemAction extends SearchAction
-    {
-        @Override
-        public String getProviderName()
-        {
-           return XTandemPipelineProvider.name;
-        }
-
-        @Override
-        protected TaskId getTaskId()
-        {
-            return new TaskId(XTandemPipelineJob.class);
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class FractionRollupAction extends SearchAction
-    {
-        @Override
-        public String getProviderName()
-        {
-           return FractionRollupPipelineProvider.NAME;
-        }
-
-        @Override
-        protected TaskId getTaskId()
-        {
-            return new TaskId(FractionRollupPipelineJob.class);
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class SearchMascotAction extends SearchAction
-    {
-        @Override
-        public String getProviderName()
-        {
-            return MascotCPipelineProvider.name;
-        }
-
-        @Override
-        protected TaskId getTaskId()
-        {
-            return new TaskId(MascotPipelineJob.class);
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class SearchSequestAction extends SearchAction
-    {
-        @Override
-        public String getProviderName()
-        {
-            return SequestPipelineProvider.name;
-        }
-
-
-        @Override
-        protected TaskId getTaskId()
-        {
-            return new TaskId(SequestPipelineJob.class);
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class SearchCometAction extends SearchAction
-    {
-        @Override
-        public String getProviderName()
-        {
-            return CometPipelineProvider.NAME;
-        }
-
-
-        @Override
-        protected TaskId getTaskId()
-        {
-            return new TaskId(CometPipelineJob.class);
-        }
-    }
-
-    @RequiresPermission(ReadPermission.class)
-    public class SearchServiceAction extends GWTServiceAction
-    {
-        @Override
-        protected BaseRemoteService createService()
-        {
-            return new SearchServiceImpl(getViewContext());
-        }
-    }
-
-
-    @RequiresPermission(InsertPermission.class)
     public abstract class SearchAction extends FormViewAction<MS2SearchForm>
     {
         private PipeRoot _root;
@@ -337,7 +232,7 @@ public class PipelineController extends SpringActionController
                 throw new NotFoundException("No path specified");
             }
             _dirData = _root.resolvePath(form.getPath());
-            if (_dirData == null || !NetworkDrive.exists(_dirData))
+            if (!NetworkDrive.exists(_dirData))
                 throw new NotFoundException("Path does not exist " + form.getPath());
 
             if (getProviderName() != null)
@@ -354,7 +249,7 @@ public class PipelineController extends SpringActionController
                 // If protocol is empty check for a saved protocol
                 String protocolNameLast = PipelineService.get().getLastProtocolSetting(protocolFactory,
                         getContainer(), getUser());
-                if (protocolNameLast != null && !"".equals(protocolNameLast))
+                if (protocolNameLast != null && !protocolNameLast.isEmpty())
                 {
                     String[] protocolNames = protocolFactory.getProtocolNames(_root, _dirData.toPath(), false);
                     // Make sure it is still around.
@@ -369,7 +264,7 @@ public class PipelineController extends SpringActionController
             }
 
             String protocolName = form.getProtocol();
-            if ( !protocolName.equals("new") && !protocolName.equals("") )
+            if ( !protocolName.equals("new") && !protocolName.isEmpty())
             {
                 try
                 {
@@ -498,7 +393,7 @@ public class PipelineController extends SpringActionController
                 }
 
                 AbstractMS2SearchPipelineJob job = _protocol.createPipelineJob(getViewBackgroundInfo(), _root,
-                        mzXMLFiles, fileParameters, null);
+                        mzXMLFiles.stream().map((f) -> f.toPath()).toList(), fileParameters.toPath(), null);
 
                 // Check for existing job
                 PipelineStatusFile existingJobStatusFile = PipelineService.get().getStatusFile(job.getLogFile());
@@ -553,7 +448,7 @@ public class PipelineController extends SpringActionController
             }
             catch (PipelineValidationException e)
             {
-                errors.reject(ERROR_MSG, Search.VALIDATION_FAILURE_PREFIX + e.getMessage());
+                errors.reject(ERROR_MSG, "Validation failure: " + e.getMessage());
                 return false;
             }
             catch (IOException e)
@@ -579,31 +474,8 @@ public class PipelineController extends SpringActionController
         @Override
         public ModelAndView getView(MS2SearchForm form, boolean reshow, BindException errors)
         {
-            if (!reshow || "".equals(form.getProtocol()))
-                form.setSaveProtocol(true);
-
-             //get help topic
-            String helpTopic = getHelpTopic(_provider.getHelpTopic()).getHelpTopicHref();
-            ActionURL returnURL = form.getReturnActionURL(getContainer().getStartURL(getUser()));
-
-            form.getValidatedFiles(getContainer(), true);
-
-            //properties to send to GWT page
-            Map<String, String> props = new HashMap<>();
-            props.put("errors", getErrors(errors));
-            props.put("saveProtocol", Boolean.toString(form.isSaveProtocol()));
-            props.put(ActionURL.Param.returnUrl.name(), returnURL.getLocalURIString() );
-            props.put("helpTopic", helpTopic);
-            props.put("file", StringUtils.join(form.getFile(), "/"));
-            props.put("searchEngine", form.getSearchEngine());
-            props.put("pipelineId", getTaskId().toString());
-            ActionURL targetURL = new ActionURL(getAction(), getContainer());
-            props.put("targetAction", targetURL.toString());
-            props.put("path", form.getPath());
-            return new GWTView(org.labkey.ms2.pipeline.client.Search.class, props);
+            throw new UnsupportedOperationException();
         }
-
-        protected abstract TaskId getTaskId();
 
         private String getErrors(BindException errors)
         {
@@ -641,7 +513,7 @@ public class PipelineController extends SpringActionController
 
             String newSequenceRoot = form.getLocalPathRoot();
             URI root = null;
-            if (newSequenceRoot != null && newSequenceRoot.length() > 0)
+            if (newSequenceRoot != null && !newSequenceRoot.isEmpty())
             {
                 File file = new File(newSequenceRoot);
                 if (!NetworkDrive.exists(file))

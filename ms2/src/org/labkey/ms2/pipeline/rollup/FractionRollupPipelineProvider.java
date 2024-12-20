@@ -21,14 +21,12 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.pipeline.AbstractMS2PipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
-import org.labkey.ms2.pipeline.PipelineController;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
 import java.io.File;
@@ -40,7 +38,7 @@ import java.util.List;
  * set of combined search results.
  * @author jeckels
  */
-public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
+public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider<FractionRollupProtocolFactory>
 {
     public static final String NAME = "FractionRollup";
     private static final String ACTION_LABEL = "Fraction Rollup Analysis";
@@ -71,9 +69,10 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
             return;
         }
 
-        String actionId = createActionId(PipelineController.FractionRollupAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.FractionRollupAction.class, ACTION_LABEL,
-                directory, directory.listFiles(new MS2PipelineManager.XtanXmlFileFilter()), true, true, includeAll);
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        String actionId = getActionId();
+        addAction(actionId, getTaskPipeline(FractionRollupPipelineJob.TASK_ID).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
+                directory, directory.listPaths(new MS2PipelineManager.XtanXmlFileFilter()), true, true, includeAll);
     }
 
     @Override
@@ -85,18 +84,24 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
             return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
         }
 
-        String actionId = createActionId(PipelineController.FractionRollupAction.class, ACTION_LABEL);
+        String actionId = getActionId();
         return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getProtocolFactory(TaskPipeline pipeline)
+    protected String getActionId()
+    {
+        return createActionId("org.labkey.ms2.pipeline.PipelineController$FractionRollupAction", ACTION_LABEL);
+    }
+
+    @Override
+    public FractionRollupProtocolFactory getProtocolFactory(TaskPipeline pipeline)
     {
         return FractionRollupProtocolFactory.get();
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getProtocolFactory(File file)
+    public FractionRollupProtocolFactory getProtocolFactory(File file)
     {
         return FractionRollupProtocolFactory.get();
     }
@@ -117,12 +122,6 @@ public class FractionRollupPipelineProvider extends AbstractMS2PipelineProvider
     public boolean isSearch()
     {
         return false;
-    }
-
-    @Override
-    public boolean dbExists(Container container, File sequenceRoot, String s)
-    {
-        throw new UnsupportedOperationException();
     }
 
     @Override
