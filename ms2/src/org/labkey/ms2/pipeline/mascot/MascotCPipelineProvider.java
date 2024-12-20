@@ -16,7 +16,6 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.jetbrains.annotations.NotNull;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
@@ -39,7 +38,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * MascotCPipelineProvider class
@@ -73,10 +71,16 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         if (!MascotConfig.findMascotConfig(context.getContainer()).hasMascotServer())
             return;
 
-        // Retain old GWT action class as the action ID to preserve file browser button configuration
-        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchMascotAction", ACTION_LABEL);
-        addAction(actionId, getTaskPipeline(MascotPipelineJob.class).getAnalyzeURL(context.getContainer(), null, null), ACTION_LABEL,
+        String actionId = getActionId();
+        addAction(actionId, getTaskPipeline(MascotPipelineJob.TASK_ID).getAnalyzeURL(context.getContainer(), null, null), ACTION_LABEL,
                 directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    protected String getActionId()
+    {
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        return createActionId("org.labkey.ms2.pipeline.PipelineController$SearchMascotAction", ACTION_LABEL);
     }
 
     @Override
@@ -84,7 +88,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
     {
         if (isEnabled() && MascotConfig.findMascotConfig(container).hasMascotServer())
         {
-            String actionId = createActionId(PipelineController.SearchMascotAction.class, ACTION_LABEL);
+            String actionId = getActionId();
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
         }
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
@@ -132,18 +136,6 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
     }
 
     @Override
-    public List<String> getSequenceDbPaths(File sequenceRoot)
-    {
-        return null;//No directories for Mascot databases.
-    }
-
-    @Override
-    public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
-    {
-        return new CaseInsensitiveHashSet(getSequenceDbDirList(container, sequenceRoot)).contains(db);
-    }
-
-    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
     {
         MascotConfig config = ensureMascotConfig(container);
@@ -162,103 +154,6 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return sequenceDBs;
     }
 
-    @Override
-    public List<String> getTaxonomyList(Container container) throws IOException
-    {
-        MascotConfig config = ensureMascotConfig(container);
-
-        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
-        mascotClient.setProxyURL(config.getMascotHTTPProxy());
-        List<String> taxonomy = mascotClient.getTaxonomyList();
-
-        if (taxonomy.isEmpty())
-        {
-            // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
-            String connectivityResult = mascotClient.testConnectivity(false);
-            if (!"".equals(connectivityResult))
-                throw new IOException(connectivityResult);
-        }
-        return taxonomy;
-//        ArrayList mock = new ArrayList();
-//        mock.add("All entries");
-//        mock.add(". . Archaea (Archaeobacteria)");
-//        mock.add(". . Eukaryota (eucaryotes)");
-//        mock.add(". . . . Alveolata (alveolates)");
-//        mock.add(". . . . . . Plasmodium falciparum (malaria parasite)");
-//        mock.add(". . . . . . Other Alveolata");
-//        mock.add(". . . . Metazoa (Animals)");
-//        mock.add(". . . . . . Caenorhabditis elegans");
-//        mock.add(". . . . . . Drosophila (fruit flies)");
-//        mock.add(". . . . . . Chordata (vertebrates and relatives)");
-//        mock.add(". . . . . . . . bony vertebrates");
-//        mock.add(". . . . . . . . . . lobe-finned fish and tetrapod clade");
-//        mock.add(". . . . . . . . . . . . Mammalia (mammals)");
-//        mock.add(". . . . . . . . . . . . . . Primates");
-//        mock.add(". . . . . . . . . . . . . . . . Homo sapiens (human)");
-//        mock.add(". . . . . . . . . . . . . . . . Other primates");
-//        mock.add(". . . . . . . . . . . . . . Rodentia (Rodents)");
-//        mock.add(". . . . . . . . . . . . . . . . Mus.");
-//        mock.add(". . . . . . . . . . . . . . . . . . Mus musculus (house mouse)");
-//        mock.add(". . . . . . . . . . . . . . . . Rattus");
-//        mock.add(". . . . . . . . . . . . . . . . Other rodentia");
-//        mock.add(". . . . . . . . . . . . . . Other mammalia");
-//        mock.add(". . . . . . . . . . . . Xenopus laevis (African clawed frog)");
-//        mock.add(". . . . . . . . . . . . Other lobe-finned fish and tetrapod clade");
-//        mock.add(". . . . . . . . . . Actinopterygii (ray-finned fishes)");
-//        mock.add(". . . . . . . . . . . . Fugu rubripes (Japanese Pufferfish)");
-//        mock.add(". . . . . . . . . . . . Danio rerio (zebra fish)");
-//        mock.add(". . . . . . . . . . . . Other Actinopterygii");
-//        mock.add(". . . . . . . . . . Other bony vertebrates");
-//        mock.add(". . . . . . . . Other Chordata");
-//        mock.add(". . . . . . Other Metazoa");
-//        mock.add(". . . . Dictyostelium discoideum");
-//        mock.add(". . . . Fungi");
-//        mock.add(". . . . . . Saccharomyces Cerevisiae (baker's yeast)");
-//        mock.add(". . . . . . Schizosaccharomyces pombe (fission yeast)");
-//        mock.add(". . . . . . Pneumocystis carinii");
-//        mock.add(". . . . . . Other Fungi");
-//        mock.add(". . . . Viridiplantae (Green Plants)");
-//        mock.add(". . . . . . Arabidopsis thaliana (thale cress)");
-//        mock.add(". . . . . . Oryza sativa (rice)");
-//        mock.add(". . . . . . Other green plants");
-//        mock.add(". . . . Other Eukaryota");
-//        mock.add(". . Bacteria (Eubacteria)");
-//        mock.add(". . . . Proteobacteria (purple bacteria)");
-//        mock.add(". . . . . . Escherichia coli");
-//        mock.add(". . . . . . Campylobacter jejuni");
-//        mock.add(". . . . . . Other Proteobacteria");
-//        mock.add(". . . . Firmicutes (gram-positive bacteria)");
-//        mock.add(". . . . . . Mycoplasma");
-//        mock.add(". . . . . . Bacillus subtilis");
-//        mock.add(". . . . . . Streptococcus Pneumoniae");
-//        mock.add(". . . . . . Streptomyces coelicolor");
-//        mock.add(". . . . . . Other Firmicutes");
-//        mock.add(". . . . Other Bacteria");
-//        mock.add(". . Viruses");
-//        mock.add(". . . . Hepatitis C virus");
-//        mock.add(". . . . Other viruses");
-//        mock.add(". . Other (includes plasmids and artificial sequences)");
-//        mock.add(". . unclassified");
-//        mock.add(". . Species information unavailable");
-//        return mock;
-    }
-
-    @Override
-    public Map<String, List<String>> getEnzymes(Container container) throws IOException
-    {
-        MascotConfig config = ensureMascotConfig(container);
-
-        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
-        mascotClient.setProxyURL(config.getMascotHTTPProxy());
-        Map<String, List<String>> enzymes = mascotClient.getEnzymeMap();
-
-        if (enzymes.isEmpty())
-        {
-            throw new IOException("Could not find any enzymes, perhaps labkeydbmgmt.pl is out of date?");
-        }
-        return enzymes;
-    }
-
     @NotNull
     private MascotConfig ensureMascotConfig(Container container) throws IOException
     {
@@ -267,53 +162,10 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
             throw new IOException("Mascot Server has not been configured.");
         return config;
     }
-
-    @Override
-    public Map<String, String> getResidue0Mods(Container container) throws IOException
-    {
-        MascotConfig config = ensureMascotConfig(container);
-
-        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
-        mascotClient.setProxyURL(config.getMascotHTTPProxy());
-        Map<String,String> mods = mascotClient.getResidueModsMap();
-
-        if (mods.isEmpty())
-        {
-            String connectivityResult = mascotClient.testConnectivity(false);
-            if (!"".equals(connectivityResult))
-                throw new IOException(connectivityResult);
-        }
-        return mods;
-    }
-
-    @Override
-    public Map<String, String> getResidue1Mods(Container container)
-    {
-        return null;  //no difference between static and dynamic mods in mascot 
-    }
-
     @Override
     public String getHelpTopic()
     {
         return "pipelineMascot";
-    }
-
-    @Override
-    public boolean supportsDirectories()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean remembersDirectories()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean hasRemoteDirectories()
-    {
-        return false;
     }
 
     @Override

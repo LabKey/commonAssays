@@ -22,7 +22,6 @@ import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
-import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileNotFoundException;

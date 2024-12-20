@@ -21,10 +21,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.TaskPipeline;
-import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
@@ -35,7 +32,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
@@ -118,33 +114,7 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
         return null; 
     }
 
-    @Override
-    public boolean dbExists(Container container, File sequenceRoot, String db) throws IOException
-    {
-        File dbFile = FileUtil.appendName(sequenceRoot, db);
-        return NetworkDrive.exists(dbFile);
-    }
-
-    abstract public boolean supportsDirectories();
-
-    abstract public boolean remembersDirectories();
-
-    abstract public boolean hasRemoteDirectories();
-
-    /** @return the list of subdirectories that might contain sequence DBs */
-    @Nullable
-    abstract public List<String> getSequenceDbPaths(File sequenceRoot);
-
     /** @return the list of sequence DBs in a given directory */
     @Nullable
     abstract public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException;
-
-    abstract public List<String> getTaxonomyList(Container container) throws IOException;
-
-    /** @return enzyme name -> cut patterns */
-    abstract public Map<String, List<String>> getEnzymes(Container container) throws IOException;
-
-    abstract public Map<String, String> getResidue0Mods(Container container) throws IOException;
-
-    abstract public Map<String, String> getResidue1Mods(Container container);
 }

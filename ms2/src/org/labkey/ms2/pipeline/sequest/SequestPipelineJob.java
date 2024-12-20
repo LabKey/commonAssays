@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
+    public static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
 
     @JsonCreator
     protected SequestPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)

@@ -25,9 +25,6 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProvider;
 import org.labkey.api.pipeline.file.FileAnalysisTaskPipeline;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * Shared between search-engine pipeline providers and ones that operate on existing search results.
  * Created by: jeckels
@@ -43,6 +40,8 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
     /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server */
     abstract public void ensureEnabled(Container container) throws PipelineValidationException;
 
+    protected abstract String getActionId();
+
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
 
     /** @return the name of the help topic that the user can consult for guidance on setting parameters */
@@ -51,11 +50,8 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
     /** @return true if this will be a full-blown search, false if it's operating on already searched-data */
     abstract public boolean isSearch();
 
-    abstract public boolean dbExists(Container container, File sequenceRoot, String dbName) throws IOException;
-
-    protected FileAnalysisTaskPipeline getTaskPipeline(Class<? extends AbstractMS2SearchPipelineJob> jobClass)
+    protected FileAnalysisTaskPipeline getTaskPipeline(TaskId id)
     {
-        TaskId id = new TaskId(jobClass);
         for (TaskPipeline<?> taskPipeline : PipelineJobService.get().getTaskPipelines(null))
         {
             if (taskPipeline.getId().equals(id) && taskPipeline instanceof FileAnalysisTaskPipeline fatp)

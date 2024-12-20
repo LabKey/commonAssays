@@ -17,7 +17,7 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 
 /**
  * User: billnelson@uky.edu

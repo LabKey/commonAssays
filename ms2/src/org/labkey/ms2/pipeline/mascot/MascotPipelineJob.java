@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements MascotSearchTask.JobSupport
 {
-    private static final TaskId TASK_ID = new TaskId(MascotPipelineJob.class);
+    public static final TaskId TASK_ID = new TaskId(MascotPipelineJob.class);
 
     private String _mascotServer;
     private String _mascotHTTPProxy;

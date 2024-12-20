@@ -31,14 +31,11 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
-import org.labkey.ms2.pipeline.SearchFormUtil;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: jeckels
@@ -64,10 +61,16 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        // Retain old GWT action class as the action ID to preserve file browser button configuration
-        String actionId = createActionId("org.labkey.ms2.pipeline.PipelineController$SearchCometAction", ACTION_LABEL);
-        addAction(actionId, getTaskPipeline(CometPipelineJob.class).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
+        String actionId = getActionId();
+        addAction(actionId, getTaskPipeline(CometPipelineJob.TASK_ID).getAnalyzeURL(context.getContainer(), directory.getRelativePath(), null), ACTION_LABEL,
                 directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    protected String getActionId()
+    {
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        return createActionId("org.labkey.ms2.pipeline.PipelineController$SearchCometAction", ACTION_LABEL);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     {
         if (isEnabled())
         {
-            String actionId = createActionId(PipelineController.SearchCometAction.class, ACTION_LABEL);
+            String actionId = getActionId();
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
         }
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
@@ -118,40 +121,9 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     }
 
     @Override
-    public List<String> getSequenceDbPaths(File sequenceRoot)
-    {
-        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<>());
-    }
-
-    @Override
     public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
     {
         return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
-    }
-
-    @Override
-    public List<String> getTaxonomyList(Container container)
-    {
-        //Comet does not support Mascot style taxonomy.
-        return null;
-    }
-
-    @Override
-    public Map<String, List<String>> getEnzymes(Container container)
-    {
-        return SearchFormUtil.getDefaultEnzymeMap();
-    }
-
-    @Override
-    public Map<String, String> getResidue0Mods(Container container)
-    {
-        return SearchFormUtil.getDefaultStaticMods();
-    }
-
-    @Override
-    public Map<String, String> getResidue1Mods(Container container)
-    {
-        return SearchFormUtil.getDefaultDynamicMods();
     }
 
     @Override
@@ -164,23 +136,4 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
     public void ensureEnabled(Container container)
     {
     }
-
-    @Override
-    public boolean supportsDirectories()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean remembersDirectories()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean hasRemoteDirectories()
-    {
-        return false;
-    }
-
 }

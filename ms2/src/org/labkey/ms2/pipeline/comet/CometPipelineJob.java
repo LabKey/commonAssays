@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class CometPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
+    public static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
 
     @JsonCreator
     protected CometPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)

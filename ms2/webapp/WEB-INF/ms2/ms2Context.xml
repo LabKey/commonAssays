@@ -71,6 +71,7 @@
                     <property name="protocolName" value="X!Tandem analysis" />
                     <property name="protocolFactoryName" value="xtandem" />
                     <property name="pipelineProviderName" value="X! Tandem" />
+                    <property name="defaultDisplayState" value="hidden" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -93,6 +94,7 @@
                     <property name="protocolName" value="Mascot analysis" />
                     <property name="protocolFactoryName" value="mascot" />
                     <property name="pipelineProviderName" value="Mascot" />
+                    <property name="defaultDisplayState" value="hidden" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -115,6 +117,7 @@
                     <property name="protocolName" value="Sequest analysis" />
                     <property name="protocolFactoryName" value="sequest" />
                     <property name="pipelineProviderName" value="Sequest" />
+                    <property name="defaultDisplayState" value="hidden" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -137,6 +140,7 @@
                     <property name="protocolName" value="Comet analysis" />
                     <property name="protocolFactoryName" value="comet" />
                     <property name="pipelineProviderName" value="Comet" />
+                    <property name="defaultDisplayState" value="hidden" />
                     <property name="taskProgressionSpec">
                         <list>
                             <value type="java.lang.Class">org.labkey.ms2.pipeline.FastaCheckTask</value>
@@ -153,10 +157,12 @@
                 </bean>
 
                 <!-- Pipeline for rolling up existing .pep.xml files -->
-                <bean class="org.labkey.api.pipeline.TaskPipelineSettings">
+                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
                     <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.rollup.FractionRollupPipelineJob"/>
                     <property name="protocolObjectId" value="MS2.FractionRollup" />
                     <property name="protocolName" value="Fraction rollup analysis" />
+                    <property name="pipelineProviderName" value="FractionRollup" />
+                    <property name="defaultDisplayState" value="hidden" />
                     <property name="taskProgressionSpec">
                         <list>
                             <ref bean="tandemToXMLTask"/>
