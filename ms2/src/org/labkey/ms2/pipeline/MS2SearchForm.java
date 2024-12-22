@@ -15,6 +15,9 @@
  */
 package org.labkey.ms2.pipeline;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <code>MS2SearchForm</code>
 */
@@ -24,20 +27,20 @@ public class MS2SearchForm extends MS2PipelineForm
     private String protocolName = "";
     private String protocolDescription = "";
     private String sequenceDBPath = "";
-    private String[] sequenceDB = new String[0];
+    private List<String> sequenceDB = Collections.emptyList();
     private String configureXml = "";
     private boolean saveProtocol;
 
     private boolean runSearch = false;
 
-    public String[] getSequenceDB()
+    public List<String> getSequenceDB()
     {
         return sequenceDB;
     }
 
-    public void setSequenceDB(String[] sequenceDB)
+    public void setSequenceDB(List<String> sequenceDB)
     {
-        this.sequenceDB = (sequenceDB == null ? new String[0] : sequenceDB);
+        this.sequenceDB = (sequenceDB == null ? Collections.emptyList() : sequenceDB);
     }
 
     public String getConfigureXml()

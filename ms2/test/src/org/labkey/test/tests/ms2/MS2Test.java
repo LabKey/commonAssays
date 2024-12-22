@@ -58,11 +58,12 @@ public class MS2Test extends AbstractMS2ImportTest
     protected static final String RUN_GROUP3_NAME = "Test Run Group 3";
     protected static final String PROTOCOL_NAME = "Protocol Rollup 1";
     protected static final String PROTOCOL_XML =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<bioml>\n" +
-                    "    <note label=\"pipeline, database\" type=\"input\">Bovine_mini1.fasta</note>\n" +
-                    "    <note label=\"protein, cleavage site\" type=\"input\">[KR]|{P}</note>\n" +
-                    "</bioml>";
+            """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <bioml>
+                        <note label="pipeline, database" type="input">Bovine_mini1.fasta</note>
+                        <note label="protein, cleavage site" type="input">[KR]|{P}</note>
+                    </bioml>""";
 
     @Override
     @LogMethod

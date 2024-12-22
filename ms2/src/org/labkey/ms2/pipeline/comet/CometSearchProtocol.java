@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.comet;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -35,9 +36,9 @@ import java.util.Map;
  */
 public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipelineJob>
 {
-    public CometSearchProtocol(String name, String description, String xml)
+    public CometSearchProtocol(String name, String description, String xml, Container container)
     {
-        super(name, description, xml);
+        super(name, description, xml, container);
     }
 
     @Override
@@ -59,13 +60,13 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
     @Override
     public void validate(PipeRoot root) throws PipelineValidationException
     {
-        String[] dbNames = getDbNames();
-        if(dbNames == null || dbNames.length == 0)
+        List<String> dbNames = getDbNames();
+        if(dbNames.isEmpty())
             throw new IllegalArgumentException("A sequence database must be selected.");
 
-        File fileSequenceDB = FileUtil.appendName(getDirSeqRoot(), dbNames[0]);
+        File fileSequenceDB = FileUtil.appendName(getDirSeqRoot(), dbNames.get(0));
         if (!fileSequenceDB.exists())
-            throw new IllegalArgumentException("Sequence database '" + dbNames[0] + "' is not found in local FASTA root.");
+            throw new IllegalArgumentException("Sequence database '" + dbNames.get(0) + "' is not found in local FASTA root.");
 
         super.validate(root);
     }

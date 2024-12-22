@@ -17,13 +17,11 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.action.FormHandlerAction;
 import org.labkey.api.action.FormViewAction;
-import org.labkey.api.action.GWTServiceAction;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.gwt.server.BaseRemoteService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -201,8 +199,8 @@ public class PipelineController extends SpringActionController
         private PipeRoot _root;
         private File _dirSeqRoot;
         private File _dirData;
-        private AbstractMS2PipelineProvider _provider;
-        private AbstractMS2SearchProtocol _protocol;
+        private AbstractMS2PipelineProvider<?> _provider;
+        private AbstractMS2SearchProtocol<?> _protocol;
 
         public abstract String getProviderName();
 
@@ -271,7 +269,7 @@ public class PipelineController extends SpringActionController
                     File protocolFile = protocolFactory.getParametersFile(_dirData, protocolName, _root);
                     if (NetworkDrive.exists(protocolFile))
                     {
-                        _protocol = protocolFactory.loadInstance(protocolFile);
+                        _protocol = protocolFactory.loadInstance(protocolFile.toPath(), getContainer());
 
                         // Don't allow the instance file to override the protocol name.
                         _protocol.setName(protocolName);
@@ -283,9 +281,9 @@ public class PipelineController extends SpringActionController
 
                     form.setProtocolName(_protocol.getName());
                     form.setProtocolDescription(_protocol.getDescription());
-                    String[] seqDbNames = _protocol.getDbNames();
+                    List<String> seqDbNames = _protocol.getDbNames();
                     form.setConfigureXml(_protocol.getXml());
-                    if (seqDbNames == null || seqDbNames.length == 0)
+                    if (seqDbNames.isEmpty())
                         errors.reject(ERROR_MSG, "Protocol must specify a FASTA file.");
                     else
                         form.setSequenceDB(seqDbNames);
@@ -346,34 +344,25 @@ public class PipelineController extends SpringActionController
                     {
                         throw new NotFoundException("Protocol '" + form.getProtocol() + "' could not be found");
                     }
-                    _protocol.setDirSeqRoot(_dirSeqRoot);
-                    _protocol.setDbPath(form.getSequenceDBPath());
-                    _protocol.setDbNames(form.getSequenceDB());
                     PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
                             getContainer(), getUser(), form.getProtocol());
-                    PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(), getContainer(),
-                            getUser(), form.getSequenceDBPath(), AbstractMS2SearchProtocolFactory.joinSequenceFiles(form.getSequenceDB()));
                 }
                 else
                 {
                     _protocol = _provider.getProtocolFactory().createProtocolInstance(
                             form.getProtocolName(),
                             form.getProtocolDescription(),
-                            form.getConfigureXml());
+                            form.getConfigureXml(),
+                            getContainer());
 
-                    _protocol.setDirSeqRoot(_dirSeqRoot);
-                    _protocol.setDbPath(form.getSequenceDBPath());
-                    _protocol.setDbNames(form.getSequenceDB());
                     _protocol.setEmail(getUser().getEmail());
                     _protocol.validateToSave(_root, true, true);
                     if (form.isSaveProtocol())
                     {
                         _protocol.saveDefinition(_root);
                         PipelineService.get().rememberLastProtocolSetting(_protocol.getFactory(),
-                                getContainer(), getUser(), form.getProtocolName());   
+                                getContainer(), getUser(), form.getProtocolName());
                     }
-                    PipelineService.get().rememberLastSequenceDbSetting(_protocol.getFactory(),getContainer(),
-                                getUser(),form.getSequenceDBPath(), AbstractMS2SearchProtocolFactory.joinSequenceFiles(form.getSequenceDB()));
                 }
 
                 if (form.getFile().length == 0)

@@ -15,7 +15,10 @@
  */
 package org.labkey.ms2.pipeline;
 
+import io.micrometer.common.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJobService;
@@ -29,10 +32,13 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory.SEQUENCE_FILE_SEPARATOR;
 
 /**
  * <code>AbstractMS2SearchProtocol</code>
@@ -42,14 +48,12 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     public static final FileType FT_MZXML = new massSpecDataFileType();
     public static final FileType FT_SEARCH_XAR = new FileType(".search.xar.xml");
     public static final String PIPELINE_DATABASE = "pipeline, database";
+    protected final Container _container;
 
-    private File _dirSeqRoot;
-    private String _dbPath;
-    private String[] _dbNames;
-
-    public AbstractMS2SearchProtocol(String name, String description, String xml)
+    public AbstractMS2SearchProtocol(String name, String description, String xml, Container container)
     {
         super(name, description, xml);
+        _container = container;
     }
 
     @Override
@@ -60,32 +64,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
 
     public File getDirSeqRoot()
     {
-        return _dirSeqRoot;
-    }
-
-    public void setDirSeqRoot(File dirSeqRoot)
-    {
-        _dirSeqRoot = dirSeqRoot;
-    }
-
-    public String getDbPath()
-    {
-        return _dbPath;
-    }
-
-    public void setDbPath(String dbPath)
-    {
-        _dbPath = dbPath;
-    }
-
-    public String[] getDbNames()
-    {
-        return _dbNames;
-    }
-
-    public void setDbNames(String[] dbNames)
-    {
-        _dbNames = dbNames;
+        return MS2PipelineManager.getSequenceDatabaseRoot(_container, true);
     }
 
     @Override
@@ -100,18 +79,6 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     {
         if (addParams == null)
             addParams = new HashMap<>();
-
-        if (_dbNames != null)
-        {
-            StringBuilder dbs = new StringBuilder();
-            for (String dbName : _dbNames)
-            {
-                if (!dbs.isEmpty())
-                    dbs.append(';');
-                dbs.append(dbName);
-            }
-            addParams.put(PIPELINE_DATABASE, dbs.toString());
-        }
 
         super.save(path, addParams, instanceParams);
     }
@@ -132,14 +99,25 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     {
         super.validate(root);
 
-        if (_dbNames == null || _dbNames.length == 0 || _dbNames[0] == null || _dbNames[0].isEmpty())
+        if (getDbNames().isEmpty())
         {
-            ParamParser parser = parse();
-            String database = parser.getInputParameter(PIPELINE_DATABASE);
-            if (database == null)
-            {
-                throw new PipelineValidationException("Select a sequence database.");
-            }
+            throw new PipelineValidationException("Select a sequence database.");
         }
+    }
+
+    @NotNull
+    protected List<String> getDbNames()
+    {
+        if (xml == null)
+        {
+            return Collections.emptyList();
+        }
+        ParamParser parser = parse();
+        String names = parser.getInputParameter(PIPELINE_DATABASE);
+        if (StringUtils.isEmpty(names))
+        {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(names.split(SEQUENCE_FILE_SEPARATOR));
     }
 }

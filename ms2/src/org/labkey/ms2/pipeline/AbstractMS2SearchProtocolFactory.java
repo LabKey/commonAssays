@@ -15,8 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -39,38 +39,16 @@ abstract public class AbstractMS2SearchProtocolFactory extends AbstractFileAnaly
         return concatenatedFiles.split(SEQUENCE_FILE_SEPARATOR);
     }
 
-    public static String joinSequenceFiles(String... databases)
-    {
-        return StringUtils.join(databases, SEQUENCE_FILE_SEPARATOR);
-    }
-
     @Override
-    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol<?> createProtocolInstance(ParamParser parser, Container container)
     {
-        // Get the pipeline specific parameters.
-        String databases = parser.getInputParameter("pipeline, database");
-
         // Remove the parameters set in the pipeline job.
         parser.removeInputParameter("list path, default parameters");
         parser.removeInputParameter("list path, taxonomy information");
         parser.removeInputParameter("spectrum, path");
         parser.removeInputParameter("output, path");
 
-        String[] dbNames;
-        if (databases == null)
-        {
-            dbNames = new String[0];
-        }
-        else
-        {
-            dbNames = splitSequenceFiles(databases);
-        }
-
-        AbstractMS2SearchProtocol instance = super.createProtocolInstance(parser);
-
-        instance.setDbNames(dbNames);
-
-        return instance;
+        return super.createProtocolInstance(parser, container);
     }
 
     public abstract String getDefaultParametersResource();

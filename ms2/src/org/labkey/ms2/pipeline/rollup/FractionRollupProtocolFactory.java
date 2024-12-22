@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.rollup;
 
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 /**
@@ -47,8 +48,8 @@ public class FractionRollupProtocolFactory extends AbstractMS2SearchProtocolFact
     }
 
     @Override
-    public FractionRollupProtocol createProtocolInstance(String name, String description, String xml)
+    public FractionRollupProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
-        return new FractionRollupProtocol(name, description, xml);
+        return new FractionRollupProtocol(name, description, xml, container);
     }
 }

@@ -16,6 +16,7 @@
 package org.labkey.ms2.pipeline.rollup;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -24,7 +25,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -36,9 +36,9 @@ import java.util.Map;
  */
 public class FractionRollupProtocol extends AbstractMS2SearchProtocol<FractionRollupPipelineJob>
 {
-    public FractionRollupProtocol(String name, String description, String xml)
+    public FractionRollupProtocol(String name, String description, String xml, Container container)
     {
-        super(name, description, xml);
+        super(name, description, xml, container);
     }
 
     @Override
