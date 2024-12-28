@@ -16,8 +16,6 @@
 package org.labkey.elispot.query;
 
 import org.labkey.api.assay.AssayDomainKind;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
@@ -32,9 +30,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Created by davebradlee on 3/24/15.
- */
 public class ElispotAntigenDomainKind extends AssayDomainKind
 {
     public static final String KINDNAME = "ElispotAntigenDomainKind";
@@ -89,17 +84,6 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     public String getStorageSchemaName()
     {
         return ElispotProtocolSchema.ELISPOT_ANTIGEN_SCHEMA_NAME;
-    }
-
-    private DbSchema getSchema()
-    {
-        return DbSchema.get(getStorageSchemaName(), getSchemaType());
-    }
-
-    @Override
-    public DbSchemaType getSchemaType()
-    {
-        return DbSchemaType.Provisioned;
     }
 
     @Override
