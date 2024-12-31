@@ -16,8 +16,6 @@
 package org.labkey.nab.query;
 
 import org.labkey.api.assay.AssayDomainKind;
-import org.labkey.api.data.DbSchema;
-import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
@@ -30,9 +28,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-/**
- * Created by klum on 7/18/2014.
- */
 public class NabVirusDomainKind extends AssayDomainKind
 {
     public static final String VIRUS_LSID_COLUMN_NAME = "virusLsid";
@@ -76,17 +71,6 @@ public class NabVirusDomainKind extends AssayDomainKind
     public String getStorageSchemaName()
     {
         return NabProtocolSchema.NAB_VIRUS_SCHEMA_NAME;
-    }
-
-    private DbSchema getSchema()
-    {
-        return DbSchema.get(getStorageSchemaName(), getSchemaType());
-    }
-
-    @Override
-    public DbSchemaType getSchemaType()
-    {
-        return DbSchemaType.Provisioned;
     }
 
     @Override
