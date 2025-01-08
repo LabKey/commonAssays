@@ -155,23 +155,6 @@
                         </list>
                     </property>
                 </bean>
-
-                <!-- Pipeline for rolling up existing .pep.xml files -->
-                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
-                    <constructor-arg type="java.lang.Class" value="org.labkey.ms2.pipeline.rollup.FractionRollupPipelineJob"/>
-                    <property name="protocolObjectId" value="MS2.FractionRollup" />
-                    <property name="protocolName" value="Fraction rollup analysis" />
-                    <property name="pipelineProviderName" value="FractionRollup" />
-                    <property name="defaultDisplayState" value="hidden" />
-                    <property name="taskProgressionSpec">
-                        <list>
-                            <ref bean="tandemToXMLTask"/>
-                            <ref bean="tppTaskJoin"/>
-                            <ref bean="expGeneratorSearchJoin"/>
-                        </list>
-                    </property>
-                </bean>
-
             </list>
         </property>
     </bean>

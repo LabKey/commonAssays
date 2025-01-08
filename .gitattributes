@@ -727,11 +727,6 @@ ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp -text
 ms2/src/org/labkey/ms2/pipeline/phenyx/PhenyxRun.java -text
-ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupDefaults.xml -text
-ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupPipelineJob.java -text
-ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupPipelineProvider.java -text
-ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupProtocol.java -text
-ms2/src/org/labkey/ms2/pipeline/rollup/FractionRollupProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractMultipleValueParamsValidator.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestParams.java -text
 ms2/src/org/labkey/ms2/pipeline/sequest/AbstractSequestSearchTaskFactory.java -text
