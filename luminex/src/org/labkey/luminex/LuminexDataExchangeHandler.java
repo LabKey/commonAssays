@@ -18,6 +18,8 @@ package org.labkey.luminex;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.transform.DataTransformService;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.exp.ExperimentException;
@@ -52,7 +54,14 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
     private final DataSerializer _serializer = new LuminexDataSerializer();
 
     @Override
-    public Pair<FileLike, Set<FileLike>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, FileLike scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<FileLike, Set<FileLike>> createTransformationRunInfo(
+            DataTransformService.TransformOperation operation,
+            AssayRunUploadContext<? extends AssayProvider> context,
+            @Nullable ExpRun run,
+            FileLike scriptDir,
+            Map<DomainProperty, String> runProperties,
+            Map<DomainProperty, String> batchProperties
+    ) throws Exception
     {
         LuminexRunContext form = (LuminexRunContext)context;
         List<Map<String, Object>> analytes = new ArrayList<>();
@@ -80,7 +89,7 @@ public class LuminexDataExchangeHandler extends TsvDataExchangeHandler
         List<Map<String, Object>> titrations = getTitrationMaps(form);
         addSampleProperties(TITRATION_DATA_PROP_NAME, titrations);
 
-        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
+        return super.createTransformationRunInfo(operation, context, run, scriptDir, runProperties, batchProperties);
     }
 
     private static @NotNull List<Map<String, Object>> getTitrationMaps(LuminexRunContext form) throws ExperimentException

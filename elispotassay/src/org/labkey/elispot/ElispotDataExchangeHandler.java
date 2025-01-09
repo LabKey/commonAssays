@@ -17,8 +17,10 @@
 package org.labkey.elispot;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.assay.transform.DataTransformService;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
@@ -45,7 +47,14 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     public static final String ANTIGEN_DATA_PROP_NAME = "antigenData";
 
     @Override
-    public Pair<FileLike, Set<FileLike>> createTransformationRunInfo(AssayRunUploadContext<? extends AssayProvider> context, ExpRun run, FileLike scriptDir, Map<DomainProperty, String> runProperties, Map<DomainProperty, String> batchProperties) throws Exception
+    public Pair<FileLike, Set<FileLike>> createTransformationRunInfo(
+            DataTransformService.TransformOperation operation,
+            AssayRunUploadContext<? extends AssayProvider> context,
+            @Nullable ExpRun run,
+            FileLike scriptDir,
+            Map<DomainProperty, String> runProperties,
+            Map<DomainProperty, String> batchProperties
+    ) throws Exception
     {
         ElispotRunUploadForm form = (ElispotRunUploadForm)context;
 
@@ -58,11 +67,16 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
         addSampleProperties(SAMPLE_DATA_PROP_NAME, GROUP_COLUMN_NAME, form.getSampleProperties(), template, WellGroup.Type.SPECIMEN);
         addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, form.getAntigenProperties(), template, WellGroup.Type.ANTIGEN);
 
-        return super.createTransformationRunInfo(context, run, scriptDir, runProperties, batchProperties);
+        return super.createTransformationRunInfo(operation, context, run, scriptDir, runProperties, batchProperties);
     }
 
     @Override
-    public void createSampleData(@NotNull ExpProtocol protocol, ViewContext viewContext, FileLike scriptDir) throws Exception
+    public void createSampleData(
+            DataTransformService.TransformOperation operation,
+            @NotNull ExpProtocol protocol,
+            ViewContext viewContext,
+            FileLike scriptDir
+    ) throws Exception
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
         if (provider instanceof ElispotAssayProvider)
@@ -81,6 +95,6 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
                 addSampleProperties(ANTIGEN_DATA_PROP_NAME, GROUP_COLUMN_NAME, antigens, template, WellGroup.Type.ANTIGEN);
             }
         }
-        super.createSampleData(protocol, viewContext, scriptDir);
+        super.createSampleData(operation, protocol, viewContext, scriptDir);
     }
 }
