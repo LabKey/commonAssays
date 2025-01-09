@@ -16,6 +16,7 @@
 
 -- @SkipScriptIfSchemaExists This script moved from the MS2 module to the Protein module in 2024. If the schema exists,
 -- we want this script to be recorded as "run", but don't want any of the statements executed.
+-- TODO: Remove the above annotation in Jan, 2026 during script consolidation
 
 CREATE SCHEMA prot;
 GO
