@@ -43,8 +43,7 @@ public class MultiValueInputColumn extends DataColumn
     @Override
     public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
     {
-        String formFieldName = ctx.getForm().getFormFieldName(getColumnInfo());
-        String id = getInputPrefix() + formFieldName;
+        String id = ctx.getForm().getFormFieldName(getColumnInfo());
 
         out.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
         out.write("<script text=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n");

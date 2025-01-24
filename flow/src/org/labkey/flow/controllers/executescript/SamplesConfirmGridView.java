@@ -17,6 +17,7 @@ package org.labkey.flow.controllers.executescript;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
 import org.labkey.api.collections.NamedObjectList;
@@ -308,7 +309,7 @@ public class SamplesConfirmGridView extends GridView
         @Override
         protected String getRecordSelectorName(RenderContext ctx)
         {
-            // Bind select checkbox to ImportAnalyisForm.selectedSamples.select
+            // Bind select checkbox to ImportAnalysisForm.selectedSamples.select
             String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
             return "selectedSamples.rows[" + sampleId + "].selected";
         }
@@ -355,9 +356,8 @@ public class SamplesConfirmGridView extends GridView
         }
     }
 
-    private class MatchedFlagDisplayColumn extends SimpleDisplayColumn
+    private static class MatchedFlagDisplayColumn extends SimpleDisplayColumn
     {
-
         public MatchedFlagDisplayColumn()
         {
             super();
@@ -387,7 +387,7 @@ public class SamplesConfirmGridView extends GridView
     }
 
     // Simple lookup to list of original FlowFCSFiles
-    private class FCSFilesFilesForeignKey extends AbstractForeignKey
+    private static class FCSFilesFilesForeignKey extends AbstractForeignKey
     {
         private static final boolean INCLUDE_ALL_FILES = false;
 
@@ -423,13 +423,13 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public NamedObjectList getSelectList(RenderContext ctx)
+        public @NotNull NamedObjectList getSelectList(RenderContext ctx)
         {
             List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
             if (candidates == null || candidates.isEmpty())
                 return _list;
 
-            // Put most likely canidates on the top of the list
+            // Put most likely candidates on the top of the list
             Set<Integer> candidateRowIds = new HashSet<>(candidates.size());
             NamedObjectList list = new NamedObjectList();
             for (FlowFCSFile candidate : candidates)
@@ -480,10 +480,9 @@ public class SamplesConfirmGridView extends GridView
             if (o instanceof String)
                return (String)o;
             
-            if (!(o instanceof FlowFCSFile))
+            if (!(o instanceof FlowFCSFile file))
                 return null;
 
-            FlowFCSFile file = (FlowFCSFile)o;
             ExpData data = file.getData();
             FlowRun run = null;
             if (data != null && data.getRunId() != null)
@@ -517,4 +516,3 @@ public class SamplesConfirmGridView extends GridView
         }
     }
 }
-
