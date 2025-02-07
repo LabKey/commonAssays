@@ -31,7 +31,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
@@ -120,21 +119,4 @@ public class XTandemPipelineProvider extends AbstractMS2SearchPipelineProvider<X
         return XTandemSearchProtocolFactory.get();
     }
 
-    @Override
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
-    {
-        return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
-    }
-
-    @Override
-    public String getHelpTopic()
-    {
-        return "pipelineXTandem";
-    }
-
-    @Override
-    public void ensureEnabled(Container container)
-    {
-        // Always enabled.
-    }
 }

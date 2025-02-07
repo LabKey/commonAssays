@@ -32,7 +32,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
@@ -120,20 +119,4 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         return CometSearchProtocolFactory.get();
     }
 
-    @Override
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
-    {
-        return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
-    }
-
-    @Override
-    public String getHelpTopic()
-    {
-        return "pipelineComet";
-    }
-
-    @Override
-    public void ensureEnabled(Container container)
-    {
-    }
 }

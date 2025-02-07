@@ -15,10 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipelineJobService;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
@@ -37,15 +35,9 @@ public abstract class AbstractMS2PipelineProvider<ProtocolFactory extends Abstra
         super(name, owningModule);
     }
 
-    /** @throws org.labkey.api.pipeline.PipelineValidationException if the provider should not be available on the current server */
-    abstract public void ensureEnabled(Container container) throws PipelineValidationException;
-
     protected abstract String getActionId();
 
     abstract public AbstractMS2SearchProtocolFactory getProtocolFactory();
-
-    /** @return the name of the help topic that the user can consult for guidance on setting parameters */
-    abstract public String getHelpTopic();
 
     /** @return true if this will be a full-blown search, false if it's operating on already searched-data */
     abstract public boolean isSearch();

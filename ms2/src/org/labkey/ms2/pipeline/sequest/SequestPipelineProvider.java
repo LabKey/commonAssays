@@ -22,7 +22,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -33,7 +32,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
@@ -133,22 +131,4 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         return SequestSearchProtocolFactory.get();
     }
 
-    @Override
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
-    {
-        return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
-    }
-
-    @Override
-    public String getHelpTopic()
-    {
-        return "pipelineSequest";
-    }
-
-    @Override
-    public void ensureEnabled(Container container) throws PipelineValidationException
-    {
-        if (!isEnabled())
-            throw new PipelineValidationException("Sequest server has not been specified in ms2Config.xml file.");
-    }
 }

@@ -21,7 +21,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -33,7 +32,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -135,25 +133,6 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         return MascotSearchProtocolFactory.get();
     }
 
-    @Override
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException
-    {
-        MascotConfig config = ensureMascotConfig(container);
-
-        MascotClientImpl mascotClient = new MascotClientImpl(config.getMascotServer(), null);
-        mascotClient.setProxyURL(config.getMascotHTTPProxy());
-        List<String> sequenceDBs = mascotClient.getSequenceDbList();
-
-        if (sequenceDBs.isEmpty())
-        {
-            // TODO: Would be nice if the Mascot client just threw its own connectivity exception.
-            String connectivityResult = mascotClient.testConnectivity(false);
-            if (!"".equals(connectivityResult))
-                throw new IOException(connectivityResult);
-        }
-        return sequenceDBs;
-    }
-
     @NotNull
     private MascotConfig ensureMascotConfig(Container container) throws IOException
     {
@@ -162,18 +141,5 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
             throw new IOException("Mascot Server has not been configured.");
         return config;
     }
-    @Override
-    public String getHelpTopic()
-    {
-        return "pipelineMascot";
-    }
 
-    @Override
-    public void ensureEnabled(Container container) throws PipelineValidationException
-    {
-        MascotConfig config = MascotConfig.findMascotConfig(container);
-        String mascotServer = config.getMascotServer();
-        if ((!config.hasMascotServer() || mascotServer.isEmpty()))
-            throw new PipelineValidationException("Mascot server has not been specified in site customization.");
-    }
 }

@@ -24,14 +24,11 @@ import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
@@ -113,8 +110,4 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
             return factory;
         return null; 
     }
-
-    /** @return the list of sequence DBs in a given directory */
-    @Nullable
-    abstract public List<String> getSequenceDbDirList(Container container, File sequenceRoot) throws IOException;
 }

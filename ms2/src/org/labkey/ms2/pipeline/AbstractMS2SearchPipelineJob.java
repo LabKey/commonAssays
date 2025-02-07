@@ -42,9 +42,9 @@ import java.util.*;
 public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJob
         implements MS2SearchJobSupport, TPPTask.JobSupport
 {
-    private static String DATATYPE_SAMPLES = "Samples"; // Default
-    private static String DATATYPE_FRACTIONS = "Fractions";
-    private static String DATATYPE_BOTH = "Both";
+    private static final String DATATYPE_SAMPLES = "Samples"; // Default
+    private static final String DATATYPE_FRACTIONS = "Fractions";
+    private static final String DATATYPE_BOTH = "Both";
 
     public static String getRawPepXMLSuffix()
     {
