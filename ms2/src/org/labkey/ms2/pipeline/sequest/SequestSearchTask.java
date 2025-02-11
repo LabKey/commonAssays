@@ -41,7 +41,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -129,26 +128,25 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         if (indexFileName == null)
         {
             // Build one based on a CRC of the parameters that define an index file
-            StringBuilder sb = new StringBuilder();
-            sb.append("Enzyme-");
-            sb.append(params.get(ParameterNames.ENZYME));
-            sb.append(".MinParentMH-");
-            sb.append(params.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H));
-            sb.append(".MaxParentMH-");
-            sb.append(params.get(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H));
-            sb.append(".MaxMissedCleavages-");
-            sb.append(params.get(AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES));
-            sb.append(".MassTypeIndex-");
-            sb.append(params.get(SequestSearchTask.MASS_TYPE_INDEX));
-            sb.append(".StaticMod-");
-            sb.append(params.get(ParameterNames.STATIC_MOD));
-            sb.append(".FASTAModified-");
-            sb.append(fastaFile.lastModified());
-            sb.append(".FASTASize-");
-            sb.append(fastaFile.length());
+            String sb = "Enzyme-" +
+                    params.get(ParameterNames.ENZYME) +
+                    ".MinParentMH-" +
+                    params.get(AbstractMS2SearchTask.MINIMUM_PARENT_M_H) +
+                    ".MaxParentMH-" +
+                    params.get(AbstractMS2SearchTask.MAXIMUM_PARENT_M_H) +
+                    ".MaxMissedCleavages-" +
+                    params.get(AbstractMS2SearchTask.MAXIMUM_MISSED_CLEAVAGE_SITES) +
+                    ".MassTypeIndex-" +
+                    params.get(SequestSearchTask.MASS_TYPE_INDEX) +
+                    ".StaticMod-" +
+                    params.get(ParameterNames.STATIC_MOD) +
+                    ".FASTAModified-" +
+                    fastaFile.lastModified() +
+                    ".FASTASize-" +
+                    fastaFile.length();
 
             CRC32 crc = new CRC32();
-            crc.update(toBytes(sb.toString()));
+            crc.update(toBytes(sb));
 
             indexFileName = fastaFile.getName() + "_" + crc.getValue();
         }
@@ -400,7 +398,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 copySequestLogFile = false;
 
                 // TODO: TGZ file is only required to get spectra loaded into CPAS.  Fix to use mzXML instead.
-                try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+                try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
                 {
                     RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                     sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
@@ -497,29 +495,16 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     private File writeDtaList(File dirOutputDta) throws IOException
     {
-        File[] dtaFiles = dirOutputDta.listFiles(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File dir, String name)
-            {
-                return name.toLowerCase().endsWith(".dta");
-            }
-        });
+        File[] dtaFiles = dirOutputDta.listFiles((dir, name) -> name.toLowerCase().endsWith(".dta"));
         File result = new File(dirOutputDta, "DtaFiles.txt");
-        OutputStream out = null;
-        try
+        try (OutputStream out = new FileOutputStream(result);
+             PrintWriter writer = new PrintWriter(out))
         {
-            out = new FileOutputStream(result);
-            PrintWriter writer = new PrintWriter(out);
             for (File dtaFile : dtaFiles)
             {
                 writer.println(dtaFile.getName());
             }
             writer.flush();
-        }
-        finally
-        {
-            if (out != null) { try { out.close(); } catch (IOException e) {} }
         }
         return result;
     }
@@ -530,9 +515,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         for (Param conv : converters)
         {
             String value = paramsXml.get(conv.getInputXmlLabels().get(0));
-            if (value == null || value.equals(""))
+            if (value == null || value.isEmpty())
             {
-                if(conv.getValue() == null || conv.getValue().equals(""))
+                if(conv.getValue() == null || conv.getValue().isEmpty())
                     continue;
             }
             else
@@ -543,7 +528,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             String parserError = conv.validate();
             if (!"".equals(parserError))
                 throw new SequestParamsException(parserError);
-            if(!conv.convert(";").equals(""))
+            if(!conv.convert(";").isEmpty())
                 paramsCmd.add(conv.convert(";"));
         }
 
