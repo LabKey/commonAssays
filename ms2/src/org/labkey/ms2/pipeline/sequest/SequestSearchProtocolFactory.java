@@ -16,7 +16,7 @@
 
 package org.labkey.ms2.pipeline.sequest;
 
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 /**
@@ -51,9 +51,9 @@ public class SequestSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
     }
 
     @Override
-    public AbstractMS2SearchProtocol createProtocolInstance(String name, String description, String xml)
+    public SequestSearchProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
-        return new SequestSearchProtocol(name, description, xml);
+        return new SequestSearchProtocol(name, description, xml, container);
     }
 
 }

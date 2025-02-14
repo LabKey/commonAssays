@@ -15,7 +15,7 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 
 import java.util.ArrayList;
 import java.util.Collection;

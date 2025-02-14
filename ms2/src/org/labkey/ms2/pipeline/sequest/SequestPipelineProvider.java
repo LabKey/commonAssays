@@ -22,7 +22,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
@@ -32,14 +31,10 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.PipelineController;
-import org.labkey.ms2.pipeline.SearchFormUtil;
 
-import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * User: billnelson@uky.edu
@@ -69,16 +64,23 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         if (!super.isEnabled())
             return false;
 
-        AbstractSequestSearchTaskFactory sequestFactory = findFactory();
+        AbstractSequestSearchTaskFactory<?> sequestFactory = findFactory();
         return sequestFactory != null && (sequestFactory.getLocation() != null || sequestFactory.getSequestInstallDir() != null);
     }
 
     @Override
     public void updateFilePropertiesEnabled(ViewContext context, PipeRoot pr, PipelineDirectory directory, boolean includeAll)
     {
-        String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
-        addAction(actionId, PipelineController.SearchSequestAction.class, ACTION_LABEL,
-            directory, directory.listFiles(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+        String actionId = getActionId();
+        addAction(actionId, getTaskPipeline(SequestPipelineJob.TASK_ID).getAnalyzeURL(context.getContainer(), null, null), ACTION_LABEL,
+                directory, directory.listPaths(MS2PipelineManager.getAnalyzeFilter()), true, true, includeAll);
+    }
+
+    @Override
+    protected String getActionId()
+    {
+        // Retain old GWT action class as the action ID to preserve file browser button configuration
+        return createActionId("org.labkey.ms2.pipeline.PipelineController$SearchSequestAction", ACTION_LABEL);
     }
 
     @Override
@@ -86,7 +88,8 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
     {
         if (isEnabled())
         {
-            String actionId = createActionId(PipelineController.SearchSequestAction.class, ACTION_LABEL);
+            // Retain old GWT action class as the action ID to preserve file browser button configuration
+            String actionId = getActionId();
             return Collections.singletonList(new PipelineActionConfig(actionId, PipelineActionConfig.displayState.toolbar, ACTION_LABEL, true));
         }
         return super.getDefaultActionConfigSkipModuleEnabledCheck(container);
@@ -94,12 +97,12 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
 
     @Override
     @NotNull
-    public HttpView createSetupWebPart(Container container)
+    public HttpView<Object> createSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
 
-    class SetupWebPart extends WebPartView
+    static class SetupWebPart extends WebPartView<Object>
     {
         public SetupWebPart()
         {
@@ -126,74 +129,6 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
     public AbstractMS2SearchProtocolFactory getProtocolFactory()
     {
         return SequestSearchProtocolFactory.get();
-    }
-
-    @Override
-    public List<String> getSequenceDbPaths(File sequenceRoot)
-    {
-        return MS2PipelineManager.addSequenceDbPaths(sequenceRoot, "", new ArrayList<String>());
-    }
-
-    @Override
-    public List<String> getSequenceDbDirList(Container container, File sequenceRoot)
-    {
-        return MS2PipelineManager.getSequenceDirList(sequenceRoot, "");
-    }
-
-    @Override
-    public List<String> getTaxonomyList(Container container)
-    {
-        //"Sequest does not support Mascot style taxonomy.
-        return null;
-    }
-
-    @Override
-    public Map<String, List<String>> getEnzymes(Container container)
-    {
-        return SearchFormUtil.getDefaultEnzymeMap();
-    }
-
-    @Override
-    public Map<String, String> getResidue0Mods(Container container)
-    {
-        return SearchFormUtil.getDefaultStaticMods();
-    }
-
-    @Override
-    public Map<String, String> getResidue1Mods(Container container)
-    {
-        return SearchFormUtil.getDefaultDynamicMods();
-    }
-
-    @Override
-    public String getHelpTopic()
-    {
-        return "pipelineSequest";
-    }
-
-    @Override
-    public void ensureEnabled(Container container) throws PipelineValidationException
-    {
-        if (!isEnabled())
-            throw new PipelineValidationException("Sequest server has not been specified in ms2Config.xml file.");
-    }
-
-    @Override
-    public boolean supportsDirectories()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean remembersDirectories()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean hasRemoteDirectories()
-    {
-        return false;
     }
 
 }

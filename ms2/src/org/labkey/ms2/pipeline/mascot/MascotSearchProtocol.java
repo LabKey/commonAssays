@@ -16,13 +16,14 @@
 package org.labkey.ms2.pipeline.mascot;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,9 @@ import java.util.Map;
  */
 public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipelineJob>
 {
-    public MascotSearchProtocol(String name, String description, String xml)
+    public MascotSearchProtocol(String name, String description, String xml, Container container)
     {
-        super(name, description, xml);
+        super(name, description, xml, container);
     }
 
     @Override
@@ -45,11 +46,11 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
 
     @Override
     public MascotPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                               PipeRoot root, List<File> filesInput,
-                                               File fileParameters, @Nullable Map<String, String> variableMap
+                                               PipeRoot root, List<Path> filesInput,
+                                               Path fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
-        return new MascotPipelineJob(this, info, root, getName(), getDirSeqRoot(),
+        return new MascotPipelineJob(this, info, root, getName(),
                 filesInput, fileParameters);
     }
 }

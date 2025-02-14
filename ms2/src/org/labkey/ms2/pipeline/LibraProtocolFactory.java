@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 
@@ -25,7 +26,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 public class LibraProtocolFactory extends AbstractFileAnalysisProtocolFactory
 {
     @Override
-    public AbstractFileAnalysisProtocol createProtocolInstance(String name, String description, String xml)
+    public AbstractFileAnalysisProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
         throw new UnsupportedOperationException();
     }

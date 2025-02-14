@@ -41,9 +41,6 @@ import org.labkey.api.util.HelpTopic;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.SearchFormUtil;
-import org.labkey.ms2.pipeline.client.CutSite;
-import org.labkey.ms2.pipeline.client.Enzyme;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -789,77 +786,6 @@ public class MascotClientImpl implements SearchClient
         return mods;
     }
 
-    public Map<String, List<String>> getEnzymeMap()
-    {
-        errorCode = 0;
-        errorString = "";
-
-        findWorkableSettings (false);
-
-        Properties results;
-        Properties parameters = new Properties();
-        parameters.setProperty("cgi", "labkeydbmgmt.pl");
-        parameters.setProperty("cmd", "getenzymes");
-
-        results = request(parameters, false);
-
-        List<Enzyme> enzymes = new ArrayList<>();
-        String dbsString = results.getProperty("HTTPContent", "");
-        String[] contentLines = dbsString.split("\n");
-        String mascotName = "";
-        char[] cuts = null;
-        char[] noCuts = new char[0];
-        boolean nTerm = false;
-
-        for (String contentLine : contentLines)
-        {
-            contentLine = contentLine.trim();
-
-            if(contentLine.startsWith("Title"))
-            {
-                mascotName = contentLine.substring(contentLine.indexOf(":") +1);
-            }
-            else if(contentLine.startsWith("Cleavage"))
-            {
-                String cutString = contentLine.substring(contentLine.indexOf(":")+1);
-                int numCuts = cutString.length();
-                cuts = new char[numCuts];
-                for(int i = 0; i < numCuts; i++)
-                {
-                    cuts[i] = cutString.charAt(i);
-                }
-            }
-            else if(contentLine.startsWith("Restrict"))
-            {
-                String noCutString = contentLine.substring(contentLine.indexOf(":")+1);
-                int numNoCuts = noCutString.length();
-                noCuts = new char[numNoCuts];
-                for(int i = 0; i < numNoCuts; i++)
-                {
-                    noCuts[i] = noCutString.charAt(i);
-                }
-            }
-            else if(contentLine.equals("Cterm"))
-            {
-                nTerm = false;
-            }
-            else if(contentLine.equals("Nterm"))
-            {
-                nTerm = true;
-            }
-            else if(contentLine.equals("*"))
-            {
-                CutSite[] cutSites = new CutSite[1];
-                cutSites[0] = new CutSite(cuts,noCuts,mascotName,nTerm);
-                Enzyme enzyme = new Enzyme(mascotName,null, cutSites);
-                enzymes.add(enzyme);
-                noCuts = new char[0];
-            }
-        }
-        return SearchFormUtil.mascot2Tpp(enzymes);
-
-    }
-
     public int search (String paramFile, String queryFile, String resultFile)
     {
         errorCode = 0;
@@ -1154,7 +1080,7 @@ public class MascotClientImpl implements SearchClient
 
         // Decoy controlled by "mascot, decoy", submitted as "1" or nothing at all
         String decoyValue = parser.getInputParameter("mascot, decoy");
-        if (decoyValue != null && ((Boolean)new BooleanConverter().convert(Boolean.class, decoyValue)).booleanValue())
+        if (decoyValue != null && new BooleanConverter().convert(Boolean.class, decoyValue).booleanValue())
         {
             parts.put("DECOY", "1");
         }
@@ -1232,7 +1158,7 @@ public class MascotClientImpl implements SearchClient
                         {
                             getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
                                     queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
-                                    (attempt + 1) + ".\n" + "Mascot output: " + sb.toString());
+                                    (attempt + 1) + ".\n" + "Mascot output: " + sb);
                         }
                     }
                     catch (IOException err)
@@ -1449,7 +1375,7 @@ public class MascotClientImpl implements SearchClient
         catch (Exception x)
         {
             String password = parameters.getProperty("password","");
-            if (password.length() >0)
+            if (!password.isEmpty())
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
             // If using the class logger, then assume user interface will deliver the error message.
             String msg = "Connect("+_url+","+parameters.getProperty("username","<null>")+","
@@ -1496,10 +1422,10 @@ public class MascotClientImpl implements SearchClient
         catch (MalformedURLException x)
         {
             String password = parameters.getProperty("password","");
-            if (password.length() >0)
+            if (!password.isEmpty())
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
             getLogger().warn("Exception "+x.getClass()+" connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(parameters.getProperty("password","").length()>0 ? "***" : "")
+                    +(!parameters.getProperty("password", "").isEmpty() ? "***" : "")
                     +","+_proxyURL+")="+mascotRequestURL, x);
             //Fail to parse Mascot Server URL
             errorCode = 1;
@@ -1507,10 +1433,10 @@ public class MascotClientImpl implements SearchClient
         catch (Exception x)
         {
             String password = parameters.getProperty("password","");
-            if (password.length() >0)
+            if (!password.isEmpty())
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
             getLogger().warn("Exception "+x.getClass()+" on connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(parameters.getProperty("password","").length()>0 ? "***" : "")
+                    +(!parameters.getProperty("password", "").isEmpty() ? "***" : "")
                     +","+_proxyURL+")="+mascotRequestURL, x);
             //Fail to interact with Mascot Server
             errorCode = 2;

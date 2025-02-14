@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.client.ParameterNames;
+import org.labkey.ms2.pipeline.ParameterNames;
 import org.labkey.ms2.pipeline.sequest.AbstractSequestParams;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ConverterFactory;
@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Support for generating comet.params for 2015.02 and newer
@@ -507,7 +508,7 @@ public class Comet2015ParamsBuilder extends SequestParamsBuilder
     private List<ResidueMod> parseMods(List<String> parserError, String paramName, PeptideTerminalModificationType type)
     {
         String mods = sequestInputParams.get(paramName);
-        if (mods == null || mods.equals("")) return Collections.emptyList();
+        if (mods == null || mods.isEmpty()) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
         List<Character> residues = new ArrayList<>();
         List<String> masses = new ArrayList<>();
@@ -572,27 +573,15 @@ public class Comet2015ParamsBuilder extends SequestParamsBuilder
             {
                 String nTermDistance = sequestInputParams.get(_variant.getParamPrefix() + ", variable_N_terminus_distance");
                 terminus = "2"; // 2 = peptide N-terminus
-                if (nTermDistance != null)
-                {
-                    distance = nTermDistance;
-                }
-                else
-                {
-                    distance = "0"; //0 = only applies to terminal residue
-                }
+                // 0 = only applies to terminal residue
+                distance = Objects.requireNonNullElse(nTermDistance, "0");
             }
             else if (mod.getType() == PeptideTerminalModificationType.C)
             {
                 String cTermDistance = sequestInputParams.get(_variant.getParamPrefix() + ", variable_C_terminus_distance");
                 terminus = "3"; // 3 = peptide C-terminus
-                if (cTermDistance != null)
-                {
-                    distance = cTermDistance;
-                }
-                else
-                {
-                    distance = "0"; //0 = only applies to terminal residue
-                }
+                //0 = only applies to terminal residue
+                distance = Objects.requireNonNullElse(cTermDistance, "0");
             }
             String required = "0";
             // http://comet-ms.sourceforge.net/parameters/parameters_201502/variable_mod06.php
