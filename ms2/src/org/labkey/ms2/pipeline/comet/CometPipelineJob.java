@@ -27,6 +27,7 @@ import org.labkey.ms2.pipeline.sequest.SequestSearchTask;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -35,7 +36,7 @@ import java.util.List;
  */
 public class CometPipelineJob extends AbstractMS2SearchPipelineJob
 {
-    private static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
+    public static final TaskId TASK_ID = new TaskId(CometPipelineJob.class);
 
     @JsonCreator
     protected CometPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
@@ -47,12 +48,11 @@ public class CometPipelineJob extends AbstractMS2SearchPipelineJob
                               ViewBackgroundInfo info,
                               PipeRoot root,
                               String name,
-                              File dirSequenceRoot,
-                              List<File> filesMzXML,
-                              File fileInputXML
+                              List<Path> filesMzXML,
+                              Path fileInputXML
     ) throws IOException
     {
-        super(protocol, SequestPipelineProvider.name, info, root, name, dirSequenceRoot, fileInputXML, filesMzXML);
+        super(protocol, SequestPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
         header("Comet search for " + getBaseName());
         writeInputFilesToLog();

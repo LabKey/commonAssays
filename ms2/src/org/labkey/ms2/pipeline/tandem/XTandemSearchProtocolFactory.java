@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.tandem;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -65,16 +66,16 @@ public class XTandemSearchProtocolFactory extends AbstractMS2SearchProtocolFacto
     }
 
     @Override
-    public XTandemSearchProtocol createProtocolInstance(String name, String description, String xml)
+    public XTandemSearchProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
-        return new XTandemSearchProtocol(name, description, xml);
+        return new XTandemSearchProtocol(name, description, xml, container);
     }
 
     @Override
-    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser, Container container)
     {
         parser.removeInputParameter("protein, taxon");
 
-        return super.createProtocolInstance(parser);
+        return super.createProtocolInstance(parser, container);
     }
 }

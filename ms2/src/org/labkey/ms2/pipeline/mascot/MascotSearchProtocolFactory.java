@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.mascot;
 
+import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -50,17 +51,17 @@ public class MascotSearchProtocolFactory extends AbstractMS2SearchProtocolFactor
     }
 
     @Override
-    public MascotSearchProtocol createProtocolInstance(String name, String description, String xml)
+    public MascotSearchProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
-        return new MascotSearchProtocol(name, description, xml);
+        return new MascotSearchProtocol(name, description, xml, container);
     }
 
     @Override
-    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser)
+    protected AbstractMS2SearchProtocol createProtocolInstance(ParamParser parser, Container container)
     {
         parser.removeInputParameter("pipeline, mascot server");
         parser.removeInputParameter("pipeline, mascot http proxy");
 
-        return super.createProtocolInstance(parser);
+        return super.createProtocolInstance(parser, container);
     }
 }

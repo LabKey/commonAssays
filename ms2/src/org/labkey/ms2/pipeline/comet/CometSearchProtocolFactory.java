@@ -15,6 +15,7 @@
  */
 package org.labkey.ms2.pipeline.comet;
 
+import org.labkey.api.data.Container;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
@@ -49,8 +50,8 @@ public class CometSearchProtocolFactory extends AbstractMS2SearchProtocolFactory
     }
 
     @Override
-    public AbstractMS2SearchProtocol createProtocolInstance(String name, String description, String xml)
+    public CometSearchProtocol createProtocolInstance(String name, String description, String xml, Container container)
     {
-        return new CometSearchProtocol(name, description, xml);
+        return new CometSearchProtocol(name, description, xml, container);
     }
 }

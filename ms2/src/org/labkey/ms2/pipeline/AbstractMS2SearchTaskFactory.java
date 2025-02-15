@@ -26,6 +26,7 @@ import org.labkey.api.util.NetworkDrive;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <code>AbstractMS2SearchTaskFactory</code>
@@ -35,14 +36,14 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
     private List<FileType> _inputTypes;
     private boolean _enabled = true;
 
-    protected AbstractMS2SearchTaskFactory(Class namespaceClass)
+    protected AbstractMS2SearchTaskFactory(Class<?> namespaceClass)
     {
         super(namespaceClass);
     }
 
     public static <FactoryType extends AbstractMS2SearchTaskFactory> FactoryType findFactory(Class<FactoryType> factoryClass)
     {
-        for (TaskFactory taskFactory : PipelineJobService.get().getTaskFactories(null))
+        for (TaskFactory<?> taskFactory : PipelineJobService.get().getTaskFactories(null))
         {
             if (factoryClass.isAssignableFrom(taskFactory.getClass()))
             {
@@ -83,11 +84,7 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
     @Override
     public List<FileType> getInputTypes()
     {
-        if (_inputTypes == null)
-        {
-            return Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
-        }
-        return _inputTypes;
+        return Objects.requireNonNullElseGet(_inputTypes, () -> Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML));
     }
 
     @Override

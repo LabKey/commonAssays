@@ -38,7 +38,6 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
-import org.labkey.ms2.pipeline.client.ParameterNames;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -310,9 +309,9 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             List<File> spectraFiles = new ArrayList<>();
 
             boolean proteinProphetOutput = getJobSupport().isProphetEnabled();
-            if (inputFiles.size() > 0)
+            if (!inputFiles.isEmpty())
             {
-                try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+                try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
                 {
                     for (File inputFile : inputFiles)
                         inputWorkFiles.add(_wd.inputFile(inputFile, false));
@@ -395,7 +394,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                         if ("yes".equalsIgnoreCase(params.get("pipeline prophet, use pI")))
                             prophetOpts.append("I");
                         String decoyTag = params.get("pipeline prophet, decoy tag");
-                        if (decoyTag != null && !"".equals(decoyTag))
+                        if (decoyTag != null && !decoyTag.isEmpty())
                             interactCmd.add("-d" + decoyTag);
                     }
                 }
@@ -409,13 +408,13 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     interactCmd.add("-nR");
 
                 String paramMinProb = params.get(ParameterNames.MIN_PEPTIDE_PROPHET_PROBABILITY);
-                if (paramMinProb == null || paramMinProb.length() == 0)
+                if (paramMinProb == null || paramMinProb.isEmpty())
                     paramMinProb = params.get("pipeline prophet, min peptide probability");
-                if (paramMinProb != null && paramMinProb.length() > 0)
+                if (paramMinProb != null && !paramMinProb.isEmpty())
                     interactCmd.add("-p" + paramMinProb);
                 
                 paramMinProb = params.get(ParameterNames.MIN_PROTEIN_PROPHET_PROBABILITY);
-                if (paramMinProb != null && paramMinProb.length() > 0)
+                if (paramMinProb != null && !paramMinProb.isEmpty())
                     interactCmd.add("-pr" + paramMinProb);
             }
 
@@ -528,7 +527,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 }
             }
 
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
                 File filePepXML = _wd.outputFile(fileWorkPepXML);
 
@@ -637,12 +636,6 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         }
     }
 
-    private boolean isSpectraProcessor(Map<String, String> params)
-    {
-        // Spectrum file(s) required to do quantitation.
-        return (getQuantitionAlgorithm(params) != null);
-    }
-    
     private QuantitationAlgorithm getQuantitionAlgorithm(Map<String, String> params)
     {
         String algorithmName = params.get(ParameterNames.QUANTITATION_ALGORITHM);
@@ -669,16 +662,15 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
     public static class TestCase extends Assert
     {
-        private Mockery _context;
-        private Factory _factory;
-        private PipelineJob _job;
+        private final Factory _factory;
+        private final PipelineJob _job;
 
         public TestCase()
         {
-            _context = new Mockery();
-            _context.setImposteriser(ClassImposteriser.INSTANCE);
-            _factory = _context.mock(Factory.class);
-            _job = _context.mock(PipelineJob.class);
+            Mockery context = new Mockery();
+            context.setImposteriser(ClassImposteriser.INSTANCE);
+            _factory = context.mock(Factory.class);
+            _job = context.mock(PipelineJob.class);
         }
 
         @Test
@@ -697,19 +689,19 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             params1.put("pipeline quantitation, residue label mass", "4.027@[,4.027@K");
             params1.put("residue, modification mass", "28.029@K,28.029@[,57.02146@C");
             params1.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@[");
-            assertTrue(Arrays.equals(new String[] { "-X-nn,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params1, "/pathToMzXML", _factory, null)));
+            assertArrayEquals(new String[]{"-X-nn,4.027 -nK,4.027 -d\"/pathToMzXML\""}, QuantitationAlgorithm.xpress.getCommand(params1, "/pathToMzXML", _factory, null));
 
             Map<String, String> params2 = new HashMap<>();
             params2.put("pipeline quantitation, residue label mass", "4.027@A,4.027@K");
             params2.put("residue, modification mass", "28.029@K,28.029@A,57.02146@C");
             params2.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@A");
-            assertTrue(Arrays.equals(new String[] { "-X-nA,4.027 -nK,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params2, "/pathToMzXML", _factory, null)));
+            assertArrayEquals(new String[]{"-X-nA,4.027 -nK,4.027 -d\"/pathToMzXML\""}, QuantitationAlgorithm.xpress.getCommand(params2, "/pathToMzXML", _factory, null));
 
             Map<String, String> params3 = new HashMap<>();
             params3.put("pipeline quantitation, residue label mass", "4.027@]");
             params3.put("residue, modification mass", "28.029@K,28.029@],57.02146@C");
             params3.put("residue, potential modification mass", "0.984016@N,15.99491@M,4.027@K,4.027@]");
-            assertTrue(Arrays.equals(new String[] { "-X-nc,4.027 -d\"/pathToMzXML\"" }, QuantitationAlgorithm.xpress.getCommand(params3, "/pathToMzXML", _factory, null)));
+            assertArrayEquals(new String[]{"-X-nc,4.027 -d\"/pathToMzXML\""}, QuantitationAlgorithm.xpress.getCommand(params3, "/pathToMzXML", _factory, null));
         }
     }
 }

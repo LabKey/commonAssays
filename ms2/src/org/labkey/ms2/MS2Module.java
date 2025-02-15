@@ -67,7 +67,6 @@ import org.labkey.ms2.pipeline.comet.Comet2015ParamsBuilder;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
-import org.labkey.ms2.pipeline.rollup.FractionRollupPipelineProvider;
 import org.labkey.ms2.pipeline.sequest.BooleanParamsValidator;
 import org.labkey.ms2.pipeline.sequest.ListParamsValidator;
 import org.labkey.ms2.pipeline.sequest.MultipleDoubleParamsValidator;
@@ -105,7 +104,7 @@ import java.util.Set;
 public class MS2Module extends SpringModule implements ProteomicsModule
 {
     public static final String WEBPART_PEP_SEARCH = "Peptide Search";
-    public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX);
+    public static final MS2SearchExperimentRunType SEARCH_RUN_TYPE = new MS2SearchExperimentRunType("MS2 Searches", MS2Schema.TableType.MS2SearchRuns.toString(), Handler.Priority.MEDIUM, MS2Schema.XTANDEM_PROTOCOL_OBJECT_PREFIX, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX, MS2Schema.IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     public static final String MS2_RUNS_NAME = "MS2 Runs";
     public static final String MS2_MODULE_NAME = "MS2";
 
@@ -188,7 +187,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         service.registerPipelineProvider(new MascotCPipelineProvider(this), "Mascot (Cluster)");
         service.registerPipelineProvider(new SequestPipelineProvider(this));
         service.registerPipelineProvider(new CometPipelineProvider(this), "Comet");
-        service.registerPipelineProvider(new FractionRollupPipelineProvider(this));
         service.registerPipelineProvider(new ProteinProphetPipelineProvider(this));
 
         final Set<ExperimentRunType> runTypes = new HashSet<>();
@@ -198,7 +196,6 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         runTypes.add(new MS2SearchExperimentRunType("Comet Searches", MS2Schema.TableType.CometSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.COMET_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Mascot Searches", MS2Schema.TableType.MascotSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.MASCOT_PROTOCOL_OBJECT_PREFIX));
         runTypes.add(new MS2SearchExperimentRunType("Sequest Searches", MS2Schema.TableType.SequestSearchRuns.toString(), Handler.Priority.HIGH, MS2Schema.SEQUEST_PROTOCOL_OBJECT_PREFIX));
-        runTypes.add(new MS2SearchExperimentRunType("Fraction Rollups", MS2Schema.TableType.FractionRollupsRuns.toString(), Handler.Priority.HIGH, MS2Schema.FRACTION_ROLLUP_PROTOCOL_OBJECT_PREFIX));
 
         ExperimentService.get().registerExperimentRunTypeSource(container ->
         {

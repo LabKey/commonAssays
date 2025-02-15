@@ -40,7 +40,7 @@ public class MS2PipelineProvider extends PipelineProvider
     }
 
     @Override
-    public HttpView getSetupWebPart(Container container)
+    public HttpView<Object> getSetupWebPart(Container container)
     {
         return new SetupWebPart();
     }
@@ -55,10 +55,10 @@ public class MS2PipelineProvider extends PipelineProvider
 
         String actionId = createActionId(PipelineController.UploadAction.class, "Import Search Results");
         addAction(actionId, PipelineController.UploadAction.class, "Import Search Results",
-                directory, directory.listFiles(MS2PipelineManager.getUploadFilter()), true, true, includeAll);
+                directory, directory.listPaths(MS2PipelineManager.getUploadFilter()), true, true, includeAll);
     }
 
-    class SetupWebPart extends WebPartView
+    static class SetupWebPart extends WebPartView<Object>
     {
         public SetupWebPart()
         {

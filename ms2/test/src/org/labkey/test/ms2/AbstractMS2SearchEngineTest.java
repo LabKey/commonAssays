@@ -20,7 +20,9 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.components.ui.lineage.LineageGraph;
+import org.labkey.test.util.PipelineAnalysisHelper;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.ui.Select;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,6 +31,40 @@ import static org.junit.Assert.assertTrue;
 public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
 {
     protected boolean _useOnlyOneFasta = false;
+
+    public static final String MULTI_FASTA_PROTOCOL_XML = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <bioml>
+                <note label="pipeline, database" type="input">Bovine_mini1.fasta;Bovine_mini2.fasta;Bovine_mini3.fasta</note>
+                <note label="protein, cleavage site" type="input">[KR]|{P}</note>
+                <note label="pipeline prophet, min probability" type="input">0</note>
+                <note label="pipeline prophet, min protein probability" type="input">0</note>
+                <note label="pipeline quantitation, residue label mass" type="input">9.0@C</note>
+                <note label="pipeline quantitation, algorithm" type="input">xpress</note>
+                <note label="pipeline, protocol name" type="input">test2</note>
+                <note label="pipeline, protocol description" type="input">This is a test protocol using the defaults.</note>
+                <note label="pipeline prophet, min peptide probability" type="input">0</note>
+                <note label="spectrum, minimum peaks" type="input">10</note>
+                <note label="mzxml2search, charge" type="input">1,3</note>
+                <note label="pipeline mspicture, enable" type="input">true</note>
+            </bioml>""";
+
+    public static final String SINGLE_FASTA_PROTOCOL_XML = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <bioml>
+                <note label="pipeline, database" type="input">Bovine_mini1.fasta</note>
+                <note label="protein, cleavage site" type="input">[KR]|{P}</note>
+                <note label="pipeline prophet, min probability" type="input">0</note>
+                <note label="pipeline prophet, min protein probability" type="input">0</note>
+                <note label="pipeline quantitation, residue label mass" type="input">9.0@C</note>
+                <note label="pipeline quantitation, algorithm" type="input">xpress</note>
+                <note label="pipeline, protocol name" type="input">test2</note>
+                <note label="pipeline, protocol description" type="input">This is a test protocol using the defaults.</note>
+                <note label="pipeline prophet, min peptide probability" type="input">0</note>
+                <note label="spectrum, minimum peaks" type="input">10</note>
+                <note label="mzxml2search, charge" type="input">1,3</note>
+                <note label="pipeline mspicture, enable" type="input">true</note>
+            </bioml>""";
 
     @Override
     abstract protected void doCleanup(boolean afterTest) throws TestTimeoutException;
@@ -53,28 +89,12 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         _fileBrowserHelper.selectFileBrowserItem("bov_sample/");
         setupEngine();
 
-        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE1 + "']"), WAIT_FOR_JAVASCRIPT);
-        assertTextPresent("Minimum PeptideProphet prob", "Minimum ProteinProphet prob", "Quantitation engine");
+        PipelineAnalysisHelper helper = new PipelineAnalysisHelper(this);
+        helper.waitForProtocolSelect();
+        helper.setProtocol("test2", _useOnlyOneFasta ? SINGLE_FASTA_PROTOCOL_XML : MULTI_FASTA_PROTOCOL_XML);
+        helper.setDescription("This is a test protocol for Verify.");
+        clickButton("Analyze");
 
-        searchMS2LibraCheck();
-
-        log("Set analysis parameters.");
-        setFormElement(Locator.name("protocolName"), "test2");
-        setFormElement(Locator.name("protocolDescription"), "This is a test protocol for Verify.");
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
-
-        if (!_useOnlyOneFasta)
-        {
-            selectOptionByText(Locator.name("sequenceDB"), DATABASE2);
-            selectOptionByText(Locator.name("sequenceDB"), DATABASE3);
-        }
-
-        setFormElement(Locator.name("configureXml"), "");
-        waitAndClick(Locator.xpath("//a[@class='labkey-button']/span[text() = 'OK']"));
-        setFormElement(Locator.name("configureXml"), INPUT_XML);
-        assertTextPresent("Quantitation mass tolerance", "Quantitation residue mass label");
-        setFormElement(Locator.name("minPeptideProphetProb"), "0");
-        clickButton("Search");
         // Search is submitted as AJAX, and upon success the browser is redirected to a new page. Wait for it to load
         waitForElement(Locator.linkWithText("Data Pipeline"), WAIT_FOR_JAVASCRIPT);
         sleep(5000); // without this sleep, some machines try to redirect back to the begin.view page after the Data Pipeline link is clicked
