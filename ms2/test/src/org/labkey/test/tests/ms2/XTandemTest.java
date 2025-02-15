@@ -32,6 +32,7 @@ import org.labkey.test.utils.ms2.Ms2DataRegionExportHelper;
 
 import java.io.File;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -48,7 +49,6 @@ public class XTandemTest extends AbstractXTandemTest
     protected static final String SEARCH_FIND_FASTA3 = "search target ribosomal protein S16 (BS17)";
     protected static final String PROTOCOL = "X!Tandem analysis";
     protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_ID = "peptideProphetRadioButton";
-    protected static final String PEPTIDE_CROSSTAB_RADIO_PROBABILITY_VALUE = "probability";
     protected static final String PEPTIDE_CROSSTAB__PROBABILITY_TEXTBOX_NAME = "peptideProphetProbability";
     protected static final String PEPTIDE_CROSSTAB_RADIO_NAME = "peptideFilterType";
     protected static final String PEPTIDE_CROSSTAB_RADIO_VALUE_NONE = "none";
@@ -59,7 +59,7 @@ public class XTandemTest extends AbstractXTandemTest
         log("Verifying that pipeline files were cleaned up properly");
         File test2 = new File(PIPELINE_PATH + "/bov_sample/" + SEARCH_TYPE + "/test2");
         if (test2.exists())
-            fail("Pipeline files were not cleaned up; test2("+test2.toString()+") directory still exists");
+            fail("Pipeline files were not cleaned up; test2("+ test2 +") directory still exists");
 
         basicMS2Check();
     }
@@ -157,7 +157,7 @@ public class XTandemTest extends AbstractXTandemTest
         setFormElement(Locator.name("minimumProbability"), "");
         clickButton("Search");
         clickAndWait(Locator.id("expandCollapse-ProteinSearchProteinMatches"), 0);
-        assertTrue(!(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1)));
+        assertFalse(isTextPresent(SEARCH_FIND_FASTA1) || isTextPresent(SEARCH_FIND_ALT_FASTA1));
         assertTextNotPresent(SEARCH_FIND_FASTA1);
         assertTextPresent("No data to show");
 

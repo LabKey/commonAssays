@@ -20,11 +20,14 @@ import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.categories.MS2;
+import org.labkey.test.categories.XTandem;
 import org.labkey.test.components.ui.lineage.LineageGraph;
+import org.labkey.test.util.PipelineAnalysisHelper;
 
 import java.io.File;
 
-@Category({Daily.class})
+@Category({Daily.class, MS2.class, XTandem.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 4)
 public class QuantitationTest extends AbstractXTandemTest
 {
@@ -34,6 +37,8 @@ public class QuantitationTest extends AbstractXTandemTest
         "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n" +
         "<bioml>\n" +
             "  <note label=\"pipeline, protocol name\" type=\"input\">" + LIBRA_PROTOCOL_NAME + "</note> \n" +
+            "  <note label=\"pipeline, database\" type=\"input\">Bovine_mini1.fasta</note>\n" +
+            "  <note label=\"protein, cleavage site\" type=\"input\">[KR]|{P}</note>\n" +
             "  <note label=\"pipeline, protocol description\" type=\"input\">Search with Libra quantitation</note> \n" +
             "  <note label=\"pipeline prophet, min peptide probability\" type=\"input\">0</note> \n" +
             "  <note label=\"pipeline prophet, min protein probability\" type=\"input\">0</note> \n" +
@@ -55,14 +60,14 @@ public class QuantitationTest extends AbstractXTandemTest
 
         setupEngine();
 
-        waitForElement(Locator.xpath("//select[@name='sequenceDB']/option[.='" + DATABASE1 + "']" ), WAIT_FOR_JAVASCRIPT);
+
         log("Set analysis parameters.");
-        setFormElement(Locator.name("protocolName"), LIBRA_PROTOCOL_NAME);
-        setFormElement(Locator.name("protocolDescription"), "Search with Libra quantitation");
-        selectOptionByText(Locator.name("sequenceDB"), DATABASE1);
-        setFormElement(Locator.name("configureXml"), "");
-        waitAndClick(Locator.xpath("//a[@class='labkey-button']/span[text() = 'OK']"));
-        setFormElement(Locator.name("configureXml"), LIBRA_INPUT_XML);
+        PipelineAnalysisHelper helper = new PipelineAnalysisHelper(this);
+        helper.waitForProtocolSelect();
+        helper.setProtocol(LIBRA_PROTOCOL_NAME, LIBRA_INPUT_XML);
+        helper.setDescription("Search with Libra quantitation");
+        clickButton("Analyze");
+
         clickButton("Search");
         log("View the analysis log.");
         // Search is submitted as AJAX, and upon success the browser is redirected to a new page. Wait for it to load
