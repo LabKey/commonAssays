@@ -60,7 +60,6 @@ public class QuantitationTest extends AbstractXTandemTest
 
         setupEngine();
 
-
         log("Set analysis parameters.");
         PipelineAnalysisHelper helper = new PipelineAnalysisHelper(this);
         helper.waitForProtocolSelect();
@@ -68,11 +67,7 @@ public class QuantitationTest extends AbstractXTandemTest
         helper.setDescription("Search with Libra quantitation");
         clickButton("Analyze");
 
-        clickButton("Search");
         log("View the analysis log.");
-        goToModule("Pipeline");
-        // Search is submitted as AJAX, and upon success the browser is redirected to a new page. Wait for it to load
-        waitForText(WAIT_FOR_JAVASCRIPT, "Protein Group Results");
         goToModule("Pipeline");
 
         String runDescription = SAMPLE_BASE_NAME + " (" + LIBRA_PROTOCOL_NAME + ")";
