@@ -17,13 +17,12 @@
 package org.labkey.ms2.query;
 
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
-import org.labkey.api.data.TableInfo;
+import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.query.DetailsURL;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.LookupForeignKey;
+import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.util.ContainerContext;
 import org.labkey.api.view.ActionURL;
 import org.labkey.ms2.MS2Controller;
@@ -43,23 +42,18 @@ public class RunTableInfo extends FilteredTable<MS2Schema>
 
         DetailsURL url = new DetailsURL(new ActionURL(MS2Controller.ShowListAction.class, getContainer()));
         url.setContainerContext(new ContainerContext.FieldKeyContext(FieldKey.fromParts("Container")));
-        var containerColumn = getMutableColumn("Container");
+        var containerColumn = getMutableColumnOrThrow("Container");
         containerColumn.setURL(url);
 
         var folderColumn = wrapColumn("Folder", getRealTable().getColumn("Container"));
         folderColumn.setURL(url);
         addColumn(folderColumn);
 
-        var erLSIDColumn = getMutableColumn("ExperimentRunLSID");
+        var erLSIDColumn = getMutableColumnOrThrow("ExperimentRunLSID");
         erLSIDColumn.setLabel("Experiment Run");
-        erLSIDColumn.setFk(new LookupForeignKey("LSID")
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                ExpSchema schema = new ExpSchema(_userSchema.getUser(), _userSchema.getContainer());
-                return schema.getRunsTable();
-            }
-        });
+        erLSIDColumn.setFk(new QueryForeignKey.Builder(_userSchema, getContainerFilter()).
+                schema(ExpSchema.SCHEMA_NAME).
+                table(ExpSchema.TableType.Runs.toString()).
+                key(ExpRunTable.Column.LSID));
     }
 }
