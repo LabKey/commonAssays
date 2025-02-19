@@ -166,7 +166,7 @@ public class FCSHeader
         if (btim == null)
             return 0;
 
-        return parseTimeToMillis(btim);
+        return parseTime(btim);
     }
 
     public long getEndTime()
@@ -175,7 +175,7 @@ public class FCSHeader
         if (etim == null)
             return 0;
 
-        return parseTimeToMillis(etim);
+        return parseTime(etim);
     }
 
     // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
@@ -187,9 +187,9 @@ public class FCSHeader
 
     // Issue 38649: flow: parse fractional seconds used in $BTIM keyword
     // turns off strict to allow overflow of jiffy seconds
-    private long parseTimeToMillis(String dateStr)
+    private long parseTime(String dateStr)
     {
-        return DateUtil.parseTimeToMillis(dateStr, false);
+        return DateUtil.parseTime(dateStr, false);
     }
 
     /** Get the duration in seconds. */
