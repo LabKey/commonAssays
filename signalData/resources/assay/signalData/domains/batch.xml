@@ -1,0 +1,19 @@
+<ap:domain xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:ap="http://labkey.org/study/assay/xml">
+    <exp:Description>Signal Data Assay Batch fields</exp:Description>
+    <exp:PropertyDescriptor>
+        <exp:Name>XAxis</exp:Name>
+        <exp:Hidden>true</exp:Hidden>
+        <exp:RangeURI>http://www.w3.org/2001/XMLSchema#string</exp:RangeURI>
+        <exp:Label>X-Axis Label</exp:Label>
+        <exp:DefaultType>FixedValue</exp:DefaultType>
+        <exp:DefaultValue>Time (m)</exp:DefaultValue>
+    </exp:PropertyDescriptor>
+    <exp:PropertyDescriptor>
+        <exp:Name>YAxis</exp:Name>
+        <exp:Hidden>true</exp:Hidden>
+        <exp:RangeURI>http://www.w3.org/2001/XMLSchema#string</exp:RangeURI>
+        <exp:Label>Y-Axis Label</exp:Label>
+        <exp:DefaultType>FixedValue</exp:DefaultType>
+        <exp:DefaultValue>mV</exp:DefaultValue>
+    </exp:PropertyDescriptor>
+</ap:domain>

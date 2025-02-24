@@ -1,0 +1,14 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Signal Data Quality Control">
+    <dependencies>
+        <dependency path="clientapi/ext4"/>
+        <dependency path="clientapi/ext3"/>
+        <dependency path="vis/vis"/>
+        <dependency path="signaldata/QCView/regression.js"/>
+        <dependency path="signaldata/QCView/Stats.js"/>
+        <dependency path="signaldata/QCView/DataService.js"/>
+        <dependency path="signaldata/QCView/SpectrumPlot.js"/>
+        <dependency path="signaldata/QCView/ProvisionalRun.js"/>
+        <dependency path="signaldata/QCView/SampleCreator.js"/>
+        <dependency path="signaldata/QCView/QualityControl.js"/>
+    </dependencies>
+</view>

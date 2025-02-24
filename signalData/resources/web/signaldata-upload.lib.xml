@@ -1,0 +1,13 @@
+<libraries xmlns="http://labkey.org/clientLibrary/xml/">
+    <library compileInProductionMode="false">
+        <script path="signaldata/signaldata.css"/>
+        <script path="signaldata/UploadView/UploadLog.js"/>
+        <script path="signaldata/UploadView/uploadResultFiles.js"/>
+        <script path="signaldata/UploadView/uploadResultDataForm.js"/>
+    </library>
+    <dependencies>
+        <dependency path="Ext4ClientApi"/>
+        <dependency path="File"/>
+        <!--<dependency path="FileUploadField.js"/>-->
+    </dependencies>
+</libraries>

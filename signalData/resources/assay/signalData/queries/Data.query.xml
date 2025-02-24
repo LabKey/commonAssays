@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ * Copyright (c) 2016 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+
+ -->
+<query xmlns="http://labkey.org/data/xml/query">
+    <metadata>
+        <tables xmlns="http://labkey.org/data/xml">
+            <table tableName="Data" tableDbType="TABLE">
+                <updateUrl>/signaldata/update.view?protocolId=${Run/Protocol/RowId}&amp;batchId=${Run/Batch/RowId}&amp;runId=${Run/RowId}&amp;rowId=${RowId}&amp;runName=${Run/Name}</updateUrl>
+                <buttonBarOptions position="both" includeStandardButtons="true">
+                    <includeScript>/signaldata/QCView/SignalData.js</includeScript>
+                    <item insertPosition="end" text="View Selected Runs" requiresSelection="true">
+                        <onClick>LABKEY.SignalData.signalDataSelection(dataRegion, dataRegionName, 'signaldata')</onClick>
+                    </item>
+                </buttonBarOptions>
+                <columns>
+                    <column columnName="WrappedRowId" wrappedColumnName="RowId">
+                        <fk>
+                            <!--<fkDbSchema>By not providing allows defaulting to design's schema</fkDbSchema>-->
+                            <fkTable>SearchSignalDataData</fkTable>
+                            <fkColumnName>RowId</fkColumnName>
+                        </fk>
+                    </column>
+                </columns>
+            </table>
+        </tables>
+    </metadata>
+</query>

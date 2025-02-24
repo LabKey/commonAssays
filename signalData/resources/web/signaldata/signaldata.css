@@ -1,0 +1,19 @@
+
+.signaldata-run-form {
+    margin: 0 5px 0 0;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+}
+
+.signaldata-run-form .x4-panel-body {
+    padding: 10px;
+}
+
+.signaldata-run-form .x4-toolbar .x4-box-target a {
+    margin-bottom: 20px;
+}
+
+.signaldata-upload-target {
+    display:block;
+    overflow:auto;
+}

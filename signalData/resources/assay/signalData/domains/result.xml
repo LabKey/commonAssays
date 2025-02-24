@@ -1,0 +1,14 @@
+<ap:domain xmlns:exp="http://cpas.fhcrc.org/exp/xml" xmlns:ap="http://labkey.org/study/assay/xml">
+    <exp:Description>Signal Data Assay Results</exp:Description>
+    <exp:PropertyDescriptor>
+        <exp:Name>Name</exp:Name>
+        <exp:Required>true</exp:Required>
+        <exp:RangeURI>http://www.w3.org/2001/XMLSchema#string</exp:RangeURI>
+    </exp:PropertyDescriptor>
+    <exp:PropertyDescriptor>
+        <exp:Name>DataFile</exp:Name>
+        <exp:Required>true</exp:Required>
+        <exp:RangeURI>http://cpas.fhcrc.org/exp/xml#fileLink</exp:RangeURI>
+        <exp:Label>Data File</exp:Label>
+    </exp:PropertyDescriptor>
+</ap:domain>

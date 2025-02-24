@@ -1,0 +1,12 @@
+<view xmlns="http://labkey.org/data/xml/view" frame="none" title="Signal Data Update">
+    <dependencies>
+        <dependency path="Ext4"/>
+        <dependency path="Ext4ClientApi"/>
+        <dependency path="clientapi/ext3"/>
+        <dependency path="Dropzone"/>
+        <dependency path="File"/>
+        <dependency path="internal-FileDrop"/>
+        <dependency path="FileUploadField.js"/>
+        <dependency path="signaldata/ResultUpdate/resultupdate.js"/>
+    </dependencies>
+</view>

@@ -1,0 +1,45 @@
+<div>
+    <input type="text" name="runs-search" placeholder="Search Runs" style="margin-bottom: 20px;"/>
+    <span id="manage-signaldata-link"></span>
+    <div id="runsResult"></div>
+</div>
+<script type="text/javascript" nonce="<%=scriptNonce%>">
+    (function() {
+
+        function init() {
+
+            Ext.get('manage-signaldata-link').update(LABKEY.Utils.textLink({
+                text: 'Manage assay design',
+                href: LABKEY.ActionURL.buildURL('assay', 'designer', undefined, {
+                    rowId: LABKEY.page.assay.id,
+                    providerName: LABKEY.page.assay.type
+                })
+            }));
+
+            // Initialize the display grid
+            var qwp = new LABKEY.QueryWebPart({
+                renderTo: 'runsResult',
+                schemaName: LABKEY.page.assay.protocolSchemaName,
+                queryName: 'Data',
+                frame: 'none'
+            });
+
+            // Bind search
+            Ext.get(Ext.DomQuery.select('input[name="runs-search"]')[0]).on('keyup', function(evt, el) {
+                var value = Ext.get(el).getValue();
+                var filter = LABKEY.Filter.create('WRAPPEDROWID/Search', value, LABKEY.Filter.Types.CONTAINS);
+
+                if (value) {
+                    qwp.getDataRegion().replaceFilter(filter, filter);
+                }
+                else {
+                    qwp.getDataRegion().removeFilter(filter);
+                }
+            }, undefined /* scope */, {
+                buffer: 250
+            });
+        }
+
+        Ext.onReady(init);
+    })();
+</script>

@@ -1,0 +1,59 @@
+    <p>Signal Data Files</p>
+    <ol>
+        <li>
+            Import (or paste) the results file. Data must include a column that has the signal data filename (case-sensitive).
+            <br/><a class="signaldata-upload-templatelink labkey-text-link">Download Spreadsheet Template</a><br/>
+        </li>
+        <li>
+            Enter Run-level data and import the relevant signal data files.
+        </li>
+    </ol>
+    <div class="signaldata-upload-target">
+        <table class="lk-fields-table">
+            <tr>
+                <td class="labkey-form-label" style="width: 100px;">Upload Type:</td>
+                <td>
+                    <input type="radio" name="uploadType" value="paste" id="upload-type-paste">Cut/Paste<br/>
+                    <input type="radio" name="uploadType" value="file" id="upload-type-file" checked="checked">File
+                </td>
+            </tr>
+            <tr>
+                <td class="labkey-form-label">Data:</td>
+                <td>
+                    <div class="signaldata-upload-file"></div>
+                    <div class="signaldata-upload-tsv"></div>
+                </td>
+            </tr>
+        </table>
+        <div class="signaldata-upload-button"></div>
+    </div>
+    <div class="signaldata-upload-result-files"></div>
+
+
+<script type="application/javascript" nonce="<%=scriptNonce%>">
+    (function($) {
+        LABKEY.Utils.onReady(function(){
+            var context = <%=webpartContext%>;
+            var metadataFormElId = LABKEY.Utils.id();
+            var metadataFileId = LABKEY.Utils.id();
+            var metadataTSVId = LABKEY.Utils.id();
+            var buttonId = LABKEY.Utils.id();
+            var fileUploadElementId = LABKEY.Utils.id();
+            var templateDivId = LABKEY.Utils.id();
+
+            $('#' + context.wrapperDivId + ' .signaldata-upload-target').attr('id', metadataFormElId);
+            $('#' + context.wrapperDivId + ' .signaldata-upload-file').attr('id', metadataFileId);
+            $('#' + context.wrapperDivId + ' .signaldata-upload-tsv').attr('id', metadataTSVId);
+            $('#' + context.wrapperDivId + ' .signaldata-upload-button').attr('id', buttonId);
+            $('#' + context.wrapperDivId + ' .signaldata-upload-result-files').attr('id', fileUploadElementId);
+            $('#' + context.wrapperDivId + ' .signaldata-upload-templatelink').attr('id', templateDivId);
+
+            // register click handlers
+            $('#upload-type-paste').on('click', function(){LABKEY.SignalData.disableFileUpload();});
+            $('#upload-type-file').on('click', function(){LABKEY.SignalData.enableFileUpload();});
+
+            LABKEY.SignalData.initializeUploadForm(metadataFormElId, metadataFileId, metadataTSVId, buttonId, fileUploadElementId, templateDivId);
+        });
+
+    })(jQuery);
+</script>

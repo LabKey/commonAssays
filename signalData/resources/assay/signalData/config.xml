@@ -1,0 +1,7 @@
+<ap:provider xmlns:ap="http://labkey.org/study/assay/xml">
+    <ap:name>Signal Data</ap:name>
+    <ap:description>X/Y plottable Signal Data</ap:description>
+    <ap:requiredModules>
+        <ap:moduleName>SignalData</ap:moduleName>
+    </ap:requiredModules>
+</ap:provider>
