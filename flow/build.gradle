@@ -5,6 +5,11 @@ plugins {
 }
 
 sourceSets {
+    main {
+        java {
+            srcDirs = ['./src', './enginesrc', "${BuildUtils.getBuildDirPath(project)}/xb"]
+        }
+    }
     engine {
         java {
             srcDirs = ['./enginesrc', "${BuildUtils.getBuildDirPath(project)}/xb"]
@@ -39,9 +44,6 @@ project.tasks.register("engineJar", Jar) {
         jar.dependsOn(project.tasks.schemasCompile)
 }
 
+// The server build directly includes enginesrc (aka flow_engine.jar).
+// However, it is a useful tool for a labkey flow develop for inspecting workspaces and FCS files
 project.tasks.named('engineJar').configure { dependsOn(project.engineClasses) }
-
-// The server build does not need flow_engine.jar
-// however it is a useful tool for a labkey flow develop for inspecting workspaces and FCS files
-//project.tasks.named('assemble').configure { dependsOn(project.tasks.engineJar) }
-//project.tasks.named('module').configure { dependsOn(project.tasks.engineJar) }
