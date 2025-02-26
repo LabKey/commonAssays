@@ -22,8 +22,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.categories.Git;
-import org.labkey.test.categories.SignalData;
+import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.pages.signaldata.SignalDataRunViewerPage;
 import org.labkey.test.pages.signaldata.SignalDataUploadPage;
@@ -38,7 +37,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-@Category({SignalData.class, Git.class})
+@Category({Daily.class})
 public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
     private static final String PROJECT_NAME = "SignalDataRawTest";
@@ -70,7 +69,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
     @BeforeClass
     public static void doSetup() throws Exception
     {
-        SignalDataRawTest test = (SignalDataRawTest) getCurrentTest();
+        SignalDataRawTest test = getCurrentTest();
         SignalDataInitializer _initializer = new SignalDataInitializer(test, test.getProjectName());
         _initializer.setupProject();
     }
