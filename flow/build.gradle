@@ -45,5 +45,5 @@ project.tasks.register("engineJar", Jar) {
 }
 
 // The server build directly includes enginesrc (aka flow_engine.jar).
-// However, it is a useful tool for a labkey flow develop for inspecting workspaces and FCS files
+// However, it is a useful tool for a labkey flow developer for inspecting workspaces and FCS files
 project.tasks.named('engineJar').configure { dependsOn(project.engineClasses) }
