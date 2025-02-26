@@ -5,6 +5,11 @@ plugins {
 }
 
 sourceSets {
+    main {
+        java {
+            srcDirs = ['./src', './enginesrc', "${BuildUtils.getBuildDirPath(project)}/xb"]
+        }
+    }
     engine {
         java {
             srcDirs = ['./enginesrc', "${BuildUtils.getBuildDirPath(project)}/xb"]
@@ -35,10 +40,9 @@ project.tasks.register("engineJar", Jar) {
         jar.archiveClassifier.set("engine")
         jar.from project.sourceSets.engine.output
         jar.archiveBaseName.set("${project.name}_engine")
-        jar.destinationDirectory.set(project.file(project.labkey.explodedModuleLibDir))
         jar.dependsOn(project.tasks.schemasCompile)
 }
 
+// The server build directly includes enginesrc (aka flow_engine.jar).
+// However, it is a useful tool for a labkey flow developer for inspecting workspaces and FCS files
 project.tasks.named('engineJar').configure { dependsOn(project.engineClasses) }
-project.tasks.named('assemble').configure { dependsOn(project.tasks.engineJar) }
-project.tasks.named('module').configure { dependsOn(project.tasks.engineJar) }
