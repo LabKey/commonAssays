@@ -394,7 +394,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
         ElisaController.RunDetailsForm form = new ElisaController.RunDetailsForm();
         form.setProtocolId(protocol.getRowId());
-        form.setSchemaName(schema.getPath().toString());
+        form.setSchemaName(schema.getSchemaPath().toString());
         form.setRunId(run.getRowId());
         form.setRunName(run.getName());
 
