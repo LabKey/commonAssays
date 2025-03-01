@@ -231,7 +231,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
                 runTypes.add(run.getRunType());
             }
             boolean highestScoreFlag = _url.getParameter("highestScore") != null;
-            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), ContainerFilter.current(schema.getContainer()), runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
+            _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), ContainerFilter.current(schema), runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
             // Manually apply the metadata
             _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<>());
         }

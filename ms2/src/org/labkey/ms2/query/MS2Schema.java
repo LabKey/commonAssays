@@ -1555,7 +1555,7 @@ public class MS2Schema extends UserSchema
 
     public TableInfo createPeptidesTableInfo()
     {
-        return createPeptidesTableInfo(true, ContainerFilter.current(getContainer()), null, null);
+        return createPeptidesTableInfo(true, ContainerFilter.current(this), null, null);
     }
 
     public TableInfo createPeptidesTableInfo(boolean includeFeatureFk, ContainerFilter containerFilter, SimpleFilter filter, Iterable<FieldKey> defaultColumns)

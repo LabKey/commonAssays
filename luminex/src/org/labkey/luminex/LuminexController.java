@@ -657,7 +657,7 @@ public class LuminexController extends SpringActionController
             PipelineService.get().queueJob(job);
 
             response.put("success", true);
-            response.put(ActionURL.Param.returnUrl.name(), urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.current(getContainer())));
+            response.put(ActionURL.Param.returnUrl.name(), urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.current(this)));
             return response;
         }
     }
