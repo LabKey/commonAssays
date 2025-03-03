@@ -142,7 +142,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
             public TableInfo getLookupTableInfo()
             {
                 ExpRunTable result = (ExpRunTable)MS2Schema.TableType.MS2SearchRuns.createTable(_userSchema, getContainerFilter());
-                result.setContainerFilter(ContainerFilter.EVERYTHING);
+                result.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
                 return result;
             }
         });
