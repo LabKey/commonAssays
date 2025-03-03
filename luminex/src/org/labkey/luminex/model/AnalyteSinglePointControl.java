@@ -21,9 +21,6 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.FieldKey;
 import org.labkey.luminex.LuminexDataHandler;
-import org.labkey.luminex.model.AbstractLuminexControlAnalyte;
-import org.labkey.luminex.model.Analyte;
-import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.query.AnalyteSinglePointControlTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
@@ -80,7 +77,7 @@ public class AnalyteSinglePointControl extends AbstractLuminexControlAnalyte
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(null, true);
-        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
         Double average = new TableSelector(analyteSinglePointControlTable, Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
 
         LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average);

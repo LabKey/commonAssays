@@ -203,13 +203,13 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         if (flowProtocol != null)
             analysisFilter = flowProtocol.getFCSAnalysisFilter();
 
-        if (analysisFilter != null && analysisFilter.getClauses().size() > 0)
+        if (analysisFilter != null && !analysisFilter.getClauses().isEmpty())
         {
             info("Using protocol FCS analysis filter: " + analysisFilter.getFilterText());
 
             User user = User.getSearchUser();
             Container c = flowProtocol.getContainer();
-            TableInfo fcsFilesTable = new FlowSchema(user, c).getTable(FlowTableType.FCSFiles, ContainerFilter.current(c));
+            TableInfo fcsFilesTable = new FlowSchema(user, c).getTable(FlowTableType.FCSFiles, ContainerFilter.current(this));
 
             List<String> filteredSampleIDs = new ArrayList<>(sampleIDs.size());
             for (String sampleID : sampleIDs)

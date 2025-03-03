@@ -40,7 +40,7 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
     {
         super(schema.getDbSchema(), LuminexProtocolSchema.GUIDE_SET_CURVE_FIT_TABLE_NAME, schema, cf);
         if (null== cf)
-            _containerFilter = ContainerFilter.current(schema.getContainer());
+            _containerFilter = ContainerFilter.current(schema);
         _curveType = curveType;
         setDescription("Contains one row per curve fit/guide set combination, and contains average and other statistics for all of the matching runs");
 
@@ -102,11 +102,11 @@ public class GuideSetCurveFitTable extends VirtualTable<LuminexProtocolSchema> i
         result.append("at.GuideSetId,\n");
         result.append("cf.CurveType FROM \n");
 
-        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_userSchema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, ContainerFilter.EVERYTHING);
+        AnalyteTitrationTable analyteTitrationTable = (AnalyteTitrationTable)_userSchema.getTable(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME, ContainerFilter.EVERYTHING_UNSAFE);
         result.append(analyteTitrationTable, "at");
         result.append(", ");
 
-        CurveFitTable curveFitTable = (CurveFitTable)_userSchema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME, ContainerFilter.EVERYTHING);
+        CurveFitTable curveFitTable = (CurveFitTable)_userSchema.getTable(LuminexProtocolSchema.CURVE_FIT_TABLE_NAME, ContainerFilter.EVERYTHING_UNSAFE);
         result.append(curveFitTable, "cf");
 
         result.append(" WHERE at.AnalyteId = cf.AnalyteId AND at.TitrationId = cf.TitrationId AND at.GuideSetId IS NOT NULL AND at.IncludeInGuideSetCalculation = ?\n");

@@ -67,7 +67,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
 
     public PeptidesTableInfo(MS2Schema schema)
     {
-        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), ContainerFilter.current(schema.getContainer()), MS2RunType.values(), false);
+        this(schema, new ActionURL(MS2Controller.BeginAction.class, schema.getContainer()), ContainerFilter.current(schema), MS2RunType.values(), false);
     }
 
     public PeptidesTableInfo(MS2Schema schema, ContainerFilter containerFilter, MS2RunType[] runTypes)

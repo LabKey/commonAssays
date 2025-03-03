@@ -167,7 +167,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         addFIColumns(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "MaxFI", "TitrationMax", "Titration Max", "GuideSetId");
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(cf, false);
-        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING);
+        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
         addFIColumns(analyteSinglePointControlTable, "AverageFiBkgd", "SinglePointControl", "Single Point Control", "GuideSet");
 
         SQLFragment controlTypeSql = new SQLFragment("(SELECT CASE WHEN IsTitration=" + this.getSqlDialect().getBooleanTRUE() +" THEN 'Titration' ELSE 'SinglePoint' END)");
