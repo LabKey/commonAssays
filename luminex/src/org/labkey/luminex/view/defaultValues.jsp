@@ -59,11 +59,11 @@
         <tr>
             <td colspan="2">
                 <%= button("Add Row").onClick("addRow();")%>
-                <%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnURL(getViewContext().getActionURL()))%>
+                <%= button("Import Data").href(new ActionURL(LuminexController.ImportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()).addReturnUrl(getViewContext().getActionURL()))%>
                 <%= button("Export TSV").href(new ActionURL(LuminexController.ExportDefaultValuesAction.class, getContainer()).addParameter("rowId", bean.getProtocol().getRowId()))%>
             </td>
             <td align="right">
-                <%= button("Cancel").href(bean.getReturnURLHelper()) %>
+                <%= button("Cancel").href(bean.getReturnUrlHelper()) %>
                 <%= button("Save Defaults").submit(true) %>
             </td>
             <td>&nbsp;</td>

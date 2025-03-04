@@ -400,7 +400,7 @@ public class LuminexController extends SpringActionController
         @Override
         public URLHelper getSuccessURL(DefaultValuesForm form)
         {
-            return form.getReturnURLHelper();
+            return form.getReturnUrlHelper();
         }
 
         @Override
@@ -919,7 +919,7 @@ public class LuminexController extends SpringActionController
                 public ActionButton createDeleteButton()
                 {
                     ActionURL urlDelete = new ActionURL(LuminexController.DeleteGuideSetAction.class, getContainer());
-                    urlDelete.addReturnURL(getReturnURL());
+                    urlDelete.addReturnUrl(getReturnUrl());
                     urlDelete.addParameter("rowId", protocolId);
                     ActionButton btnDelete = new ActionButton(urlDelete, "Delete");
                     btnDelete.setIconCls("trash");

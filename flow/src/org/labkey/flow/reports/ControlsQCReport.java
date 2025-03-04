@@ -41,11 +41,11 @@ public class ControlsQCReport extends FilterFlowReport
     public static String DESC = "Flow Controls Statistics over Time";
     public static final String STATISTIC_PROP = "statistic";
 
-    public static ActionURL createURL(Container c, @Nullable ActionURL returnURL, @Nullable ActionURL cancelURL)
+    public static ActionURL createURL(Container c, @Nullable ActionURL returnUrl, @Nullable ActionURL cancelURL)
     {
         ActionURL url = new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, TYPE);
-        if (returnURL != null)
-            url.addReturnURL(returnURL);
+        if (returnUrl != null)
+            url.addReturnUrl(returnUrl);
         if (cancelURL != null)
             url.addCancelURL(cancelURL);
         return url;
@@ -70,9 +70,9 @@ public class ControlsQCReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
+    public HttpView<?> getConfigureForm(ViewContext context, ActionURL returnUrl, ActionURL cancelUrl)
     {
-        return new JspView<>("/org/labkey/flow/reports/editQCReport.jsp", Tuple3.of(this, returnURL, cancelURL));
+        return new JspView<>("/org/labkey/flow/reports/editQCReport.jsp", Tuple3.of(this, returnUrl, cancelUrl));
     }
 
     @Override

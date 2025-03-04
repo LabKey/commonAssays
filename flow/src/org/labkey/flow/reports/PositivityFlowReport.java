@@ -59,13 +59,13 @@ public class PositivityFlowReport extends FilterFlowReport
     public static final String DESC = "Flow Positivity Call";
     public static final String SUBSET_PROP = "subset";
 
-    public static ActionURL createURL(Container c, @Nullable ActionURL returnURL, @Nullable ActionURL cancelURL)
+    public static ActionURL createURL(Container c, @Nullable ActionURL returnUrl, @Nullable ActionURL cancelUrl)
     {
         ActionURL url = new ActionURL(ReportsController.CreateAction.class, c).addParameter(ReportDescriptor.Prop.reportType, TYPE);
-        if (returnURL != null)
-            url.addReturnURL(returnURL);
-        if (cancelURL != null)
-            url.addCancelURL(cancelURL);
+        if (returnUrl != null)
+            url.addReturnUrl(returnUrl);
+        if (cancelUrl != null)
+            url.addCancelURL(cancelUrl);
         return url;
     }
 
@@ -91,9 +91,9 @@ public class PositivityFlowReport extends FilterFlowReport
     }
 
     @Override
-    public HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL)
+    public HttpView<?> getConfigureForm(ViewContext context, ActionURL returnUrl, ActionURL cancelUrl)
     {
-        return new JspView<>("/org/labkey/flow/reports/editPositivityReport.jsp", Tuple3.of(this, returnURL, cancelURL));
+        return new JspView<>("/org/labkey/flow/reports/editPositivityReport.jsp", Tuple3.of(this, returnUrl, cancelUrl));
     }
 
     SubsetSpec getSubset()
@@ -174,7 +174,7 @@ public class PositivityFlowReport extends FilterFlowReport
             FlowProtocol protocol = FlowProtocol.getForContainer(context.getContainer());
             ActionURL currentURL = context.getActionURL();
             ActionURL editICSMetadataURL = protocol.urlFor(ProtocolController.EditICSMetadataAction.class);
-            editICSMetadataURL.addReturnURL(currentURL);
+            editICSMetadataURL.addReturnUrl(currentURL);
 
             return HtmlView.unsafe(
                     "<p class='labkey-error'>Positivity report requires configuring flow experiment metadata for study and background information before running.</p>" +

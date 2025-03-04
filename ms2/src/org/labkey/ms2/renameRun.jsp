@@ -25,7 +25,7 @@
     RenameBean bean = ((JspView<RenameBean>) HttpView.currentView()).getModelBean();
 %>
 <labkey:form action="<%=urlFor(RenameRunAction.class)%>" method="post">
-<%=generateReturnUrlFormField(bean.returnURL)%>
+<%=generateReturnUrlFormField(bean.returnUrl)%>
 <input type="hidden" name="run" value="<%=bean.run.getRun()%>"/>
 <table class="lk-fields-table">
     <tr>
@@ -35,7 +35,7 @@
     <tr>
         <td colspan="2" style="padding-top: 10px;">
             <%= button("Rename").submit(true) %>
-            <%= button("Cancel").href(bean.returnURL) %>
+            <%= button("Cancel").href(bean.returnUrl) %>
         </td>
     </tr>
 </table>

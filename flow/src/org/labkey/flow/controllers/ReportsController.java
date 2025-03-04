@@ -303,7 +303,7 @@ public class ReportsController extends BaseFlowController
         {
             ActionURL url = new ActionURL(UpdateAction.class, getContainer()).addParameter("reportId", r.getReportId().toString());
             if (idForm.getReturnActionURL() != null)
-                url.addReturnURL(idForm.getReturnActionURL());
+                url.addReturnUrl(idForm.getReturnActionURL());
             return url;
         }
 
@@ -346,7 +346,7 @@ public class ReportsController extends BaseFlowController
         @Override
         public URLHelper getCancelUrl()
         {
-            return _form.getReturnURLHelper(new ActionURL(BeginAction.class, getContainer()));
+            return _form.getReturnUrlHelper(new ActionURL(BeginAction.class, getContainer()));
         }
 
         @Override

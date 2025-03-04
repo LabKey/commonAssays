@@ -435,7 +435,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
             {
                 ActionURL url = new ActionURL(ViabilityController.RecalculateSpecimenAggregatesAction.class, c);
                 url.addParameter("rowId", protocol.getRowId());
-                url.addReturnURL(getViewContext().getActionURL());
+                url.addReturnUrl(getViewContext().getActionURL());
 
                 links.add(new NavTree("recalc specimen aggregates", url));
             }

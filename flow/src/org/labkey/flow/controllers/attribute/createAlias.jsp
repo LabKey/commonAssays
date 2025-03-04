@@ -26,7 +26,7 @@
     AttributeCache.Entry entry = form.getEntry(getContainer());
 
     ActionURL editURL = getActionURL();
-    ActionURL returnURL = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
+    ActionURL returnUrl = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
 %>
 
 Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
@@ -49,7 +49,7 @@ Create alias for <%=h(entry.getType().name())%>: <%=h(entry.getName())%>
             <td>&nbsp;</td>
             <td>
                 <%= button("Submit").submit(true) %>
-                <%= button("Cancel").href(returnURL) %>
+                <%= button("Cancel").href(returnUrl) %>
             </td>
         </tr>
     </table>

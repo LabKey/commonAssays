@@ -37,13 +37,13 @@
 <%
     Tuple3<FilterFlowReport, ActionURL, ActionURL> bean = (Tuple3<FilterFlowReport, ActionURL, ActionURL>) HttpView.currentModel();
     FilterFlowReport report = bean.first;
-    ActionURL returnURL = bean.second;
-    ActionURL cancelURL = bean.third;
+    ActionURL returnUrl = bean.second;
+    ActionURL cancelUrl = bean.third;
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
-    ActionURL retURL = returnURL == null ? urlFor(BeginAction.class) : returnURL;
-    ActionURL canURL = cancelURL == null ? retURL : cancelURL;
+    ActionURL retURL = returnUrl == null ? urlFor(BeginAction.class) : returnUrl;
+    ActionURL canURL = cancelUrl == null ? retURL : cancelUrl;
 %>
 <style type="text/css">
     .x-form-item {
@@ -113,12 +113,12 @@ function Form_onDelete()
    if (d.getReportId() != null)
    {
        url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());
-       if (returnURL != null)
-           url.addReturnURL(returnURL);
+       if (returnUrl != null)
+           url.addReturnUrl(returnUrl);
    }
-   else if (returnURL != null)
+   else if (returnUrl != null)
    {
-       url = returnURL;
+       url = returnUrl;
    }
    else
    {

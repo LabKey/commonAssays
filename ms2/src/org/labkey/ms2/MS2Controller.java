@@ -685,11 +685,11 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static ActionURL getRenameRunURL(Container c, MS2Run run, ActionURL returnURL)
+    public static ActionURL getRenameRunURL(Container c, MS2Run run, ActionURL returnUrl)
     {
         ActionURL url = new ActionURL(RenameRunAction.class, c);
         url.addParameter("run", run.getRun());
-        url.addReturnURL(returnURL);
+        url.addReturnUrl(returnUrl);
         return url;
     }
 
@@ -697,7 +697,7 @@ public class MS2Controller extends SpringActionController
     public class RenameRunAction extends FormViewAction<RenameForm>
     {
         private MS2Run _run;
-        private URLHelper _returnURL;
+        private URLHelper _returnUrl;
 
         @Override
         public void validateCommand(RenameForm target, Errors errors)
@@ -708,16 +708,16 @@ public class MS2Controller extends SpringActionController
         public ModelAndView getView(RenameForm form, boolean reshow, BindException errors)
         {
             _run = form.validateRun();
-            _returnURL = form.getReturnURLHelper(getShowRunURL(getUser(), getContainer(), form.getRun()));
+            _returnUrl = form.getReturnUrlHelper(getShowRunURL(getUser(), getContainer(), form.getRun()));
 
             String description = form.getDescription();
-            if (description == null || description.length() == 0)
+            if (description == null || description.isEmpty())
                 description = _run.getDescription();
 
             RenameBean bean = new RenameBean();
             bean.run = _run;
             bean.description = description;
-            bean.returnURL = _returnURL;
+            bean.returnUrl = _returnUrl;
 
             getPageConfig().setFocusId("description");
 
@@ -739,13 +739,13 @@ public class MS2Controller extends SpringActionController
         @Override
         public URLHelper getSuccessURL(RenameForm form)
         {
-            return form.getReturnURLHelper();
+            return form.getReturnUrlHelper();
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
-            addRunNavTrail(root, _run, _returnURL, "Rename Run", getPageConfig(), null);
+            addRunNavTrail(root, _run, _returnUrl, "Rename Run", getPageConfig(), null);
         }
     }
 
@@ -754,7 +754,7 @@ public class MS2Controller extends SpringActionController
     {
         public MS2Run run;
         public String description;
-        public URLHelper returnURL;
+        public URLHelper returnUrl;
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -1004,7 +1004,7 @@ public class MS2Controller extends SpringActionController
     {
         ActionURL url = new ActionURL(ManageViewsAction.class, getContainer());
         url.addParameter("run", run.getRun());
-        url.addReturnURL(runURL);
+        url.addReturnUrl(runURL);
         return url;
     }
 
@@ -1053,7 +1053,7 @@ public class MS2Controller extends SpringActionController
     public class ManageViewsAction extends FormViewAction<ManageViewsForm>
     {
         private MS2Run _run;
-        private ActionURL _returnURL;
+        private ActionURL _returnUrl;
 
         @Override
         public void validateCommand(ManageViewsForm form, Errors errors)
@@ -1065,7 +1065,7 @@ public class MS2Controller extends SpringActionController
         {
             _run = form.validateRun();
 
-            _returnURL = form.getReturnActionURL();
+            _returnUrl = form.getReturnActionURL();
 
             DefaultViewType defaultViewType;
             Map<String, String> props = PropertyManager.getProperties(getUser(), ContainerManager.getRoot(), MS2_DEFAULT_VIEW_CATEGORY);
@@ -1086,7 +1086,7 @@ public class MS2Controller extends SpringActionController
             }
 
 
-            ManageViewsBean bean = new ManageViewsBean(_returnURL, defaultViewType, viewMap, viewName);
+            ManageViewsBean bean = new ManageViewsBean(_returnUrl, defaultViewType, viewMap, viewName);
             JspView<ManageViewsBean> view = new JspView<>("/org/labkey/ms2/manageViews.jsp", bean);
             view.setFrame(WebPartView.FrameType.PORTAL);
             view.setTitle("Manage Views");
@@ -1096,7 +1096,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void addNavTrail(NavTree root)
         {
-            addRunNavTrail(root, _run, _returnURL, "Customize Views", getPageConfig(), "viewRun");
+            addRunNavTrail(root, _run, _returnUrl, "Customize Views", getPageConfig(), "viewRun");
         }
 
         @Override
@@ -1178,22 +1178,22 @@ public class MS2Controller extends SpringActionController
 
     public static class ManageViewsBean
     {
-        private final ActionURL _returnURL;
+        private final ActionURL _returnUrl;
         private final DefaultViewType _defaultViewType;
         private final Map<String, String> _views;
         private final String _viewName;
 
-        public ManageViewsBean(ActionURL returnURL, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
+        public ManageViewsBean(ActionURL returnUrl, DefaultViewType defaultViewType, Map<String, String> views, String viewName)
         {
-            _returnURL = returnURL;
+            _returnUrl = returnUrl;
             _defaultViewType = defaultViewType;
             _views = views;
             _viewName = viewName;
         }
 
-        public ActionURL getReturnURL()
+        public ActionURL getReturnUrl()
         {
-            return _returnURL;
+            return _returnUrl;
         }
 
         public DefaultViewType getDefaultViewType()
@@ -1216,7 +1216,7 @@ public class MS2Controller extends SpringActionController
     {
         public ActionURL nextURL;
         public SelectBuilder select;
-        public HttpView extraOptionsView;
+        public HttpView<?> extraOptionsView;
         public String viewInstructions;
         public int runList;
         public String buttonText;
@@ -1296,7 +1296,7 @@ public class MS2Controller extends SpringActionController
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(CompareProteinProphetQueryAction.class, getContainer()), runListId, form);
 
-            return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
+            return new JspView<>("/org/labkey/ms2/compare/compareProteinProphetQueryOptions.jsp", bean);
         }
 
         @Override
@@ -3038,7 +3038,7 @@ public class MS2Controller extends SpringActionController
     public class SaveViewAction extends FormViewAction<MS2ViewForm>
     {
         private MS2Run _run;
-        private ActionURL _returnURL;
+        private ActionURL _returnUrl;
 
         @Override
         public void validateCommand(MS2ViewForm target, Errors errors)
@@ -3050,13 +3050,13 @@ public class MS2Controller extends SpringActionController
         {
             _run = form.validateRun();
 
-            _returnURL = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
+            _returnUrl = getViewContext().cloneActionURL().setAction(ShowRunAction.class);
             JspView<SaveViewBean> saveView = new JspView<>("/org/labkey/ms2/saveView.jsp", new SaveViewBean());
             SaveViewBean bean = saveView.getModelBean();
-            bean.returnURL = _returnURL;
+            bean.returnUrl = _returnUrl;
             bean.canShare = getContainer().hasPermission(getUser(), InsertPermission.class);
 
-            ActionURL newURL = bean.returnURL.clone().deleteParameter("run");
+            ActionURL newURL = bean.returnUrl.clone().deleteParameter("run");
             bean.viewParams = newURL.getRawQuery();
 
             getPageConfig().setFocusId("name");
@@ -3085,20 +3085,20 @@ public class MS2Controller extends SpringActionController
         @Override
         public URLHelper getSuccessURL(MS2ViewForm form)
         {
-            return form.getReturnURLHelper();
+            return form.getReturnUrlHelper();
         }
 
         @Override
         public void addNavTrail(NavTree root)
         {
-            addRunNavTrail(root, _run, _returnURL, "Save View", getPageConfig(), "viewRun");
+            addRunNavTrail(root, _run, _returnUrl, "Save View", getPageConfig(), "viewRun");
         }
     }
 
 
     public static class SaveViewBean
     {
-        public ActionURL returnURL;
+        public ActionURL returnUrl;
         public boolean canShare;
         public String viewParams;
     }

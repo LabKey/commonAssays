@@ -236,7 +236,7 @@ public class FlowQueryView extends QueryView
     {
         // The Analysis "folder" table needs to use the getDeleteProtocolURL, the FCSRuns and FCSAnalysis 'views' need the getDeleteSelectedExpRunsURL
         if (useExpRunsURL)
-            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnURL()).toContainerRelativeURL());
+            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnUrl()).toContainerRelativeURL());
         return super.createDeleteButton(showConfirmation);
     }
 
@@ -300,9 +300,9 @@ public class FlowQueryView extends QueryView
         if (queryName.equals(FlowTableType.FCSFiles.toString()))
         {
             ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
-            URLHelper returnURL = getReturnURL();
-            editWellsURL.addReturnURL(returnURL);
-            editWellsURL.addParameter("editWellReturnUrl", getReturnURL().toString());
+            URLHelper returnUrl = getReturnUrl();
+            editWellsURL.addReturnUrl(returnUrl);
+            editWellsURL.addParameter("editWellReturnUrl", getReturnUrl().toString());
             editWellsURL.addParameter("ff_isBulkEdit", true);
             editWellsURL.addParameter("isUpdate", false);
 

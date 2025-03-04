@@ -26,7 +26,7 @@
 %>
 <labkey:form method="post" name="manageViewsForm" action="">
     <p>
-        <input type=hidden value="<%=h(bean.getReturnURL())%>">
+        <input type=hidden value="<%=h(bean.getReturnUrl())%>">
         <%
             getPageConfig().addHandlerForQuerySelector("INPUT.labkey-defaultViewType", "change", "updateForm();");
             for (MS2Controller.DefaultViewType defaultViewType : MS2Controller.DefaultViewType.values())
@@ -71,7 +71,7 @@
         }
         %>
     </table><br/>
-    <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnURL()) %>
+    <%= button("OK").submit(true) %> <%= button("Cancel").href(bean.getReturnUrl()) %>
 </labkey:form>
 
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">

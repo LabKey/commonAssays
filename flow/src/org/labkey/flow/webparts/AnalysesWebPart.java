@@ -49,7 +49,7 @@ public class AnalysesWebPart extends FlowQueryView
         setShowDeleteButtonConfirmationText(false);
         setShowExportButtons(false);
         setShowPagination(false);
-        // Workaround for "Issue 18903: can't change query on showRuns.view" -- for now, just don't display the [details] link which includes the returnURL parameter.
+        // Workaround for "Issue 18903: can't change query on showRuns.view" -- for now, just don't display the [details] link which includes the returnUrl parameter.
         setShowDetailsColumn(false);
         setButtonBarPosition(DataRegion.ButtonBarPosition.TOP);
     }
@@ -77,7 +77,7 @@ public class AnalysesWebPart extends FlowQueryView
                 bar.add(btnAnalyze);
             }
 
-            ActionURL createRunGroupURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateRunGroupURL(getContainer(), getReturnURL(), false);
+            ActionURL createRunGroupURL = PageFlowUtil.urlProvider(ExperimentUrls.class).getCreateRunGroupURL(getContainer(), getReturnUrl(), false);
             ActionButton createExperiment = new ActionButton(createRunGroupURL, "Create Analysis Folder", ActionButton.Action.POST);
             createExperiment.setActionType(ActionButton.Action.LINK);
             createExperiment.setDisplayPermission(InsertPermission.class);

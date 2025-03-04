@@ -45,13 +45,13 @@
 
     Tuple3<PositivityFlowReport, ActionURL, ActionURL> bean = (Tuple3<PositivityFlowReport, ActionURL, ActionURL>) HttpView.currentModel();
     PositivityFlowReport report = bean.first;
-    ActionURL returnURL = bean.second;
-    ActionURL cancelURL = bean.third;
+    ActionURL returnUrl = bean.second;
+    ActionURL cancelUrl = bean.third;
     ReportDescriptor d = report.getDescriptor();
     String reportId = d.getReportId() == null ? null : d.getReportId().toString();
 
-    ActionURL retURL = returnURL == null ? urlFor(BeginAction.class) : returnURL;
-    ActionURL canURL = cancelURL == null ? retURL : cancelURL;
+    ActionURL retURL = returnUrl == null ? urlFor(BeginAction.class) : returnUrl;
+    ActionURL canURL = cancelUrl == null ? retURL : cancelUrl;
 
     FlowProtocol protocol = FlowProtocol.getForContainer(c);
     ICSMetadata metadata = protocol == null ? null : protocol.getICSMetadata();
@@ -61,7 +61,7 @@
     if (protocol != null)
     {
         editICSMetadataURL = protocol.urlFor(EditICSMetadataAction.class);
-        editICSMetadataURL.addReturnURL(currentURL);
+        editICSMetadataURL.addReturnUrl(currentURL);
     }
 %>
 
@@ -142,12 +142,12 @@ function Form_onDelete()
    if (d.getReportId() != null)
    {
        url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());
-       if (returnURL != null)
-           url.addReturnURL(returnURL);
+       if (returnUrl != null)
+           url.addReturnUrl(returnUrl);
    }
-   else if (returnURL != null)
+   else if (returnUrl != null)
    {
-       url = returnURL;
+       url = returnUrl;
    }
    else
    {

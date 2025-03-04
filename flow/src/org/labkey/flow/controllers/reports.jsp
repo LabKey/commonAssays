@@ -42,8 +42,8 @@
     boolean canEdit = c.hasPermission(user, UpdatePermission.class);
 
     ActionURL currentURL = getActionURL();
-    ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c).addReturnURL(currentURL);
-    ActionURL deleteURL = new ActionURL(ReportsController.DeleteAction.class, c).addReturnURL(currentURL);
+    ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c).addReturnUrl(currentURL);
+    ActionURL deleteURL = new ActionURL(ReportsController.DeleteAction.class, c).addReturnUrl(currentURL);
 
     Collection<FlowReport> reports = FlowReportManager.getFlowReports(c, user);
     Map<String, List<FlowReport>> reportsByType = new TreeMap<>();
@@ -96,7 +96,7 @@ table.reports td {
                 navtree.addChild("Edit", editURL);
                 navtree.addChild("Copy", copyURL);
                 navtree.addChild("Delete", deleteURL);
-                navtree.addChild("Execute", r.getRunReportURL(context).addParameter("confirm", true).addReturnURL(currentURL));
+                navtree.addChild("Execute", r.getRunReportURL(context).addParameter("confirm", true).addReturnUrl(currentURL));
                 PopupMenu menu = new PopupMenu(navtree, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.TEXT);
             %><td><% menu.render(out); %></td>
             <%}%>
