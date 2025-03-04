@@ -155,7 +155,7 @@ public class FlowQueryView extends QueryView
 
                 if (showGraphs == FlowQuerySettings.ShowGraphs.Inline)
                 {
-                    JspView view = new SetGraphSizeView();
+                    SetGraphSizeView view = new SetGraphSizeView();
                     view.setFrame(FrameType.NONE);
                     HttpView.currentView().include(view, out);
                 }
@@ -334,7 +334,7 @@ public class FlowQueryView extends QueryView
                 form.setIncludeStatistics(true);
                 form.setIncludeFCSFiles(false);
                 form.setSelectionType("runs");
-                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                JspView<?> analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
             else if (queryName.equals(FlowTableType.FCSFiles.toString()) || queryName.equals(FlowTableType.FCSAnalyses.toString()) || queryName.equals(FlowTableType.CompensationControls.toString()))
@@ -346,7 +346,7 @@ public class FlowQueryView extends QueryView
                 form.setIncludeStatistics(false);
                 form.setIncludeFCSFiles(true);
                 form.setSelectionType("wells");
-                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                JspView<?> analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
         }
