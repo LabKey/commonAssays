@@ -391,7 +391,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                 {
                     ExpProtocol protocol = data.getRun().getProtocol();
                     AssayProvider provider = AssayService.get().getProvider(protocol);
-                    AssayProtocolSchema protocolSchema = provider.createProtocolSchema(null, protocol.getContainer(), protocol, null);
+                    AssayProtocolSchema protocolSchema = provider.createProtocolSchema(user, protocol.getContainer(), protocol, null);
                     TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
                     if (virusTable instanceof FilteredTable ft)
                     {
