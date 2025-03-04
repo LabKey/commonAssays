@@ -302,7 +302,7 @@ public class FlowQueryView extends QueryView
             ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
             URLHelper returnUrl = getReturnUrl();
             editWellsURL.addReturnUrl(returnUrl);
-            editWellsURL.addParameter("editWellReturnUrl", getReturnUrl().toString());
+            editWellsURL.addParameter("editWellReturnUrl", returnUrl.toString());
             editWellsURL.addParameter("ff_isBulkEdit", true);
             editWellsURL.addParameter("isUpdate", false);
 
