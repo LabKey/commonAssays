@@ -257,6 +257,7 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
                     queryName: this.controlType === 'SinglePoint' ? 'AnalyteSinglePointControl' : 'AnalyteTitration',
                     columns: 'Analyte/Data/Run/RowId',
                     filterArray: [LABKEY.Filter.create('Analyte', analyteIds, LABKEY.Filter.Types.IN)],
+                    containerFilter: LABKEY.Query.containerFilter.allFolders,
                     success: function(data) {
                         var runIds = [];
                         for (var i = 0; i < data.rows.length; i++) {
@@ -457,11 +458,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
                     if (Ext.getDom(divId)) {
                         var html = Ext.getDom(divId).innerHTML;
                         html = html.replace(/&amp;/g, "&");
-                        var pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('&attachment=true'));
+                        var pdfHref = html.substring(html.indexOf('href="') + 6, html.indexOf('Curve Comparison Plot.pdf') - 2);
                         if (pdfHref.indexOf("deleteFile") == -1) {
                             pdfHref = pdfHref + "&deleteFile=false";
                         }
-                        window.location = pdfHref + "&attachment=true";
+                        window.location = pdfHref;
                     }
                 }
             },
