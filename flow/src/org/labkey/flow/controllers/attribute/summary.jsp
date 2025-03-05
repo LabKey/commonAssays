@@ -31,9 +31,9 @@
     Map<FlowEntry, Collection<FlowEntry>> aliasMap = FlowManager.get().getAliases(getContainer(), type);
     ActionURL summaryURL = getActionURL();
 
-    ActionURL editURL = new ActionURL(AttributeController.EditAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
-    ActionURL detailsURL = new ActionURL(AttributeController.DetailsAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
-    ActionURL aliasURL = new ActionURL(AttributeController.CreateAliasAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnURL(summaryURL);
+    ActionURL editURL = new ActionURL(AttributeController.EditAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnUrl(summaryURL);
+    ActionURL detailsURL = new ActionURL(AttributeController.DetailsAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnUrl(summaryURL);
+    ActionURL aliasURL = new ActionURL(AttributeController.CreateAliasAction.class, getContainer()).addParameter(AttributeController.Param.type, type.name()).addReturnUrl(summaryURL);
 %>
 
 <table>

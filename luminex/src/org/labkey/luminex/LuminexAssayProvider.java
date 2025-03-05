@@ -349,7 +349,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 {
                     ActionURL analytePropsUrl = new ActionURL(LuminexController.SetAnalyteDefaultValuesAction.class, viewContext.getContainer());
                     analytePropsUrl.addParameter("rowId", protocol.getRowId());
-                    analytePropsUrl.addReturnURL(viewContext.getActionURL());
+                    analytePropsUrl.addReturnUrl(viewContext.getActionURL());
                     analytePropsTree.setHref(analytePropsUrl.toString());
                 }
             }

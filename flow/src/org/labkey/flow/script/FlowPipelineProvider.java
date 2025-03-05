@@ -103,7 +103,7 @@ public class FlowPipelineProvider extends PipelineProvider
 
         String path = directory.getPathParameter();
         ActionURL returnUrl = PageFlowUtil.urlProvider(PipelineUrls.class).urlBrowse(context.getContainer(), null, path.toString());
-        importRunsURL.addReturnURL(returnUrl);
+        importRunsURL.addReturnUrl(returnUrl);
         importRunsURL.replaceParameter("path", path);
         String baseId = this.getClass().getName();
 

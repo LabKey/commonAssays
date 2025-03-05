@@ -155,7 +155,7 @@ public class FlowQueryView extends QueryView
 
                 if (showGraphs == FlowQuerySettings.ShowGraphs.Inline)
                 {
-                    JspView view = new SetGraphSizeView();
+                    SetGraphSizeView view = new SetGraphSizeView();
                     view.setFrame(FrameType.NONE);
                     HttpView.currentView().include(view, out);
                 }
@@ -236,7 +236,7 @@ public class FlowQueryView extends QueryView
     {
         // The Analysis "folder" table needs to use the getDeleteProtocolURL, the FCSRuns and FCSAnalysis 'views' need the getDeleteSelectedExpRunsURL
         if (useExpRunsURL)
-            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnURL()).toContainerRelativeURL());
+            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnUrl()).toContainerRelativeURL());
         return super.createDeleteButton(showConfirmation);
     }
 
@@ -300,9 +300,9 @@ public class FlowQueryView extends QueryView
         if (queryName.equals(FlowTableType.FCSFiles.toString()))
         {
             ActionURL editWellsURL = new ActionURL(WellController.EditWellAction.class, getContainer());
-            URLHelper returnURL = getReturnURL();
-            editWellsURL.addReturnURL(returnURL);
-            editWellsURL.addParameter("editWellReturnUrl", getReturnURL().toString());
+            URLHelper returnUrl = getReturnUrl();
+            editWellsURL.addReturnUrl(returnUrl);
+            editWellsURL.addParameter("editWellReturnUrl", returnUrl.toString());
             editWellsURL.addParameter("ff_isBulkEdit", true);
             editWellsURL.addParameter("isUpdate", false);
 
@@ -334,7 +334,7 @@ public class FlowQueryView extends QueryView
                 form.setIncludeStatistics(true);
                 form.setIncludeFCSFiles(false);
                 form.setSelectionType("runs");
-                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                JspView<?> analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
             else if (queryName.equals(FlowTableType.FCSFiles.toString()) || queryName.equals(FlowTableType.FCSAnalyses.toString()) || queryName.equals(FlowTableType.CompensationControls.toString()))
@@ -346,7 +346,7 @@ public class FlowQueryView extends QueryView
                 form.setIncludeStatistics(false);
                 form.setIncludeFCSFiles(true);
                 form.setSelectionType("wells");
-                HttpView analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
+                JspView<?> analysisExportView = new JspView<>("/org/labkey/flow/view/exportAnalysis.jsp", form);
                 panelButton.addSubPanel("Analysis", analysisExportView);
             }
         }

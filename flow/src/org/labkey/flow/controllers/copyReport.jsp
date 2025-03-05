@@ -32,7 +32,7 @@
 
     ActionURL copyURL = new ActionURL(ReportsController.CopyAction.class, c).addParameter("reportId", report.getReportId().toString());
     if (form.getReturnUrl() != null)
-        copyURL.addReturnURL(form.getReturnActionURL());
+        copyURL.addReturnUrl(form.getReturnActionURL());
 %>
 <labkey:errors/>
 

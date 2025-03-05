@@ -63,8 +63,8 @@
 </p>
 <p><b>Manage Names and Aliases</b><br>
     Create and remove names and aliases for Keywords, Statistics, and Graphs.<br>
-    <%=link("Case sensitivity").href(protocol.urlFor(AttributeController.CaseSensitivityAction.class).addReturnURL(getActionURL()))%><br/>
-    <%=link("Delete Unused").href(protocol.urlFor(AttributeController.DeleteUnusedAction.class).addReturnURL(getActionURL()))%><br/>
+    <%=link("Case sensitivity").href(protocol.urlFor(AttributeController.CaseSensitivityAction.class).addReturnUrl(getActionURL()))%><br/>
+    <%=link("Delete Unused").href(protocol.urlFor(AttributeController.DeleteUnusedAction.class).addReturnUrl(getActionURL()))%><br/>
     <%=link("Manage Keywords").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.keyword.name()))%><br/>
     <%=link("Manage Statistics").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.statistic.name()))%><br/>
     <%=link("Manage Graphs").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.graph.name()))%><br/>

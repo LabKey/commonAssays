@@ -153,7 +153,7 @@ abstract public class FlowReport extends AbstractReport
         }
     }
 
-    public abstract HttpView getConfigureForm(ViewContext context, ActionURL returnURL, ActionURL cancelURL);
+    public abstract HttpView<?> getConfigureForm(ViewContext context, ActionURL returnUrl, ActionURL cancelUrl);
 
     /** override=true means only set parameters overrideable via the URL on execute */
     public abstract boolean updateProperties(ContainerUser cu, PropertyValues pvs, BindException errors, boolean override);

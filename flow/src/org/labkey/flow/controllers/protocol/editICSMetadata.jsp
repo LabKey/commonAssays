@@ -58,7 +58,7 @@
 
     ActionURL submitURL = form.getProtocol().urlFor(ProtocolController.EditICSMetadataAction.class);
     if (form.getReturnActionURL() != null)
-        submitURL.addReturnURL(form.getReturnActionURL());
+        submitURL.addReturnUrl(form.getReturnActionURL());
 %>
 <labkey:errors />
 <labkey:form action="<%=submitURL%>" method="POST">

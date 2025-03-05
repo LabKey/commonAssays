@@ -377,7 +377,7 @@ public class AnalysisScriptController extends BaseFlowController
         {
             if (!form.isConfirm())
             {
-                URLHelper url = form.getReturnURLHelper();
+                URLHelper url = form.getReturnUrlHelper();
                 if (url == null)
                     url = new ActionURL(BeginAction.class, getContainer());
                 return HttpView.redirect(url);

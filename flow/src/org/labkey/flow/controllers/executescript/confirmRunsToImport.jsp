@@ -95,12 +95,12 @@
 
         <br />
         <%=button("Import Selected Runs").submit(true)%>
-        <labkey:button text="Cancel" href="<%=form.getReturnURLHelper()%>"/>
+        <labkey:button text="Cancel" href="<%=form.getReturnUrlHelper()%>"/>
         </labkey:form><%
     }
     else
     {
-        %><labkey:button text="Browse for more runs" href="<%=form.getReturnURLHelper()%>"/><%
+        %><labkey:button text="Browse for more runs" href="<%=form.getReturnUrlHelper()%>"/><%
     }
 
 %>

@@ -70,7 +70,7 @@ public class FeatureAnnotationSetQueryView extends QueryView
         ActionButton deleteButton = new ActionButton(FeatureAnnotationSetController.DeleteAction.class, "Delete", ActionButton.Action.GET);
         deleteButton.setDisplayPermission(DeletePermission.class);
         ActionURL deleteURL = new ActionURL(FeatureAnnotationSetController.DeleteAction.class, getContainer());
-        deleteURL.addReturnURL(getViewContext().getActionURL());
+        deleteURL.addReturnUrl(getViewContext().getActionURL());
         deleteButton.setURL(deleteURL);
         deleteButton.setActionType(ActionButton.Action.POST);
         deleteButton.setRequiresSelection(true);
@@ -78,7 +78,7 @@ public class FeatureAnnotationSetQueryView extends QueryView
 
         ActionButton uploadButton = new ActionButton(FeatureAnnotationSetController.UploadAction.class, "Import Feature Annotation Set", ActionButton.Action.LINK);
         ActionURL uploadURL = new ActionURL(FeatureAnnotationSetController.UploadAction.class, getContainer());
-        uploadURL.addReturnURL(getViewContext().getActionURL());
+        uploadURL.addReturnUrl(getViewContext().getActionURL());
         uploadButton.setURL(uploadURL);
         uploadButton.setDisplayPermission(UpdatePermission.class);
         bar.add(uploadButton);

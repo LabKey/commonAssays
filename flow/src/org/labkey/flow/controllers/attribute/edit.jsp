@@ -29,15 +29,15 @@
     if (StringUtils.isEmpty(name))
         name = entry.getName();
 
-    ActionURL editURL = getActionURL();
-    ActionURL returnURL = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
+    ActionURL editUrl = getActionURL();
+    ActionURL returnUrl = form.getReturnActionURL(new ActionURL(ProtocolController.BeginAction.class, getContainer()));
 %>
 
 Change the name of the <%=h(entry.getType().name())%> or clear the name to delete it.
 <br>
 
 <labkey:errors/>
-<labkey:form action="<%=editURL%>" method="post">
+<labkey:form action="<%=editUrl%>" method="post">
     <table>
         <tr>
             <td>
@@ -51,7 +51,7 @@ Change the name of the <%=h(entry.getType().name())%> or clear the name to delet
             <td>&nbsp;</td>
             <td>
                 <%= button("Submit").submit(true) %>
-                <%= button("Cancel").href(returnURL) %>
+                <%= button("Cancel").href(returnUrl) %>
             </td>
         </tr>
     </table>

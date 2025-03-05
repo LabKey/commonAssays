@@ -301,7 +301,7 @@ public class FeatureAnnotationSetController extends SpringActionController
             ButtonBar bb = new ButtonBar();
             ActionURL editURL = QueryService.get().urlDefault(getContainer(), QueryAction.updateQueryRow, schema.getSchemaPath().toString(), featureAnnotationSetTable.getName());
             editURL.addParameter("RowId", form.getRowId());
-            editURL.addReturnURL(getViewContext().getActionURL());
+            editURL.addReturnUrl(getViewContext().getActionURL());
 
             ActionButton edit = new ActionButton(editURL, "Edit");
             edit.setActionType(ActionButton.Action.LINK);
