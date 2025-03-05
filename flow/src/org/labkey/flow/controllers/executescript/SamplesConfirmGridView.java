@@ -46,7 +46,9 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
+import org.labkey.api.util.element.Input;
 import org.labkey.api.view.GridView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
@@ -329,12 +331,15 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
+        protected void renderExtraRecordSelectorContent(RenderContext ctx, HtmlWriter out) throws IOException
         {
-            // Add a hidden input for spring form binding -- if this value is posed, the row was unchecked.
-            out.write("<input type=\"hidden\" name=\"");
-            out.write(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx));
-            out.write("\" value=\"0\">");
+            // Add a hidden input for spring form binding -- if this value is posted, the row was unchecked.
+            out.write(
+                new Input.InputBuilder()
+                    .type("hidden")
+                    .name(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx))
+                    .value("0")
+            );
         }
 
         @Override
