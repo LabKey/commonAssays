@@ -31,9 +31,6 @@ import java.util.Set;
 /**
  * Render row of values and row of graphs for every row in the grid.
  * Replaces GraphView.
- *
- * User: kevink
- * Date: 7/20/11
  */
 public class GraphDataRegion extends DataRegion
 {
@@ -72,24 +69,24 @@ public class GraphDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
+    protected void renderTableRow(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
-        super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
+        super.renderTableRow(ctx, oldWriter, showRecordSelectors, renderers, rowIndex);
 
-        out.write("<tr");
+        oldWriter.write("<tr");
         String rowClass = getRowClass(ctx, rowIndex);
         if (rowClass != null)
-            out.write(" class=\"" + rowClass + "\"");
-        out.write(">");
+            oldWriter.write(" class=\"" + rowClass + "\"");
+        oldWriter.write(">");
         // skip one cell for the [details] column
-        out.write("<td>&nbsp;</td>");
-        out.write("<td colspan=\"" + (renderers.size()) + "\">");
+        oldWriter.write("<td>&nbsp;</td>");
+        oldWriter.write("<td colspan=\"" + (renderers.size()) + "\">");
 
         for (GraphColumn graphColumn : _graphColumns)
         {
             if (graphColumn.isVisible(ctx))
-                graphColumn.renderGraph(ctx, out);
+                graphColumn.renderGraph(ctx, oldWriter);
         }
-        out.write("</td></tr>\n");
+        oldWriter.write("</td></tr>\n");
     }
 }

@@ -21,7 +21,9 @@ import org.labkey.api.data.DetailsColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.UpdateColumn;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.data.FlowCompensationControl;
 import org.labkey.flow.data.FlowExperiment;
@@ -32,7 +34,6 @@ import org.labkey.flow.data.FlowWell;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.util.List;
 
 public class ChooseRunsRegion extends DataRegion
@@ -46,15 +47,15 @@ public class ChooseRunsRegion extends DataRegion
 
 
     @Override
-    protected void renderFormBegin(RenderContext ctx, Writer out, int mode) throws IOException
+    protected void renderFormBegin(RenderContext ctx, Writer oldWriter, int mode)
     {
-        renderHiddenFormFields(ctx, out, mode);
+        renderHiddenFormFields(ctx, HtmlWriter.of(oldWriter), mode);
     }
 
     @Override
-    protected String getNoRowsMessage()
+    protected HtmlString getNoRowsMessage()
     {
-        return "No runs available.  Please import some FCS files or import a FlowJo workspace associated with FCS files.";
+        return HtmlString.of("No runs available.  Please import some FCS files or import a FlowJo workspace associated with FCS files.");
     }
 
     @Override
@@ -66,16 +67,18 @@ public class ChooseRunsRegion extends DataRegion
     // Allows subclasses to do pre-row and post-row processing
     // CONSIDER: Separate as renderTableRow and renderTableRowContents?
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
+    protected void renderTableRow(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
     {
-        out.write("<tr");
+        HtmlWriter out = HtmlWriter.of(oldWriter);
+
+        oldWriter.write("<tr");
         String disabledReason = getDisabledReason(ctx);
         if (disabledReason != null)
         {
-            out.write(" title=\"" + PageFlowUtil.filter(disabledReason) + "\"");
-            out.write(" class=\"disabledRow\"");
+            oldWriter.write(" title=\"" + PageFlowUtil.filter(disabledReason) + "\"");
+            oldWriter.write(" class=\"disabledRow\"");
         }
-        out.write(">");
+        oldWriter.write(">");
 
         DisplayColumn detailsColumn = getDetailsUpdateColumn(ctx, renderers, true);
         DisplayColumn updateColumn = getDetailsUpdateColumn(ctx, renderers, false);
@@ -99,20 +102,20 @@ public class ChooseRunsRegion extends DataRegion
                 if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
                     nameColumn = i+1;
                 visibleCount++;
-                renderer.renderGridDataCell(ctx, out);
+                renderer.renderGridDataCell(ctx, oldWriter);
             }
         }
 
-        out.write("</tr>\n");
+        oldWriter.write("</tr>\n");
 
         if (disabledReason != null)
         {
-            out.write("<tr class='disabledRow'>");
-            out.write("<td style='border-right:0;' colspan='" + nameColumn + "'>&nbsp;</td>");
-            out.write("<td style='font-size:smaller;' colspan='" + visibleCount + "'>");
-            out.write(PageFlowUtil.filter(disabledReason));
-            out.write("</td>");
-            out.write("</tr>");
+            oldWriter.write("<tr class='disabledRow'>");
+            oldWriter.write("<td style='border-right:0;' colspan='" + nameColumn + "'>&nbsp;</td>");
+            oldWriter.write("<td style='font-size:smaller;' colspan='" + visibleCount + "'>");
+            oldWriter.write(PageFlowUtil.filter(disabledReason));
+            oldWriter.write("</td>");
+            oldWriter.write("</tr>");
         }
     }
 

@@ -297,9 +297,9 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderFormBegin(RenderContext ctx, Writer out, int mode) throws IOException
+        protected void renderFormBegin(RenderContext ctx, Writer oldWriter, int mode)
         {
-            renderHiddenFormFields(ctx, out, mode);
+            renderHiddenFormFields(ctx, HtmlWriter.of(oldWriter), mode);
         }
 
         @Override
