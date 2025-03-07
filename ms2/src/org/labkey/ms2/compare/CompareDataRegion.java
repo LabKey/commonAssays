@@ -19,6 +19,7 @@ package org.labkey.ms2.compare;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.MS2Manager;
 
 import java.io.IOException;
@@ -69,9 +70,11 @@ public class CompareDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderGridHeaderColumns(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers)
+    protected void renderGridHeaderColumns(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers)
             throws IOException, SQLException
     {
+        Writer oldWriter = out.unwrap();
+
         // Add an extra row and render the multi-column captions
         oldWriter.write("<tr>");
 
@@ -126,7 +129,7 @@ public class CompareDataRegion extends DataRegion
         }
         oldWriter.write("</tr>\n");
 
-        super.renderGridHeaderColumns(ctx, oldWriter, showRecordSelectors, renderers);
+        super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
     }
 
     @Override
