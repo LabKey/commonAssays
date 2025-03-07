@@ -17,15 +17,15 @@
 package org.labkey.ms2.compare;
 
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.RenderContext;
 import org.labkey.ms2.MS2Manager;
 
-import java.util.List;
-import java.io.Writer;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 public class CompareDataRegion extends DataRegion
 {
@@ -69,14 +69,14 @@ public class CompareDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderGridHeaderColumns(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers)
+    protected void renderGridHeaderColumns(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers)
             throws IOException, SQLException
     {
         // Add an extra row and render the multi-column captions
-        out.write("<tr>");
+        oldWriter.write("<tr>");
 
         if (showRecordSelectors)
-            out.write("<td></td>");
+            oldWriter.write("<td></td>");
 
         boolean shade = false;
         int columnIndex = 0;
@@ -91,20 +91,20 @@ public class CompareDataRegion extends DataRegion
         }
         if (_offset > 0)
         {
-            out.write("<td colspan=\"");
-            out.write(Integer.toString(_offset));
-            out.write("\" style=\"text-align: center; vertical-align: bottom;\"");
-            out.write("\">");
-            out.write(_columnHeader);
-            out.write("</td>");
+            oldWriter.write("<td colspan=\"");
+            oldWriter.write(Integer.toString(_offset));
+            oldWriter.write("\" style=\"text-align: center; vertical-align: bottom;\"");
+            oldWriter.write("\">");
+            oldWriter.write(_columnHeader);
+            oldWriter.write("</td>");
         }
 
         for (String caption : _multiColumnCaptions)
         {
-            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\"");
+            oldWriter.write("<td align=\"center\" colspan=\"" + _colSpan + "\"");
             if (shade)
             {
-                out.write(" class=\"labkey-alternate-row\"");
+                oldWriter.write(" class=\"labkey-alternate-row\"");
                 for (int i = 0; i < _colSpan; i++)
                 {
                     renderers.get(columnIndex++).addDisplayClass("labkey-alternate-row");
@@ -115,18 +115,18 @@ public class CompareDataRegion extends DataRegion
                 columnIndex += _colSpan;
             }
 
-            out.write(">" + caption + "</td>");
+            oldWriter.write(">" + caption + "</td>");
             shade = !shade;
         }
         if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.size())
         {
-            out.write("<td colspan=\"");
-            out.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
-            out.write("\">&nbsp;</td>");
+            oldWriter.write("<td colspan=\"");
+            oldWriter.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
+            oldWriter.write("\">&nbsp;</td>");
         }
-        out.write("</tr>\n");
+        oldWriter.write("</tr>\n");
 
-        super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
+        super.renderGridHeaderColumns(ctx, oldWriter, showRecordSelectors, renderers);
     }
 
     @Override

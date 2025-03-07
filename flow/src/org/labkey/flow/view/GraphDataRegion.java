@@ -20,6 +20,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -69,9 +70,11 @@ public class GraphDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
+    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
     {
-        super.renderTableRow(ctx, oldWriter, showRecordSelectors, renderers, rowIndex);
+        super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
+
+        Writer oldWriter = out.unwrap();
 
         oldWriter.write("<tr");
         String rowClass = getRowClass(ctx, rowIndex);
@@ -85,7 +88,7 @@ public class GraphDataRegion extends DataRegion
         for (GraphColumn graphColumn : _graphColumns)
         {
             if (graphColumn.isVisible(ctx))
-                graphColumn.renderGraph(ctx, oldWriter);
+                graphColumn.renderGraph(ctx, out);
         }
         oldWriter.write("</td></tr>\n");
     }

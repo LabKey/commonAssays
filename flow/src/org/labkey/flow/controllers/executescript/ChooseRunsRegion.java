@@ -47,9 +47,9 @@ public class ChooseRunsRegion extends DataRegion
 
 
     @Override
-    protected void renderFormBegin(RenderContext ctx, Writer oldWriter, int mode)
+    protected void renderFormBegin(RenderContext ctx, HtmlWriter out, int mode)
     {
-        renderHiddenFormFields(ctx, HtmlWriter.of(oldWriter), mode);
+        renderHiddenFormFields(ctx, out, mode);
     }
 
     @Override
@@ -67,9 +67,9 @@ public class ChooseRunsRegion extends DataRegion
     // Allows subclasses to do pre-row and post-row processing
     // CONSIDER: Separate as renderTableRow and renderTableRowContents?
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer oldWriter, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
+    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
     {
-        HtmlWriter out = HtmlWriter.of(oldWriter);
+        Writer oldWriter = out.unwrap();
 
         oldWriter.write("<tr");
         String disabledReason = getDisabledReason(ctx);
@@ -102,7 +102,7 @@ public class ChooseRunsRegion extends DataRegion
                 if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
                     nameColumn = i+1;
                 visibleCount++;
-                renderer.renderGridDataCell(ctx, oldWriter);
+                renderer.renderGridDataCell(ctx, out);
             }
         }
 

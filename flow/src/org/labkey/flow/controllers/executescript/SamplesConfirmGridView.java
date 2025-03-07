@@ -15,8 +15,8 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
@@ -297,13 +297,13 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderFormBegin(RenderContext ctx, Writer oldWriter, int mode)
+        protected void renderFormBegin(RenderContext ctx, HtmlWriter out, int mode)
         {
-            renderHiddenFormFields(ctx, HtmlWriter.of(oldWriter), mode);
+            renderHiddenFormFields(ctx, out, mode);
         }
 
         @Override
-        protected void renderFormEnd(RenderContext ctx, Writer out)
+        protected void renderFormEnd(RenderContext ctx, HtmlWriter out)
         {
             // No-op.  Don't close the form.
         }
@@ -331,7 +331,7 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderExtraRecordSelectorContent(RenderContext ctx, HtmlWriter out) throws IOException
+        protected void renderExtraRecordSelectorContent(RenderContext ctx, HtmlWriter out)
         {
             // Add a hidden input for spring form binding -- if this value is posted, the row was unchecked.
             out.write(

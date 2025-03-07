@@ -32,6 +32,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
@@ -127,6 +128,11 @@ public class GraphColumn extends DataColumn
     public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
     {
         renderGraph(ctx, out);
+    }
+
+    public void renderGraph(RenderContext ctx, HtmlWriter out) throws IOException
+    {
+        renderGraph(ctx, out.unwrap());
     }
 
     public void renderGraph(RenderContext ctx, Writer out) throws IOException
