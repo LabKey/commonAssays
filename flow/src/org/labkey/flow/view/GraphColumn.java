@@ -27,6 +27,8 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.DOM.Renderable;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.JavaScriptFragment;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -38,7 +40,6 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.query.FlowQuerySettings;
 
-import java.io.IOException;
 import java.io.Writer;
 
 import static org.labkey.api.util.DOM.Attribute.alt;
@@ -50,6 +51,7 @@ import static org.labkey.api.util.DOM.Attribute.width;
 import static org.labkey.api.util.DOM.BR;
 import static org.labkey.api.util.DOM.IMG;
 import static org.labkey.api.util.DOM.SPAN;
+import static org.labkey.api.util.DOM.WBR;
 import static org.labkey.api.util.DOM.at;
 import static org.labkey.api.util.DOM.cl;
 
@@ -74,7 +76,6 @@ public class GraphColumn extends DataColumn
     static public Pair<Integer, String> parseObjectIdGraph(@NotNull String objectIdGraph)
     {
         Integer objectId = null;
-        String graphSpec = null;
 
         String[] parts = objectIdGraph.split(SEP, 2);
         if (parts.length != 2)
@@ -92,7 +93,7 @@ public class GraphColumn extends DataColumn
             }
         }
 
-        graphSpec = parts[1];
+        String graphSpec = parts[1];
         if (graphSpec.isEmpty())
         {
             throw new IllegalArgumentException("error parsing graph spec: expected second part to be non-empty string: " + objectIdGraph);
@@ -125,29 +126,24 @@ public class GraphColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, Writer out)
     {
-        renderGraph(ctx, out);
+        renderGraph(ctx, HtmlWriter.of(out));
     }
 
-    public void renderGraph(RenderContext ctx, HtmlWriter out) throws IOException
-    {
-        renderGraph(ctx, out.unwrap());
-    }
-
-    public void renderGraph(RenderContext ctx, Writer out) throws IOException
+    public void renderGraph(RenderContext ctx, HtmlWriter out)
     {
         if (!ctx.containsKey(INCLUDE_UTIL_SCRIPT))
         {
-            out.write(String.format("<script type='text/javascript' src='%1$s/Flow/util.js' nonce='%2$s' ></script>", AppProps.getInstance().getContextPath(), PageConfig.getScriptNonceHeader(ctx.getRequest())));
+            out.write(JavaScriptFragment.unsafe(String.format("<script type='text/javascript' src='%1$s/Flow/util.js' nonce='%2$s' ></script>", AppProps.getInstance().getContextPath(), PageConfig.getScriptNonceHeader(ctx.getRequest()))));
             ctx.put(INCLUDE_UTIL_SCRIPT, true);
         }
 
         Object boundValue = getColumnInfo().getValue(ctx);
         if ((!(boundValue instanceof String)))
         {
-            LOG.debug("error parsing graph spec: expected pair of values, but got '" + boundValue + "'");
-            out.write("&nbsp;");
+            LOG.debug("error parsing graph spec: expected pair of values, but got '{}'", boundValue);
+            out.write(HtmlString.NBSP);
             return;
         }
 
@@ -163,7 +159,7 @@ public class GraphColumn extends DataColumn
         catch (IllegalArgumentException ex)
         {
             LOG.debug(ex.getMessage());
-            out.write("&nbsp;");
+            out.write(HtmlString.NBSP);
             return;
         }
 
@@ -182,13 +178,13 @@ public class GraphColumn extends DataColumn
                     )
             ).appendTo(out);
             ensureErrorHandler();
-            out.write("<wbr>");
+            WBR().appendTo(out);
         }
         else if (showGraphs(ctx) == FlowQuerySettings.ShowGraphs.Thumbnail)
         {
             if (objectId == null)
             {
-                out.write("&nbsp;");
+                out.write(HtmlString.NBSP);
             }
             else
             {

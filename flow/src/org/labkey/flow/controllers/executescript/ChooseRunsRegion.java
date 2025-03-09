@@ -16,13 +16,14 @@
 
 package org.labkey.flow.controllers.executescript;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DetailsColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.UpdateColumn;
+import org.labkey.api.util.DOM.Renderable;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.data.FlowCompensationControl;
@@ -33,8 +34,15 @@ import org.labkey.flow.data.FlowWell;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
+
+import static org.labkey.api.util.DOM.Attribute.colspan;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.Attribute.title;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
 
 public class ChooseRunsRegion extends DataRegion
 {
@@ -69,53 +77,52 @@ public class ChooseRunsRegion extends DataRegion
     @Override
     protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
     {
-        Writer oldWriter = out.unwrap();
-
-        oldWriter.write("<tr");
         String disabledReason = getDisabledReason(ctx);
-        if (disabledReason != null)
-        {
-            oldWriter.write(" title=\"" + PageFlowUtil.filter(disabledReason) + "\"");
-            oldWriter.write(" class=\"disabledRow\"");
-        }
-        oldWriter.write(">");
-
         DisplayColumn detailsColumn = getDetailsUpdateColumn(ctx, renderers, true);
         DisplayColumn updateColumn = getDetailsUpdateColumn(ctx, renderers, false);
+        MutableInt visibleCount = new MutableInt(0);
+        MutableInt nameColumn = new MutableInt(0);
 
-        int visibleCount = 0;
-        if (showRecordSelectors || (detailsColumn != null || updateColumn != null))
-        {
-            visibleCount++;
-            renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
-        }
+        TR(
+            disabledReason != null ? cl("disabledRow").at(title, disabledReason) : null,
+            (Renderable) ret -> {
+                if (showRecordSelectors || (detailsColumn != null || updateColumn != null))
+                {
+                    visibleCount.increment();
+                    renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
+                }
 
-        int nameColumn = 0;
-        for (int i = 0, renderersSize = renderers.size(); i < renderersSize; i++)
-        {
-            DisplayColumn renderer = renderers.get(i);
-            if (renderer.isVisible(ctx))
-            {
-                if (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn)
-                    continue;
+                for (int i = 0, renderersSize = renderers.size(); i < renderersSize; i++)
+                {
+                    DisplayColumn renderer = renderers.get(i);
+                    if (renderer.isVisible(ctx))
+                    {
+                        if (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn)
+                            continue;
 
-                if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
-                    nameColumn = i+1;
-                visibleCount++;
-                renderer.renderGridDataCell(ctx, out);
+                        if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
+                            nameColumn.setValue(i + 1);
+                        visibleCount.increment();
+                        renderer.renderGridDataCell(ctx, out);
+                    }
+                }
+                return ret;
             }
-        }
-
-        oldWriter.write("</tr>\n");
+        ).appendTo(out);
 
         if (disabledReason != null)
         {
-            oldWriter.write("<tr class='disabledRow'>");
-            oldWriter.write("<td style='border-right:0;' colspan='" + nameColumn + "'>&nbsp;</td>");
-            oldWriter.write("<td style='font-size:smaller;' colspan='" + visibleCount + "'>");
-            oldWriter.write(PageFlowUtil.filter(disabledReason));
-            oldWriter.write("</td>");
-            oldWriter.write("</tr>");
+            TR(
+                cl("disabledRow"),
+                TD(
+                    at(style,"border-right:0;", colspan, nameColumn.getValue()),
+                    HtmlString.NBSP
+                ),
+                TD(
+                    at(style, "font-size:smaller;", colspan, visibleCount.getValue()),
+                    disabledReason
+                )
+            ).appendTo(out);
         }
     }
 
