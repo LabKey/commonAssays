@@ -77,7 +77,7 @@ public class GraphDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
+    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException
     {
         super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
 

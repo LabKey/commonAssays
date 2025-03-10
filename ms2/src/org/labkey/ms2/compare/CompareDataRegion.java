@@ -81,7 +81,7 @@ public class CompareDataRegion extends DataRegion
 
     @Override
     protected void renderGridHeaderColumns(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers)
-            throws IOException, SQLException
+            throws SQLException
     {
         // Add an extra row and render the multi-column captions
         TR(
