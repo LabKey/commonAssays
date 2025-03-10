@@ -100,6 +100,14 @@ public class CompareDataRegion extends DataRegion
                     columnIndex.increment();
                 }
 
+                if (_offset > 0)
+                {
+                    TD(
+                        at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"),
+                        _columnHeader
+                    ).appendTo(out);
+                }
+
                 for (String caption : _multiColumnCaptions)
                 {
                     TD(
@@ -120,21 +128,7 @@ public class CompareDataRegion extends DataRegion
                         },
                         caption
                     ).appendTo(out);
-//                    oldWriter.write("<td align=\"center\" colspan=\"" + _colSpan + "\"");
-//                    if (shade)
-//                    {
-//                        oldWriter.write(" class=\"labkey-alternate-row\"");
-//                        for (int i = 0; i < _colSpan; i++)
-//                        {
-//                            renderers.get(columnIndex++).addDisplayClass("labkey-alternate-row");
-//                        }
-//                    }
-//                    else
-//                    {
-//                        columnIndex += _colSpan;
-//                    }
-//
-//                    oldWriter.write(">" + caption + "</td>");
+
                     shade.setValue(!shade.getValue());
                 }
 
@@ -142,30 +136,6 @@ public class CompareDataRegion extends DataRegion
             },
             _colSpan * _multiColumnCaptions.size() + _offset < renderers.size() ? TD(at(colspan, renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset), HtmlString.NBSP) : null
         ).appendTo(out);
-
-//        oldWriter.write("<tr>");
-
-//        if (showRecordSelectors)
-//            oldWriter.write("<td></td>");
-//
-//        if (_offset > 0)
-//        {
-//            oldWriter.write("<td colspan=\"");
-//            oldWriter.write(Integer.toString(_offset));
-//            oldWriter.write("\" style=\"text-align: center; vertical-align: bottom;\"");
-//            oldWriter.write("\">");
-//            oldWriter.write(_columnHeader);
-//            oldWriter.write("</td>");
-//        }
-
-//
-//        if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.size())
-//        {
-//            oldWriter.write("<td colspan=\"");
-//            oldWriter.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
-//            oldWriter.write("\">&nbsp;</td>");
-//        }
-//        oldWriter.write("</tr>\n");
 
         super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
     }

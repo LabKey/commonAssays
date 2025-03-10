@@ -338,7 +338,7 @@ public class SamplesConfirmGridView extends GridView
                 new Input.InputBuilder()
                     .type("hidden")
                     .name(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx))
-                    .value("0")
+                    .value(0)
             );
         }
 

@@ -63,7 +63,7 @@ public class ChooseRunsRegion extends DataRegion
     @Override
     protected HtmlString getNoRowsMessage()
     {
-        return HtmlString.of("No runs available.  Please import some FCS files or import a FlowJo workspace associated with FCS files.");
+        return HtmlString.of("No runs available. Please import some FCS files or import a FlowJo workspace associated with FCS files.");
     }
 
     @Override
@@ -115,7 +115,7 @@ public class ChooseRunsRegion extends DataRegion
             TR(
                 cl("disabledRow"),
                 TD(
-                    at(style,"border-right:0;", colspan, nameColumn.getValue()),
+                    at(style, "border-right:0;", colspan, nameColumn.getValue()),
                     HtmlString.NBSP
                 ),
                 TD(
