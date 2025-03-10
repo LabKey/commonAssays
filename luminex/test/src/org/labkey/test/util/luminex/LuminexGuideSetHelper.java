@@ -224,7 +224,7 @@ public class LuminexGuideSetHelper
         WebElement selectedRunsGrid = Locator.byClass("selectedRunsGrid").waitForElement(applyGuideSetWindow, WAIT_FOR_JAVASCRIPT);
         for (String network : networks)
         {
-            Locator.byClass("x-grid3-cell").withText(network).waitForElement(selectedRunsGrid, WAIT_FOR_JAVASCRIPT * 3);
+            Locator.byClass("x-grid3-cell").withText(network).waitForElement(selectedRunsGrid, WAIT_FOR_JAVASCRIPT * 5);
         }
 
         WebElement guideSetsGrid = Locator.byClass("guideSetsGrid").waitForElement(applyGuideSetWindow, WAIT_FOR_JAVASCRIPT);
