@@ -24,7 +24,6 @@ import org.labkey.api.util.DOM.Renderable;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,13 +85,15 @@ public class GraphDataRegion extends DataRegion
 
             // skip one cell for the [details] column
             TD(HtmlString.NBSP),
-            TD(at(colspan, renderers.size())),
-            (Renderable) ret -> {
-                _graphColumns.stream()
-                    .filter(gc -> gc.isVisible(ctx))
-                    .forEach(gc -> gc.renderGraph(ctx, out));
-                return ret;
-            }
+            TD(
+                at(colspan, renderers.size()),
+                (Renderable) ret -> {
+                    _graphColumns.stream()
+                        .filter(gc -> gc.isVisible(ctx))
+                        .forEach(gc -> gc.renderGraph(ctx, out));
+                    return ret;
+                }
+            )
         ).appendTo(out);
     }
 }
