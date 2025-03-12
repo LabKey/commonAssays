@@ -16,16 +16,27 @@
 
 package org.labkey.ms2.compare;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.labkey.api.data.DataRegion;
-import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.DOM.Renderable;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.MS2Manager;
 
-import java.util.List;
-import java.io.Writer;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import static org.labkey.api.util.DOM.Attribute.align;
+import static org.labkey.api.util.DOM.Attribute.colspan;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
 
 public class CompareDataRegion extends DataRegion
 {
@@ -69,62 +80,62 @@ public class CompareDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderGridHeaderColumns(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers)
-            throws IOException, SQLException
+    protected void renderGridHeaderColumns(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers)
+            throws SQLException
     {
         // Add an extra row and render the multi-column captions
-        out.write("<tr>");
-
-        if (showRecordSelectors)
-            out.write("<td></td>");
-
-        boolean shade = false;
-        int columnIndex = 0;
-        for (int i = 0; i < _offset; i++)
-        {
-            if (shade)
-            {
-                renderers.get(columnIndex).addDisplayClass("labkey-alternate-row");
-            }
-            shade = !shade;
-            columnIndex++;
-        }
-        if (_offset > 0)
-        {
-            out.write("<td colspan=\"");
-            out.write(Integer.toString(_offset));
-            out.write("\" style=\"text-align: center; vertical-align: bottom;\"");
-            out.write("\">");
-            out.write(_columnHeader);
-            out.write("</td>");
-        }
-
-        for (String caption : _multiColumnCaptions)
-        {
-            out.write("<td align=\"center\" colspan=\"" + _colSpan + "\"");
-            if (shade)
-            {
-                out.write(" class=\"labkey-alternate-row\"");
-                for (int i = 0; i < _colSpan; i++)
+        TR(
+            showRecordSelectors ? TD() : null,
+            _offset > 0 ? TD(at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"), _columnHeader) : null,
+            (Renderable) ret -> {
+                final MutableBoolean shade = new MutableBoolean(false);
+                final MutableInt columnIndex = new MutableInt(0);
+                for (int i = 0; i < _offset; i++)
                 {
-                    renderers.get(columnIndex++).addDisplayClass("labkey-alternate-row");
+                    if (shade.booleanValue())
+                    {
+                        renderers.get(columnIndex.getValue()).addDisplayClass("labkey-alternate-row");
+                    }
+                    shade.setValue(!shade.getValue());
+                    columnIndex.increment();
                 }
-            }
-            else
-            {
-                columnIndex += _colSpan;
-            }
 
-            out.write(">" + caption + "</td>");
-            shade = !shade;
-        }
-        if (_colSpan * _multiColumnCaptions.size() + _offset < renderers.size())
-        {
-            out.write("<td colspan=\"");
-            out.write(Integer.toString(renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset));
-            out.write("\">&nbsp;</td>");
-        }
-        out.write("</tr>\n");
+                if (_offset > 0)
+                {
+                    TD(
+                        at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"),
+                        _columnHeader
+                    ).appendTo(out);
+                }
+
+                for (String caption : _multiColumnCaptions)
+                {
+                    TD(
+                        at(align, "center", colspan, _colSpan).cl(shade.isTrue(), "labkey-alternate-row"),
+                        (Renderable) rend -> {
+                            if (shade.isTrue())
+                            {
+                                for (int i = 0; i < _colSpan; i++)
+                                {
+                                    renderers.get(columnIndex.getAndIncrement()).addDisplayClass("labkey-alternate-row");
+                                }
+                            }
+                            else
+                            {
+                                columnIndex.add(_colSpan);
+                            }
+                            return rend;
+                        },
+                        caption
+                    ).appendTo(out);
+
+                    shade.setValue(!shade.getValue());
+                }
+
+                return ret;
+            },
+            _colSpan * _multiColumnCaptions.size() + _offset < renderers.size() ? TD(at(colspan, renderers.size() - _colSpan * _multiColumnCaptions.size() + _offset), HtmlString.NBSP) : null
+        ).appendTo(out);
 
         super.renderGridHeaderColumns(ctx, out, showRecordSelectors, renderers);
     }

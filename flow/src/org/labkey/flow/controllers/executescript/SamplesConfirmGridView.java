@@ -15,8 +15,8 @@
  */
 package org.labkey.flow.controllers.executescript;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.NamedObject;
@@ -46,7 +46,9 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
+import org.labkey.api.util.element.Input;
 import org.labkey.api.view.GridView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.ISampleInfo;
 import org.labkey.flow.analysis.model.Workspace;
 import org.labkey.flow.data.FlowFCSFile;
@@ -277,7 +279,7 @@ public class SamplesConfirmGridView extends GridView
         protected int matchedCount = 0;
 
         @Override
-        public Map<String, String> prepareMessages(RenderContext ctx) throws IOException
+        public Map<String, String> prepareMessages(RenderContext ctx)
         {
             Map<String, String> messages = super.prepareMessages(ctx);
 
@@ -295,13 +297,13 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderFormBegin(RenderContext ctx, Writer out, int mode) throws IOException
+        protected void renderFormBegin(RenderContext ctx, HtmlWriter out, int mode)
         {
             renderHiddenFormFields(ctx, out, mode);
         }
 
         @Override
-        protected void renderFormEnd(RenderContext ctx, Writer out)
+        protected void renderFormEnd(RenderContext ctx, HtmlWriter out)
         {
             // No-op.  Don't close the form.
         }
@@ -329,12 +331,15 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        protected void renderExtraRecordSelectorContent(RenderContext ctx, Writer out) throws IOException
+        protected void renderExtraRecordSelectorContent(RenderContext ctx, HtmlWriter out)
         {
-            // Add a hidden input for spring form binding -- if this value is posed, the row was unchecked.
-            out.write("<input type=\"hidden\" name=\"");
-            out.write(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx));
-            out.write("\" value=\"0\">");
+            // Add a hidden input for spring form binding -- if this value is posted, the row was unchecked.
+            out.write(
+                new Input.InputBuilder()
+                    .type("hidden")
+                    .name(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx))
+                    .value(0)
+            );
         }
 
         @Override
