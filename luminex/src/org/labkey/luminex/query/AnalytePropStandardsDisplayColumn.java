@@ -21,6 +21,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
@@ -31,6 +32,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.Attribute.name;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.at;
 
 public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 {
@@ -112,13 +117,11 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputWrapperBegin(Writer out) throws IOException
+    public DOM._Attributes getInputAttributes()
     {
         String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
 
-        out.write("<td");
-        out.write(" style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\"");
-        out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
+        return at(style, "display:" + (_hideCell ? "none" : "table-cell"), name, titrationCellName);
     }
 
     @Override

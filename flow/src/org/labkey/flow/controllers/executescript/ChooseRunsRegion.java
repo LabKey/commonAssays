@@ -33,7 +33,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import static org.labkey.api.util.DOM.Attribute.colspan;
