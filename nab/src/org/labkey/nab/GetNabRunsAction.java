@@ -156,10 +156,6 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
         {
             throw new RuntimeSQLException(e);
         }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
         List<ExpRun> runs = new ArrayList<>();
         for (Integer rowId : rowIds)
         {

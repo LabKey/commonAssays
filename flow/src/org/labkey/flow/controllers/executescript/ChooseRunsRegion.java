@@ -16,12 +16,15 @@
 
 package org.labkey.flow.controllers.executescript;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DetailsColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.UpdateColumn;
-import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.DOM.Renderable;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.data.FlowCompensationControl;
 import org.labkey.flow.data.FlowExperiment;
@@ -31,9 +34,15 @@ import org.labkey.flow.data.FlowWell;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
-import java.sql.SQLException;
 import java.util.List;
+
+import static org.labkey.api.util.DOM.Attribute.colspan;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.Attribute.title;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
 
 public class ChooseRunsRegion extends DataRegion
 {
@@ -46,15 +55,15 @@ public class ChooseRunsRegion extends DataRegion
 
 
     @Override
-    protected void renderFormBegin(RenderContext ctx, Writer out, int mode) throws IOException
+    protected void renderFormBegin(RenderContext ctx, HtmlWriter out, int mode)
     {
         renderHiddenFormFields(ctx, out, mode);
     }
 
     @Override
-    protected String getNoRowsMessage()
+    protected HtmlString getNoRowsMessage()
     {
-        return "No runs available.  Please import some FCS files or import a FlowJo workspace associated with FCS files.";
+        return HtmlString.of("No runs available. Please import some FCS files or import a FlowJo workspace associated with FCS files.");
     }
 
     @Override
@@ -66,53 +75,54 @@ public class ChooseRunsRegion extends DataRegion
     // Allows subclasses to do pre-row and post-row processing
     // CONSIDER: Separate as renderTableRow and renderTableRowContents?
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws IOException
+    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex)
     {
-        out.write("<tr");
         String disabledReason = getDisabledReason(ctx);
-        if (disabledReason != null)
-        {
-            out.write(" title=\"" + PageFlowUtil.filter(disabledReason) + "\"");
-            out.write(" class=\"disabledRow\"");
-        }
-        out.write(">");
-
         DisplayColumn detailsColumn = getDetailsUpdateColumn(ctx, renderers, true);
         DisplayColumn updateColumn = getDetailsUpdateColumn(ctx, renderers, false);
+        MutableInt visibleCount = new MutableInt(0);
+        MutableInt nameColumn = new MutableInt(0);
 
-        int visibleCount = 0;
-        if (showRecordSelectors || (detailsColumn != null || updateColumn != null))
-        {
-            visibleCount++;
-            renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
-        }
+        TR(
+            disabledReason != null ? cl("disabledRow").at(title, disabledReason) : null,
+            (Renderable) ret -> {
+                if (showRecordSelectors || (detailsColumn != null || updateColumn != null))
+                {
+                    visibleCount.increment();
+                    renderActionColumn(ctx, out, rowIndex, showRecordSelectors, detailsColumn, updateColumn);
+                }
 
-        int nameColumn = 0;
-        for (int i = 0, renderersSize = renderers.size(); i < renderersSize; i++)
-        {
-            DisplayColumn renderer = renderers.get(i);
-            if (renderer.isVisible(ctx))
-            {
-                if (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn)
-                    continue;
+                for (int i = 0, renderersSize = renderers.size(); i < renderersSize; i++)
+                {
+                    DisplayColumn renderer = renderers.get(i);
+                    if (renderer.isVisible(ctx))
+                    {
+                        if (renderer instanceof DetailsColumn || renderer instanceof UpdateColumn)
+                            continue;
 
-                if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
-                    nameColumn = i+1;
-                visibleCount++;
-                renderer.renderGridDataCell(ctx, out);
+                        if (renderer.getColumnInfo() != null && "name".equalsIgnoreCase(renderer.getColumnInfo().getName()))
+                            nameColumn.setValue(i + 1);
+                        visibleCount.increment();
+                        renderer.renderGridDataCell(ctx, out);
+                    }
+                }
+                return ret;
             }
-        }
-
-        out.write("</tr>\n");
+        ).appendTo(out);
 
         if (disabledReason != null)
         {
-            out.write("<tr class='disabledRow'>");
-            out.write("<td style='border-right:0;' colspan='" + nameColumn + "'>&nbsp;</td>");
-            out.write("<td style='font-size:smaller;' colspan='" + visibleCount + "'>");
-            out.write(PageFlowUtil.filter(disabledReason));
-            out.write("</td>");
-            out.write("</tr>");
+            TR(
+                cl("disabledRow"),
+                TD(
+                    at(style, "border-right:0;", colspan, nameColumn.getValue()),
+                    HtmlString.NBSP
+                ),
+                TD(
+                    at(style, "font-size:smaller;", colspan, visibleCount.getValue()),
+                    disabledReason
+                )
+            ).appendTo(out);
         }
     }
 

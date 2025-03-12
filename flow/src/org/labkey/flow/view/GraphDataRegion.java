@@ -20,20 +20,24 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.DOM.Renderable;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.writer.HtmlWriter;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.labkey.api.util.DOM.Attribute.colspan;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
+
 /**
  * Render row of values and row of graphs for every row in the grid.
  * Replaces GraphView.
- *
- * User: kevink
- * Date: 7/20/11
  */
 public class GraphDataRegion extends DataRegion
 {
@@ -72,24 +76,24 @@ public class GraphDataRegion extends DataRegion
     }
 
     @Override
-    protected void renderTableRow(RenderContext ctx, Writer out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException, IOException
+    protected void renderTableRow(RenderContext ctx, HtmlWriter out, boolean showRecordSelectors, List<DisplayColumn> renderers, int rowIndex) throws SQLException
     {
         super.renderTableRow(ctx, out, showRecordSelectors, renderers, rowIndex);
 
-        out.write("<tr");
-        String rowClass = getRowClass(ctx, rowIndex);
-        if (rowClass != null)
-            out.write(" class=\"" + rowClass + "\"");
-        out.write(">");
-        // skip one cell for the [details] column
-        out.write("<td>&nbsp;</td>");
-        out.write("<td colspan=\"" + (renderers.size()) + "\">");
+        TR(
+            cl(getRowClass(ctx, rowIndex)),
 
-        for (GraphColumn graphColumn : _graphColumns)
-        {
-            if (graphColumn.isVisible(ctx))
-                graphColumn.renderGraph(ctx, out);
-        }
-        out.write("</td></tr>\n");
+            // skip one cell for the [details] column
+            TD(HtmlString.NBSP),
+            TD(
+                at(colspan, renderers.size()),
+                (Renderable) ret -> {
+                    _graphColumns.stream()
+                        .filter(gc -> gc.isVisible(ctx))
+                        .forEach(gc -> gc.renderGraph(ctx, out));
+                    return ret;
+                }
+            )
+        ).appendTo(out);
     }
 }
