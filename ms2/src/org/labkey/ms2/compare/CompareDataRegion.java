@@ -26,7 +26,6 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.MS2Manager;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;

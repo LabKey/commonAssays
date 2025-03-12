@@ -28,14 +28,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * User: jeckels
- * Date: Apr 9, 2007
- */
 public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColumn
 {
-    private ColumnInfo _groupingColumn;
-    private ColumnInfo _peptideColumn;
+    private final ColumnInfo _groupingColumn;
+    private final ColumnInfo _peptideColumn;
 
     private static final Logger LOG = LogManager.getLogger(PeptideAggregrationDisplayColumn.class);
     private boolean _loggedError = false;
@@ -147,19 +143,6 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
     protected abstract Object calculateValue(RenderContext ctx, List<String> peptides)
             throws SQLException;
 
-
-    @Override
-    public boolean isFilterable()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isSortable()
-    {
-        return false;
-    }
-
     @Override
     public void addQueryColumns(Set<ColumnInfo> set)
     {
@@ -175,5 +158,5 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
     }
 
     @Override
-    public abstract Class getValueClass();
+    public abstract Class<?> getValueClass();
 }

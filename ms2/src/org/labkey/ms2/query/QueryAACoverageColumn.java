@@ -56,7 +56,7 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
     }
 
     @Override
-    public Class getValueClass()
+    public Class<Double> getValueClass()
     {
         return Double.class;
     }

@@ -16,6 +16,7 @@
 package org.labkey.luminex.query;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
@@ -23,6 +24,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
 import org.labkey.luminex.LuminexDataHandler;
@@ -58,15 +60,15 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             }
 
             @Override
-            public void renderTitle(RenderContext ctx, Writer out) throws IOException
+            public @NotNull HtmlString getTitle(RenderContext ctx)
             {
-                out.write("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n" +
+                return HtmlStringBuilder.of()
+                    .unsafeAppend("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n" +
                         "LABKEY.requiresExt4Sandbox(function() {\n" +
-                            "LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');\n" +
+                        "    LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');\n" +
                         "});\n" +
-                    "</script>\n");
-
-                out.write(PageFlowUtil.filter(_displayName));
+                        "</script>\n")
+                    .append(_displayName).getHtmlString();
             }
 
             @Override
@@ -74,7 +76,7 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             {
                 out.write("<td class=\"control-header-label\">");
 
-                renderTitle(ctx, out);
+                out.write(getTitle(ctx).toString());
                 StringBuilder sb = new StringBuilder();
                 sb.append("The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are " +
                         "those selected as Negative Control analytes.\n\n");

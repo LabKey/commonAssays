@@ -19,14 +19,9 @@ package org.labkey.ms2.query;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 
-import java.util.List;
 import java.util.HashSet;
-import java.sql.SQLException;
+import java.util.List;
 
-/**
- * User: jeckels
- * Date: Apr 9, 2007
- */
 public class UniquePeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
 {
     public UniquePeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn, String caption)
@@ -41,7 +36,7 @@ public class UniquePeptideCountCoverageColumn extends PeptideAggregrationDisplay
     }
 
     @Override
-    public Class getValueClass()
+    public Class<Integer> getValueClass()
     {
         return Integer.class;
     }

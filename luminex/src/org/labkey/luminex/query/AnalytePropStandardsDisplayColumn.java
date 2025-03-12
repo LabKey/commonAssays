@@ -127,7 +127,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
         out.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
                 + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
-        renderTitle(ctx, out);
+        out.write(getTitle(ctx).toString());
         out.write("</td>");
     }
 

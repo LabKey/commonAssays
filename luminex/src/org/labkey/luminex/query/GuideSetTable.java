@@ -64,10 +64,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: jeckels
- * Date: Aug 26, 2011
- */
 public class GuideSetTable extends AbstractCurveFitPivotTable
 {
     public GuideSetTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
@@ -125,9 +121,9 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 }
 
                 @Override
-                public void renderTitle(RenderContext ctx, Writer out)
+                public HtmlString getTitle(RenderContext ctx)
                 {
-                    // no title
+                    return null; // no title
                 }
 
                 @Override

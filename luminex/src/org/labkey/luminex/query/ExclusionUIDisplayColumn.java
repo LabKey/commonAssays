@@ -82,9 +82,9 @@ public class ExclusionUIDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderTitle(RenderContext ctx, Writer out)
+    public HtmlString getTitle(RenderContext ctx)
     {
-        // Don't render a title, to keep the column narrow
+        return null; // Don't render a title, to keep the column narrow
     }
 
     @Override

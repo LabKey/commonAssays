@@ -19,12 +19,15 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.DOM;
+import org.labkey.api.util.element.Input;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
+
+import static org.labkey.api.util.DOM.TD;
 
 public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
 {
@@ -37,33 +40,35 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
     }
 
     @Override
-    public void writeSameCheckboxCell(RenderContext ctx, Writer out) throws IOException
+    public void writeSameCheckboxCell(RenderContext ctx, HtmlWriter out)
     {
-        out.write("<td>");
-        if (isCopyable())
-        {
-            String inputName = ColumnInfo.propNameFromName(_inputName);
-            String id = inputName + "CheckBox";
-            out.write("<input type=checkbox name='" + id + "' id='" + id + "' />");
-            StringBuilder onChange = new StringBuilder("b = this.checked;\n");
-            for (int i = 1; i < getColumns().size(); i++)
-            {
-                DisplayColumn col = getColumns().get(i);
-                if (col.getColumnInfo() != null)
-                {
-                    onChange.append("s = document.getElementsByName('")
-                        .append(col.getFormFieldName(ctx))
-                        .append("')[0].options.length;\n")
-                        .append("document.getElementsByName('")
-                        .append(col.getFormFieldName(ctx))
-                        .append("')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
-                }
-            }
-            onChange.append(" if (b) { ")
-                .append(inputName)
-                .append("Updated(); }");
-            HttpView.currentPageConfig().addHandler(id, "change", onChange.toString());
-        }
-        out.write("</td>");
+        TD(
+            isCopyable() ? (DOM.Renderable) ret -> {
+                String inputName = ColumnInfo.propNameFromName(_inputName);
+                String id = inputName + "CheckBox";
+                new Input.InputBuilder().type("checkbox").name(id).id(id).appendTo(out);
+                StringBuilder onChange = new StringBuilder("b = this.checked;\n");
+
+                getColumns().forEach(col -> {
+                    if (col.getColumnInfo() != null)
+                    {
+                        onChange.append("s = document.getElementsByName('")
+                            .append(col.getFormFieldName(ctx))
+                            .append("')[0].options.length;\n")
+                            .append("document.getElementsByName('")
+                            .append(col.getFormFieldName(ctx))
+                            .append("')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
+                    }
+                });
+
+                onChange.append(" if (b) { ")
+                    .append(inputName)
+                    .append("Updated(); }");
+                HttpView.currentPageConfig().addHandler(id, "change", onChange.toString());
+
+                return ret;
+            } :
+            null
+        ).appendTo(out);
     }
 }

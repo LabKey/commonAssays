@@ -18,6 +18,7 @@ package org.labkey.luminex;
 
 import jakarta.servlet.ServletException;
 import org.apache.commons.collections4.keyvalue.MultiKey;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.LabKeyError;
 import org.labkey.api.action.SpringActionController;
@@ -53,11 +54,13 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.element.Input;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewServlet;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.SinglePointControl;
 import org.labkey.luminex.model.Titration;
@@ -84,6 +87,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.at;
 
 /**
  * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
@@ -421,13 +428,19 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             view.getDataRegion().addGroup(new DisplayColumnGroup(cols, titrationEntry.getKey(), true)
             {
                 @Override
-                public void writeSameCheckboxCell(RenderContext ctx, Writer out) throws IOException
+                public void writeSameCheckboxCell(RenderContext ctx, HtmlWriter out)
                 {
                     String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
                     String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
                     String id = groupName + "CheckBox";
-                    out.write("<td name='" + titrationCellName + "' style='display:" + (hideCell ? "none" : "table-cell") + "' >");
-                    out.write("<input type=checkbox name='" + id + "' id='" + id + "'>");
+
+                    TD(
+                            at(style, "display:" + (hideCell ? "none" : "table-cell")).
+                            name(titrationCellName),
+                            new Input.InputBuilder().type("checkbox").name(id).id(id)
+
+                    ).appendTo(out);
+
                     StringBuilder onchange = new StringBuilder("b = this.checked;");
                     for (DisplayColumn col : getColumns())
                     {
@@ -435,7 +448,6 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     }
                     onchange.append("if (b) { ").append(groupName).append("Updated(); }");
                     HttpView.currentPageConfig().addHandler(id, "change", onchange.toString());
-                    out.write("</td>");
                 }
 
                 @Override
@@ -548,7 +560,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return (errorReshow && requestParamValue.equals("true")) || (!errorReshow && standardTitrations.contains(standard));
     }
 
-    private DisplayColumnFactory createAnalytePropertyDisplayColumnFactory(final String inputName, final String displayName)
+    private DisplayColumnFactory createAnalytePropertyDisplayColumnFactory(final String inputName, final @NotNull String displayName)
     {
         return colInfo -> new DataColumn(colInfo)
         {
@@ -559,9 +571,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             @Override
-            public void renderTitle(RenderContext ctx, Writer out) throws IOException
+            public HtmlString getTitle(RenderContext ctx)
             {
-                out.write(displayName);
+                return HtmlString.of(displayName);
             }
 
             @Override
@@ -569,7 +581,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             {
                 out.write("<td class=\"control-header-label\">");
 
-                renderTitle(ctx, out);
+                out.write(getTitle(ctx).toString());
                 String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
                 PageFlowUtil.popupHelp(HtmlString.of(sb), displayName).appendTo(out);
 

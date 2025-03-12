@@ -58,7 +58,7 @@ public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
     }
 
     @Override
-    public Class getValueClass()
+    public Class<Double> getValueClass()
     {
         return Double.class;
     }

@@ -21,10 +21,6 @@ import org.labkey.api.data.RenderContext;
 
 import java.util.List;
 
-/**
- * User: jeckels
- * Date: Apr 9, 2007
- */
 public class PeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
 {
     public PeptideCountCoverageColumn(ColumnInfo colInfo, ColumnInfo peptideColumn, String caption)
@@ -33,7 +29,7 @@ public class PeptideCountCoverageColumn extends PeptideAggregrationDisplayColumn
     }
 
     @Override
-    public Class getValueClass()
+    public Class<Integer> getValueClass()
     {
         return Integer.class;
     }
