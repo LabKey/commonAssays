@@ -67,7 +67,8 @@ import static org.labkey.test.util.TestDataGenerator.DOMAIN_SPECIAL_STRING;
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
 public abstract class LuminexTest extends BaseWebDriverTest
 {
-    protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";            //project for luminex test
+    protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";
+    protected final static String TEST_ASSAY_SUBFOLDER = "Subfolder";//project for luminex test
 
     // Issue 51845:
     //  - Luminex assay not working well when assay name contains dot (.)
@@ -186,6 +187,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
             createDefaultStudy();
             goToProjectHome();
         }
+
+        // create a subfolder to the project
+        _containerHelper.createSubfolder(getProjectName(), TEST_ASSAY_SUBFOLDER, "Assay");
+        goToProjectHome();
 
         PortalHelper portalHelper = new PortalHelper(this);
         //add the Assay List web part so we can create a new luminex assay
@@ -581,7 +586,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     //helper function to go to test assay home from anywhere the project link is visible
     public void goToTestAssayHome(String assayName)
     {
-        if (!isTextPresent(assayName + " Runs"))
+        if (!getDriver().getTitle().startsWith(assayName + " Runs"))
         {
             goToProjectHome();
             clickAndWait(Locator.linkWithText(assayName));

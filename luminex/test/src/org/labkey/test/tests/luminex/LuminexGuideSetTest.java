@@ -384,6 +384,10 @@ public final class LuminexGuideSetTest extends LuminexTest
     @LogMethod
     private void verifyLeveyJenningsPlots()
     {
+        // Issue 52461: view the LJ report and curve fit comparison plots from subfolder
+        goToProjectFolder(getProjectName(), TEST_ASSAY_SUBFOLDER);
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
+
         _guideSetHelper.goToLeveyJenningsGraphPage(TEST_ASSAY_LUM, "Standard1");
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
 
@@ -434,6 +438,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         selectCurveComparisonPlotOption("curvecomparison-legend-combo", "Notebook No.");
         Locator.extButton("Close").findElement(curveComparisonWindow).click();
         _extHelper.waitForExt3MaskToDisappear(WAIT_FOR_JAVASCRIPT);
+
+        goToProjectHome();
     }
 
     private void selectCurveComparisonPlotOption(String comboName, String value)
