@@ -27,6 +27,7 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 
 import java.io.IOException;
@@ -72,27 +73,35 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             }
 
             @Override
-            public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
+            public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
             {
-                out.write("<td class=\"control-header-label\">");
+                Writer oldWriter = out.unwrap();
+                try
+                {
+                    oldWriter.write("<td class=\"control-header-label\">");
 
-                out.write(getTitle(ctx).toString());
-                StringBuilder sb = new StringBuilder();
-                sb.append("The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are " +
-                        "those selected as Negative Control analytes.\n\n");
-                sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
-                PageFlowUtil.popupHelp(HtmlString.of(sb), _displayName).appendTo(out);
+                    oldWriter.write(getTitle(ctx).toString());
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are " +
+                            "those selected as Negative Control analytes.\n\n");
+                    sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
+                    PageFlowUtil.popupHelp(HtmlString.of(sb), _displayName).appendTo(oldWriter);
 
-                out.write("</td>");
+                    oldWriter.write("</td>");
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
-            public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+            public void renderInputHtml(RenderContext ctx, Writer oldWriter, HtmlWriter out, Object value) throws IOException
             {
                 String strValue = ConvertUtils.convert(value);
                 boolean hidden = _initNegativeControlAnalytes.contains(_analyteName);
 
-                out.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
+                oldWriter.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
                         "class=\"form-control negative-bead-input\" " + // used by NegativeBeadPopulation.js
                         "analytename=\"" + PageFlowUtil.filter(_analyteName) + "\" " + // used by NegativeBeadPopulation.js
                         "width=\"200\" style=\"width:200px;" +
@@ -100,20 +109,20 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
 
                 if (!hidden)
                 {
-                    out.write("<option value=\"\"></option>");
+                    oldWriter.write("<option value=\"\"></option>");
                     for (String negControlAnalyte : _initNegativeControlAnalytes)
                     {
-                        out.write("<option value=\"" + PageFlowUtil.filter(negControlAnalyte) + "\"");
+                        oldWriter.write("<option value=\"" + PageFlowUtil.filter(negControlAnalyte) + "\"");
                         if (strValue != null && strValue.equals(negControlAnalyte))
                         {
-                            out.write(" SELECTED");
+                            oldWriter.write(" SELECTED");
                         }
-                        out.write(">");
-                        out.write(PageFlowUtil.filter(negControlAnalyte));
-                        out.write("</option>");
+                        oldWriter.write(">");
+                        oldWriter.write(PageFlowUtil.filter(negControlAnalyte));
+                        oldWriter.write("</option>");
                     }
                 }
-                out.write("</select>");
+                oldWriter.write("</select>");
             }
         };
     }

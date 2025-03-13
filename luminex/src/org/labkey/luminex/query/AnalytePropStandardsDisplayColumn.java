@@ -23,6 +23,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
 import org.labkey.luminex.model.Analyte;
@@ -60,7 +61,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+    public void renderInputHtml(RenderContext ctx, Writer oldWriter, HtmlWriter out, Object value) throws IOException
     {
         String titrationName = _titration.getName();
         String propertyName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationCheckboxName(titrationName, _analyteName));
@@ -113,7 +114,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
             }
         }
 
-        out.write("<input type=\"checkbox\" value='" + 1 + "' name='" + propertyName + "' " + checked + " />");
+        oldWriter.write("<input type=\"checkbox\" value='" + 1 + "' name='" + propertyName + "' " + checked + " />");
     }
 
     @Override
@@ -125,13 +126,21 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
+    public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
     {
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
-                + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
-        out.write(getTitle(ctx).toString());
-        out.write("</td>");
+        Writer oldWriter = out.unwrap();
+        try
+        {
+            oldWriter.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
+                    + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
+            oldWriter.write(getTitle(ctx).toString());
+            oldWriter.write("</td>");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

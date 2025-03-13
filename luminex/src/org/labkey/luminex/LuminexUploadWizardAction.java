@@ -577,15 +577,24 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             @Override
-            public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
+            public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
             {
-                out.write("<td class=\"control-header-label\">");
+                Writer oldWriter = out.unwrap();
 
-                out.write(getTitle(ctx).toString());
-                String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
-                PageFlowUtil.popupHelp(HtmlString.of(sb), displayName).appendTo(out);
+                try
+                {
+                    oldWriter.write("<td class=\"control-header-label\">");
 
-                out.write("</td>");
+                    oldWriter.write(getTitle(ctx).toString());
+                    String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
+                    PageFlowUtil.popupHelp(HtmlString.of(sb), displayName).appendTo(oldWriter);
+
+                    oldWriter.write("</td>");
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
             }
         };
     }

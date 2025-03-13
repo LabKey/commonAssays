@@ -504,9 +504,9 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, Writer oldWriter) throws IOException
         {
-            super.renderGridCellContents(ctx, out);
+            super.renderGridCellContents(ctx, oldWriter);
 
             // Render hidden form inputs for candidate well ids.
             List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
@@ -515,7 +515,7 @@ public class SamplesConfirmGridView extends GridView
                 String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
                 for (FlowFCSFile candidate : candidates)
                 {
-                    out.write("<input type='hidden' name='selectedSamples.rows[" + sampleId + "].candidateFile' value='" + candidate.getRowId() + "'>\n");
+                    oldWriter.write("<input type='hidden' name='selectedSamples.rows[" + sampleId + "].candidateFile' value='" + candidate.getRowId() + "'>\n");
                 }
             }
         }
