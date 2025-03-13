@@ -20,16 +20,17 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.FieldKey;
-import java.io.IOException;
-import java.io.Writer;
+import org.labkey.api.util.DOM;
+import org.labkey.api.writer.HtmlWriter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * User: cnathe
- * Date: 1/9/12
- */
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.SPAN;
+import static org.labkey.api.util.DOM.at;
+
 public class QCFlagHighlightDisplayColumn extends DataColumn
 {
     private final FieldKey _qcFlagsEnabledKey;
@@ -49,19 +50,26 @@ public class QCFlagHighlightDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
         // comma separated list of enabled states for any associated QC Flags (i.e. true,false)
         String flagsEnabled = ctx.get(_qcFlagsEnabledKey, String.class);
         List<Boolean> enabled = parseBooleans(flagsEnabled);
 
         if (enabled.contains(true))
-            out.write("<span style='color:red;'>");
-
-        super.renderGridCellContents(ctx, out);
-        
-        if (enabled.contains(true))
-            out.write("</span>");
+        {
+            SPAN(
+                at(style, "color:red;"),
+                    (DOM.Renderable) ret -> {
+                        super.renderGridCellContents(ctx, out);
+                        return ret;
+                    }
+            ).appendTo(out);
+        }
+        else
+        {
+            super.renderGridCellContents(ctx, out);
+        }
     }
 
     private List<Boolean> parseBooleans(String s)

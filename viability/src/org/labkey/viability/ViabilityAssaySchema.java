@@ -56,6 +56,7 @@ import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.SpecimenForeignKey;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
@@ -63,10 +64,9 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.HtmlWriter;
 import org.springframework.validation.BindException;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -75,6 +75,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.Attribute.align;
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
 
 public class ViabilityAssaySchema extends AssayProtocolSchema
 {
@@ -382,7 +387,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             return new DataColumn(colInfo)
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     super.renderGridCellContents(ctx, out);
 
@@ -408,10 +413,12 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                             .unsafeAppend("</p>")
                             .getHtmlString();
 
-                        HtmlString imgHtml = HtmlString.unsafe("<img align=\"top\" src=\"" + HttpView.currentContext().getContextPath() +
-                            "/_images/mv_indicator.gif\" class=\"labkey-mv-indicator\">");
+                        DOM.Renderable image = IMG(
+                            at(align, "top", src, HttpView.currentContext().getContextPath() + "/_images/mv_indicator.gif").
+                            cl("labkey-mv-indicator")
+                        );
 
-                        PageFlowUtil.popupHelp(popupHtml, "Unmatched Specimen IDs").link(imgHtml).width(0).appendTo(out);
+                        PageFlowUtil.popupHelp(popupHtml, "Unmatched Specimen IDs").link(image).width(0).appendTo(out);
                     }
                 }
 

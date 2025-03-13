@@ -74,6 +74,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.controllers.FlowController;
@@ -454,7 +455,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             return new DataColumn(colInfo)
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                 {
                     String targetStudyId = (String)getBoundColumn().getValue(ctx);
                     if (targetStudyId != null && targetStudyId.length() > 0)
@@ -467,11 +468,11 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                             var urlProvider = PageFlowUtil.urlProvider(ProjectUrls.class);
                             if (study != null && urlProvider != null)
                             {
-                                out.write("<a href=\"");
-                                out.write(PageFlowUtil.filter(urlProvider.getBeginURL(c)));
-                                out.write("\">");
-                                out.write(study.getLabel().replaceAll(" ", "&nbsp;"));
-                                out.write("</a>");
+                                oldWriter.write("<a href=\"");
+                                oldWriter.write(PageFlowUtil.filter(urlProvider.getBeginURL(c)));
+                                oldWriter.write("\">");
+                                oldWriter.write(study.getLabel().replaceAll(" ", "&nbsp;"));
+                                oldWriter.write("</a>");
                             }
                         }
                     }
@@ -881,12 +882,12 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                         }
 
                         @Override
-                        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                         {
                             String url = renderURL(ctx);
                             if (url != null)
                             {
-                                out.write(PageFlowUtil.iconLink("fa fa-download", null).href(url).toString());
+                                oldWriter.write(PageFlowUtil.iconLink("fa fa-download", null).href(url).toString());
                             }
                         }
                     };

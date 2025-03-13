@@ -153,6 +153,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.compare.CompareDataRegion;
 import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
@@ -2976,7 +2977,7 @@ public class MS2Controller extends SpringActionController
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);

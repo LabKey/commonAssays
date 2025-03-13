@@ -23,6 +23,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -221,13 +222,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
     {
         Map row = ctx.getRow();
 
         if (!row.containsKey(_columnName))
         {
-            out.write("ProteinGroupId not present in ResultSet");
+            oldWriter.write("ProteinGroupId not present in ResultSet");
             return;
         }
         Object groupIdObject = row.get(_columnName);
@@ -237,7 +238,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         }
         if (!(groupIdObject instanceof Number))
         {
-            out.write("ProteinGroupId is of unexpected type: " + groupIdObject.getClass());
+            oldWriter.write("ProteinGroupId is of unexpected type: " + groupIdObject.getClass());
             return;
         }
         int groupId = ((Number) groupIdObject).intValue();
@@ -250,7 +251,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         {
             for (ProteinSummary summary : summaryList)
             {
-                writeInfo(summary, out, url, groupId);
+                writeInfo(summary, oldWriter, url, groupId);
             }
         }
     }

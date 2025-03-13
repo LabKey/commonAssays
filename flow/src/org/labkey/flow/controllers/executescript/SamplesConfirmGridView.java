@@ -369,23 +369,23 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
         {
             Boolean match = ctx.get(MATCHED_FLAG_FIELD_KEY, Boolean.class);
             if (match != null)
             {
-                out.write("<img src=\"");
-                out.write(AppProps.getInstance().getContextPath());
+                oldWriter.write("<img src=\"");
+                oldWriter.write(AppProps.getInstance().getContextPath());
                 if (match)
                 {
-                    out.write("/_images/check.png\" />");
+                    oldWriter.write("/_images/check.png\" />");
                     String fileName = ctx.get(SAMPLE_NAME_FIELD_KEY, String.class);
-                    PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched").appendTo(out);
+                    PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched").appendTo(oldWriter);
                 }
                 else
                 {
-                    out.write("/_images/cancel.png\" />");
-                    PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched").appendTo(out);
+                    oldWriter.write("/_images/cancel.png\" />");
+                    PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched").appendTo(oldWriter);
                 }
             }
         }
@@ -504,9 +504,9 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer oldWriter) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
-            super.renderGridCellContents(ctx, oldWriter);
+            super.renderGridCellContents(ctx, out);
 
             // Render hidden form inputs for candidate well ids.
             List<FlowFCSFile> candidates = (List<FlowFCSFile>)ctx.get(CANDIDATE_FILES_FIELD_KEY, List.class);
@@ -515,7 +515,7 @@ public class SamplesConfirmGridView extends GridView
                 String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
                 for (FlowFCSFile candidate : candidates)
                 {
-                    oldWriter.write("<input type='hidden' name='selectedSamples.rows[" + sampleId + "].candidateFile' value='" + candidate.getRowId() + "'>\n");
+                    out.write(new Input.InputBuilder().type("hidden").name("selectedSamples.rows[" + sampleId + "].candidateFile").value(candidate.getRowId()));
                 }
             }
         }

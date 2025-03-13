@@ -46,6 +46,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.PopupMenu;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.Analyte;
@@ -125,7 +126,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                 {
                     int protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
@@ -143,7 +144,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
 
                     PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                    ljPlotsMenu.renderMenuButton(ctx, out, false, null);
+                    ljPlotsMenu.renderMenuButton(ctx, oldWriter, false, null);
                 }
 
                 @Override

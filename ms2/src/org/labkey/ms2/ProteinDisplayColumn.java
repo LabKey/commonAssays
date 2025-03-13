@@ -21,13 +21,14 @@ import org.labkey.api.data.AJAXDetailsDisplayColumn;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.JavaScriptFragment;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.HttpView;
+import org.labkey.api.writer.HtmlWriter;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.SCRIPT;
 
 public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
 {
@@ -47,17 +48,20 @@ public class ProteinDisplayColumn extends AJAXDetailsDisplayColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
         if (!_renderedCSS)
         {
-            out.write("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">");
-            out.write("""
+            String script ="""
                             LABKEY.requiresCss("protein/ProteinCoverageMap.css");
                             LABKEY.requiresScript("protein/ProteinCoverageMap.js");
                             LABKEY.requiresScript("util.js");
-                            """);
-            out.write("</script>");
+                            """;
+
+            SCRIPT(
+                JavaScriptFragment.unsafe(script)
+            ).appendTo(out);
+
             _renderedCSS = true;
         }
         super.renderGridCellContents(ctx, out);

@@ -44,6 +44,7 @@ import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.Pair;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.AbstractLuminexControlUpdateService;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.Analyte;
@@ -120,7 +121,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
             return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out)
+                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out)
                 {
                     int protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
@@ -130,7 +131,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
                     HtmlString html = HtmlString.unsafe(String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png"));
 
-                    renderLink(out, html, onClick, null);
+                    renderLink(oldWriter, html, onClick, null);
                 }
 
                 @Override

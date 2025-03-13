@@ -35,6 +35,7 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.Portal;
 import org.labkey.api.view.SimpleWebPartFactory;
 import org.labkey.api.view.ViewContext;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.data.FlowProtocolStep;
@@ -151,7 +152,7 @@ public class AnalysisScriptsWebPart extends FlowQueryView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
         {
             FlowScript script = getScript(ctx);
             if (script != null)
@@ -161,21 +162,21 @@ public class AnalysisScriptsWebPart extends FlowQueryView
                 if (script.hasStep(FlowProtocolStep.calculateCompensation))
                 {
                     ActionURL url = script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.calculateCompensation);
-                    out.write("<a href='" + PageFlowUtil.filter(url) + "'>Compensation</a>");
+                    oldWriter.write("<a href='" + PageFlowUtil.filter(url) + "'>Compensation</a>");
                     and = "<br>";
                 }
 
                 if (script.hasStep(FlowProtocolStep.analysis))
                 {
                     ActionURL url = script.urlFor(AnalysisScriptController.ChooseRunsToAnalyzeAction.class, FlowProtocolStep.analysis);
-                    out.write(and);
-                    out.write("<a href='" + PageFlowUtil.filter(url) + "'>Statistics and Graphs</a>");
+                    oldWriter.write(and);
+                    oldWriter.write("<a href='" + PageFlowUtil.filter(url) + "'>Statistics and Graphs</a>");
                 }
 
             }
             else
             {
-                out.write("&nbsp;");
+                oldWriter.write("&nbsp;");
             }
         }
     }

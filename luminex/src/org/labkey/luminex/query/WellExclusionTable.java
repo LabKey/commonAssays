@@ -48,8 +48,10 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunDatabaseContext;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.UnauthorizedException;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexManager;
 import org.labkey.luminex.LuminexRunCreator;
 
@@ -111,10 +113,10 @@ public class WellExclusionTable extends AbstractExclusionTable
         wellsCol.setDisplayColumnFactory(colInfo -> new DataColumn(colInfo)
         {
             @Override
-            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+            public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
             {
                 Object o = getDisplayValue(ctx);
-                out.write(null == o ? "&nbsp;" : PageFlowUtil.filter(o.toString()));
+                out.write(null == o ? HtmlString.NBSP : HtmlString.of(o.toString()));
             }
 
             @Override

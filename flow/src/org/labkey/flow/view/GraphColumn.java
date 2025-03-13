@@ -125,9 +125,9 @@ public class GraphColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out)
+    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out)
     {
-        renderGraph(ctx, HtmlWriter.of(out));
+        renderGraph(ctx, HtmlWriter.of(oldWriter));
     }
 
     public void renderGraph(RenderContext ctx, HtmlWriter out)

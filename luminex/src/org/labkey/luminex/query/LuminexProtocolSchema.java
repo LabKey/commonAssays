@@ -69,6 +69,7 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.template.ClientDependency;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.LuminexResultsDataRegion;
@@ -623,7 +624,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
 
             @Override
-            public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+            public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
             {
                 Map<Integer, String> pdfs = new HashMap<>();
                 for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
@@ -641,9 +642,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     {
                         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
                         url.addParameter("rowId", entry.getKey().toString());
-                        out.write("<a href=\"" + url + "\">");
-                        out.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                        out.write("</a>");
+                        oldWriter.write("<a href=\"" + url + "\">");
+                        oldWriter.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
+                        oldWriter.write("</a>");
                     }
                 }
                 else if (pdfs.size() > 1)
@@ -664,7 +665,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     new LinkBuilder(image)
                         .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
                         .clearClasses()
-                        .appendTo(out);
+                        .appendTo(oldWriter);
                 }
             }
         };

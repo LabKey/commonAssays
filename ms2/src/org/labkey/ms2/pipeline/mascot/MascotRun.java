@@ -20,9 +20,11 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Peptide;
@@ -33,16 +35,9 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Map;
 
-/**
- * User: arauch
- * Date: Jul 21, 2005
- * Time: 10:19:11 PM
- */
 public class MascotRun extends MS2Run
 {
     private String mascotFile;
@@ -173,17 +168,17 @@ public class MascotRun extends MS2Run
         }
 
         @Override
-        public void renderDetailsCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderDetailsCellContents(RenderContext ctx, HtmlWriter out)
         {
             renderGridCellContents(ctx, out);
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
             if (_currentPeptideId.equals(ctx.getRow().get("rowId")))
             {
-                out.write("<b>&#x2714;</b>"); // html checkmark
+                out.write(HtmlString.unsafe("<b>&#x2714;</b>")); // html checkmark
             }
         }
     }
