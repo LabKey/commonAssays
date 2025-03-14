@@ -23,16 +23,19 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
+import org.labkey.api.util.JavaScriptFragment;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.SCRIPT;
 
 public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
 {
@@ -63,12 +66,14 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
             @Override
             public @NotNull HtmlString getTitle(RenderContext ctx)
             {
+                String script = """
+                    LABKEY.requiresExt4Sandbox(function() {
+                        LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');
+                    });
+                    """;
+
                 return HtmlStringBuilder.of()
-                    .unsafeAppend("<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n" +
-                        "LABKEY.requiresExt4Sandbox(function() {\n" +
-                        "    LABKEY.requiresScript('luminex/NegativeBeadPopulation.js');\n" +
-                        "});\n" +
-                        "</script>\n")
+                    .append(DOM.createHtml(SCRIPT(JavaScriptFragment.unsafe(script))))
                     .append(_displayName).getHtmlString();
             }
 

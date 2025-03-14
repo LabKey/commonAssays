@@ -26,7 +26,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.DOM.Attribute;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.writer.HtmlWriter;
 
@@ -112,7 +112,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
             // add onclick handler to call the well exclusion window creation function
             String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
                 jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
-            new Link.LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(oldWriter);
+            new LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(oldWriter);
         }
         else
         {
