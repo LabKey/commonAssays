@@ -23,6 +23,7 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.element.Input.InputBuilder;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
@@ -61,7 +62,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputHtml(RenderContext ctx, Writer oldWriter, HtmlWriter out, Object value) throws IOException
+    public void renderInputHtml(RenderContext ctx, HtmlWriter out, Object value)
     {
         String titrationName = _titration.getName();
         String propertyName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationCheckboxName(titrationName, _analyteName));
@@ -91,30 +92,30 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 
             defVal = new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists() ? "true" : "false";
         }
-        String checked = "";
+        boolean checked = false;
 
         if (_errorReshow)
         {
             // if reshowing form on error, preselect based on request value
             if (_form.getViewContext().getRequest().getParameter(propertyName) != null)
-                checked = "CHECKED";
+                checked = true;
         }
         else if (_standardTitrations.contains(_titration))
         {
             if (_standardTitrations.size() == 1)
             {
                 // if there is only one standard, then preselect the checkbox
-                checked = "CHECKED";
+                checked = true;
             }
             else if (defVal == null || defVal.equalsIgnoreCase("true"))
             {
                 // if > 1 standard and default value exists, set checkbox based on default value
                 // else if no default value and titration is standard, then preselect the checkbox
-                checked = "CHECKED";
+                checked = true;
             }
         }
 
-        oldWriter.write("<input type=\"checkbox\" value='" + 1 + "' name='" + propertyName + "' " + checked + " />");
+        out.write(new InputBuilder<>().type("checkbox").value(1).name(propertyName).checked(checked));
     }
 
     @Override
