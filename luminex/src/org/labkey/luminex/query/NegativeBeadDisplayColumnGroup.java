@@ -46,7 +46,7 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
             isCopyable() ? (DOM.Renderable) ret -> {
                 String inputName = ColumnInfo.propNameFromName(_inputName);
                 String id = inputName + "CheckBox";
-                new Input.InputBuilder().type("checkbox").name(id).id(id).appendTo(out);
+                new Input.InputBuilder<>().type("checkbox").name(id).id(id).appendTo(out);
                 StringBuilder onChange = new StringBuilder("b = this.checked;\n");
 
                 getColumns().forEach(col -> {

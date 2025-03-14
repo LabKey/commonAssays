@@ -335,7 +335,7 @@ public class SamplesConfirmGridView extends GridView
         {
             // Add a hidden input for spring form binding -- if this value is posted, the row was unchecked.
             out.write(
-                new Input.InputBuilder()
+                new Input.InputBuilder<>()
                     .type("hidden")
                     .name(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx))
                     .value(0)
@@ -515,7 +515,7 @@ public class SamplesConfirmGridView extends GridView
                 String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
                 for (FlowFCSFile candidate : candidates)
                 {
-                    out.write(new Input.InputBuilder().type("hidden").name("selectedSamples.rows[" + sampleId + "].candidateFile").value(candidate.getRowId()));
+                    out.write(new Input.InputBuilder<>().type("hidden").name("selectedSamples.rows[" + sampleId + "].candidateFile").value(candidate.getRowId()));
                 }
             }
         }

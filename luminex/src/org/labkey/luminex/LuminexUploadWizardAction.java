@@ -437,7 +437,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     TD(
                             at(style, "display:" + (hideCell ? "none" : "table-cell")).
                             name(titrationCellName),
-                            new Input.InputBuilder().type("checkbox").name(id).id(id)
+                            new Input.InputBuilder<>().type("checkbox").name(id).id(id)
 
                     ).appendTo(out);
 
