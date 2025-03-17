@@ -43,17 +43,10 @@ public class CompareDataRegion extends DataRegion
     int _offset = 0;
     int _colSpan;
     private final ResultSet _rs;
-    private final String _columnHeader;
 
     public CompareDataRegion(ResultSet rs)
     {
-        this(rs, "&nbsp;");
-    }
-
-    public CompareDataRegion(ResultSet rs, String columnHeader)
-    {
         _rs = rs;
-        _columnHeader = columnHeader;
         setName(MS2Manager.getDataRegionNameCompare());
         setShowPagination(false);
     }
@@ -85,7 +78,7 @@ public class CompareDataRegion extends DataRegion
         // Add an extra row and render the multi-column captions
         TR(
             showRecordSelectors ? TD() : null,
-            _offset > 0 ? TD(at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"), _columnHeader) : null,
+            _offset > 0 ? TD(at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"), HtmlString.NBSP) : null,
             (Renderable) ret -> {
                 final MutableBoolean shade = new MutableBoolean(false);
                 final MutableInt columnIndex = new MutableInt(0);
@@ -103,7 +96,7 @@ public class CompareDataRegion extends DataRegion
                 {
                     TD(
                         at(colspan, _offset, style, "text-align: center; vertical-align: bottom;"),
-                        _columnHeader
+                        HtmlString.NBSP
                     ).appendTo(out);
                 }
 
