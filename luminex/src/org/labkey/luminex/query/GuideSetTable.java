@@ -51,6 +51,7 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.AnalyteTitration;
@@ -64,10 +65,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: jeckels
- * Date: Aug 26, 2011
- */
 public class GuideSetTable extends AbstractCurveFitPivotTable
 {
     public GuideSetTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
@@ -125,9 +122,9 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 }
 
                 @Override
-                public void renderTitle(RenderContext ctx, Writer out)
+                public HtmlString getTitle(RenderContext ctx)
                 {
-                    // no title
+                    return null; // no title
                 }
 
                 @Override
@@ -153,12 +150,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 return new DataColumn(colInfo){
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
                     {
                         if ( (Boolean)ctx.get(this.getColumnInfo().getFieldKey()) )
-                            out.write("Value-based");
+                            oldWriter.write("Value-based");
                         else
-                            out.write("Run-based");
+                            oldWriter.write("Run-based");
                     }
                 };
             }

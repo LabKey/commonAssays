@@ -153,6 +153,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.compare.CompareDataRegion;
 import org.labkey.ms2.compare.CompareExcelWriter;
 import org.labkey.ms2.compare.CompareQuery;
@@ -194,7 +195,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1234,7 +1234,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getSetupView(RunListForm form, BindException errors, int runListId)
         {
-            JspView<CompareOptionsBean> extraCompareOptions = new JspView<>("/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp");
+            JspView<CompareOptionsBean<?>> extraCompareOptions = new JspView<>("/org/labkey/ms2/compare/compareSearchEngineProteinOptions.jsp");
 
             ActionURL nextURL = getViewContext().cloneActionURL().setAction(ApplyCompareViewAction.class);
             return pickView(nextURL, "Select a view to apply a filter to all the runs.", extraCompareOptions, runListId, "Compare");
@@ -1340,7 +1340,7 @@ public class MS2Controller extends SpringActionController
         {
             CompareOptionsBean<PeptideFilteringComparisonForm> bean = new CompareOptionsBean<>(new ActionURL(ComparePeptideQueryAction.class, getContainer()), runListId, form);
 
-            return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
+            return new JspView<CompareOptionsBean<?>>("/org/labkey/ms2/compare/comparePeptideQueryOptions.jsp", bean);
         }
 
         @Override
@@ -1886,7 +1886,7 @@ public class MS2Controller extends SpringActionController
     }
 
     // extraFormHtml gets inserted between the view dropdown and the button.
-    private HttpView pickView(ActionURL nextURL, String viewInstructions, HttpView embeddedView, int runListId, String buttonText)
+    private HttpView<?> pickView(ActionURL nextURL, String viewInstructions, HttpView<?> embeddedView, int runListId, String buttonText)
     {
         JspView<PickViewBean> pickView = new JspView<>("/org/labkey/ms2/pickView.jsp", new PickViewBean());
 
@@ -1919,7 +1919,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getSetupView(RunListForm form, BindException errors, int runListId)
         {
-            JspView extraExportView = new JspView("/org/labkey/ms2/extraExportOptions.jsp");
+            JspView<?> extraExportView = new JspView<>("/org/labkey/ms2/extraExportOptions.jsp");
             return pickView(getViewContext().cloneActionURL().setAction(ApplyExportRunsViewAction.class), "Select a view to apply a filter to all the runs and to indicate what columns to export.", extraExportView, runListId, "Export");
         }
 
@@ -1962,12 +1962,12 @@ public class MS2Controller extends SpringActionController
     @RequiresPermission(ReadPermission.class)
     public class ShowCompareAction extends SimpleViewAction<ExportForm>
     {
-        private StringBuilder _title = new StringBuilder();
+        private final StringBuilder _title = new StringBuilder();
 
         @Override
         public ModelAndView getView(ExportForm form, BindException errors)
         {
-            return compareRuns(form.getRunList(), false, _title, form.getColumn(), errors);
+            return compareRuns(form.getRunList(), false, _title, errors);
         }
 
         @Override
@@ -1984,7 +1984,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public void export(ExportForm form, HttpServletResponse response, BindException errors) throws Exception
         {
-            ModelAndView view = compareRuns(form.getRunList(), true, null, form.getColumn(), errors);
+            ModelAndView view = compareRuns(form.getRunList(), true, null, errors);
             if (view != null)
             {
                 throw new ExportException(view);
@@ -2170,7 +2170,7 @@ public class MS2Controller extends SpringActionController
         {
             CompareOptionsBean<SpectraCountForm> bean = new CompareOptionsBean<>(new ActionURL(SpectraCountAction.class, getContainer()), runListId, form);
 
-            return new JspView<CompareOptionsBean>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
+            return new JspView<CompareOptionsBean<?>>("/org/labkey/ms2/compare/spectraCountOptions.jsp", bean);
         }
 
         @Override
@@ -2281,7 +2281,7 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, String column, BindException errors)
+    private ModelAndView compareRuns(int runListIndex, boolean exportToExcel, StringBuilder title, BindException errors)
     {
         ActionURL currentURL = getViewContext().getActionURL();
 
@@ -2351,7 +2351,7 @@ public class MS2Controller extends SpringActionController
             rgn.setColSpan(query.getColumnsPerRun());
             rgn.setMultiColumnCaptions(runCaptions);
 
-            HttpView filterView = new CurrentFilterView(query);
+            HttpView<?> filterView = new CurrentFilterView(query);
 
             GridView compareView = new GridView(rgn, errors);
             rgn.setShowPagination(false);
@@ -2543,10 +2543,9 @@ public class MS2Controller extends SpringActionController
         {
             MS2Run run = form.validateRun();
             AbstractMS2RunView peptideView = getPeptideView(form.getGrouping(), run);
-            WebPartView gridView = peptideView.createGridView(form);
-            if (gridView instanceof QueryView)
+            AbstractMS2QueryView queryView = peptideView.createGridView(form);
+            if (queryView != null)
             {
-                QueryView queryView = (QueryView)gridView;
                 int count = DataRegionSelection.setSelectionForAll(queryView, queryView.getSettings().getSelectionKey(), true);
                 return new DataRegionSelection.SelectionResponse(count);
             }
@@ -2976,7 +2975,7 @@ public class MS2Controller extends SpringActionController
 
             DataColumn descriptionColumn = new DataColumn(MS2Manager.getTableInfoRuns().getColumn("Description")) {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     if (null != ctx.get("Container") && !((Boolean)ctx.get("deleted")).booleanValue())
                         super.renderGridCellContents(ctx, out);
@@ -3563,7 +3562,7 @@ public class MS2Controller extends SpringActionController
                 proteinSummary.enableExpandCollapse("ProteinSummary", false);
                 addView(proteinSummary);
                 //TODO:  do something sensible for a single seqid and no run.
-                WebPartView sequenceView;
+                WebPartView<?> sequenceView;
                 bean.run = run;
                 if (showPeptides && !form.isSimpleSequenceView())
                 {
@@ -3948,7 +3947,7 @@ public class MS2Controller extends SpringActionController
             ms2Run = form.validateRun();
             MS2Run[] runs = new MS2Run[] { ms2Run };
             QueryPeptideMS2RunView peptideView = new QueryPeptideMS2RunView(getViewContext(), runs);
-            WebPartView gv = peptideView.createGridView(form);
+            AbstractMS2QueryView gv = peptideView.createGridView(form);
             VBox vBox = new VBox();
             vBox.setFrame(WebPartView.FrameType.DIALOG);
             vBox.addView(gv);
@@ -4010,11 +4009,11 @@ public class MS2Controller extends SpringActionController
             if (StringUtils.isBlank(sliceDefinition))
                 sliceDefinition = "Miscellaneous or Defunct Category";
             String html = "<font size=\"+1\">" + PageFlowUtil.filter(sliceDefinition) + "</font>";
-            HttpView definitionView = new HtmlView("Definition", HtmlString.unsafe(html));
+            HtmlView definitionView = new HtmlView("Definition", HtmlString.unsafe(html));
             vbox.addView(definitionView);
 
             String sqids = form.getSqids();
-            String sqidArr[] = sqids.split(",");
+            String[] sqidArr = sqids.split(",");
             List<SimpleProtein> proteins = new ArrayList<>(sqidArr.length);
             for (String curSqid : sqidArr)
             {
@@ -4813,7 +4812,7 @@ public class MS2Controller extends SpringActionController
                     }
                 }
             }
-            if (paramsFile == null || !NetworkDrive.exists(paramsFile))
+            if (!NetworkDrive.exists(paramsFile))
             {
                 // If not, fall back on the default name
                 paramsFile = new File(run.getPath() + "/" + run.getParamsFileName());

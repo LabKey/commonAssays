@@ -21,7 +21,10 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.element.Input.InputBuilder;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
 import org.labkey.luminex.model.Analyte;
@@ -31,6 +34,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.Attribute.name;
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.at;
 
 public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 {
@@ -55,7 +62,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+    public void renderInputHtml(RenderContext ctx, HtmlWriter out, Object value)
     {
         String titrationName = _titration.getName();
         String propertyName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationCheckboxName(titrationName, _analyteName));
@@ -85,50 +92,56 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 
             defVal = new SqlSelector(LuminexProtocolSchema.getSchema(), selectedSQL).exists() ? "true" : "false";
         }
-        String checked = "";
+        boolean checked = false;
 
         if (_errorReshow)
         {
             // if reshowing form on error, preselect based on request value
             if (_form.getViewContext().getRequest().getParameter(propertyName) != null)
-                checked = "CHECKED";
+                checked = true;
         }
         else if (_standardTitrations.contains(_titration))
         {
             if (_standardTitrations.size() == 1)
             {
                 // if there is only one standard, then preselect the checkbox
-                checked = "CHECKED";
+                checked = true;
             }
             else if (defVal == null || defVal.equalsIgnoreCase("true"))
             {
                 // if > 1 standard and default value exists, set checkbox based on default value
                 // else if no default value and titration is standard, then preselect the checkbox
-                checked = "CHECKED";
+                checked = true;
             }
         }
 
-        out.write("<input type=\"checkbox\" value='" + 1 + "' name='" + propertyName + "' " + checked + " />");
+        out.write(new InputBuilder<>().type("checkbox").value(1).name(propertyName).checked(checked));
     }
 
     @Override
-    public void renderInputWrapperBegin(Writer out) throws IOException
+    public DOM._Attributes getInputAttributes()
     {
         String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
 
-        out.write("<td");
-        out.write(" style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\"");
-        out.write(" name=\"" + PageFlowUtil.filter(titrationCellName) + "\">");
+        return at(style, "display:" + (_hideCell ? "none" : "table-cell"), name, titrationCellName);
     }
 
     @Override
-    public void renderDetailsCaptionCell(RenderContext ctx, Writer out, @Nullable String cls) throws IOException
+    public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
     {
         String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        out.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
-                + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
-        renderTitle(ctx, out);
-        out.write("</td>");
+        Writer oldWriter = out.unwrap();
+        try
+        {
+            oldWriter.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
+                    + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
+            oldWriter.write(getTitle(ctx).toString());
+            oldWriter.write("</td>");
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

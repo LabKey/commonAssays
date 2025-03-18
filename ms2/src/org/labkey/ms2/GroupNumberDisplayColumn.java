@@ -65,7 +65,7 @@ public class GroupNumberDisplayColumn extends DataColumn
     }
 
     @Override
-    public Class getDisplayValueClass()
+    public Class<String> getDisplayValueClass()
     {
         return String.class;
     }

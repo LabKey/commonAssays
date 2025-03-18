@@ -26,8 +26,9 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.DOM.Attribute;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link;
+import org.labkey.api.util.Link.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -82,13 +83,13 @@ public class ExclusionUIDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderTitle(RenderContext ctx, Writer out)
+    public HtmlString getTitle(RenderContext ctx)
     {
-        // Don't render a title, to keep the column narrow
+        return null; // Don't render a title, to keep the column narrow
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
     {
         String type = (String)ctx.get(_typeFieldKey);
         String description = (String)ctx.get(_descriptionFieldKey);
@@ -111,11 +112,11 @@ public class ExclusionUIDisplayColumn extends DataColumn
             // add onclick handler to call the well exclusion window creation function
             String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
                 jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
-            new Link.LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(out);
+            new LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(oldWriter);
         }
         else
         {
-            out.write(img.toString());
+            oldWriter.write(img.toString());
         }
     }
 

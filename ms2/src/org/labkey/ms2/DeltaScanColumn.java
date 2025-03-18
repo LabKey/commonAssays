@@ -108,7 +108,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 
 
     @Override
-    public Class getValueClass()
+    public Class<Double> getValueClass()
     {
         return Double.class;
     }

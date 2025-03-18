@@ -39,8 +39,6 @@ import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.query.FlowQuerySettings;
 
-import java.io.Writer;
-
 import static org.labkey.api.util.DOM.Attribute.alt;
 import static org.labkey.api.util.DOM.Attribute.height;
 import static org.labkey.api.util.DOM.Attribute.src;
@@ -125,9 +123,9 @@ public class GraphColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer out)
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
-        renderGraph(ctx, HtmlWriter.of(out));
+        renderGraph(ctx, out);
     }
 
     public void renderGraph(RenderContext ctx, HtmlWriter out)

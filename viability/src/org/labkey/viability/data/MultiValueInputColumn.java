@@ -21,6 +21,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.Writer;
 import java.io.IOException;
@@ -41,34 +42,34 @@ public class MultiValueInputColumn extends DataColumn
     }
 
     @Override
-    public void renderInputHtml(RenderContext ctx, Writer out, Object value) throws IOException
+    public void renderInputHtml(RenderContext ctx, Writer oldWriter, HtmlWriter out, Object value) throws IOException
     {
         String id = ctx.getForm().getFormFieldName(getColumnInfo());
 
-        out.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
-        out.write("<script text=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n");
-        out.write("LABKEY.requiresScript('viability/MultiValueInput', function(){\n");
-        out.write("new MultiValueInput('");
-        out.write(PageFlowUtil.filter(id));
-        out.write("'");
+        oldWriter.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
+        oldWriter.write("<script text=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n");
+        oldWriter.write("LABKEY.requiresScript('viability/MultiValueInput', function(){\n");
+        oldWriter.write("new MultiValueInput('");
+        oldWriter.write(PageFlowUtil.filter(id));
+        oldWriter.write("'");
 
         // XXX: hack. ignore the value in the render context. take the value as passed in during view creation.
         if (_values != null && !_values.isEmpty())
         {
-            out.write(", [");
+            oldWriter.write(", [");
             for (int i = 0; i < _values.size(); i++)
             {
-                out.write("'");
-                out.write(PageFlowUtil.filter(_values.get(i)));
-                out.write("'");
+                oldWriter.write("'");
+                oldWriter.write(PageFlowUtil.filter(_values.get(i)));
+                oldWriter.write("'");
                 if (i < _values.size() - 1)
-                    out.write(", ");
+                    oldWriter.write(", ");
             }
-            out.write("]");
+            oldWriter.write("]");
         }
 
-        out.write(");\n});\n");
-        out.write("</script>\n");
+        oldWriter.write(");\n});\n");
+        oldWriter.write("</script>\n");
     }
 
     @Override
