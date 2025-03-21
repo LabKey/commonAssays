@@ -95,27 +95,6 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                     PageFlowUtil.popupHelp(builder, _displayName)
 
                 ).appendTo(out);
-
-//                Writer oldWriter = out.unwrap();
-//                try
-//                {
-//                    oldWriter.write("<td class=\"control-header-label\">");
-//
-//                    oldWriter.write(getTitle(ctx).toString());
-//                    StringBuilder sb = new StringBuilder();
-//                    sb.append("""
-//                            The analyte to use in the FI-Bkgd-Neg transform script calculation. Available options are \
-//                            those selected as Negative Control analytes.
-//                            """);
-//                    sb.append("Type: ").append(getBoundColumn().getFriendlyTypeName()).append("\n");
-//                    PageFlowUtil.popupHelp(HtmlString.of(sb), _displayName).appendTo(oldWriter);
-//
-//                    oldWriter.write("</td>");
-//                }
-//                catch (IOException e)
-//                {
-//                    throw new RuntimeException(e);
-//                }
             }
 
             @Override
@@ -130,13 +109,6 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                     .addStyle("width:200px;" + (hidden ? "display:none;" : "display:inline-block;"))
                     .addDataAttribute("analytename", _analyteName); // used by NegativeBeadPopulation.js
 
-
-////                oldWriter.write("<select name=\"" + PageFlowUtil.filter(_inputName) + "\" " +
-////                        "class=\"form-control negative-bead-input\" " + // used by NegativeBeadPopulation.js
-//                        "analytename=\"" + PageFlowUtil.filter(_analyteName) + "\" " + // used by NegativeBeadPopulation.js
-////                        "width=\"200\" style=\"width:200px;" +
-////                        (hidden ? "display:none;" : "display:inline-block;") + "\">");
-
                 if (!hidden)
                     builder
                         .addOption("")
@@ -144,7 +116,6 @@ public class NegativeBeadDisplayColumnFactory implements DisplayColumnFactory
                         .selected(strValue);
 
                 builder.appendTo(out);
-//                oldWriter.write("</select>");
             }
         };
     }
