@@ -27,7 +27,7 @@ function getAnalyteSelectedNegativeControls()
     {
         var negControlEl = getAnalyteNegativeControlEl(negBeadEls[i].name);
         if (negControlEl != null && negControlEl.checked)
-            negControlAnalytes.push(negBeadEls[i].getAttribute("analytename"));
+            negControlAnalytes.push(negBeadEls[i].getAttribute("data-analytename"));
     }
     return negControlAnalytes.sort();
 }
@@ -69,7 +69,7 @@ function updateAnalyteNegativeBeadInputs()
     {
         var negBeadEl = negBeadEls[i];
         var prevValue = negBeadEl.value;
-        var analyteName = negBeadEl.getAttribute("analytename");
+        var analyteName = negBeadEl.getAttribute("data-analytename");
         var hidden = negControlAnalytes.indexOf(analyteName) > -1;
 
         negBeadEl.value = null;

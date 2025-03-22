@@ -91,6 +91,7 @@ import java.util.TreeSet;
 import static org.labkey.api.util.DOM.Attribute.style;
 import static org.labkey.api.util.DOM.TD;
 import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
 
 /**
  * Adds Analyte Properties as third wizard step, handles analyte and titration definition input view UI and post, saves
@@ -435,10 +436,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     String id = groupName + "CheckBox";
 
                     TD(
-                            at(style, "display:" + (hideCell ? "none" : "table-cell")).
-                            name(titrationCellName),
-                            new Input.InputBuilder<>().type("checkbox").name(id).id(id)
-
+                        at(style, "display:" + (hideCell ? "none" : "table-cell")).
+                        name(titrationCellName),
+                        new Input.InputBuilder<>().type("checkbox").name(id).id(id)
                     ).appendTo(out);
 
                     StringBuilder onchange = new StringBuilder("b = this.checked;");
@@ -579,22 +579,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             @Override
             public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
             {
-                Writer oldWriter = out.unwrap();
+                String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
 
-                try
-                {
-                    oldWriter.write("<td class=\"control-header-label\">");
-
-                    oldWriter.write(getTitle(ctx).toString());
-                    String sb = "Type: " + getBoundColumn().getFriendlyTypeName() + "\n";
-                    PageFlowUtil.popupHelp(HtmlString.of(sb), displayName).appendTo(oldWriter);
-
-                    oldWriter.write("</td>");
-                }
-                catch (IOException e)
-                {
-                    throw new RuntimeException(e);
-                }
+                TD(
+                    cl("control-header-label"),
+                    getTitle(ctx),
+                    PageFlowUtil.popupHelp(HtmlString.of(sb), displayName)
+                ).appendTo(out);
             }
         };
     }

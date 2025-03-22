@@ -37,7 +37,9 @@ import java.util.Set;
 
 import static org.labkey.api.util.DOM.Attribute.name;
 import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.TD;
 import static org.labkey.api.util.DOM.at;
+import static org.labkey.api.util.DOM.cl;
 
 public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
 {
@@ -129,19 +131,12 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
     {
-        String titrationCellName = PageFlowUtil.filter(LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName()));
-        Writer oldWriter = out.unwrap();
-        try
-        {
-            oldWriter.write("<td name=\"" + titrationCellName + "\"" + " class=\"" + PageFlowUtil.filter(cls)+ "\""
-                    + " style=\"display:" + (_hideCell ? "none" : "table-cell") + ";\">");
-            oldWriter.write(getTitle(ctx).toString());
-            oldWriter.write("</td>");
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+
+        TD(
+            cl(cls).at(style, "display:" + (_hideCell ? "none" : "table-cell") + ";").name(titrationCellName),
+            getTitle(ctx)
+        ).appendTo(out);
     }
 
     @Override
