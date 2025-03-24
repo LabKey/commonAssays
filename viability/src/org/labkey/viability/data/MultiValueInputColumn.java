@@ -19,21 +19,19 @@ package org.labkey.viability.data;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.RenderContext;
+import org.labkey.api.util.JavaScriptFragment;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.view.HttpView;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.Writer;
-import java.io.IOException;
 import java.util.List;
 
-/**
- * User: kevink
- * Date: Sep 19, 2009
- */
+import static org.labkey.api.util.DOM.DIV;
+import static org.labkey.api.util.DOM.SCRIPT;
+import static org.labkey.api.util.DOM.id;
+
 public class MultiValueInputColumn extends DataColumn
 {
-    private List<String> _values;
+    private final List<String> _values;
 
     public MultiValueInputColumn(ColumnInfo col, List<String> values)
     {
@@ -42,34 +40,36 @@ public class MultiValueInputColumn extends DataColumn
     }
 
     @Override
-    public void renderInputHtml(RenderContext ctx, Writer oldWriter, HtmlWriter out, Object value) throws IOException
+    public void renderInputHtml(RenderContext ctx, HtmlWriter out, Object value)
     {
-        String id = ctx.getForm().getFormFieldName(getColumnInfo());
+        String colId = ctx.getForm().getFormFieldName(getColumnInfo());
 
-        oldWriter.write("<div id=\"" + PageFlowUtil.filter(id) + "\" class=\"extContainer\"></div>");
-        oldWriter.write("<script text=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">\n");
-        oldWriter.write("LABKEY.requiresScript('viability/MultiValueInput', function(){\n");
-        oldWriter.write("new MultiValueInput('");
-        oldWriter.write(PageFlowUtil.filter(id));
-        oldWriter.write("'");
+        DIV(
+            id(colId).cl("extContainer")
+        ).appendTo(out);
+
+        StringBuilder script = new StringBuilder("LABKEY.requiresScript('viability/MultiValueInput', function(){");
+        script.append("new MultiValueInput(");
+        script.append(PageFlowUtil.jsString(colId));
 
         // XXX: hack. ignore the value in the render context. take the value as passed in during view creation.
         if (_values != null && !_values.isEmpty())
         {
-            oldWriter.write(", [");
+            script.append(", [");
             for (int i = 0; i < _values.size(); i++)
             {
-                oldWriter.write("'");
-                oldWriter.write(PageFlowUtil.filter(_values.get(i)));
-                oldWriter.write("'");
+                script.append(PageFlowUtil.jsString(_values.get(i)));
                 if (i < _values.size() - 1)
-                    oldWriter.write(", ");
+                    script.append(", ");
             }
-            oldWriter.write("]");
+            script.append("]");
         }
 
-        oldWriter.write(");\n});\n");
-        oldWriter.write("</script>\n");
+        script.append(");\n});\n");
+
+        SCRIPT(
+            JavaScriptFragment.unsafe(script.toString())
+        ).appendTo(out);
     }
 
     @Override
