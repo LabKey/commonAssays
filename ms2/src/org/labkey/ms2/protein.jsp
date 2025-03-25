@@ -23,6 +23,7 @@
 <%@ page import="org.labkey.ms2.PeptideManager" %>
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ page import="java.text.Format" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
@@ -46,7 +47,7 @@
         ActionURL urlProteinDetailsPage = getViewContext().cloneActionURL();
         urlProteinDetailsPage.deleteParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM); %>
         <tr>
-            <td class="labkey-form-label">Peptides<%=helpPopup("Peptides", "<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>", true)%></td>
+            <td class="labkey-form-label">Peptides<%=helpPopup("Peptides", HtmlString.unsafe("<p><strong>Show only peptides assigned by search engine</strong><br/>The page displays only the set of peptides that the search engine has chosen as matching the subject protein, based on engine-specific scoring.</p><p><strong>Show all peptides with sequence matches</strong><br/>The coverage map and peptide grid show all the filtered trimmed peptides from the run that match a sequence within the subject protein, regardless of whether the protein was chosen by the search engine as matching that specific peptide.</p>"))%></td>
             <td>
                 <labkey:form action="<%= urlProteinDetailsPage %>" method="GET">
                     <% for (Pair<String, String> param : urlProteinDetailsPage.getParameters()) { %>
