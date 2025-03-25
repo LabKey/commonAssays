@@ -50,12 +50,12 @@
 <labkey:form method="post" action="<%=bean.applyViewURL%>">
     <table id="ms2RunViewConfig" class="lk-fields-table">
         <tr>
-            <td valign=bottom><%=bean.applyView%></td>
-            <td valign=bottom><%= button("Go").submit(true) %></td>
+            <td style="vertical-align: bottom"><%=bean.applyView%></td>
+            <td  style="vertical-align: bottom"><%= button("Go").submit(true) %></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td valign=bottom><% if (!user.isGuest()) { %>
+            <td  style="vertical-align: bottom"><% if (!user.isGuest()) { %>
                 <%= button("Save View").href(bean.saveViewURL) %><% } %></td>
-            <td valign=bottom><% if (!user.isGuest()) { %>
+            <td  style="vertical-align: bottom"><% if (!user.isGuest()) { %>
                 <%= button("Manage Views").href(bean.manageViewsURL) %><% } %></td>
         </tr>
     </table>
