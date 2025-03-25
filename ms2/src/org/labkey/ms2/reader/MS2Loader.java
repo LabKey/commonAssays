@@ -17,7 +17,6 @@
 package org.labkey.ms2.reader;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.ms2.MS2Modification;
 
@@ -68,6 +67,8 @@ public abstract class MS2Loader
         protected String _searchEnzyme = null;
 
         protected Set<String> _databaseLocalPaths = new LinkedHashSet<>();
+        // PEAKS exports use <search_summary><parameter name="database"> to reference the FASTA used
+        protected Set<String> _databaseParameterValues = new LinkedHashSet<>();
         protected String _dataBasename;
         protected String _dataSuffix;
         protected String _spectrumPath = null;
@@ -119,6 +120,12 @@ public abstract class MS2Loader
         public Set<String> getDatabaseLocalPaths()
         {
             return _databaseLocalPaths;
+        }
+
+        @NotNull
+        public Set<String> getDatabaseParameterValues()
+        {
+            return _databaseParameterValues;
         }
 
         public String getSpectrumPath()

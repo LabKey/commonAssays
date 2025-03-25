@@ -26,6 +26,7 @@ import org.labkey.ms2.pipeline.UnknownMS2Run;
 import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.comet.LegacyCometRun;
 import org.labkey.ms2.pipeline.mascot.MascotRun;
+import org.labkey.ms2.pipeline.peaks.PeaksRun;
 import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
 import org.labkey.ms2.pipeline.tandem.XCometRun;
@@ -114,6 +115,8 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             return true;
         }
     },
+    PeaksDb(PeaksRun.class,
+            new ScoreInfo("-10lgP", "-10lgP")),
     Unknown(UnknownMS2Run.class)
     {
         @Override
