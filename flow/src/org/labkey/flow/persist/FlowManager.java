@@ -1232,7 +1232,7 @@ public class FlowManager
     private void addKeywordAuditEvent(Container c, User user, String keyword, String newValue, String oldValue, String fileName, String lsid)
     {
 
-        FlowKeywordAuditProvider.FlowKeywordAuditEvent event =  new FlowKeywordAuditProvider.FlowKeywordAuditEvent(c.getId(),"keyword");
+        FlowKeywordAuditProvider.FlowKeywordAuditEvent event =  new FlowKeywordAuditProvider.FlowKeywordAuditEvent(c,"keyword");
         event.setKeywordName(keyword);
         event.setOldValue(oldValue);
         event.setNewValue(newValue);

@@ -20,6 +20,7 @@ import org.labkey.api.audit.AuditTypeEvent;
 import org.labkey.api.audit.AuditTypeProvider;
 import org.labkey.api.audit.query.AbstractAuditDomainKind;
 import org.labkey.api.audit.query.DefaultAuditTypeTable;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -133,7 +134,7 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
             super();
         }
 
-        public FlowKeywordAuditEvent(String container, String comment)
+        public FlowKeywordAuditEvent(Container container, String comment)
         {
             super(EVENT_TYPE, container, comment);
         }
