@@ -89,21 +89,21 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
                 rs = ((GroupedResultSet) originalRS).getNextResultSet();
                 closeRS = true;
             }
-            Object groupingValue = originalRS.getObject(_groupingColumn.getAlias());
+            Object groupingValue = _groupingColumn.getValue(originalRS);
             List<String> peptides = (List<String>) ctx.get("PeptideList");
             Object cachedGroupingValue = ctx.get("PeptideListGroupingValue");
             if (peptides == null || cachedGroupingValue == null || !cachedGroupingValue.equals(groupingValue))
             {
                 peptides = new ArrayList<>();
 
-                peptides.add(originalRS.getString(_peptideColumn.getAlias()));
+                peptides.add(_peptideColumn.getStringValue(originalRS));
                 int originalRow = originalRS.getRow();
 
                 while (rs.next())
                 {
-                    if (Objects.equals(rs.getObject(_groupingColumn.getAlias()), groupingValue))
+                    if (Objects.equals(_groupingColumn.getValue(rs), groupingValue))
                     {
-                        peptides.add(rs.getString(_peptideColumn.getAlias()));
+                        peptides.add(_peptideColumn.getStringValue(rs));
                     }
                     else
                     {

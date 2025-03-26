@@ -554,7 +554,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
 
         BaseColumnInfo addExpColumn(@NotNull ColumnInfo underlyingColumn)
         {
-            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
+            ExprColumn ret = new ExprColumn(this, underlyingColumn.getAlias().getString(), underlyingColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS), underlyingColumn.getJdbcType());
             ret.copyAttributesFrom(underlyingColumn);
             ret.setHidden(underlyingColumn.isHidden());
             if (underlyingColumn.getFk() instanceof RowIdForeignKey)
@@ -2123,7 +2123,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             selectInto.append(and);
             if (null == fgMap.get(m) || null == bgMap.get(m))
                 return null;
-            selectInto.append("F.").append(fgMap.get(m).getAlias()).append("=B.").append(bgMap.get(m).getAlias());
+            selectInto.append("F.").appendIdentifier(fgMap.get(m).getAlias()).append("=B.").appendIdentifier(bgMap.get(m).getAlias());
             and = " AND ";
         }
 

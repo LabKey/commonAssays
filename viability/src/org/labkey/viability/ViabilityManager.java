@@ -412,12 +412,12 @@ public class ViabilityManager
         {
             // New viability.resultspecimens are added by the LetvinController.CreateVialsAction.importSpecimens() method
             // We need to re-generate the group-concat of the specimen IDs.
-            SQLFragment specimenID = new SQLFragment(columnMap.get(specimenId).getAlias());
-            SQLFragment specimenIDs = schema.getDbSchema().getSqlDialect().getGroupConcat(specimenID, true, true);
+            var specimenID = columnMap.get(specimenId).getAlias();
+            SQLFragment specimenIDs = schema.getDbSchema().getSqlDialect().getGroupConcat(specimenID.getSql(), true, true);
             groupFrag.append("  ").append(specimenIDs).append(" AS SpecimenIDs,\n");
 
-            SQLFragment guid = new SQLFragment(columnMap.get(globalUniqueId).getAlias());
-            SQLFragment specimenMatches = schema.getDbSchema().getSqlDialect().getGroupConcat(guid, true, true);
+            var guid = columnMap.get(globalUniqueId).getAlias();
+            SQLFragment specimenMatches = schema.getDbSchema().getSqlDialect().getGroupConcat(guid.getSql(), true, true);
             groupFrag.append("  ").append(specimenMatches).append(" AS SpecimenMatches\n");
         }
         else

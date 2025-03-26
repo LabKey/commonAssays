@@ -393,11 +393,10 @@ public class PeptideManager
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             ColumnInfo colInfo = columnMap != null ? columnMap.get(_fieldKey) : null;
-            String name = colInfo != null ? colInfo.getAlias() : _fieldKey.getName();
-            String alias = dialect.getColumnSelectName(name);
+            var alias = SimpleFilter.getAliasForColumnFilter(dialect, colInfo, _fieldKey);
 
             SQLFragment sql = new SQLFragment();
-            sql.append(alias);
+            sql.appendIdentifier(alias);
             sql.append(" >= CASE Charge");
 
             for (int i = 0; i < _values.length; i++)

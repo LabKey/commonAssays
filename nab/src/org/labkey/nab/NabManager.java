@@ -197,9 +197,7 @@ public class NabManager extends AbstractNabManager
                     ColumnInfo column = columns.get(fieldKeys.get(pd));
                     if (null != column)
                     {
-                        String columnAlias = column.getAlias();
-                        if (null != columnAlias)
-                            dataProperties.put(pd, rowMap.get(columnAlias));
+                        dataProperties.put(pd, column.getValue(rowMap));
                     }
                 }
             }

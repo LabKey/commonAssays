@@ -933,7 +933,7 @@ public class MS2Schema extends UserSchema
         {
             sql.append(separator);
             separator = ", ";
-            sql.append(columnMap.get(fieldKey).getAlias());
+            sql.appendIdentifier(columnMap.get(fieldKey).getAlias());
         }
         sql.append(" FROM (\n");
         sql.append(innerSelect);

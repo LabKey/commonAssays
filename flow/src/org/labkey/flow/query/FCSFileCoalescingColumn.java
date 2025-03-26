@@ -134,7 +134,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
         SQLFragment coalesceFrag = new SQLFragment();
         coalesceFrag.append("SELECT\n");
         for (FieldKey pkCol : pkCols)
-            coalesceFrag.append("  ").append(columnMap.get(pkCol).getAlias()).append("\n");
+            coalesceFrag.append("  ").appendIdentifier(columnMap.get(pkCol).getAlias()).append("\n");
 
         for (Map.Entry<String, Pair<FieldKey, FieldKey>> entry : pairs.entrySet())
         {
@@ -143,9 +143,9 @@ public class FCSFileCoalescingColumn extends ExprColumn
 
             coalesceFrag.append(",\n");
             coalesceFrag.append("  COALESCE(\n");
-            coalesceFrag.append(columnMap.get(pair.first).getAlias());
+            coalesceFrag.appendIdentifier(columnMap.get(pair.first).getAlias());
             coalesceFrag.append(", ");
-            coalesceFrag.append(columnMap.get(pair.second).getAlias());
+            coalesceFrag.appendIdentifier(columnMap.get(pair.second).getAlias());
             coalesceFrag.append(") AS ").append(name);
         }
         coalesceFrag.append("\n");
@@ -162,7 +162,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
             frag.append(and);
             frag.append(parentAlias).append(".").append(pkCol);
             frag.append(" = ");
-            frag.append(name).append(".").append(columnMap.get(pkCol).getAlias());
+            frag.append(name).append(".").appendIdentifier(columnMap.get(pkCol).getAlias());
             and = " AND ";
         }
 
