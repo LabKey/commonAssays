@@ -54,13 +54,22 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
 
     getFields: function (resultFields) {
         if (!this.fields) {
+            // issue 52421 data file metadata can contain full paths
+            var fileNameFromPath = function(v, rec) {
+                if (v.indexOf('/') > -1)
+                    return v.substring(v.lastIndexOf('/') + 1, v.length);
+
+                return v.substring(v.lastIndexOf('\\') + 1, v.length);
+            };
+
             var fields = [];
             resultFields.forEach(function (field) {
                 fields.push({
                     name: field.name,
-                    type: 'string'
+                    type: 'string',
+                    convert: field.fieldKey === 'DataFile' ? fileNameFromPath : null
                 });
-            });
+            }, this);
 
             this.fields = fields.concat([
                 {name: this.FILE_URL, type: 'string'},
@@ -105,6 +114,17 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
         }
 
         return this._grid;
+    },
+
+    convertPath : function(v, rec) {
+        console.log(v, rec);
+    },
+
+    getFileName : function(pathname) {
+        if (pathname.indexOf('/') > -1) {
+            return pathname.substring(pathname.lastIndexOf('/') + 1, pathname.length);
+        }
+        return pathname.substring(pathname.lastIndexOf('\\') + 1, pathname.length);
     },
 
     getColumns: function (assayResultFields) {
