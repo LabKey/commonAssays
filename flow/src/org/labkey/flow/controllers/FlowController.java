@@ -28,6 +28,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
@@ -312,7 +313,7 @@ public class FlowController extends BaseFlowController
         @Override
         public boolean handlePost(FlowAdminForm form, BindException errors)
         {
-            if (form.getWorkingDirectory() != null)
+            if (form.getWorkingDirectory() != null && PipelineService.get().findPipelineRoot(getContainer()).getRootFileLike().isDescendant(FileUtil.createUri(form.getWorkingDirectory()) ))
             {
                 FileLike dir = new FileSystemLike.Builder(FileUtil.stringToPath(getContainer(), form.getWorkingDirectory()))
                         .readonly().root();
