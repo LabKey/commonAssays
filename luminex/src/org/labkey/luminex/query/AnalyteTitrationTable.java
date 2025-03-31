@@ -144,7 +144,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
 
                     PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                    ljPlotsMenu.renderMenuButton(ctx, oldWriter, false, null);
+                    ljPlotsMenu.renderMenuButton(ctx, out, false, null);
                 }
 
                 @Override
