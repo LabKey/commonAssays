@@ -45,7 +45,7 @@ public class MS2ModificationList extends ArrayList<MS2Modification>
     }
 
 
-    private static final String _symbols = "'\"~#*@!$%&:0123456789";
+    private static final String _symbols = "'\"~#*@!$%&:0123456789{}[];|<>,.`\\/_+=abcdefghijklmnopqrstuvwxyz";
 
     // Fills in unique modification symbols if they haven't been specified in the pepXML file.
     // This needs to be called explicitly after all modifications have been added.

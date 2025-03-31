@@ -163,6 +163,7 @@ public class PepXmlLoader extends MS2XmlLoader
             _searchEngine = null;
             _searchEnzyme = null;
             _databaseLocalPaths = new LinkedHashSet<>();
+            _databaseParameterValues = new LinkedHashSet<>();
 
             handleMsMsRunSummary();
 
@@ -239,6 +240,9 @@ public class PepXmlLoader extends MS2XmlLoader
 
                         if ("pipeline, load spectra".equals(name) || "pipeline, import spectra".equals(name))
                             _loadSpectra = !"no".equalsIgnoreCase(_parser.getAttributeValue(null, "value"));
+
+                        if ("database".equalsIgnoreCase(name))
+                            _databaseParameterValues.add(_parser.getAttributeValue(null, "value"));
                     }
                 }
                 else
@@ -589,6 +593,10 @@ public class PepXmlLoader extends MS2XmlLoader
                             _deltaMass = 0.0f;
                         else
                             _deltaMass = Float.parseFloat(massDiff);
+                        if (Float.isInfinite(_deltaMass))
+                        {
+                            _deltaMass = 1000000f;
+                        }
 
                         // Create protein lookup string that matches the way we import FASTA files (which matches what Comet does)
                         String proteinName = _parser.getAttributeValue(null, "protein");
