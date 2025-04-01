@@ -81,7 +81,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         // Get the average of the non-excluded FI-Background values for this control
         SQLFragment avgFiSQL = new SQLFragment("(SELECT AVG(dr.FIBackground) FROM (");
         // TODO ContainerFilter -- Do we really want a non-permission checking container filter here?
-        LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.EVERYTHING_UNSAFE, false);
+        LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.getUnsafeEverythingFilter(), false);
         List<ColumnInfo> dataColumns = Arrays.asList(dataTable.getColumn("FlaggedAsExcluded"), dataTable.getColumn("FIBackground"), dataTable.getColumn("Description"), dataTable.getColumn("Data"), dataTable.getColumn("Analyte"));
         avgFiSQL.append(QueryService.get().getSelectSQL(dataTable, dataColumns, null, null, Table.ALL_ROWS, 0, false));
         avgFiSQL.append(") dr, ");
