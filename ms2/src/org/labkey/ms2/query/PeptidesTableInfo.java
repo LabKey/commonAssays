@@ -20,7 +20,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -132,10 +131,10 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoQuantitation(), getUserSchema());
+                FilteredTable<?> result = new FilteredTable<>(MS2Manager.getTableInfoQuantitation(), getUserSchema());
                 result.wrapAllColumns(true);
-                result.getMutableColumn("PeptideId").setHidden(true);
-                result.getMutableColumn("QuantId").setHidden(true);
+                result.getMutableColumnOrThrow("PeptideId").setHidden(true);
+                result.getMutableColumnOrThrow("QuantId").setHidden(true);
                 return result;
             }
         });
@@ -150,9 +149,9 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable result = new FilteredTable<>(MS2Manager.getTableInfoITraqPeptideQuantitation(), getUserSchema());
+                FilteredTable<?> result = new FilteredTable<>(MS2Manager.getTableInfoITraqPeptideQuantitation(), getUserSchema());
                 result.wrapAllColumns(true);
-                result.getMutableColumn("PeptideId").setHidden(true);
+                result.getMutableColumnOrThrow("PeptideId").setHidden(true);
 
                 SQLFragment sumSQL = new SQLFragment(
                         "(COALESCE (" + ExprColumn.STR_TABLE_ALIAS + ".AbsoluteIntensity1, 0) + " +
@@ -208,9 +207,9 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                FilteredTable table = new FilteredTable<>(MS2Manager.getTableInfoPeptideProphetData(), getUserSchema());
+                FilteredTable<?> table = new FilteredTable<>(MS2Manager.getTableInfoPeptideProphetData(), getUserSchema());
                 table.wrapAllColumns(true);
-                table.getMutableColumn("PeptideId").setHidden(true);
+                table.getMutableColumnOrThrow("PeptideId").setHidden(true);
                 return table;
             }
         });
@@ -232,14 +231,14 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             dataColumn.setLinkTarget("peptide");
             return dataColumn;
         };
-        getMutableColumn("Scan").setURL(StringExpressionFactory.createURL(showPeptideURL));
-        getMutableColumn("Scan").setDisplayColumnFactory(factory);
-        getMutableColumn("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURL));
-        getMutableColumn("Peptide").setDisplayColumnFactory(factory);
+        getMutableColumnOrThrow("Scan").setURL(StringExpressionFactory.createURL(showPeptideURL));
+        getMutableColumnOrThrow("Scan").setDisplayColumnFactory(factory);
+        getMutableColumnOrThrow("Peptide").setURL(StringExpressionFactory.createURL(showPeptideURL));
+        getMutableColumnOrThrow("Peptide").setDisplayColumnFactory(factory);
 
         addScoreColumns();
 
-        getMutableColumn("Fraction").setFk(new LookupForeignKey("Fraction")
+        getMutableColumnOrThrow("Fraction").setFk(new LookupForeignKey("Fraction")
         {
             @Override
             public TableInfo getLookupTableInfo()
@@ -360,11 +359,13 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             MS2Run run = runs.get(0);  // all run types are the same, so just get the first one
             String chargeColumnName = run.getChargeFilterColumnName();
             int index = runType.getScoreColumnList().indexOf(FieldKey.fromParts(chargeColumnName));  // all run types are the same, so re-use runType
-            String databaseScoreColumn = "Score" + String.valueOf(index + 1);  // db columns are 1-indexed
+            String databaseScoreColumn = "Score" + (index + 1);  // db columns are 1-indexed
 
             SQLFragment sql = new SQLFragment();
             sql.append("RowId IN (SELECT RowId FROM \n");
-            sql.append(" (SELECT RowId, row_number() OVER(PARTITION BY Peptide ORDER BY " + databaseScoreColumn + " DESC) as RowNum FROM ");
+            sql.append(" (SELECT RowId, row_number() OVER(PARTITION BY Peptide ORDER BY ");
+            sql.append(databaseScoreColumn);
+            sql.append(" DESC) as RowNum FROM ");
             sql.append(MS2Manager.getTableInfoPeptidesData(), "pep");
             sql.append(" JOIN ");
             sql.append(MS2Manager.getTableInfoFractions(), "fra");
@@ -399,13 +400,13 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             }
         };
         fk.setPrefixColumnCaption(false);
-        getMutableColumn("SeqId").setFk(fk);
+        getMutableColumnOrThrow("SeqId").setFk(fk);
 
-        getMutableColumn("SeqId").setURL(StringExpressionFactory.createURL(showProteinURL));
-        getMutableColumn("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
-        getMutableColumn("SeqId").setLabel("Search Engine Protein");
-        getMutableColumn("Protein").setURL(StringExpressionFactory.createURL(showProteinURL));
-        getMutableColumn("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
+        getMutableColumnOrThrow("SeqId").setURL(StringExpressionFactory.createURL(showProteinURL));
+        getMutableColumnOrThrow("SeqId").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
+        getMutableColumnOrThrow("SeqId").setLabel("Search Engine Protein");
+        getMutableColumnOrThrow("Protein").setURL(StringExpressionFactory.createURL(showProteinURL));
+        getMutableColumnOrThrow("Protein").setDisplayColumnFactory(new ProteinDisplayColumnFactory(_userSchema.getContainer()));
     }
 
     public static void addPeptideAggregationColumns(SequencesTableInfo<MS2Schema> tableInfo)
@@ -439,16 +440,11 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         for (MS2RunType runType : getRunTypes())
         {
             int index = 1;
-            // Since some search engines have the same names for different scores, build a list of all of the
+            // Since some search engines have the same names for different scores, build a list of all the
             // possible interpretations for a given score name based on the run type
             for (FieldKey name : runType.getScoreColumnList())
             {
-                List<Pair<MS2RunType, Integer>> l = columnMap.get(name);
-                if (l == null)
-                {
-                    l = new ArrayList<>();
-                    columnMap.put(name, l);
-                }
+                List<Pair<MS2RunType, Integer>> l = columnMap.computeIfAbsent(name, k -> new ArrayList<>());
                 l.add(new Pair<>(runType, index++));
             }
         }
@@ -495,7 +491,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         List<MS2Run> runs = _userSchema.getRuns();
 
         Collection<MS2RunType> runTypes = new HashSet<>(Arrays.asList(_runTypes));
-        if (runs != null && runs.size() > 0)
+        if (runs != null && !runs.isEmpty())
         {
             Set<MS2RunType> usedRunTypes = new HashSet<>();
             for (MS2Run run : runs)
@@ -580,30 +576,19 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         return _runTypes.length > 1 ? MS2Schema.TableType.Peptides.toString() : _runTypes[0].getPeptideTableName();
     }
 
-    public static void addCalculatedColumns(FilteredTable table)
+    public static void addCalculatedColumns(FilteredTable<?> table)
     {
         var hColumn = table.wrapColumn("H", table.getRealTable().getColumn("Peptide"));
-        hColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new HydrophobicityColumn(colInfo);
-            }
-        });
+        hColumn.setDisplayColumnFactory(HydrophobicityColumn::new);
         table.addColumn(hColumn);
 
         var deltaScanColumn = table.wrapColumn("DeltaScan", table.getRealTable().getColumn("Fraction"));
-        deltaScanColumn.setDisplayColumnFactory(new DisplayColumnFactory()
-        {
-            @Override
-            public DisplayColumn createRenderer(ColumnInfo colInfo)
-            {
-                return new DeltaScanColumn(colInfo);
-            }
-        });
+        deltaScanColumn.setDisplayColumnFactory(DeltaScanColumn::new);
         deltaScanColumn.clearFk();
         table.addColumn(deltaScanColumn);
+
+        ExprColumn lengthCol = new ExprColumn(table, "Length", new SQLFragment(table.getSqlDialect().getVarcharLengthFunction() + "(Peptide)"), JdbcType.INTEGER);
+        table.addColumn(lengthCol);
     }
 
     @Override

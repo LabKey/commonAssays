@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--BSI implementation of pepXML output--><msms_pipeline_analysis xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:schemaLocation="http://regis-web.systemsbiology.net/pepXML pepXML_v18_peaks_denovo.xsd" date="2024-10-09T20:28:58.5817215" summary_xml="D:\PEAKS_v12\PeaksExports\Curso Q24_TMTpro\TMT1_rep3\db.pep.xml">
+  <msms_run_summary base_name="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" raw_data_type="" raw_data="" msManufacturer="Thermo Fisher Scientific" msModel="Eclipse, Lumos, Fusion, Q Exactive, Velos Pro, Elite" msIonization="ESI(nano-spray)" msMassAnalyzer="FT-ICR/Orbitrap">
+    <sample_enzyme name="Trypsin">
+      <specificity sense="C" cut="RK" no_cut="P"/>
+    </sample_enzyme>
+    <search_summary base_name="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" search_engine="PEAKS_DB" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" search_id="1">
+      <enzymatic_search_constraint max_num_internal_cleavages="3" min_number_termini="2" enzyme="Trypsin"/>
+      <aminoacid_modification aminoacid="C" description="C(+57.02)" massdiff="+57.021464" mass="+160.030654" variable="N"/>
+      <aminoacid_modification aminoacid="K" description="K(+304.21)" massdiff="+304.207146" mass="+432.302106" variable="N"/>
+      <aminoacid_modification aminoacid="A" description="A(+304.21)" massdiff="+304.207146" mass="+375.244256" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="R" description="R(+304.21)" massdiff="+304.207146" mass="+460.30825600000003" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="N" description="N(+304.21)" massdiff="+304.207146" mass="+418.25007600000004" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="D" description="D(+304.21)" massdiff="+304.207146" mass="+419.23408600000005" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="E" description="E(+304.21)" massdiff="+304.207146" mass="+433.249736" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="Q" description="Q(+304.21)" massdiff="+304.207146" mass="+432.26572600000003" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="G" description="G(+304.21)" massdiff="+304.207146" mass="+361.228606" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="H" description="H(+304.21)" massdiff="+304.207146" mass="+441.26605600000005" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="I" description="I(+304.21)" massdiff="+304.207146" mass="+417.291206" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="L" description="L(+304.21)" massdiff="+304.207146" mass="+417.291206" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="M" description="M(+304.21)" massdiff="+304.207146" mass="+435.24763600000006" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="F" description="F(+304.21)" massdiff="+304.207146" mass="+451.27555600000005" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="P" description="P(+304.21)" massdiff="+304.207146" mass="+401.259906" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="S" description="S(+304.21)" massdiff="+304.207146" mass="+391.23917600000004" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="T" description="T(+304.21)" massdiff="+304.207146" mass="+405.25482600000004" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="W" description="W(+304.21)" massdiff="+304.207146" mass="+490.28645600000004" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="Y" description="Y(+304.21)" massdiff="+304.207146" mass="+467.27047600000003" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="V" description="V(+304.21)" massdiff="+304.207146" mass="+403.27555600000005" variable="N" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="A" description="A(+42.01)" massdiff="+42.010565" mass="+113.047675" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="R" description="R(+42.01)" massdiff="+42.010565" mass="+198.111675" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="N" description="N(+42.01)" massdiff="+42.010565" mass="+156.053495" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="D" description="D(+42.01)" massdiff="+42.010565" mass="+157.037505" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="C" description="C(+42.01)" massdiff="+42.010565" mass="+145.019755" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="E" description="E(+42.01)" massdiff="+42.010565" mass="+171.053155" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="Q" description="Q(+42.01)" massdiff="+42.010565" mass="+170.069145" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="G" description="G(+42.01)" massdiff="+42.010565" mass="+99.032025" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="H" description="H(+42.01)" massdiff="+42.010565" mass="+179.069475" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="I" description="I(+42.01)" massdiff="+42.010565" mass="+155.094625" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="L" description="L(+42.01)" massdiff="+42.010565" mass="+155.094625" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="K" description="K(+42.01)" massdiff="+42.010565" mass="+170.105525" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="M" description="M(+42.01)" massdiff="+42.010565" mass="+173.05105500000002" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="F" description="F(+42.01)" massdiff="+42.010565" mass="+189.078975" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="P" description="P(+42.01)" massdiff="+42.010565" mass="+139.06332500000002" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="S" description="S(+42.01)" massdiff="+42.010565" mass="+129.042595" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="T" description="T(+42.01)" massdiff="+42.010565" mass="+143.058245" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="W" description="W(+42.01)" massdiff="+42.010565" mass="+228.089875" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="Y" description="Y(+42.01)" massdiff="+42.010565" mass="+205.073895" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="V" description="V(+42.01)" massdiff="+42.010565" mass="+141.078975" variable="Y" peptide_terminus="n"/>
+      <aminoacid_modification aminoacid="M" description="M(+15.99)" massdiff="+15.994915" mass="+147.035405" variable="Y"/>
+      <aminoacid_modification aminoacid="Q" description="Q(--17.03)" massdiff="-17.026549" mass="+111.032031" variable="Y" peptide_terminus="n"/>
+      <parameter name="instrument" value="Orbitrap (Orbi-Orbi)"/>
+      <parameter name="parent_error" value="10.0"/>
+      <parameter name="delta" value="0.02"/>
+      <parameter name="top" value="25"/>
+      <parameter name="enzyme" value="Trypsin"/>
+      <parameter name="missed_cleavage" value="2"/>
+      <parameter name="max_ptm" value="3"/>
+      <parameter name="database" value="peaksMinimal.fasta"/>
+      <parameter name="taxons" value="all species"/>
+    </search_summary>
+    <spectrum_query spectrum="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" start_scan="1950" end_scan="1950" retention_time_sec="639.918" precursor_intensity="67572.44677734375" activation_method="high energy CID (y and b ions)" precursor_neutral_mass="966.469640493393" assumed_charge="2" index="1950">
+      <search_result>
+        <search_hit hit_rank="1" peptide="GDGDSGR" calc_neutral_pep_mass="0.0" massdiff="Infinity" num_tot_proteins="1" protein="P58107|EPIPL_HUMAN" protein_descr="Epiplakin OS=Homo sapiens OX=9606 GN=EPPK1 PE=1 SV=3" protein_mw="555658.136459082">
+          <modification_info modified_peptide="G(+304.21)DGDSGR">
+            <mod_aminoacid_mass position="1" mass="361.23145294189453"/>
+          </modification_info>
+          <search_score name="-10lgP" value="31.21804"/>
+        </search_hit>
+      </search_result>
+    </spectrum_query>
+    <spectrum_query spectrum="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" start_scan="1991" end_scan="1991" retention_time_sec="640.697" precursor_intensity="1207099.991699" activation_method="high energy CID (y and b ions)" precursor_neutral_mass="980.484777212143" assumed_charge="2" index="1991">
+      <search_result>
+        <search_hit hit_rank="1" peptide="GDDQSR" calc_neutral_pep_mass="0.0" massdiff="Infinity" num_tot_proteins="1" protein="P49368|TCPG_HUMAN" protein_descr="T-complex protein 1 subunit gamma OS=Homo sapiens OX=9606 GN=CCT3 PE=1 SV=4" protein_mw="60533.882859082034">
+          <modification_info modified_peptide="G(+304.21)DDQSR">
+            <mod_aminoacid_mass position="1" mass="361.23145294189453"/>
+          </modification_info>
+          <search_score name="-10lgP" value="23.525602"/>
+        </search_hit>
+      </search_result>
+    </spectrum_query>
+    <spectrum_query spectrum="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" start_scan="2191" end_scan="2191" retention_time_sec="682.397" precursor_intensity="809090.1660156" activation_method="high energy CID (y and b ions)" precursor_neutral_mass="1078.5341546535492" assumed_charge="2" index="2191">
+      <search_result>
+        <search_hit hit_rank="1" peptide="GDNEGQR" calc_neutral_pep_mass="0.0" massdiff="Infinity" num_tot_proteins="1" protein="O14467|MBF1_YEAST" protein_descr="Multiprotein-bridging factor 1 OS=Saccharomyces cerevisiae (strain ATCC 204508 / S288c) OX=559292 GN=MBF1 PE=1 SV=2" protein_mw="16403.622259082033">
+          <modification_info modified_peptide="G(+304.21)DNEGQR">
+            <mod_aminoacid_mass position="1" mass="361.23145294189453"/>
+          </modification_info>
+          <search_score name="-10lgP" value="42.821186"/>
+        </search_hit>
+      </search_result>
+    </spectrum_query>
+    <spectrum_query spectrum="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" start_scan="2276" end_scan="2276" retention_time_sec="698.039" precursor_intensity="567675.3061523" activation_method="high energy CID (y and b ions)" precursor_neutral_mass="951.4944207668304" assumed_charge="2" index="2276">
+      <search_result>
+        <search_hit hit_rank="1" peptide="EESGAR" calc_neutral_pep_mass="0.0" massdiff="Infinity" num_tot_proteins="4" protein="Q15365|PCBP1_HUMAN" protein_descr="Poly(rC)-binding protein 1 OS=Homo sapiens OX=9606 GN=PCBP1 PE=1 SV=2" protein_mw="37497.80505908203">
+          <alternative_protein protein="Q15366|PCBP2_HUMAN" protein_descr="Poly(rC)-binding protein 2 OS=Homo sapiens OX=9606 GN=PCBP2 PE=1 SV=1" protein_mw="38580.06495908203"/>
+          <alternative_protein protein="A0A3Q1LX34|A0A3Q1LX34_BOVIN" protein_descr="Poly(rC) binding protein 2 OS=Bos taurus OX=9913 GN=PCBP2 PE=1 SV=2" protein_mw="47271.97325908203"/>
+          <alternative_protein protein="P57721|PCBP3_HUMAN" protein_descr="Poly(rC)-binding protein 3 OS=Homo sapiens OX=9606 GN=PCBP3 PE=1 SV=2" protein_mw="39465.24985908203"/>
+          <modification_info modified_peptide="E(+304.21)ESGAR">
+            <mod_aminoacid_mass position="1" mass="433.25257873535156"/>
+          </modification_info>
+          <search_score name="-10lgP" value="24.704155"/>
+        </search_hit>
+      </search_result>
+    </spectrum_query>
+    <spectrum_query spectrum="20240822_9_TMTpro_MS2v3_Q24_TMT1_sinFr_3.mzML" start_scan="2303" end_scan="2303" retention_time_sec="700.175" precursor_intensity="166627.269043" activation_method="high energy CID (y and b ions)" precursor_neutral_mass="1109.5275628566742" assumed_charge="2" index="2303">
+      <search_result>
+        <search_hit hit_rank="1" peptide="SNDGEER" calc_neutral_pep_mass="0.0" massdiff="Infinity" num_tot_proteins="2" protein="Q29RF7|PDS5A_HUMAN" protein_descr="Sister chromatid cohesion protein PDS5 homolog A OS=Homo sapiens OX=9606 GN=PDS5A PE=1 SV=1" protein_mw="150830.15765908203">
+          <alternative_protein protein="E1BKG4|E1BKG4_BOVIN" protein_descr="PDS5 cohesin associated factor A OS=Bos taurus OX=9913 GN=PDS5A PE=3 SV=3" protein_mw="150728.98855908203"/>
+          <modification_info modified_peptide="S(+304.21)NDGEER">
+            <mod_aminoacid_mass position="1" mass="391.2420196533203"/>
+          </modification_info>
+          <search_score name="-10lgP" value="32.483765"/>
+        </search_hit>
+      </search_result>
+    </spectrum_query>
+  </msms_run_summary></msms_pipeline_analysis>

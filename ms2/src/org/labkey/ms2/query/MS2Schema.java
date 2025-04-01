@@ -651,7 +651,7 @@ public class MS2Schema extends UserSchema
             filter.addUrlFilters(url, "InternalName");
         }
         ProteinGroupTableInfo tableInfo = new ProteinGroupTableInfo(this, null, false);
-        tableInfo.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
+        tableInfo.setContainerFilter(ContainerFilter.getUnsafeEverythingFilter());
         sql.append(getSelectSQL(tableInfo, filter, Collections.singleton(FieldKey.fromParts("RowId"))));
     }
 
@@ -701,7 +701,7 @@ public class MS2Schema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return createPeptidesTable(ContainerFilter.EVERYTHING_UNSAFE, MS2RunType.values());
+                return createPeptidesTable(ContainerFilter.getUnsafeEverythingFilter(), MS2RunType.values());
             }
         });
 
@@ -906,7 +906,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo tiFiltered = getTable(HiddenTableType.PeptidesFilter.name(), ContainerFilter.EVERYTHING_UNSAFE, true, false);
+        TableInfo tiFiltered = getTable(HiddenTableType.PeptidesFilter.name(), ContainerFilter.getUnsafeEverythingFilter(), true, false);
         return getSelectSQL(tiFiltered, filter, fieldKeys);
     }
 

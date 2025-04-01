@@ -155,7 +155,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         {
             QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
             queryDef.setSql("SELECT DISTINCT CurveType FROM \"" + CURVE_FIT_TABLE_NAME+ "\"");
-            queryDef.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
+            queryDef.setContainerFilter(ContainerFilter.getUnsafeEverythingFilter());
 
             ArrayList<QueryException> errors = new ArrayList<>();
             TableInfo table = queryDef.getTable(this, errors, false);
