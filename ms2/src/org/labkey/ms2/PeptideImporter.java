@@ -26,7 +26,10 @@ import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
 import org.labkey.ms2.reader.MS2Loader;
 import org.labkey.ms2.reader.PeptideProphetHandler;
@@ -127,6 +130,42 @@ public abstract class PeptideImporter extends MS2Importer
             dbPaths.add(dbPath);
         }
 
+        // Handle PEAKS FASTA references
+        for (String dbName : fraction.getDatabaseParameterValues())
+        {
+            File database = null;
+
+            // First look in the FASTA directory, with and without a .fasta extension
+            File databaseRoot = MS2PipelineManager.getSequenceDatabaseRoot(_container, true);
+            if (NetworkDrive.exists(databaseRoot))
+            {
+                database = FileUtil.appendName(databaseRoot, dbName);
+                if (!NetworkDrive.exists(database))
+                {
+                    database = FileUtil.appendName(databaseRoot, dbName + ".fasta");
+                }
+            }
+
+            // Also try relative to the file being imported, with and without a .fasta extension
+            if (!NetworkDrive.exists(database))
+            {
+                database = FileUtil.appendName(new File(_path), dbName);
+            }
+            if (!NetworkDrive.exists(database))
+            {
+                database = FileUtil.appendName(new File(_path), dbName + ".fasta");
+            }
+
+            if (NetworkDrive.exists(database))
+            {
+                dbPaths.add(database.getAbsolutePath());
+            }
+            else
+            {
+                _log.warn("Could not find FASTA " + dbName);
+            }
+        }
+
         try
         {
             // Clear any stale values so we can re-insert
@@ -192,7 +231,7 @@ public abstract class PeptideImporter extends MS2Importer
         columnNames.append(", HitRank");
         columnNames.append(", Decoy");
 
-        return super.getTableColumnNames() + columnNames.toString();
+        return super.getTableColumnNames() + columnNames;
     }
 
 
@@ -299,7 +338,7 @@ public abstract class PeptideImporter extends MS2Importer
         // If we have quantitation, use the statement that reselects the rowId; otherwise, use the simple insert statement
         PeptideProphetHandler.PeptideProphetResult pp = peptide.getPeptideProphetResult();
         boolean hasProphet = (_scoringAnalysis && pp != null && pp.isSummaryLoaded());
-        boolean hasQuant = (null != _quantSummaries && _quantSummaries.size() > 0);
+        boolean hasQuant = (null != _quantSummaries && !_quantSummaries.isEmpty());
 
         if (hasProphet || hasQuant)
         {
