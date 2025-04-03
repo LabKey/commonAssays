@@ -272,6 +272,6 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     public void setColumnInfo(ColumnInfo colInfo)
     {
         _columnInfo = colInfo;
-        _columnName = colInfo.getAlias().getString();
+        _columnName = colInfo.getAlias().getId();
     }
 }
