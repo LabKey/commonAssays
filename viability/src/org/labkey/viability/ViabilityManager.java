@@ -403,10 +403,10 @@ public class ViabilityManager
         SQLFragment groupFrag = new SQLFragment();
         groupFrag.append("SELECT\n");
         groupFrag.append("  {fn now()} AS SpecimenAggregatesUpdated,\n");
-        groupFrag.append("  " + columnMap.get(resultId).getAlias() + " AS ResultID,\n");
-        groupFrag.append("  SUM(" + columnMap.get(volume).getAlias() + ") AS OriginalCells,\n");
-        groupFrag.append("  COUNT(" + columnMap.get(specimenId).getAlias() + ") AS SpecimenCount,\n");
-        groupFrag.append("  COUNT(" + columnMap.get(globalUniqueId).getAlias() + ") AS SpecimenMatchCount,\n");
+        groupFrag.append("  ").appendIdentifier(columnMap.get(resultId).getAlias()).append(" AS ResultID,\n");
+        groupFrag.append("  SUM(").appendIdentifier(columnMap.get(volume).getAlias()).append(") AS OriginalCells,\n");
+        groupFrag.append("  COUNT(").appendIdentifier(columnMap.get(specimenId).getAlias()).append(") AS SpecimenCount,\n");
+        groupFrag.append("  COUNT(").appendIdentifier(columnMap.get(globalUniqueId).getAlias()).append(") AS SpecimenMatchCount,\n");
 
         if (schema.getDbSchema().getSqlDialect().supportsGroupConcat())
         {
@@ -428,7 +428,7 @@ public class ViabilityManager
 
         groupFrag.append("FROM (\n");
         groupFrag.append(sub);
-        groupFrag.append(") y \nGROUP BY " + columnMap.get(resultId).getAlias());
+        groupFrag.append(") y \nGROUP BY ").appendIdentifier(columnMap.get(resultId).getAlias());
 
         // Debug the specimen aggregate queries
         if (LOG.isDebugEnabled())

@@ -123,7 +123,8 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         {
             runCountSQL.append(separator);
             separator = " + ";
-            runCountSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE 1 END ");
+            // TODO Guessing the lookup column alias?
+            runCountSQL.append("CASE WHEN " + runCol.getAlias().getId() + "$.RowId IS NULL THEN 0 ELSE 1 END ");
         }
         runCountSQL.append(")");
         ExprColumn runCount = new ExprColumn(this, "RunCount", runCountSQL, JdbcType.INTEGER, runColumns.toArray(new ColumnInfo[runColumns.size()]));
@@ -136,7 +137,8 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         {
             patternSQL.append(separator);
             separator = " + ";
-            patternSQL.append("CASE WHEN " + runCol.getAlias() + "$.RowId IS NULL THEN 0 ELSE ");
+            // TODO Guessing the lookup column alias?
+            patternSQL.append("CASE WHEN " + runCol.getAlias().getId() + "$.RowId IS NULL THEN 0 ELSE ");
             patternSQL.appendValue(1 << offset);
             patternSQL.append(" END ");
             offset++;

@@ -122,7 +122,7 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
         }
         else
         {
-            result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
+            result = new SQLFragment("SELECT ").appendIdentifier(desiredCol.getAlias()).append(" FROM (");
         }
         result.append(sql);
         result.append(") x");
