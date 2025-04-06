@@ -20,13 +20,14 @@
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.FilterHeaderBean" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
 <%@ page import="static org.labkey.api.util.DOM.Attribute.style" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
+    JspView<FilterHeaderBean> view = HttpView.currentView();
+    FilterHeaderBean bean = view.getModelBean();
     User user = getUser();
     String runChargeFilterColumnName = bean.run.getChargeFilterColumnName();
     String grouping = getViewContext().cloneActionURL().getParameter("grouping");

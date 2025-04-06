@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.MassType"%>
+<%@ page import="org.labkey.api.protein.PeptideUtils"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
-<%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager"%>
+<%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
+<%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
-<%@ page import="org.labkey.api.protein.MassType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.protein.PeptideUtils" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -40,7 +40,7 @@
     }
 %>
 <%
-    JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
+    JspView<ShowPeptideContext> me = HttpView.currentView();
     ShowPeptideContext ctx = me.getModelBean();
     MS2Peptide p = ctx.peptide;
     LibraQuantResult libra = p.getLibraQuantResult();

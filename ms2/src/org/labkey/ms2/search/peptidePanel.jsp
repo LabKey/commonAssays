@@ -29,7 +29,7 @@
 <%
     // This panel is optionally rendered by proteinPanel.jsp for MS2 deployments only. It requires "MS2/inlineViewDesigner.js",
     // which is optionally included by searchProteins.jsp.
-    JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
+    JspView<ProteinSearchBean> me = HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
     ViewContext ctx = getViewContext();
     FilterView peptideView = new FilterView(ctx, true);

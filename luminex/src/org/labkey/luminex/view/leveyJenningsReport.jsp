@@ -14,12 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
-* User: cnathe
-* Date: Sept 19, 2011
-*/
-
 %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -36,7 +30,7 @@
     }
 %>
 <%
-    JspView<LeveyJenningsForm> me = (JspView<LeveyJenningsForm>) HttpView.currentView();
+    JspView<LeveyJenningsForm> me = HttpView.currentView();
     LeveyJenningsForm bean = me.getModelBean();
 %>
 

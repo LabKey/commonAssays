@@ -30,7 +30,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
+    JspView<ChooseRunsToAnalyzeForm> me = HttpView.currentView();
     ChooseRunsToAnalyzeForm form = me.getModelBean();
     Container c = getContainer();
 %>

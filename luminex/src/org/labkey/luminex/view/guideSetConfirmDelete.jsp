@@ -39,7 +39,7 @@
     }
 %>
 <%
-    JspView<LuminexController.GuideSetsDeleteBean> me = (JspView<LuminexController.GuideSetsDeleteBean>) HttpView.currentView();
+    JspView<LuminexController.GuideSetsDeleteBean> me = HttpView.currentView();
     LuminexController.GuideSetsDeleteBean bean = me.getModelBean();
     List<GuideSet> guideSets = bean.getGuideSets();
 

@@ -18,7 +18,6 @@
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.data.ContainerManager" %>
 <%@ page import="org.labkey.api.security.permissions.InsertPermission" %>
-<%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -27,7 +26,6 @@
 <%@ page import="org.springframework.validation.Errors" %>
 <%@ page import="org.springframework.validation.ObjectError" %>
 <%@ page import="java.util.LinkedHashMap" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
@@ -38,7 +36,7 @@
     }
 %>
 <%
-    JspView<FeatureAnnotationSetController.FeatureAnnotationSetForm> me = (JspView<FeatureAnnotationSetController.FeatureAnnotationSetForm>) HttpView.currentView();
+    JspView<FeatureAnnotationSetController.FeatureAnnotationSetForm> me = HttpView.currentView();
     String vendor = me.getModelBean().getVendor();
     String name = me.getModelBean().getName();
     String description = me.getModelBean().getDescription();
