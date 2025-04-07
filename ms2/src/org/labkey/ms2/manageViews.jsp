@@ -21,7 +21,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    HttpView<MS2Controller.ManageViewsBean> me = (HttpView<MS2Controller.ManageViewsBean>) HttpView.currentView();
+    HttpView<MS2Controller.ManageViewsBean> me = HttpView.currentView();
     MS2Controller.ManageViewsBean bean = me.getModelBean();
 %>
 <labkey:form method="post" name="manageViewsForm" action="">

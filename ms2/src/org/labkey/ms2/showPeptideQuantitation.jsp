@@ -27,7 +27,7 @@
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
+JspView<ShowPeptideContext> me = HttpView.currentView();
 ShowPeptideContext ctx = me.getModelBean();
 MS2Peptide p = ctx.peptide;
 

@@ -20,10 +20,12 @@
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.MS2AdminBean" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.MS2AdminBean bean = ((JspView<MS2Controller.MS2AdminBean>)HttpView.currentView()).getModelBean();
+    JspView<MS2AdminBean> view = HttpView.currentView();
+    MS2AdminBean bean = view.getModelBean();
 %>
 <table class="labkey-data-region-legacy labkey-show-borders" cellpadding="4" cellspacing="4">
 <tr>

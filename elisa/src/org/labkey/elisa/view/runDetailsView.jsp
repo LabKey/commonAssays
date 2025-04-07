@@ -30,7 +30,7 @@
     }
 %>
 <%
-    JspView<ElisaController.RunDetailsForm> me = (JspView<ElisaController.RunDetailsForm>) HttpView.currentView();
+    JspView<ElisaController.RunDetailsForm> me = HttpView.currentView();
     ElisaController.RunDetailsForm form = me.getModelBean();
     String appId = "run-details-" + getRequestScopedUID();
 %>

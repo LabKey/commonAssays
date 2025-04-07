@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.view.HttpView"%>
+<%@ page import="org.apache.commons.lang3.StringUtils"%>
+<%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
-<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.labkey.ms2.MS2Controller.TestMascotForm" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.TestMascotForm form = ((JspView<MS2Controller.TestMascotForm>)HttpView.currentView()).getModelBean();
+    JspView<TestMascotForm> view = HttpView.currentView();
+    TestMascotForm form = view.getModelBean();
 
     if (!StringUtils.isBlank(form.getMessage()))
     {

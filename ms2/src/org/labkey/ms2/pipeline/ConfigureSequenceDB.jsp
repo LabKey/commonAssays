@@ -21,7 +21,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    HttpView<String> me = (HttpView<String>) HttpView.currentView();
+    HttpView<String> me = HttpView.currentView();
     String localPathRoot = me.getModelBean();
 %>
 <labkey:form method="POST" name="updateClusterSequenceDB" action="<%=urlFor(PipelineController.SetupClusterSequenceDBAction.class)%>">

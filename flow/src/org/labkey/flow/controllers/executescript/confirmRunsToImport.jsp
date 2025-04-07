@@ -32,7 +32,7 @@
 <%@ page import="java.util.Set" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<ImportRunsForm> me = (JspView<ImportRunsForm>) HttpView.currentView();
+    JspView<ImportRunsForm> me = HttpView.currentView();
     ImportRunsForm form = me.getModelBean();
     Container c = getContainer();
 

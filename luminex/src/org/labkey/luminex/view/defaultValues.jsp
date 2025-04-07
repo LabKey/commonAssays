@@ -24,7 +24,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    JspView<DefaultValuesForm> me = (JspView<DefaultValuesForm>) HttpView.currentView();
+    JspView<DefaultValuesForm> me = HttpView.currentView();
     DefaultValuesForm bean = me.getModelBean();
     List<String> analytes = bean.getAnalytes();
     List<String> positivityThresholds = bean.getPositivityThresholds();

@@ -42,7 +42,7 @@
 </style>
 
 <%
-    JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
+    JspView<LuminexRunUploadForm> me = HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
     Map<String, Titration> titrationsWithTypes = bean.getParser().getTitrationsWithTypes();
 

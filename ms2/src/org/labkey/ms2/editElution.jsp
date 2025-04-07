@@ -24,7 +24,7 @@
 <%@ page import="java.text.DecimalFormat"%>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<EditElutionGraphContext> me = (JspView<EditElutionGraphContext>) HttpView.currentView();
+    JspView<EditElutionGraphContext> me = HttpView.currentView();
     EditElutionGraphContext ctx = me.getModelBean();
     MS2Peptide p = ctx.getPeptide();
     PeptideQuantitation quant = ctx.getQuantitation();

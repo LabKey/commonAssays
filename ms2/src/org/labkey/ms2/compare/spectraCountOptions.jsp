@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="org.labkey.api.protein.search.ProphetFilterType" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
@@ -24,6 +23,7 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideFilteringFormElements" %>
 <%@ page import="static org.labkey.ms2.MS2Controller.PeptideFilteringFormElements.peptideFilterType" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.probability" %>
 <%@ page import="static org.labkey.api.protein.search.ProphetFilterType.customView" %>
@@ -41,7 +41,7 @@
     }
 %>
 <%
-    JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
+    JspView<MS2Controller.CompareOptionsBean> view = HttpView.currentView();
     MS2Controller.CompareOptionsBean<MS2Controller.SpectraCountForm> bean = view.getModelBean();
     MS2Controller.SpectraCountForm form = bean.getForm();
     String peptideViewName = form.getPeptideCustomViewName(getViewContext());

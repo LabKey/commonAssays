@@ -25,7 +25,8 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ProteinGroupWithQuantitation group = ((JspView<ProteinGroupWithQuantitation>)HttpView.currentView()).getModelBean();
+    JspView<ProteinGroupWithQuantitation> view = HttpView.currentView();
+    ProteinGroupWithQuantitation group = view.getModelBean();
     ITraqProteinQuantitation libra = group.getITraqProteinQuantitation();
     Format floatFormat = Formats.f2;
 %>

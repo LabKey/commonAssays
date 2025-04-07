@@ -25,7 +25,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
+    JspView<LuminexRunUploadForm> me = HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
     long exclusionCount = bean.getExclusionCount();
     long lostExclusions = bean.getLostExclusions();
