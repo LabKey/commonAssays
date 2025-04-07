@@ -30,7 +30,7 @@
     }
 %>
 <%
-    JspView<ElispotController.PlateSummaryBean> me = (JspView<ElispotController.PlateSummaryBean>)HttpView.currentView();
+    JspView<ElispotController.PlateSummaryBean> me = HttpView.currentView();
     ElispotController.PlateSummaryBean bean = me.getModelBean();
 
     String renderId = "plate-summary-div-" + 1; // getRequestScopedUID(); // TODO ElispotAssayTest test expects 1

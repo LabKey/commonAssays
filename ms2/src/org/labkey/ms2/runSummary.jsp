@@ -28,7 +28,7 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
+    JspView<MS2Controller.RunSummaryBean> me = HttpView.currentView();
     Container c = getContainer();
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;

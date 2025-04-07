@@ -74,7 +74,7 @@
 %>
 
 <%
-    JspView<Pair<ActionURL, List<Protein>>> view = (JspView<Pair<ActionURL, List<Protein>>>) HttpView.currentView();
+    JspView<Pair<ActionURL, List<Protein>>> view = HttpView.currentView();
     Pair<ActionURL, List<Protein>> actionWithProteins = view.getModelBean();
     List<Protein> proteins = actionWithProteins.second;
     ActionURL baseUrl = actionWithProteins.first;

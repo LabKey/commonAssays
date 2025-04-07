@@ -22,7 +22,8 @@
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
+    JspView<ProteinViewBean> view = HttpView.currentView();
+    ProteinViewBean bean = view.getModelBean();
 
     if (bean.showPeptides)
     {

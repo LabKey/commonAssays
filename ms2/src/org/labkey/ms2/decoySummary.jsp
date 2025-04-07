@@ -27,7 +27,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<MS2Manager.DecoySummaryBean> me = ((JspView<MS2Manager.DecoySummaryBean>)HttpView.currentView());
+    JspView<MS2Manager.DecoySummaryBean> me = HttpView.currentView();
     MS2Manager.DecoySummaryBean bean = me.getModelBean();
 
     NumberFormat defaultFormat = NumberFormat.getPercentInstance();

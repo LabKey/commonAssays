@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.util.Formats" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.util.Pair" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
@@ -23,11 +24,11 @@
 <%@ page import="org.labkey.ms2.PeptideManager" %>
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
 <%@ page import="java.text.Format" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    ProteinViewBean bean = ((JspView<ProteinViewBean>)HttpView.currentView()).getModelBean();
+    JspView<ProteinViewBean> view = HttpView.currentView();
+    ProteinViewBean bean = view.getModelBean();
     Format intFormat = Formats.commaf0;
     Format percentFormat = Formats.percent;
 %>

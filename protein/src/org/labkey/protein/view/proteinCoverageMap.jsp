@@ -36,7 +36,8 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    CoverageViewBean bean = ((JspView<CoverageViewBean>)HttpView.currentView()).getModelBean();
+    JspView<CoverageViewBean> view = HttpView.currentView();
+    CoverageViewBean bean = view.getModelBean();
     var currentURL = getActionURL();
     var displayLegend = true;
     var viewByParam = currentURL.getParameter("viewBy");

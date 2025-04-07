@@ -39,7 +39,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    HttpView<ChooseGraphForm> me = (HttpView<ChooseGraphForm>) HttpView.currentView();
+    HttpView<ChooseGraphForm> me = HttpView.currentView();
     ChooseGraphForm form = me.getModelBean();
 
     boolean hasScripts = false;
