@@ -38,6 +38,7 @@ import org.labkey.api.data.Results;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
@@ -94,12 +95,11 @@ public class SamplesConfirmGridView extends GridView
     public SamplesConfirmGridView(User user, Container container, Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
-
         boolean hasGroupInfo = samples.get(0) instanceof Workspace.SampleInfo;
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
-        Map<FieldKey, ColumnInfo> columns = new LinkedHashMap<>();
+        Map<FieldKey, BaseColumnInfo> columns = new LinkedHashMap<>();
         if (resolving)
         {
             columns.put(MATCHED_FLAG_FIELD_KEY, new BaseColumnInfo(MATCHED_FLAG_FIELD_KEY, JdbcType.BOOLEAN));
@@ -116,7 +116,6 @@ public class SamplesConfirmGridView extends GridView
         {
             FieldKey fieldKey = new FieldKey(null, keyword);
             var col = new BaseColumnInfo(fieldKey, JdbcType.VARCHAR);
-            col.setAlias(fieldKey.getName());
             if (!columns.containsKey(fieldKey))
             {
                 uniqueKeywords.add(keyword);
@@ -127,8 +126,9 @@ public class SamplesConfirmGridView extends GridView
                 LOG.warn("Ignoring duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
             }
         }
-
+        // these are "fake" columns (set fake aliases)
         int columnCount = columns.size();
+        columns.values().forEach(c -> c.setAlias(SqlDialect.makeDatabaseIdentifier(c.getName(), null)));
 
         List<String> columnNames = columns.keySet().stream().map(FieldKey::getName).collect(Collectors.toList());
         RowMapFactory<Object> factory = new RowMapFactory<>(columnNames);
@@ -189,7 +189,7 @@ public class SamplesConfirmGridView extends GridView
 
         // Initialize the ResultSet and DataRegion
         ResultSet rs = CachedResultSets.create(maps);
-        Results results = new ResultsImpl(rs, columns);
+        Results results = new ResultsImpl(rs, (Map<FieldKey,ColumnInfo>)(Map)columns);
         setResults(results);
 
         SamplesConfirmDataRegion dr = (SamplesConfirmDataRegion)getDataRegion();
