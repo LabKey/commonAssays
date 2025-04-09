@@ -296,7 +296,7 @@ public abstract class MS2Importer
         runMap.put("Status", IMPORT_STARTED);
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
-        var returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
+        Map<String,Object> returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
         return (Integer)returnMap.get("Run");
     }
 
@@ -441,7 +441,7 @@ public abstract class MS2Importer
     }
 
 
-    private static SQLFragment _updateSwissProtSeqIdSql;
+    private static String _updateSwissProtSeqIdSql;
 
     static
     {
@@ -483,10 +483,10 @@ public abstract class MS2Importer
         sql.append(")");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSwissProtSeqIdSql = sql;
+        _updateSwissProtSeqIdSql = sql.getSQL();
     }
 
-    private static SQLFragment _updateSeqIdEndOfLookupStringSql;
+    private static String _updateSeqIdEndOfLookupStringSql;
 
     static
     {
@@ -540,10 +540,10 @@ public abstract class MS2Importer
         sql.append("            ms2.PeptidesData.Protein = x.Protein AND\n");
         sql.append("            ms2.PeptidesData.Fraction = ?");
 
-        _updateSeqIdEndOfLookupStringSql = sql;
+        _updateSeqIdEndOfLookupStringSql = sql.getSQL();
     }
 
-    private static final SQLFragment _updateSeqIdInexactMatchSql;
+    private static final String _updateSeqIdInexactMatchSql;
 
     static
     {
@@ -577,7 +577,7 @@ public abstract class MS2Importer
         sql.append("        END)");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSeqIdInexactMatchSql = sql;
+        _updateSeqIdInexactMatchSql = sql.getSQL();
     }
 
     private static final SQLFragment _updateSequencePositionSql;
@@ -636,18 +636,21 @@ public abstract class MS2Importer
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 3 == StringUtils.countMatches(_updateSwissProtSeqIdSql,"?");
                 int rowCount = executor.execute(_updateSwissProtSeqIdSql, fastaId, fastaId, fraction.getFraction());
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database for FASTA id " + fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 3 == StringUtils.countMatches(_updateSeqIdEndOfLookupStringSql, "?");
                 int rowCount = executor.execute(_updateSeqIdEndOfLookupStringSql, fraction.getFraction(), fastaId, fraction.getFraction());
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on trailing FASTA header line for FASTA id " + fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 2 == StringUtils.countMatches(_updateSpPrefixSeqIdSql, "?");
                 int rowCount = executor.execute(_updateSpPrefixSeqIdSql, fraction.getFraction(), fastaId);
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on 'sp|' prefix name match for FASTA id " + fastaId);
             }
