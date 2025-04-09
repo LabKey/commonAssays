@@ -1180,7 +1180,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         @Override
         public void addCondition(@NotNull SQLFragment condition, FieldKey... fieldKeys)
         {
-            _filter.addWhereClause(condition.getSQL(), condition.getParams().toArray(), fieldKeys);
+            _filter.addWhereClause(condition, fieldKeys);
         }
 
         @Override

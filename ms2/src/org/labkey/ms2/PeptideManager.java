@@ -226,18 +226,18 @@ public class PeptideManager
     public static void addRunCondition(SimpleFilter filter, @Nullable String runTableName, MS2Run... runs)
     {
         String columnName = (runTableName == null ? "Run" : runTableName + ".Run");
-        StringBuilder sb = new StringBuilder();
-        sb.append(columnName);
-        sb.append(" IN (");
+        SQLFragment sql = new SQLFragment();
+        sql.append(columnName);
+        sql.append(" IN (");
         String separator = "";
         for (MS2Run run : runs)
         {
-            sb.append(separator);
+            sql.append(separator);
             separator = ", ";
-            sb.append(run.getRun());
+            sql.appendValue(run.getRun());
         }
-        sb.append(")");
-        filter.addWhereClause(sb.toString(), new Object[0], FieldKey.fromString("Run"));
+        sql.append(")");
+        filter.addWhereClause(sql, FieldKey.fromString("Run"));
     }
 
     // TODO: runTableName is null in all cases... remove parameter?

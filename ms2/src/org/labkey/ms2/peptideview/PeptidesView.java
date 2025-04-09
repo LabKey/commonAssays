@@ -18,6 +18,7 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.TableInfo;
@@ -80,7 +81,7 @@ public class PeptidesView extends QueryView
                 ContainerManager.getAllChildren(getViewContext().getContainer(), getViewContext().getUser())
                 : Collections.singleton(getViewContext().getContainer());
 
-        StringBuilder sql = new StringBuilder("Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run IN (SELECT Run FROM ms2.Runs WHERE Container IN (");
+        SQLFragment sql = new SQLFragment("Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run IN (SELECT Run FROM ms2.Runs WHERE Container IN (");
         String sep = "";
         for(Container container : containers)
         {
@@ -91,7 +92,7 @@ public class PeptidesView extends QueryView
             sep = ",";
         }
         sql.append(")))");
-        filter.addWhereClause(sql.toString(), null, FieldKey.fromParts("Fraction"));
+        filter.addWhereClause(sql, null, FieldKey.fromParts("Fraction"));
 
         List<FieldKey> defCols = new ArrayList<>();
         defCols.add(FieldKey.fromParts("Fraction", "Run", "Description"));

@@ -296,7 +296,7 @@ public abstract class MS2Importer
         runMap.put("Status", IMPORT_STARTED);
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
-        Map returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
+        var returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
         return (Integer)returnMap.get("Run");
     }
 
@@ -441,11 +441,11 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateSwissProtSeqIdSql;
+    private static SQLFragment _updateSwissProtSeqIdSql;
 
     static
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         /*
         UPDATE ms2.PeptidesData SET SeqId = (SELECT
             CASE (SELECT Count(*) FROM
@@ -483,10 +483,10 @@ public abstract class MS2Importer
         sql.append(")");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSwissProtSeqIdSql = sql.toString();
+        _updateSwissProtSeqIdSql = sql;
     }
 
-    private static final String _updateSeqIdEndOfLookupStringSql;
+    private static SQLFragment _updateSeqIdEndOfLookupStringSql;
 
     static
     {
@@ -540,14 +540,14 @@ public abstract class MS2Importer
         sql.append("            ms2.PeptidesData.Protein = x.Protein AND\n");
         sql.append("            ms2.PeptidesData.Fraction = ?");
 
-        _updateSeqIdEndOfLookupStringSql = sql.getSQL();
+        _updateSeqIdEndOfLookupStringSql = sql;
     }
 
-    private static final String _updateSeqIdInexactMatchSql;
+    private static final SQLFragment _updateSeqIdInexactMatchSql;
 
     static
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
 
         /*
             UPDATE ms2.peptidesdata p SET SeqId = (
@@ -577,10 +577,10 @@ public abstract class MS2Importer
         sql.append("        END)");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSeqIdInexactMatchSql = sql.toString();
+        _updateSeqIdInexactMatchSql = sql;
     }
 
-    private static SQLFragment _updateSequencePositionSql;
+    private static final SQLFragment _updateSequencePositionSql;
 
     static
     {

@@ -17,6 +17,7 @@
 package org.labkey.api.protein.annotation;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.SafeToRenderEnum;
@@ -60,9 +61,9 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         return null;
     }
 
-    public String getFirstSelectForSeqId()
+    public SQLFragment getFirstSelectForSeqId()
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         sql.append("(SELECT MIN(Identifier) FROM ");
         sql.append(ProteinSchema.getTableInfoIdentifiers());
         sql.append(" i, ");
@@ -72,7 +73,7 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         sql.append("' AND i.SeqId = ");
         sql.append(ExprColumn.STR_TABLE_ALIAS);
         sql.append(".SeqId)");
-        return sql.toString();
+        return sql;
     }
 
     private final String _description;
