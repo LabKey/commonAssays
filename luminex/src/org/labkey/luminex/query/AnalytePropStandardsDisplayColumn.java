@@ -23,15 +23,13 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.element.Input.InputBuilder;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.Titration;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
@@ -117,7 +115,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
             }
         }
 
-        out.write(new InputBuilder<>().type("checkbox").value(1).name(propertyName).checked(checked));
+        out.write(InputBuilder.checkbox().value(1).name(propertyName).checked(checked));
     }
 
     @Override

@@ -19,7 +19,7 @@ import org.labkey.api.protein.organism.Organism;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.view.NotFoundException;
 
 import java.io.ByteArrayOutputStream;
@@ -298,7 +298,7 @@ public class ProteinManager
         if (null == url)
             return HtmlString.of(txt);
 
-        return new Link.LinkBuilder(txt).href(url).target(target).clearClasses().getHtmlString();
+        return new LinkBuilder(txt).href(url).target(target).clearClasses().getHtmlString();
     }
 
     public static List<HtmlString> makeFullAnchorLinks(Collection<String> idents, String target, String identType)

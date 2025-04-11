@@ -20,7 +20,7 @@ import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.DOM;
-import org.labkey.api.util.element.Input;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
@@ -46,7 +46,7 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
             isCopyable() ? (DOM.Renderable) ret -> {
                 String inputName = ColumnInfo.propNameFromName(_inputName);
                 String id = inputName + "CheckBox";
-                new Input.InputBuilder<>().type("checkbox").name(id).id(id).appendTo(out);
+                InputBuilder.checkbox().name(id).id(id).appendTo(out);
                 StringBuilder onChange = new StringBuilder("b = this.checked;\n");
 
                 getColumns().forEach(col -> {
